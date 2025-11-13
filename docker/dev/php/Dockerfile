@@ -15,7 +15,7 @@ RUN ln -fs /usr/share/zoneinfo/Europe/Kyiv /etc/localtime \
 COPY --from=composer:2.8.8 /usr/bin/composer /usr/bin/composer
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions gd zip mysqli pdo pdo_mysql xdebug xhprof sockets
+RUN install-php-extensions gd zip mysqli pdo pdo_mysql xdebug xhprof sockets intl
 
 RUN echo "xhprof.output_dir = /tmp/xhprof" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini \
     && echo "xhprof.collect_additional_info = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini \
@@ -56,15 +56,18 @@ RUN mkdir -p /home/www-data/.npm-global /var/www/.npm \
 ENV NPM_CONFIG_PREFIX=/home/www-data/.npm-global
 ENV PATH="/home/www-data/.npm-global/bin:${PATH}"
 
+# Configure composer cache directory
+ENV COMPOSER_CACHE_DIR=/home/www-data/.composer/cache
+
+RUN mkdir -p /home/www-data/.composer/cache \
+    && chown -R www-data:www-data /home/www-data/.composer \
+    && chmod -R 775 /home/www-data/.composer
+
 # Copy and set permissions for entrypoint script
 COPY docker/dev/php/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && chown www-data:www-data /usr/local/bin/entrypoint.sh
-
-#RUN mkdir -p /var/log/php-fpm \
-#    && chown -R www-data:www-data /var/log/php-fpm \
-#    && chmod -R 775 /var/log/php-fpm
 
 USER www-data
 

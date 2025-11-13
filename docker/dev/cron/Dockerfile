@@ -13,7 +13,7 @@ RUN curl -fsSLO "https://github.com/aptible/supercronic/releases/download/v0.2.3
 COPY --from=composer:2.8.8 /usr/bin/composer /usr/bin/composer
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions gd zip mysqli pdo pdo_mysql sockets
+RUN install-php-extensions gd zip mysqli pdo pdo_mysql sockets intl
 
 # Import UID and GID
 ARG UID=1000

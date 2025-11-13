@@ -24,13 +24,6 @@ export default defineConfig(() : UserConfig => {
             sourcemap: isProduction ? 'hidden' : true,
             manifest:  true,
         },
-        /*server:  {
-         host:    "127.0.0.1",
-         port:    2210,
-         headers: {
-         'Access-Control-Allow-Origin': '*',
-         },
-         },*/
         plugins: [
             laravel({
                 input:   [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
@@ -13,11 +15,13 @@ class AppServiceProvider extends ServiceProvider
     {
         $new_storage_path = config('filesystems.new_storage_path');
 
-        // Override the framework storage path
-        app()->useStoragePath($new_storage_path);
-
-        // Override compiled views path
-        config(['view.compiled' => $new_storage_path . '/framework/views']);
+        if ($new_storage_path) {
+            config([
+                // Override compiled views path
+                'view.compiled'         => $new_storage_path . '/framework/views',
+                'debugbar.storage.path' => $new_storage_path . '/debugbar',
+            ]);
+        }
     }
 
     /**
@@ -25,6 +29,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $new_storage_path = config('filesystems.new_storage_path');
+        $new_public_path  = config('filesystems.new_public_path');
+
+        if ($new_storage_path && $new_public_path) {
+            // Override symbolic links configuration
+            config([
+                'filesystems.links' => [
+                    $new_public_path . '/storage' => $new_storage_path . '/app/public',
+                ],
+            ]);
+        }
     }
 }

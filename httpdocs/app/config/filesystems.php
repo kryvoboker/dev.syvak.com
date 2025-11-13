@@ -78,5 +78,6 @@ return [
     ],
 
     'new_storage_path' => env('NEW_STORAGE_PATH'),
+    'new_public_path'  => env('NEW_PUBLIC_PATH'),
 
 ];
