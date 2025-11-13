@@ -1,0 +1,63 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@ts-shared/*": [
+        "./resources/assets/ts/shared/*"
+      ],
+      "@ts-features/*": [
+        "./resources/assets/ts/features/*"
+      ],
+      "@ts-stores/*": [
+        "./resources/assets/ts/stores/*"
+      ]
+    },
+    "target": "ES2024",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": [
+      "es2015",
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    "downlevelIteration": true,
+    /* Bundler mode */
+    "sourceMap": true,
+    "declaration": true,
+    // maybe it need remove
+    "noImplicitAny": true,
+    // maybe it need remove
+    "allowJs": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": [
+      "node",
+      "@types/node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+  },
+  "include": [
+    "./resources/assets/ts/**/*.ts",
+    "./vite.config.ts",
+    "./vite-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

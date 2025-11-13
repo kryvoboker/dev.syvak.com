@@ -1,0 +1,210 @@
+@layer theme, base, app, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* Preline UI */
+@import "../../../node_modules/preline/variants.css";
+@source "../../../node_modules/preline/dist/*.js";
+
+@source '../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../ts/**/*.ts';
+
+@source "./_source.txt";
+
+:root {
+    --base-font-size: 16;
+    --max-viewport-width: 1920;
+    --max-viewport-width-rem: calc(1920 / var(--base-font-size) * 1rem);
+    --container-padding: calc(16 / var(--base-font-size) * 1rem);
+
+    /* 48rem - 768px */
+    @media (width >= 48rem) {
+        --container-padding: calc(32 / var(--base-font-size) * 1rem);
+    }
+
+    /* 64rem - 1024px */
+    @media (width >= 64rem) {
+        --container-padding: calc(60 / var(--base-font-size) * 1rem);
+    }
+
+    /* 96rem - 1920px */
+    @media (width >= 120rem) {
+        --container-padding: calc(76 / var(--base-font-size) * 1rem);
+    }
+}
+
+@theme {
+    --breakpoint-bp1440px: 90rem;
+    --breakpoint-bp1920px: 120rem;
+
+    --font-inter: "Inter", sans-serif;
+    --font-cormorant-garamond: "Cormorant Garamond", serif;
+
+    --text-11px: calc(11 / var(--base-font-size) * 1rem);
+    --text-26px: calc(26 / var(--base-font-size) * 1rem);
+    --text-32px: calc(32 / var(--base-font-size) * 1rem);
+    --text-42px: calc(42 / var(--base-font-size) * 1rem);
+    --text-44px: calc(44 / var(--base-font-size) * 1rem);
+    --text-64px: calc(64 / var(--base-font-size) * 1rem);
+    --text-82px: calc(82 / var(--base-font-size) * 1rem);
+    --text-90px: calc(90 / var(--base-font-size) * 1rem);
+    --text-122px: calc(122 / var(--base-font-size) * 1rem);
+
+    --color-white: rgba(255,251,254,1); /* #FFFBFE */
+    --color-black: rgba(12,18,12,1); /* #0C120C */
+    --color-black-light: rgba(12,18,12,0.20);
+    --color-gray-light: rgba(136,136,136,1); /* #888888 */
+    --color-gray-dark: rgba(136,136,136,0.40);
+    --color-red-light: rgba(212,4,28,1); /* #D4041C */
+    --color-red-dark: rgba(212,4,28,0.70);
+
+    --spacing-0\.8em: 0.8em;
+    --spacing-0\.9em: 0.9em;
+    --spacing-1\.4em: 1.4em;
+
+    --tracking-0\.02em: 0.02em;
+    --tracking-0\.028em: 0.028em;
+    --tracking-0\.04em: 0.04em;
+    --tracking-0\.05em: 0.05em;
+}
+
+@layer components {
+    .wrapper {
+        @apply flex flex-col min-h-full;
+    }
+
+    .main {
+        @apply shrink grow basis-auto relative;
+    }
+}
+
+@layer utilities {
+    .container {
+        max-width: calc(var(--max-viewport-width) / var(--base-font-size) * 1rem); /* 1920px */
+        padding-inline: var(--container-padding);
+        margin: 0 auto;
+    }
+
+    .container .container {
+        max-width: none;
+        padding-inline: 0;
+    }
+}
+
+@layer app {
+    /* Disable animation if user disable it in his device */
+    *, ::after, ::before, ::backdrop, ::file-selector-button {
+        @apply motion-reduce:animate-none! motion-reduce:transition-none! motion-reduce:scroll-auto!;
+    }
+
+    html,
+    body {
+        @apply h-full;
+    }
+
+    /* Disabling arrows in Webkit-based browsers (Chrome, Safari, Edge) */
+    input[type="number"],
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        -moz-appearance: textfield; /* Disabling arrows in Firefox */
+        margin: 0;
+    }
+
+    body {
+        @apply font-inter font-normal text-sm lg:text-base bp1920px:text-lg leading-1.4em
+        tracking-normal lg:tracking-0.02em bp1920px:tracking-normal text-white bg-black;
+    }
+
+    h1, h2, h3, h4 {
+        @apply font-cormorant-garamond uppercase;
+    }
+
+    h1 {
+        @apply text-42px md:text-64px lg:text-82px bp1920px:text-122px font-semibold -tracking-0.05em leading-0.8em;
+    }
+
+    h2 {
+        @apply text-32px md:text-44px lg:text-6xl bp1920px:text-90px font-normal tracking-normal leading-0.9em;
+    }
+
+    h3 {
+        @apply text-26px md:text-32px bp1920px:text-64px font-normal tracking-0.028em leading-0.9em;
+    }
+
+    h4 {
+        @apply text-lg md:text-2xl bp1920px:text-4xl font-bold tracking-normal leading-none;
+    }
+
+    .default-btn,
+    h5, h6 {
+        @apply font-inter font-normal tracking-normal leading-1.4em;
+    }
+
+    h5 {
+        @apply text-xl bp1920px:text-32px uppercase;
+    }
+
+    .default-btn,
+    h6 {
+        @apply text-lg bp1920px:text-2xl;
+    }
+
+    .default-btn {
+        @apply lg:text-2xl;
+    }
+
+    button {
+        @apply font-inter tracking-normal cursor-pointer;
+    }
+
+    span {
+        @apply text-inherit leading-[inherit] tracking-[inherit];
+    }
+
+    [type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'],
+    [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'],
+    [type='week'], [multiple], textarea, select {
+        @apply text-inherit leading-[inherit] tracking-[inherit] appearance-none bg-black border-b border-gray-dark p-2 lg:px-4;
+
+        &:focus {
+            @apply outline-2 outline-solid outline-offset-2 outline-transparent border-white shadow-white;
+        }
+
+        &::placeholder {
+            @apply text-11px md:text-sm lg:text-base bp1920px:text-lg text-gray-dark font-light tracking-0.04em;
+        }
+    }
+
+    .text-accent {
+        @apply text-11px md:text-sm lg:text-base bp1920px:text-lg font-light tracking-0.04em;
+    }
+
+    .icon-size {
+        @apply w-8 h-8 lg:w-10 lg:h-10;
+    }
+
+    .dark-btn,
+    .light-btn {
+        @apply border duration-300 ease-in p-2;
+    }
+
+    .light-btn {
+        @apply text-lg text-black border-transparent bg-white;
+    }
+
+    .dark-btn,
+    .light-btn:active,
+    .light-btn:hover {
+        @apply text-white border-white bg-black;
+    }
+
+    .dark-btn:active,
+    .dark-btn:hover {
+        @apply text-black border-gray-light bg-gray-light;
+    }
+}

@@ -1,0 +1,2 @@
+# Run every minute full day
+#* * * * * timeout 120 /usr/bin/php -f /var/www/html/cron_queue_worker.php >> /var/log/cron/cron.log 2>&1
