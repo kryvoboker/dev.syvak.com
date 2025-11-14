@@ -31,6 +31,10 @@ class AlyoAdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            // Show group menu list if user visited page from group
+            ->collapsibleNavigationGroups()
+            // Show group menu list if user visited page from group
+            ->sidebarCollapsibleOnDesktop(false)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

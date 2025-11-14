@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Settings\Languages;
 
 use App\Filament\Resources\Settings\Languages\Pages\CreateLanguage;
@@ -18,9 +20,9 @@ use UnitEnum;
 class LanguageResource extends Resource
 {
     protected static ?string                $model                = Language::class;
-    protected static string|null|UnitEnum   $navigationGroup      = 'Settings';
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::Language;
-    protected static ?string                $recordTitleAttribute = 'language';
+    protected static string|null|UnitEnum   $navigationGroup      = 'Settings';
+    protected static ?string                $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
@@ -46,5 +48,45 @@ class LanguageResource extends Resource
             'create' => CreateLanguage::route('/create'),
             'edit'   => EditLanguage::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Get the navigation label for the resource.
+     *
+     * @return string
+     */
+    public static function getNavigationLabel(): string
+    {
+        return __('admin/settings/language.navigation_label');
+    }
+
+    /**
+     * Get the model label for the resource.
+     *
+     * @return string
+     */
+    public static function getModelLabel(): string
+    {
+        return __('admin/settings/language.label_model');
+    }
+
+    /**
+     * Get the plural model label for the resource.
+     *
+     * @return string
+     */
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin/settings/language.label_plural_model');
+    }
+
+    /**
+     * Get the navigation group for the resource.
+     *
+     * @return string|null
+     */
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin/settings/language.navigation_group');
     }
 }

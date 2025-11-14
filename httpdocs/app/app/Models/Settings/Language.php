@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models\Settings;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 
 class Language extends Model
 {
@@ -23,6 +25,81 @@ class Language extends Model
         return [
             'is_active'  => 'boolean',
             'is_default' => 'boolean',
+        ];
+    }
+
+    /**
+     * Boot the model.
+     *
+     * @return void
+     */
+    protected static function booted(): void
+    {
+        // Ensure only one default language
+        static::saving(function (Language $language) {
+            if ($language->is_default) {
+                // Set all other languages as non-default
+                static::where('id', '!=', $language->id)
+                    ->where('is_default', true)
+                    ->update(['is_default' => false]);
+
+                // Default language must be active
+                $language->is_active = true;
+            } else {
+                // Ensure there is always one default language
+                $default_exists = static::where('is_default', true)
+                    ->where('id', '!=', $language->id)
+                    ->exists();
+
+                if (!$default_exists) {
+                    $language->is_default = true;
+                }
+            }
+        });
+
+        // Prevent deletion of default language
+        static::deleting(function (Language $language) {
+            if ($language->is_default) {
+                throw new Exception(__('admin/settings/language.error_cant_delete_default_language'));
+            }
+
+            $active_langs = static::where('is_active', true)->count();
+
+            if ($active_langs == 1) {
+                throw new Exception(__('admin/settings/language.error_cant_delete_last_active_language'));
+            }
+        });
+    }
+
+    /**
+     * Get validation rules for the model.
+     *
+     * @param int|null $id
+     *
+     * @return array
+     */
+    public static function validationRules(?int $id = null): array
+    {
+        return [
+            'code'       => [
+                'required',
+                'string',
+                'max:10',
+                'alpha_dash',
+                'lowercase',
+                Rule::unique('languages', 'code')->ignore($id),
+            ],
+            'name'       => [
+                'required',
+                'string',
+                'max:100',
+            ],
+            'is_active'  => [
+                'boolean',
+            ],
+            'is_default' => [
+                'boolean',
+            ],
         ];
     }
 }
