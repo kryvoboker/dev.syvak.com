@@ -18,7 +18,6 @@ class AppSettingResource extends Resource
 {
     protected static ?string                $model                = AppSetting::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::Cog6Tooth;
-    protected static string|null|UnitEnum   $navigationGroup      = 'Settings';
     protected static ?string                $recordTitleAttribute = 'timezone';
     protected static ?int                   $navigationSort       = 10;
 

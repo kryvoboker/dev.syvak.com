@@ -46,7 +46,6 @@ class LanguagesTable
                     ->label(__('admin/settings/language.column_created_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->date(config('app.datetime_format'), config('app.timezone')),
             ])
             ->filters([

@@ -21,7 +21,7 @@ class LanguageForm
                     ->maxLength(10)
                     ->unique(ignoreRecord: true)
                     ->placeholder('en')
-                    ->rules(['alpha_dash', 'lowercase']),
+                    ->rules(['alpha_dash', 'lowercase', 'max:10']),
 
                 TextInput::make('name')
                     ->label(__('admin/settings/language.label_name'))

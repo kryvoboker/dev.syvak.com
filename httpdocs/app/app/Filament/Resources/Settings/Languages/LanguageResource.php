@@ -21,7 +21,6 @@ class LanguageResource extends Resource
 {
     protected static ?string                $model                = Language::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::Language;
-    protected static string|null|UnitEnum   $navigationGroup      = 'Settings';
     protected static ?string                $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
