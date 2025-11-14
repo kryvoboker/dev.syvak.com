@@ -3,7 +3,6 @@
 return [
     // Navigation
     'navigation_label'           => 'Application Settings',
-    'navigation_group'           => 'Settings',
 
     // Labels
     'label_model'                => 'Application Setting',

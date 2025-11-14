@@ -2,5 +2,5 @@
 
 return [
     // Menu items
-    'item_settings' => 'Settings',
+    'menu_item_settings' => 'Settings',
 ];

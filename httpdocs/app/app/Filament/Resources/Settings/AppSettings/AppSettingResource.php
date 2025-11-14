@@ -78,7 +78,7 @@ class AppSettingResource extends Resource
      */
     public static function getNavigationGroup(): ?string
     {
-        return __('admin/settings/app_settings.navigation_group');
+        return __('admin/default.menu_item_settings');
     }
 
     /**

@@ -87,6 +87,6 @@ class LanguageResource extends Resource
      */
     public static function getNavigationGroup(): ?string
     {
-        return __('admin/settings/language.navigation_group');
+        return __('admin/default.menu_item_settings');
     }
 }

@@ -3,7 +3,6 @@
 return [
     // Navigation
     'navigation_label'                       => 'Languages',
-    'navigation_group'                       => 'Settings',
 
     // Labels
     'label_model'                            => 'Language',
