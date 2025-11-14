@@ -34,7 +34,10 @@ class AppSetting extends Model
             'meta_titles'       => 'array',
             'meta_descriptions' => 'array',
             'meta_keywords'     => 'array',
+            'contact_emails'    => 'array',
+            'contact_phones'    => 'array',
             'socials'           => 'array',
+            'work_time'         => 'array',
             'contact_addresses' => 'array',
             'image_sizes'       => 'array',
         ];

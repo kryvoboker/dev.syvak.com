@@ -6,6 +6,7 @@ namespace App\Models\Settings;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 class Language extends Model
@@ -101,5 +102,16 @@ class Language extends Model
                 'boolean',
             ],
         ];
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getActiveLanguages(): Collection
+    {
+        return Language::where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderByDesc('name')
+            ->get();
     }
 }
