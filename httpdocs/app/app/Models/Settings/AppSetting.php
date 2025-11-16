@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Settings;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class AppSetting extends Model
@@ -41,5 +42,65 @@ class AppSetting extends Model
             'contact_addresses' => 'array',
             'image_sizes'       => 'array',
         ];
+    }
+
+    /**
+     * @return Attribute
+     */
+    public function titles(): Attribute
+    {
+        return Attribute::make(
+            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
+    }
+
+    /**
+     * @return Attribute
+     */
+    public function metaTitles(): Attribute
+    {
+        return Attribute::make(
+            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
+    }
+
+    /**
+     * @return Attribute
+     */
+    public function metaDescriptions(): Attribute
+    {
+        return Attribute::make(
+            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
+    }
+
+    /**
+     * @return Attribute
+     */
+    public function metaKeywords(): Attribute
+    {
+        return Attribute::make(
+            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
+    }
+
+    /**
+     * @return Attribute
+     */
+    public function workTime(): Attribute
+    {
+        return Attribute::make(
+            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
+    }
+
+    /**
+     * @return Attribute
+     */
+    public function contactAddresses(): Attribute
+    {
+        return Attribute::make(
+            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
     }
 }
