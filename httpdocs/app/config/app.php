@@ -131,4 +131,14 @@ return [
         'store'  => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'denied_delete_emails' => [
+        'fast.kamaz@gmail.com'
+    ],
+
+    'regex_validate_conditions' => [
+        'email'     => '/^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/',
+        'telephone' => '/(^((\+?\d{2,}\s?)|(.*))\(?\d{3,}\)?\s?\d{3,}-?\d{2,}-?\d{2,}$)/',
+        'password'  => '/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\s:])(\S)+$/',
+    ]
+
 ];

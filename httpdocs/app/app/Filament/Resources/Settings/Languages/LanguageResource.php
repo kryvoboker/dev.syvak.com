@@ -15,7 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class LanguageResource extends Resource
 {
@@ -50,7 +49,7 @@ class LanguageResource extends Resource
     }
 
     /**
-     * Get the navigation label for the resource.
+     * Signature in the navigation menu (left panel)
      *
      * @return string
      */
@@ -60,7 +59,7 @@ class LanguageResource extends Resource
     }
 
     /**
-     * Get the model label for the resource.
+     * A single model name (e.g. in headings, "Create X" button)
      *
      * @return string
      */
@@ -70,7 +69,7 @@ class LanguageResource extends Resource
     }
 
     /**
-     * Get the plural model label for the resource.
+     * Plural model name (e.g. in lists, section headings)
      *
      * @return string
      */
@@ -80,7 +79,7 @@ class LanguageResource extends Resource
     }
 
     /**
-     * Get the navigation group for the resource.
+     * For the name of the parent menu item for the menu group
      *
      * @return string|null
      */

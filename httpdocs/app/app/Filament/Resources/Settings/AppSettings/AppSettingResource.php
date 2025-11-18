@@ -12,7 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
-use UnitEnum;
 
 class AppSettingResource extends Resource
 {
@@ -61,7 +60,7 @@ class AppSettingResource extends Resource
     }
 
     /**
-     * Get navigation label
+     * Signature in the navigation menu (left panel)
      *
      * @return string
      */
@@ -71,7 +70,7 @@ class AppSettingResource extends Resource
     }
 
     /**
-     * Get the navigation group for the resource.
+     * For the name of the parent menu item for the menu group
      *
      * @return string|null
      */
@@ -81,7 +80,7 @@ class AppSettingResource extends Resource
     }
 
     /**
-     * Get model label
+     * A single model name (e.g. in headings, "Create X" button)
      *
      * @return string
      */
@@ -91,7 +90,7 @@ class AppSettingResource extends Resource
     }
 
     /**
-     * Get plural model label
+     * Plural model name (e.g. in lists, section headings)
      *
      * @return string
      */
