@@ -9,14 +9,14 @@ use Exception;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
-class UpdateRatesCommand extends Command
+class UpdateCurrencyRatesCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:update-rates-command';
+    protected $signature = 'app:update-currency-rates-command';
 
     /**
      * The console command description.
