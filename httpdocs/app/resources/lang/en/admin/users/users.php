@@ -16,6 +16,7 @@ return [
     'label_password'                      => 'Password',
     'label_password_confirmation'         => 'Password Confirmation',
     'label_is_active'                     => 'Is Active',
+    'label_user_group'                    => 'User Group',
 
     // Helpers
     'helper_email_verified_at'            => 'The date when the user verified their email address',

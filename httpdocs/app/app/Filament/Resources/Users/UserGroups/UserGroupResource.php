@@ -2,34 +2,36 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\Users;
+namespace App\Filament\Resources\Users\UserGroups;
 
-use App\Filament\Resources\Users\Pages\CreateUser;
-use App\Filament\Resources\Users\Pages\EditUser;
-use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Tables\UsersTable;
-use App\Models\Users\User;
+use App\Filament\Resources\Users\UserGroups\Pages\CreateUserGroup;
+use App\Filament\Resources\Users\UserGroups\Pages\EditUserGroup;
+use App\Filament\Resources\Users\UserGroups\Pages\ListUserGroups;
+use App\Filament\Resources\Users\UserGroups\Schemas\UserGroupForm;
+use App\Filament\Resources\Users\UserGroups\Tables\UserGroupsTable;
+use App\Models\Users\UserGroup;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class UserResource extends Resource
+class UserGroupResource extends Resource
 {
-    protected static ?string                $model                = User::class;
-    protected static string|BackedEnum|null $navigationIcon       = Heroicon::User;
-    protected static ?string                $recordTitleAttribute = 'full_name';
+    protected static ?string $model = UserGroup::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
-        return UserForm::configure($schema);
+        return UserGroupForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return UsersTable::configure($table);
+        return UserGroupsTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -42,9 +44,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListUsers::route('/'),
-            'create' => CreateUser::route('/create'),
-            'edit'   => EditUser::route('/{record}/edit'),
+            'index' => ListUserGroups::route('/'),
+            'create' => CreateUserGroup::route('/create'),
+            'edit' => EditUserGroup::route('/{record}/edit'),
         ];
     }
 
@@ -55,7 +57,7 @@ class UserResource extends Resource
      */
     public static function getNavigationLabel(): string
     {
-        return __('admin/users/users.navigation_label');
+        return __('admin/users/user_groups.navigation_label');
     }
 
     /**
@@ -65,7 +67,7 @@ class UserResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/users/users.label_model');
+        return __('admin/users/user_groups.label_model');
     }
 
     /**
@@ -75,7 +77,7 @@ class UserResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/users/users.label_plural_model');
+        return __('admin/users/user_groups.label_plural_model');
     }
 
     /**

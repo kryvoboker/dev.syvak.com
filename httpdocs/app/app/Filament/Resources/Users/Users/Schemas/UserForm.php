@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\Users\Schemas;
+namespace App\Filament\Resources\Users\Users\Schemas;
 
+use App\Models\Users\UserGroup;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -15,6 +17,8 @@ class UserForm
 {
     public static function configure(Schema $schema): Schema
     {
+        $user_group = new UserGroup();
+
         return $schema
             ->components([
                 TextInput::make('name')
@@ -81,6 +85,16 @@ class UserForm
                     ->label(__('admin/users/users.label_is_active'))
                     ->helperText(__('admin/users/users.helper_is_active'))
                     ->default(false),
+
+                Select::make('user_group_id')
+                    ->label(__('admin/users/users.label_user_group'))
+                    ->options(function () use ($user_group) {
+                        return $user_group->getAllActiveUserGroups()->pluck('name', 'id');
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->rules(['nullable', 'exists:user_groups,id'])
+                    ->required(),
             ]);
     }
 }
