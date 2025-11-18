@@ -45,6 +45,13 @@ return [
     'false_label_inactive_only'              => 'Inactive only',
     'true_label_default_only'                => 'Default only',
 
+    // Actions
+    'action_update_rates'                    => 'Update rates',
+    'modal_update_rates_title'               => 'Update currency rates',
+    'modal_update_rates_body'                => 'The system will request new exchange rates and update active currencies.',
+    'notification_rates_updated_title'       => 'Currency rates updated',
+    'notification_rates_updated_body'        => 'Exchange rates have been successfully updated.',
+
     // Text
     'text_cant_delete_default_currency'      => 'Cannot delete default currency',
     'text_cant_delete_last_active_currency'  => 'Cannot delete last active currency',
@@ -52,4 +59,6 @@ return [
     // Error
     'error_cant_delete_default_currency'     => 'Please set another currency as default before deleting this one!',
     'error_cant_delete_last_active_currency' => 'At least one active currency must remain in the system!',
+    'error_failed_to_update_rates'           => 'Failed to update currency rates. Please try again later!',
+    'error_absent_default_currency'          => 'The system must have a default currency set!',
 ];

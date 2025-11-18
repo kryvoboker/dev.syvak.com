@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Console\Commands\Currency;
+
+use App\Services\Currency\UpdateRates;
+use Exception;
+use Illuminate\Console\Command;
+use Symfony\Component\Console\Command\Command as CommandAlias;
+
+class UpdateRatesCommand extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'app:update-rates-command';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Update app currency exchange rates from external source';
+
+    /**
+     * @return int
+     * @throws Exception
+     */
+    public function handle(): int
+    {
+        $error_message = app(UpdateRates::class)->handle();
+
+        if ($error_message) {
+            $this->error($error_message);
+
+            return CommandAlias::FAILURE;
+        }
+
+        $this->info('Currency exchange rates updated successfully.');
+
+        return CommandAlias::SUCCESS;
+    }
+}

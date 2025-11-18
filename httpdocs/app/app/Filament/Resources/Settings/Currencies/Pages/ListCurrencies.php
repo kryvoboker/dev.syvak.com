@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Settings\Currencies\Pages;
 
 use App\Filament\Resources\Settings\Currencies\CurrencyResource;
+use App\Services\Currency\UpdateRates;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Icons\Heroicon;
 
 class ListCurrencies extends ListRecords
 {
@@ -32,9 +37,37 @@ class ListCurrencies extends ListRecords
         return __('admin/settings/currency.navigation_label');
     }
 
+    /**
+     * @return array|Action[]|ActionGroup[]
+     */
     protected function getHeaderActions(): array
     {
         return [
+            // Exchange rate update button
+            Action::make('updateCurrencyRates')
+                ->label(__('admin/settings/currency.action_update_rates'))
+                ->icon(Heroicon::ArrowPath)
+                ->requiresConfirmation()
+                ->modalHeading(__('admin/settings/currency.modal_update_rates_title'))
+                ->modalDescription(__('admin/settings/currency.modal_update_rates_body'))
+                ->action(function (): void {
+                     $error_message = app(UpdateRates::class)->handle();
+
+                    if ($error_message) {
+                        Notification::make()
+                            ->title($error_message)
+                            ->danger()
+                            ->send();
+                    } else {
+                        Notification::make()
+                            ->title(__('admin/settings/currency.notification_rates_updated_title'))
+                            ->body(__('admin/settings/currency.notification_rates_updated_body'))
+                            ->success()
+                            ->send();
+                    }
+                }),
+
+            // Standard button for creating currency
             CreateAction::make(),
         ];
     }

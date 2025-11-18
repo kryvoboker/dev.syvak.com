@@ -80,9 +80,31 @@ class Currency extends Model
     /**
      * @return Collection
      */
-    public function getActiveCurrencies(): Collection
+    public function getAllActiveCurrencies(): Collection
     {
         return $this->where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderByDesc('name')
+            ->get();
+    }
+
+    /**
+     * @return Currency|null
+     */
+    public function getDefaultActiveCurrency(): ?self
+    {
+        return $this
+            ->where('is_active', true)
+            ->where('is_default', true)
+            ->first();
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getAllCurrencies(): Collection
+    {
+        return $this
             ->orderByDesc('is_default')
             ->orderByDesc('name')
             ->get();

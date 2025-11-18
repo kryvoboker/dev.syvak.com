@@ -50,7 +50,7 @@ class CurrenciesTable
                     ->sortable(),
 
                 TextColumn::make('exchange_rate')
-                    ->label(__('admin/settings/currency.column_decimal_places'))
+                    ->label(__('admin/settings/currency.column_exchange_rate'))
                     ->sortable(),
 
                 IconColumn::make('is_active')
