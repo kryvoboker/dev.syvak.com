@@ -18,8 +18,11 @@ class AppServiceProvider extends ServiceProvider
         if ($new_storage_path) {
             config([
                 // Override compiled views path
-                'view.compiled'         => $new_storage_path . '/framework/views',
-                'debugbar.storage.path' => $new_storage_path . '/debugbar',
+                'view.compiled'                => $new_storage_path . '/framework/views',
+                'debugbar.storage.path'        => $new_storage_path . '/debugbar',
+                'logging.channels.single.path' => $new_storage_path . '/logs/laravel.log',
+                'logging.channels.daily.path'  => $new_storage_path . '/logs/laravel.log',
+                'logging.channels.stack.path'  => $new_storage_path . '/logs/laravel.log',
             ]);
         }
     }
