@@ -109,7 +109,8 @@ class Language extends Model
      */
     public function getActiveLanguages(): Collection
     {
-        return $this->where('is_active', true)
+        return self::query()
+            ->where('is_active', true)
             ->orderByDesc('is_default')
             ->orderByDesc('name')
             ->get();

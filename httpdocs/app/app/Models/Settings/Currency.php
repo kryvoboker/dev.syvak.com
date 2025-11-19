@@ -82,7 +82,8 @@ class Currency extends Model
      */
     public function getAllActiveCurrencies(): Collection
     {
-        return $this->where('is_active', true)
+        return self::query()
+            ->where('is_active', true)
             ->orderByDesc('is_default')
             ->orderByDesc('name')
             ->get();
@@ -93,7 +94,7 @@ class Currency extends Model
      */
     public function getDefaultActiveCurrency(): ?self
     {
-        return $this
+        return self::query()
             ->where('is_active', true)
             ->where('is_default', true)
             ->first();
@@ -104,7 +105,7 @@ class Currency extends Model
      */
     public function getAllCurrencies(): Collection
     {
-        return $this
+        return self::query()
             ->orderByDesc('is_default')
             ->orderByDesc('name')
             ->get();

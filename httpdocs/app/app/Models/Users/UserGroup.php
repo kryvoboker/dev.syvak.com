@@ -74,7 +74,7 @@ class UserGroup extends Model
      */
     public function getAllActiveUserGroups(): Collection
     {
-        return $this
+        return self::query()
             ->where('is_active', true)
             ->orderByDesc('name')
             ->get();
@@ -85,7 +85,7 @@ class UserGroup extends Model
      */
     public function getDefaultUserGroupId(): ?int
     {
-        return $this
+        return self::query()
             ->where('is_default', true)
             ->value('id');
     }
@@ -95,7 +95,7 @@ class UserGroup extends Model
      */
     public function getDefaultUserGroup(): ?self
     {
-        return $this
+        return self::query()
             ->where('is_default', true)
             ->first();
     }
