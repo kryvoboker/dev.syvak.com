@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas;
+
+use App\Models\Settings\Language;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Collection;
+
+class AttributeForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        $active_languages = new Language()->getActiveLanguages();
+
+        return $schema
+            ->components([
+                Section::make()
+                    ->schema([
+                        Tabs::make('LanguageTabs')
+                            ->tabs(self::createLanguageTabs($active_languages))
+                            ->activeTab(1)
+                            ->contained(false)
+                            ->persistTabInQueryString(),
+
+                        Toggle::make('is_active')
+                            ->label(__('admin/catalogs/attributes/attributes.label_is_active'))
+                            ->default(true)
+                            ->required(),
+
+                        TextInput::make('sort_order')
+                            ->label(__('admin/catalogs/attributes/attributes.label_sort_order'))
+                            ->numeric()
+                            ->default(1)
+                            ->required(),
+                    ])
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    /**
+     * Create language tabs for specific section
+     *
+     * @param Collection<Language> $active_languages
+     *
+     * @return array<Tabs>
+     */
+    protected static function createLanguageTabs(Collection $active_languages): array
+    {
+        $tabs = [];
+
+        foreach ($active_languages as $language) {
+            $tabs[] = Tabs\Tab::make($language->name)
+                ->schema([
+                    Hidden::make("descriptions.$language->id.language_id")
+                        ->default($language->id),
+
+                    TextInput::make("descriptions.$language->id.name")
+                        ->label(__('admin/catalogs/attributes/attributes.label_name'))
+                        ->maxLength(255)
+                        ->required(),
+                ])
+                ->badge($language->code);
+        }
+
+        return $tabs;
+    }
+}

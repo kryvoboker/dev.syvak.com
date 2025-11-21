@@ -115,4 +115,26 @@ class Language extends Model
             ->orderByDesc('name')
             ->get();
     }
+
+    /**
+     * @param string $code
+     *
+     * @return self|null
+     */
+    public function getLanguageByCode(string $code): ?self
+    {
+        return self::query()
+            ->where('code', $code)
+            ->first();
+    }
+
+    /**
+     * @return self|null
+     */
+    public function getDefaultLanguage(): ?self
+    {
+        return self::query()
+            ->where('is_default', true)
+            ->first();
+    }
 }

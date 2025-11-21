@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Catalogs\Products;
 
+use App\Models\Catalogs\Attributes\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

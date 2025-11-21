@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models\Catalogs\Products;
+namespace App\Models\Catalogs\Attributes;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

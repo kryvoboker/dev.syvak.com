@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Models\Catalogs\Products;
+namespace App\Models\Catalogs\Attributes;
 
+use App\Models\Catalogs\Products\ProductToAttribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -39,5 +40,16 @@ class Attribute extends Model
     public function productToAttribute(): HasMany
     {
         return $this->hasMany(ProductToAttribute::class);
+    }
+
+    /**
+     * @return void
+     */
+    protected static function booted(): void
+    {
+        // Delete related translations when attribute is deleted
+        static::deleting(function (Attribute $attribute) {
+            $attribute->attributeDescription()->delete();
+        });
     }
 }
