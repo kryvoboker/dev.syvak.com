@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Catalogs\Attributes;
 
 use App\Models\Catalogs\Products\ProductToAttribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -51,5 +52,22 @@ class Attribute extends Model
         static::deleting(function (Attribute $attribute) {
             $attribute->attributeDescription()->delete();
         });
+    }
+
+    /**
+     * @param int $language_id
+     *
+     * @return Collection
+     */
+    public function getActiveAttributesWithDescriptionsByLanguageId(int $language_id): Collection
+    {
+        return self::query()
+            ->where('is_active', true)
+            ->with([
+                'attributeDescription' => function ($query) use ($language_id) {
+                    $query->where('language_id', $language_id);
+                }
+            ])
+            ->get();
     }
 }

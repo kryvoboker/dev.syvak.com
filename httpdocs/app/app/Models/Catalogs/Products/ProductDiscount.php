@@ -11,7 +11,7 @@ class ProductDiscount extends Model
 {
     protected $fillable = [
         'product_id',
-        'customer_group_id',
+        'user_group_id',
         'quantity',
         'priority',
         'price',
@@ -26,7 +26,7 @@ class ProductDiscount extends Model
     {
         return [
             'product_id'         => 'integer',
-            'customer_group_id'  => 'integer',
+            'user_group_id'  => 'integer',
             'quantity'           => 'integer',
             'priority'           => 'integer',
             'price'              => 'float',
