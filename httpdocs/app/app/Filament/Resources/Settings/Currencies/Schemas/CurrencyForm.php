@@ -15,8 +15,8 @@ class CurrencyForm
         return $schema
             ->components([
                 TextInput::make('code')
-                    ->label(__('admin/settings/currency.label_code'))
-                    ->helperText(__('admin/settings/currency.helper_code'))
+                    ->label(__('admin/settings/currencies.label_code'))
+                    ->helperText(__('admin/settings/currencies.helper_code'))
                     ->required()
                     ->maxLength(3)
                     ->unique(ignoreRecord: true)
@@ -24,27 +24,27 @@ class CurrencyForm
                     ->rules(['alpha', 'uppercase', 'size:3']),
 
                 TextInput::make('name')
-                    ->label(__('admin/settings/currency.label_name'))
-                    ->helperText(__('admin/settings/currency.helper_name'))
+                    ->label(__('admin/settings/currencies.label_name'))
+                    ->helperText(__('admin/settings/currencies.helper_name'))
                     ->required()
                     ->maxLength(100)
                     ->placeholder('US Dollar'),
 
                 TextInput::make('symbol_left')
-                    ->label(__('admin/settings/currency.label_symbol_left'))
-                    ->helperText(__('admin/settings/currency.helper_symbol_left'))
+                    ->label(__('admin/settings/currencies.label_symbol_left'))
+                    ->helperText(__('admin/settings/currencies.helper_symbol_left'))
                     ->maxLength(10)
                     ->placeholder('$'),
 
                 TextInput::make('symbol_right')
-                    ->label(__('admin/settings/currency.label_symbol_right'))
-                    ->helperText(__('admin/settings/currency.helper_symbol_right'))
+                    ->label(__('admin/settings/currencies.label_symbol_right'))
+                    ->helperText(__('admin/settings/currencies.helper_symbol_right'))
                     ->maxLength(10)
                     ->placeholder('€'),
 
                 TextInput::make('decimal_places')
-                    ->label(__('admin/settings/currency.label_decimal_places'))
-                    ->helperText(__('admin/settings/currency.helper_decimal_places'))
+                    ->label(__('admin/settings/currencies.label_decimal_places'))
+                    ->helperText(__('admin/settings/currencies.helper_decimal_places'))
                     ->required()
                     ->numeric()
                     ->default(2)
@@ -53,8 +53,8 @@ class CurrencyForm
                     ->placeholder('2'),
 
                 TextInput::make('exchange_rate')
-                    ->label(__('admin/settings/currency.label_exchange_rate'))
-                    ->helperText(__('admin/settings/currency.helper_exchange_rate'))
+                    ->label(__('admin/settings/currencies.label_exchange_rate'))
+                    ->helperText(__('admin/settings/currencies.helper_exchange_rate'))
                     ->required()
                     ->numeric()
                     ->default(1.000000)
@@ -63,13 +63,13 @@ class CurrencyForm
                     ->placeholder('1.000000'),
 
                 Toggle::make('is_active')
-                    ->label(__('admin/settings/currency.label_is_active'))
-                    ->helperText(__('admin/settings/currency.helper_is_active'))
+                    ->label(__('admin/settings/currencies.label_is_active'))
+                    ->helperText(__('admin/settings/currencies.helper_is_active'))
                     ->default(false),
 
                 Toggle::make('is_default')
-                    ->label(__('admin/settings/currency.label_is_default'))
-                    ->helperText(__('admin/settings/currency.helper_is_default'))
+                    ->label(__('admin/settings/currencies.label_is_default'))
+                    ->helperText(__('admin/settings/currencies.helper_is_default'))
                     ->default(false)
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {

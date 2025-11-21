@@ -18,7 +18,7 @@ class CreateCurrency extends CreateRecord
      */
     public function getTitle(): string
     {
-        return __('admin/settings/currency.navigation_label');
+        return __('admin/settings/currencies.navigation_label');
     }
 
     /**
@@ -28,6 +28,6 @@ class CreateCurrency extends CreateRecord
      */
     public function getHeading(): ?string
     {
-        return __('admin/settings/currency.navigation_label');
+        return __('admin/settings/currencies.navigation_label');
     }
 }

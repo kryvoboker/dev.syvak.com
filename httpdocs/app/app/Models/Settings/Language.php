@@ -61,13 +61,13 @@ class Language extends Model
         // Prevent deletion of default language
         static::deleting(function (Language $language) {
             if ($language->is_default) {
-                throw new Exception(__('admin/settings/language.error_cant_delete_default_language'));
+                throw new Exception(__('admin/settings/languages.error_cant_delete_default_language'));
             }
 
             $active_langs = static::where('is_active', true)->count();
 
             if ($active_langs == 1) {
-                throw new Exception(__('admin/settings/language.error_cant_delete_last_active_language'));
+                throw new Exception(__('admin/settings/languages.error_cant_delete_last_active_language'));
             }
         });
     }

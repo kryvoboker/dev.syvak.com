@@ -21,7 +21,7 @@ class EditLanguage extends EditRecord
      */
     public function getTitle(): string
     {
-        return __('admin/settings/language.navigation_label');
+        return __('admin/settings/languages.navigation_label');
     }
 
     /**
@@ -31,7 +31,7 @@ class EditLanguage extends EditRecord
      */
     public function getHeading(): ?string
     {
-        return __('admin/settings/language.navigation_label');
+        return __('admin/settings/languages.navigation_label');
     }
 
     protected function getHeaderActions(): array
@@ -41,8 +41,8 @@ class EditLanguage extends EditRecord
                 ->before(function (DeleteAction $action, Language $record) {
                     if ($record->is_default) {
                         Notification::make()
-                            ->title(__('admin/settings/language.text_cant_delete_default_language'))
-                            ->body(__('admin/settings/language.error_cant_delete_default_language'))
+                            ->title(__('admin/settings/languages.text_cant_delete_default_language'))
+                            ->body(__('admin/settings/languages.error_cant_delete_default_language'))
                             ->danger()
                             ->send();
 

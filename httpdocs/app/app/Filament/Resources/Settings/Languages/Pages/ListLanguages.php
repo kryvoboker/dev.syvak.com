@@ -19,7 +19,7 @@ class ListLanguages extends ListRecords
      */
     public function getTitle(): string
     {
-        return __('admin/settings/language.navigation_label');
+        return __('admin/settings/languages.navigation_label');
     }
 
     /**
@@ -29,7 +29,7 @@ class ListLanguages extends ListRecords
      */
     public function getHeading(): ?string
     {
-        return __('admin/settings/language.navigation_label');
+        return __('admin/settings/languages.navigation_label');
     }
 
     protected function getHeaderActions(): array

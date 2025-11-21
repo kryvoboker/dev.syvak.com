@@ -36,8 +36,10 @@ return [
     // Text
     'text_cant_delete_default_language'      => 'Cannot delete default language',
     'text_cant_delete_last_active_language'  => 'Cannot delete last active language',
+    'text_cant_delete_special_user'          => 'Cannot delete special user!',
 
     // Error
     'error_cant_delete_default_language'     => 'Please set another language as default before deleting this one!',
     'error_cant_delete_last_active_language' => 'At least one active language must remain in the system!',
+    'error_cant_delete_special_user'         => 'Please do not attempt to delete this special user account!'
 ];

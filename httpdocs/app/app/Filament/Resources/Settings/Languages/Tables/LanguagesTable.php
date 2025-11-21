@@ -22,43 +22,43 @@ class LanguagesTable
         return $table
             ->columns([
                 TextColumn::make('code')
-                    ->label(__('admin/settings/language.column_code'))
+                    ->label(__('admin/settings/languages.column_code'))
                     ->searchable()
                     ->sortable()
                     ->badge(),
 
                 TextColumn::make('name')
-                    ->label(__('admin/settings/language.column_name'))
+                    ->label(__('admin/settings/languages.column_name'))
                     ->searchable()
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label(__('admin/settings/language.column_active'))
+                    ->label(__('admin/settings/languages.column_active'))
                     ->boolean()
                     ->sortable(),
 
                 IconColumn::make('is_default')
-                    ->label(__('admin/settings/language.column_default'))
+                    ->label(__('admin/settings/languages.column_default'))
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label(__('admin/settings/language.column_created_at'))
+                    ->label(__('admin/settings/languages.column_created_at'))
                     ->dateTime()
                     ->sortable()
                     ->date(config('app.datetime_format'), config('app.timezone')),
             ])
             ->filters([
                 TernaryFilter::make('is_active')
-                    ->label(__('admin/settings/language.filter_active'))
-                    ->placeholder(__('admin/settings/language.placeholder_all_languages'))
-                    ->trueLabel(__('admin/settings/language.true_label_active_only'))
-                    ->falseLabel(__('admin/settings/language.false_label_inactive_only')),
+                    ->label(__('admin/settings/languages.filter_active'))
+                    ->placeholder(__('admin/settings/languages.placeholder_all_languages'))
+                    ->trueLabel(__('admin/settings/languages.true_label_active_only'))
+                    ->falseLabel(__('admin/settings/languages.false_label_inactive_only')),
 
                 TernaryFilter::make('is_default')
-                    ->label(__('admin/settings/language.filter_default'))
-                    ->placeholder(__('admin/settings/language.placeholder_all_languages'))
-                    ->trueLabel(__('admin/settings/language.true_label_default_only')),
+                    ->label(__('admin/settings/languages.filter_default'))
+                    ->placeholder(__('admin/settings/languages.placeholder_all_languages'))
+                    ->trueLabel(__('admin/settings/languages.true_label_default_only')),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -72,8 +72,8 @@ class LanguagesTable
 
                             if ($has_default) {
                                 Notification::make()
-                                    ->title(__('admin/settings/language.text_cant_delete_default_language'))
-                                    ->body(__('admin/settings/language.error_cant_delete_default_language'))
+                                    ->title(__('admin/settings/languages.text_cant_delete_default_language'))
+                                    ->body(__('admin/settings/languages.error_cant_delete_default_language'))
                                     ->danger()
                                     ->send();
 
@@ -86,8 +86,8 @@ class LanguagesTable
 
                             if ($active_to_delete >= $total_active) {
                                 Notification::make()
-                                    ->title(__('admin/settings/language.text_cant_delete_last_active_language'))
-                                    ->body(__('admin/settings/language.error_cant_delete_last_active_language'))
+                                    ->title(__('admin/settings/languages.text_cant_delete_last_active_language'))
+                                    ->body(__('admin/settings/languages.error_cant_delete_last_active_language'))
                                     ->danger()
                                     ->send();
 

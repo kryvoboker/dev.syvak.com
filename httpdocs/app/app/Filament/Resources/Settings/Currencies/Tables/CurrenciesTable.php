@@ -22,59 +22,59 @@ class CurrenciesTable
         return $table
             ->columns([
                 TextColumn::make('code')
-                    ->label(__('admin/settings/currency.column_code'))
+                    ->label(__('admin/settings/currencies.column_code'))
                     ->searchable()
                     ->sortable()
                     ->badge(),
 
                 TextColumn::make('name')
-                    ->label(__('admin/settings/currency.column_name'))
+                    ->label(__('admin/settings/currencies.column_name'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('symbol_left')
-                    ->label(__('admin/settings/currency.column_symbol_left'))
+                    ->label(__('admin/settings/currencies.column_symbol_left'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('symbol_right')
-                    ->label(__('admin/settings/currency.column_symbol_right'))
+                    ->label(__('admin/settings/currencies.column_symbol_right'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('decimal_places')
-                    ->label(__('admin/settings/currency.column_decimal_places'))
+                    ->label(__('admin/settings/currencies.column_decimal_places'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
 
                 TextColumn::make('exchange_rate')
-                    ->label(__('admin/settings/currency.column_exchange_rate'))
+                    ->label(__('admin/settings/currencies.column_exchange_rate'))
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label(__('admin/settings/currency.column_active'))
+                    ->label(__('admin/settings/currencies.column_active'))
                     ->boolean()
                     ->sortable(),
 
                 IconColumn::make('is_default')
-                    ->label(__('admin/settings/currency.column_default'))
+                    ->label(__('admin/settings/currencies.column_default'))
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label(__('admin/settings/currency.column_created_at'))
+                    ->label(__('admin/settings/currencies.column_created_at'))
                     ->dateTime()
                     ->sortable()
                     ->date(config('app.datetime_format'), config('app.timezone')),
             ])
             ->filters([
                 TernaryFilter::make('is_active')
-                    ->label(__('admin/settings/currency.filter_active'))
-                    ->placeholder(__('admin/settings/currency.placeholder_all_currencies'))
-                    ->trueLabel(__('admin/settings/currency.true_label_active_only'))
-                    ->falseLabel(__('admin/settings/currency.false_label_inactive_only')),
+                    ->label(__('admin/settings/currencies.filter_active'))
+                    ->placeholder(__('admin/settings/currencies.placeholder_all_currencies'))
+                    ->trueLabel(__('admin/settings/currencies.true_label_active_only'))
+                    ->falseLabel(__('admin/settings/currencies.false_label_inactive_only')),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -88,8 +88,8 @@ class CurrenciesTable
 
                             if ($has_default) {
                                 Notification::make()
-                                    ->title(__('admin/settings/currency.text_cant_delete_default_currency'))
-                                    ->body(__('admin/settings/currency.error_cant_delete_default_currency'))
+                                    ->title(__('admin/settings/currencies.text_cant_delete_default_currency'))
+                                    ->body(__('admin/settings/currencies.error_cant_delete_default_currency'))
                                     ->danger()
                                     ->send();
 
@@ -102,8 +102,8 @@ class CurrenciesTable
 
                             if ($active_to_delete >= $total_active) {
                                 Notification::make()
-                                    ->title(__('admin/settings/currency.text_cant_delete_last_active_currency'))
-                                    ->body(__('admin/settings/currency.error_cant_delete_last_active_currency'))
+                                    ->title(__('admin/settings/currencies.text_cant_delete_last_active_currency'))
+                                    ->body(__('admin/settings/currencies.error_cant_delete_last_active_currency'))
                                     ->danger()
                                     ->send();
 

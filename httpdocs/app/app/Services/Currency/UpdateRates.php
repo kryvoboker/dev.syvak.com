@@ -18,7 +18,7 @@ class UpdateRates
         $default_active_currency = $currency->getDefaultActiveCurrency();
 
         if (!$default_active_currency) {
-            return __('admin/settings/currency.error_absent_default_currency');
+            return __('admin/settings/currencies.error_absent_default_currency');
         }
 
         $json_url = 'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json';
@@ -27,11 +27,11 @@ class UpdateRates
             $response = Http::timeout(10)->get($json_url);
 
             if ($response->failed()) {
-                Log::channel('stack')->error(__('admin/settings/currency.error_failed_to_update_rates'), [
+                Log::channel('stack')->error(__('admin/settings/currencies.error_failed_to_update_rates'), [
                     'status' => $response->status(),
                 ]);
 
-                return __('admin/settings/currency.error_failed_to_update_rates');
+                return __('admin/settings/currencies.error_failed_to_update_rates');
             }
 
             $json = $response->json();
@@ -40,11 +40,11 @@ class UpdateRates
                 return null;
             }
         } catch (Exception $e) {
-            Log::channel('stack')->error(__('admin/settings/currency.error_failed_to_update_rates'), [
+            Log::channel('stack')->error(__('admin/settings/currencies.error_failed_to_update_rates'), [
                 'message' => $e->getMessage(),
             ]);
 
-            return __('admin/settings/currency.error_failed_to_update_rates');
+            return __('admin/settings/currencies.error_failed_to_update_rates');
         }
 
         $currencies      = $currency->getAllCurrencies();

@@ -115,8 +115,8 @@ class UsersTable
                             // Check if any selected record has an email in denied list
                             if ($records->pluck('email')->intersect($denied_emails)->isNotEmpty()) {
                                 Notification::make()
-                                    ->title(__('admin/settings/language.text_cant_delete_special_user'))
-                                    ->body(__('admin/settings/language.error_cant_delete_special_user'))
+                                    ->title(__('admin/settings/languages.text_cant_delete_special_user'))
+                                    ->body(__('admin/settings/languages.error_cant_delete_special_user'))
                                     ->danger()
                                     ->send();
 

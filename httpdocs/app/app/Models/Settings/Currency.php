@@ -66,13 +66,13 @@ class Currency extends Model
         // Prevent deletion of default language
         static::deleting(function (Language $language) {
             if ($language->is_default) {
-                throw new Exception(__('admin/settings/currency.error_cant_delete_default_currency'));
+                throw new Exception(__('admin/settings/currencies.error_cant_delete_default_currency'));
             }
 
             $active_currencies = static::where('is_active', true)->count();
 
             if ($active_currencies == 1) {
-                throw new Exception(__('admin/settings/currency.error_cant_delete_last_active_currency'));
+                throw new Exception(__('admin/settings/currencies.error_cant_delete_last_active_currency'));
             }
         });
     }

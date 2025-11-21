@@ -18,7 +18,7 @@ class CreateLanguage extends CreateRecord
      */
     public function getTitle(): string
     {
-        return __('admin/settings/language.navigation_label');
+        return __('admin/settings/languages.navigation_label');
     }
 
     /**
@@ -28,6 +28,6 @@ class CreateLanguage extends CreateRecord
      */
     public function getHeading(): ?string
     {
-        return __('admin/settings/language.navigation_label');
+        return __('admin/settings/languages.navigation_label');
     }
 }
