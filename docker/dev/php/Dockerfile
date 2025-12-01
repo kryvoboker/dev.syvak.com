@@ -3,7 +3,7 @@ FROM php:8.4-fpm
 WORKDIR /var/www/html
 
 RUN apt-get update \
-    && apt-get -y install curl gnupg ca-certificates unzip zip tzdata nano \
+    && apt-get -y install curl ca-certificates unzip zip tzdata nano \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Europe/Kyiv

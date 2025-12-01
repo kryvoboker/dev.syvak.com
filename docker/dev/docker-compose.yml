@@ -85,10 +85,6 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    cap_add:
-      - CHOWN
-      - SETUID
-      - SETGID
     depends_on:
       - dev-syvak-php-fpm
     networks:
@@ -96,15 +92,28 @@ services:
       - dev-syvak-net
 
   dev-syvak-mariadb:
-    image: mariadb:10.11.5
+    build:
+      context: $PWD
+      dockerfile: $PWD/docker/dev/mariadb/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+    image: dev-syvak-mariadb:1.0
+#    image: mariadb:10.11.5
     container_name: dev-syvak-mariadb
     ports:
       - "3340:3306"
     restart: no
     env_file:
+      - $PWD/docker/dev/env/.env
       - $PWD/docker/dev/env/.env.mariadb
     volumes:
       - $PWD/db:/var/lib/mysql
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     networks:
       - dev-syvak-net
 

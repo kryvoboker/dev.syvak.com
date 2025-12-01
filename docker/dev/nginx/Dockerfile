@@ -3,7 +3,7 @@ FROM nginx:1.29.1
 WORKDIR /var/www/html
 
 RUN apt-get update \
-    && apt-get -y install curl gnupg ca-certificates tzdata \
+    && apt-get -y install tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Europe/Kyiv

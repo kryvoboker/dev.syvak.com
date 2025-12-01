@@ -26,3 +26,6 @@ vite:
 vite-build:
 	cd httpdocs/app \
 	&& npm run build
+
+spfdb:
+	chown -R ${id -u}:${id -g} db

@@ -1,6 +1,6 @@
 FROM php:8.4-cli-alpine3.22
 
-RUN apk add --no-cache curl gnupg ca-certificates unzip zip tzdata nano \
+RUN apk add --no-cache curl ca-certificates unzip zip tzdata \
     && rm -rf /var/cache/apk/*
 
 ENV TZ=Europe/Kyiv
