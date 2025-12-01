@@ -85,6 +85,6 @@ class UserResource extends Resource
      */
     public static function getNavigationGroup(): ?string
     {
-        return __('admin/default.menu_item_users');
+        return __('admin/default.menu.item_users');
     }
 }

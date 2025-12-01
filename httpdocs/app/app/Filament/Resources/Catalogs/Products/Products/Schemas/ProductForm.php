@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
 use App\Models\Catalogs\Attributes\Attribute;
-use App\Models\Catalogs\Products\ProductToAttribute;
+use App\Models\Catalogs\Categories\Category;
 use App\Models\Settings\Language;
+use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -33,6 +34,7 @@ class ProductForm
                     ->tabs([
                         self::createGeneralTab(),
                         self::createTranslationsTab($active_languages),
+                        self::createCategoriesTab($active_languages),
                         self::createImagesTab(),
                         self::createDiscountsTab(),
                         self::createAttributesTab($active_languages),
@@ -51,65 +53,65 @@ class ProductForm
      */
     protected static function createGeneralTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('admin/catalogs/products/products.tab_general'))
+        return Tabs\Tab::make(__('admin/default.tabs.general'))
             ->schema([
-                Section::make(__('admin/catalogs/products/products.section_basic_info'))
+                Section::make(__('admin/default.sections.basic_info'))
                     ->schema([
                         TextInput::make('model')
-                            ->label(__('admin/catalogs/products/products.label_product_model'))
+                            ->label(__('admin/default.labels.model'))
                             ->maxLength(64)
                             ->required(),
 
                         TextInput::make('sku')
-                            ->label(__('admin/catalogs/products/products.label_sku'))
+                            ->label(__('admin/default.labels.sku'))
                             ->maxLength(64)
                             ->unique(ignoreRecord: true)
                             ->required(),
 
                         TextInput::make('ean')
-                            ->label(__('admin/catalogs/products/products.label_ean'))
+                            ->label(__('admin/default.labels.ean'))
                             ->maxLength(14)
                             ->default(null),
                     ])
                     ->columns(3),
 
-                Section::make(__('admin/catalogs/products/products.section_stock'))
+                Section::make(__('admin/default.sections.stock'))
                     ->schema([
                         TextInput::make('quantity')
-                            ->label(__('admin/catalogs/products/products.label_quantity'))
+                            ->label(__('admin/default.labels.quantity'))
                             ->numeric()
                             ->minValue(0)
                             ->default(0)
                             ->required(),
 
                         TextInput::make('minimum')
-                            ->label(__('admin/catalogs/products/products.label_minimum'))
+                            ->label(__('admin/default.labels.minimum'))
                             ->numeric()
                             ->minValue(1)
                             ->default(1)
                             ->required(),
                     ])
-                    ->columns(2),
+                    ->columns(),
 
-                Section::make(__('admin/catalogs/products/products.section_pricing'))
+                Section::make(__('admin/default.sections.pricing'))
                     ->schema([
                         TextInput::make('price')
-                            ->label(__('admin/catalogs/products/products.label_price'))
+                            ->label(__('admin/default.labels.price'))
                             ->numeric()
                             ->minValue(0)
-                            ->prefix('$')
+                            ->prefix(config('app.currency.default_currency_symbol'))
                             ->default(0.0)
                             ->required(),
                     ])
                     ->columns(1),
 
-                Section::make(__('admin/catalogs/products/products.section_image'))
+                Section::make(__('admin/default.sections.image'))
                     ->schema([
                         FileUpload::make('image')
-                            ->label(__('admin/catalogs/products/products.label_image'))
+                            ->label(__('admin/default.labels.image'))
                             ->image()
-                            ->directory('products')
-                            ->maxSize(2048)
+                            ->directory(config('path.products_images'))
+                            ->maxSize((int)config('app.files.max_size_kb.max_upload_product_image'))
                             ->imageEditor()
                             ->imageEditorAspectRatios([
                                 '16:9',
@@ -119,31 +121,31 @@ class ProductForm
                     ])
                     ->columns(1),
 
-                Section::make(__('admin/catalogs/products/products.section_settings'))
+                Section::make(__('admin/default.sections.settings'))
                     ->schema([
                         Toggle::make('is_active')
-                            ->label(__('admin/catalogs/products/products.label_is_active'))
+                            ->label(__('admin/default.labels.is_active'))
                             ->default(true)
                             ->required(),
 
                         DateTimePicker::make('date_available')
-                            ->label(__('admin/catalogs/products/products.label_date_available'))
+                            ->label(__('admin/default.labels.date_available'))
                             ->default(now()),
 
                         DateTimePicker::make('date_added')
-                            ->label(__('admin/catalogs/products/products.label_date_added'))
+                            ->label(__('admin/default.labels.date_added'))
                             ->default(now())
                             ->required(),
 
                         TextInput::make('viewed')
-                            ->label(__('admin/catalogs/products/products.label_viewed'))
+                            ->label(__('admin/default.labels.viewed'))
                             ->numeric()
                             ->minValue(0)
                             ->default(0)
                             ->disabled()
                             ->dehydrated(false),
                     ])
-                    ->columns(2),
+                    ->columns(),
             ]);
     }
 
@@ -156,9 +158,9 @@ class ProductForm
      */
     protected static function createTranslationsTab(Collection $active_languages): Tabs\Tab
     {
-        return Tabs\Tab::make(__('admin/catalogs/products/products.tab_translations'))
+        return Tabs\Tab::make(__('admin/default.tabs.translations'))
             ->schema([
-                Section::make(__('admin/catalogs/products/products.section_translations'))
+                Section::make(__('admin/default.sections.translations'))
                     ->schema([
                         Tabs::make('LanguageTabs')
                             ->tabs(self::createLanguageTabs($active_languages))
@@ -184,16 +186,16 @@ class ProductForm
         foreach ($active_languages as $language) {
             $tabs[] = Tabs\Tab::make($language->name)
                 ->schema([
-                    Hidden::make("descriptions.{$language->id}.language_id")
+                    Hidden::make("descriptions.$language->id.language_id")
                         ->default($language->id),
 
-                    TextInput::make("descriptions.{$language->id}.name")
-                        ->label(__('admin/catalogs/products/products.label_name'))
+                    TextInput::make("descriptions.$language->id.name")
+                        ->label(__('admin/default.labels.name'))
                         ->maxLength(255)
                         ->required(),
 
-                    RichEditor::make("descriptions.{$language->id}.description")
-                        ->label(__('admin/catalogs/products/products.label_description'))
+                    RichEditor::make("descriptions.$language->id.description")
+                        ->label(__('admin/default.labels.description'))
                         ->toolbarButtons([
                             'bold',
                             'italic',
@@ -208,23 +210,158 @@ class ProductForm
                         ])
                         ->columnSpanFull(),
 
-                    TextInput::make("descriptions.{$language->id}.meta_title")
-                        ->label(__('admin/catalogs/products/products.label_meta_title'))
+                    TextInput::make("descriptions.$language->id.meta_title")
+                        ->label(__('admin/default.labels.meta_title'))
                         ->maxLength(255),
 
-                    TextInput::make("descriptions.{$language->id}.meta_description")
-                        ->label(__('admin/catalogs/products/products.label_meta_description'))
+                    TextInput::make("descriptions.$language->id.meta_description")
+                        ->label(__('admin/default.labels.meta_description'))
                         ->maxLength(255),
 
-                    TextInput::make("descriptions.{$language->id}.meta_keywords")
-                        ->label(__('admin/catalogs/products/products.label_meta_keywords'))
+                    TextInput::make("descriptions.$language->id.meta_keywords")
+                        ->label(__('admin/default.labels.meta_keywords'))
                         ->maxLength(255),
                 ])
                 ->badge($language->code)
-                ->columns(2);
+                ->columns();
         }
 
         return $tabs;
+    }
+
+    /**
+     * Create categories tab
+     *
+     * @param Collection<Language> $active_languages
+     *
+     * @return Tabs\Tab
+     */
+    protected static function createCategoriesTab(Collection $active_languages): Tabs\Tab
+    {
+        /** @var Language $language */
+        $language            = $active_languages->where('is_default', true)->first();
+        $current_language_id = $language?->id;
+
+        if ($current_language_id === null) {
+            Notification::make()
+                ->title(__('admin/default.errors.title'))
+                ->body(__('admin/default.errors.no_language'))
+                ->danger()
+                ->send();
+        }
+
+        return Tabs\Tab::make(__('admin/default.tabs.categories'))
+            ->schema([
+                Section::make(__('admin/default.sections.categories'))
+                    ->schema([
+                        Select::make('categories')
+                            ->label(__('admin/default.labels.categories'))
+                            ->multiple()
+                            ->relationship('categories', 'id')
+                            ->options(function () use ($current_language_id) {
+                                if ($current_language_id === null) {
+                                    return [];
+                                }
+
+                                return self::getCategoryHierarchy($current_language_id);
+                            })
+                            ->getOptionLabelUsing(function ($value) use ($current_language_id) {
+                                if ($value === null || $current_language_id === null) {
+                                    return '-';
+                                }
+
+                                return self::getCategoryFullPath($value, $current_language_id);
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->helperText(__('admin/default.helpers.categories'))
+                            ->distinct()
+                            ->rules([
+                                fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                                    if (is_array($value) && count($value) !== count(array_unique($value))) {
+                                        $fail(__('admin/default.errors.validation_duplicate_categories'));
+                                    }
+                                },
+                            ]),
+                    ])
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    /**
+     * Get category hierarchy with full paths
+     *
+     * @param int $language_id
+     *
+     * @return array<int, string>
+     */
+    protected static function getCategoryHierarchy(int $language_id): array
+    {
+        $categories = Category::with([
+            'categoryDescription' => function ($query) use ($language_id) {
+                $query->where('language_id', $language_id);
+            }
+        ])
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $hierarchy = [];
+
+        foreach ($categories as $category) {
+            $path                     = self::getCategoryFullPath($category->id, $language_id);
+            $hierarchy[$category->id] = $path;
+        }
+
+        return $hierarchy;
+    }
+
+    /**
+     * Get full category path (Parent > Child > Grandchild)
+     *
+     * @param int $category_id
+     * @param int $language_id
+     *
+     * @return string
+     */
+    protected static function getCategoryFullPath(int $category_id, int $language_id): string
+    {
+        $category = Category::with([
+            'categoryDescription' => function ($query) use ($language_id) {
+                $query->where('language_id', $language_id);
+            }
+        ])->find($category_id);
+
+        if ($category === null) {
+            return "Category #$category_id";
+        }
+
+        $path             = [];
+        $current_category = $category;
+
+        // Build path from current to root
+        while ($current_category !== null) {
+            $description = $current_category->categoryDescription
+                ->firstWhere('language_id', $language_id);
+
+            $name = $description?->name
+                ?? $current_category->categoryDescription->first()?->name
+                ?? "Category #$current_category->id";
+
+            array_unshift($path, $name);
+
+            if ($current_category->parent_id !== null) {
+                $current_category = Category::with([
+                    'categoryDescription' => function ($query) use ($language_id) {
+                        $query->where('language_id', $language_id);
+                    }
+                ])->find($current_category->parent_id);
+            } else {
+                $current_category = null;
+            }
+        }
+
+        return implode(' > ', $path);
     }
 
     /**
@@ -234,15 +371,15 @@ class ProductForm
      */
     protected static function createImagesTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('admin/catalogs/products/products.tab_images'))
+        return Tabs\Tab::make(__('admin/default.tabs.images'))
             ->schema([
-                Section::make(__('admin/catalogs/products/products.section_additional_images'))
+                Section::make(__('admin/default.sections.additional_images'))
                     ->schema([
                         Repeater::make('images')
-                            ->label(__('admin/catalogs/products/products.label_images'))
+                            ->label(__('admin/default.labels.images'))
                             ->schema([
                                 FileUpload::make('image')
-                                    ->label(__('admin/catalogs/products/products.label_image'))
+                                    ->label(__('admin/default.labels.image'))
                                     ->image()
                                     ->directory('products/gallery')
                                     ->maxSize(2048)
@@ -250,18 +387,18 @@ class ProductForm
                                     ->required(),
 
                                 TextInput::make('sort_order')
-                                    ->label(__('admin/catalogs/products/products.label_sort_order'))
+                                    ->label(__('admin/default.labels.sort_order'))
                                     ->numeric()
                                     ->default(0)
                                     ->required(),
                             ])
-                            ->columns(2)
+                            ->columns()
                             ->defaultItems(0)
                             ->collapsible()
                             ->cloneable()
                             ->reorderable()
                             ->orderColumn('sort_order')
-                            ->addActionLabel(__('admin/catalogs/products/products.label_add_image'))
+                            ->addActionLabel(__('admin/default.labels.add_image'))
                     ])
                     ->columnSpanFull(),
             ]);
@@ -274,15 +411,15 @@ class ProductForm
      */
     protected static function createDiscountsTab(): Tabs\Tab
     {
-        return Tabs\Tab::make(__('admin/catalogs/products/products.tab_discounts'))
+        return Tabs\Tab::make(__('admin/default.tabs.discounts'))
             ->schema([
-                Section::make(__('admin/catalogs/products/products.section_discounts'))
+                Section::make(__('admin/default.sections.discounts'))
                     ->schema([
                         Repeater::make('discounts')
-                            ->label(__('admin/catalogs/products/products.label_discounts'))
+                            ->label(__('admin/default.labels.discounts'))
                             ->schema([
                                 Select::make('user_group_id')
-                                    ->label(__('admin/catalogs/products/products.label_user_group'))
+                                    ->label(__('admin/default.labels.user_group'))
                                     ->options([
                                         1 => 'Default',
                                         2 => 'Wholesale',
@@ -292,32 +429,32 @@ class ProductForm
                                     ->required(),
 
                                 TextInput::make('quantity')
-                                    ->label(__('admin/catalogs/products/products.label_discount_quantity'))
+                                    ->label(__('admin/default.labels.discount_quantity'))
                                     ->numeric()
                                     ->minValue(1)
                                     ->default(1)
                                     ->required(),
 
                                 TextInput::make('priority')
-                                    ->label(__('admin/catalogs/products/products.label_priority'))
+                                    ->label(__('admin/default.labels.priority'))
                                     ->numeric()
                                     ->minValue(0)
                                     ->default(0)
                                     ->required(),
 
                                 TextInput::make('price')
-                                    ->label(__('admin/catalogs/products/products.label_discount_price'))
+                                    ->label(__('admin/default.labels.discount_price'))
                                     ->numeric()
                                     ->minValue(0)
                                     ->prefix('$')
                                     ->required(),
 
                                 DateTimePicker::make('date_start')
-                                    ->label(__('admin/catalogs/products/products.label_date_start'))
+                                    ->label(__('admin/default.labels.date_start'))
                                     ->required(),
 
                                 DateTimePicker::make('date_end')
-                                    ->label(__('admin/catalogs/products/products.label_date_end'))
+                                    ->label(__('admin/default.labels.date_end'))
                                     ->required(),
                             ])
                             ->columns(3)
@@ -325,7 +462,7 @@ class ProductForm
                             ->collapsible()
                             ->cloneable()
                             ->reorderable(false)
-                            ->addActionLabel(__('admin/catalogs/products/products.label_add_discount'))
+                            ->addActionLabel(__('admin/default.labels.add_discount'))
                     ])
                     ->columnSpanFull(),
             ]);
@@ -346,21 +483,21 @@ class ProductForm
 
         if ($current_language_id === null) {
             Notification::make()
-                ->title(__('admin/catalogs/products/products.error_title'))
-                ->body(__('admin/catalogs/products/products.error_no_language'))
+                ->title(__('admin/default.errors.title'))
+                ->body(__('admin/default.errors.no_language'))
                 ->danger()
                 ->send();
         }
 
-        return Tabs\Tab::make(__('admin/catalogs/products/products.tab_attributes'))
+        return Tabs\Tab::make(__('admin/default.tabs.attributes'))
             ->schema([
-                Section::make(__('admin/catalogs/products/products.section_attributes'))
+                Section::make(__('admin/default.sections.attributes'))
                     ->schema([
                         Repeater::make('attributes')
-                            ->label(__('admin/catalogs/products/products.label_attributes'))
+                            ->label(__('admin/default.labels.attributes'))
                             ->schema([
                                 Select::make('attribute_id')
-                                    ->label(__('admin/catalogs/products/products.label_attribute'))
+                                    ->label(__('admin/default.labels.attribute'))
                                     ->options(function () use ($current_language_id) {
                                         if ($current_language_id === null) {
                                             return [];
@@ -374,7 +511,7 @@ class ProductForm
 
                                                 $name = $description?->name
                                                     ?? $attribute->attributeDescription->first()?->name
-                                                    ?? "Attribute #{$attribute->id}";
+                                                    ?? "Attribute #$attribute->id";
 
                                                 return [$attribute->id => $name];
                                             });
@@ -410,7 +547,7 @@ class ProductForm
                                     }),
 
                                 Select::make('language_id')
-                                    ->label(__('admin/catalogs/products/products.label_language'))
+                                    ->label(__('admin/default.labels.language'))
                                     ->options($active_languages->pluck('name', 'id'))
                                     ->default($current_language_id)
                                     ->required()
@@ -420,7 +557,7 @@ class ProductForm
                                     }),
 
                                 TextInput::make('text')
-                                    ->label(__('admin/catalogs/products/products.label_attribute_text'))
+                                    ->label(__('admin/default.labels.attribute_text'))
                                     ->maxLength(255)
                                     ->required(),
                             ])
@@ -429,7 +566,7 @@ class ProductForm
                             ->collapsible()
                             ->cloneable()
                             ->reorderable(false)
-                            ->addActionLabel(__('admin/catalogs/products/products.label_add_attribute'))
+                            ->addActionLabel(__('admin/default.labels.add_attribute'))
                             ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
                                 return $data;
                             })

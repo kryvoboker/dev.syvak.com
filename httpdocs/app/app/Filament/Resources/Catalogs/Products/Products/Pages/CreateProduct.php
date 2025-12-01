@@ -13,12 +13,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreateProduct extends CreateRecord
 {
-    protected static string   $resource          = ProductResource::class;
-    protected array           $descriptions      = [];
-    protected array           $images            = [];
-    protected array           $discounts         = [];
-    protected array           $productAttributes = [];
-    public null|Model|Product $record            = null;
+    protected static string   $resource           = ProductResource::class;
+    protected array           $descriptions       = [];
+    protected array           $images             = [];
+    protected array           $discounts          = [];
+    protected array           $product_attributes = [];
+    public null|Model|Product $record             = null;
 
     /**
      * Mutate form data before creating record
@@ -26,17 +26,18 @@ class CreateProduct extends CreateRecord
      * @param array $data
      *
      * @return array
+     * @throws Halt
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Store related data temporarily
-        $this->descriptions      = $data['descriptions'] ?? [];
-        $this->images            = $data['images'] ?? [];
-        $this->discounts         = $data['discounts'] ?? [];
-        $this->productAttributes = $data['attributes'] ?? [];
+        $this->descriptions       = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->images             = $data['images'] ?? [];
+        $this->discounts          = $data['discounts'] ?? [];
+        $this->product_attributes = trim_strs_in_arr($data['attributes'] ?? []);
 
         // Validate unique attribute-language pairs
-        $this->validateAttributeLanguagePairs($this->productAttributes);
+        $this->validateAttributeLanguagePairs($this->product_attributes);
 
         // Remove from main data
         unset($data['descriptions'], $data['images'], $data['discounts'], $data['attributes']);
@@ -147,10 +148,10 @@ class CreateProduct extends CreateRecord
         }
 
         // Create attributes
-        if (!empty($this->productAttributes)) {
+        if (!empty($this->product_attributes)) {
             $attributes_data = [];
 
-            foreach ($this->productAttributes as $attribute) {
+            foreach ($this->product_attributes as $attribute) {
                 if (!empty($attribute['attribute_id']) && !empty($attribute['text'])) {
                     $attributes_data[] = [
                         'attribute_id' => $attribute['attribute_id'],

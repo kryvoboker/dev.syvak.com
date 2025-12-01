@@ -17,8 +17,4 @@ return [
     'column_sort_order'         => 'Sort Order',
     'column_is_active'          => 'Is Active',
     'column_created_at'         => 'Created At',
-
-    // Errors
-    'error_title'               => 'Error',
-    'error_no_language'         => 'No default language configured. Please configure languages in settings!',
 ];

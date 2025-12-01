@@ -6,6 +6,10 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Pages;
 
 use App\Filament\Resources\Catalogs\Products\Products\ProductResource;
 use App\Models\Catalogs\Products\Product;
+use App\Models\Catalogs\Products\ProductDescription;
+use App\Models\Catalogs\Products\ProductDiscount;
+use App\Models\Catalogs\Products\ProductImage;
+use App\Models\Catalogs\Products\ProductToAttribute;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -15,11 +19,11 @@ use Livewire\Attributes\Locked;
 
 class EditProduct extends EditRecord
 {
-    protected static string              $resource          = ProductResource::class;
-    protected array                      $descriptions      = [];
-    protected array                      $images            = [];
-    protected array                      $discounts         = [];
-    protected array                      $productAttributes = [];
+    protected static string              $resource           = ProductResource::class;
+    protected array                      $descriptions       = [];
+    protected array                      $images             = [];
+    protected array                      $discounts          = [];
+    protected array                      $product_attributes = [];
     #[Locked]
     public Model|int|string|null|Product $record;
 
@@ -43,7 +47,7 @@ class EditProduct extends EditRecord
         $descriptions = $this->record->productDescription()
             ->get()
             ->keyBy('language_id')
-            ->map(fn($desc) => [
+            ->map(fn(ProductDescription $desc) => [
                 'language_id'      => $desc->language_id,
                 'name'             => $desc->name,
                 'description'      => $desc->description,
@@ -59,7 +63,7 @@ class EditProduct extends EditRecord
         $images = $this->record->productImage()
             ->orderBy('sort_order')
             ->get()
-            ->map(fn($img) => [
+            ->map(fn(ProductImage $img) => [
                 'id'         => $img->id,
                 'image'      => $img->image,
                 'sort_order' => $img->sort_order,
@@ -71,7 +75,7 @@ class EditProduct extends EditRecord
         // Load discounts
         $discounts = $this->record->productDiscount()
             ->get()
-            ->map(fn($disc) => [
+            ->map(fn(ProductDiscount $disc) => [
                 'id'            => $disc->id,
                 'user_group_id' => $disc->user_group_id,
                 'quantity'      => $disc->quantity,
@@ -87,7 +91,7 @@ class EditProduct extends EditRecord
         // Load attributes
         $attributes = $this->record->productToAttribute()
             ->get()
-            ->map(fn($attr) => [
+            ->map(fn(ProductToAttribute $attr) => [
                 'id'           => $attr->id,
                 'attribute_id' => $attr->attribute_id,
                 'language_id'  => $attr->language_id,
@@ -106,17 +110,18 @@ class EditProduct extends EditRecord
      * @param array $data
      *
      * @return array
+     * @throws Halt
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         // Store related data temporarily
-        $this->descriptions      = $data['descriptions'] ?? [];
-        $this->images            = $data['images'] ?? [];
-        $this->discounts         = $data['discounts'] ?? [];
-        $this->productAttributes = $data['attributes'] ?? [];
+        $this->descriptions       = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->images             = $data['images'] ?? [];
+        $this->discounts          = $data['discounts'] ?? [];
+        $this->product_attributes = trim_strs_in_arr($data['attributes'] ?? []);
 
         // Validate unique attribute-language pairs
-        $this->validateAttributeLanguagePairs($this->productAttributes);
+        $this->validateAttributeLanguagePairs($this->product_attributes);
 
         // Remove from main data
         unset($data['descriptions'], $data['images'], $data['discounts'], $data['attributes']);
@@ -242,10 +247,10 @@ class EditProduct extends EditRecord
         // Update attributes
         $this->record->productToAttribute()->delete();
 
-        if (!empty($this->productAttributes)) {
+        if (!empty($this->product_attributes)) {
             $attributes_data = [];
 
-            foreach ($this->productAttributes as $attribute) {
+            foreach ($this->product_attributes as $attribute) {
                 if (!empty($attribute['attribute_id']) && !empty($attribute['text'])) {
                     $attributes_data[] = [
                         'attribute_id' => $attribute['attribute_id'],

@@ -40,8 +40,8 @@ class AttributesTable
 
                         if ($current_language_id === null) {
                             Notification::make()
-                                ->title(__('admin/catalogs/attributes/attributes.error_title'))
-                                ->body(__('admin/catalogs/attributes/attributes.error_no_language'))
+                                ->title(__('admin/default.errors.title'))
+                                ->body(__('admin/default.errors.no_language'))
                                 ->danger()
                                 ->send();
 

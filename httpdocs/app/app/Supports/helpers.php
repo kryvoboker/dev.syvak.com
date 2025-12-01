@@ -43,3 +43,21 @@ if (!function_exists('parse_telephone')) {
         return $mask;
     }
 }
+
+if (!function_exists('trim_strs_in_arr')) {
+    /**
+     * @param array $arr
+     *
+     * @return array
+     */
+    function trim_strs_in_arr(array $arr): array
+    {
+        return array_map(function ($item) {
+            if (is_string($item)) {
+                return trim($item);
+            }
+
+            return $item;
+        }, $arr);
+    }
+}

@@ -58,11 +58,9 @@ class EditAttribute extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $descriptions = $data['descriptions'] ?? [];
-        unset($data['descriptions']);
+        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
 
-        // Store descriptions temporarily
-        $this->descriptions = $descriptions;
+        unset($data['descriptions']);
 
         return $data;
     }

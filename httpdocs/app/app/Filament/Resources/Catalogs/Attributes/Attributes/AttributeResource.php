@@ -84,6 +84,6 @@ class AttributeResource extends Resource
      */
     public static function getNavigationGroup(): ?string
     {
-        return __('admin/default.menu_item_catalog');
+        return __('admin/default.menu.item_catalog');
     }
 }

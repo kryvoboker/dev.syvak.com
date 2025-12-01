@@ -2,7 +2,127 @@
 
 return [
     // Menu items
-    'menu_item_catalog'  => 'Catalog',
-    'menu_item_users'    => 'Users',
-    'menu_item_settings' => 'Settings',
+    'menu'     => [
+        'item_catalog'  => 'Catalog',
+        'item_users'    => 'Users',
+        'item_settings' => 'Settings',
+    ],
+
+    // Columns
+    'columns'  => [
+        'name'       => 'Name',
+        'email'      => 'Email',
+        'is_active'  => 'Is Active',
+        'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
+    ],
+
+    // Labels
+    'labels'   => [
+        'model'             => 'Model',
+        'sku'               => 'SKU',
+        'ean'               => 'EAN',
+        'quantity'          => 'Quantity',
+        'minimum'           => 'Minimum',
+        'price'             => 'Price',
+        'image'             => 'Image',
+        'viewed'            => 'Viewed',
+        'date_available'    => 'Date Available',
+        'date_added'        => 'Date Added',
+        'is_active'         => 'Is Active',
+        'name'              => 'Name',
+        'description'       => 'Description',
+        'meta_title'        => 'Meta Title',
+        'meta_description'  => 'Meta Description',
+        'meta_keywords'     => 'Meta Keywords',
+        'images'            => 'Images',
+        'sort_order'        => 'Sort Order',
+        'discounts'         => 'Discounts',
+        'user_group'        => 'User Group',
+        'discount_quantity' => 'Quantity',
+        'priority'          => 'Priority',
+        'discount_price'    => 'Discount Price',
+        'date_start'        => 'Date Start',
+        'date_end'          => 'Date End',
+        'attributes'        => 'Attributes',
+        'attribute'         => 'Attribute',
+        'language'          => 'Language',
+        'attribute_text'    => 'Value',
+        'categories'        => 'Categories',
+    ],
+
+    // Helpers
+    'helpers'  => [
+        'categories' => 'Select the categories',
+    ],
+
+    // Tabs
+    'tabs'     => [
+        'general'      => 'General',
+        'translations' => 'Translations',
+        'categories'   => 'Categories',
+        'images'       => 'Images',
+        'discounts'    => 'Discounts',
+        'attributes'   => 'Attributes',
+    ],
+
+    // Sections
+    'sections' => [
+        'basic_info'        => 'Basic Information',
+        'stock'             => 'Stock',
+        'pricing'           => 'Pricing',
+        'image'             => 'Main Image',
+        'settings'          => 'Settings',
+        'translations'      => 'Translations',
+        'categories'        => 'Categories',
+        'additional_images' => 'Additional Images',
+        'discounts'         => 'Discounts',
+        'attributes'        => 'Attributes',
+    ],
+
+    // Filters
+    'filters'  => [
+        'active_users'            => 'Active Users',
+        'active'                  => 'Active Users',
+        'name'                    => 'Name',
+        'model'                   => 'Model',
+        'sku'                     => 'SKU',
+        'ean'                     => 'EAN',
+        'price'                   => 'Price',
+        'quantity'                => 'Quantity',
+        'category'                => 'Category',
+        'lastname'                => 'Last Name',
+        'email'                   => 'Email',
+        'telephone'               => 'Telephone',
+        'email_verified_at'       => 'Email Verified At',
+        'created_at'              => 'Created At',
+        'placeholder_all'         => 'All',
+        'placeholder_all_users'   => 'All Users',
+        'placeholder_name'        => 'Flowers',
+        'placeholder_model'       => 'PL-1001',
+        'placeholder_sku'         => 'VA-0001',
+        'placeholder_ean'         => '1234567890123',
+        'placeholder_price'       => '135.50',
+        'placeholder_quantity'    => '50',
+        'placeholder_category'    => 'Paintings by Numbers',
+        'active_only'             => 'Active Only',
+        'lastname_only'           => 'Last Name Only',
+        'email_only'              => 'Email Only',
+        'telephone_only'          => 'Telephone Only',
+        'email_verified_only'     => 'Email Verified Only',
+        'created_only'            => 'Created Only',
+        'inactive_only'           => 'Inactive Only',
+        'email_not_verified_only' => 'Email Not Verified Only',
+        'name_excluded'           => 'Name Excluded',
+        'lastname_excluded'       => 'Last Name Excluded',
+        'email_excluded'          => 'Email Excluded',
+        'telephone_excluded'      => 'Telephone Excluded',
+    ],
+
+    // Errors
+    'errors'   => [
+        'title'                           => 'Error',
+        'no_language'                     => 'No default language configured. Please configure languages in settings!',
+        'validation_duplicate_categories' => 'The selected categories contain duplicates. Please remove the duplicates and try again.',
+    ]
 ];

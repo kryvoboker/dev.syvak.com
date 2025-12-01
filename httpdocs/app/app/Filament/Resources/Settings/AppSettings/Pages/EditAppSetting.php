@@ -40,7 +40,7 @@ class EditAppSetting extends EditRecord
     public function getBreadcrumbs(): array
     {
         return [
-            'admin/settings'                    => __('admin/default.menu_item_settings'),
+            'admin/settings'                    => __('admin/default.menu.item_settings'),
             AppSettingResource::getUrl('index') => __('admin/settings/app_settings.navigation_label'),
         ];
     }

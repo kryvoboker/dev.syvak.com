@@ -56,7 +56,7 @@ class UserForm
                 FileUpload::make('avatar')
                     ->label(__('admin/users/users.label_avatar'))
                     ->image() // accept images only
-                    ->directory('avatars/' . date('Y/m')) // store under avatars folder
+                    ->directory(config('path.avatars') . date('Y/m')) // store under avatars folder
                     ->preserveFilenames(false) // generate unique names
                     ->maxSize(5120) // max 5MB
                     ->nullable()

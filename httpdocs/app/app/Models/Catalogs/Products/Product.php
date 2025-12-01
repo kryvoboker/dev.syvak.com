@@ -101,4 +101,16 @@ class Product extends Model
             'category_id'
         )->withTimestamps();
     }
+
+    /**
+     * @param string $model
+     *
+     * @return Product|null
+     */
+    public function getProductByModel(string $model): ?Product
+    {
+        return self::query()
+            ->where('model', $model)
+            ->first();
+    }
 }

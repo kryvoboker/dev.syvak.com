@@ -24,11 +24,10 @@ class CreateAttribute extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $descriptions = $data['descriptions'] ?? [];
-        unset($data['descriptions']);
-
         // Store descriptions temporarily
-        $this->descriptions = $descriptions;
+        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
+
+        unset($data['descriptions']);
 
         return $data;
     }

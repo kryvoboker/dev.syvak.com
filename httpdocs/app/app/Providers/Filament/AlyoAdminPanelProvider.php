@@ -36,16 +36,16 @@ class AlyoAdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make()
-                    ->navigationGroup(__('admin/default.menu_item_users')),
+                    ->navigationGroup(__('admin/default.menu.item_users')),
             ])
             // Show group menu list if user visited page from group
             ->collapsibleNavigationGroups()
             // Show group menu list if user visited page from group
             ->sidebarCollapsibleOnDesktop(false)
             ->navigationGroups([
-                __('admin/default.menu_item_catalog'),
-                __('admin/default.menu_item_users'),
-                __('admin/default.menu_item_settings'),
+                __('admin/default.menu_item.catalog'),
+                __('admin/default.menu_item.users'),
+                __('admin/default.menu_item.settings'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

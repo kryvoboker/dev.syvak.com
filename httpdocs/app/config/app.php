@@ -131,19 +131,25 @@ return [
         'store'  => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'denied_delete_emails' => [
+    'denied_delete_emails'      => [
         'fast.kamaz@gmail.com'
     ],
-
     'regex_validate_conditions' => [
         'email'     => '/^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/',
         'telephone' => '/(^((\+?\d{2,}\s?)|(.*))\(?\d{3,}\)?\s?\d{3,}-?\d{2,}-?\d{2,}$)/',
         'password'  => '/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\s:])(\S)+$/',
     ],
-
-    'currency' => [
-        'default_currency'      => 'UAH',
-        'default_exchange_rate' => 1.00000,
+    'currency'                  => [
+        'default_currency'        => env('DEFAULT_CURRENCY'),
+        'default_exchange_rate'   => (float)env('DEFAULT_EXCHANGE_RATE'),
+        'default_currency_symbol' => env('DEFAULT_CURRENCY_SYMBOL'),
+        'default_format_locale'   => env('DEFAULT_CURRENCY_FORMAT_LOCALE', 'en_US'),
+        'default_decimal_places'  => (int)env('DEFAULT_CURRENCY_DECIMAL_PLACES', 2),
+    ],
+    'files'                     => [
+        'max_size_kb' => [
+            'max_upload_product_image' => (int)env('MAX_UPLOAD_PRODUCT_IMAGE_SIZE_KB', 5120), // 5 MB
+        ],
     ],
 
 ];
