@@ -20,6 +20,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AlyoAdminPanelProvider extends PanelProvider
@@ -34,6 +35,10 @@ class AlyoAdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->renderHook(
+                'panels::body.end',
+                fn (): string => Blade::render('<script src="{{ asset(\'js/livewire-file-upload.js\') }}"></script>')
+            )
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->navigationGroup(__('admin/default.menu.item_users')),

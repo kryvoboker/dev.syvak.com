@@ -10,11 +10,25 @@ return [
 
     // Columns
     'columns'  => [
-        'name'       => 'Name',
-        'email'      => 'Email',
-        'is_active'  => 'Is Active',
-        'created_at' => 'Created At',
-        'updated_at' => 'Updated At',
+        'name'              => 'Name',
+        'lastname'          => 'Last Name',
+        'email'             => 'Email',
+        'telephone'         => 'Telephone',
+        'avatar'            => 'Avatar',
+        'model'             => 'Modal',
+        'sku'               => 'SKU',
+        'ean'               => 'EAN',
+        'quantity'          => 'Quantity',
+        'minimum'           => 'Minimum',
+        'price'             => 'Price',
+        'viewed'            => 'Viewed',
+        'image'             => 'Image',
+        'is_active'         => 'Is Active',
+        'created_at'        => 'Created At',
+        'updated_at'        => 'Updated At',
+        'date_available'    => 'Date Available',
+        'date_added'        => 'Date Added',
+        'email_verified_at' => 'Email Verified At',
     ],
 
     // Labels
@@ -49,6 +63,8 @@ return [
         'language'          => 'Language',
         'attribute_text'    => 'Value',
         'categories'        => 'Categories',
+        'add_attribute'     => 'Add Attribute',
+        'add_discount'      => 'Add Discount',
     ],
 
     // Helpers
@@ -124,5 +140,6 @@ return [
         'title'                           => 'Error',
         'no_language'                     => 'No default language configured. Please configure languages in settings!',
         'validation_duplicate_categories' => 'The selected categories contain duplicates. Please remove the duplicates and try again.',
+        'something_went_wrong'            => 'Something went wrong. Please try again later.',
     ]
 ];

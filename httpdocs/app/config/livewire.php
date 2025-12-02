@@ -75,7 +75,7 @@ return [
         ],
         'max_upload_time' => 5, // Max duration (in minutes) before an upload is invalidated...
         'cleanup' => true, // Should cleanup temporary uploads older than 24 hrs...
-
+        'use_original_file_names' => true,
     ],
         'manifest_path' => env('NEW_STORAGE_PATH') . '/framework/cache/livewire-components.php',
 

@@ -56,9 +56,17 @@ class UserForm
                 FileUpload::make('avatar')
                     ->label(__('admin/users/users.label_avatar'))
                     ->image() // accept images only
-                    ->directory(config('path.avatars') . date('Y/m')) // store under avatars folder
-                    ->preserveFilenames(false) // generate unique names
-                    ->maxSize(5120) // max 5MB
+                    ->directory(config('app.images.user.image_path')) // store under avatars folder
+                    ->preserveFilenames() // generate unique names
+                    ->maxSize((int)config('app.images.user.upload.max_size_kb'))
+                    ->rules(['nullable', 'image', 'max:' . (int)config('app.images.user.upload.max_size_kb')])
+                    ->imageEditor()
+                    ->imageEditorViewportWidth((int)config('app.images.user.preview_in_page_in_admin.width'))
+                    ->imageEditorAspectRatios([
+                        '16:9',
+                        '4:3',
+                        '1:1',
+                    ])
                     ->nullable()
                     ->default(null),
 

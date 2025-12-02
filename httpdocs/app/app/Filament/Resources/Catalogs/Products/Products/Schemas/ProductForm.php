@@ -17,10 +17,14 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
+use Throwable;
 
 class ProductForm
 {
@@ -59,18 +63,21 @@ class ProductForm
                     ->schema([
                         TextInput::make('model')
                             ->label(__('admin/default.labels.model'))
-                            ->maxLength(64)
+                            ->maxLength(255)
+                            ->rules(['required', 'string', 'max:255'])
+                            ->unique(ignoreRecord: true)
                             ->required(),
 
                         TextInput::make('sku')
                             ->label(__('admin/default.labels.sku'))
-                            ->maxLength(64)
-                            ->unique(ignoreRecord: true)
+                            ->maxLength(255)
+                            ->rules(['required', 'string', 'max:255'])
                             ->required(),
 
                         TextInput::make('ean')
                             ->label(__('admin/default.labels.ean'))
-                            ->maxLength(14)
+                            ->maxLength(255)
+                            ->rules(['nullable', 'string', 'numeric', 'max:255'])
                             ->default(null),
                     ])
                     ->columns(3),
@@ -80,6 +87,7 @@ class ProductForm
                         TextInput::make('quantity')
                             ->label(__('admin/default.labels.quantity'))
                             ->numeric()
+                            ->rules(['required', 'numeric', 'min:0'])
                             ->minValue(0)
                             ->default(0)
                             ->required(),
@@ -87,6 +95,7 @@ class ProductForm
                         TextInput::make('minimum')
                             ->label(__('admin/default.labels.minimum'))
                             ->numeric()
+                            ->rules(['required', 'numeric', 'min:1'])
                             ->minValue(1)
                             ->default(1)
                             ->required(),
@@ -99,6 +108,7 @@ class ProductForm
                             ->label(__('admin/default.labels.price'))
                             ->numeric()
                             ->minValue(0)
+                            ->rules(['required', 'numeric', 'min:0'])
                             ->prefix(config('app.currency.default_currency_symbol'))
                             ->default(0.0)
                             ->required(),
@@ -110,42 +120,60 @@ class ProductForm
                         FileUpload::make('image')
                             ->label(__('admin/default.labels.image'))
                             ->image()
-                            ->directory(config('path.products_images'))
-                            ->maxSize((int)config('app.files.max_size_kb.max_upload_product_image'))
-                            ->imageEditor()
+                            ->directory(config('app.images.product.image_path'))
+                            ->maxSize((int)config('app.images.product.upload.max_size_kb'))
+                            ->rules(['nullable', 'image', 'max:' . (int)config('app.images.product.upload.max_size_kb')])
+                            ->imageEditor(function ($aa) {
+                                return $aa;
+                            })
+                            ->imageEditorViewportWidth((int)config('app.images.product.preview_in_page_in_admin.width'))
                             ->imageEditorAspectRatios([
                                 '16:9',
                                 '4:3',
                                 '1:1',
-                            ]),
+                            ])
+                            ->getUploadedFileNameForStorageUsing(
+                                function (UploadedFile $file): string {
+                                    $file_name = $file->getClientOriginalName();
+
+                                    return $file_name;
+                                }
+                            ),
                     ])
                     ->columns(1),
 
                 Section::make(__('admin/default.sections.settings'))
                     ->schema([
-                        Toggle::make('is_active')
-                            ->label(__('admin/default.labels.is_active'))
-                            ->default(true)
-                            ->required(),
-
-                        DateTimePicker::make('date_available')
-                            ->label(__('admin/default.labels.date_available'))
-                            ->default(now()),
-
-                        DateTimePicker::make('date_added')
-                            ->label(__('admin/default.labels.date_added'))
-                            ->default(now())
-                            ->required(),
-
                         TextInput::make('viewed')
                             ->label(__('admin/default.labels.viewed'))
                             ->numeric()
+                            ->rules(['required', 'numeric', 'min:0'])
                             ->minValue(0)
                             ->default(0)
                             ->disabled()
                             ->dehydrated(false),
+
+                        Grid::make(2)
+                            ->schema([
+                                DateTimePicker::make('date_available')
+                                    ->label(__('admin/default.labels.date_available'))
+                                    ->rules(['required', 'date'])
+                                    ->default(now(config('app.timezone')))
+                                    ->required(),
+
+                                DateTimePicker::make('date_added')
+                                    ->label(__('admin/default.labels.date_added'))
+                                    ->rules(['required', 'date'])
+                                    ->default(now(config('app.timezone')))
+                                    ->required(),
+                            ]),
+
+                        Toggle::make('is_active')
+                            ->label(__('admin/default.labels.is_active'))
+                            ->default(true)
+                            ->required(),
                     ])
-                    ->columns(),
+                    ->columns(1),
             ]);
     }
 
@@ -181,7 +209,8 @@ class ProductForm
      */
     protected static function createLanguageTabs(Collection $active_languages): array
     {
-        $tabs = [];
+        $tabs            = [];
+        $total_languages = $active_languages->count();
 
         foreach ($active_languages as $language) {
             $tabs[] = Tabs\Tab::make($language->name)
@@ -192,38 +221,42 @@ class ProductForm
                     TextInput::make("descriptions.$language->id.name")
                         ->label(__('admin/default.labels.name'))
                         ->maxLength(255)
+                        ->rules(['required', 'string', 'max:255'])
+                        ->columnSpanFull()
                         ->required(),
 
                     RichEditor::make("descriptions.$language->id.description")
                         ->label(__('admin/default.labels.description'))
                         ->toolbarButtons([
-                            'bold',
-                            'italic',
-                            'underline',
-                            'strike',
-                            'link',
-                            'bulletList',
-                            'orderedList',
-                            'h2',
-                            'h3',
-                            'blockquote',
+                            ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+                            ['h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify', 'textColor'],
+                            ['blockquote', 'bulletList', 'orderedList'],
+                            ['table'],
+                            ['undo', 'redo', 'clearFormatting'],
                         ])
+                        ->rules(['nullable'])
                         ->columnSpanFull(),
 
                     TextInput::make("descriptions.$language->id.meta_title")
                         ->label(__('admin/default.labels.meta_title'))
-                        ->maxLength(255),
+                        ->rules(['nullable', 'string', 'max:255'])
+                        ->maxLength(255)
+                        ->columnSpanFull(),
 
                     TextInput::make("descriptions.$language->id.meta_description")
                         ->label(__('admin/default.labels.meta_description'))
-                        ->maxLength(255),
+                        ->rules(['nullable', 'string', 'max:255'])
+                        ->maxLength(255)
+                        ->columnSpanFull(),
 
                     TextInput::make("descriptions.$language->id.meta_keywords")
                         ->label(__('admin/default.labels.meta_keywords'))
-                        ->maxLength(255),
+                        ->rules(['nullable', 'string', 'max:255'])
+                        ->maxLength(255)
+                        ->columnSpanFull(),
                 ])
                 ->badge($language->code)
-                ->columns();
+                ->columns(min($total_languages, 4));
         }
 
         return $tabs;
@@ -294,17 +327,11 @@ class ProductForm
      * @param int $language_id
      *
      * @return array<int, string>
+     * @throws Throwable
      */
     protected static function getCategoryHierarchy(int $language_id): array
     {
-        $categories = Category::with([
-            'categoryDescription' => function ($query) use ($language_id) {
-                $query->where('language_id', $language_id);
-            }
-        ])
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        $categories = new Category()->getActiveCategoriesWithDescriptionsByLanguageId($language_id);
 
         $hierarchy = [];
 
@@ -323,24 +350,35 @@ class ProductForm
      * @param int $language_id
      *
      * @return string
+     * @throws Throwable
      */
     protected static function getCategoryFullPath(int $category_id, int $language_id): string
     {
-        $category = Category::with([
-            'categoryDescription' => function ($query) use ($language_id) {
-                $query->where('language_id', $language_id);
-            }
-        ])->find($category_id);
+        $category_instance = new Category();
+
+        $category = $category_instance->getActiveCategoryWithDescriptionByCategoryIdAndLanguageId(
+            $category_id,
+            $language_id
+        );
 
         if ($category === null) {
             return "Category #$category_id";
         }
 
         $path             = [];
+        $total_iterations = 0;
         $current_category = $category;
 
         // Build path from current to root
         while ($current_category !== null) {
+            throw_if(
+                $total_iterations > 100,
+                'Exception',
+                __('admin/default.errors.something_went_wrong')
+            );
+
+            $total_iterations++;
+
             $description = $current_category->categoryDescription
                 ->firstWhere('language_id', $language_id);
 
@@ -351,11 +389,10 @@ class ProductForm
             array_unshift($path, $name);
 
             if ($current_category->parent_id !== null) {
-                $current_category = Category::with([
-                    'categoryDescription' => function ($query) use ($language_id) {
-                        $query->where('language_id', $language_id);
-                    }
-                ])->find($current_category->parent_id);
+                $current_category = $category_instance->getActiveCategoryWithDescriptionByCategoryIdAndLanguageId(
+                    (int)$current_category->parent_id,
+                    $language_id
+                );
             } else {
                 $current_category = null;
             }
@@ -381,14 +418,16 @@ class ProductForm
                                 FileUpload::make('image')
                                     ->label(__('admin/default.labels.image'))
                                     ->image()
-                                    ->directory('products/gallery')
-                                    ->maxSize(2048)
+                                    ->directory(config('app.images.product.image_path'))
+                                    ->maxSize((int)config('app.images.product.upload.max_size_kb'))
+                                    ->rules(['nullable', 'image', 'max:' . (int)config('app.images.product.upload.max_size_kb')])
                                     ->imageEditor()
                                     ->required(),
 
                                 TextInput::make('sort_order')
                                     ->label(__('admin/default.labels.sort_order'))
                                     ->numeric()
+                                    ->rules(['nullable', 'numeric', 'min:0'])
                                     ->default(0)
                                     ->required(),
                             ])
@@ -425,6 +464,7 @@ class ProductForm
                                         2 => 'Wholesale',
                                         3 => 'Retail',
                                     ])
+                                    ->rules(['required', 'numeric', Rule::exists('user_groups', 'id')])
                                     ->default(1)
                                     ->required(),
 
@@ -432,12 +472,14 @@ class ProductForm
                                     ->label(__('admin/default.labels.discount_quantity'))
                                     ->numeric()
                                     ->minValue(1)
+                                    ->rules(['required', 'numeric', 'min:1'])
                                     ->default(1)
                                     ->required(),
 
                                 TextInput::make('priority')
                                     ->label(__('admin/default.labels.priority'))
                                     ->numeric()
+                                    ->rules(['required', 'numeric', 'min:0'])
                                     ->minValue(0)
                                     ->default(0)
                                     ->required(),
@@ -445,16 +487,19 @@ class ProductForm
                                 TextInput::make('price')
                                     ->label(__('admin/default.labels.discount_price'))
                                     ->numeric()
+                                    ->rules(['required', 'numeric', 'min:0'])
                                     ->minValue(0)
-                                    ->prefix('$')
+                                    ->prefix(config('app.currency.default_currency_symbol'))
                                     ->required(),
 
                                 DateTimePicker::make('date_start')
                                     ->label(__('admin/default.labels.date_start'))
+                                    ->rules(['required', 'date'])
                                     ->required(),
 
                                 DateTimePicker::make('date_end')
                                     ->label(__('admin/default.labels.date_end'))
+                                    ->rules(['required', 'date'])
                                     ->required(),
                             ])
                             ->columns(3)
@@ -516,16 +561,15 @@ class ProductForm
                                                 return [$attribute->id => $name];
                                             });
                                     })
-                                    ->getOptionLabelUsing(function ($value) use ($current_language_id) {
-                                        if ($value === null || $current_language_id === null) {
+                                    ->getOptionLabelUsing(function ($attribute_id) use ($current_language_id) {
+                                        if ($attribute_id === null || $current_language_id === null) {
                                             return '-';
                                         }
 
-                                        $attribute = Attribute::with([
-                                            'attributeDescription' => function ($query) use ($current_language_id) {
-                                                $query->where('language_id', $current_language_id);
-                                            }
-                                        ])->find($value);
+                                        $attribute = new Attribute()->getActiveAttributeWithDescriptionByAttributeIdAndLanguageId(
+                                            $attribute_id,
+                                            $current_language_id
+                                        );
 
                                         if ($attribute === null) {
                                             return '-';
@@ -559,13 +603,14 @@ class ProductForm
                                 TextInput::make('text')
                                     ->label(__('admin/default.labels.attribute_text'))
                                     ->maxLength(255)
+                                    ->rules(['required', 'string', 'max:255'])
                                     ->required(),
                             ])
                             ->columns(3)
                             ->defaultItems(0)
                             ->collapsible()
                             ->cloneable()
-                            ->reorderable(false)
+                            ->reorderableWithDragAndDrop()
                             ->addActionLabel(__('admin/default.labels.add_attribute'))
                             ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
                                 return $data;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Catalogs\Categories;
 
 use App\Models\Catalogs\Products\Product;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -72,5 +73,39 @@ class Category extends Model
             'category_id',
             'product_id'
         )->withTimestamps();
+    }
+
+    /**
+     * @param int $language_id
+     *
+     * @return Collection<Category>
+     */
+    public function getActiveCategoriesWithDescriptionsByLanguageId(int $language_id): Collection
+    {
+        return self::with([
+            'categoryDescription' => function ($query) use ($language_id) {
+                $query->where('language_id', $language_id);
+            }
+        ])
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    /**
+     * @param int $category_id
+     * @param int $language_id
+     *
+     * @return self|null
+     */
+    public function getActiveCategoryWithDescriptionByCategoryIdAndLanguageId(int $category_id, int $language_id): ?self
+    {
+        return self::with([
+            'categoryDescription' => function ($query) use ($language_id) {
+                $query->where('language_id', $language_id);
+            }
+        ])
+            ->where('is_active', true)
+            ->find($category_id);
     }
 }

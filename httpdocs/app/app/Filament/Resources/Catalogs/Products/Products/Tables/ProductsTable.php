@@ -17,6 +17,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use function Symfony\Component\String\s;
 
@@ -62,59 +63,80 @@ class ProductsTable
                     }),
 
                 TextColumn::make('model')
+                    ->label(__('admin/default.columns.model'))
                     ->searchable(),
 
                 TextColumn::make('sku')
-                    ->label('SKU')
+                    ->label(__('admin/default.columns.sku'))
                     ->searchable(),
 
                 TextColumn::make('ean')
-                    ->searchable(),
+                    ->label(__('admin/default.columns.ean'))
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('quantity')
+                    ->label(__('admin/default.columns.quantity'))
                     ->numeric()
                     ->sortable(),
 
                 TextColumn::make('minimum')
+                    ->label(__('admin/default.columns.minimum'))
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                    ->label(__('admin/default.columns.image'))
+                    ->imageSize((int)config('app.images.product.preview_in_list_in_admin.width'))
+                    ->checkFileExistence()
+                    ->defaultImageUrl(Storage::url(config('app.images.product.no_image')))
+                    ->extraImgAttributes([
+                        'decoding' => 'async',
+                        'loading'  => 'lazy',
+                        'style'    => 'object-fit: contain;',
+                    ]),
 
                 TextColumn::make('price')
+                    ->label(__('admin/default.columns.price'))
                     ->money(
-                        currency: config('app.currency.default_currency'),
-                        locale: config('app.currency.default_format_locale'),
+                        currency     : config('app.currency.default_currency'),
+                        locale       : config('app.currency.default_format_locale'),
                         decimalPlaces: (int)config('app.currency.default_decimal_places'),
                     )
                     ->sortable(),
 
                 TextColumn::make('viewed')
+                    ->label(__('admin/default.columns.viewed'))
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('date_available')
-                    ->dateTime()
+                    ->label(__('admin/default.columns.date_available'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('date_added')
-                    ->dateTime()
+                    ->label(__('admin/default.columns.date_added'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 IconColumn::make('is_active')
+                    ->label(__('admin/default.columns.is_active'))
                     ->boolean(),
 
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label(__('admin/default.columns.created_at'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label(__('admin/default.columns.updated_at'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

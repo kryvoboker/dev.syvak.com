@@ -15,6 +15,11 @@ use Filament\Tables\Table;
 
 class AttributesTable
 {
+    /**
+     * @param Table $table
+     *
+     * @return Table
+     */
     public static function configure(Table $table): Table
     {
         return $table

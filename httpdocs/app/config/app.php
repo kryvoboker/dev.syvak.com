@@ -151,5 +151,37 @@ return [
             'max_upload_product_image' => (int)env('MAX_UPLOAD_PRODUCT_IMAGE_SIZE_KB', 5120), // 5 MB
         ],
     ],
+    'images'                    => [
+        'product' => [
+            'upload'                   => [
+                'max_size_kb' => (int)env('MAX_UPLOAD_PRODUCT_IMAGE_SIZE_KB', 5120), // 5 MB,
+            ],
+            'no_image'                 => env('DEFAULT_PRODUCT_NO_IMAGE_PATH'),
+            'preview_in_list_in_admin' => [
+                'width'  => (int)env('PRODUCT_IMAGE_PREVIEW_IN_LIST_IN_ADMIN_WIDTH', 100),
+                'height' => (int)env('PRODUCT_IMAGE_PREVIEW_IN_LIST_IN_ADMIN_HEIGHT', 100),
+            ],
+            'preview_in_page_in_admin' => [
+                'width'  => (int)env('PRODUCT_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_WIDTH', 500),
+                'height' => (int)env('PRODUCT_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_HEIGHT', 500),
+            ],
+            'image_path'               => env('PRODUCTS_IMAGES_PATH', 'images/products') . '/' . date('Y/m'),
+        ],
+        'user'    => [
+            'upload'                   => [
+                'max_size_kb' => (int)env('MAX_UPLOAD_USER_IMAGE_SIZE_KB', 5120), // 5 MB,
+            ],
+            'no_image'                 => env('DEFAULT_USER_NO_AVATAR_PATH'),
+            'preview_in_list_in_admin' => [
+                'width'  => (int)env('USER_AVATAR_PREVIEW_IN_LIST_IN_ADMIN_WIDTH', 100),
+                'height' => (int)env('USER_AVATAR_PREVIEW_IN_LIST_IN_ADMIN_HEIGHT', 100),
+            ],
+            'preview_in_page_in_admin' => [
+                'width'  => (int)env('USER_AVATAR_PREVIEW_IN_PAGE_IN_ADMIN_WIDTH', 500),
+                'height' => (int)env('USER_AVATAR_PREVIEW_IN_PAGE_IN_ADMIN_HEIGHT', 500),
+            ],
+            'image_path'               => env('AVATARS_PATH') . '/' . date('Y/m'),
+        ]
+    ],
 
 ];

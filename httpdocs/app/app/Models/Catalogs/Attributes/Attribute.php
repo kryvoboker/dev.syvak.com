@@ -70,4 +70,21 @@ class Attribute extends Model
             ])
             ->get();
     }
+
+    /**
+     * @param int $attribute_id
+     * @param int $language_id
+     *
+     * @return self|null
+     */
+    public function getActiveAttributeWithDescriptionByAttributeIdAndLanguageId(int $attribute_id, int $language_id): ?self
+    {
+        return self::with([
+            'attributeDescription' => function ($query) use ($language_id) {
+                $query->where('language_id', $language_id);
+            }
+        ])
+            ->where('is_active', true)
+            ->find($attribute_id);
+    }
 }
