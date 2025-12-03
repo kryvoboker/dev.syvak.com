@@ -4,24 +4,41 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Topbar\LanguageSwitcherTopbar;
+use App\Filament\Widgets\LanguageSwitcher;
+use App\Http\Middleware\SetDefaultLocalePrefix;
+use App\Models\Settings\Language;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\Select;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationBuilder;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use LaravelLang\Routes\Middlewares\LocalizationByCookie;
+use LaravelLang\Routes\Middlewares\LocalizationByHeader;
+use LaravelLang\Routes\Middlewares\LocalizationByModel;
+use LaravelLang\Routes\Middlewares\LocalizationByParameter;
+use LaravelLang\Routes\Middlewares\LocalizationByParameterPrefix;
+use LaravelLang\Routes\Middlewares\LocalizationByParameterWithRedirect;
+use LaravelLang\Routes\Middlewares\LocalizationBySession;
 
 class AlyoAdminPanelProvider extends PanelProvider
 {
@@ -30,14 +47,22 @@ class AlyoAdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('alyo-admin')
-            ->path('alyo-admin')
+            ->path('{locale}/alyo-admin')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue,
             ])
+            ->viteTheme('resources/css/filament/alyo-admin/theme.css')
             ->renderHook(
-                'panels::body.end',
-                fn (): string => Blade::render('<script src="{{ asset(\'js/livewire-file-upload.js\') }}"></script>')
+                PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+                function (): View {
+                    $languages = new Language()->getActiveLanguages();
+
+                    return view('filament.hooks.language-switcher', [
+                        'languages'      => $languages,
+                        'currentLocale'  => app()->getLocale(),
+                    ]);
+                },
             )
             ->plugins([
                 FilamentShieldPlugin::make()
@@ -72,6 +97,15 @@ class AlyoAdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                SetDefaultLocalePrefix::class,
+                // TODO: check what middlewares is needed for localization
+                //                LocalizationByParameterWithRedirect::class,
+                //                LocalizationByHeader::class,
+                //                LocalizationByCookie::class,
+                //                LocalizationBySession::class,
+                //                LocalizationByModel::class,
+                //                LocalizationByParameter::class,
+                //                LocalizationByParameterPrefix::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

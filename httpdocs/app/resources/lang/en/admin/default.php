@@ -8,6 +8,11 @@ return [
         'item_settings' => 'Settings',
     ],
 
+    // Texts
+    'texts'    => [
+        'language' => 'Language',
+    ],
+
     // Columns
     'columns'  => [
         'name'              => 'Name',
@@ -65,6 +70,7 @@ return [
         'categories'        => 'Categories',
         'add_attribute'     => 'Add Attribute',
         'add_discount'      => 'Add Discount',
+        'add_image'         => 'Add Image',
     ],
 
     // Helpers

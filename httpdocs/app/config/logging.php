@@ -134,28 +134,39 @@ return [
         ],
 
         'buggregator_monolog' => [
-            'driver'       => 'monolog',
-            'level'        => env('LOG_LEVEL', 'debug'),
-            'handler'      => SocketHandler::class,
-            'formatter'    => JsonFormatter::class,
-            'processors'   => [UidProcessor::class, WebProcessor::class],
-            'handler_with' => [
+            'driver'         => 'monolog',
+            'level'          => env('LOG_LEVEL', 'debug'),
+            'handler'        => SocketHandler::class,
+            'formatter'      => JsonFormatter::class,
+            'formatter_with' => [
+                'dateFormat' => 'Y-m-d H:i:s',
+            ],
+            'processors'     => [UidProcessor::class, WebProcessor::class],
+            'handler_with'   => [
                 'connectionString' => env('LOG_SOCKET_URL', '127.0.0.1:9913'),
             ],
+//            'tap'            => [\App\Logging\CustomizeFormatter::class],
         ],
 
-        'buggregator_monolog_telegram_bot' => [
-            'driver'       => 'monolog',
-            'level'        => env('LOG_LEVEL', 'debug'),
-            'handler'      => TelegramBotHandler::class,
-            'formatter'    => LineFormatter::class,
-            'processors'   => [UidProcessor::class, WebProcessor::class, PsrLogMessageProcessor::class],
-            'handler_with' => [
+        'monolog_telegram_bot' => [
+            'driver'         => 'monolog',
+            'level'          => env('LOG_LEVEL', 'debug'),
+            'handler'        => TelegramBotHandler::class,
+            'formatter'      => LineFormatter::class,
+            'formatter_with' => [
+                'format'                     => "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
+                'dateFormat'                 => 'Y-m-d H:i:s',
+                'allowInlineLineBreaks'      => true,
+                'ignoreEmptyContextAndExtra' => true,
+            ],
+            'processors'     => [UidProcessor::class, WebProcessor::class, PsrLogMessageProcessor::class],
+            'handler_with'   => [
                 'apiKey'               => config('buggregator.telegram_token'),
                 'channel'              => config('buggregator.kamaz_id'),
                 'splitLongMessages'    => true,
                 'delayBetweenMessages' => 1,
             ],
+//            'tap'            => [\App\Logging\CustomizeFormatter::class],
         ],
 
     ],

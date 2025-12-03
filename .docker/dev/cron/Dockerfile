@@ -37,7 +37,7 @@ RUN mkdir -p /etc/crontabs /var/log/cron \
     && chmod -R 775 /var/log/cron
 
 # Copy entrypoint script
-COPY docker/dev/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY .docker/dev/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 

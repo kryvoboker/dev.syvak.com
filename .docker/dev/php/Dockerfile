@@ -15,7 +15,10 @@ RUN ln -fs /usr/share/zoneinfo/Europe/Kyiv /etc/localtime \
 COPY --from=composer:2.8.8 /usr/bin/composer /usr/bin/composer
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions gd zip mysqli pdo pdo_mysql xdebug xhprof sockets intl
+# Configure composer cache directory
+ENV COMPOSER_CACHE_DIR=/home/www-data/.composer/cache
+
+RUN install-php-extensions gd zip mysqli pdo pdo_mysql xdebug xhprof sockets intl bcmath
 
 RUN echo "xhprof.output_dir = /tmp/xhprof" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini \
     && echo "xhprof.collect_additional_info = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini \
@@ -35,6 +38,10 @@ RUN apt-get update \
     && apt-get purge -y --auto-remove xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
+# Configure npm prefix for processes in the image and ensure PATH includes it
+ENV NPM_CONFIG_PREFIX=/home/www-data/.npm-global
+ENV PATH="/home/www-data/.npm-global/bin:${PATH}"
+
 # Import UID and GID from docker compose
 ARG UID=1000
 ARG GID=1000
@@ -52,19 +59,12 @@ RUN mkdir -p /home/www-data/.npm-global /var/www/.npm \
     && chown -R www-data:www-data /home/www-data/.npm-global \
     && chown -R www-data:www-data /var/www/.npm
 
-# Configure npm prefix for processes in the image and ensure PATH includes it
-ENV NPM_CONFIG_PREFIX=/home/www-data/.npm-global
-ENV PATH="/home/www-data/.npm-global/bin:${PATH}"
-
-# Configure composer cache directory
-ENV COMPOSER_CACHE_DIR=/home/www-data/.composer/cache
-
 RUN mkdir -p /home/www-data/.composer/cache \
     && chown -R www-data:www-data /home/www-data/.composer \
     && chmod -R 775 /home/www-data/.composer
 
 # Copy and set permissions for entrypoint script
-COPY docker/dev/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY .docker/dev/php/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && chown www-data:www-data /usr/local/bin/entrypoint.sh

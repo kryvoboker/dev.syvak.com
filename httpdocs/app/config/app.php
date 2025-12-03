@@ -84,7 +84,7 @@ return [
 
     'locale' => env('APP_LOCALE', 'en'),
 
-    'allowed_locales' => array_filter(
+    'locales' => array_filter(
         explode(',', env('APP_ALLOWED_LOCALES', 'en'))
     ),
 

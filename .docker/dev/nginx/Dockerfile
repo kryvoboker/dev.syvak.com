@@ -32,7 +32,7 @@ RUN chown -R www-data:www-data /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
     && chmod -R 755 /var/cache/nginx /var/log/nginx
 
 # Copy and set permissions for entrypoint script
-COPY docker/dev/nginx/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY .docker/dev/nginx/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && chown www-data:www-data /usr/local/bin/entrypoint.sh

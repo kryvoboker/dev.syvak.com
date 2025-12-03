@@ -18,15 +18,16 @@ const isProduction = process.env.NODE_ENV === 'production';
 export default defineConfig(() : UserConfig => {
     return {
         root:  resolve(__dirname, './'),
-        base:  isProduction ? '../httpdocs/dist/' : '/',
+        base:  isProduction ? resolve(__dirname, '../httpdocs') : '/',
         build: {
-            outDir:    'dist',
+            outDir:    'build',
             sourcemap: isProduction ? 'hidden' : true,
             manifest:  true,
         },
         plugins: [
             laravel({
                 input:   [
+                    'resources/css/filament/alyo-admin/theme.css',
                     './resources/assets/css/app.css',
                     './resources/assets/css/libs/leaflet.css',
                     './node_modules/choices.js/src/styles/choices.scss',

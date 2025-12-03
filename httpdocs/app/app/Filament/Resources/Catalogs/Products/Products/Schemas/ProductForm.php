@@ -21,7 +21,6 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Throwable;
@@ -40,7 +39,7 @@ class ProductForm
                         self::createTranslationsTab($active_languages),
                         self::createCategoriesTab($active_languages),
                         self::createImagesTab(),
-                        self::createDiscountsTab(),
+                        self::createDiscountsTab($active_languages),
                         self::createAttributesTab($active_languages),
                     ])
                     ->activeTab(1)
@@ -119,26 +118,21 @@ class ProductForm
                     ->schema([
                         FileUpload::make('image')
                             ->label(__('admin/default.labels.image'))
-                            ->image()
+                            ->image() // accept images only
                             ->directory(config('app.images.product.image_path'))
                             ->maxSize((int)config('app.images.product.upload.max_size_kb'))
                             ->rules(['nullable', 'image', 'max:' . (int)config('app.images.product.upload.max_size_kb')])
-                            ->imageEditor(function ($aa) {
-                                return $aa;
-                            })
+                            ->preserveFilenames() // not generate unique names
+                            ->imageEditor()
                             ->imageEditorViewportWidth((int)config('app.images.product.preview_in_page_in_admin.width'))
+                            ->imageEditorViewportHeight((int)config('app.images.product.preview_in_page_in_admin.height'))
                             ->imageEditorAspectRatios([
-                                '16:9',
-                                '4:3',
-                                '1:1',
+                                '1:1'  => '1:1',
+                                '4:3'  => '4:3',
+                                '16:9' => '16:9',
                             ])
-                            ->getUploadedFileNameForStorageUsing(
-                                function (UploadedFile $file): string {
-                                    $file_name = $file->getClientOriginalName();
-
-                                    return $file_name;
-                                }
-                            ),
+                            ->nullable()
+                            ->default(null),
                     ])
                     ->columns(1),
 
@@ -271,17 +265,7 @@ class ProductForm
      */
     protected static function createCategoriesTab(Collection $active_languages): Tabs\Tab
     {
-        /** @var Language $language */
-        $language            = $active_languages->where('is_default', true)->first();
-        $current_language_id = $language?->id;
-
-        if ($current_language_id === null) {
-            Notification::make()
-                ->title(__('admin/default.errors.title'))
-                ->body(__('admin/default.errors.no_language'))
-                ->danger()
-                ->send();
-        }
+        $current_language_id = self::tryGetCurrentLanguageId($active_languages);
 
         return Tabs\Tab::make(__('admin/default.tabs.categories'))
             ->schema([
@@ -417,11 +401,19 @@ class ProductForm
                             ->schema([
                                 FileUpload::make('image')
                                     ->label(__('admin/default.labels.image'))
-                                    ->image()
+                                    ->image() // accept images only
                                     ->directory(config('app.images.product.image_path'))
                                     ->maxSize((int)config('app.images.product.upload.max_size_kb'))
-                                    ->rules(['nullable', 'image', 'max:' . (int)config('app.images.product.upload.max_size_kb')])
+                                    ->rules(['image', 'max:' . (int)config('app.images.product.upload.max_size_kb')])
+                                    ->preserveFilenames() // not generate unique names
                                     ->imageEditor()
+                                    ->imageEditorViewportWidth((int)config('app.images.product.preview_in_page_in_admin.width'))
+                                    ->imageEditorViewportHeight((int)config('app.images.product.preview_in_page_in_admin.height'))
+                                    ->imageEditorAspectRatios([
+                                        '1:1'  => '1:1',
+                                        '4:3'  => '4:3',
+                                        '16:9' => '16:9',
+                                    ])
                                     ->required(),
 
                                 TextInput::make('sort_order')
@@ -448,7 +440,7 @@ class ProductForm
      *
      * @return Tabs\Tab
      */
-    protected static function createDiscountsTab(): Tabs\Tab
+    protected static function createDiscountsTab(Collection $active_languages): Tabs\Tab
     {
         return Tabs\Tab::make(__('admin/default.tabs.discounts'))
             ->schema([
@@ -621,5 +613,27 @@ class ProductForm
                     ])
                     ->columnSpanFull(),
             ]);
+    }
+
+    /**
+     * @param Collection $active_languages
+     *
+     * @return int|null
+     */
+    private static function tryGetCurrentLanguageId(Collection $active_languages): ?int
+    {
+        /** @var Language $language */
+        $language            = $active_languages->where('is_default', true)->first();
+        $current_language_id = $language?->id;
+
+        if ($current_language_id === null) {
+            Notification::make()
+                ->title(__('admin/default.errors.title'))
+                ->body(__('admin/default.errors.no_language'))
+                ->danger()
+                ->send();
+        }
+
+        return $current_language_id;
     }
 }

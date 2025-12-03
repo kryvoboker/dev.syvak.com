@@ -57,15 +57,16 @@ class UserForm
                     ->label(__('admin/users/users.label_avatar'))
                     ->image() // accept images only
                     ->directory(config('app.images.user.image_path')) // store under avatars folder
-                    ->preserveFilenames() // generate unique names
+                    ->preserveFilenames() // not generate unique names
                     ->maxSize((int)config('app.images.user.upload.max_size_kb'))
                     ->rules(['nullable', 'image', 'max:' . (int)config('app.images.user.upload.max_size_kb')])
                     ->imageEditor()
                     ->imageEditorViewportWidth((int)config('app.images.user.preview_in_page_in_admin.width'))
+                    ->imageEditorViewportHeight((int)config('app.images.user.preview_in_page_in_admin.height'))
                     ->imageEditorAspectRatios([
-                        '16:9',
-                        '4:3',
-                        '1:1',
+                        '1:1'  => '1:1',
+                        '4:3'  => '4:3',
+                        '16:9' => '16:9',
                     ])
                     ->nullable()
                     ->default(null),
