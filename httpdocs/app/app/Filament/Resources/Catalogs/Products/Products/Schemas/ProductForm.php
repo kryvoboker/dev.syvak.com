@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Settings\Language;
+use App\Models\Users\UserGroup;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -20,6 +21,7 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
@@ -436,11 +438,9 @@ class ProductForm
     }
 
     /**
-     * Create discounts tab
-     *
-     * @return Tabs\Tab
+     * @return Tab
      */
-    protected static function createDiscountsTab(Collection $active_languages): Tabs\Tab
+    protected static function createDiscountsTab(): Tabs\Tab
     {
         return Tabs\Tab::make(__('admin/default.tabs.discounts'))
             ->schema([
@@ -451,13 +451,16 @@ class ProductForm
                             ->schema([
                                 Select::make('user_group_id')
                                     ->label(__('admin/default.labels.user_group'))
-                                    ->options([
-                                        1 => 'Default',
-                                        2 => 'Wholesale',
-                                        3 => 'Retail',
-                                    ])
+                                    ->options(function () {
+                                        return new UserGroup()
+                                            ->getActiveUserGroups()
+                                            ->mapWithKeys(function (UserGroup $user_group) {
+                                                $name = $user_group->name ?: "User Group #$user_group->id";
+
+                                                return [$user_group->id => $name];
+                                            });
+                                    })
                                     ->rules(['required', 'numeric', Rule::exists('user_groups', 'id')])
-                                    ->default(1)
                                     ->required(),
 
                                 TextInput::make('quantity')
@@ -473,7 +476,7 @@ class ProductForm
                                     ->numeric()
                                     ->rules(['required', 'numeric', 'min:0'])
                                     ->minValue(0)
-                                    ->default(0)
+                                    ->default(1)
                                     ->required(),
 
                                 TextInput::make('price')

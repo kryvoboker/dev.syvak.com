@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('coordinates')->nullable();
             $table->text('iframe_map')->nullable();
 
-            $table->text('timezone')->default(config('app.timezone'));
+            $table->text('timezone')->default(config('app.timezone'))->nullable(false);
             $table->json('image_sizes')->nullable();
 
             $table->timestamps();

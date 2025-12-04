@@ -113,4 +113,24 @@ class Product extends Model
             ->where('model', $model)
             ->first();
     }
+
+    /**
+     * @param Product $product
+     *
+     * @return ProductDiscount|null
+     */
+    public function getLastActualAndLastModifiedDiscountFromModel(self $product): null|ProductDiscount
+    {
+        $current_date_time = now(config('app.timezone'));
+
+        /** @var ProductDiscount $discount */
+        $discount = $product
+            ->productDiscount()
+            ->where('date_start', '<=', $current_date_time)
+            ->where('date_end', '>=', $current_date_time)
+            ->orderByDesc('updated_at')
+            ->first();
+
+        return $discount;
+    }
 }

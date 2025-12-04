@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Settings\AppSettings\Schemas;
 
 use App\Models\Settings\Language;
+use Carbon\Carbon;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -51,11 +52,14 @@ class AppSettingForm
                                 TextInput::make('coordinates')
                                     ->label(__('admin/settings/app_settings.label_coordinates'))
                                     ->helperText(__('admin/settings/app_settings.helper_coordinates'))
-                                    ->placeholder(__('admin/settings/app_settings.placeholder_coordinates')),
+                                    ->placeholder(__('admin/settings/app_settings.placeholder_coordinates'))
+                                    ->maxLength(255)
+                                    ->rules(['nullable', 'string', 'regex:/^-?\d{1,2}\.\d+,\s?-?\d{1,3}\.\d+$/', 'max:255']),
 
                                 Textarea::make('iframe_map')
                                     ->label(__('admin/settings/app_settings.label_iframe_map'))
                                     ->helperText(__('admin/settings/app_settings.helper_iframe_map'))
+                                    ->rules(['nullable', 'string'])
                                     ->rows(4),
                             ])
                             ->columns(1),
@@ -66,22 +70,36 @@ class AppSettingForm
                                 Select::make('timezone')
                                     ->label(__('admin/settings/app_settings.label_timezone'))
                                     ->helperText(__('admin/settings/app_settings.helper_timezone'))
-                                    ->options(timezone_identifiers_list())
+                                    ->options(function () {
+                                        $timezones = [];
+
+                                        foreach (timezone_identifiers_list() as $timezone) {
+                                            $offset = Carbon::now($timezone)->format('P'); // +02:00 format
+                                            $timezones[$timezone] = "$timezone ($offset)";
+                                        }
+
+                                        return $timezones;
+                                    })
                                     ->searchable()
-                                    ->default(config('app.timezone')),
+                                    ->rules(['required', 'string', 'in:' . implode(',', timezone_identifiers_list())])
+                                    ->default(config('app.timezone'))
+                                    ->required(),
 
                                 Repeater::make('image_sizes')
                                     ->label(__('admin/settings/app_settings.label_image_sizes'))
                                     ->helperText(__('admin/settings/app_settings.helper_image_sizes'))
                                     ->schema([
                                         TextInput::make('name')
-                                            ->label(__('admin/settings/app_settings.label_name')),
+                                            ->label(__('admin/settings/app_settings.label_name'))
+                                            ->rules(['required', 'string', 'max:255']),
                                         TextInput::make('width')
                                             ->label(__('admin/settings/app_settings.label_width'))
-                                            ->numeric(),
+                                            ->numeric()
+                                            ->rules(['required', 'numeric']),
                                         TextInput::make('height')
                                             ->label(__('admin/settings/app_settings.label_height'))
-                                            ->numeric(),
+                                            ->numeric()
+                                            ->rules(['required', 'numeric']),
                                     ])
                                     ->columns(3),
                             ])
@@ -132,19 +150,24 @@ class AppSettingForm
                 TextInput::make("titles.$lang_code")
                     ->label(__('admin/settings/app_settings.label_titles'))
                     ->helperText(__('admin/settings/app_settings.helper_titles'))
+                    ->rules(['required', 'string', 'max:255'])
                     ->required(),
 
                 TextInput::make("meta_titles.$lang_code")
                     ->label(__('admin/settings/app_settings.label_meta_titles'))
-                    ->helperText(__('admin/settings/app_settings.helper_meta_titles')),
+                    ->rules(['nullable', 'max:255'])
+                    ->helperText(__('admin/settings/app_settings.helper_meta_titles'))
+                ->default(null),
 
                 Textarea::make("meta_descriptions.$lang_code")
                     ->label(__('admin/settings/app_settings.label_meta_descriptions'))
+                    ->rules(['nullable', 'max:255'])
                     ->helperText(__('admin/settings/app_settings.helper_meta_descriptions'))
                     ->rows(3),
 
                 TextInput::make("meta_keywords.$lang_code")
                     ->label(__('admin/settings/app_settings.label_meta_keywords'))
+                    ->rules(['nullable', 'max:255'])
                     ->helperText(__('admin/settings/app_settings.helper_meta_keywords')),
             ],
             'contacts' => [
@@ -152,12 +175,14 @@ class AppSettingForm
                     ->label(__('admin/settings/app_settings.label_contact_emails'))
                     ->helperText(__('admin/settings/app_settings.helper_contact_emails'))
                     ->placeholder(__('admin/settings/app_settings.placeholder_contact_emails'))
+                    ->rules(['nullable', 'string', 'max:500'])
                     ->maxLength(500),
 
                 TextInput::make("contact_phones.$lang_code")
                     ->label(__('admin/settings/app_settings.label_contact_phones'))
                     ->helperText(__('admin/settings/app_settings.helper_contact_phones'))
                     ->placeholder(__('admin/settings/app_settings.placeholder_contact_phones'))
+                    ->rules(['nullable', 'string', 'max:500'])
                     ->maxLength(500),
 
                 Repeater::make("socials.$lang_code")
@@ -173,7 +198,8 @@ class AppSettingForm
                                 'linkedin'  => __('admin/settings/app_settings.text_linkedin'),
                                 'youtube'   => __('admin/settings/app_settings.text_youtube'),
                                 'telegram'  => __('admin/settings/app_settings.text_telegram'),
-                            ]),
+                            ])
+                            ->rules(['required', 'string', 'in:' . implode(',', config('app.socials_list'))]),
                         TextInput::make('url')
                             ->label(__('admin/settings/app_settings.label_url'))
                             ->url(),
@@ -183,12 +209,16 @@ class AppSettingForm
                 TextInput::make("work_time.$lang_code")
                     ->label(__('admin/settings/app_settings.label_work_time'))
                     ->helperText(__('admin/settings/app_settings.helper_work_time'))
+                    ->rules(['nullable', 'string', 'max:255'])
+                    ->maxLength(255)
                     ->placeholder(__('admin/settings/app_settings.placeholder_work_time')),
 
                 Textarea::make("contact_addresses.$lang_code")
                     ->label(__('admin/settings/app_settings.label_contact_addresses'))
                     ->helperText(__('admin/settings/app_settings.helper_contact_addresses'))
-                    ->rows(2),
+                    ->rows(2)
+                    ->rules(['nullable', 'string', 'max:1000'])
+                    ->maxLength(1000),
             ],
             default    => [],
         };

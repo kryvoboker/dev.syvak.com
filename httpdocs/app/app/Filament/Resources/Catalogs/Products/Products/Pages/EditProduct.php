@@ -230,7 +230,7 @@ class EditProduct extends EditRecord
             foreach ($this->discounts as $discount) {
                 if (!empty($discount['price'])) {
                     $discounts_data[] = [
-                        'customer_group_id' => $discount['customer_group_id'],
+                        'user_group_id' => $discount['user_group_id'],
                         'quantity'          => $discount['quantity'],
                         'priority'          => $discount['priority'],
                         'price'             => $discount['price'],

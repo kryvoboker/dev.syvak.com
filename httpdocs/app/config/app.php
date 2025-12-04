@@ -134,13 +134,14 @@ return [
     'denied_delete_emails'      => [
         'fast.kamaz@gmail.com'
     ],
+    'socials_list'              => explode(',', env('SOCIALS_LIST')),
     'regex_validate_conditions' => [
         'email'     => '/^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/',
         'telephone' => '/(^((\+?\d{2,}\s?)|(.*))\(?\d{3,}\)?\s?\d{3,}-?\d{2,}-?\d{2,}$)/',
         'password'  => '/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\s:])(\S)+$/',
     ],
     'currency'                  => [
-        'default_currency'        => env('DEFAULT_CURRENCY'),
+        'default_currency_code'   => env('DEFAULT_CURRENCY_CODE'),
         'default_exchange_rate'   => (float)env('DEFAULT_EXCHANGE_RATE'),
         'default_currency_symbol' => env('DEFAULT_CURRENCY_SYMBOL'),
         'default_format_locale'   => env('DEFAULT_CURRENCY_FORMAT_LOCALE', 'en_US'),

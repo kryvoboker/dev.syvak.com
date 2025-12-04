@@ -16,6 +16,7 @@ return new class extends Migration
 
             $table->string('code', 10)->unique()->nullable(false);
             $table->string('name', 100)->nullable(false);
+            $table->string('format_locale', 10)->nullable(false);
             $table->string('symbol_left', 10)->nullable();
             $table->string('symbol_right', 10)->nullable();
             $table->smallInteger('decimal_places')->default(0)->nullable(false);

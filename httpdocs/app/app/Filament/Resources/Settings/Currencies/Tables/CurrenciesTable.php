@@ -32,6 +32,12 @@ class CurrenciesTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('format_locale')
+                    ->label(__('admin/settings/currencies.column_format_locale'))
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('symbol_left')
                     ->label(__('admin/settings/currencies.column_symbol_left'))
                     ->toggleable(isToggledHiddenByDefault: true)

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Tables;
 
+use App\Models\Catalogs\Products\Product;
 use App\Models\Settings\Language;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -19,7 +20,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use function Symfony\Component\String\s;
+use NumberFormatter;
 
 class ProductsTable
 {
@@ -99,11 +100,46 @@ class ProductsTable
 
                 TextColumn::make('price')
                     ->label(__('admin/default.columns.price'))
-                    ->money(
+                    ->html()
+                    /*->money(
                         currency     : config('app.currency.default_currency'),
                         locale       : config('app.currency.default_format_locale'),
                         decimalPlaces: (int)config('app.currency.default_decimal_places'),
-                    )
+                    )*/
+                    ->getStateUsing(function (Product $record) {
+                        $discount = new Product()->getLastActualAndLastModifiedDiscountFromModel($record);
+
+                        $currency = config('app.currency.default_currency_code');
+
+                        $number_formatter = new NumberFormatter(
+                            config('app.currency.default_format_locale'),
+                            NumberFormatter::CURRENCY
+                        );
+
+                        $number_formatter->setAttribute(
+                            NumberFormatter::FRACTION_DIGITS,
+                            (int)config('app.currency.default_decimal_places')
+                        );
+
+                        if ($discount === null || $discount->price <= 0) {
+                            return $number_formatter->formatCurrency(
+                                $record->price,
+                                $currency
+                            );
+                        }
+
+                        $old_price = $number_formatter->formatCurrency(
+                            $record->price,
+                            $currency
+                        );
+                        $new_price = $number_formatter->formatCurrency(
+                            $discount->price,
+                            $currency
+                        );
+
+                        return '<span style="font-size: 1rem; text-decoration: line-through; color: #9ca3af;"><del>' . $old_price . '</del></span><br>' .
+                            '<span style="font-size: 1.3rem; color: #ef4444; font-weight: 600;">' . $new_price . '</span>';
+                    })
                     ->sortable(),
 
                 TextColumn::make('viewed')

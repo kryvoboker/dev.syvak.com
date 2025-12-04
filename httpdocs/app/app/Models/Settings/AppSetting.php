@@ -103,4 +103,12 @@ class AppSetting extends Model
             set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
         );
     }
+
+    /**
+     * @return self|null
+     */
+    public function getAppSettings(): ?self
+    {
+        return self::first();
+    }
 }

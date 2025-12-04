@@ -9,6 +9,7 @@ return [
     'label_plural_model'                     => 'Currencies',
     'label_code'                             => 'Currency Code',
     'label_name'                             => 'Currency Name',
+    'label_format_locale'                    => 'Format Locale',
     'label_symbol_left'                      => 'Symbol Left',
     'label_symbol_right'                     => 'Symbol Right',
     'label_decimal_places'                   => 'Decimal Places',
@@ -18,7 +19,7 @@ return [
 
     // Helpers
     'helper_code'                            => 'ISO 4217 code (e.g., USD, EUR, UAH)',
-    'helper_name'                            => 'Full currency name (e.g., US Dollar, Euro)',
+    'helper_format_locale'                   => 'Locale for formatting currency (e.g., en_US, de_DE)',
     'helper_symbol_left'                     => 'Symbol displayed to the left of the amount (e.g., $)',
     'helper_symbol_right'                    => 'Symbol displayed to the right of the amount (e.g., €)',
     'helper_decimal_places'                  => 'Number of decimal places to display (e.g., 2 for cents)',
@@ -29,6 +30,7 @@ return [
     // Columns
     'column_code'                            => 'Code',
     'column_name'                            => 'Name',
+    'column_format_locale'                   => 'Format Locale',
     'column_symbol_left'                     => 'Symbol Left',
     'column_symbol_right'                    => 'Symbol Right',
     'column_decimal_places'                  => 'Decimal Places',

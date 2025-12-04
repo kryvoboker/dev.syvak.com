@@ -33,7 +33,7 @@ class AlyoAdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('alyo-admin')
-            ->path('{locale}/alyo-admin')
+            ->path('{locale?}/alyo-admin')
             ->login()
             ->colors([
                 'primary' => Color::Blue,

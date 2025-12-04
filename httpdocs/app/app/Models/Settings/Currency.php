@@ -13,6 +13,7 @@ class Currency extends Model
     protected $fillable = [
         'code',
         'name',
+        'format_locale',
         'symbol_left',
         'symbol_right',
         'decimal_places',

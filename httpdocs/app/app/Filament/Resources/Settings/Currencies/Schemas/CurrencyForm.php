@@ -30,6 +30,13 @@ class CurrencyForm
                     ->maxLength(100)
                     ->placeholder('US Dollar'),
 
+                TextInput::make('format_locale')
+                    ->label(__('admin/settings/currencies.label_format_locale'))
+                    ->helperText(__('admin/settings/currencies.helper_format_locale'))
+                    ->required()
+                    ->maxLength(10)
+                    ->placeholder('uk_UA'),
+
                 TextInput::make('symbol_left')
                     ->label(__('admin/settings/currencies.label_symbol_left'))
                     ->helperText(__('admin/settings/currencies.helper_symbol_left'))

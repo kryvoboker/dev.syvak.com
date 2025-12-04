@@ -99,4 +99,14 @@ class UserGroup extends Model
             ->where('is_default', true)
             ->first();
     }
+
+    /**
+     * @return Collection
+     */
+    public function getActiveUserGroups(): Collection
+    {
+        return self::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+    }
 }
