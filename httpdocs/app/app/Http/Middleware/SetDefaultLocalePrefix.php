@@ -21,16 +21,36 @@ class SetDefaultLocalePrefix
      */
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
+        $path_info = ltrim($request->getPathInfo(), '/');
+
+        // Skip redirect for Livewire update requests
+        $is_livewire_update = str_contains($path_info, 'livewire/update');
         $locale = $request->route('locale');
 
-        // If locale is in route, save it to session
+        if ($is_livewire_update) {
+            session()->put(
+                'locale',
+                $locale ?: session('locale', config('app.locale', 'en'))
+            );
+            app()->setLocale($locale);
+            url()->defaults(['locale' => $locale]);
+
+            return $next($request);
+        }
+
+        // If locale is missing or invalid, redirect with locale
         if (!$locale || !in_array($locale, config('app.locales', ['en']))) {
             $locale = session('locale', config('app.locale', 'en'));
+            $route = $request->route();
+            $route_name = $route?->getName();
 
-            return redirect()->route(
-                $request->route()->getName(),
-                array_merge($request->route()->parameters(), ['locale' => $locale])
-            );
+            if ($route_name) {
+                return redirect()->route(
+                    $route_name,
+                    array_merge($route->parameters(), ['locale' => $locale]),
+                    Response::HTTP_TEMPORARY_REDIRECT
+                );
+            }
         }
 
         session()->put('locale', $locale);

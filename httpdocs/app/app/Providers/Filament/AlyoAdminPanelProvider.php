@@ -4,20 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\Topbar\LanguageSwitcherTopbar;
-use App\Filament\Widgets\LanguageSwitcher;
 use App\Http\Middleware\SetDefaultLocalePrefix;
 use App\Models\Settings\Language;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
-use Filament\Forms\Components\Select;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationBuilder;
-use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -32,13 +25,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use LaravelLang\Routes\Middlewares\LocalizationByCookie;
-use LaravelLang\Routes\Middlewares\LocalizationByHeader;
-use LaravelLang\Routes\Middlewares\LocalizationByModel;
-use LaravelLang\Routes\Middlewares\LocalizationByParameter;
-use LaravelLang\Routes\Middlewares\LocalizationByParameterPrefix;
-use LaravelLang\Routes\Middlewares\LocalizationByParameterWithRedirect;
-use LaravelLang\Routes\Middlewares\LocalizationBySession;
 
 class AlyoAdminPanelProvider extends PanelProvider
 {
@@ -98,14 +84,6 @@ class AlyoAdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SetDefaultLocalePrefix::class,
-                // TODO: check what middlewares is needed for localization
-                //                LocalizationByParameterWithRedirect::class,
-                //                LocalizationByHeader::class,
-                //                LocalizationByCookie::class,
-                //                LocalizationBySession::class,
-                //                LocalizationByModel::class,
-                //                LocalizationByParameter::class,
-                //                LocalizationByParameterPrefix::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
