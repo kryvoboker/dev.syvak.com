@@ -16,7 +16,6 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class EditProduct extends EditRecord
 {
@@ -142,7 +141,7 @@ class EditProduct extends EditRecord
     {
         $pairs = [];
 
-        foreach ($attributes as $index => $attribute) {
+        foreach ($attributes as $attribute) {
             if (empty($attribute['attribute_id']) || empty($attribute['language_id'])) {
                 continue;
             }

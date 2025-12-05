@@ -101,11 +101,6 @@ class ProductsTable
                 TextColumn::make('price')
                     ->label(__('admin/default.columns.price'))
                     ->html()
-                    /*->money(
-                        currency     : config('app.currency.default_currency'),
-                        locale       : config('app.currency.default_format_locale'),
-                        decimalPlaces: (int)config('app.currency.default_decimal_places'),
-                    )*/
                     ->getStateUsing(function (Product $record) {
                         $discount = new Product()->getLastActualAndLastModifiedDiscountFromModel($record);
 

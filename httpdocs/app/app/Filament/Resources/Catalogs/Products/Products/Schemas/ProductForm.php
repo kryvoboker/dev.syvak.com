@@ -149,7 +149,7 @@ class ProductForm
                             ->disabled()
                             ->dehydrated(false),
 
-                        Grid::make(2)
+                        Grid::make()
                             ->schema([
                                 DateTimePicker::make('date_available')
                                     ->label(__('admin/default.labels.date_available'))
