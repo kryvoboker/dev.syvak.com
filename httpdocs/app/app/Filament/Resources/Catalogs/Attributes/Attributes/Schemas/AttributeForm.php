@@ -6,7 +6,6 @@ namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas;
 
 use App\Models\Settings\Language;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
@@ -31,12 +30,12 @@ class AttributeForm
                             ->persistTabInQueryString(),
 
                         Toggle::make('is_active')
-                            ->label(__('admin/catalogs/attributes/attributes.label_is_active'))
+                            ->label(__('admin/default.labels.is_active'))
                             ->default(true)
                             ->required(),
 
                         TextInput::make('sort_order')
-                            ->label(__('admin/catalogs/attributes/attributes.label_sort_order'))
+                            ->label(__('admin/default.labels.sort_order'))
                             ->numeric()
                             ->default(1)
                             ->required(),
@@ -63,7 +62,7 @@ class AttributeForm
                         ->default($language->id),
 
                     TextInput::make("descriptions.$language->id.name")
-                        ->label(__('admin/catalogs/attributes/attributes.label_name'))
+                        ->label(__('admin/default.labels.name'))
                         ->maxLength(255)
                         ->required(),
                 ])

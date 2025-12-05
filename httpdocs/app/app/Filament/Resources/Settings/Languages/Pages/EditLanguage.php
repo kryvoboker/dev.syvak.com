@@ -41,8 +41,8 @@ class EditLanguage extends EditRecord
                 ->before(function (DeleteAction $action, Language $record) {
                     if ($record->is_default) {
                         Notification::make()
-                            ->title(__('admin/settings/languages.text_cant_delete_default_language'))
-                            ->body(__('admin/settings/languages.error_cant_delete_default_language'))
+                            ->title(__('admin/default.errors.title'))
+                            ->body(__('admin/settings/languages.errors.cant_delete_default_language'))
                             ->danger()
                             ->send();
 

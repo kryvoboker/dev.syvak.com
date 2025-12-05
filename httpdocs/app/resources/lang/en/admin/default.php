@@ -2,19 +2,25 @@
 
 return [
     // Menu items
-    'menu'     => [
+    'menu'         => [
         'item_catalog'  => 'Catalog',
         'item_users'    => 'Users',
         'item_settings' => 'Settings',
     ],
 
     // Texts
-    'texts'    => [
-        'language' => 'Language',
+    'texts'        => [
+        'language'  => 'Language',
+        'facebook'  => 'Facebook',
+        'twitter'   => 'Twitter',
+        'instagram' => 'Instagram',
+        'linkedin'  => 'LinkedIn',
+        'youtube'   => 'YouTube',
+        'telegram'  => 'Telegram',
     ],
 
     // Columns
-    'columns'  => [
+    'columns'      => [
         'name'              => 'Name',
         'lastname'          => 'Last Name',
         'email'             => 'Email',
@@ -29,57 +35,75 @@ return [
         'viewed'            => 'Viewed',
         'image'             => 'Image',
         'is_active'         => 'Is Active',
+        'is_default'        => 'Is Default',
         'created_at'        => 'Created At',
         'updated_at'        => 'Updated At',
         'date_available'    => 'Date Available',
         'date_added'        => 'Date Added',
         'email_verified_at' => 'Email Verified At',
+        'sort_order'        => 'Sort Order',
+        'code'              => 'Code',
+        'format_locale'     => 'Format Locale',
     ],
 
     // Labels
-    'labels'   => [
-        'model'             => 'Model',
-        'sku'               => 'SKU',
-        'ean'               => 'EAN',
-        'quantity'          => 'Quantity',
-        'minimum'           => 'Minimum',
-        'price'             => 'Price',
-        'image'             => 'Image',
-        'viewed'            => 'Viewed',
-        'date_available'    => 'Date Available',
-        'date_added'        => 'Date Added',
-        'is_active'         => 'Is Active',
-        'name'              => 'Name',
-        'description'       => 'Description',
-        'meta_title'        => 'Meta Title',
-        'meta_description'  => 'Meta Description',
-        'meta_keywords'     => 'Meta Keywords',
-        'images'            => 'Images',
-        'sort_order'        => 'Sort Order',
-        'discounts'         => 'Discounts',
-        'user_group'        => 'User Group',
-        'discount_quantity' => 'Quantity',
-        'priority'          => 'Priority',
-        'discount_price'    => 'Discount Price',
-        'date_start'        => 'Date Start',
-        'date_end'          => 'Date End',
-        'attributes'        => 'Attributes',
-        'attribute'         => 'Attribute',
-        'language'          => 'Language',
-        'attribute_text'    => 'Value',
-        'categories'        => 'Categories',
-        'add_attribute'     => 'Add Attribute',
-        'add_discount'      => 'Add Discount',
-        'add_image'         => 'Add Image',
+    'labels'       => [
+        'model'                 => 'Model',
+        'sku'                   => 'SKU',
+        'ean'                   => 'EAN',
+        'quantity'              => 'Quantity',
+        'minimum'               => 'Minimum',
+        'price'                 => 'Price',
+        'image'                 => 'Image',
+        'viewed'                => 'Viewed',
+        'date_available'        => 'Date Available',
+        'date_added'            => 'Date Added',
+        'is_active'             => 'Is Active',
+        'is_default'            => 'Is Default',
+        'name'                  => 'Name',
+        'format_locale'         => 'Format Locale',
+        'code'                  => 'Code',
+        'email'                 => 'Email',
+        'telephone'             => 'Telephone',
+        'avatar'                => 'Avatar',
+        'lastname'              => 'Last Name',
+        'description'           => 'Description',
+        'meta_title'            => 'Meta Title',
+        'meta_description'      => 'Meta Description',
+        'meta_keywords'         => 'Meta Keywords',
+        'images'                => 'Images',
+        'sort_order'            => 'Sort Order',
+        'discounts'             => 'Discounts',
+        'user_group'            => 'User Group',
+        'discount_quantity'     => 'Quantity',
+        'priority'              => 'Priority',
+        'discount_price'        => 'Discount Price',
+        'date_start'            => 'Date Start',
+        'date_end'              => 'Date End',
+        'attributes'            => 'Attributes',
+        'attribute'             => 'Attribute',
+        'language'              => 'Language',
+        'attribute_text'        => 'Value',
+        'categories'            => 'Categories',
+        'add_attribute'         => 'Add Attribute',
+        'add_discount'          => 'Add Discount',
+        'add_image'             => 'Add Image',
+        'delete_image'          => 'Delete Image',
+        'email_verified_at'     => 'Email Verified At',
+        'password'              => 'Password',
+        'password_confirmation' => 'Password Confirmation',
+        'width'                 => 'Width (px)',
+        'height'                => 'Height (px)',
+        'url'                   => 'URL',
     ],
 
     // Helpers
-    'helpers'  => [
+    'helpers'      => [
         'categories' => 'Select the categories',
     ],
 
     // Tabs
-    'tabs'     => [
+    'tabs'         => [
         'general'      => 'General',
         'translations' => 'Translations',
         'categories'   => 'Categories',
@@ -89,7 +113,7 @@ return [
     ],
 
     // Sections
-    'sections' => [
+    'sections'     => [
         'basic_info'        => 'Basic Information',
         'stock'             => 'Stock',
         'pricing'           => 'Pricing',
@@ -103,9 +127,10 @@ return [
     ],
 
     // Filters
-    'filters'  => [
-        'active_users'            => 'Active Users',
-        'active'                  => 'Active Users',
+    'filters'      => [
+        'active'                  => 'Active',
+        'default'                 => 'Default',
+        'default_only'            => 'Default Only',
         'name'                    => 'Name',
         'model'                   => 'Model',
         'sku'                     => 'SKU',
@@ -118,15 +143,6 @@ return [
         'telephone'               => 'Telephone',
         'email_verified_at'       => 'Email Verified At',
         'created_at'              => 'Created At',
-        'placeholder_all'         => 'All',
-        'placeholder_all_users'   => 'All Users',
-        'placeholder_name'        => 'Flowers',
-        'placeholder_model'       => 'PL-1001',
-        'placeholder_sku'         => 'VA-0001',
-        'placeholder_ean'         => '1234567890123',
-        'placeholder_price'       => '135.50',
-        'placeholder_quantity'    => '50',
-        'placeholder_category'    => 'Paintings by Numbers',
         'active_only'             => 'Active Only',
         'lastname_only'           => 'Last Name Only',
         'email_only'              => 'Email Only',
@@ -141,8 +157,26 @@ return [
         'telephone_excluded'      => 'Telephone Excluded',
     ],
 
+    // Placeholders
+    'placeholders' => [
+        'all'       => 'All',
+        'all_users' => 'All Users',
+        'name'      => 'Flowers',
+        'model'     => 'PL-1001',
+        'sku'       => 'VA-0001',
+        'ean'       => '1234567890123',
+        'price'     => '135.50',
+        'quantity'  => '50',
+        'category'  => 'Paintings by Numbers',
+    ],
+
+    // Success
+    'success'      => [
+        'title' => 'Success',
+    ],
+
     // Errors
-    'errors'   => [
+    'errors'       => [
         'title'                           => 'Error',
         'no_language'                     => 'No default language configured. Please configure languages in settings!',
         'validation_duplicate_categories' => 'The selected categories contain duplicates. Please remove the duplicates and try again.',

@@ -64,7 +64,7 @@ class ProductResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/catalogs/products/products.label_model');
+        return __('admin/catalogs/products/products.labels.model');
     }
 
     /**
@@ -74,7 +74,7 @@ class ProductResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/catalogs/products/products.label_plural_model');
+        return __('admin/catalogs/products/products.labels.plural_model');
     }
 
     /**

@@ -136,9 +136,10 @@ return [
     ],
     'socials_list'              => explode(',', env('SOCIALS_LIST')),
     'regex_validate_conditions' => [
-        'email'     => '/^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/',
-        'telephone' => '/(^((\+?\d{2,}\s?)|(.*))\(?\d{3,}\)?\s?\d{3,}-?\d{2,}-?\d{2,}$)/',
-        'password'  => '/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\s:])(\S)+$/',
+        'email'       => '/^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/',
+        'telephone'   => '/(^((\+?\d{2,}\s?)|(.*))\(?\d{3,}\)?\s?\d{3,}-?\d{2,}-?\d{2,}$)/',
+        'password'    => '/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\s:])(\S)+$/',
+        'coordinates' => '/^-?\d{1,2}\.\d+,\s?-?\d{1,3}\.\d+$/',
     ],
     'currency'                  => [
         'default_currency_code'   => env('DEFAULT_CURRENCY_CODE'),

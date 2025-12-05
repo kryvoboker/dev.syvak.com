@@ -67,7 +67,7 @@ class UserGroupResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/users/user_groups.label_model');
+        return __('admin/users/user_groups.labels.model');
     }
 
     /**
@@ -77,7 +77,7 @@ class UserGroupResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/users/user_groups.label_plural_model');
+        return __('admin/users/user_groups.labels.plural_model');
     }
 
     /**

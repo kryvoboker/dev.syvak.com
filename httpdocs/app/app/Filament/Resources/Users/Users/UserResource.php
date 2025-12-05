@@ -65,7 +65,7 @@ class UserResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/users/users.label_model');
+        return __('admin/users/users.labels.model');
     }
 
     /**
@@ -75,7 +75,7 @@ class UserResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/users/users.label_plural_model');
+        return __('admin/users/users.labels.plural_model');
     }
 
     /**

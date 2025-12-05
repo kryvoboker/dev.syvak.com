@@ -41,7 +41,7 @@ class ProductForm
                         self::createTranslationsTab($active_languages),
                         self::createCategoriesTab($active_languages),
                         self::createImagesTab(),
-                        self::createDiscountsTab($active_languages),
+                        self::createDiscountsTab(),
                         self::createAttributesTab($active_languages),
                     ])
                     ->activeTab(1)

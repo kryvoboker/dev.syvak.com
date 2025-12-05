@@ -150,8 +150,8 @@ class EditProduct extends EditRecord
 
             if (in_array($pair, $pairs)) {
                 Notification::make()
-                    ->title(__('admin/catalogs/products/products.error_title'))
-                    ->body(__('admin/catalogs/products/products.error_duplicate_attribute_language'))
+                    ->title(__('admin/default.errors.title'))
+                    ->body(__('admin/catalogs/products/products.errors.duplicate_attribute_language'))
                     ->danger()
                     ->send();
 

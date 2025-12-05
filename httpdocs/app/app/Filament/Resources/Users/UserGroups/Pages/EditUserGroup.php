@@ -21,8 +21,8 @@ class EditUserGroup extends EditRecord
                 ->before(function (DeleteAction $action, UserGroup $record) {
                     if ($record->is_default) {
                         Notification::make()
-                            ->title(__('admin/users/user_groups.text_cant_delete_default_user_group'))
-                            ->body(__('admin/users/user_groups.error_cant_delete_default_user_group'))
+                            ->title(__('admin/default.errors.title'))
+                            ->body(__('admin/users/user_groups.errors.cant_delete_default_user_group'))
                             ->danger()
                             ->send();
 

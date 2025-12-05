@@ -33,43 +33,43 @@ class AppSettingForm
                 Tabs::make('MainSettings')
                     ->tabs([
                         // SEO Tab with language tabs inside
-                        Tabs\Tab::make(__('admin/settings/app_settings.tab_seo'))
+                        Tabs\Tab::make(__('admin/settings/app_settings.tabs.seo'))
                             ->schema([
                                 self::createLanguageTabs($languages, 'seo'),
                             ])
                             ->columns(1),
 
                         // Contact Information Tab with language tabs inside
-                        Tabs\Tab::make(__('admin/settings/app_settings.tab_contacts'))
+                        Tabs\Tab::make(__('admin/settings/app_settings.tabs.contacts'))
                             ->schema([
                                 self::createLanguageTabs($languages, 'contacts'),
                             ])
                             ->columns(1),
 
                         // Map Settings Tab
-                        Tabs\Tab::make(__('admin/settings/app_settings.tab_map'))
+                        Tabs\Tab::make(__('admin/settings/app_settings.tabs.map'))
                             ->schema([
                                 TextInput::make('coordinates')
-                                    ->label(__('admin/settings/app_settings.label_coordinates'))
-                                    ->helperText(__('admin/settings/app_settings.helper_coordinates'))
-                                    ->placeholder(__('admin/settings/app_settings.placeholder_coordinates'))
+                                    ->label(__('admin/settings/app_settings.labels.coordinates'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.coordinates'))
+                                    ->placeholder(__('admin/settings/app_settings.placeholders.coordinates'))
                                     ->maxLength(255)
-                                    ->rules(['nullable', 'string', 'regex:/^-?\d{1,2}\.\d+,\s?-?\d{1,3}\.\d+$/', 'max:255']),
+                                    ->rules(['nullable', 'string', 'regex:' . config('app.regex_validate_conditions.coordinates'), 'max:255']),
 
                                 Textarea::make('iframe_map')
-                                    ->label(__('admin/settings/app_settings.label_iframe_map'))
-                                    ->helperText(__('admin/settings/app_settings.helper_iframe_map'))
+                                    ->label(__('admin/settings/app_settings.labels.iframe_map'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.iframe_map'))
                                     ->rules(['nullable', 'string'])
                                     ->rows(4),
                             ])
                             ->columns(1),
 
                         // System Settings Tab
-                        Tabs\Tab::make(__('admin/settings/app_settings.tab_system'))
+                        Tabs\Tab::make(__('admin/settings/app_settings.tabs.system'))
                             ->schema([
                                 Select::make('timezone')
-                                    ->label(__('admin/settings/app_settings.label_timezone'))
-                                    ->helperText(__('admin/settings/app_settings.helper_timezone'))
+                                    ->label(__('admin/settings/app_settings.labels.timezone'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.timezone'))
                                     ->options(function () {
                                         $timezones = [];
 
@@ -86,18 +86,18 @@ class AppSettingForm
                                     ->required(),
 
                                 Repeater::make('image_sizes')
-                                    ->label(__('admin/settings/app_settings.label_image_sizes'))
-                                    ->helperText(__('admin/settings/app_settings.helper_image_sizes'))
+                                    ->label(__('admin/settings/app_settings.labels.image_sizes'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.image_sizes'))
                                     ->schema([
                                         TextInput::make('name')
-                                            ->label(__('admin/settings/app_settings.label_name'))
+                                            ->label(__('admin/default.labels.name'))
                                             ->rules(['required', 'string', 'max:255']),
                                         TextInput::make('width')
-                                            ->label(__('admin/settings/app_settings.label_width'))
+                                            ->label(__('admin/default.labels.width'))
                                             ->numeric()
                                             ->rules(['required', 'numeric']),
                                         TextInput::make('height')
-                                            ->label(__('admin/settings/app_settings.label_height'))
+                                            ->label(__('admin/default.labels.height'))
                                             ->numeric()
                                             ->rules(['required', 'numeric']),
                                     ])
@@ -148,74 +148,74 @@ class AppSettingForm
         return match ($section) {
             'seo'      => [
                 TextInput::make("titles.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_titles'))
-                    ->helperText(__('admin/settings/app_settings.helper_titles'))
+                    ->label(__('admin/settings/app_settings.labels.titles'))
+                    ->helperText(__('admin/settings/app_settings.helpers.titles'))
                     ->rules(['required', 'string', 'max:255'])
                     ->required(),
 
                 TextInput::make("meta_titles.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_meta_titles'))
+                    ->label(__('admin/settings/app_settings.labels.meta_titles'))
                     ->rules(['nullable', 'max:255'])
-                    ->helperText(__('admin/settings/app_settings.helper_meta_titles'))
+                    ->helperText(__('admin/settings/app_settings.helpers.meta_titles'))
                 ->default(null),
 
                 Textarea::make("meta_descriptions.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_meta_descriptions'))
+                    ->label(__('admin/settings/app_settings.labels.meta_descriptions'))
                     ->rules(['nullable', 'max:255'])
-                    ->helperText(__('admin/settings/app_settings.helper_meta_descriptions'))
+                    ->helperText(__('admin/settings/app_settings.helpers.meta_descriptions'))
                     ->rows(3),
 
                 TextInput::make("meta_keywords.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_meta_keywords'))
+                    ->label(__('admin/settings/app_settings.labels.meta_keywords'))
                     ->rules(['nullable', 'max:255'])
-                    ->helperText(__('admin/settings/app_settings.helper_meta_keywords')),
+                    ->helperText(__('admin/settings/app_settings.helpers.meta_keywords')),
             ],
             'contacts' => [
                 TextInput::make("contact_emails.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_contact_emails'))
-                    ->helperText(__('admin/settings/app_settings.helper_contact_emails'))
-                    ->placeholder(__('admin/settings/app_settings.placeholder_contact_emails'))
+                    ->label(__('admin/settings/app_settings.labels.contact_emails'))
+                    ->helperText(__('admin/settings/app_settings.helpers.contact_emails'))
+                    ->placeholder(__('admin/settings/app_settings.placeholders.contact_emails'))
                     ->rules(['nullable', 'string', 'max:500'])
                     ->maxLength(500),
 
                 TextInput::make("contact_phones.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_contact_phones'))
-                    ->helperText(__('admin/settings/app_settings.helper_contact_phones'))
-                    ->placeholder(__('admin/settings/app_settings.placeholder_contact_phones'))
+                    ->label(__('admin/settings/app_settings.labels.contact_phones'))
+                    ->helperText(__('admin/settings/app_settings.helpers.contact_phones'))
+                    ->placeholder(__('admin/settings/app_settings.placeholders.contact_phones'))
                     ->rules(['nullable', 'string', 'max:500'])
                     ->maxLength(500),
 
                 Repeater::make("socials.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_socials'))
-                    ->helperText(__('admin/settings/app_settings.helper_socials'))
+                    ->label(__('admin/settings/app_settings.labels.socials'))
+                    ->helperText(__('admin/settings/app_settings.helpers.socials'))
                     ->schema([
-                        Select::make('platform')
-                            ->label(__('admin/settings/app_settings.label_platform'))
+                        Select::make('social_type')
+                            ->label(__('admin/settings/app_settings.labels.social_type'))
                             ->options([
-                                'facebook'  => __('admin/settings/app_settings.text_facebook'),
-                                'instagram' => __('admin/settings/app_settings.text_instagram'),
-                                'twitter'   => __('admin/settings/app_settings.text_twitter'),
-                                'linkedin'  => __('admin/settings/app_settings.text_linkedin'),
-                                'youtube'   => __('admin/settings/app_settings.text_youtube'),
-                                'telegram'  => __('admin/settings/app_settings.text_telegram'),
+                                'facebook'  => __('admin/default.texts.facebook'),
+                                'instagram' => __('admin/default.texts.instagram'),
+                                'twitter'   => __('admin/default.texts.twitter'),
+                                'linkedin'  => __('admin/default.texts.linkedin'),
+                                'youtube'   => __('admin/default.texts.youtube'),
+                                'telegram'  => __('admin/default.texts.telegram'),
                             ])
                             ->rules(['required', 'string', 'in:' . implode(',', config('app.socials_list'))]),
                         TextInput::make('url')
-                            ->label(__('admin/settings/app_settings.label_url'))
+                            ->label(__('admin/default.labels.url'))
                             ->url(),
                     ])
                     ->columns(),
 
                 TextInput::make("work_time.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_work_time'))
-                    ->helperText(__('admin/settings/app_settings.helper_work_time'))
+                    ->label(__('admin/settings/app_settings.labels.work_time'))
+                    ->helperText(__('admin/settings/app_settings.helpers.work_time'))
                     ->rules(['nullable', 'string', 'max:255'])
                     ->maxLength(255)
-                    ->placeholder(__('admin/settings/app_settings.placeholder_work_time')),
+                    ->placeholder(__('admin/settings/app_settings.placeholders.work_time')),
 
                 Textarea::make("contact_addresses.$lang_code")
-                    ->label(__('admin/settings/app_settings.label_contact_addresses'))
-                    ->helperText(__('admin/settings/app_settings.helper_contact_addresses'))
+                    ->label(__('admin/settings/app_settings.labels.contact_addresses'))
+                    ->helperText(__('admin/settings/app_settings.helpers.contact_addresses'))
                     ->rows(2)
                     ->rules(['nullable', 'string', 'max:1000'])
                     ->maxLength(1000),

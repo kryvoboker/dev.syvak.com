@@ -29,7 +29,7 @@ class AttributesTable
             })
             ->columns([
                 TextColumn::make('attributeDescription.name')
-                    ->label(__('admin/catalogs/attributes/attributes.column_name'))
+                    ->label(__('admin/default.columns.name'))
                     ->searchable(['name'])
                     ->sortable()
                     ->limit(50)
@@ -66,16 +66,16 @@ class AttributesTable
                     }),
 
                 TextColumn::make('sort_order')
-                    ->label(__('admin/catalogs/attributes/attributes.column_sort_order'))
+                    ->label(__('admin/default.columns.sort_order'))
                     ->numeric()
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label(__('admin/catalogs/attributes/attributes.column_is_active'))
+                    ->label(__('admin/default.columns.is_active'))
                     ->boolean(),
 
                 TextColumn::make('created_at')
-                    ->label(__('admin/catalogs/attributes/attributes.column_created_at'))
+                    ->label(__('admin/default.columns.created_at'))
                     ->date(config('app.datetime_format'), config('app.timezone'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

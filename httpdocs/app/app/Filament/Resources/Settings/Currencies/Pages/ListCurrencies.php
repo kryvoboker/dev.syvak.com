@@ -45,11 +45,11 @@ class ListCurrencies extends ListRecords
         return [
             // Exchange rate update button
             Action::make('updateCurrencyRates')
-                ->label(__('admin/settings/currencies.action_update_rates'))
+                ->label(__('admin/settings/currencies.actions.update_rates'))
                 ->icon(Heroicon::ArrowPath)
                 ->requiresConfirmation()
-                ->modalHeading(__('admin/settings/currencies.modal_update_rates_title'))
-                ->modalDescription(__('admin/settings/currencies.modal_update_rates_body'))
+                ->modalHeading(__('admin/default.success.title'))
+                ->modalDescription(__('admin/settings/currencies.actions.modal_update_rates_body'))
                 ->action(function (): void {
                      $error_message = app(UpdateRates::class)->handle();
 
@@ -60,8 +60,8 @@ class ListCurrencies extends ListRecords
                             ->send();
                     } else {
                         Notification::make()
-                            ->title(__('admin/settings/currencies.notification_rates_updated_title'))
-                            ->body(__('admin/settings/currencies.notification_rates_updated_body'))
+                            ->title(__('admin/default.success.title'))
+                            ->body(__('admin/settings/currencies.notifications.rates_updated_body'))
                             ->success()
                             ->send();
                     }

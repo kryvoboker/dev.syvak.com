@@ -41,8 +41,8 @@ class EditCurrency extends EditRecord
                 ->before(function (DeleteAction $action, Currency $record) {
                     if ($record->is_default) {
                         Notification::make()
-                            ->title(__('admin/settings/currencies.text_cant_delete_default_currency'))
-                            ->body(__('admin/settings/currencies.error_cant_delete_default_currency'))
+                            ->title(__('admin/default.errors.title'))
+                            ->body(__('admin/settings/currencies.errors.cant_delete_default_currency'))
                             ->danger()
                             ->send();
 

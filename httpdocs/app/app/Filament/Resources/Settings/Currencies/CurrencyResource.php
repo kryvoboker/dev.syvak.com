@@ -65,7 +65,7 @@ class CurrencyResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/settings/currencies.label_model');
+        return __('admin/settings/currencies.labels.model');
     }
 
     /**
@@ -75,7 +75,7 @@ class CurrencyResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/settings/currencies.label_plural_model');
+        return __('admin/settings/currencies.labels.plural_model');
     }
 
     /**

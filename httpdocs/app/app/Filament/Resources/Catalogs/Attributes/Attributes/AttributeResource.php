@@ -64,7 +64,7 @@ class AttributeResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/catalogs/attributes/attributes.label_model');
+        return __('admin/catalogs/attributes/attributes.labels.model');
     }
 
     /**
@@ -74,7 +74,7 @@ class AttributeResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/catalogs/attributes/attributes.label_plural_model');
+        return __('admin/catalogs/attributes/attributes.labels.plural_model');
     }
 
     /**

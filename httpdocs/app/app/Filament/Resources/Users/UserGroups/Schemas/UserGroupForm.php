@@ -16,7 +16,7 @@ class UserGroupForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label(__('admin/users/user_groups.label_name'))
+                    ->label(__('admin/default.labels.name'))
                     ->maxLength(255)
                     ->placeholder('RRC Users')
                     ->rules(['string', 'max:255'])
@@ -28,15 +28,14 @@ class UserGroupForm
                     ->columnSpanFull(),
 
                 Toggle::make('is_active')
-                    ->label(__('admin/users/user_groups.label_is_active'))
-                    ->helperText(__('admin/users/user_groups.helper_is_active'))
+                    ->label(__('admin/default.labels.is_active'))
+                    ->helperText(__('admin/users/user_groups.helpers.is_active'))
                     ->default(false),
 
                 Toggle::make('is_default')
-                    ->label(__('admin/users/user_groups.label_is_default'))
-                    ->helperText(__('admin/users/user_groups.helper_is_default'))
+                    ->label(__('admin/default.labels.is_default'))
+                    ->helperText(__('admin/users/user_groups.helpers.is_default'))
                     ->default(false),
-
             ]);
     }
 }

@@ -86,7 +86,7 @@ class AppSettingResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/settings/app_settings.label_model');
+        return __('admin/settings/app_settings.labels.model');
     }
 
     /**
@@ -96,7 +96,7 @@ class AppSettingResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/settings/app_settings.label_plural_model');
+        return __('admin/settings/app_settings.labels.plural_model');
     }
 
     /**

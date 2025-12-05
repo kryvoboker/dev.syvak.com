@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Users\Schemas;
 
+use App\Models\Users\User;
 use App\Models\Users\UserGroup;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -15,46 +16,53 @@ use Illuminate\Validation\Rule;
 
 class UserForm
 {
+    /**
+     * @param Schema $schema
+     *
+     * @return Schema
+     */
     public static function configure(Schema $schema): Schema
     {
         $user_group = new UserGroup();
+        /** @var User|null $record */
+        $record = $schema->getRecord();
 
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label(__('admin/users/users.label_name'))
+                    ->label(__('admin/default.labels.name'))
                     ->maxLength(255)
                     ->placeholder('John')
                     ->rules(['string', 'max:255'])
                     ->required(),
 
                 TextInput::make('lastname')
-                    ->label(__('admin/users/users.label_lastname'))
+                    ->label(__('admin/default.labels.lastname'))
                     ->maxLength(255)
                     ->placeholder('Doe')
                     ->rules(['nullable', 'string', 'max:255'])
                     ->default(null),
 
                 TextInput::make('email')
-                    ->label(__('admin/users/users.label_email'))
+                    ->label(__('admin/default.labels.email'))
                     ->maxLength(255)
                     ->placeholder('knur@gamil.com')
                     ->regex(config('app.regex_validate_conditions.email'))
                     ->email()
-                    ->rules(['email', 'max:255', Rule::unique('users', 'email')->ignore($schema->getRecord()->id)])
+                    ->rules(['email', 'max:255', Rule::unique('users', 'email')->ignore($record?->id)])
                     ->required(),
 
                 TextInput::make('telephone')
-                    ->label(__('admin/users/users.label_telephone'))
+                    ->label(__('admin/default.labels.telephone'))
                     ->maxLength(20)
                     ->placeholder('+380 (96) 690-64-12')
                     ->telRegex(config('app.regex_validate_conditions.telephone'))
                     ->tel()
-                    ->rules(['nullable', 'string', 'max:20', Rule::unique('users', 'telephone')->ignore($schema->getRecord()->id), 'regex:' . config('app.regex_validate_conditions.telephone')])
+                    ->rules(['nullable', 'string', 'max:20', Rule::unique('users', 'telephone')->ignore($record?->id), 'regex:' . config('app.regex_validate_conditions.telephone')])
                     ->default(null),
 
                 FileUpload::make('avatar')
-                    ->label(__('admin/users/users.label_avatar'))
+                    ->label(__('admin/default.labels.avatar'))
                     ->image() // accept images only
                     ->directory(config('app.images.user.image_path')) // store under avatars folder
                     ->preserveFilenames() // not generate unique names
@@ -72,37 +80,37 @@ class UserForm
                     ->default(null),
 
                 DateTimePicker::make('email_verified_at')
-                    ->label(__('admin/users/users.label_email_verified_at'))
-                    ->helperText(__('admin/users/users.helper_email_verified_at'))
+                    ->label(__('admin/default.labels.email_verified_at'))
+                    ->helperText(__('admin/users/users.helpers.email_verified_at'))
                     ->rules(['nullable', 'date'])
                     ->default(null),
 
                 TextInput::make('password')
-                    ->label(__('admin/users/users.label_password'))
-                    ->helperText(__('admin/users/users.label_password'))
+                    ->label(__('admin/default.labels.password'))
+                    ->helperText(__('admin/users/users.helpers.password'))
                     ->password()
                     ->rules(['nullable', 'string', 'min:3', 'confirmed', 'regex:' . config('app.regex_validate_conditions.password')])
                     ->default(null),
 
                 TextInput::make('password_confirmation')
-                    ->label(__('admin/users/users.label_password_confirmation'))
+                    ->label(__('admin/default.labels.password_confirmation'))
                     ->password()
                     ->rules(['nullable', 'required_with:password'])
                     ->default(null),
 
                 Toggle::make('is_active')
-                    ->label(__('admin/users/users.label_is_active'))
-                    ->helperText(__('admin/users/users.helper_is_active'))
+                    ->label(__('admin/default.labels.is_active'))
+                    ->helperText(__('admin/users/users.helpers.is_active'))
                     ->default(false),
 
                 Select::make('user_group_id')
-                    ->label(__('admin/users/users.label_user_group'))
+                    ->label(__('admin/default.labels.user_group'))
                     ->options(function () use ($user_group) {
                         return $user_group->getAllActiveUserGroups()->pluck('name', 'id');
                     })
                     ->searchable()
                     ->preload()
-                    ->rules(['nullable', 'exists:user_groups,id'])
+                    ->rules(['nullable', Rule::exists('user_groups', 'id')])
                     ->required(),
             ]);
     }

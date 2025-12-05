@@ -26,19 +26,19 @@ class UserGroupsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('admin/users/user_groups.column_name'))
+                    ->label(__('admin/default.columns.name'))
                     ->searchable(),
 
                 IconColumn::make('is_active')
-                    ->label(__('admin/users/user_groups.column_active'))
+                    ->label(__('admin/default.columns.is_active'))
                     ->boolean(),
 
                 IconColumn::make('is_default')
-                    ->label(__('admin/users/user_groups.column_default'))
+                    ->label(__('admin/default.columns.is_default'))
                     ->boolean(),
 
                 TextColumn::make('created_at')
-                    ->label(__('admin/users/user_groups.column_created_at'))
+                    ->label(__('admin/default.columns.created_at'))
                     ->date(config('app.datetime_format'), config('app.timezone'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -56,8 +56,8 @@ class UserGroupsTable
                         ->before(function (DeleteBulkAction $action, Collection $records) {
                             if ($records->contains('is_default', true)) {
                                 Notification::make()
-                                    ->title(__('admin/users/user_groups.text_cant_delete_default_user_group'))
-                                    ->body(__('admin/users/user_groups.error_cant_delete_default_user_group'))
+                                    ->title(__('admin/default.errors.title'))
+                                    ->body(__('admin/users/user_groups.errors.cant_delete_default_user_group'))
                                     ->danger()
                                     ->send();
 
@@ -70,8 +70,8 @@ class UserGroupsTable
 
                             if ($active_to_delete >= $total_active) {
                                 Notification::make()
-                                    ->title(__('admin/users/user_groups.text_cant_delete_last_active_user_group'))
-                                    ->body(__('admin/users/user_groups.error_cant_delete_last_active_user_group'))
+                                    ->title(__('admin/default.errors.title'))
+                                    ->body(__('admin/users/user_groups.errors.cant_delete_last_active_user_group'))
                                     ->danger()
                                     ->send();
 

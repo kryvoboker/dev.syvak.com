@@ -174,7 +174,7 @@ class ProductsTable
             ->filters([
                 TernaryFilter::make('is_active')
                     ->label(__('admin/default.filters.active'))
-                    ->placeholder(__('admin/default.filters.placeholder_all'))
+                    ->placeholder(__('admin/default.placeholders.all'))
                     ->trueLabel(__('admin/default.filters.active_only'))
                     ->falseLabel(__('admin/default.filters.inactive_only')),
 
@@ -183,7 +183,7 @@ class ProductsTable
                     ->schema([
                         TextInput::make('name')
                             ->label(__('admin/default.filters.name'))
-                            ->placeholder(__('admin/default.filters.placeholder_name'))
+                            ->placeholder(__('admin/default.placeholders.name'))
                             ->minLength(3)
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
@@ -223,7 +223,7 @@ class ProductsTable
                     ->schema([
                         TextInput::make('model')
                             ->label(__('admin/default.filters.model'))
-                            ->placeholder(__('admin/default.filters.placeholder_model'))
+                            ->placeholder(__('admin/default.placeholders.model'))
                             ->minLength(3)
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
@@ -260,7 +260,7 @@ class ProductsTable
                     ->schema([
                         TextInput::make('sku')
                             ->label(__('admin/default.filters.sku'))
-                            ->placeholder(__('admin/default.filters.placeholder_sku'))
+                            ->placeholder(__('admin/default.placeholders.sku'))
                             ->minLength(3)
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
@@ -297,7 +297,7 @@ class ProductsTable
                     ->schema([
                         TextInput::make('ean')
                             ->label(__('admin/default.filters.ean'))
-                            ->placeholder(__('admin/default.filters.placeholder_ean'))
+                            ->placeholder(__('admin/default.placeholders.ean'))
                             ->minLength(3)
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
@@ -334,7 +334,7 @@ class ProductsTable
                     ->schema([
                         TextInput::make('price')
                             ->label(__('admin/default.filters.price'))
-                            ->placeholder(__('admin/default.filters.placeholder_price'))
+                            ->placeholder(__('admin/default.placeholders.price'))
                             ->numeric()
                             ->minValue(0)
                             ->afterStateUpdated(function ($state, $set) {
@@ -369,7 +369,7 @@ class ProductsTable
                     ->schema([
                         TextInput::make('quantity')
                             ->label(__('admin/default.filters.quantity'))
-                            ->placeholder(__('admin/default.filters.placeholder_quantity'))
+                            ->placeholder(__('admin/default.placeholders.quantity'))
                             ->numeric()
                             ->minValue(0)
                             ->afterStateUpdated(function ($state, $set) {
@@ -404,7 +404,7 @@ class ProductsTable
                     ->schema([
                         TextInput::make('category')
                             ->label(__('admin/default.filters.category'))
-                            ->placeholder(__('admin/default.filters.placeholder_category'))
+                            ->placeholder(__('admin/default.placeholders.category'))
                             ->minLength(3)
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {

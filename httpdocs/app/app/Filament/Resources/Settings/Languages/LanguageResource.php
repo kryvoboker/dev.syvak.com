@@ -65,7 +65,7 @@ class LanguageResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/settings/languages.label_model');
+        return __('admin/settings/languages.labels.model');
     }
 
     /**
@@ -75,7 +75,7 @@ class LanguageResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/settings/languages.label_plural_model');
+        return __('admin/settings/languages.labels.plural_model');
     }
 
     /**

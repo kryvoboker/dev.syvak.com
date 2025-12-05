@@ -22,43 +22,41 @@ class LanguagesTable
         return $table
             ->columns([
                 TextColumn::make('code')
-                    ->label(__('admin/settings/languages.column_code'))
+                    ->label(__('admin/default.columns.code'))
                     ->searchable()
                     ->sortable()
                     ->badge(),
 
                 TextColumn::make('name')
-                    ->label(__('admin/settings/languages.column_name'))
+                    ->label(__('admin/default.columns.name'))
                     ->searchable()
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label(__('admin/settings/languages.column_active'))
+                    ->label(__('admin/default.columns.is_active'))
                     ->boolean()
                     ->sortable(),
 
                 IconColumn::make('is_default')
-                    ->label(__('admin/settings/languages.column_default'))
+                    ->label(__('admin/default.columns.is_default'))
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label(__('admin/settings/languages.column_created_at'))
+                    ->label(__('admin/default.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->date(config('app.datetime_format'), config('app.timezone')),
             ])
             ->filters([
                 TernaryFilter::make('is_active')
-                    ->label(__('admin/settings/languages.filter_active'))
-                    ->placeholder(__('admin/settings/languages.placeholder_all_languages'))
-                    ->trueLabel(__('admin/settings/languages.true_label_active_only'))
-                    ->falseLabel(__('admin/settings/languages.false_label_inactive_only')),
+                    ->label(__('admin/default.filters.active'))
+                    ->trueLabel(__('admin/default.filters.active_only'))
+                    ->falseLabel(__('admin/default.filters.inactive_only')),
 
                 TernaryFilter::make('is_default')
-                    ->label(__('admin/settings/languages.filter_default'))
-                    ->placeholder(__('admin/settings/languages.placeholder_all_languages'))
-                    ->trueLabel(__('admin/settings/languages.true_label_default_only')),
+                    ->label(__('admin/default.filters.default'))
+                    ->trueLabel(__('admin/default.filters.default_only')),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -72,8 +70,8 @@ class LanguagesTable
 
                             if ($has_default) {
                                 Notification::make()
-                                    ->title(__('admin/settings/languages.text_cant_delete_default_language'))
-                                    ->body(__('admin/settings/languages.error_cant_delete_default_language'))
+                                    ->title(__('admin/default.errors.title'))
+                                    ->body(__('admin/settings/languages.errors.cant_delete_default_language'))
                                     ->danger()
                                     ->send();
 
@@ -86,8 +84,8 @@ class LanguagesTable
 
                             if ($active_to_delete >= $total_active) {
                                 Notification::make()
-                                    ->title(__('admin/settings/languages.text_cant_delete_last_active_language'))
-                                    ->body(__('admin/settings/languages.error_cant_delete_last_active_language'))
+                                    ->title(__('admin/default.errors.title'))
+                                    ->body(__('admin/settings/languages.errors.cant_delete_last_active_language'))
                                     ->danger()
                                     ->send();
 

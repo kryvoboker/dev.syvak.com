@@ -18,24 +18,29 @@ use Illuminate\Support\Facades\Storage;
 
 class UsersTable
 {
+    /**
+     * @param Table $table
+     *
+     * @return Table
+     */
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('admin/users/users.column_name'))
+                    ->label(__('admin/default.columns.name'))
                     ->searchable(),
 
                 TextColumn::make('lastname')
-                    ->label(__('admin/users/users.column_lastname'))
+                    ->label(__('admin/default.columns.lastname'))
                     ->searchable(),
 
                 TextColumn::make('email')
-                    ->label(__('admin/users/users.column_email'))
+                    ->label(__('admin/default.columns.email'))
                     ->searchable(),
 
                 TextColumn::make('telephone')
-                    ->label(__('admin/users/users.column_telephone'))
+                    ->label(__('admin/default.columns.telephone'))
                     ->formatStateUsing(function ($state) {
                         return parse_telephone($state);
                     })
@@ -55,29 +60,27 @@ class UsersTable
                     ]),
 
                 IconColumn::make('is_active')
-                    ->label(__('admin/users/users.column_active'))
+                    ->label(__('admin/default.columns.is_active'))
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('email_verified_at')
-                    ->label(__('admin/users/users.column_email_verified_at'))
+                    ->label(__('admin/default.columns.email_verified_at'))
                     ->date(config('app.datetime_format'), config('app.timezone'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
-                    ->label(__('admin/users/users.column_created_at'))
+                    ->label(__('admin/default.columns.created_at'))
                     ->date(config('app.datetime_format'), config('app.timezone'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TernaryFilter::make('is_active')
-                    ->label(__('admin/users/users.filter_active'))
-                    ->placeholder(__('admin/users/users.placeholder_all'))
-                    ->trueLabel(__('admin/users/users.true_label_active_only'))
-                    ->falseLabel(__('admin/users/users.false_label_inactive_only')),
-
+                    ->label(__('admin/default.filters.active'))
+                    ->trueLabel(__('admin/default.filters.active_only'))
+                    ->falseLabel(__('admin/default.filters.inactive_only')),
             ])
             ->recordActions([
                 EditAction::make(),
