@@ -31,7 +31,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
-            $table->string('text', 2000)->nullable();
+            $table->string('text', 3000)->nullable();
 
             $table->unique(['product_id', 'attribute_id', 'language_id'], 'product_attribute_language_unique');
 

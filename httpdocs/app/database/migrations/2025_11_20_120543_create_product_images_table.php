@@ -19,7 +19,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->string('image');
+            $table->string('image', 3000)->nullable(false);
             $table->integer('sort_order')->default(1);
 
             $table->timestamps();

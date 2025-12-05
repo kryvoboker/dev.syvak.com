@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('parent_id')->nullable()->index();
-            $table->unsignedTinyInteger('sort_order')->default(0);
+            $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(false);
 
             $table->timestamps();

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('user_group_id')
                 ->nullable()
                 ->after('id')
-                ->constrained('user_groups')
+                ->constrained()
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
         });

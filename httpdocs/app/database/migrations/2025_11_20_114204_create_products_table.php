@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('ean')->unique()->nullable();
             $table->integer('quantity')->default(0);
             $table->integer('minimum')->default(1);
-            $table->string('image', 1000)->nullable();
+            $table->string('image', 3000)->nullable();
             $table->decimal('price', 15, 4)->default(0);
             $table->unsignedInteger('viewed')->default(0);
             $table->dateTime('date_available')->nullable()->useCurrent();

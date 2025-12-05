@@ -28,8 +28,8 @@ return new class extends Migration
             $table->unsignedInteger('quantity')->nullable();
             $table->unsignedInteger('priority')->default(1);
             $table->decimal('price', 15, 4)->default(0);
-            $table->dateTime('date_start')->nullable();
-            $table->dateTime('date_end')->nullable();
+            $table->dateTime('date_start')->nullable(false);
+            $table->dateTime('date_end')->nullable(false);
 
             $table->unique(['product_id', 'user_group_id'], 'product_id_user_group_id_unique');
 
