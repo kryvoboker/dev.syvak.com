@@ -15,6 +15,11 @@ use Illuminate\Support\Collection;
 
 class AttributeForm
 {
+    /**
+     * @param Schema $schema
+     *
+     * @return Schema
+     */
     public static function configure(Schema $schema): Schema
     {
         $active_languages = new Language()->getActiveLanguages();
@@ -64,6 +69,7 @@ class AttributeForm
                     TextInput::make("descriptions.$language->id.name")
                         ->label(__('admin/default.labels.name'))
                         ->maxLength(255)
+                        ->rules(['required', 'string', 'max:255'])
                         ->required(),
                 ])
                 ->badge($language->code);

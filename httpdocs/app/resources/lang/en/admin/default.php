@@ -55,6 +55,7 @@ return [
         'minimum'               => 'Minimum',
         'price'                 => 'Price',
         'image'                 => 'Image',
+        'icon'                  => 'Icon',
         'viewed'                => 'Viewed',
         'date_available'        => 'Date Available',
         'date_added'            => 'Date Added',
@@ -68,6 +69,7 @@ return [
         'avatar'                => 'Avatar',
         'lastname'              => 'Last Name',
         'description'           => 'Description',
+        'h1_title'              => 'Title For H1',
         'meta_title'            => 'Meta Title',
         'meta_description'      => 'Meta Description',
         'meta_keywords'         => 'Meta Keywords',
@@ -95,11 +97,13 @@ return [
         'width'                 => 'Width (px)',
         'height'                => 'Height (px)',
         'url'                   => 'URL',
+        'parent_category'       => 'Parent Category',
     ],
 
     // Helpers
     'helpers'      => [
-        'categories' => 'Select the categories',
+        'categories'      => 'Select the categories',
+        'parent_category' => 'Select the parent category under which this category will be nested. Leave empty to make it a top-level category.',
     ],
 
     // Tabs
@@ -110,6 +114,7 @@ return [
         'images'       => 'Images',
         'discounts'    => 'Discounts',
         'attributes'   => 'Attributes',
+        'meta_texts'   => 'Meta Texts',
     ],
 
     // Sections
@@ -121,9 +126,11 @@ return [
         'settings'          => 'Settings',
         'translations'      => 'Translations',
         'categories'        => 'Categories',
+        'images'            => 'Images',
         'additional_images' => 'Additional Images',
         'discounts'         => 'Discounts',
         'attributes'        => 'Attributes',
+        'meta_texts'        => 'Meta Texts',
     ],
 
     // Filters
@@ -159,15 +166,16 @@ return [
 
     // Placeholders
     'placeholders' => [
-        'all'       => 'All',
-        'all_users' => 'All Users',
-        'name'      => 'Flowers',
-        'model'     => 'PL-1001',
-        'sku'       => 'VA-0001',
-        'ean'       => '1234567890123',
-        'price'     => '135.50',
-        'quantity'  => '50',
-        'category'  => 'Paintings by Numbers',
+        'all'                    => 'All',
+        'all_users'              => 'All Users',
+        'name'                   => 'Flowers',
+        'model'                  => 'PL-1001',
+        'sku'                    => 'VA-0001',
+        'ean'                    => '1234567890123',
+        'price'                  => '135.50',
+        'quantity'               => '50',
+        'category'               => 'Paintings by Numbers',
+        'select_parent_category' => 'Select Parent Category',
     ],
 
     // Success
@@ -181,5 +189,6 @@ return [
         'no_language'                     => 'No default language configured. Please configure languages in settings!',
         'validation_duplicate_categories' => 'The selected categories contain duplicates. Please remove the duplicates and try again.',
         'something_went_wrong'            => 'Something went wrong. Please try again later.',
+        'category_path_not_found'         => 'Category path <b>:id</b> not found!',
     ]
 ];

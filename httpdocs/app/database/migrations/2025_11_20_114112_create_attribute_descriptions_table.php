@@ -27,9 +27,9 @@ return new class extends Migration
 
             $table->string('name');
 
-            $table->unique(['attribute_id', 'language_id'], 'attribute_id_language_id_unique');
-
             $table->timestamps();
+
+            $table->unique(['attribute_id', 'language_id']);
         });
     }
 

@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Pages;
 
 use App\Filament\Resources\Catalogs\Attributes\Attributes\AttributeResource;
 use App\Models\Catalogs\Attributes\Attribute;
+use App\Models\Catalogs\Attributes\AttributeDescription;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -38,7 +39,7 @@ class EditAttribute extends EditRecord
         $descriptions = $this->record->attributeDescription()
             ->get()
             ->keyBy('language_id')
-            ->map(fn($desc) => [
+            ->map(fn(AttributeDescription $desc) => [
                 'language_id' => $desc->language_id,
                 'name'        => $desc->name,
             ])

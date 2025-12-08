@@ -31,9 +31,9 @@ return new class extends Migration
             $table->dateTime('date_start')->nullable(false);
             $table->dateTime('date_end')->nullable(false);
 
-            $table->unique(['product_id', 'user_group_id'], 'product_id_user_group_id_unique');
-
             $table->timestamps();
+
+            $table->unique(['product_id', 'user_group_id']);
         });
     }
 

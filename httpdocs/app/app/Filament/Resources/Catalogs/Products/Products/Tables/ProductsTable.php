@@ -27,13 +27,23 @@ class ProductsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                // Eager load descriptions to avoid N+1 problem
+                return $query->with([
+                    'productDescription',
+                    'productDiscount',
+                    'productImage',
+                    'productToAttribute',
+                    'categories',
+                ]);
+            })
             ->columns([
                 TextColumn::make('productDescription.name')
                     ->label(__('admin/default.columns.name'))
                     ->searchable()
                     ->sortable()
                     ->limit(50)
-                    ->getStateUsing(function ($record) {
+                    ->getStateUsing(function (Product $record) {
                         $language = new Language();
 
                         // Get current locale language ID (adjust based on your logic)
@@ -188,7 +198,7 @@ class ProductsTable
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
                                 // Clear invalid input
-                                if ($state === null || Str::length(trim($state)) < 3) {
+                                if ($state === null || Str::length(Str::trim($state)) < 3) {
                                     $set('name', null);
                                 }
                             }),
@@ -197,25 +207,27 @@ class ProductsTable
                         $search = $data['name'] ?? null;
 
                         // Apply validation in query
-                        if ($search === null || Str::length(trim($search)) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return $query;
                         }
 
-                        $search = trim($search);
+                        $search = Str::trim($search);
 
                         return $query->whereHas(
                             'productDescription',
-                            fn(Builder $query): Builder => $query->where('name', 'like', "%$search%")
+                            function (Builder $query) use ($search) {
+                                return $query->where('name', 'LIKE', "%$search%");
+                            }
                         );
                     })
                     ->indicateUsing(function (array $data): ?string {
                         $search = $data['name'] ?? null;
 
-                        if ($search === null || Str::length($search) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return null;
                         }
 
-                        return __('admin/default.filters.name') . ': ' . trim($search);
+                        return __('admin/default.filters.name') . ': ' . Str::trim($search);
                     }),
 
                 Filter::make('model')
@@ -228,7 +240,7 @@ class ProductsTable
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
                                 // Clear invalid input
-                                if ($state === null || Str::length(trim($state)) < 3) {
+                                if ($state === null || Str::length(Str::trim($state)) < 3) {
                                     $set('model', null);
                                 }
                             }),
@@ -237,22 +249,22 @@ class ProductsTable
                         $search = $data['model'] ?? null;
 
                         // Apply validation in query
-                        if ($search === null || Str::length(trim($search)) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return $query;
                         }
 
-                        $search = trim($search);
+                        $search = Str::trim($search);
 
                         return $query->whereLike('model', "$search%");
                     })
                     ->indicateUsing(function (array $data): ?string {
                         $search = $data['model'] ?? null;
 
-                        if ($search === null || Str::length($search) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return null;
                         }
 
-                        return __('admin/default.filters.model') . ': ' . trim($search);
+                        return __('admin/default.filters.model') . ': ' . Str::trim($search);
                     }),
 
                 Filter::make('sku')
@@ -265,7 +277,7 @@ class ProductsTable
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
                                 // Clear invalid input
-                                if ($state === null || Str::length(trim($state)) < 3) {
+                                if ($state === null || Str::length(Str::trim($state)) < 3) {
                                     $set('sku', null);
                                 }
                             }),
@@ -274,22 +286,22 @@ class ProductsTable
                         $search = $data['sku'] ?? null;
 
                         // Apply validation in query
-                        if ($search === null || Str::length(trim($search)) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return $query;
                         }
 
-                        $search = trim($search);
+                        $search = Str::trim($search);
 
                         return $query->whereLike('sku', "$search%");
                     })
                     ->indicateUsing(function (array $data): ?string {
                         $search = $data['sku'] ?? null;
 
-                        if ($search === null || Str::length($search) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return null;
                         }
 
-                        return __('admin/default.filters.sku') . ': ' . trim($search);
+                        return __('admin/default.filters.sku') . ': ' . Str::trim($search);
                     }),
 
                 Filter::make('ean')
@@ -302,7 +314,7 @@ class ProductsTable
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
                                 // Clear invalid input
-                                if ($state === null || Str::length(trim($state)) < 3) {
+                                if ($state === null || Str::length(Str::trim($state)) < 3) {
                                     $set('ean', null);
                                 }
                             }),
@@ -311,22 +323,22 @@ class ProductsTable
                         $search = $data['ean'] ?? null;
 
                         // Apply validation in query
-                        if ($search === null || Str::length(trim($search)) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return $query;
                         }
 
-                        $search = trim($search);
+                        $search = Str::trim($search);
 
                         return $query->whereLike('ean', "$search%");
                     })
                     ->indicateUsing(function (array $data): ?string {
                         $search = $data['ean'] ?? null;
 
-                        if ($search === null || Str::length($search) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return null;
                         }
 
-                        return __('admin/default.filters.ean') . ': ' . trim($search);
+                        return __('admin/default.filters.ean') . ': ' . Str::trim($search);
                     }),
 
                 Filter::make('price')
@@ -409,7 +421,7 @@ class ProductsTable
                             ->maxLength(255)
                             ->afterStateUpdated(function ($state, $set) {
                                 // Clear invalid input
-                                if ($state === null || Str::length(trim($state)) < 3) {
+                                if ($state === null || Str::length(Str::trim($state)) < 3) {
                                     $set('category', null);
                                 }
                             }),
@@ -418,22 +430,22 @@ class ProductsTable
                         $search = $data['category'] ?? null;
 
                         // Apply validation in query
-                        if ($search === null || Str::length(trim($search)) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return $query;
                         }
 
-                        $search = trim($search);
+                        $search = Str::trim($search);
 
                         return $query->whereLike('category', "$search%");
                     })
                     ->indicateUsing(function (array $data): ?string {
                         $search = $data['category'] ?? null;
 
-                        if ($search === null || Str::length($search) < 3) {
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
                             return null;
                         }
 
-                        return __('admin/default.filters.category') . ': ' . trim($search);
+                        return __('admin/default.filters.category') . ': ' . Str::trim($search);
                     }),
             ])
             ->recordActions([

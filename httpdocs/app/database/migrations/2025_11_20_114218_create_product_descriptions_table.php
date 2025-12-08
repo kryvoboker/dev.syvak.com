@@ -31,9 +31,9 @@ return new class extends Migration
             $table->string('meta_description')->nullable();
             $table->string('meta_keywords')->nullable();
 
-            $table->unique(['product_id', 'language_id'], 'product_id_language_id_unique');
-
             $table->timestamps();
+
+            $table->unique(['product_id', 'language_id']);
         });
     }
 

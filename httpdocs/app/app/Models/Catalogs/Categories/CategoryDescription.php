@@ -14,6 +14,7 @@ class CategoryDescription extends Model
         'language_id',
         'name',
         'description',
+        'h1_title',
         'meta_title',
         'meta_description',
         'meta_keywords',

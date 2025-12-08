@@ -33,9 +33,9 @@ return new class extends Migration
 
             $table->string('text', 3000)->nullable();
 
-            $table->unique(['product_id', 'attribute_id', 'language_id'], 'product_attribute_language_unique');
-
             $table->timestamps();
+
+            $table->unique(['product_id', 'attribute_id', 'language_id']);
         });
     }
 

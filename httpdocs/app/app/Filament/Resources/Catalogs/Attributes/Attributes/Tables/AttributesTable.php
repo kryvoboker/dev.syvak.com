@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Tables;
 
+use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Settings\Language;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -12,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AttributesTable
 {
@@ -23,7 +25,7 @@ class AttributesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function ($query) {
+            ->modifyQueryUsing(function (Builder $query) {
                 // Eager load descriptions to avoid N+1 problem
                 return $query->with('attributeDescription');
             })
@@ -33,7 +35,7 @@ class AttributesTable
                     ->searchable(['name'])
                     ->sortable()
                     ->limit(50)
-                    ->getStateUsing(function ($record) {
+                    ->getStateUsing(function (Attribute $record) {
                         $language = new Language();
 
                         // Get current locale language ID (adjust based on your logic)

@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Categories\Category;
+use App\Models\Catalogs\Categories\CategoryPath;
 use App\Models\Settings\Language;
 use App\Models\Users\UserGroup;
 use Closure;
@@ -269,6 +270,11 @@ class ProductForm
     {
         $current_language_id = self::tryGetCurrentLanguageId($active_languages);
 
+        if ($current_language_id === null) {
+            return Tabs\Tab::make(__('admin/default.tabs.categories'))
+                ->schema([]);
+        }
+
         return Tabs\Tab::make(__('admin/default.tabs.categories'))
             ->schema([
                 Section::make(__('admin/default.sections.categories'))
@@ -317,12 +323,13 @@ class ProductForm
      */
     protected static function getCategoryHierarchy(int $language_id): array
     {
-        $categories = new Category()->getActiveCategoriesWithDescriptionsByLanguageId($language_id);
+        $categories = new Category()->getActiveCategoryWithDescriptionsAndPathByLanguageId($language_id);
 
         $hierarchy = [];
 
         foreach ($categories as $category) {
-            $path                     = self::getCategoryFullPath($category->id, $language_id);
+            $path = self::getCategoryFullPath($category->id, $language_id);
+
             $hierarchy[$category->id] = $path;
         }
 
@@ -330,7 +337,7 @@ class ProductForm
     }
 
     /**
-     * Get full category path (Parent > Child > Grandchild)
+     * Get full category path using category_paths table (Parent > Child > Grandchild)
      *
      * @param int $category_id
      * @param int $language_id
@@ -340,51 +347,43 @@ class ProductForm
      */
     protected static function getCategoryFullPath(int $category_id, int $language_id): string
     {
-        $category_instance = new Category();
+        // Get all path IDs for this category ordered by level (root first)
+        $path_ids = new CategoryPath()->getPathIdsByCategoryId($category_id)
+            ->pluck('path_id')
+            ->toArray();
 
-        $category = $category_instance->getActiveCategoryWithDescriptionByCategoryIdAndLanguageId(
-            $category_id,
-            $language_id
+        throw_if(
+            empty($path_ids),
+            'Exception',
+            __('admin/default.errors.category_path_not_found', ['id' => $category_id])
         );
 
-        if ($category === null) {
-            return "Category #$category_id";
-        }
+        // Get all categories in the path with descriptions
+        $categories = new Category()->getActiveCategoryWithDescriptionsByLanguageId($language_id, $path_ids)
+            ->keyBy('id');
 
-        $path             = [];
-        $total_iterations = 0;
-        $current_category = $category;
+        $path = [];
 
-        // Build path from current to root
-        while ($current_category !== null) {
-            throw_if(
-                $total_iterations > 100,
-                'Exception',
-                __('admin/default.errors.something_went_wrong')
-            );
+        // Build path in correct order (from root to current)
+        foreach ($path_ids as $path_id) {
+            /** @var Category $category */
+            $category = $categories->get($path_id);
 
-            $total_iterations++;
+            if ($category === null) {
+                continue;
+            }
 
-            $description = $current_category->categoryDescription
+            $description = $category->categoryDescription
                 ->firstWhere('language_id', $language_id);
 
             $name = $description?->name
-                ?? $current_category->categoryDescription->first()?->name
-                ?? "Category #$current_category->id";
+                ?? $category->categoryDescription->first()?->name
+                ?? "Category #$category->id";
 
-            array_unshift($path, $name);
-
-            if ($current_category->parent_id !== null) {
-                $current_category = $category_instance->getActiveCategoryWithDescriptionByCategoryIdAndLanguageId(
-                    (int)$current_category->parent_id,
-                    $language_id
-                );
-            } else {
-                $current_category = null;
-            }
+            $path[] = $name;
         }
 
-        return implode(' > ', $path);
+        return implode(' > ', array_reverse($path));
     }
 
     /**
