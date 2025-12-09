@@ -38,10 +38,6 @@ RUN apt-get update \
     && apt-get purge -y --auto-remove xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure npm prefix for processes in the image and ensure PATH includes it
-ENV NPM_CONFIG_PREFIX=/home/www-data/.npm-global
-ENV PATH="/home/www-data/.npm-global/bin:${PATH}"
-
 # Import UID and GID from docker compose
 ARG UID=1000
 ARG GID=1000
@@ -58,6 +54,10 @@ RUN groupmod -o -g ${GID} www-data \
 RUN mkdir -p /home/www-data/.npm-global /var/www/.npm \
     && chown -R www-data:www-data /home/www-data/.npm-global \
     && chown -R www-data:www-data /var/www/.npm
+
+# Configure npm prefix for processes in the image and ensure PATH includes it
+ENV NPM_CONFIG_PREFIX=/home/www-data/.npm-global
+ENV PATH="/home/www-data/.npm-global/bin:${PATH}"
 
 RUN mkdir -p /home/www-data/.composer/cache \
     && chown -R www-data:www-data /home/www-data/.composer \

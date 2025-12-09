@@ -26,7 +26,7 @@ return [
         'email'             => 'Email',
         'telephone'         => 'Telephone',
         'avatar'            => 'Avatar',
-        'model'             => 'Modal',
+        'model'             => 'Model',
         'sku'               => 'SKU',
         'ean'               => 'EAN',
         'quantity'          => 'Quantity',

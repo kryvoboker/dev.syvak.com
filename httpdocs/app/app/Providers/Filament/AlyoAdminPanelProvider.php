@@ -59,9 +59,9 @@ class AlyoAdminPanelProvider extends PanelProvider
             // Show group menu list if user visited page from group
             ->sidebarCollapsibleOnDesktop(true)
             ->navigationGroups([
-                __('admin/default.menu_item.catalog'),
-                __('admin/default.menu_item.users'),
-                __('admin/default.menu_item.settings'),
+                __('admin/default.menu.item_catalog'),
+                __('admin/default.menu.item_users'),
+                __('admin/default.menu.item_settings'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
