@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Catalogs\Categories;
 
 use App\Models\Catalogs\Products\Product;
+use App\Models\Trait\SlugTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
+    use SlugTrait;
+
     protected $fillable = [
         'parent_id',
         'slug',
@@ -82,14 +85,6 @@ class Category extends Model
             'category_id',
             'product_id'
         )->withTimestamps();
-    }
-
-    /**
-     * @return string
-     */
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
     }
 
     /**
