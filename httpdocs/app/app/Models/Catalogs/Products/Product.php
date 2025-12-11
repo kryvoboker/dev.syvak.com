@@ -20,9 +20,10 @@ class Product extends Model
         'image',
         'price',
         'viewed',
+        'is_active',
+        'slug',
         'date_available',
         'date_added',
-        'is_active',
     ];
 
     /**
@@ -77,15 +78,15 @@ class Product extends Model
      * Get categories associated with the product
      *
      * ```
-     * // Получить все товары категории
+     * // Get all products in the category
      * $category = Category::find(1);
      * $products = $category->products;
      *
-     * // Получить все категории товара
+     * // Get all categories for a product
      * $product = Product::find(1);
      * $categories = $product->categories;
      *
-     * // С eager loading
+     * // With eager loading
      * $category = Category::with('products')->find(1);
      * $product = Product::with('categories')->find(1);
      * ```
@@ -100,6 +101,14 @@ class Product extends Model
             'product_id',
             'category_id'
         )->withTimestamps();
+    }
+
+    /**
+     * @return string
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 
     /**

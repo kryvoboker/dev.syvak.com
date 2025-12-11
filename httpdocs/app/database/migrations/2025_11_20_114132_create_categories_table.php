@@ -15,6 +15,12 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('parent_id')->nullable()->index();
+
+            $table->string('slug', 2000)
+                ->nullable()
+                ->unique()
+                ->comment('SEO friendly URL');
+
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(false);
 

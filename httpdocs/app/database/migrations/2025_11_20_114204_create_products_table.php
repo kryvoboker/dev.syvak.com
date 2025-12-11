@@ -22,9 +22,15 @@ return new class extends Migration
             $table->string('image', 3000)->nullable();
             $table->decimal('price', 15, 4)->default(0);
             $table->unsignedInteger('viewed')->default(0);
+            $table->boolean('is_active')->default(false);
+
+            $table->string('slug', 2000)
+                ->nullable()
+                ->unique()
+                ->comment('SEO friendly URL');
+
             $table->dateTime('date_available')->nullable()->useCurrent();
             $table->dateTime('date_added')->nullable()->useCurrent();
-            $table->boolean('is_active')->default(false);
 
             $table->timestamps();
         });

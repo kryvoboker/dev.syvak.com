@@ -14,6 +14,7 @@ class Category extends Model
 {
     protected $fillable = [
         'parent_id',
+        'slug',
         'sort_order',
         'is_active',
     ];
@@ -58,15 +59,15 @@ class Category extends Model
      * Get products associated with the category
      *
      * ```
-     * // Получить все товары категории
+     * // Get all products in a category
      * $category = Category::find(1);
      * $products = $category->products;
      *
-     * // Получить все категории товара
+     * // Get all categories for a product
      * $product = Product::find(1);
      * $categories = $product->categories;
      *
-     * // С eager loading
+     * // Width eager loading
      * $category = Category::with('products')->find(1);
      * $product = Product::with('categories')->find(1);
      * ```
@@ -84,17 +85,26 @@ class Category extends Model
     }
 
     /**
+     * @return string
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    /**
      * @param int $language_id
      *
      * @return Collection<Category>
      */
     public function getActiveCategoriesWithDescriptionsByLanguageId(int $language_id): Collection
     {
-        return self::with([
-            'categoryDescription' => function ($query) use ($language_id) {
-                $query->where('language_id', $language_id);
-            }
-        ])
+        return self::query()
+            ->with([
+                'categoryDescription' => function ($query) use ($language_id) {
+                    $query->where('language_id', $language_id);
+                }
+            ])
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
@@ -108,11 +118,12 @@ class Category extends Model
      */
     public function getActiveCategoryWithDescriptionByCategoryIdAndLanguageId(int $category_id, int $language_id): ?self
     {
-        return self::with([
-            'categoryDescription' => function ($query) use ($language_id) {
-                $query->where('language_id', $language_id);
-            }
-        ])
+        return self::query()
+            ->with([
+                'categoryDescription' => function ($query) use ($language_id) {
+                    $query->where('language_id', $language_id);
+                }
+            ])
             ->where('is_active', true)
             ->find($category_id);
     }
