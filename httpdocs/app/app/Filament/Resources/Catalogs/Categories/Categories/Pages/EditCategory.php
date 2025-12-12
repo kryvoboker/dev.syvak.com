@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Catalogs\Categories\Categories\Pages;
 use App\Filament\Resources\Catalogs\Categories\Categories\CategoryResource;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryDescription;
+use App\Models\Slug;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ class EditCategory extends EditRecord
 {
     protected static string               $resource      = CategoryResource::class;
     protected array                       $descriptions  = [];
+    protected array                       $slugs         = [];
     protected ?string                     $preview_image = null;
     protected ?string                     $icon          = null;
     #[Locked]
@@ -61,6 +63,17 @@ class EditCategory extends EditRecord
 
         $data['descriptions'] = $descriptions;
 
+        $slugs = $this->record->slugs()
+            ->get()
+            ->keyBy('language_id')
+            ->map(fn(Slug $slug): array => [
+                'language_id' => $slug->language_id,
+                'name'        => $slug->slug,
+            ])
+            ->toArray();
+
+        $data['slugs'] = $slugs;
+
         return $data;
     }
 
@@ -76,8 +89,9 @@ class EditCategory extends EditRecord
         $this->descriptions  = trim_strs_in_arr($data['descriptions'] ?? []);
         $this->preview_image = $data['preview_image'] ?? null;
         $this->icon          = $data['icon'] ?? null;
+        $this->slugs         = trim_strs_in_arr($data['slugs'] ?? []);
 
-        unset($data['descriptions'], $data['preview_image'], $data['icon']);
+        unset($data['descriptions'], $data['preview_image'], $data['icon'], $data['slugs']);
 
         return $data;
     }
@@ -89,13 +103,29 @@ class EditCategory extends EditRecord
      */
     protected function afterSave(): void
     {
+        $category_images = $this->record->categoryImage();
+
         if (!empty($this->preview_image) || !empty($this->icon)) {
-            $this->record->categoryImage()->updateOrCreate(
+            $category_images->updateOrCreate(
                 [], // Empty array means "find the first related record"
                 [
                     'icon'          => $this->icon,
                     'preview_image' => $this->preview_image,
                 ]);
+        } else if ($category_images->exists()) {
+            // If both images are empty, delete the record if it exists
+            $category_images->delete();
+        }
+
+        foreach ($this->slugs as $language_id => $slug_data) {
+            if (empty($slug_data['name'])) {
+                continue;
+            }
+
+            $this->record->slugs()->updateOrCreate(
+                ['language_id' => (int)$language_id],
+                ['slug' => $slug_data['name']]
+            );
         }
 
         // Collect language IDs with non-empty names
@@ -125,7 +155,7 @@ class EditCategory extends EditRecord
         // Update or create descriptions
         foreach ($descriptions_to_sync as $language_id => $description_data) {
             $this->record->categoryDescription()->updateOrCreate(
-                ['language_id' => $language_id],
+                ['language_id' => (int)$language_id],
                 $description_data
             );
         }

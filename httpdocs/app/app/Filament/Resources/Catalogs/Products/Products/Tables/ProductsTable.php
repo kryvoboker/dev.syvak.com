@@ -24,8 +24,22 @@ use NumberFormatter;
 
 class ProductsTable
 {
+    /**
+     * @param Table $table
+     *
+     * @return Table
+     */
     public static function configure(Table $table): Table
     {
+        $language = new Language();
+
+        // Get current locale language ID (adjust based on your logic)
+        $current_language_id = $language->getLanguageByCode(app()->getLocale())?->id;
+
+        if ($current_language_id === null) {
+            $current_language_id = $language->getDefaultLanguage()?->id;
+        }
+
         return $table
             ->modifyQueryUsing(function (Builder $query) {
                 // Eager load descriptions to avoid N+1 problem
@@ -35,6 +49,7 @@ class ProductsTable
                     'productImage',
                     'productToAttribute',
                     'categories',
+                    'slugs',
                 ]);
             })
             ->columns([
@@ -43,16 +58,7 @@ class ProductsTable
                     ->searchable()
                     ->sortable()
                     ->limit(50)
-                    ->getStateUsing(function (Product $record) {
-                        $language = new Language();
-
-                        // Get current locale language ID (adjust based on your logic)
-                        $current_language_id = $language->getLanguageByCode(app()->getLocale())?->id;
-
-                        if ($current_language_id === null) {
-                            $current_language_id = $language->getDefaultLanguage()?->id;
-                        }
-
+                    ->getStateUsing(function (Product $record) use ($current_language_id) {
                         if ($current_language_id === null) {
                             Notification::make()
                                 ->title(__('admin/default.errors.title'))
@@ -168,6 +174,22 @@ class ProductsTable
                 IconColumn::make('is_active')
                     ->label(__('admin/default.columns.is_active'))
                     ->boolean(),
+
+                TextColumn::make('slugs')
+                    ->label(__('admin/default.columns.slug'))
+                    ->sortable()
+                    ->limit(50)
+                    ->getStateUsing(function (Product $product) use ($current_language_id) {
+                        if ($current_language_id === null) {
+                            return '-';
+                        }
+
+                        $slug = $product->slugs
+                            ->firstWhere('language_id', $current_language_id)?->slug;
+
+                        return $slug ?? '-';
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->label(__('admin/default.columns.created_at'))
@@ -446,6 +468,49 @@ class ProductsTable
                         }
 
                         return __('admin/default.filters.category') . ': ' . Str::trim($search);
+                    }),
+
+                Filter::make('slugs')
+                    ->label(__('admin/default.filters.slug'))
+                    ->schema([
+                        TextInput::make('slugs')
+                            ->label(__('admin/default.filters.slug'))
+                            ->placeholder(__('admin/default.placeholders.slug'))
+                            ->minLength(3)
+                            ->maxLength(500)
+                            ->afterStateUpdated(function ($state, $set) {
+                                // Clear empty input to avoid filtering by empty value
+                                if ($state === null || Str::length(Str::trim($state)) < 3) {
+                                    $set('slugs', null);
+                                }
+                            })
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        $search = $data['slugs'] ?? null;
+
+                        // Apply validation in query
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
+                            return $query;
+                        }
+
+                        $search = Str::trim($search);
+
+                        return $query->whereHas(
+                            'slugs',
+                            function (Builder $query) use ($search) {
+                                return $query
+                                    ->whereLike('slug', "$search%");
+                            }
+                        );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        $search = $data['slugs'] ?? null;
+
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
+                            return null;
+                        }
+
+                        return __('admin/default.filters.slug') . ': ' . Str::trim($search);
                     }),
             ])
             ->recordActions([

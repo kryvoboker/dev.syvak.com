@@ -29,10 +29,23 @@ class CategoriesTable
      */
     public static function configure(Table $table): Table
     {
+        $language = new Language();
+
+        // Get current locale language ID (adjust based on your logic)
+        $current_language_id = $language->getLanguageByCode(app()->getLocale())?->id;
+
+        if ($current_language_id === null) {
+            $current_language_id = $language->getDefaultLanguage()?->id;
+        }
+
         return $table
             ->modifyQueryUsing(function (Builder $query) {
                 // Eager load descriptions to avoid N+1 problem
-                return $query->with('categoryDescription');
+                return $query->with([
+                    'categoryDescription',
+                    'categoryImage',
+                    'slugs',
+                ]);
             })
             ->columns([
                 TextColumn::make('categoryDescription.name')
@@ -40,16 +53,7 @@ class CategoriesTable
                     ->searchable(['name'])
                     ->sortable()
                     ->limit(50)
-                    ->getStateUsing(function (Category $record) {
-                        $language = new Language();
-
-                        // Get current locale language ID (adjust based on your logic)
-                        $current_language_id = $language->getLanguageByCode(app()->getLocale())?->id;
-
-                        if ($current_language_id === null) {
-                            $current_language_id = $language->getDefaultLanguage()?->id;
-                        }
-
+                    ->getStateUsing(function (Category $record) use ($current_language_id) {
                         if ($current_language_id === null) {
                             Notification::make()
                                 ->title(__('admin/default.errors.title'))
@@ -72,16 +76,22 @@ class CategoriesTable
                         return $description?->name ?? '-';
                     }),
 
-                ImageColumn::make('image')
+                ImageColumn::make('icon')
                     ->label(__('admin/default.columns.image'))
                     ->imageSize((int)config('app.images.category.preview_in_list_in_admin.width'))
                     ->checkFileExistence()
-                    ->defaultImageUrl(Storage::url(config('app.images.category.no_image')))
                     ->extraImgAttributes([
                         'decoding' => 'async',
                         'loading'  => 'lazy',
-                        'style'    => 'object-fit: contain;',
-                    ]),
+                        'style'    => 'object-fit: contain; background-color: #f9f9f9;',
+                    ])
+                    ->getStateUsing(function (Category $category) {
+                        $category_image = $category->categoryImage()->first();
+
+                        return $category_image?->icon
+                            ? Storage::url($category_image->icon)
+                            : null;
+                    }),
 
                 TextColumn::make('sort_order')
                     ->label(__('admin/default.columns.sort_order'))
@@ -91,6 +101,22 @@ class CategoriesTable
                 IconColumn::make('is_active')
                     ->label(__('admin/default.columns.is_active'))
                     ->boolean(),
+
+                TextColumn::make('slugs')
+                    ->label(__('admin/default.columns.slug'))
+                    ->sortable()
+                    ->limit(50)
+                    ->getStateUsing(function (Category $category) use ($current_language_id) {
+                        if ($current_language_id === null) {
+                            return '-';
+                        }
+
+                        $slug = $category->slugs
+                            ->firstWhere('language_id', $current_language_id)?->slug;
+
+                        return $slug ?? '-';
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->label(__('admin/default.columns.created_at'))
@@ -139,6 +165,49 @@ class CategoriesTable
                         }
 
                         return __('admin/default.filters.name') . ': ' . Str::trim($search);
+                    }),
+
+                Filter::make('slugs')
+                    ->label(__('admin/default.filters.slug'))
+                    ->schema([
+                        TextInput::make('slugs')
+                            ->label(__('admin/default.filters.slug'))
+                            ->placeholder(__('admin/default.placeholders.slug'))
+                            ->minLength(3)
+                            ->maxLength(500)
+                            ->afterStateUpdated(function ($state, $set) {
+                                // Clear empty input to avoid filtering by empty value
+                                if ($state === null || Str::length(Str::trim($state)) < 3) {
+                                    $set('slugs', null);
+                                }
+                            })
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        $search = $data['slugs'] ?? null;
+
+                        // Apply validation in query
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
+                            return $query;
+                        }
+
+                        $search = Str::trim($search);
+
+                        return $query->whereHas(
+                            'slugs',
+                            function (Builder $query) use ($search) {
+                                return $query
+                                    ->whereLike('slug', "$search%");
+                            }
+                        );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        $search = $data['slugs'] ?? null;
+
+                        if ($search === null || Str::length(Str::trim($search)) < 3) {
+                            return null;
+                        }
+
+                        return __('admin/default.filters.slug') . ': ' . Str::trim($search);
                     }),
             ])
             ->recordActions([

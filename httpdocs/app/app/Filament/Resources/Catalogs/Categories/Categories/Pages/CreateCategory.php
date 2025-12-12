@@ -13,6 +13,7 @@ class CreateCategory extends CreateRecord
 {
     protected static string    $resource      = CategoryResource::class;
     protected array            $descriptions  = [];
+    protected array            $slugs         = [];
     protected ?string          $preview_image = null;
     protected ?string          $icon          = null;
     public null|Model|Category $record        = null;
@@ -30,8 +31,9 @@ class CreateCategory extends CreateRecord
         $this->descriptions  = trim_strs_in_arr($data['descriptions'] ?? []);
         $this->preview_image = $data['preview_image'] ?? null;
         $this->icon          = $data['icon'] ?? null;
+        $this->slugs         = trim_strs_in_arr($data['slugs'] ?? []);
 
-        unset($data['descriptions'], $data['preview_image'], $data['icon']);
+        unset($data['descriptions'], $data['preview_image'], $data['icon'], $data['slugs']);
 
         return $data;
     }
@@ -47,6 +49,17 @@ class CreateCategory extends CreateRecord
             $this->record->categoryImage()->create([
                 'icon'          => $this->icon,
                 'preview_image' => $this->preview_image,
+            ]);
+        }
+
+        foreach ($this->slugs as $language_id => $slug_data) {
+            if (empty($slug_data['name'])) {
+                continue;
+            }
+
+            $this->record->slugs()->create([
+                'language_id' => (int)$language_id,
+                'slug'        => $slug_data['name'],
             ]);
         }
 

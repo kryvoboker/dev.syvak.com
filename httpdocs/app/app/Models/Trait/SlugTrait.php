@@ -13,10 +13,6 @@ trait SlugTrait
      */
     public function getRouteKeyName(): string
     {
-        if (request()->is('*/alyo-admin/*')) {
-            return 'id';
-        }
-
-        return 'slug';
+        return 'id';
     }
 }

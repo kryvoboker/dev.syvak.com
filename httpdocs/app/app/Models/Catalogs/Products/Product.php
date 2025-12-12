@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Catalogs\Products;
 
 use App\Models\Catalogs\Categories\Category;
+use App\Models\Trait\HasSlugsTrait;
 use App\Models\Trait\SlugTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    use SlugTrait;
+    use SlugTrait, HasSlugsTrait;
 
     protected $fillable = [
         'model',
@@ -24,7 +25,6 @@ class Product extends Model
         'price',
         'viewed',
         'is_active',
-        'slug',
         'date_available',
         'date_added',
     ];

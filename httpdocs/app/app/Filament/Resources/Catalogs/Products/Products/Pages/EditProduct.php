@@ -10,6 +10,7 @@ use App\Models\Catalogs\Products\ProductDescription;
 use App\Models\Catalogs\Products\ProductDiscount;
 use App\Models\Catalogs\Products\ProductImage;
 use App\Models\Catalogs\Products\ProductToAttribute;
+use App\Models\Slug;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -24,6 +25,7 @@ class EditProduct extends EditRecord
     protected array                      $images             = [];
     protected array                      $discounts          = [];
     protected array                      $product_attributes = [];
+    protected array                      $slugs              = [];
     #[Locked]
     public Model|int|string|null|Product $record;
 
@@ -101,6 +103,17 @@ class EditProduct extends EditRecord
 
         $data['attributes'] = $attributes;
 
+        $slugs = $this->record->slugs()
+            ->get()
+            ->keyBy('language_id')
+            ->map(fn(Slug $slug): array => [
+                'language_id' => $slug->language_id,
+                'name'        => $slug->slug,
+            ])
+            ->toArray();
+
+        $data['slugs'] = $slugs;
+
         return $data;
     }
 
@@ -119,12 +132,16 @@ class EditProduct extends EditRecord
         $this->images             = $data['images'] ?? [];
         $this->discounts          = $data['discounts'] ?? [];
         $this->product_attributes = trim_strs_in_arr($data['attributes'] ?? []);
+        $this->slugs              = trim_strs_in_arr($data['slugs'] ?? []);
 
         // Validate unique attribute-language pairs
         $this->validateAttributeLanguagePairs($this->product_attributes);
 
         // Remove from main data
-        unset($data['descriptions'], $data['images'], $data['discounts'], $data['attributes']);
+        unset(
+            $data['descriptions'], $data['images'], $data['discounts'],
+            $data['attributes'], $data['slugs']
+        );
 
         return $data;
     }
@@ -230,11 +247,11 @@ class EditProduct extends EditRecord
                 if (!empty($discount['price'])) {
                     $discounts_data[] = [
                         'user_group_id' => $discount['user_group_id'],
-                        'quantity'          => $discount['quantity'],
-                        'priority'          => $discount['priority'],
-                        'price'             => $discount['price'],
-                        'date_start'        => $discount['date_start'],
-                        'date_end'          => $discount['date_end'],
+                        'quantity'      => $discount['quantity'],
+                        'priority'      => $discount['priority'],
+                        'price'         => $discount['price'],
+                        'date_start'    => $discount['date_start'],
+                        'date_end'      => $discount['date_end'],
                     ];
                 }
             }
@@ -263,6 +280,17 @@ class EditProduct extends EditRecord
             if (!empty($attributes_data)) {
                 $this->record->productToAttribute()->createMany($attributes_data);
             }
+        }
+
+        foreach ($this->slugs as $language_id => $slug_data) {
+            if (empty($slug_data['name'])) {
+                continue;
+            }
+
+            $this->record->slugs()->updateOrCreate(
+                ['language_id' => (int)$language_id],
+                ['slug' => $slug_data['name']]
+            );
         }
     }
 

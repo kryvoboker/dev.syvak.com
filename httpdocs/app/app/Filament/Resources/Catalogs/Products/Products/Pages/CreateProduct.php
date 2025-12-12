@@ -18,6 +18,7 @@ class CreateProduct extends CreateRecord
     protected array           $images             = [];
     protected array           $discounts          = [];
     protected array           $product_attributes = [];
+    protected array                      $slugs              = [];
     public null|Model|Product $record             = null;
 
     /**
@@ -35,12 +36,16 @@ class CreateProduct extends CreateRecord
         $this->images             = $data['images'] ?? [];
         $this->discounts          = $data['discounts'] ?? [];
         $this->product_attributes = trim_strs_in_arr($data['attributes'] ?? []);
+        $this->slugs              = trim_strs_in_arr($data['slugs'] ?? []);
 
         // Validate unique attribute-language pairs
         $this->validateAttributeLanguagePairs($this->product_attributes);
 
         // Remove from main data
-        unset($data['descriptions'], $data['images'], $data['discounts'], $data['attributes']);
+        unset(
+            $data['descriptions'], $data['images'], $data['discounts'],
+            $data['attributes'], $data['slugs']
+        );
 
         return $data;
     }
@@ -164,6 +169,17 @@ class CreateProduct extends CreateRecord
             if (!empty($attributes_data)) {
                 $this->record->productToAttribute()->createMany($attributes_data);
             }
+        }
+
+        foreach ($this->slugs as $language_id => $slug_data) {
+            if (empty($slug_data['name'])) {
+                continue;
+            }
+
+            $this->record->slugs()->updateOrCreate(
+                ['language_id' => (int)$language_id],
+                ['slug' => $slug_data['name']]
+            );
         }
     }
 

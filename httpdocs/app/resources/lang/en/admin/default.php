@@ -44,6 +44,7 @@ return [
         'sort_order'        => 'Sort Order',
         'code'              => 'Code',
         'format_locale'     => 'Format Locale',
+        'slug'              => 'Slug (SEO URL)',
     ],
 
     // Labels
@@ -98,6 +99,7 @@ return [
         'height'                => 'Height (px)',
         'url'                   => 'URL',
         'parent_category'       => 'Parent Category',
+        'slug'                  => 'Slug (SEO URL)',
     ],
 
     // Helpers
@@ -115,6 +117,7 @@ return [
         'discounts'    => 'Discounts',
         'attributes'   => 'Attributes',
         'meta_texts'   => 'Meta Texts',
+        'slugs'        => 'Slugs (SEO URLs)',
     ],
 
     // Sections
@@ -131,6 +134,7 @@ return [
         'discounts'         => 'Discounts',
         'attributes'        => 'Attributes',
         'meta_texts'        => 'Meta Texts',
+        'slugs'             => 'Slugs (SEO URLs)',
     ],
 
     // Filters
@@ -162,6 +166,7 @@ return [
         'lastname_excluded'       => 'Last Name Excluded',
         'email_excluded'          => 'Email Excluded',
         'telephone_excluded'      => 'Telephone Excluded',
+        'slug'                    => 'Slug (SEO URL)',
     ],
 
     // Placeholders
@@ -176,6 +181,7 @@ return [
         'quantity'               => '50',
         'category'               => 'Paintings by Numbers',
         'select_parent_category' => 'Select Parent Category',
+        'slug'                   => 'my-product-seo-url',
     ],
 
     // Success

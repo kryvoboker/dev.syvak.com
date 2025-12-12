@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Catalogs\Categories;
 
 use App\Models\Catalogs\Products\Product;
+use App\Models\Trait\HasSlugsTrait;
 use App\Models\Trait\SlugTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -13,11 +14,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
-    use SlugTrait;
+    use SlugTrait, HasSlugsTrait;
 
     protected $fillable = [
         'parent_id',
-        'slug',
         'sort_order',
         'is_active',
     ];

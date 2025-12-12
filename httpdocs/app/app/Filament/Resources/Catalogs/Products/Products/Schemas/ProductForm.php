@@ -44,6 +44,7 @@ class ProductForm
                         self::createImagesTab(),
                         self::createDiscountsTab(),
                         self::createAttributesTab($active_languages),
+                        self::createSlugsTab($active_languages),
                     ])
                     ->activeTab(1)
                     ->contained(false)
@@ -637,5 +638,30 @@ class ProductForm
         }
 
         return $current_language_id;
+    }
+
+    /**
+     * @param Collection<Language> $active_languages
+     *
+     * @return Tabs\Tab
+     */
+    protected static function createSlugsTab(Collection $active_languages): Tabs\Tab
+    {
+        $schema_fields = [];
+
+        foreach ($active_languages as $language) {
+            $schema_fields[] = TextInput::make("slugs.$language->id.name")
+                ->hiddenLabel()
+                ->prefix($language->code)
+                ->maxLength(500)
+                ->rules(['nullable', 'string', 'max:500']);
+        }
+
+        return Tabs\Tab::make(__('admin/default.tabs.slugs'))
+            ->schema([
+                Section::make(__('admin/default.sections.slugs'))
+                    ->schema($schema_fields)
+                    ->columnSpanFull(),
+            ]);
     }
 }

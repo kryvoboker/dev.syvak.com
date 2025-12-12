@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Settings;
 
+use App\Models\Slug;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
@@ -27,6 +29,14 @@ class Language extends Model
             'is_active'  => 'boolean',
             'is_default' => 'boolean',
         ];
+    }
+
+    /**
+     * @return HasMany<Slug>
+     */
+    public function slug(): HasMany
+    {
+        return $this->hasMany(Slug::class);
     }
 
     /**
@@ -112,7 +122,7 @@ class Language extends Model
         return self::query()
             ->where('is_active', true)
             ->orderByDesc('is_default')
-            ->orderByDesc('name')
+            ->orderBy('name')
             ->get();
     }
 
