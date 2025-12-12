@@ -7,12 +7,16 @@ namespace App\Models\Catalogs\Products;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Trait\HasSlugsTrait;
 use App\Models\Trait\SlugTrait;
+use Database\Factories\Catalogs\Products\ProductFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    /** @use HasFactory<ProductFactory> */
+    use HasFactory;
     use SlugTrait, HasSlugsTrait;
 
     protected $fillable = [

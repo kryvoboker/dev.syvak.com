@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Supports\Services\Images\ImageUrlBuilder;
+
 if (!function_exists('clear_telephone')) {
     /**
      * @param string|null $telephone
@@ -59,5 +61,19 @@ if (!function_exists('trim_strs_in_arr')) {
 
             return $item;
         }, $arr);
+    }
+}
+
+if (! function_exists('img_cached_url')) {
+    /**
+     * @param string   $path
+     * @param int      $width
+     * @param int|null $height
+     *
+     * @return string
+     */
+    function img_cached_url(string $path, int $width, ?int $height = null): string
+    {
+        return app(ImageUrlBuilder::class)->url($path, $width, $height);
     }
 }

@@ -149,7 +149,8 @@ return [
         'default_decimal_places'  => (int)env('DEFAULT_CURRENCY_DECIMAL_PLACES', 2),
     ],
     'images'                    => [
-        'category' => [
+        'image_version' => env('IMAGE_VERSION'),
+        'category'      => [
             'upload'                   => [
                 'max_size_kb' => (int)env('MAX_UPLOAD_CATEGORY_IMAGE_SIZE_KB', 5120), // 5 MB,
             ],
@@ -164,7 +165,7 @@ return [
             ],
             'image_path'               => env('CATEGORIES_IMAGES_PATH', 'images/categories') . '/' . date('Y/m'),
         ],
-        'product'  => [
+        'product'       => [
             'upload'                   => [
                 'max_size_kb' => (int)env('MAX_UPLOAD_PRODUCT_IMAGE_SIZE_KB', 5120), // 5 MB,
             ],
@@ -179,7 +180,7 @@ return [
             ],
             'image_path'               => env('PRODUCTS_IMAGES_PATH', 'images/products') . '/' . date('Y/m'),
         ],
-        'user'     => [
+        'user'          => [
             'upload'                   => [
                 'max_size_kb' => (int)env('MAX_UPLOAD_USER_IMAGE_SIZE_KB', 5120), // 5 MB,
             ],

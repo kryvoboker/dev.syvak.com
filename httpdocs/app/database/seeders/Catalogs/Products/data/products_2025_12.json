@@ -1,0 +1,4002 @@
+[
+    {
+        "sku": "60826",
+        "ean": "2999999990073",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Блискавична S-M Білий (60826)",
+        "image": "images/products/2025/12/60826.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61051д",
+        "ean": "2999995999827",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Блискавична S-M Білий (61051д)",
+        "image": "images/products/2025/12/60826.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60828",
+        "ean": "2999999990059",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Блискавична L-XL Білий (60828)",
+        "image": "images/products/2025/12/60826.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61049д",
+        "ean": "2999995999841",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Блискавична L-XL Білий (61049д)",
+        "image": "images/products/2025/12/60826.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60827",
+        "ean": "2999999990066",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Блискавична S-M Чорний (60827)",
+        "image": "images/products/2025/12/60827.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61050д",
+        "ean": "2999995999834",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Блискавична S-M Чорний (61050д)",
+        "image": "images/products/2025/12/60827.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60829",
+        "ean": "2999999990042",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Блискавична L-XL Чорний (60829)",
+        "image": "images/products/2025/12/60827.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61048д",
+        "ean": "2999995999858",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Блискавична L-XL Чорний (61048д)",
+        "image": "images/products/2025/12/60827.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60874",
+        "ean": "2999999990196",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Годувальниця S-M Білий (60874)",
+        "image": "images/products/2025/12/60874.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61063д",
+        "ean": "2999995999704",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Годувальниця S-M Білий (61063д)",
+        "image": "images/products/2025/12/60874.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60876",
+        "ean": "2999999990172",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Годувальниця L-XL Білий (60876)",
+        "image": "images/products/2025/12/60874.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61061д",
+        "ean": "2999995999728",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Годувальниця L-XL Білий (61061д)",
+        "image": "images/products/2025/12/60874.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60875",
+        "ean": "2999999990189",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Годувальниця S-M Чорний (60875)",
+        "image": "images/products/2025/12/60875.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61062д",
+        "ean": "2999995999711",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Годувальниця S-M Чорний (61062д)",
+        "image": "images/products/2025/12/60875.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60877",
+        "ean": "2999999990165",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Годувальниця L-XL Чорний (60877)",
+        "image": "images/products/2025/12/60875.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61060д",
+        "ean": "2999995999735",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Годувальниця L-XL Чорний (61060д)",
+        "image": "images/products/2025/12/60875.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60770",
+        "ean": "2999999990233",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Господарка S-M Білий (60770)",
+        "image": "images/products/2025/12/60770.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61067д",
+        "ean": "2999995999667",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Господарка S-M Білий (61067д)",
+        "image": "images/products/2025/12/60770.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60772",
+        "ean": "2999999990219",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Господарка L-XL Білий (60772)",
+        "image": "images/products/2025/12/60770.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61065д",
+        "ean": "2999995999681",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Господарка L-XL Білий (61065д)",
+        "image": "images/products/2025/12/60770.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60771",
+        "ean": "2999999990226",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Господарка S-M Чорний (60771)",
+        "image": "images/products/2025/12/60771.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61066д",
+        "ean": "2999995999674",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Господарка S-M Чорний (61066д)",
+        "image": "images/products/2025/12/60771.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60773",
+        "ean": "2999999990202",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Господарка L-XL Чорний (60773)",
+        "image": "images/products/2025/12/60771.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61064д",
+        "ean": "2999995999698",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Господарка L-XL Чорний (61064д)",
+        "image": "images/products/2025/12/60771.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60814",
+        "ean": "2999999990271",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Гостинна S-M Білий (60814)",
+        "image": "images/products/2025/12/60814.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61071д",
+        "ean": "2999995999629",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Гостинна S-M Білий (61071д)",
+        "image": "images/products/2025/12/60814.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60816",
+        "ean": "2999999990257",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Гостинна L-XL Білий (60816)",
+        "image": "images/products/2025/12/60814.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61069д",
+        "ean": "2999995999643",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Гостинна L-XL Білий (61069д)",
+        "image": "images/products/2025/12/60814.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60815",
+        "ean": "2999999990264",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Гостинна S-M Чорний (60815)",
+        "image": "images/products/2025/12/60815.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61070д",
+        "ean": "2999995999636",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Гостинна S-M Чорний (61070д)",
+        "image": "images/products/2025/12/60815.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60817",
+        "ean": "2999999990240",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Гостинна L-XL Чорний (60817)",
+        "image": "images/products/2025/12/60815.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61068д",
+        "ean": "2999995999650",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Гостинна L-XL Чорний (61068д)",
+        "image": "images/products/2025/12/60815.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60778",
+        "ean": "2999999990356",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Затишниця S-M Білий (60778)",
+        "image": "images/products/2025/12/60778.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61079д",
+        "ean": "2999995999544",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Затишниця S-M Білий (61079д)",
+        "image": "images/products/2025/12/60778.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60780",
+        "ean": "2999999990332",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Затишниця L-XL Білий (60780)",
+        "image": "images/products/2025/12/60778.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61077д",
+        "ean": "2999995999568",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Затишниця L-XL Білий (61077д)",
+        "image": "images/products/2025/12/60778.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60779",
+        "ean": "2999999990349",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Затишниця S-M Чорний (60779)",
+        "image": "images/products/2025/12/60779.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61078д",
+        "ean": "2999995999551",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Затишниця S-M Чорний (61078д)",
+        "image": "images/products/2025/12/60779.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60781",
+        "ean": "2999999990325",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Затишниця L-XL Чорний (60781)",
+        "image": "images/products/2025/12/60779.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61076д",
+        "ean": "2999995999575",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Затишниця L-XL Чорний (61076д)",
+        "image": "images/products/2025/12/60779.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60850",
+        "ean": "2999999990394",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Колоска S-M Білий (60850)",
+        "image": "images/products/2025/12/60850.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61083д",
+        "ean": "2999995999506",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Колоска S-M Білий (61083д)",
+        "image": "images/products/2025/12/60850.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60852",
+        "ean": "2999999990370",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Колоска L-XL Білий (60852)",
+        "image": "images/products/2025/12/60850.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61081д",
+        "ean": "2999995999520",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Колоска L-XL Білий (61081д)",
+        "image": "images/products/2025/12/60850.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60851",
+        "ean": "2999999990387",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Колоска S-M Чорний (60851)",
+        "image": "images/products/2025/12/60851.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61082д",
+        "ean": "2999995999513",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Колоска S-M Чорний (61082д)",
+        "image": "images/products/2025/12/60851.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60853",
+        "ean": "2999999990363",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Колоска L-XL Чорний (60853)",
+        "image": "images/products/2025/12/60851.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61080д",
+        "ean": "2999995999537",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Колоска L-XL Чорний (61080д)",
+        "image": "images/products/2025/12/60851.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60790",
+        "ean": "2999999990554",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Молочарка S-M Білий (60790)",
+        "image": "images/products/2025/12/60790.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61099д",
+        "ean": "2999995999346",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Молочарка S-M Білий (61099д)",
+        "image": "images/products/2025/12/60790.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60792",
+        "ean": "2999999990530",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Молочарка L-XL Білий (60792)",
+        "image": "images/products/2025/12/60790.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61097д",
+        "ean": "2999995999360",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Молочарка L-XL Білий (61097д)",
+        "image": "images/products/2025/12/60790.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60791",
+        "ean": "2999999990547",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Молочарка S-M Чорний (60791)",
+        "image": "images/products/2025/12/60791.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61098д",
+        "ean": "2999995999353",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Молочарка S-M Чорний (61098д)",
+        "image": "images/products/2025/12/60791.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60793",
+        "ean": "2999999990523",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Молочарка L-XL Чорний (60793)",
+        "image": "images/products/2025/12/60791.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61096д",
+        "ean": "2999995999377",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Молочарка L-XL Чорний (61096д)",
+        "image": "images/products/2025/12/60791.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60854",
+        "ean": "2999999990639",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Нерозривні S-M Білий (60854)",
+        "image": "images/products/2025/12/60854.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61108д",
+        "ean": "2999995999261",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Нерозривні S-M Білий (61108д)",
+        "image": "images/products/2025/12/60854.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60856",
+        "ean": "2999999990615",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Нерозривні L-XL Білий (60856)",
+        "image": "images/products/2025/12/60854.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61106д",
+        "ean": "2999995999285",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Нерозривні L-XL Білий (61106д)",
+        "image": "images/products/2025/12/60854.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60855",
+        "ean": "2999999990622",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Нерозривні S-M Чорний (60855)",
+        "image": "images/products/2025/12/60855.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61107д",
+        "ean": "2999995999278",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Нерозривні S-M Чорний (61107д)",
+        "image": "images/products/2025/12/60855.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60857",
+        "ean": "2999999990608",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Нерозривні L-XL Чорний (60857)",
+        "image": "images/products/2025/12/60855.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61105д",
+        "ean": "2999995999292",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Нерозривні L-XL Чорний (61105д)",
+        "image": "images/products/2025/12/60855.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60862",
+        "ean": "2999999990677",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Обрана S-M Білий (60862)",
+        "image": "images/products/2025/12/60862.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61112д",
+        "ean": "2999995999223",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Обрана S-M Білий (61112д)",
+        "image": "images/products/2025/12/60862.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60864",
+        "ean": "2999999990653",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Обрана L-XL Білий (60864)",
+        "image": "images/products/2025/12/60862.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61110д",
+        "ean": "2999995999247",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Обрана L-XL Білий (61110д)",
+        "image": "images/products/2025/12/60862.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60863",
+        "ean": "2999999990660",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Обрана S-M Чорний (60863)",
+        "image": "images/products/2025/12/60863.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61111д",
+        "ean": "2999995999230",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Обрана S-M Чорний (61111д)",
+        "image": "images/products/2025/12/60863.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60865",
+        "ean": "2999999990646",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Обрана L-XL Чорний (60865)",
+        "image": "images/products/2025/12/60863.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61109д",
+        "ean": "2999995999254",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Обрана L-XL Чорний (61109д)",
+        "image": "images/products/2025/12/60863.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60858",
+        "ean": "2999999990837",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Пригорнута S-M Білий (60858)",
+        "image": "images/products/2025/12/60858.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61128д",
+        "ean": "2999995999063",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Пригорнута S-M Білий (61128д)",
+        "image": "images/products/2025/12/60858.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60860",
+        "ean": "2999999990813",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Пригорнута L-XL Білий (60860)",
+        "image": "images/products/2025/12/60858.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61126д",
+        "ean": "2999995999087",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Пригорнута L-XL Білий (61126д)",
+        "image": "images/products/2025/12/60858.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60859",
+        "ean": "2999999990820",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Пригорнута S-M Чорний (60859",
+        "image": "images/products/2025/12/60859.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61127д",
+        "ean": "2999995999070",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Пригорнута S-M Чорний (61127д)",
+        "image": "images/products/2025/12/60859.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60861",
+        "ean": "2999999990806",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Пригорнута L-XL Чорний (60861)",
+        "image": "images/products/2025/12/60859.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61125д",
+        "ean": "2999995999094",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Пригорнута L-XL Чорний (61125д)",
+        "image": "images/products/2025/12/60859.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60798",
+        "ean": "2999999990912",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Разом S-M Білий (60798)",
+        "image": "images/products/2025/12/60798.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61154д",
+        "ean": "2999995998981",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Разом S-M Білий (61154д)",
+        "image": "images/products/2025/12/60798.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60800",
+        "ean": "2999999990899",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Разом L-XL Білий (60800)",
+        "image": "images/products/2025/12/60798.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61134д",
+        "ean": "2999995999001",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Разом L-XL Білий (61134д)",
+        "image": "images/products/2025/12/60798.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60799",
+        "ean": "2999999990905",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Разом S-M Чорний (60799)",
+        "image": "images/products/2025/12/60799.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61135д",
+        "ean": "2999995998998",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Разом S-M Чорний (61135д)",
+        "image": "images/products/2025/12/60799.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60801",
+        "ean": "2999999990882",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Разом L-XL Чорний (60801)",
+        "image": "images/products/2025/12/60799.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61133д",
+        "ean": "2999995999018",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Разом L-XL Чорний (61133д)",
+        "image": "images/products/2025/12/60799.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60794",
+        "ean": "2999999990950",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Ранкова S-M Білий (60794)",
+        "image": "images/products/2025/12/60794.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61141д",
+        "ean": "2999995998943",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Ранкова S-M Білий (61141д)",
+        "image": "images/products/2025/12/60794.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60796",
+        "ean": "2999999990936",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Ранкова L-XL Білий (60796)",
+        "image": "images/products/2025/12/60794.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61156д",
+        "ean": "2999995998967",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Ранкова L-XL Білий (61156д)",
+        "image": "images/products/2025/12/60794.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60795",
+        "ean": "2999999990943",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Ранкова S-M Чорний (60795)",
+        "image": "images/products/2025/12/60795.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61140д",
+        "ean": "2999995998950",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Ранкова S-M Чорний (61140д)",
+        "image": "images/products/2025/12/60795.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60797",
+        "ean": "2999999990929",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Ранкова L-XL Чорний (60797)",
+        "image": "images/products/2025/12/60795.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61155д",
+        "ean": "2999995998974",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Ранкова L-XL Чорний (61155д)",
+        "image": "images/products/2025/12/60795.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60846",
+        "ean": "2999999990998",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Розквітла S-M Білий (60846)",
+        "image": "images/products/2025/12/60846.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61145д",
+        "ean": "2999999999900",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Розквітла S-M Білий (61145д)",
+        "image": "images/products/2025/12/60846.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60848",
+        "ean": "2999999990974",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Розквітла L-XL Білий (60848)",
+        "image": "images/products/2025/12/60846.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61143д",
+        "ean": "2999999999902",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Розквітла L-XL Білий (61143д)",
+        "image": "images/products/2025/12/60846.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60847",
+        "ean": "2999999990981",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Розквітла S-M Чорний (60847)",
+        "image": "images/products/2025/12/60847.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61144д",
+        "ean": "2999999999901",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Розквітла S-M Чорний (61144д)",
+        "image": "images/products/2025/12/60847.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60849",
+        "ean": "2999999990967",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Розквітла L-XL Чорний (60849)",
+        "image": "images/products/2025/12/60847.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61142д",
+        "ean": "2999999999903",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Розквітла L-XL Чорний (61142д)",
+        "image": "images/products/2025/12/60847.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60818",
+        "ean": "2999999991032",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Сіяна S-M Білий (60818)",
+        "image": "images/products/2025/12/60818.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61149д",
+        "ean": "2999999999896",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Сіяна S-M Білий (61149д)",
+        "image": "images/products/2025/12/60818.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60820",
+        "ean": "2999999991018",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Сіяна L-XL Білий (60820)",
+        "image": "images/products/2025/12/60818.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61147д",
+        "ean": "2999999999898",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Сіяна L-XL Білий (61147д)",
+        "image": "images/products/2025/12/60818.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60819",
+        "ean": "2999999991025",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Сіяна S-M Чорний (60819)",
+        "image": "images/products/2025/12/60819.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61148д",
+        "ean": "2999999999897",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Сіяна S-M Чорний (61148д)",
+        "image": "images/products/2025/12/60819.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60821",
+        "ean": "2999999991001",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Сіяна L-XL Чорний (60821)",
+        "image": "images/products/2025/12/60819.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61146д",
+        "ean": "2999999999899",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Сіяна L-XL Чорний (61146д)",
+        "image": "images/products/2025/12/60819.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60822",
+        "ean": "2999999991070",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Солоха S-M Білий (60822)",
+        "image": "images/products/2025/12/60822.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61153д",
+        "ean": "2999999999892",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Солоха S-M Білий (61153д)",
+        "image": "images/products/2025/12/60822.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60824",
+        "ean": "2999999991056",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Солоха L-XL Білий (60824)",
+        "image": "images/products/2025/12/60822.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61151д",
+        "ean": "2999999999894",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Солоха L-XL Білий (61151д)",
+        "image": "images/products/2025/12/60822.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60823",
+        "ean": "2999999991063",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Солоха S-M Чорний (60823)",
+        "image": "images/products/2025/12/60823.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61152д",
+        "ean": "2999999999893",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Солоха S-M Чорний (61152д)",
+        "image": "images/products/2025/12/60823.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60825",
+        "ean": "2999999991049",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Солоха L-XL Чорний (60825)",
+        "image": "images/products/2025/12/60823.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61150д",
+        "ean": "2999999999895",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Солоха L-XL Чорний (61150д)",
+        "image": "images/products/2025/12/60823.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60834",
+        "ean": "2999999990158",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Гірська кров S-M Білий (60834)",
+        "image": "images/products/2025/12/60834.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61059д",
+        "ean": "2999995999742",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Гірська кров S-M Білий (61059д)",
+        "image": "images/products/2025/12/60834.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60836",
+        "ean": "2999999990134",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Гірська кров L-XL Білий (60836)",
+        "image": "images/products/2025/12/60834.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61057д",
+        "ean": "2999995999766",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Гірська кров L-XL Білий (61057д)",
+        "image": "images/products/2025/12/60834.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60835",
+        "ean": "2999999990141",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Гірська кров S-M Чорний (60835)",
+        "image": "images/products/2025/12/60835.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61058д",
+        "ean": "2999995999759",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Гірська кров S-M Чорний (61058д)",
+        "image": "images/products/2025/12/60835.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60837",
+        "ean": "2999999990127",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Гірська кров L-XL Чорний (60837)",
+        "image": "images/products/2025/12/60835.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61056д",
+        "ean": "2999995999773",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Гірська кров L-XL Чорний (61056д)",
+        "image": "images/products/2025/12/60835.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60870",
+        "ean": "2999999990431",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Лагідна S-M Білий (60870)",
+        "image": "images/products/2025/12/60870.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61087д",
+        "ean": "2999995999469",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Лагідна S-M Білий (61087д)",
+        "image": "images/products/2025/12/60870.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60872",
+        "ean": "2999999990417",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Лагідна L-XL Білий (60872)",
+        "image": "images/products/2025/12/60870.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61085д",
+        "ean": "2999995999483",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Лагідна L-XL Білий (61085д)",
+        "image": "images/products/2025/12/60870.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60871",
+        "ean": "2999999990424",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Лагідна S-M Чорний (60871)",
+        "image": "images/products/2025/12/60871.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61086д",
+        "ean": "2999995999476",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Лагідна S-M Чорний (61086д)",
+        "image": "images/products/2025/12/60871.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60873",
+        "ean": "2999999990400",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Лагідна L-XL Чорний (60873)",
+        "image": "images/products/2025/12/60871.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61084д",
+        "ean": "2999995999490",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Лагідна L-XL Чорний (61084д)",
+        "image": "images/products/2025/12/60871.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60830",
+        "ean": "2999999990592",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Надійна S-M Білий (60830)",
+        "image": "images/products/2025/12/60830.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61104д",
+        "ean": "2999999999940",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Надійна S-M Білий (61104д)",
+        "image": "images/products/2025/12/60830.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60832",
+        "ean": "2999999990578",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Надійна L-XL Білий (60832)",
+        "image": "images/products/2025/12/60830.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61102д",
+        "ean": "2999999999942",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Надійна L-XL Білий (61102д)",
+        "image": "images/products/2025/12/60830.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60831",
+        "ean": "2999999990585",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Надійна S-M Чорний (60831)",
+        "image": "images/products/2025/12/60831.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61103д",
+        "ean": "2999999999941",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Надійна S-M Чорний (61103д)",
+        "image": "images/products/2025/12/60831.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60833",
+        "ean": "2999999990561",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Надійна L-XL Чорний (60833)",
+        "image": "images/products/2025/12/60831.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61101д",
+        "ean": "2999999999943",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Надійна L-XL Чорний (61101д)",
+        "image": "images/products/2025/12/60831.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60806",
+        "ean": "2999999990714",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Осяяна S-M Білий (60806)",
+        "image": "images/products/2025/12/60806.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61116д",
+        "ean": "2999995999186",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Осяяна S-M Білий (61116д)",
+        "image": "images/products/2025/12/60806.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60808",
+        "ean": "2999999990691",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Осяяна L-XL Білий (60808)",
+        "image": "images/products/2025/12/60806.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61114д",
+        "ean": "2999995999209",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Осяяна L-XL Білий (61114д)",
+        "image": "images/products/2025/12/60806.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60807",
+        "ean": "2999999990707",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Осяяна S-M Чорний (60807)",
+        "image": "images/products/2025/12/60807.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61115д",
+        "ean": "2999995999193",
+        "price": 2500.0,
+        "name": "Футболка довгаSYVAK Осяяна S-M Чорний (61115д)",
+        "image": "images/products/2025/12/60807.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60809",
+        "ean": "2999999990684",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Осяяна L-XL Чорний (60809)",
+        "image": "images/products/2025/12/60807.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61113д",
+        "ean": "2999995999216",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Осяяна L-XL Чорний (61113д)",
+        "image": "images/products/2025/12/60807.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60810",
+        "ean": "2999999990752",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Піднесена S-M Білий (60810)",
+        "image": "images/products/2025/12/60810.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61120д",
+        "ean": "2999995999148",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Піднесена S-M Білий (61120д)",
+        "image": "images/products/2025/12/60810.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60812",
+        "ean": "2999999990738",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Піднесена L-XL Білий (60812)",
+        "image": "images/products/2025/12/60810.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61118д",
+        "ean": "2999995999162",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Піднесена L-XL Білий (61118д)",
+        "image": "images/products/2025/12/60810.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60811",
+        "ean": "2999999990745",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Піднесена S-M Чорний (60811)",
+        "image": "images/products/2025/12/60811.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61119д",
+        "ean": "2999995999155",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Піднесена S-M Чорний (61119д)",
+        "image": "images/products/2025/12/60811.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60813",
+        "ean": "2999999990721",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Піднесена L-XL Чорний (60813)",
+        "image": "images/products/2025/12/60811.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61117д",
+        "ean": "2999995999179",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Піднесена L-XL Чорний (61117д)",
+        "image": "images/products/2025/12/60811.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60802",
+        "ean": "2999999990790",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Праля S-M Білий (60802)",
+        "image": "images/products/2025/12/60802.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61124д",
+        "ean": "2999995999100",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Праля S-M Білий (61124д)",
+        "image": "images/products/2025/12/60802.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60804",
+        "ean": "2999999990776",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Праля L-XL Білий (60804)",
+        "image": "images/products/2025/12/60802.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61122д",
+        "ean": "2999995999124",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Праля L-XL Білий (61122д)",
+        "image": "images/products/2025/12/60802.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60803",
+        "ean": "2999999990783",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Праля S-M Чорний (60803)",
+        "image": "images/products/2025/12/60803.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61123д",
+        "ean": "2999995999117",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Праля S-M Чорний (61123д)",
+        "image": "images/products/2025/12/60803.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60805",
+        "ean": "2999999990769",
+        "price": 2500.0,
+        "name": "Футболка SYVAK Праля L-XL Чорний (60805)",
+        "image": "images/products/2025/12/60803.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61121д",
+        "ean": "2999995999131",
+        "price": 2500.0,
+        "name": "Футболка довга SYVAK Праля L-XL Чорний (61121д)",
+        "image": "images/products/2025/12/60803.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60838",
+        "ean": "2999999990035",
+        "price": null,
+        "name": "Футболка SYVAK Берегиня саду S-M Білий (60838)",
+        "image": "images/products/2025/12/60838.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61047д",
+        "ean": "2999995999865",
+        "price": null,
+        "name": "Футболка довга SYVAK Берегиня саду S-M Білий (61047д)",
+        "image": "images/products/2025/12/60838.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60840",
+        "ean": "2999999990011",
+        "price": null,
+        "name": "Футболка SYVAK Берегиня саду L-XL  білий (60840)",
+        "image": "images/products/2025/12/60838.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61045д",
+        "ean": "2999995999889",
+        "price": null,
+        "name": "Футболка довга SYVAK Берегиня саду L-XL Білий (61045д)",
+        "image": "images/products/2025/12/60838.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60839",
+        "ean": "2999999990028",
+        "price": null,
+        "name": "Футболка SYVAK Берегиня саду S-M Чорний (60839)",
+        "image": "images/products/2025/12/60839.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61046д",
+        "ean": "2999995999872",
+        "price": null,
+        "name": "Футболка довга SYVAK Берегиня саду S-M Чорний (61046д)",
+        "image": "images/products/2025/12/60839.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60841",
+        "ean": "2999999990004",
+        "price": null,
+        "name": "Футболка SYVAK Берегиня саду L-XL Чорний (60841)",
+        "image": "images/products/2025/12/60839.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61044д",
+        "ean": "2999995999896",
+        "price": null,
+        "name": "Футболка довга SYVAK Берегиня саду L-XL Чорний (61044д)",
+        "image": "images/products/2025/12/60839.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60866",
+        "ean": "2999999990110",
+        "price": null,
+        "name": "Футболка SYVAK Вільна S-M Білий (60866)",
+        "image": "images/products/2025/12/60866.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61055д",
+        "ean": "2999995999780",
+        "price": null,
+        "name": "Футболка довга SYVAK Вільна S-M Білий (61055д)",
+        "image": "images/products/2025/12/60866.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60868",
+        "ean": "2999999990097",
+        "price": null,
+        "name": "Футболка SYVAK Вільна L-XL Білий (60868)",
+        "image": "images/products/2025/12/60866.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61053д",
+        "ean": "2999995999803",
+        "price": null,
+        "name": "Футболка довга SYVAK Вільна L-XL Білий (61053д)",
+        "image": "images/products/2025/12/60866.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60867",
+        "ean": "2999999990103",
+        "price": null,
+        "name": "Футболка SYVAK Вільна S-M Чорний (60867)",
+        "image": "images/products/2025/12/60867.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61054д",
+        "ean": "2999995999797",
+        "price": null,
+        "name": "Футболка довга SYVAK Вільна S-M Чорний (61054д)",
+        "image": "images/products/2025/12/60867.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60869",
+        "ean": "2999999990080",
+        "price": null,
+        "name": "Футболка SYVAK Вільна L-XL Чорний (60869)",
+        "image": "images/products/2025/12/60867.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61052д",
+        "ean": "2999995999810",
+        "price": null,
+        "name": "Футболка довга SYVAK Вільна L-XL Чорний (61052д)",
+        "image": "images/products/2025/12/60867.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60782",
+        "ean": "2999999990318",
+        "price": null,
+        "name": "Футболка SYVAK Ґаздиня S-M Білий (60782)",
+        "image": "images/products/2025/12/60782.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61075д",
+        "ean": "2999995999582",
+        "price": null,
+        "name": "Футболка довга SYVAK Ґаздиня S-M Білий (61075д)",
+        "image": "images/products/2025/12/60782.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60784",
+        "ean": "2999999990295",
+        "price": null,
+        "name": "Футболка SYVAK Ґаздиня L-XL Білий (60784)",
+        "image": "images/products/2025/12/60782.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61073д",
+        "ean": "2999995999605",
+        "price": null,
+        "name": "Футболка довга SYVAK Ґаздиня L-XL Білий (61073д)",
+        "image": "images/products/2025/12/60782.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60783",
+        "ean": "2999999990301",
+        "price": null,
+        "name": "Футболка SYVAK Ґаздиня S-M Чорний (60783)",
+        "image": "images/products/2025/12/60783.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61074д",
+        "ean": "2999995999599",
+        "price": null,
+        "name": "Футболка довга SYVAK Ґаздиня S-M Чорний (61074д)",
+        "image": "images/products/2025/12/60783.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60785",
+        "ean": "2999999990288",
+        "price": null,
+        "name": "Футболка SYVAK Ґаздиня L-XL Чорний (60785)",
+        "image": "images/products/2025/12/60783.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61072д",
+        "ean": "2999995999612",
+        "price": null,
+        "name": "Футболка довга SYVAK Ґаздиня L-XL Чорний (61072д)",
+        "image": "images/products/2025/12/60783.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60842",
+        "ean": "2999999990479",
+        "price": null,
+        "name": "Футболка SYVAK Ладанна S-M Білий (60842)",
+        "image": "images/products/2025/12/60842.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61091д",
+        "ean": "2999995999421",
+        "price": null,
+        "name": "Футболка довга SYVAK Ладанна S-M Білий (61091д)",
+        "image": "images/products/2025/12/60842.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60844",
+        "ean": "2999999990455",
+        "price": null,
+        "name": "Футболка SYVAK Ладанна L-XL Білий (60844)",
+        "image": "images/products/2025/12/60842.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61089д",
+        "ean": "2999995999445",
+        "price": null,
+        "name": "Футболка довга SYVAK Ладанна L-XL Білий (61089д)",
+        "image": "images/products/2025/12/60842.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60843",
+        "ean": "2999999990462",
+        "price": null,
+        "name": "Футболка SYVAK Ладанна S-M Чорний (60843)",
+        "image": "images/products/2025/12/60843.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61090д",
+        "ean": "2999995999438",
+        "price": null,
+        "name": "Футболка довга SYVAK Ладанна S-M Чорний (61090д)",
+        "image": "images/products/2025/12/60843.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60845",
+        "ean": "2999999990448",
+        "price": null,
+        "name": "Футболка SYVAK Ладанна L-XL Чорний (60845)",
+        "image": "images/products/2025/12/60843.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61088д",
+        "ean": "2999995999452",
+        "price": null,
+        "name": "Футболка довга SYVAK Ладанна L-XL Чорний (61088д)",
+        "image": "images/products/2025/12/60843.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60786",
+        "ean": "2999999990516",
+        "price": null,
+        "name": "Футболка SYVAK Маковія S-M Білий (60786)",
+        "image": "images/products/2025/12/60786.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61095д",
+        "ean": "2999995999384",
+        "price": null,
+        "name": "Футболка довга SYVAK Маковія S-M Білий (61095д)",
+        "image": "images/products/2025/12/60786.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60788",
+        "ean": "2999999990493",
+        "price": null,
+        "name": "Футболка SYVAK Маковія L-XL Білий (60788)",
+        "image": "images/products/2025/12/60786.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61093д",
+        "ean": "2999995999407",
+        "price": null,
+        "name": "Футболка довга SYVAK Маковія L-XL Білий (61093д)",
+        "image": "images/products/2025/12/60786.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60787",
+        "ean": "2999999990509",
+        "price": null,
+        "name": "Футболка SYVAK Маковія S-M Чорний (60787)",
+        "image": "images/products/2025/12/60787.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61094д",
+        "ean": "2999995999391",
+        "price": null,
+        "name": "Футболка довга SYVAK Маковія S-M Чорний (61094д)",
+        "image": "images/products/2025/12/60787.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60789",
+        "ean": "2999999990486",
+        "price": null,
+        "name": "Футболка SYVAK Маковія L-XL Чорний (60789)",
+        "image": "images/products/2025/12/60787.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61092д",
+        "ean": "2999995999414",
+        "price": null,
+        "name": "Футболка довга SYVAK Маковія L-XL Чорний (61092д)",
+        "image": "images/products/2025/12/60787.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60774",
+        "ean": "2999999990875",
+        "price": null,
+        "name": "Футболка SYVAK Пташина S-M Білий (60774)",
+        "image": "images/products/2025/12/60774.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61132д",
+        "ean": "2999995999025",
+        "price": null,
+        "name": "Футболка довга SYVAK Пташина S-M Білий (61132д)",
+        "image": "images/products/2025/12/60774.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60776",
+        "ean": "2999999990851",
+        "price": null,
+        "name": "Футболка SYVAK Пташина L-XL Білий (60776)",
+        "image": "images/products/2025/12/60774.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61130д",
+        "ean": "2999995999049",
+        "price": null,
+        "name": "Футболка довга SYVAK Пташина L-XL Білий (61130д)",
+        "image": "images/products/2025/12/60774.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60775",
+        "ean": "2999999990868",
+        "price": null,
+        "name": "Футболка SYVAK Пташина S-M Чорний (60775)",
+        "image": "images/products/2025/12/60775.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61131д",
+        "ean": "2999995999032",
+        "price": null,
+        "name": "Футболка довга SYVAK Пташина S-M Чорний (61131д)",
+        "image": "images/products/2025/12/60775.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60777",
+        "ean": "2999999990844",
+        "price": null,
+        "name": "Футболка SYVAK Пташина L-XL Чорний (60777)",
+        "image": "images/products/2025/12/60775.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61129д",
+        "ean": "2999995999056",
+        "price": null,
+        "name": "Футболка довга SYVAK Пташина L-XL Чорний (61129д)",
+        "image": "images/products/2025/12/60775.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61178",
+        "ean": "2999995998646",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Арткод часу L-XL Білий (61178)",
+        "image": "images/products/2025/12/61178.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61180",
+        "ean": "2999995998639",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Арткод часу L-XL Чорний (61180)",
+        "image": "images/products/2025/12/61178.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61177",
+        "ean": "2999995998622",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Арткод часу S-M Білий (61177)",
+        "image": "images/products/2025/12/61178.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61179",
+        "ean": "2999995998615",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Арткод часу S-M Чорний (61179)",
+        "image": "images/products/2025/12/61178.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61194д",
+        "ean": "2999995998486",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Арткод часу L-XL Білий (61194д)",
+        "image": "images/products/2025/12/61194д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61196д",
+        "ean": "2999995998479",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Арткод часу L-XL Чорний (61196д)",
+        "image": "images/products/2025/12/61194д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61193д",
+        "ean": "2999995998462",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Арткод часу S-M Білий (61193д)",
+        "image": "images/products/2025/12/61194д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61195д",
+        "ean": "2999995998455",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Арткод часу S-M Чорний (61195д)",
+        "image": "images/products/2025/12/61194д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61174",
+        "ean": "2999995998561",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Перлина Бароко L-XL Білий (61174)",
+        "image": "images/products/2025/12/61174.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61176",
+        "ean": "2999995998554",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Перлина Бароко L-XL Чорний (61176)",
+        "image": "images/products/2025/12/61174.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61173",
+        "ean": "2999995998547",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Перлина Бароко S-M Білий (61173)",
+        "image": "images/products/2025/12/61174.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61175",
+        "ean": "2999995998530",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Перлина Бароко S-M Чорний (61175)",
+        "image": "images/products/2025/12/61174.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61190д",
+        "ean": "2999995998400",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Перлина Бароко L-XL Білий (61190д)",
+        "image": "images/products/2025/12/61190д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61192д",
+        "ean": "2999995998394",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Перлина Бароко L-XL Чорний (61192д)",
+        "image": "images/products/2025/12/61190д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61189д",
+        "ean": "2999995998387",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Перлина Бароко S-M Білий (61189д)",
+        "image": "images/products/2025/12/61190д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61191д",
+        "ean": "2999995998370",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Перлина Бароко S-M Чорний (61191д)",
+        "image": "images/products/2025/12/61190д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61166",
+        "ean": "2999995998608",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Пані Ренесанс L-XL Білий (61166)",
+        "image": "images/products/2025/12/61166.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61168",
+        "ean": "2999995998592",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Пані Ренесанс L-XL Чорний (61168)",
+        "image": "images/products/2025/12/61166.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61165",
+        "ean": "2999995998585",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Пані Ренесанс S-M Білий (61165)",
+        "image": "images/products/2025/12/61166.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61167",
+        "ean": "2999995998578",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Пані Ренесанс S-M Чорний (61167)",
+        "image": "images/products/2025/12/61166.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61182д",
+        "ean": "2999995998448",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Пані Ренесанс L-XL Білий (61182д)",
+        "image": "images/products/2025/12/61182д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61184д",
+        "ean": "2999995998431",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Пані Ренесанс L-XL Чорний (61184д)",
+        "image": "images/products/2025/12/61182д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61181д",
+        "ean": "2999995998424",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Пані Ренесанс S-M Білий (61181д)",
+        "image": "images/products/2025/12/61182д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61183д",
+        "ean": "2999995998417",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Пані Ренесанс S-M Чорний (61183д)",
+        "image": "images/products/2025/12/61182д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61170",
+        "ean": "2999995998523",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Сонце Імпресіонізму L-XL Білий (61170)",
+        "image": "images/products/2025/12/61170.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61172",
+        "ean": "2999995998516",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Сонце Імпресіонізму L-XL Чорний (61172)",
+        "image": "images/products/2025/12/61170.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61169",
+        "ean": "2999995998509",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Сонце Імпресіонізму S-M Білий (61169)",
+        "image": "images/products/2025/12/61170.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61171",
+        "ean": "2999995998493",
+        "price": 1500.0,
+        "name": "Футболка SYVAK Сонце Імпресіонізму S-M Чорний (61171)",
+        "image": "images/products/2025/12/61170.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61186д",
+        "ean": "2999995998363",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Сонце Імпресіонізму L-XL Білий (61186д)",
+        "image": "images/products/2025/12/61186д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61188д",
+        "ean": "2999995998356",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Сонце Імпресіонізму L-XL Чорний (61188д)",
+        "image": "images/products/2025/12/61186д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61185д",
+        "ean": "2999995998349",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Сонце Імпресіонізму S-M Білий (61185д)",
+        "image": "images/products/2025/12/61186д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61187д",
+        "ean": "2999995998332",
+        "price": 1500.0,
+        "name": "Футболка довга SYVAK Сонце Імпресіонізму S-M Чорний (61187д)",
+        "image": "images/products/2025/12/61186д.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60912",
+        "ean": "2999999989992",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Гостинна 110-116 біла (60912)",
+        "image": "images/products/2025/12/60912.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60913",
+        "ean": "2999999989985",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Гостинна 122-128 біла (60913)",
+        "image": "images/products/2025/12/60912.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60914",
+        "ean": "2999999989978",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Гостинна 134-140 біла (60914)",
+        "image": "images/products/2025/12/60912.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60915",
+        "ean": "2999999989961",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Гостинна 146-152 біла (60915)",
+        "image": "images/products/2025/12/60912.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60916",
+        "ean": "2999999989954",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Гостинна 110-116 чорна (60916)",
+        "image": "images/products/2025/12/60916.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60917",
+        "ean": "2999999989947",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Гостинна 122-128 чорна (60917)",
+        "image": "images/products/2025/12/60916.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60918",
+        "ean": "2999999989930",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Гостинна 134-140 чорна (60918)",
+        "image": "images/products/2025/12/60916.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60919",
+        "ean": "2999999989923",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Гостинна 146-152 чорна (60919)",
+        "image": "images/products/2025/12/60916.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60920",
+        "ean": "2999999989916",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Затишниця 110-116 біла (60920)",
+        "image": "images/products/2025/12/60920.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60921",
+        "ean": "2999999989909",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Затишниця 122-128 біла (60921)",
+        "image": "images/products/2025/12/60920.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60922",
+        "ean": "2999999989893",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Затишниця 134-140 біла (60922)",
+        "image": "images/products/2025/12/60920.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60923",
+        "ean": "2999999989886",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Затишниця 146-152 біла (60923)",
+        "image": "images/products/2025/12/60920.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60924",
+        "ean": "2999999989879",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Затишниця 110-116 чорна (60924)",
+        "image": "images/products/2025/12/60924.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60925",
+        "ean": "2999999989862",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Затишниця 122-128 чорна (60925)",
+        "image": "images/products/2025/12/60924.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60926",
+        "ean": "2999999989855",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Затишниця 134-140 чорна (60926)",
+        "image": "images/products/2025/12/60924.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60927",
+        "ean": "2999999989848",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Затишниця 146-152 чорна (60927)",
+        "image": "images/products/2025/12/60924.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60928",
+        "ean": "2999999989831",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Молочарка 110-116 біла (60928)",
+        "image": "images/products/2025/12/60928.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60929",
+        "ean": "2999999989824",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Молочарка 122-128 біла (60929)",
+        "image": "images/products/2025/12/60928.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60930",
+        "ean": "2999999989817",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Молочарка 134-140 біла (60930)",
+        "image": "images/products/2025/12/60928.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60931",
+        "ean": "2999999989800",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Молочарка 146-152 біла (60931)",
+        "image": "images/products/2025/12/60928.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60932",
+        "ean": "2999999989794",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Молочарка 110-116 чорна (60932)",
+        "image": "images/products/2025/12/60932.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60933",
+        "ean": "2999999989787",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Молочарка 122-128 чорна (60933)",
+        "image": "images/products/2025/12/60932.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60934",
+        "ean": "2999999989770",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Молочарка 134-140 чорна (60934)",
+        "image": "images/products/2025/12/60932.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60935",
+        "ean": "2999999989763",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Молочарка 146-152 чорна (60935)",
+        "image": "images/products/2025/12/60932.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60936",
+        "ean": "2999999989756",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Блискавична 110-116 біла (60936)",
+        "image": "images/products/2025/12/60936.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60937",
+        "ean": "2999999989749",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Блискавична 122-128 біла (60937)",
+        "image": "images/products/2025/12/60936.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60938",
+        "ean": "2999999989732",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Блискавична 134-140 біла (60938)",
+        "image": "images/products/2025/12/60936.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60939",
+        "ean": "2999999989725",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Блискавична 146-152 біла (60939)",
+        "image": "images/products/2025/12/60936.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60940",
+        "ean": "2999999989718",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Блискавична 110-116 чорна (60940)",
+        "image": "images/products/2025/12/60940.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60941",
+        "ean": "2999999989701",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Блискавична 122-128 чорна (60941)",
+        "image": "images/products/2025/12/60940.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60942",
+        "ean": "2999999989695",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Блискавична 134-140 чорна (60942)",
+        "image": "images/products/2025/12/60940.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60943",
+        "ean": "2999999989688",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Блискавична 146-152 чорна (60943)",
+        "image": "images/products/2025/12/60940.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60944",
+        "ean": "2999999989671",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Сіяна 110-116 біла (60944)",
+        "image": "images/products/2025/12/60944.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60945",
+        "ean": "2999999989664",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Сіяна 122-128 біла (60945)",
+        "image": "images/products/2025/12/60944.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60946",
+        "ean": "2999999989657",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Сіяна 134-140 біла (60946)",
+        "image": "images/products/2025/12/60944.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60947",
+        "ean": "2999999989640",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Сіяна 146-152 біла (60947)",
+        "image": "images/products/2025/12/60944.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60948",
+        "ean": "2999999989633",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Сіяна 110-116 чорна (60948)",
+        "image": "images/products/2025/12/60948.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60949",
+        "ean": "2999999989626",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Сіяна 122-128 чорна (60949)",
+        "image": "images/products/2025/12/60948.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60950",
+        "ean": "2999999989619",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Сіяна 134-140 чорна (60950)",
+        "image": "images/products/2025/12/60948.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60951",
+        "ean": "2999999989602",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Сіяна 146-152 чорна (60951)",
+        "image": "images/products/2025/12/60948.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60952",
+        "ean": "2999999989596",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Розквітла 110-116 біла (60952)",
+        "image": "images/products/2025/12/60952.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60953",
+        "ean": "2999999989589",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Розквітла 122-128 біла (60953)",
+        "image": "images/products/2025/12/60952.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60954",
+        "ean": "2999999989572",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Розквітла 134-140 біла (60954)",
+        "image": "images/products/2025/12/60952.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60955",
+        "ean": "2999999989565",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Розквітла 146-152 біла (60955)",
+        "image": "images/products/2025/12/60952.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60956",
+        "ean": "2999999989558",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Розквітла 110-116 чорна (60956)",
+        "image": "images/products/2025/12/60956.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60957",
+        "ean": "2999999989541",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Розквітла 122-128 чорна (60957)",
+        "image": "images/products/2025/12/60956.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60958",
+        "ean": "2999999989534",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Розквітла 134-140 чорна (60958)",
+        "image": "images/products/2025/12/60956.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60959",
+        "ean": "2999999989527",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Розквітла 146-152 чорна (60959)",
+        "image": "images/products/2025/12/60956.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60960",
+        "ean": "2999999989510",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пригорнута 110-116 біла (60960)",
+        "image": "images/products/2025/12/60960.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60961",
+        "ean": "2999999989503",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пригорнута 122-128 біла (60961)",
+        "image": "images/products/2025/12/60960.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60962",
+        "ean": "2999999989497",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пригорнута 134-140 біла (60962)",
+        "image": "images/products/2025/12/60960.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60963",
+        "ean": "2999999989480",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пригорнута 146-152 біла (60963)",
+        "image": "images/products/2025/12/60960.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60964",
+        "ean": "2999999989473",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пригорнута 110-116 чорна (60964)",
+        "image": "images/products/2025/12/60964.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60965",
+        "ean": "2999999989466",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пригорнута 122-128 чорна (60965)",
+        "image": "images/products/2025/12/60964.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60966",
+        "ean": "2999999989459",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пригорнута 134-140 чорна (60966)",
+        "image": "images/products/2025/12/60964.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60967",
+        "ean": "2999999989442",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пригорнута 146-152 чорна (60967)",
+        "image": "images/products/2025/12/60964.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60968",
+        "ean": "2999999989435",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Осяяна 110-116 біла (60968)",
+        "image": "images/products/2025/12/60968.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60969",
+        "ean": "2999999989428",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Осяяна 122-128 біла (60969)",
+        "image": "images/products/2025/12/60968.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60970",
+        "ean": "2999999989411",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Осяяна 134-140 біла (60970)",
+        "image": "images/products/2025/12/60968.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60971",
+        "ean": "2999999989404",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Осяяна 146-152 біла (60971)",
+        "image": "images/products/2025/12/60968.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60972",
+        "ean": "2999999989398",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Осяяна 110-116 чорна (60972)",
+        "image": "images/products/2025/12/60972.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60973",
+        "ean": "2999999989381",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Осяяна 122-128 чорна (60973)",
+        "image": "images/products/2025/12/60972.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60974",
+        "ean": "2999999989374",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Осяяна 134-140 чорна (60974)",
+        "image": "images/products/2025/12/60972.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60975",
+        "ean": "2999999989367",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Осяяна 146-152 чорна (60975)",
+        "image": "images/products/2025/12/60972.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60976",
+        "ean": "2999999989350",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Надійна 110-116 біла (60976)",
+        "image": "images/products/2025/12/60976.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60977",
+        "ean": "2999999989343",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Надійна 122-128 біла (60977)",
+        "image": "images/products/2025/12/60976.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60978",
+        "ean": "2999999989336",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Надійна 134-140 біла (60978)",
+        "image": "images/products/2025/12/60976.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60979",
+        "ean": "2999999989329",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Надійна 146-152 біла (60979)",
+        "image": "images/products/2025/12/60976.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60980",
+        "ean": "2999999989312",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Надійна 110-116 чорна (60980)",
+        "image": "images/products/2025/12/60980.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60981",
+        "ean": "2999999989305",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Надійна 122-128 чорна (60981)",
+        "image": "images/products/2025/12/60980.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60982",
+        "ean": "2999999989299",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Надійна 134-140 чорна (60982)",
+        "image": "images/products/2025/12/60980.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60983",
+        "ean": "2999999989282",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Надійна 146-152 чорна (60983)",
+        "image": "images/products/2025/12/60980.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60984",
+        "ean": "2999999989275",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Лагідна 110-116 біла (60984)",
+        "image": "images/products/2025/12/60984.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60985",
+        "ean": "2999999989268",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Лагідна 122-128 біла (60985)",
+        "image": "images/products/2025/12/60984.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60986",
+        "ean": "2999999989251",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Лагідна 134-140 біла (60986)",
+        "image": "images/products/2025/12/60984.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60987",
+        "ean": "2999999989244",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Лагідна 146-152 біла (60987)",
+        "image": "images/products/2025/12/60984.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60988",
+        "ean": "2999999989237",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Лагідна 110-116 чорна (60988)",
+        "image": "images/products/2025/12/60988.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60989",
+        "ean": "2999999989220",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Лагідна 122-128 чорна (60989)",
+        "image": "images/products/2025/12/60988.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60990",
+        "ean": "2999999989213",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Лагідна 134-140 чорна (60990)",
+        "image": "images/products/2025/12/60988.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "60991",
+        "ean": "2999999989206",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Лагідна 146-152 чорна (60991)",
+        "image": "images/products/2025/12/60988.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61011",
+        "ean": "2999999989008",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пташина 110-116 біла (61011)",
+        "image": "images/products/2025/12/61011.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61012",
+        "ean": "2999999989015",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пташина 122-128 біла (61012)",
+        "image": "images/products/2025/12/61011.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61013",
+        "ean": "2999999989022",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пташина 134-140 біла (61013)",
+        "image": "images/products/2025/12/61011.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61014",
+        "ean": "2999999989039",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пташина 146-152 біла (61014)",
+        "image": "images/products/2025/12/61011.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61015",
+        "ean": "2999999989046",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пташина 110-116 чорна (61015)",
+        "image": "images/products/2025/12/61015.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61016",
+        "ean": "2999999989053",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пташина 122-128 чорна (61016)",
+        "image": "images/products/2025/12/61015.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61017",
+        "ean": "2999999989060",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пташина 134-140 чорна (61017)",
+        "image": "images/products/2025/12/61015.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61018",
+        "ean": "2999999989077",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Пташина 146-152 чорна (61018)",
+        "image": "images/products/2025/12/61015.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61019",
+        "ean": "2999999989084",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Вільна 110-116 біла (61019)",
+        "image": "images/products/2025/12/61019.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61020",
+        "ean": "2999999989091",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Вільна 122-128 біла (61020)",
+        "image": "images/products/2025/12/61019.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61021",
+        "ean": "2999999989107",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Вільна 134-140 біла (61021)",
+        "image": "images/products/2025/12/61019.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61022",
+        "ean": "2999999989114",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Вільна 146-152 біла (61022)",
+        "image": "images/products/2025/12/61019.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61023",
+        "ean": "2999999989121",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Вільна 110-116 чорна (61023)",
+        "image": "images/products/2025/12/61023.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61024",
+        "ean": "2999999989138",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Вільна 122-128 чорна (61024)",
+        "image": "images/products/2025/12/61023.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61025",
+        "ean": "2999999989145",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Вільна 134-140 чорна (61025)",
+        "image": "images/products/2025/12/61023.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61026",
+        "ean": "2999999989152",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Вільна146-152 чорна (61026)",
+        "image": "images/products/2025/12/61023.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61027",
+        "ean": "2999999989169",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Маковія 110-116 біла (61027)",
+        "image": "images/products/2025/12/61027.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61028",
+        "ean": "2999999989176",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Маковія 122-128 біла (61028)",
+        "image": "images/products/2025/12/61027.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61029",
+        "ean": "2999999989183",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Маковія 134-140 біла (61029)",
+        "image": "images/products/2025/12/61027.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61030",
+        "ean": "2999999989190",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Маковія 146-152 біла (61030)",
+        "image": "images/products/2025/12/61027.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61031",
+        "ean": "2999996000003",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Маковія 110-116 чорна (61031)",
+        "image": "images/products/2025/12/61031.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61032",
+        "ean": "2999996000010",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Маковія 122-128 чорна (61032)",
+        "image": "images/products/2025/12/61031.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61033",
+        "ean": "2999996000027",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Маковія 134-140 чорна (61033)",
+        "image": "images/products/2025/12/61031.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61034",
+        "ean": "2999996000034",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Маковія 146-152 чорна (61034)",
+        "image": "images/products/2025/12/61031.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61035",
+        "ean": "2999996000041",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Берегиня саду 110-116 біла (61035)",
+        "image": "images/products/2025/12/61035.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61036",
+        "ean": "2999996000058",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Берегиня саду 122-128 біла (61036)",
+        "image": "images/products/2025/12/61035.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61037",
+        "ean": "2999996000065",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Берегиня саду 134-140 біла (61037)",
+        "image": "images/products/2025/12/61035.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61038",
+        "ean": "2999996000072",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Берегиня саду 146-152 біла (61038)",
+        "image": "images/products/2025/12/61035.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61039",
+        "ean": "2999996000089",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Березиня саду 110-116 чорна (61039)",
+        "image": "images/products/2025/12/61039.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61040",
+        "ean": "2999996000096",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Берегиня саду 122-128 чорна (61040)",
+        "image": "images/products/2025/12/61039.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61041",
+        "ean": "2999996000102",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Берегиня саду 134-140 чорна (61041)",
+        "image": "images/products/2025/12/61039.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61042",
+        "ean": "2999996000119",
+        "price": 999.0,
+        "name": "Футболка дитяча SYVAK Берегиня саду 146-152 чорна (61042)",
+        "image": "images/products/2025/12/61039.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61277",
+        "ean": "2999995997441",
+        "price": 2500.0,
+        "name": "Худі SYVAK Господарка р 44 чорний (61277)",
+        "image": "images/products/2025/12/61277.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61278",
+        "ean": "2999995997434",
+        "price": 2500.0,
+        "name": "Худі SYVAK Господарка р 50 чорний (61278)",
+        "image": "images/products/2025/12/61277.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61279",
+        "ean": "2999995997427",
+        "price": 2500.0,
+        "name": "Худі SYVAK Господарка р 44 бежевий (61279)",
+        "image": "images/products/2025/12/61279.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61280",
+        "ean": "2999995997410",
+        "price": 2500.0,
+        "name": "Худі SYVAK Господарка р 50 бежевий (61280)",
+        "image": "images/products/2025/12/61279.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61281",
+        "ean": "2999995997403",
+        "price": 2500.0,
+        "name": "Худі SYVAK Блискавична р 44 чорний (61281)",
+        "image": "images/products/2025/12/61281.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61282",
+        "ean": "2999995997397",
+        "price": 2500.0,
+        "name": "Худі SYVAK Блискавична р 50 чорний (61282)",
+        "image": "images/products/2025/12/61281.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61283",
+        "ean": "2999995997380",
+        "price": 2500.0,
+        "name": "Худі SYVAK Блискавична р 44 бежевий (61283)",
+        "image": "images/products/2025/12/61283.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61284",
+        "ean": "2999995997373",
+        "price": 2500.0,
+        "name": "Худі SYVAK Блискавична р 50 бежевий (61284)",
+        "image": "images/products/2025/12/61283.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61285",
+        "ean": "2999995997366",
+        "price": 2500.0,
+        "name": "Худі SYVAK Розквітла р 44 чорний (61285)",
+        "image": "images/products/2025/12/61285.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61286",
+        "ean": "2999995997359",
+        "price": 2500.0,
+        "name": "Худі SYVAK Розквітла р 50 чорний (61286)",
+        "image": "images/products/2025/12/61285.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61287",
+        "ean": "2999995997342",
+        "price": 2500.0,
+        "name": "Худі SYVAK Розквітла р 44 бежевий (61287)",
+        "image": "images/products/2025/12/61287.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61288",
+        "ean": "2999995997335",
+        "price": 2500.0,
+        "name": "Худі SYVAK Розквітла р 50 бежевий (61288)",
+        "image": "images/products/2025/12/61287.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61289",
+        "ean": "2999995997328",
+        "price": 2500.0,
+        "name": "Худі SYVAK Ранкова р 44 чорний (61289)",
+        "image": "images/products/2025/12/61289.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61290",
+        "ean": "2999995997311",
+        "price": 2500.0,
+        "name": "Худі SYVAK Ранкова р 50 чорний (61290)",
+        "image": "images/products/2025/12/61289.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61291",
+        "ean": "2999995997304",
+        "price": 2500.0,
+        "name": "Худі SYVAK Ранкова р 44 бежевий (61291)",
+        "image": "images/products/2025/12/61291.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61373",
+        "ean": "2999995997298",
+        "price": 2500.0,
+        "name": "Худі SYVAK Ранкова р 50 бежевий (61373)",
+        "image": "images/products/2025/12/61291.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61292",
+        "ean": "2999995997281",
+        "price": 2500.0,
+        "name": "Худі SYVAK Сіяна р 44 чорний (61292)",
+        "image": "images/products/2025/12/61292.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61293",
+        "ean": "2999995997274",
+        "price": 2500.0,
+        "name": "Худі SYVAK Сіяна р 50 чорний (61293)",
+        "image": "images/products/2025/12/61292.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61294",
+        "ean": "2999995997267",
+        "price": 2500.0,
+        "name": "Худі SYVAK Сіяна р 44 бежевий (61294)",
+        "image": "images/products/2025/12/61294.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61295",
+        "ean": "2999995997250",
+        "price": 2500.0,
+        "name": "Худі SYVAK Сіяна р 50 бежевий (61295)",
+        "image": "images/products/2025/12/61294.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61296",
+        "ean": "2999995997243",
+        "price": 2500.0,
+        "name": "Худі SYVAK Разом р 44 чорний (61296)",
+        "image": "images/products/2025/12/61296.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61297",
+        "ean": "2999995997236",
+        "price": 2500.0,
+        "name": "Худі SYVAK Разом р 50 чорний (61297)",
+        "image": "images/products/2025/12/61296.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61298",
+        "ean": "2999995997229",
+        "price": 2500.0,
+        "name": "Худі SYVAK Разом р 44 бежевий (61298)",
+        "image": "images/products/2025/12/61298.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61299",
+        "ean": "2999995997212",
+        "price": 2500.0,
+        "name": "Худі SYVAK Разом р 50 бежевий (61299)",
+        "image": "images/products/2025/12/61298.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61300",
+        "ean": "2999995997205",
+        "price": 2500.0,
+        "name": "Худі SYVAK Нерозривні р 44 чорний (61300)",
+        "image": "images/products/2025/12/61300.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61301",
+        "ean": "2999995997199",
+        "price": 2500.0,
+        "name": "Худі SYVAK Нерозривні р 50 чорний (61301)",
+        "image": "images/products/2025/12/61300.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61302",
+        "ean": "2999995997182",
+        "price": 2500.0,
+        "name": "Худі SYVAK Нерозривні р 44 бежевий (61302)",
+        "image": "images/products/2025/12/61302.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61303",
+        "ean": "2999995997175",
+        "price": 2500.0,
+        "name": "Худі SYVAK Нерозривні р 50 бежевий (61303)",
+        "image": "images/products/2025/12/61302.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61304",
+        "ean": "2999995997168",
+        "price": 3500.0,
+        "name": "Худі SYVAK Надійна р 44 чорний (61304)",
+        "image": "images/products/2025/12/61304.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61305",
+        "ean": "2999995997151",
+        "price": 3500.0,
+        "name": "Худі SYVAK Надійна р 50 чорний (61305)",
+        "image": "images/products/2025/12/61304.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61306",
+        "ean": "2999995997144",
+        "price": 3500.0,
+        "name": "Худі SYVAK Надійна р 44 бежевий (61306)",
+        "image": "images/products/2025/12/61306.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61307",
+        "ean": "2999995997137",
+        "price": 3500.0,
+        "name": "Худі SYVAK Надійна р 50 бежевий (61307)",
+        "image": "images/products/2025/12/61306.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61308",
+        "ean": "2999995997120",
+        "price": 3500.0,
+        "name": "Худі SYVAK Піднесена р 44 чорний (61308)",
+        "image": "images/products/2025/12/61308.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61309",
+        "ean": "2999995997113",
+        "price": 3500.0,
+        "name": "Худі SYVAK Піднесена р 50 чорний (61309)",
+        "image": "images/products/2025/12/61308.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61310",
+        "ean": "2999995997106",
+        "price": 3500.0,
+        "name": "Худі SYVAK Піднесена р 44 бежевий (61310)",
+        "image": "images/products/2025/12/61310.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61311",
+        "ean": "2999995997090",
+        "price": 3500.0,
+        "name": "Худі SYVAK Піднесена р 50 бежевий (61311)",
+        "image": "images/products/2025/12/61310.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61312",
+        "ean": "2999995997083",
+        "price": 3500.0,
+        "name": "Худі SYVAK Пташина р 44 чорний (61312)",
+        "image": "images/products/2025/12/61312.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61313",
+        "ean": "2999995997076",
+        "price": 3500.0,
+        "name": "Худі SYVAK Пташина р 50 чорний (61313)",
+        "image": "images/products/2025/12/61312.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61314",
+        "ean": "2999995997069",
+        "price": 3500.0,
+        "name": "Худі SYVAK Пташина р 44 бежевий (61314)",
+        "image": "images/products/2025/12/61314.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61315",
+        "ean": "2999995997052",
+        "price": 3500.0,
+        "name": "Худі SYVAK Пташина р 50 бежевий (61315)",
+        "image": "images/products/2025/12/61314.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61317",
+        "ean": "2999995997038",
+        "price": 2500.0,
+        "name": "Худі SYVAK Скарби матері р 44 чорний (61317)",
+        "image": "images/products/2025/12/61317.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61318",
+        "ean": "2999995997021",
+        "price": 2500.0,
+        "name": "Худі SYVAK Скарби матері р 50 чорний (61318)",
+        "image": "images/products/2025/12/61317.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61319",
+        "ean": "2999995997014",
+        "price": 2500.0,
+        "name": "Худі SYVAK Скарби матері р 44 бежевий (61319)",
+        "image": "images/products/2025/12/61319.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61320",
+        "ean": "2999995997007",
+        "price": 2500.0,
+        "name": "Худі SYVAK Скарби матері р 50 бежевий (61320)",
+        "image": "images/products/2025/12/61319.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61321",
+        "ean": "2999995996994",
+        "price": 2500.0,
+        "name": "Худі SYVAK Голос води р 44 чорний (61321)",
+        "image": "images/products/2025/12/61321.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61322",
+        "ean": "2999995996987",
+        "price": 2500.0,
+        "name": "Худі SYVAK Голос води р 50 чорний (61322)",
+        "image": "images/products/2025/12/61321.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61323",
+        "ean": "2999995996970",
+        "price": 2500.0,
+        "name": "Худі SYVAK Голос води р 44 бежевий (61323)",
+        "image": "images/products/2025/12/61323.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61324",
+        "ean": "2999995996963",
+        "price": 2500.0,
+        "name": "Худі SYVAK Голос води р 50 бежевий (61324)",
+        "image": "images/products/2025/12/61323.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61325",
+        "ean": "2999995996956",
+        "price": 2500.0,
+        "name": "Худі SYVAK Та, що тримає світло р 44 чорний (61325)",
+        "image": "images/products/2025/12/61325.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61326",
+        "ean": "2999995996949",
+        "price": 2500.0,
+        "name": "Худі SYVAK Та, що тримає світло р 50 чорний (61326)",
+        "image": "images/products/2025/12/61325.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61327",
+        "ean": "2999995996932",
+        "price": 2500.0,
+        "name": "Худі SYVAK Та, що тримає світло р 44 бежевий (61327)",
+        "image": "images/products/2025/12/61327.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61328",
+        "ean": "2999995996925",
+        "price": 2500.0,
+        "name": "Худі SYVAK Та, що тримає світло р 50 бежевий (61328)",
+        "image": "images/products/2025/12/61327.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61329",
+        "ean": "2999995996918",
+        "price": 3500.0,
+        "name": "Худі SYVAK Берегиня маків р 44 чорний (61329)",
+        "image": "images/products/2025/12/61329.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61330",
+        "ean": "2999995996901",
+        "price": 3500.0,
+        "name": "Худі SYVAK Берегиня маків р 50 чорний (61330)",
+        "image": "images/products/2025/12/61329.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61331",
+        "ean": "2999995996895",
+        "price": 3500.0,
+        "name": "Худі SYVAK Берегиня маків р 44 бежевий (61331)",
+        "image": "images/products/2025/12/61331.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61332",
+        "ean": "2999995996888",
+        "price": 3500.0,
+        "name": "Худі SYVAK Берегиня маків р 50 бежевий (61332)",
+        "image": "images/products/2025/12/61331.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61333",
+        "ean": "2999995996871",
+        "price": 2500.0,
+        "name": "Худі SYVAK Ткачиха роду р 44 чорний (61333)",
+        "image": "images/products/2025/12/61333.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61334",
+        "ean": "2999995996864",
+        "price": 2500.0,
+        "name": "Худі SYVAK Ткачиха роду р 50 чорний (61334)",
+        "image": "images/products/2025/12/61333.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61335",
+        "ean": "2999995996857",
+        "price": 2500.0,
+        "name": "Худі SYVAK Ткачиха роду р 44 бежевий (61335)",
+        "image": "images/products/2025/12/61335.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61336",
+        "ean": "2999995996840",
+        "price": 2500.0,
+        "name": "Худі SYVAK Ткачиха роду р 50 бежевий (61336)",
+        "image": "images/products/2025/12/61335.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61337",
+        "ean": "2999995996833",
+        "price": 2500.0,
+        "name": "Худі SYVAK Під крилом р 44 чорний (61337)",
+        "image": "images/products/2025/12/61337.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61338",
+        "ean": "2999995996826",
+        "price": 2500.0,
+        "name": "Худі SYVAK Під крилом р 50 чорний (61338)",
+        "image": "images/products/2025/12/61337.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61339",
+        "ean": "2999995996819",
+        "price": 2500.0,
+        "name": "Худі SYVAK Під крилом р 44 бежевий (61339)",
+        "image": "images/products/2025/12/61339.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61340",
+        "ean": "2999995996802",
+        "price": 2500.0,
+        "name": "Худі SYVAK Під крилом р 50 бежевий (61340)",
+        "image": "images/products/2025/12/61339.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61341",
+        "ean": "2999995996796",
+        "price": 2500.0,
+        "name": "Худі SYVAK Мотанка мистецтво р 44 чорний (61341)",
+        "image": "images/products/2025/12/61341.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61342",
+        "ean": "2999995996789",
+        "price": 2500.0,
+        "name": "Худі SYVAK Мотанка мистецтво р 50 чорний (61342)",
+        "image": "images/products/2025/12/61341.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61343",
+        "ean": "2999995996772",
+        "price": 2500.0,
+        "name": "Худі SYVAK Мотанка мистецтво р 44 бежевий (61343)",
+        "image": "images/products/2025/12/61343.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61344",
+        "ean": "2999995996765",
+        "price": 2500.0,
+        "name": "Худі SYVAK Мотанка мистецтво р 50 бежевий (61344)",
+        "image": "images/products/2025/12/61343.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61345",
+        "ean": "2999995996758",
+        "price": 2500.0,
+        "name": "Худі SYVAK Матір-Ніжність р 44 чорний (61345)",
+        "image": "images/products/2025/12/61345.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61346",
+        "ean": "2999995996741",
+        "price": 2500.0,
+        "name": "Худі SYVAK Матір-Ніжність р 50 чорний (61346)",
+        "image": "images/products/2025/12/61346.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61347",
+        "ean": "2999995996734",
+        "price": 2500.0,
+        "name": "Худі SYVAK Матір-Ніжність р 44 бежевий (61347)",
+        "image": "images/products/2025/12/61346.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61348",
+        "ean": "2999995996727",
+        "price": 2500.0,
+        "name": "Худі SYVAK Матір-Ніжність р 50 бежевий (61348)",
+        "image": "images/products/2025/12/61346.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61349",
+        "ean": "2999995996710",
+        "price": 2500.0,
+        "name": "Худі SYVAK Корінна р 44 чорний (61349)",
+        "image": "images/products/2025/12/61349.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61350",
+        "ean": "2999995996703",
+        "price": 2500.0,
+        "name": "Худі SYVAK Корінна р 50 чорний (61350)",
+        "image": "images/products/2025/12/61349.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61351",
+        "ean": "2999995996697",
+        "price": 2500.0,
+        "name": "Худі SYVAK Корінна р 44 бежевий (61351)",
+        "image": "images/products/2025/12/61351.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61352",
+        "ean": "2999995996680",
+        "price": 2500.0,
+        "name": "Худі SYVAK Корінна р 50 бежевий (61352)",
+        "image": "images/products/2025/12/61351.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61353",
+        "ean": "2999995996673",
+        "price": 2500.0,
+        "name": "Худі SYVAK Дівчина з хусткою р 44 чорний (61353)",
+        "image": "images/products/2025/12/61353.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61354",
+        "ean": "2999995996666",
+        "price": 2500.0,
+        "name": "Худі SYVAK Дівчина з хусткою р 50 чорний (61354)",
+        "image": "images/products/2025/12/61354.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61355",
+        "ean": "2999995996659",
+        "price": 2500.0,
+        "name": "Худі SYVAK Дівчина з хусткою р 44 бежевий (61355)",
+        "image": "images/products/2025/12/61354.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61356",
+        "ean": "2999995996642",
+        "price": 2500.0,
+        "name": "Худі SYVAK Дівчина з хусткою р 50 бежевий (61356)",
+        "image": "images/products/2025/12/61354.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61357",
+        "ean": "2999995996635",
+        "price": 3500.0,
+        "name": "Худі SYVAK Творча суть р 44 чорний (61357)",
+        "image": "images/products/2025/12/61357.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61358",
+        "ean": "2999995996628",
+        "price": 3500.0,
+        "name": "Худі SYVAK Творча суть р 50 чорний (61358)",
+        "image": "images/products/2025/12/61357.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61359",
+        "ean": "2999995996611",
+        "price": 3500.0,
+        "name": "Худі SYVAK Творча суть р 44 бежевий (61359)",
+        "image": "images/products/2025/12/61359.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61360",
+        "ean": "2999995996604",
+        "price": 3500.0,
+        "name": "Худі SYVAK Творча суть р 50 бежевий (61360)",
+        "image": "images/products/2025/12/61359.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61361",
+        "ean": "2999995996597",
+        "price": 3500.0,
+        "name": "Худі SYVAK Мова змії р 44 чорний (61361)",
+        "image": "images/products/2025/12/61361.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61362",
+        "ean": "2999995996580",
+        "price": 3500.0,
+        "name": "Худі SYVAK Мова змії р 50 чорний (61362)",
+        "image": "images/products/2025/12/61361.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61363",
+        "ean": "2999995996573",
+        "price": 3500.0,
+        "name": "Худі SYVAK Мова змії р 44 бежевий (61363)",
+        "image": "images/products/2025/12/61363.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61364",
+        "ean": "2999995996566",
+        "price": 3500.0,
+        "name": "Худі SYVAK Мова змії р 50 бежевий (61364)",
+        "image": "images/products/2025/12/61363.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61365",
+        "ean": "2999995996559",
+        "price": 3500.0,
+        "name": "Худі SYVAK Дівоча суть р 44 чорний (61365)",
+        "image": "images/products/2025/12/61365.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61366",
+        "ean": "2999995996542",
+        "price": 3500.0,
+        "name": "Худі SYVAK Дівоча суть р 50 чорний (61366)",
+        "image": "images/products/2025/12/61365.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61367",
+        "ean": "2999995996535",
+        "price": 3500.0,
+        "name": "Худі SYVAK Дівоча суть р 44 бежевий (61367)",
+        "image": "images/products/2025/12/61367.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61368",
+        "ean": "2999995996528",
+        "price": 3500.0,
+        "name": "Худі SYVAK Дівоча суть р 50 бежевий (61368)",
+        "image": "images/products/2025/12/61367.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61369",
+        "ean": "2999995996511",
+        "price": 3500.0,
+        "name": "Худі SYVAK Вечір тайн р 44 чорний (61369)",
+        "image": "images/products/2025/12/61369.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61370",
+        "ean": "2999995996504",
+        "price": 3500.0,
+        "name": "Худі SYVAK Вечір тайн р 50 чорний (61370)",
+        "image": "images/products/2025/12/61369.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61371",
+        "ean": "2999995996497",
+        "price": 3500.0,
+        "name": "Худі SYVAK Вечір тайн р 44 бежевий (61371)",
+        "image": "images/products/2025/12/61371.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61372",
+        "ean": "2999995996480",
+        "price": 3500.0,
+        "name": "Худі SYVAK Вечір тайн р 50 бежевий (61372)",
+        "image": "images/products/2025/12/61371.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61229",
+        "ean": "2999995997939",
+        "price": 3500.0,
+        "name": "Худі SYVAK Берегиня саду р 44 Бежевий (61229)",
+        "image": "images/products/2025/12/61229.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61230",
+        "ean": "2999995997922",
+        "price": 3500.0,
+        "name": "Худі SYVAK Берегиня саду р 50 Бежевий (61230)",
+        "image": "images/products/2025/12/61230.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61249",
+        "ean": "2999995997731",
+        "price": 3500.0,
+        "name": "Худі SYVAK Берегиня саду р 44 чорний (61249)",
+        "image": "images/products/2025/12/61230.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61250",
+        "ean": "2999995997724",
+        "price": 3500.0,
+        "name": "Худі SYVAK Берегиня саду р 50 чорний (61250)",
+        "image": "images/products/2025/12/61230.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61231",
+        "ean": "2999995997915",
+        "price": 3500.0,
+        "name": "Худі SYVAK Гірська кров р 44 Бежевий (61231)",
+        "image": "images/products/2025/12/61231.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61232",
+        "ean": "2999995997908",
+        "price": 3500.0,
+        "name": "Худі SYVAK Гірська кров р 50 Бежевий (61232)",
+        "image": "images/products/2025/12/61231.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61253",
+        "ean": "2999995997687",
+        "price": 3500.0,
+        "name": "Худі SYVAK Гірська кров р 44 чорний (61253)",
+        "image": "images/products/2025/12/61253.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61254",
+        "ean": "2999995997670",
+        "price": 3500.0,
+        "name": "Худі SYVAK Гірська кров р 50 чорний (61254)",
+        "image": "images/products/2025/12/61253.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61233",
+        "ean": "2999995997892",
+        "price": 2500.0,
+        "name": "Худі SYVAK Гостинна р 44 Бежевий (61233)",
+        "image": "images/products/2025/12/61233.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61234",
+        "ean": "2999995997885",
+        "price": 2500.0,
+        "name": "Худі SYVAK Гостинна р 50 Бежевий (61234)",
+        "image": "images/products/2025/12/61233.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61255",
+        "ean": "2999995997663",
+        "price": 2500.0,
+        "name": "Худі SYVAK Гостинна р 44 чорний (61255)",
+        "image": "images/products/2025/12/61255.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61256",
+        "ean": "2999995997656",
+        "price": 2500.0,
+        "name": "Худі SYVAK Гостинна р 50 чорний (61256)",
+        "image": "images/products/2025/12/61255.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61235",
+        "ean": "2999995997878",
+        "price": 2500.0,
+        "name": "Худі SYVAK Затишниця р 44 Бежевий (61235)",
+        "image": "images/products/2025/12/61235.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61236",
+        "ean": "2999995997861",
+        "price": 2500.0,
+        "name": "Худі SYVAK Затишниця р 50 Бежевий (61236)",
+        "image": "images/products/2025/12/61235.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61257",
+        "ean": "2999995997649",
+        "price": 2500.0,
+        "name": "Худі SYVAK Затишниця р 44 чорний (61257)",
+        "image": "images/products/2025/12/61257.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61258",
+        "ean": "2999995997632",
+        "price": 2500.0,
+        "name": "Худі SYVAK Затишниця р 50 чорний (61258)",
+        "image": "images/products/2025/12/61257.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61237",
+        "ean": "2999995997854",
+        "price": 2500.0,
+        "name": "Худі SYVAK Колоска р 44 Бежевий (61237)",
+        "image": "images/products/2025/12/61237.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61238",
+        "ean": "2999995997847",
+        "price": 2500.0,
+        "name": "Худі SYVAK Колоска р 50 Бежевий (61238)",
+        "image": "images/products/2025/12/61237.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61259",
+        "ean": "2999995997625",
+        "price": 2500.0,
+        "name": "Худі SYVAK Колоска р 44 чорний (61259)",
+        "image": "images/products/2025/12/61259.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61260",
+        "ean": "2999995997618",
+        "price": 2500.0,
+        "name": "Худі SYVAK Колоска р 50 чорний (61260)",
+        "image": "images/products/2025/12/61259.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61241",
+        "ean": "2999995997816",
+        "price": 3500.0,
+        "name": "Худі SYVAK Маковія р 44 Бежевий (61241)",
+        "image": "images/products/2025/12/61241.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61242",
+        "ean": "2999995997809",
+        "price": 3500.0,
+        "name": "Худі SYVAK Маковія р 50 Бежевий (61242)",
+        "image": "images/products/2025/12/61241.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61263",
+        "ean": "2999995997588",
+        "price": 3500.0,
+        "name": "Худі SYVAK Маковія р 44 чорний (61263)",
+        "image": "images/products/2025/12/61263.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61264",
+        "ean": "2999995997571",
+        "price": 3500.0,
+        "name": "Худі SYVAK Маковія р 50 чорний (61264)",
+        "image": "images/products/2025/12/61263.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61243",
+        "ean": "2999995997793",
+        "price": 2500.0,
+        "name": "Худі SYVAK Обрана р 44 Бежевий (61243)",
+        "image": "images/products/2025/12/61243.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61244",
+        "ean": "2999995997786",
+        "price": 2500.0,
+        "name": "Худі SYVAK Обрана р 50 Бежевий (61244)",
+        "image": "images/products/2025/12/61243.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61265",
+        "ean": "2999995997564",
+        "price": 2500.0,
+        "name": "Худі SYVAK Обрана р 44 чорний (61265)",
+        "image": "images/products/2025/12/61265.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61266",
+        "ean": "2999995997557",
+        "price": 2500.0,
+        "name": "Худі SYVAK Обрана р 50 чорний (61266)",
+        "image": "images/products/2025/12/61265.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61245",
+        "ean": "2999995997779",
+        "price": 3500.0,
+        "name": "Худі SYVAK Осяяна р 44 Бежевий (61245)",
+        "image": "images/products/2025/12/61245.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61246",
+        "ean": "2999995997762",
+        "price": 3500.0,
+        "name": "Худі SYVAK Осяяна р 50 Бежевий (61246)",
+        "image": "images/products/2025/12/61245.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61267",
+        "ean": "2999995997540",
+        "price": 3500.0,
+        "name": "Худі SYVAK Осяяна р 44 чорний (61267)",
+        "image": "images/products/2025/12/61267.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61268",
+        "ean": "2999995997533",
+        "price": 3500.0,
+        "name": "Худі SYVAK Осяяна р 50 чорний (61268)",
+        "image": "images/products/2025/12/61267.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61247",
+        "ean": "2999995997755",
+        "price": 3500.0,
+        "name": "Худі SYVAK Газдиня р 44 Бежевий (61247)",
+        "image": "images/products/2025/12/61247.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61248",
+        "ean": "2999995997748",
+        "price": 3500.0,
+        "name": "Худі SYVAK Газдиня р 50 Бежевий (61248)",
+        "image": "images/products/2025/12/61247.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61251",
+        "ean": "2999995997700",
+        "price": 3500.0,
+        "name": "Худі SYVAK Газдиня р 44 чорний (61251)",
+        "image": "images/products/2025/12/61251.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61252",
+        "ean": "2999995997694",
+        "price": 3500.0,
+        "name": "Худі SYVAK Газдиня р 50 чорний (61252)",
+        "image": "images/products/2025/12/61251.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61239",
+        "ean": "2999995997830",
+        "price": 3500.0,
+        "name": "Худі SYVAK Ладана р 44 Бежевий (61239)",
+        "image": "images/products/2025/12/61239.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61240",
+        "ean": "2999995997823",
+        "price": 3500.0,
+        "name": "Худі SYVAK Ладана р 50 Бежевий (61240)",
+        "image": "images/products/2025/12/61239.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61261",
+        "ean": "2999995997601",
+        "price": 3500.0,
+        "name": "Худі SYVAK Ладана р 44 чорний (61261)",
+        "image": "images/products/2025/12/61261.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61262",
+        "ean": "2999995997595",
+        "price": 3500.0,
+        "name": "Худі SYVAK Ладана р 50 чорний (61262)",
+        "image": "images/products/2025/12/61261.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61380",
+        "ean": "2999995996442",
+        "price": 2500.0,
+        "name": "Худі SYVAK Кольорові думки р 44 бежевий (61380)",
+        "image": "images/products/2025/12/61380.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61381",
+        "ean": "2999995996435",
+        "price": 2500.0,
+        "name": "Худі SYVAK Кольорові думки р 50 бежевий (61381)",
+        "image": "images/products/2025/12/61380.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61378",
+        "ean": "2999995996466",
+        "price": 2500.0,
+        "name": "Худі SYVAK Кольорові думки р 44 чорний (61378)",
+        "image": "images/products/2025/12/61378.png",
+        "image_ext": "png"
+    },
+    {
+        "sku": "61379",
+        "ean": "2999995996459",
+        "price": 2500.0,
+        "name": "Худі SYVAK Кольорові думки р 50 чорний (61379)",
+        "image": "images/products/2025/12/61378.png",
+        "image_ext": "png"
+    }
+]
