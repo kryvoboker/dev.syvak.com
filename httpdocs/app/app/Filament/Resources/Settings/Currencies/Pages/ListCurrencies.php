@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Settings\Currencies\Pages;
 
 use App\Filament\Resources\Settings\Currencies\CurrencyResource;
-use App\Services\Currency\UpdateRates;
+use App\Services\Currency\UpdateRatesService;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -51,7 +51,7 @@ class ListCurrencies extends ListRecords
                 ->modalHeading(__('admin/default.success.title'))
                 ->modalDescription(__('admin/settings/currencies.actions.modal_update_rates_body'))
                 ->action(function (): void {
-                     $error_message = app(UpdateRates::class)->handle();
+                     $error_message = app(UpdateRatesService::class)->handle();
 
                     if ($error_message) {
                         Notification::make()

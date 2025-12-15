@@ -87,6 +87,7 @@ return [
     'locales' => array_filter(
         explode(',', env('APP_ALLOWED_LOCALES', 'en'))
     ),
+    'default_locale' => env('APP_DEFAULT_LOCALE', 'en'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
@@ -142,6 +143,7 @@ return [
         'coordinates' => '/^-?\d{1,2}\.\d+,\s?-?\d{1,3}\.\d+$/',
     ],
     'currency'                  => [
+        'json_url'                => env('CURRENCY_JSON_URL'),
         'default_currency_code'   => env('DEFAULT_CURRENCY_CODE'),
         'default_exchange_rate'   => (float)env('DEFAULT_EXCHANGE_RATE'),
         'default_currency_symbol' => env('DEFAULT_CURRENCY_SYMBOL'),

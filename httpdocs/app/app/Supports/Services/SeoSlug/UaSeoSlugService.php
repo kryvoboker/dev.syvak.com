@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
  *  "Футболка червона з білими кружечками"
  *    -> "futbolka-chervona-z-bilymy-kruzhechkamy"
  */
-final class UaSeoSlug
+final class UaSeoSlugService
 {
     /**
      * @param string $text    Source text (UA/RU/EN mixed ok)

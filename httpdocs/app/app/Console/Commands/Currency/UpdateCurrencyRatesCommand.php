@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\Currency;
 
-use App\Services\Currency\UpdateRates;
+use App\Services\Currency\UpdateRatesService;
 use Exception;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Command\Command as CommandAlias;
@@ -31,7 +31,7 @@ class UpdateCurrencyRatesCommand extends Command
      */
     public function handle(): int
     {
-        $error_message = app(UpdateRates::class)->handle();
+        $error_message = app(UpdateRatesService::class)->handle();
 
         if ($error_message) {
             $this->error($error_message);

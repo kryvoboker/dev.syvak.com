@@ -13,7 +13,7 @@ use Intervention\Image\ImageManager;
 use InvalidArgumentException;
 use RuntimeException;
 
-final readonly class ImageUrlBuilder
+final readonly class ImageUrlBuilderService
 {
     public function __construct(
         private Request $request,
@@ -61,8 +61,8 @@ final readonly class ImageUrlBuilder
 
         // Queue conversion job (idempotent inside job)
         ConvertImagePrototypeJob::dispatch(
-            originalRelativePath : $path,
-            prototypeRelativePath: $prototype_rel,
+            original_relative_path : $path,
+            prototype_relative_path: $prototype_rel,
             width                : $width,
             height               : $height,
         )->onQueue('images');

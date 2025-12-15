@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Catalogs\Attributes;
 
+use App\Models\Catalogs\Products\ProductAttributeTextHash;
 use App\Models\Catalogs\Products\ProductToAttribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,14 @@ class Attribute extends Model
             'sort_order' => 'integer',
             'is_active'  => 'boolean',
         ];
+    }
+
+    /**
+     * @return HasMany<ProductAttributeTextHash>
+     */
+    public function productAttributeTextHash(): HasMany
+    {
+        return $this->hasMany(ProductAttributeTextHash::class);
     }
 
     /**

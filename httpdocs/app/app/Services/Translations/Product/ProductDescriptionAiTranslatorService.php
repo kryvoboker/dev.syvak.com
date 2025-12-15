@@ -1,0 +1,64 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Translations\Product;
+
+use App\Abstratcts\Ai\AiDbCachedTranslatorAbstract;
+use App\Models\Catalogs\Products\ProductDescriptionHash;
+use App\Services\Ai\OpenAiTranslatorService;
+use Illuminate\Database\Eloquent\Model;
+
+class ProductDescriptionAiTranslatorService extends AiDbCachedTranslatorAbstract
+{
+    /**
+     * @inheritDoc
+     */
+    public function __construct(
+        OpenAiTranslatorService $ai,
+        private readonly int    $product_id,
+    ) {
+        parent::__construct($ai);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function findCached(string $hash): ?string
+    {
+        $product_description_hash = ProductDescriptionHash::getDescriptionHash($this->product_id, $hash);
+
+        $this->setProductDescriptionHash($product_description_hash);
+
+        $ai_answer_cache = $product_description_hash
+            ?->aiAnswerCache()
+            ->first();
+
+        return $ai_answer_cache?->answer;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model
+    {
+        $product_description_hash = $this->getProductDescriptionHash();
+
+        if ($product_description_hash === null) {
+            $product_description_hash = ProductDescriptionHash::create([
+                'product_id' => $this->product_id,
+                'hash'       => $hash,
+            ]);
+        }
+
+        return $product_description_hash
+            ?->aiAnswerCache()
+            ->updateOrCreate(
+                [],
+                [
+                    'prompt' => $prompt,
+                    'answer' => $translated_text,
+                ],
+            );
+    }
+}

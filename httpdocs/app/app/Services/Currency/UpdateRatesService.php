@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class UpdateRates
+class UpdateRatesService
 {
     public function handle(): string|null
     {
@@ -21,7 +21,7 @@ class UpdateRates
             return __('admin/settings/currencies.error_absent_default_currency');
         }
 
-        $json_url = 'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json';
+        $json_url = config('app.currency.json_url');
 
         try {
             $response = Http::timeout(10)->get($json_url);

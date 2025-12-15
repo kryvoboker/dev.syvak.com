@@ -147,4 +147,19 @@ class Language extends Model
             ->where('is_default', true)
             ->first();
     }
+
+    /**
+     * @param string $code
+     *
+     * @return Collection
+     */
+    public function getActiveLanguagesWithoutExceptCode(string $code): Collection
+    {
+        return self::query()
+            ->where('is_active', true)
+            ->where('code', '!=', $code)
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get();
+    }
 }

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
@@ -47,6 +48,54 @@ class Product extends Model
             'date_added'     => 'datetime',
             'is_active'      => 'boolean',
         ];
+    }
+
+    /**
+     * @return HasMany<ProductNameHash>
+     */
+    public function productNameHash(): HasMany
+    {
+        return $this->hasMany(ProductNameHash::class);
+    }
+
+    /**
+     * @return HasMany<ProductDescriptionHash>
+     */
+    public function productDescriptionHash(): HasMany
+    {
+        return $this->hasMany(ProductDescriptionHash::class);
+    }
+
+    /**
+     * @return HasMany<ProductAttributeTextHash>
+     */
+    public function productAttributeTextHash(): HasMany
+    {
+        return $this->hasMany(ProductAttributeTextHash::class);
+    }
+
+    /**
+     * @return HasOne<ProductNameHash>
+     */
+    public function latestProductNameHash(): HasOne
+    {
+        return $this->hasOne(ProductNameHash::class)->latestOfMany('updated_at');
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function lagestProductDescriptionHash(): HasOne
+    {
+        return $this->hasOne(ProductDescriptionHash::class)->latestOfMany('updated_at');
+    }
+
+    /**
+     * @return HasOne<ProductAttributeTextHash>
+     */
+    public function latestProductAttributeTextHash(): HasOne
+    {
+        return $this->hasOne(ProductAttributeTextHash::class)->latestOfMany('updated_at');
     }
 
     /**

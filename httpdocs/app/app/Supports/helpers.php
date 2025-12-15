@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Supports\Services\Images\ImageUrlBuilder;
+use App\Supports\Services\Images\ImageUrlBuilderService;
 
 if (!function_exists('clear_telephone')) {
     /**
@@ -74,6 +74,6 @@ if (! function_exists('img_cached_url')) {
      */
     function img_cached_url(string $path, int $width, ?int $height = null): string
     {
-        return app(ImageUrlBuilder::class)->url($path, $width, $height);
+        return app(ImageUrlBuilderService::class)->url($path, $width, $height);
     }
 }
