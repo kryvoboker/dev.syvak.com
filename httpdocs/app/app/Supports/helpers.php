@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Supports\Services\Images\ImageUrlBuilderService;
+use App\Services\Images\ImageUrlBuilderService;
 
 if (!function_exists('clear_telephone')) {
     /**

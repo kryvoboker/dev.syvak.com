@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Services\Images\ImageUrlBuilderService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
                 'logging.channels.stack.path'  => $new_storage_path . '/logs/laravel.log',
             ]);
         }
+
+        $this->app->singleton(ImageUrlBuilderService::class);
     }
 
     /**
