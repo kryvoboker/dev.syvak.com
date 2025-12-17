@@ -1,16 +1,16 @@
-FROM nginx:1.29.1
+FROM nginx:1.29.1-alpine3.22 AS base
 
-WORKDIR /var/www/html
+WORKDIR /var/www/app
 
-RUN apt-get update \
-    && apt-get -y install tzdata \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache tzdata
 
 ENV TZ=Europe/Kyiv
 
-# set time zone in container
-RUN ln -fs /usr/share/zoneinfo/Europe/Kyiv /etc/localtime \
-    && dpkg-reconfigure -f noninteractive tzdata
+# Set time zone in container
+RUN cp /usr/share/zoneinfo/Europe/Kyiv /etc/localtime \
+    && echo "Europe/Kyiv" > /etc/timezone
+
+FROM base AS development
 
 # Import UID and GID
 ARG UID=1000
@@ -24,8 +24,8 @@ ENV UMASK=${UMASK}
 # Create www-data user with proper shell (Debian syntax)
 RUN deluser www-data 2>/dev/null || true \
     && delgroup www-data 2>/dev/null || true \
-    && groupadd -g ${GID} www-data \
-    && useradd -u ${UID} -g www-data -s /bin/bash -m www-data
+    && addgroup -g ${GID} www-data \
+    && adduser -D -u ${UID} -G www-data -s /bin/bash www-data
 
 # Set proper permissions for nginx directories
 RUN chown -R www-data:www-data /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \

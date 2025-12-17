@@ -32,12 +32,12 @@ services:
   dev-syvak-cron:
     build:
       context: $PWD
-      dockerfile: ../../.docker/dev/cron/Dockerfile
+      dockerfile: .docker/dev/cron/Dockerfile
       args:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
-    image: dev-syvak-cron:1.0
+    image: dev-syvak-cron:1.0-alpine
     container_name: dev-syvak-cron
     restart: unless-stopped
     env_file:
@@ -67,7 +67,7 @@ services:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
-    image: dev-syvak-nginx:1.0
+    image: dev-syvak-nginx:1.0-alpine
     container_name: dev-syvak-nginx
     env_file:
       - ../../.docker/dev/env/.env
