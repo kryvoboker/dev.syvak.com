@@ -1,4 +1,4 @@
-FROM mariadb:10.11.5 AS base
+FROM mariadb:10.11.5
 
 RUN apt-get update \
     && apt-get -y install tzdata \
@@ -9,8 +9,6 @@ ENV TZ=Europe/Kyiv
 # set time zone in container
 RUN ln -fs /usr/share/zoneinfo/Europe/Kyiv /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata
-
-FROM base AS development
 
 # Import UID and GID from docker compose
 ARG UID=1000

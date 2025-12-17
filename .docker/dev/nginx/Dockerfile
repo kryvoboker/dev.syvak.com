@@ -1,4 +1,4 @@
-FROM nginx:1.29.1-alpine3.22 AS base
+FROM nginx:1.29.1-alpine3.22
 
 WORKDIR /var/www/app
 
@@ -9,8 +9,6 @@ ENV TZ=Europe/Kyiv
 # Set time zone in container
 RUN cp /usr/share/zoneinfo/Europe/Kyiv /etc/localtime \
     && echo "Europe/Kyiv" > /etc/timezone
-
-FROM base AS development
 
 # Import UID and GID
 ARG UID=1000
