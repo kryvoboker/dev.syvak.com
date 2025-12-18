@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr">
 <head>
     <meta name="robots" content="none">
 
@@ -16,6 +16,7 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" onload="this.rel='stylesheet'">
 
     @vite(['resources/assets/catalog/css/app.css'])
+    @stack('styles')
 </head>
 
 <body>
@@ -30,5 +31,6 @@
 </div>
 
 @vite(['resources/assets/catalog/ts/index.ts'])
+@stack('scripts')
 </body>
 </html>
