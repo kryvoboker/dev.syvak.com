@@ -3,13 +3,13 @@
     "baseUrl": ".",
     "paths": {
       "@ts-shared/*": [
-        "./resources/assets/ts/shared/*"
+        "./resources/assets/catalog/ts/shared/*"
       ],
       "@ts-features/*": [
-        "./resources/assets/ts/features/*"
+        "./resources/assets/catalog/ts/features/*"
       ],
       "@ts-stores/*": [
-        "./resources/assets/ts/stores/*"
+        "./resources/assets/catalog/ts/stores/*"
       ]
     },
     "target": "ES2024",
@@ -52,7 +52,7 @@
     ]
   },
   "include": [
-    "./resources/assets/ts/**/*.ts",
+    "./resources/assets/catalog/ts/**/*.ts",
     "./vite.config.ts",
     "./vite-env.d.ts"
   ],

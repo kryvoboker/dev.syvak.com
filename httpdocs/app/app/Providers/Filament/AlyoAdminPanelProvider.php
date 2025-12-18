@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\LogFilamentErrors;
 use App\Http\Middleware\SetDefaultLocalePrefix;
+use App\Http\Middleware\User\SetCommonPreferences;
 use App\Models\Settings\Language;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -38,7 +40,7 @@ class AlyoAdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
-            ->viteTheme('resources/css/filament/alyo-admin/theme.css')
+            ->viteTheme('resources/assets/filament/alyo-admin/theme.css')
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 function (): View {
@@ -83,7 +85,9 @@ class AlyoAdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                SetCommonPreferences::class,
                 SetDefaultLocalePrefix::class,
+                LogFilamentErrors::class
             ])
             ->authMiddleware([
                 Authenticate::class,

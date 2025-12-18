@@ -1,5 +1,4 @@
 import { defineConfig, UserConfig } from "vite";
-import { resolve }                  from 'path';
 import { fileURLToPath }            from 'url';
 import { dirname }                  from 'node:path';
 import path                         from "node:path";
@@ -10,40 +9,37 @@ import laravel                      from "laravel-vite-plugin";
 // Resolve __dirname and __filename for ESM
 // This is necessary because ESM does not have __dirname and __filename by default
 // And we can't use debagger to resolve them
-const __filename = fileURLToPath(import.meta.url);
-const __dirname  = dirname(__filename);
+const __filename: string = fileURLToPath(import.meta.url);
+const __dirname: string  = dirname(__filename);
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction: boolean = process.env.NODE_ENV === 'production';
 
-export default defineConfig(() : UserConfig => {
+export default defineConfig((): UserConfig => {
     return {
-        root:  resolve(__dirname, './'),
-        base:  isProduction ? resolve(__dirname, '../httpdocs') : '/',
-        build: {
-            outDir:    'build',
+        build:   {
             sourcemap: isProduction ? 'hidden' : true,
-            manifest:  true,
         },
         plugins: [
             laravel({
-                input:   [
-                    'resources/css/filament/alyo-admin/theme.css',
-                    './resources/assets/css/app.css',
-                    './resources/assets/css/libs/leaflet.css',
+                publicDirectory: '../html',
+                input:           [
+                    'resources/assets/filament/alyo-admin/theme.css',
+                    './resources/assets/catalog/css/app.css',
+                    './resources/assets/catalog/css/libs/leaflet.css',
                     './node_modules/choices.js/src/styles/choices.scss',
                     './node_modules/@fancyapps/ui/dist/fancybox/fancybox.css',
 
-                    './resources/assets/ts/index.ts',
+                    './resources/assets/catalog/ts/index.ts',
                 ],
-                refresh: true,
+                refresh:         true,
             }),
             tailwindcss(),
         ],
         resolve: {
             alias: {
-                '@ts-shared':   path.resolve(__dirname, './resources/assets/ts/shared'),
-                '@ts-features': path.resolve(__dirname, './resources/assets/ts/features'),
-                '@ts-stores':   path.resolve(__dirname, './resources/assets/ts/stores'),
+                '@ts-shared':   path.resolve(__dirname, './resources/assets/catalog/ts/shared'),
+                '@ts-features': path.resolve(__dirname, './resources/assets/catalog/ts/features'),
+                '@ts-stores':   path.resolve(__dirname, './resources/assets/catalog/ts/stores'),
             },
         }
     };

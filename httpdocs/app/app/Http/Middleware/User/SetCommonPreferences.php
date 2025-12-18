@@ -32,7 +32,7 @@ class SetCommonPreferences
             ]);
         }
 
-        if ($app_settings !== null && !empty($app_settings->timezone)) {
+        if ($app_settings !== null && !empty($app_settings->timezone) && in_array($app_settings->timezone, timezone_identifiers_list())) {
             config(['app.timezone' => $app_settings->timezone]);
 
             date_default_timezone_set($app_settings->timezone);
