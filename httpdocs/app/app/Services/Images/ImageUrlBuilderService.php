@@ -22,16 +22,23 @@ final readonly class ImageUrlBuilderService
     /**
      * Generate URL for image with specified dimensions.
      *
-     * @param string   $path   Original path (relative to public), e.g: "images/products/2025/12/ABC123.jpg"
-     * @param int      $width  Required width
-     * @param int|null $height Required height (defaults to width)
+     * @param string|null $path   Original path (relative to public), e.g: "images/products/2025/12/ABC123.jpg"
+     * @param int         $width  Required width
+     * @param int|null    $height Required height (defaults to width)
+     *
+     * @return string
      */
-    public function url(string $path, int $width, ?int $height = null): string
+    public function url(?string $path, int $width, ?int $height = null): string
     {
+        $path   = (string)$path;
         $height ??= $width;
 
         $path = Str::ltrim($path, '/');
         $this->validateArgs($path, $width, $height);
+
+        if (Storage::fileExists($path) === false) {
+            return $path;
+        }
 
         // 1) If browser supports AVIF - try to return AVIF (if exists)
         if ($this->clientSupports('image/avif')) {
@@ -63,8 +70,8 @@ final readonly class ImageUrlBuilderService
         ConvertImagePrototypeJob::dispatch(
             original_relative_path : $path,
             prototype_relative_path: $prototype_rel,
-            width                : $width,
-            height               : $height,
+            width                  : $width,
+            height                 : $height,
         )->onQueue('images');
 
         // 4) Return prototype
@@ -78,7 +85,7 @@ final readonly class ImageUrlBuilderService
      *
      * @return void
      */
-    private function validateArgs(string $path, int $width, int $height): void
+    private function validateArgs(string &$path, int $width, int $height): void
     {
         if ($width < 1 || $height < 1) {
             throw new InvalidArgumentException('Width/height must be >= 1.');
@@ -92,8 +99,8 @@ final readonly class ImageUrlBuilderService
         // Original file must exist
         $abs = Storage::path($path);
 
-        if (!Storage::fileExists($abs)) {
-            throw new RuntimeException("Original image not found: $path");
+        if (Storage::fileExists($abs) === false) {
+            $path = config('app.images.no_image');
         }
     }
 

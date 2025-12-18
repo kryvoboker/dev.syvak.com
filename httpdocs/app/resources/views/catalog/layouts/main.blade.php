@@ -21,13 +21,13 @@
 
 <body>
 <div class="wrapper">
-    @include('layouts.partials.header')
+    @include('catalog.layouts.partials.header')
 
     <main class="main">
         @yield('content')
     </main>
 
-    @include('layouts.partials.footer')
+    @include('catalog.layouts.partials.footer')
 </div>
 
 @vite(['resources/assets/catalog/ts/index.ts'])

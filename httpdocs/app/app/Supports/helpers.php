@@ -66,13 +66,13 @@ if (!function_exists('trim_strs_in_arr')) {
 
 if (! function_exists('img_cached_url')) {
     /**
-     * @param string   $path
-     * @param int      $width
-     * @param int|null $height
+     * @param string|null $path
+     * @param int         $width
+     * @param int|null    $height
      *
      * @return string
      */
-    function img_cached_url(string $path, int $width, ?int $height = null): string
+    function img_cached_url(?string $path, int $width, ?int $height = null): string
     {
         return app(ImageUrlBuilderService::class)->url($path, $width, $height);
     }

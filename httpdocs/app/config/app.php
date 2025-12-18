@@ -84,7 +84,7 @@ return [
 
     'locale' => env('APP_LOCALE', 'en'),
 
-    'locales' => array_filter(
+    'locales'        => array_filter(
         explode(',', env('APP_ALLOWED_LOCALES', 'en'))
     ),
     'default_locale' => env('APP_DEFAULT_LOCALE', 'en'),
@@ -152,6 +152,10 @@ return [
     ],
     'images'                    => [
         'image_version' => env('IMAGE_VERSION'),
+        'path_to_logo'  => env('PATH_TO_LOGO_IMAGE'),
+        'logo_width'    => (int)env('LOGO_IMAGE_WIDTH'),
+        'logo_height'   => (int)env('LOGO_IMAGE_HEIGHT'),
+        'no_image'      => env('DEFAULT_NO_IMAGE_PATH'),
         'category'      => [
             'upload'                   => [
                 'max_size_kb' => (int)env('MAX_UPLOAD_CATEGORY_IMAGE_SIZE_KB', 5120), // 5 MB,
@@ -197,6 +201,10 @@ return [
             ],
             'image_path'               => env('AVATARS_PATH') . '/' . date('Y/m'),
         ]
+    ],
+    'categories'                => [
+        'hoodie_id'          => (int)env('CATEGORY_HOODIE_ID'),
+        'exclusive_gifts_id' => (int)env('CATEGORY_EXCLUSIVE_GIFTS_ID'),
     ],
 
 ];

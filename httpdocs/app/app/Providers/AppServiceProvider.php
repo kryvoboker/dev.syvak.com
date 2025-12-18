@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Services\AppSettingsService;
 use App\Services\Images\ImageUrlBuilderService;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->app->singleton(ImageUrlBuilderService::class);
+        $this->app->singleton(AppSettingsService::class);
     }
 
     /**
@@ -48,5 +51,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         require_once app_path('Supports/helpers.php');
+
+        $app_settings_service = app(AppSettingsService::class);
+        $app_settings_service->setSettings();
+
+        View::share('app_settings', $app_settings_service->getSettings());
     }
 }
