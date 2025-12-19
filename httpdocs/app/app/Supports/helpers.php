@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Data\AppSettingsData;
+use App\Services\AppSettingsService;
 use App\Services\Images\ImageUrlBuilderService;
 
 if (!function_exists('clear_telephone')) {
@@ -64,7 +66,7 @@ if (!function_exists('trim_strs_in_arr')) {
     }
 }
 
-if (! function_exists('img_cached_url')) {
+if (!function_exists('img_cached_url')) {
     /**
      * @param string|null $path
      * @param int         $width
@@ -75,5 +77,42 @@ if (! function_exists('img_cached_url')) {
     function img_cached_url(?string $path, int $width, ?int $height = null): string
     {
         return app(ImageUrlBuilderService::class)->url($path, $width, $height);
+    }
+}
+
+if (!function_exists('multiple_img_cached_url')) {
+    /**
+     * @param string|null $path
+     * @param int         $width
+     * @param int|null    $height
+     *
+     * @return array
+     */
+    function multiple_img_cached_url(?string $path, int $width, ?int $height = null): array
+    {
+        return app(ImageUrlBuilderService::class)->multipleUrl($path, $width, $height);
+    }
+}
+
+if (!function_exists('get_app_settings')) {
+    /**
+     * @return AppSettingsData|null
+     */
+    function get_app_settings(): ?AppSettingsData
+    {
+        return app(AppSettingsService::class)->getSettings();
+    }
+}
+
+if (!function_exists('breadcrumb')) {
+    /**
+     * @param string      $title
+     * @param string|null $url
+     *
+     * @return array
+     */
+    function breadcrumb(string $title, ?string $url = null): array
+    {
+        return ['title' => $title, 'url' => $url];
     }
 }

@@ -11,13 +11,38 @@ use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 use InvalidArgumentException;
-use RuntimeException;
 
 final readonly class ImageUrlBuilderService
 {
     public function __construct(
         private Request $request,
     ) {}
+
+    /**
+     * @param string|null $path
+     * @param int         $width
+     * @param int|null    $height
+     *
+     * @return string[]
+     */
+    public function multipleUrl(?string $path, int $width, ?int $height = null): array
+    {
+        $total_sizes_for_generate = (int)config('app.images.total_sizes_for_generate');
+        $path                     = (string)$path;
+        $height                   ??= $width;
+
+        $this->chechSourceImage($path);
+
+        $urls = [
+            'original_thumb' => $this->assetVersioned($path),
+        ];
+
+        for ($scale = 1; $scale <= $total_sizes_for_generate; $scale++) {
+            $urls["thumb_{$scale}x"] = $this->url($path, $width * $scale, $height * $scale);
+        }
+
+        return $urls;
+    }
 
     /**
      * Generate URL for image with specified dimensions.
@@ -36,8 +61,23 @@ final readonly class ImageUrlBuilderService
         $path = Str::ltrim($path, '/');
         $this->validateArgs($path, $width, $height);
 
-        if (Storage::fileExists($path) === false) {
+        if (
+            Storage::fileExists($path) === false ||
+            $width > (int)config('app.images.max_image_width_for_convert') ||
+            $height > (int)config('app.images.max_image_height_for_convert')
+        ) {
             return $path;
+        }
+
+        $image_size = getimagesize(Storage::path($path));
+
+        // If original image is smaller or equal than requested size - return original
+        if ($image_size !== false) {
+            [$original_width, $original_height] = $image_size;
+
+            if ($original_width < $width && $original_height < $height) {
+                return $this->assetVersioned($path);
+            }
         }
 
         // 1) If browser supports AVIF - try to return AVIF (if exists)
@@ -88,19 +128,26 @@ final readonly class ImageUrlBuilderService
     private function validateArgs(string &$path, int $width, int $height): void
     {
         if ($width < 1 || $height < 1) {
-            throw new InvalidArgumentException('Width/height must be >= 1.');
+            throw new InvalidArgumentException('Width/height must be >= 1!');
         }
 
         // Basic protection against path traversal
         if (Str::contains($path, ['../', '..\\'])) {
-            throw new InvalidArgumentException('Invalid image path.');
+            throw new InvalidArgumentException('Invalid image path!');
         }
 
-        // Original file must exist
-        $abs = Storage::path($path);
+        $this->chechSourceImage($path);
+    }
 
-        if (Storage::fileExists($abs) === false) {
-            $path = config('app.images.no_image');
+    /**
+     * @param string $path
+     *
+     * @return void
+     */
+    private function chechSourceImage(string &$path): void
+    {
+        if (Storage::fileExists($path) === false) {
+            $path = config('app.images.default_no_image');
         }
     }
 
@@ -124,7 +171,7 @@ final readonly class ImageUrlBuilderService
     private function assetVersioned(string $public_relative): string
     {
         $v   = (string)config('app.images.image_version');
-        $url = asset($public_relative);
+        $url = asset("storage/$public_relative");
 
         // Add version to query string
         $sep = Str::contains($url, '?') ? '&' : '?';
@@ -184,7 +231,7 @@ final readonly class ImageUrlBuilderService
 
         $file = sprintf('%s_%d_%d.%s', $name, $w, $h, $ext);
 
-        return Str::trim("cache/prototype/$dir/$file", '/');
+        return Str::trim("$dir/cache/prototype/$file", '/');
     }
 
     /**
@@ -200,7 +247,7 @@ final readonly class ImageUrlBuilderService
         [$dir, $name] = $this->splitPath($original_path);
         $file = sprintf('%s_%d_%d.%s', $name, $w, $h, $format);
 
-        return Str::trim("cache/$format/$dir/$file", '/');
+        return Str::trim("$dir/cache/$format/$file", '/');
     }
 
     /**
@@ -230,6 +277,6 @@ final readonly class ImageUrlBuilderService
         $image = $image->cover($w, $h);
 
         // Save in original format (extension already in filename)
-        $image->save($dst);
+        $image->save($dst, quality: (int)config('app.images.prototype_quality'));
     }
 }

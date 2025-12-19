@@ -20,7 +20,7 @@ class SetCommonPreferences
     public function handle(Request $request, Closure $next): Response
     {
         $currency     = new Currency()->getDefaultActiveCurrency();
-        $app_settings = new AppSetting()->getAppSettings();
+        $app_settings = get_app_settings();
 
         if ($currency !== null) {
             config([

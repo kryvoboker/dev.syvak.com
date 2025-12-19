@@ -324,7 +324,7 @@ class ProductForm
      */
     protected static function getCategoryHierarchy(int $language_id): array
     {
-        $categories = new Category()->getActiveCategoryWithDescriptionsAndPathByLanguageId($language_id);
+        $categories = new Category()->getActiveCategoriesWithDescriptionsAndPathByLanguageId($language_id);
 
         $hierarchy = [];
 
@@ -360,7 +360,7 @@ class ProductForm
         );
 
         // Get all categories in the path with descriptions
-        $categories = new Category()->getActiveCategoryWithDescriptionsByLanguageId($language_id, $path_ids)
+        $categories = new Category()->getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds($language_id, $path_ids)
             ->keyBy('id');
 
         $path = [];

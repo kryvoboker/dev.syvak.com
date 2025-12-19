@@ -6,7 +6,9 @@ namespace App\Services;
 
 use App\Data\AppSettingsData;
 use App\Models\Settings\AppSetting;
+use App\Models\Settings\Language;
 use Illuminate\Support\Facades\Cache;
+use RuntimeException;
 
 final class AppSettingsService
 {
@@ -14,7 +16,7 @@ final class AppSettingsService
     private const int    TTL       = 3600; // 1 hour
 
     /**
-     * @return AppSetting|null
+     * @return AppSettingsData|null
      */
     public function getSettings(): ?AppSettingsData
     {
@@ -30,7 +32,16 @@ final class AppSettingsService
             self::CACHE_KEY,
             self::TTL,
             function () {
-                return AppSettingsData::from(new AppSetting()->getAppSettings() ?? []);
+                $language_id = new Language()->getLanguageByCode(app()->getLocale())?->id;
+
+                if ($language_id === null) {
+                    throw new RuntimeException('Current language not found!');
+                }
+
+                return AppSettingsData::from(array_merge(
+                    new AppSetting()->getAppSettings()?->toArray() ?? [],
+                    compact('language_id')
+                ));
             });
     }
 

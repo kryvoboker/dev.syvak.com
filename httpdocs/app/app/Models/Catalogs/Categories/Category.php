@@ -184,7 +184,7 @@ class Category extends Model
      *
      * @return Collection
      */
-    public function getActiveCategoryWithDescriptionsByLanguageId(int $language_id, array $path_ids): Collection
+    public function getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds(int $language_id, array $path_ids): Collection
     {
         return self::query()
             ->with([
@@ -201,7 +201,7 @@ class Category extends Model
      *
      * @return Collection
      */
-    public function getActiveCategoryWithDescriptionsAndPathByLanguageId(int $language_id): Collection
+    public function getActiveCategoriesWithDescriptionsAndPathByLanguageId(int $language_id): Collection
     {
         return self::query()
             ->with([

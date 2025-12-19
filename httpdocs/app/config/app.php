@@ -151,12 +151,18 @@ return [
         'default_decimal_places'  => (int)env('DEFAULT_CURRENCY_DECIMAL_PLACES', 2),
     ],
     'images'                    => [
-        'image_version' => env('IMAGE_VERSION'),
-        'path_to_logo'  => env('PATH_TO_LOGO_IMAGE'),
-        'logo_width'    => (int)env('LOGO_IMAGE_WIDTH'),
-        'logo_height'   => (int)env('LOGO_IMAGE_HEIGHT'),
-        'no_image'      => env('DEFAULT_NO_IMAGE_PATH'),
-        'category'      => [
+        'image_version'                => env('IMAGE_VERSION'),
+        'path_to_logo'                 => env('PATH_TO_LOGO_IMAGE'),
+        'logo_width'                   => (int)env('LOGO_IMAGE_WIDTH'),
+        'logo_height'                  => (int)env('LOGO_IMAGE_HEIGHT'),
+        'default_no_image'             => env('DEFAULT_NO_IMAGE_PATH'),
+        'prototype_quality'            => (int)env('PROTOTYPE_IMAGE_QUALITY'),
+        'webp_quality'                 => (int)env('WEBP_IMAGE_QUALITY'),
+        'avif_quality'                 => (int)env('AVIF_IMAGE_QUALITY'),
+        'total_sizes_for_generate'     => (int)env('TOTAL_IMAGE_SIZES_FOR_GENERATE'),
+        'max_image_width_for_convert'  => (int)env('MAX_IMAGE_WIDTH_FOR_CONVERT'),
+        'max_image_height_for_convert' => (int)env('MAX_IMAGE_HEIGHT_FOR_CONVERT'),
+        'category'                     => [
             'upload'                   => [
                 'max_size_kb' => (int)env('MAX_UPLOAD_CATEGORY_IMAGE_SIZE_KB', 5120), // 5 MB,
             ],
@@ -171,7 +177,7 @@ return [
             ],
             'image_path'               => env('CATEGORIES_IMAGES_PATH', 'images/categories') . '/' . date('Y/m'),
         ],
-        'product'       => [
+        'product'                      => [
             'upload'                   => [
                 'max_size_kb' => (int)env('MAX_UPLOAD_PRODUCT_IMAGE_SIZE_KB', 5120), // 5 MB,
             ],
@@ -186,7 +192,7 @@ return [
             ],
             'image_path'               => env('PRODUCTS_IMAGES_PATH', 'images/products') . '/' . date('Y/m'),
         ],
-        'user'          => [
+        'user'                         => [
             'upload'                   => [
                 'max_size_kb' => (int)env('MAX_UPLOAD_USER_IMAGE_SIZE_KB', 5120), // 5 MB,
             ],

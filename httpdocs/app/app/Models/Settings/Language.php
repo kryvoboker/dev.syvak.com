@@ -8,7 +8,7 @@ use App\Models\Slug;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
 
 class Language extends Model
@@ -115,7 +115,7 @@ class Language extends Model
     }
 
     /**
-     * @return Collection
+     * @return Collection<Language>
      */
     public function getActiveLanguages(): Collection
     {
