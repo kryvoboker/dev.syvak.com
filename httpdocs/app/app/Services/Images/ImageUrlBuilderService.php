@@ -22,23 +22,25 @@ final readonly class ImageUrlBuilderService
      * @param string|null $path
      * @param int         $width
      * @param int|null    $height
+     * @param bool        $is_square
+     * @param string      $bg_color HEX or transparent color
      *
      * @return string[]
      */
-    public function multipleUrl(?string $path, int $width, ?int $height = null): array
+    public function multipleUrl(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): array
     {
         $total_sizes_for_generate = (int)config('app.images.total_sizes_for_generate');
         $path                     = (string)$path;
         $height                   ??= $width;
 
-        $this->chechSourceImage($path);
+        $this->checkSourceImage($path);
 
         $urls = [
             'original_thumb' => $this->assetVersioned($path),
         ];
 
         for ($scale = 1; $scale <= $total_sizes_for_generate; $scale++) {
-            $urls["thumb_{$scale}x"] = $this->url($path, $width * $scale, $height * $scale);
+            $urls["thumb_{$scale}x"] = $this->url($path, $width * $scale, $height * $scale, $is_square, $bg_color);
         }
 
         return $urls;
@@ -47,18 +49,20 @@ final readonly class ImageUrlBuilderService
     /**
      * Generate URL for image with specified dimensions.
      *
-     * @param string|null $path   Original path (relative to public), e.g: "images/products/2025/12/ABC123.jpg"
-     * @param int         $width  Required width
-     * @param int|null    $height Required height (defaults to width)
+     * @param string|null $path     Original path (relative to public), e.g: "images/products/2025/12/ABC123.jpg"
+     * @param int         $width    Required width
+     * @param int|null    $height   Required height (defaults to width)
+     * @param bool        $is_square
+     * @param string      $bg_color HEX or transparent color
      *
      * @return string
      */
-    public function url(?string $path, int $width, ?int $height = null): string
+    public function url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): string
     {
         $path   = (string)$path;
         $height ??= $width;
+        $path   = Str::ltrim($path, '/');
 
-        $path = Str::ltrim($path, '/');
         $this->validateArgs($path, $width, $height);
 
         if (
@@ -75,8 +79,16 @@ final readonly class ImageUrlBuilderService
         if ($image_size !== false) {
             [$original_width, $original_height] = $image_size;
 
-            if ($original_width < $width && $original_height < $height) {
-                return $this->assetVersioned($path);
+            if ($original_width < $width || $original_height < $height) {
+                $width  = $original_width;
+                $height = $original_height;
+            }
+
+            if ($is_square === false) {
+                $this->calculateAspectionSizes($original_width, $original_height, $width, $height);
+            } else {
+                $width  = max($width, $height);
+                $height = $width;
             }
         }
 
@@ -103,7 +115,7 @@ final readonly class ImageUrlBuilderService
 
         // If prototype not created yet - create it
         if (!$this->publicFileExists($prototype_rel)) {
-            $this->createPrototype($path, $prototype_rel, $width, $height);
+            $this->createPrototype($path, $prototype_rel, $width, $height, $is_square, $bg_color);
         }
 
         // Queue conversion job (idempotent inside job)
@@ -116,6 +128,29 @@ final readonly class ImageUrlBuilderService
 
         // 4) Return prototype
         return $this->assetVersioned($prototype_rel);
+    }
+
+    /**
+     * @param int $original_width
+     * @param int $original_height
+     * @param int $target_width
+     * @param int $target_height
+     *
+     * @return void
+     */
+    private function calculateAspectionSizes(int $original_width, int $original_height, int &$target_width, int &$target_height): void
+    {
+        if ($target_width == $target_height) {
+            return;
+        }
+
+        if ($target_width > $target_height) {
+            $k             = min($original_width, $target_width) / max($original_width, $target_width);
+            $target_height = (int)round($original_height * $k);
+        } else {
+            $k            = min($original_height, $target_height) / max($original_height, $target_height);
+            $target_width = (int)round($original_width * $k);
+        }
     }
 
     /**
@@ -136,7 +171,7 @@ final readonly class ImageUrlBuilderService
             throw new InvalidArgumentException('Invalid image path!');
         }
 
-        $this->chechSourceImage($path);
+        $this->checkSourceImage($path);
     }
 
     /**
@@ -144,7 +179,7 @@ final readonly class ImageUrlBuilderService
      *
      * @return void
      */
-    private function chechSourceImage(string &$path): void
+    private function checkSourceImage(string &$path): void
     {
         if (Storage::fileExists($path) === false) {
             $path = config('app.images.default_no_image');
@@ -258,10 +293,12 @@ final readonly class ImageUrlBuilderService
      * @param string $prototype_rel
      * @param int    $w
      * @param int    $h
+     * @param bool   $is_square
+     * @param string $bg_color HEX or transparent color
      *
      * @return void
      */
-    private function createPrototype(string $original_rel, string $prototype_rel, int $w, int $h): void
+    private function createPrototype(string $original_rel, string $prototype_rel, int $w, int $h, bool $is_square, string $bg_color = '000000'): void
     {
         $this->ensureDirFor($prototype_rel);
 
@@ -269,14 +306,33 @@ final readonly class ImageUrlBuilderService
         $dst = Storage::path($prototype_rel);
 
         // Requires: intervention/image v3 (Laravel-friendly)
-        $manager = new ImageManager(new Driver());
+        $image_manager = new ImageManager(new Driver());
 
-        $image = $manager->read($src);
+        $image_obj = $image_manager->read($src);
 
-        // Prototype: fit to dimensions (center), no upscaling can be enabled if needed
-        $image = $image->cover($w, $h);
+        if ($is_square === true) {
+            // Scale image to fit into target dimensions while preserving aspect ratio
+            // This prevents upscaling and cropping of content
+            $image_obj->scaleDown($w, $h);
 
-        // Save in original format (extension already in filename)
-        $image->save($dst, quality: (int)config('app.images.prototype_quality'));
+            // Get actual dimensions after scaling
+            $actual_width  = $image_obj->width();
+            $actual_height = $image_obj->height();
+
+            // If image is smaller than target size, we need to add padding
+            if ($actual_width < $w || $actual_height < $h) {
+                // Place image on canvas with transparent/white background
+                $image_obj->pad($w, $h, $bg_color);
+            }
+
+            $image_obj->save($dst, (int)config('app.images.prototype_quality'));
+
+            return;
+        }
+
+        // Non-square: use cover to fill the dimensions
+        $image_obj
+            ->cover($w, $h)
+            ->save($dst, (int)config('app.images.prototype_quality'));
     }
 }

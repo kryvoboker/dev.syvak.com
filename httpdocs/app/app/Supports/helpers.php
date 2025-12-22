@@ -66,31 +66,35 @@ if (!function_exists('trim_strs_in_arr')) {
     }
 }
 
-if (!function_exists('img_cached_url')) {
+if (!function_exists('convert_img_and_get_url')) {
     /**
      * @param string|null $path
      * @param int         $width
      * @param int|null    $height
+     * @param bool        $is_square
+     * @param string      $bg_color HEX or transparent color
      *
      * @return string
      */
-    function img_cached_url(?string $path, int $width, ?int $height = null): string
+    function convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): string
     {
-        return app(ImageUrlBuilderService::class)->url($path, $width, $height);
+        return app(ImageUrlBuilderService::class)->url($path, $width, $height, $is_square, $bg_color);
     }
 }
 
-if (!function_exists('multiple_img_cached_url')) {
+if (!function_exists('multiple_convert_img_and_get_url')) {
     /**
      * @param string|null $path
      * @param int         $width
      * @param int|null    $height
+     * @param bool        $is_square
+     * @param string      $bg_color HEX or transparent color
      *
      * @return array
      */
-    function multiple_img_cached_url(?string $path, int $width, ?int $height = null): array
+    function multiple_convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): array
     {
-        return app(ImageUrlBuilderService::class)->multipleUrl($path, $width, $height);
+        return app(ImageUrlBuilderService::class)->multipleUrl($path, $width, $height, $is_square, $bg_color);
     }
 }
 

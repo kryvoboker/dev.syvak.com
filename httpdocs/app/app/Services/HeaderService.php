@@ -25,10 +25,11 @@ class HeaderService
         $languages    = new Language()->getActiveLanguages();
 
         return [
-            'logo_urls'                => multiple_img_cached_url(
+            'logo_urls'                => multiple_convert_img_and_get_url(
                 config('app.images.path_to_logo'),
                 (int)($app_settings->image_sizes['logo']['width'] ?? config('app.images.logo_width')),
-                (int)($app_settings->image_sizes['logo']['height'] ?? config('app.images.logo_height'))
+                (int)($app_settings->image_sizes['logo']['height'] ?? config('app.images.logo_height')),
+                is_square: false
             ),
             'breadcrumbs'              => $params['breadcrumbs'] ?? [],
             'categories'               => $categories,
