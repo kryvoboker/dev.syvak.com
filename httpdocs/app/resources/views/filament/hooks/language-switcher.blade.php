@@ -20,7 +20,7 @@
                 />
 
                 <span class="font-medium">
-                    {{ Str::upper($currentLocale) }}
+                    {{ Str::upper($current_locale) }}
                 </span>
             </button>
         </x-slot>
@@ -28,7 +28,7 @@
         <x-filament::dropdown.list>
             @foreach ($languages as $language)
                 <x-filament::dropdown.list.item
-                    :color="$currentLocale === $language->code ? 'primary' : null"
+                    :color="$current_locale === $language->code ? 'primary' : null"
                     icon="heroicon-m-chevron-right"
                     :href="route($current_route, array_merge($route_params, ['locale' => $language->code]))"
                     tag="a"

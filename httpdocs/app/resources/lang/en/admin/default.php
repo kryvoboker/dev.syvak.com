@@ -17,6 +17,7 @@ return [
         'linkedin'  => 'LinkedIn',
         'youtube'   => 'YouTube',
         'telegram'  => 'Telegram',
+        'tiktok'    => 'TikTok',
     ],
 
     // Columns
@@ -100,6 +101,7 @@ return [
         'url'                   => 'URL',
         'parent_category'       => 'Parent Category',
         'slug'                  => 'Slug (SEO URL)',
+        'svg_icon'              => 'SVG Icon',
     ],
 
     // Helpers

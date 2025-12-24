@@ -9,11 +9,11 @@ Route::redirect('/', '/' . app()->getLocale());
 })->middleware('localization.redirect');*/
 
 Route::prefix('{locale}')
-    ->name('catalog.')
+    ->name('localized.catalog.')
     ->group(function () {
         Route::get('/', [\App\Http\Controllers\Pages\HomeController::class, 'index'])->name('home');
 
         Route::get('/category/{slug}', function (string $locale, string $slug) {
 
-        });
+        })->name('category.show');
     });

@@ -1,63 +1,64 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@ts-shared/*": [
-        "./resources/assets/catalog/ts/shared/*"
-      ],
-      "@ts-features/*": [
-        "./resources/assets/catalog/ts/features/*"
-      ],
-      "@ts-stores/*": [
-        "./resources/assets/catalog/ts/stores/*"
-      ]
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@ts-shared/*": [
+                "./resources/assets/catalog/ts/shared/*"
+            ],
+            "@ts-features/*": [
+                "./resources/assets/catalog/ts/features/*"
+            ],
+            "@ts-stores/*": [
+                "./resources/assets/catalog/ts/stores/*"
+            ]
+        },
+        "target": "ES2024",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
+        "lib": [
+            "es2015",
+            "ES2020",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "skipLibCheck": true,
+        "downlevelIteration": true,
+        /* Bundler mode */
+        "sourceMap": true,
+        "declaration": true,
+        // maybe it need remove
+        "noImplicitAny": true,
+        // maybe it need remove
+        "allowJs": true,
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "moduleDetection": "force",
+        "noEmit": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "types": [
+            "node",
+            "@types/node",
+            "./resources/assets/catalog/ts/types/global.d.ts"
+        ],
+        "typeRoots": [
+            "node_modules/@types"
+        ]
     },
-    "target": "ES2024",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": [
-      "es2015",
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
+    "include": [
+        "./resources/assets/catalog/ts/**/*.ts",
+        "./vite.config.ts",
+        "./vite-env.d.ts"
     ],
-    "skipLibCheck": true,
-    "downlevelIteration": true,
-    /* Bundler mode */
-    "sourceMap": true,
-    "declaration": true,
-    // maybe it need remove
-    "noImplicitAny": true,
-    // maybe it need remove
-    "allowJs": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "types": [
-      "node",
-      "@types/node"
-    ],
-    "typeRoots": [
-      "node_modules/@types"
+    "exclude": [
+        "node_modules",
+        "dist"
     ]
-  },
-  "include": [
-    "./resources/assets/catalog/ts/**/*.ts",
-    "./vite.config.ts",
-    "./vite-env.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
 }

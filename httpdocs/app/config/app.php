@@ -65,8 +65,7 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
-
+    'timezone'        => env('APP_TIMEZONE', 'UTC'),
     'date_format'     => env('APP_DATE_FORMAT', 'Y-m-d'),
     'time_format'     => env('APP_TIME_FORMAT', 'H:i:s'),
     'datetime_format' => env('APP_DATETIME_FORMAT', 'Y-m-d H:i:s'),
@@ -82,16 +81,13 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
-
-    'locales'        => array_filter(
+    'locale'          => env('APP_LOCALE', 'en'),
+    'locales'         => array_filter(
         explode(',', env('APP_ALLOWED_LOCALES', 'en'))
     ),
-    'default_locale' => env('APP_DEFAULT_LOCALE', 'en'),
-
+    'default_locale'  => env('APP_DEFAULT_LOCALE', 'en'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
-
-    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'faker_locale'    => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*
     |--------------------------------------------------------------------------

@@ -15,8 +15,8 @@
     <!-- Load Google Fonts asynchronously: preload as style then switch to stylesheet onload -->
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" onload="this.rel='stylesheet'">
 
-    @vite(['resources/assets/catalog/css/app.css'])
-    @stack('styles')
+    @vite(['./resources/assets/catalog/css/app.css'])
+{{--    @stack('styles')--}}
 </head>
 
 <body>
@@ -30,7 +30,7 @@
     @include('catalog.layouts.partials.footer')
 </div>
 
-@vite(['resources/assets/catalog/ts/index.ts'])
-@stack('scripts')
+@vite(['./resources/assets/catalog/ts/index.ts'])
+{{--@stack('scripts')--}}
 </body>
 </html>

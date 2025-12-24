@@ -10,6 +10,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
@@ -74,7 +75,7 @@ class AppSettingForm
                                         $timezones = [];
 
                                         foreach (timezone_identifiers_list() as $timezone) {
-                                            $offset = Carbon::now($timezone)->format('P'); // +02:00 format
+                                            $offset               = Carbon::now($timezone)->format('P'); // +02:00 format
                                             $timezones[$timezone] = "$timezone ($offset)";
                                         }
 
@@ -157,7 +158,7 @@ class AppSettingForm
                     ->label(__('admin/settings/app_settings.labels.meta_titles'))
                     ->rules(['nullable', 'max:255'])
                     ->helperText(__('admin/settings/app_settings.helpers.meta_titles'))
-                ->default(null),
+                    ->default(null),
 
                 Textarea::make("meta_descriptions.$lang_code")
                     ->label(__('admin/settings/app_settings.labels.meta_descriptions'))
@@ -189,20 +190,33 @@ class AppSettingForm
                     ->label(__('admin/settings/app_settings.labels.socials'))
                     ->helperText(__('admin/settings/app_settings.helpers.socials'))
                     ->schema([
-                        Select::make('social_type')
-                            ->label(__('admin/settings/app_settings.labels.social_type'))
-                            ->options([
-                                'facebook'  => __('admin/default.texts.facebook'),
-                                'instagram' => __('admin/default.texts.instagram'),
-                                'twitter'   => __('admin/default.texts.twitter'),
-                                'linkedin'  => __('admin/default.texts.linkedin'),
-                                'youtube'   => __('admin/default.texts.youtube'),
-                                'telegram'  => __('admin/default.texts.telegram'),
+                        Grid::make()
+                            ->schema([
+                                Select::make('social_type')
+                                    ->label(__('admin/settings/app_settings.labels.social_type'))
+                                    ->options([
+                                        'facebook'  => __('admin/default.texts.facebook'),
+                                        'instagram' => __('admin/default.texts.instagram'),
+                                        'twitter'   => __('admin/default.texts.twitter'),
+                                        'linkedin'  => __('admin/default.texts.linkedin'),
+                                        'youtube'   => __('admin/default.texts.youtube'),
+                                        'telegram'  => __('admin/default.texts.telegram'),
+                                        'tiktok'    => __('admin/default.texts.tiktok'),
+                                    ])
+                                    ->rules(['required', 'string', 'in:' . implode(',', config('app.socials_list'))]),
+
+                                TextInput::make('url')
+                                    ->label(__('admin/default.labels.url'))
+                                    ->url(),
+
+                                Textarea::make('svg_icon')
+                                    ->label(__('admin/default.labels.svg_icon'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.svg_icon'))
+                                    ->rows(4)
+                                    ->rules(['nullable', 'string'])
+                                ->columnSpan(2),
                             ])
-                            ->rules(['required', 'string', 'in:' . implode(',', config('app.socials_list'))]),
-                        TextInput::make('url')
-                            ->label(__('admin/default.labels.url'))
-                            ->url(),
+                        ->columnSpanFull(),
                     ])
                     ->columns(),
 

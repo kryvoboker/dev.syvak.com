@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware\User;
 
-use App\Models\Settings\AppSetting;
 use App\Models\Settings\Currency;
+use App\Services\AppSettingsService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetCommonPreferences
@@ -19,8 +20,16 @@ class SetCommonPreferences
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $currency     = new Currency()->getDefaultActiveCurrency();
-        $app_settings = get_app_settings();
+        $currency             = new Currency()->getDefaultActiveCurrency();
+        $app_settings_service = app(AppSettingsService::class);
+
+        $app_settings_service->setSettings();
+
+        View::share([
+            'app_settings'   => $app_settings_service->getSettings(),
+            'no_image_url'   => asset('storage/' . config('app.images.default_no_image')),
+            'current_locale' => app()->getLocale(),
+        ]);
 
         if ($currency !== null) {
             config([
@@ -32,10 +41,10 @@ class SetCommonPreferences
             ]);
         }
 
-        if ($app_settings !== null && !empty($app_settings->timezone) && in_array($app_settings->timezone, timezone_identifiers_list())) {
-            config(['app.timezone' => $app_settings->timezone]);
+        if (!empty($app_settings_service->timezone) && in_array($app_settings_service->timezone, timezone_identifiers_list())) {
+            config(['app.timezone' => $app_settings_service->timezone]);
 
-            date_default_timezone_set($app_settings->timezone);
+            date_default_timezone_set($app_settings_service->timezone);
         }
 
         return $next($request);

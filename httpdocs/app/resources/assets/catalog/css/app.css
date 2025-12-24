@@ -4,14 +4,14 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
 
-@plugin "flyonui";
 @import "flyonui/variants.css";
+@plugin "flyonui";
 @source "../../../../node_modules/flyonui/flyonui.js";
 @plugin "@iconify/tailwind4";
 
 @source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../../../../storage/framework/views/*.php';
-@source '../../../views/**/*.blade.php';
+@source '../../../views/catalog/**/*.blade.php';
 @source '../ts/**/*.ts';
 
 @source "./_source.txt";
@@ -57,15 +57,19 @@
 
     --color-white: rgba(255,251,254,1); /* #FFFBFE */
     --color-black: rgba(12,18,12,1); /* #0C120C */
-    --color-black-light: rgba(12,18,12,0.20);
-    --color-gray-light: rgba(136,136,136,1); /* #888888 */
-    --color-gray-dark: rgba(136,136,136,0.40);
-    --color-red-light: rgba(212,4,28,1); /* #D4041C */
-    --color-red-dark: rgba(212,4,28,0.70);
+    --color-light-black: rgba(12,18,12,0.20); /* #0C120C33 */
+    --color-light-gray: rgba(136,136,136,1); /* #888888 */
+    --color-opacity-light-gray-40\%: rgba(136,136,136,.4); /* #888888 */
+    --color-dark-gray: rgba(136,136,136,0.40); /* #88888866 */
+    --color-light-red: rgba(212,4,28,1); /* #D4041C */
+    --color-dark-red: rgba(212,4,28,0.70); /* #D4041CB3 */
 
     --spacing-0\.8em: 0.8em;
     --spacing-0\.9em: 0.9em;
     --spacing-1\.4em: 1.4em;
+    --spacing-18px: calc(18 / var(--base-font-size) * 1rem);
+    --spacing-19px: calc(19 / var(--base-font-size) * 1rem);
+    --spacing-38px: calc(38 / var(--base-font-size) * 1rem);
 
     --tracking-0\.02em: 0.02em;
     --tracking-0\.028em: 0.028em;
@@ -170,14 +174,14 @@
     [type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'],
     [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'],
     [type='week'], [multiple], textarea, select {
-        @apply text-inherit leading-[inherit] tracking-[inherit] appearance-none bg-black border-b border-gray-dark p-2 lg:px-4;
+        @apply text-inherit leading-[inherit] tracking-[inherit] appearance-none bg-black border-b border-dark-gray p-2 lg:px-4;
 
         &:focus {
             @apply outline-2 outline-solid outline-offset-2 outline-transparent border-white shadow-white;
         }
 
         &::placeholder {
-            @apply text-11px md:text-sm lg:text-base bp1920px:text-lg text-gray-dark font-light tracking-0.04em;
+            @apply text-11px md:text-sm lg:text-base bp1920px:text-lg text-dark-gray font-light tracking-0.04em;
         }
     }
 
@@ -185,27 +189,12 @@
         @apply text-11px md:text-sm lg:text-base bp1920px:text-lg font-light tracking-0.04em;
     }
 
-    .icon-size {
-        @apply w-8 h-8 lg:w-10 lg:h-10;
-    }
-
-    .dark-btn,
-    .light-btn {
-        @apply border duration-300 ease-in p-2;
-    }
-
-    .light-btn {
-        @apply text-lg text-black border-transparent bg-white;
-    }
-
-    .dark-btn,
-    .light-btn:active,
-    .light-btn:hover {
-        @apply text-white border-white bg-black;
-    }
-
     .dark-btn:active,
     .dark-btn:hover {
-        @apply text-black border-gray-light bg-gray-light;
+        @apply text-black border-light-gray bg-light-gray cursor-pointer duration-500 ease-in-out;
     }
+}
+
+@utility custom-icon {
+    @apply block size-6 md:size-8 lg:size-10 text-white;
 }

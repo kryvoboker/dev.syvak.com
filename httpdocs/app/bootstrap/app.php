@@ -16,8 +16,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            SetCommonPreferences::class,
             SetDefaultLocalePrefix::class,
+            SetCommonPreferences::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

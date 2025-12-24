@@ -28,11 +28,19 @@ final class AppSettingsService
      */
     public function setSettings(): void
     {
+        $this->removeSettings();
+
+        $locale = app()->getLocale();
+
+        if ($locale === null) {
+            return;
+        }
+
         Cache::remember(
             self::CACHE_KEY,
             self::TTL,
-            function () {
-                $language_id = new Language()->getLanguageByCode(app()->getLocale())?->id;
+            function () use ($locale) {
+                $language_id = new Language()->getLanguageByCode($locale)?->id;
 
                 if ($language_id === null) {
                     throw new RuntimeException('Current language not found!');

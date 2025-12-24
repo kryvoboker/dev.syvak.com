@@ -48,7 +48,7 @@ class AlyoAdminPanelProvider extends PanelProvider
 
                     return view('filament.hooks.language-switcher', [
                         'languages'      => $languages,
-                        'currentLocale'  => app()->getLocale(),
+                        'current_locale'  => app()->getLocale(),
                     ]);
                 },
             )
@@ -85,8 +85,8 @@ class AlyoAdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                SetCommonPreferences::class,
                 SetDefaultLocalePrefix::class,
+                SetCommonPreferences::class,
                 LogFilamentErrors::class
             ])
             ->authMiddleware([

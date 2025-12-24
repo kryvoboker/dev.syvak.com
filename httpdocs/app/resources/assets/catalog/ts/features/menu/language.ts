@@ -1,17 +1,20 @@
-import { HSDropdown, type IHTMLElementFloatingUI } from "flyonui/flyonui";
-import { findElem }                           from "@ts-shared/lib/helpers.ts";
+import { findArrayElems, isEmpty }     from "@ts-shared/lib/helpers.ts";
+import HSDropdown                      from "flyonui/src/js/plugins/dropdown/index";
+import type { IHTMLElementFloatingUI } from "flyonui/flyonui";
 
-export const handle = () => {
-    const dropdownLangMenuEl = <IHTMLElementFloatingUI | null>findElem('.dropdown-lang-menu');
-    const dropdownLangMenuBtnEl = <IHTMLElementFloatingUI | null>findElem('.dropdown-lang-menu-btn');
+export const handleLanguageMenu = (): void => {
+    const dropdownLangMenuEls       = <IHTMLElementFloatingUI[] | []>findArrayElems('.dropdown-lang-menu');
+    const closeDropdownLangMenuBtns = <HTMLElement[] | []>findArrayElems('.close-dropdown-lang-menu-btn');
 
-    if (!dropdownLangMenuEl || !dropdownLangMenuBtnEl) {
+    if (isEmpty(dropdownLangMenuEls)) {
         return;
     }
 
-    const dropdown = new HSDropdown(dropdownLangMenuEl);
+    dropdownLangMenuEls.forEach((menuEl: IHTMLElementFloatingUI, index: number): void => {
+        const dropdownInstance = new HSDropdown(menuEl);
 
-    dropdownLangMenuBtnEl.addEventListener('click', () => {
-        dropdown.open();
+        closeDropdownLangMenuBtns[index]?.addEventListener('click', (): void => {
+            dropdownInstance.close();
+        });
     });
 };

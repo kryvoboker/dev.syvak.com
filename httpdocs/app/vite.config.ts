@@ -21,7 +21,7 @@ export default defineConfig((): UserConfig => {
         },
         plugins: [
             laravel({
-                publicDirectory: '../html',
+                publicDirectory: isProduction ? '../html' : '../httpdocs',
                 input:           [
                     'resources/assets/filament/alyo-admin/theme.css',
                     './resources/assets/catalog/css/app.css',

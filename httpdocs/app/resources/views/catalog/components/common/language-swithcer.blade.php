@@ -1,26 +1,49 @@
 @php
     $current_route = request()->route()->getName();
     $route_params = request()->route()->parameters();
+    $locale = config('localization.locale_parameter');
 @endphp
 
-<div class="dropdown-lang-menu relative inline-flex">
-    <button type="button" class="dropdown-toggle dropdown-lang-menu-btn btn btn-primary"
+<div {{ $attributes->merge(['class' => 'dropdown dropdown-lang-menu relative']) }}>
+    <button type="button" class="dropdown-toggle dropdown-lang-menu-btn flex items-center uppercase"
             id="dropdown-lang-menu-btn"
             aria-haspopup="menu"
             aria-expanded="false"
             aria-label="Dropdown">
-        Dropdown
+        {{ $current_locale }}
 
-        <svg class="icon-size dropdown-open:rotate-180"
-            width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16.3543 10.3533L12.3543 14.3533C12.2563 14.4513 12.1283 14.4993 12.0003 14.4993C11.8723 14.4993 11.7442 14.4503 11.6462 14.3533L7.64625 10.3533C7.45125 10.1583 7.45125 9.84125 7.64625 9.64625C7.84125 9.45125 8.15828 9.45125 8.35328 9.64625L11.9993 13.2922L15.6453 9.64625C15.8403 9.45125 16.1573 9.45125 16.3523 9.64625C16.5473 9.84125 16.5493 10.1573 16.3543 10.3533Z"
-                  fill="currentColor"/>
-        </svg>
+        <div class="flex items-center justify-center p-2">
+            <span class="icon-[solar--alt-arrow-down-line-duotone] dropdown-open:rotate-180 size-19px text-white duration-100 ease-in-out"></span>
+        </div>
     </button>
-    <ul class="dropdown-menu dropdown-open:opacity-100 hidden min-w-60" role="menu" aria-orientation="vertical" aria-labelledby="dropdown-lang-menu-btn">
-        <li><a class="dropdown-item" href="#">My Profile</a></li>
-        <li><a class="dropdown-item" href="#">Settings</a></li>
-        <li><a class="dropdown-item" href="#">Billing</a></li>
-        <li><a class="dropdown-item" href="#">FAQs</a></li>
+
+    <ul class="dropdown-menu dropdown-open:opacity-100 hidden max-w-36 w-full text-light-gray bg-black border border-opacity-light-gray-40% rounded-none p-4"
+        role="menu"
+        aria-orientation="vertical"
+        aria-labelledby="dropdown-lang-menu-btn">
+        <button class="close-dropdown-lang-menu-btn block ms-auto">
+            <span class="icon-[ic--baseline-close] size-5 text-white"></span>
+        </button>
+
+        @foreach ($languages as $language)
+            <li class="flex items-center gap-x-2 border-b border-b-opacity-light-gray-40% dark-btn p-3">
+                @if ($language->code == $current_locale)
+                    <span class="icon-[material-symbols--square] size-2 text-white"></span>
+
+                    <span
+                        class="block w-full text-white"
+                        aria-current="true">
+                        {{ $language->name }}
+                    </span>
+                @else
+                    <span class="material-symbols--square size-2 bg-transparent"></span>
+
+                    <a class="block w-full"
+                       href="{{ route($current_route, array_merge($route_params, [$locale => $language->code])) }}">
+                        {{ $language->name }}
+                    </a>
+                @endif
+            </li>
+        @endforeach
     </ul>
 </div>

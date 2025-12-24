@@ -100,6 +100,7 @@ return [
         'url'                   => 'URL',
         'parent_category'       => 'Батьківська категорія',
         'slug'                  => 'Slug (SEO URL)',
+        'svg_icon'              => 'SVG іконка',
     ],
 
     // Helpers

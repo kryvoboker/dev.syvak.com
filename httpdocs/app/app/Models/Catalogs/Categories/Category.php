@@ -106,6 +106,27 @@ class Category extends Model
     }
 
     /**
+     * @param int $language_id
+     *
+     * @return Collection<Category>
+     */
+    public function getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(int $language_id): Collection
+    {
+        return self::query()
+            ->with([
+                'categoryDescription' => function ($query) use ($language_id) {
+                    $query->where('language_id', $language_id);
+                },
+                'slugs'              => function ($query) use ($language_id) {
+                    $query->where('language_id', $language_id);
+                }
+            ])
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    /**
      * @param int $category_id
      * @param int $language_id
      *

@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Services\AppSettingsService;
 use App\Services\Images\ImageUrlBuilderService;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -52,9 +53,12 @@ class AppServiceProvider extends ServiceProvider
 
         require_once app_path('Supports/helpers.php');
 
-        $app_settings_service = app(AppSettingsService::class);
-        $app_settings_service->setSettings();
+        // Register view namespaces for frontend (catalog) and admin
+        // This allows usage like view('catalog::layouts.partials.header')
+        $catalog_path = resource_path('views/catalog');
 
-        View::share('app_settings', $app_settings_service->getSettings());
+        if (File::isDirectory($catalog_path)) {
+            View::addNamespace('catalog', $catalog_path);
+        }
     }
 }

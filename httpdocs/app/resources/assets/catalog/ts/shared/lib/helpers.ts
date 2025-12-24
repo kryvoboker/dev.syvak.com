@@ -1,50 +1,52 @@
 import { $HIDDEN_CLASS_NAME } from "@ts-shared/lib/constants.ts";
 
-export const findElem             = <T extends HTMLElement>(searchVal : string, context : T | Document | null = document) : T | HTMLElement | null => context ? context.querySelector(searchVal) : null;
-export const findElems            = <T extends HTMLElement>(searchVal : string, context : T | Document = document) : NodeListOf<T> | NodeListOf<HTMLElement> | null => context.querySelectorAll(searchVal);
-export const arrayFrom            = <T>(pseudoArray : ArrayLike<T> | null) : T[] => pseudoArray ? Array.from(pseudoArray) : [];
-export const findArrayElems       = <T extends HTMLElement>(searchVal : string, context : T | Document = document) : (T | HTMLElement)[] | [] => arrayFrom(findElems(searchVal, context));
-export const isArray              = (value : any) : value is any[] => Array.isArray(value);
-export const addClass             = <T extends HTMLElement>(element : T | null, selector : string | string[]) : void | null => element ? (isArray(selector) ? element.classList.add(... selector) : element.classList.add(selector)) : null;
-export const removeClass          = <T extends HTMLElement>(element : T | null, selector : string | string[]) : void | null => element ? (isArray(selector) ? element.classList.remove(... selector) : element.classList.remove(selector)) : null;
-export const toggleClass          = <T extends HTMLElement>(element : T | null, selector : string) : boolean => element ? element.classList.toggle(selector) : false;
-export const toggleActive         = (DOMElements : NodeListOf<HTMLElement> | HTMLElement[] = []) : void => arrayFrom(DOMElements).forEach((element : HTMLElement) => toggleClass(element, 'active'));
-export const setLocalStorage      = (key : string, value : string) : void => localStorage.setItem(key, value);
-export const getLocalStorage      = (key : string, defaultValue : any = null) : string | null => (localStorage.getItem(key) ?? defaultValue);
-export const removeLocalStorage   = (key : string) : void => localStorage.removeItem(key);
-export const setSessionStorage    = (key : string, value : string) : void => sessionStorage.setItem(key, value);
-export const getSessionStorage    = (key : string, defaultValue : any = null) : string | null => (sessionStorage.getItem(key) ?? defaultValue);
-export const removeSessionStorage = (key : string) : void => sessionStorage.removeItem(key);
-export const isContainsClass      = <T extends HTMLElement>(element : T | null, className : string) : boolean => element ? element.classList.contains(className) : false;
-export const redirect             = (url : string) : string => location.href = url;
-export const removeElement        = <T extends HTMLElement>(selector : string, context : T | Document = document) : void => findElem(selector, context)?.remove();
-export const getSpinnerHtml       = (selector : string = '') : string => `<div class="spinner-border ${selector}" role="status"></div>`;
-export const blockBody            = (isBlock : boolean = true) : string => document.body.style.overflow = isBlock ? $HIDDEN_CLASS_NAME : '';
-export const showErrorInConsole   = (errorMessage : string) : void => console.error(new Error(errorMessage));
-export const getFormDataInstance  = <T extends HTMLFormElement>(form : T | null = null) : FormData => form ? new FormData(form) : new FormData();
-export const getRandomNums        = () : string => Math.random().toString(36).substring(2, 9);
-export const windowMatchMedia     = (query : string) : boolean => matchMedia(`(${query.replace(/^\(+/, '').replace(/\)+$/, '')})`).matches;
-export const getClosestParentEl   = <T extends HTMLElement>(selector : string, childEl : T | null) : T | null => childEl ? childEl.closest(selector) : null;
-export const isClosestClass       = <T extends HTMLElement>(selector : string, context : T | null) : boolean => getClosestParentEl(selector, context) !== null;
+export const findElem             = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): T | HTMLElement | null => context ? context.querySelector(searchVal) : null;
+export const findElems            = <T extends HTMLElement>(searchVal: string, context: T | Document = document): NodeListOf<T> | NodeListOf<HTMLElement> | null => context.querySelectorAll(searchVal);
+export const arrayFrom            = <T>(pseudoArray: ArrayLike<T> | null): T[] => pseudoArray ? Array.from(pseudoArray) : [];
+export const findArrayElems       = <T extends HTMLElement>(searchVal: string, context: T | Document = document): (T | HTMLElement)[] | [] => arrayFrom(findElems(searchVal, context));
+export const isArray              = (value: any): value is any[] => Array.isArray(value);
+export const addClass             = <T extends HTMLElement>(element: T | null, selector: string | string[]): void | null => element ? (isArray(selector) ? element.classList.add(... selector) : element.classList.add(selector)) : null;
+export const removeClass          = <T extends HTMLElement>(element: T | null, selector: string | string[]): void | null => element ? (isArray(selector) ? element.classList.remove(... selector) : element.classList.remove(selector)) : null;
+export const toggleClass          = <T extends HTMLElement>(element: T | null, selector: string): boolean => element ? element.classList.toggle(selector) : false;
+export const toggleActive         = (DOMElements: NodeListOf<HTMLElement> | HTMLElement[] = []): void => arrayFrom(DOMElements).forEach((element: HTMLElement) => toggleClass(element, 'active'));
+export const setLocalStorage      = (key: string, value: string): void => localStorage.setItem(key, value);
+export const getLocalStorage      = (key: string, defaultValue: any = null): string | null => (localStorage.getItem(key) ?? defaultValue);
+export const removeLocalStorage   = (key: string): void => localStorage.removeItem(key);
+export const setSessionStorage    = (key: string, value: string): void => sessionStorage.setItem(key, value);
+export const getSessionStorage    = (key: string, defaultValue: any = null): string | null => (sessionStorage.getItem(key) ?? defaultValue);
+export const removeSessionStorage = (key: string): void => sessionStorage.removeItem(key);
+export const isContainsClass      = <T extends HTMLElement>(element: T | null, className: string): boolean => element ? element.classList.contains(className) : false;
+export const redirect             = (url: string): string => location.href = url;
+export const removeElement        = <T extends HTMLElement>(selector: string, context: T | Document = document): void => findElem(selector, context)?.remove();
+export const getSpinnerHtml       = (selector: string = ''): string => `<div class="spinner-border ${selector}" role="status"></div>`;
+export const blockBody            = (isBlock: boolean = true): string => document.body.style.overflow = isBlock ? $HIDDEN_CLASS_NAME : '';
+export const showErrorInConsole   = (errorMessage: string): void => console.error(new Error(errorMessage));
+export const getFormDataInstance  = <T extends HTMLFormElement>(form: T | null = null): FormData => form ? new FormData(form) : new FormData();
+export const getRandomNums        = (): string => Math.random().toString(36).substring(2, 9);
+export const windowMatchMedia     = (query: string): boolean => matchMedia(`(${query.replace(/^\(+/, '').replace(/\)+$/, '')})`).matches;
+export const getClosestParentEl   = <T extends HTMLElement>(selector: string, childEl: T | null): T | null => childEl ? childEl.closest(selector) : null;
+export const isClosestClass       = <T extends HTMLElement>(selector: string, context: T | null): boolean => getClosestParentEl(selector, context) !== null;
 
-const isEmpty = <T extends Object>(value : string | number | null | undefined | any[] | T) : boolean => {
+const isEmpty = <T extends Object>(value: string | number | null | undefined | any[] | T): boolean => {
     if (typeof value === 'number') {
         return isNaN(value) ? false : value === 0;
     } else if (isArray(value) || typeof value === 'string') {
         return value.length === 0;
-    } else if (value === null || value === undefined) {
+    } else if (value === null) {
+        return true;
+    } else if (value === undefined) {
         return false;
     } else {
         return Object.keys(value).length === 0;
     }
 };
 
-const throttle = (func : Function, delay : number) : Function => {
-    let isThrottled : boolean = false,
-        savedArgs : IArguments | null,
-        savedThis : Function | null;
+const throttle = (func: Function, delay: number): Function => {
+    let isThrottled: boolean = false,
+        savedArgs: IArguments | null,
+        savedThis: Function | null;
 
-    function wrapper(this : Function) : void {
+    function wrapper(this: Function): void {
         if (isThrottled) {
             savedArgs = arguments;
             savedThis = this;
@@ -55,7 +57,7 @@ const throttle = (func : Function, delay : number) : Function => {
 
         isThrottled = true;
 
-        setTimeout(() : void => {
+        setTimeout((): void => {
             isThrottled = false;
 
             if (savedArgs && savedThis) {
@@ -68,7 +70,7 @@ const throttle = (func : Function, delay : number) : Function => {
     return wrapper;
 };
 
-const scrollToTop = (anchor : string = '') : void => {
+const scrollToTop = (anchor: string = ''): void => {
     const behavior = 'smooth';
 
     if (anchor) {
@@ -83,8 +85,8 @@ const scrollToTop = (anchor : string = '') : void => {
     }
 };
 
-const scrollToBottom = (selector : string = '') : void => {
-    const behavior : ScrollBehavior = 'smooth';
+const scrollToBottom = (selector: string = ''): void => {
+    const behavior: ScrollBehavior = 'smooth';
 
     if (selector) {
         const element = <HTMLElement | null>findElem(selector);
@@ -103,17 +105,17 @@ const scrollToBottom = (selector : string = '') : void => {
     }
 };
 
-const debounce = <F extends (... args : any[]) => any>(func : F, delay : number) : (this : ThisParameterType<F>, ... args : Parameters<F>) => void => {
-    let timeout : ReturnType<typeof setTimeout>;
+const debounce = <F extends (... args: any[]) => any>(func: F, delay: number): (this: ThisParameterType<F>, ... args: Parameters<F>) => void => {
+    let timeout: ReturnType<typeof setTimeout>;
 
-    return function (this : ThisParameterType<F>, ... args : Parameters<F>) : void {
-        const context : ThisParameterType<F> = this;
+    return function (this: ThisParameterType<F>, ... args: Parameters<F>): void {
+        const context: ThisParameterType<F> = this;
 
         if (timeout) {
             clearTimeout(timeout);
         }
 
-        timeout = setTimeout(() : void => {
+        timeout = setTimeout((): void => {
             func.apply(context, args);
         }, delay);
     };
@@ -121,30 +123,30 @@ const debounce = <F extends (... args : any[]) => any>(func : F, delay : number)
 
 type FetchFuncOptions = Record<string | number, string | number>;
 
-const fetchFunc = async (url : string, data : FetchFuncOptions | FormData = {}, method : string = 'POST', isRecursion : boolean = false) : Promise<any> => {
+const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, method: string = 'POST', isRecursion: boolean = false): Promise<any> => {
     type TypeHeaders = {
-        "X-Requested-With" : string,
-        contentType? : string,
+        "X-Requested-With": string,
+        contentType?: string,
     };
 
     type TypeOptions = {
-        method? : string,
-        headers : TypeHeaders,
-        body? : FormData | string
+        method?: string,
+        headers: TypeHeaders,
+        body?: FormData | string
     };
 
-    const headers : TypeHeaders = {
+    const headers: TypeHeaders = {
               'X-Requested-With': 'XMLHttpRequest',
           },
-          contentType           = 'application/json;charset=utf-8';
+          contentType          = 'application/json;charset=utf-8';
 
-    let options : TypeOptions = {
+    let options: TypeOptions = {
         method,
         headers
     };
 
     if (method.toUpperCase() === 'GET') {
-        options = {headers};
+        options = { headers };
     } else if (!(data instanceof FormData)) {
         options.headers.contentType = contentType;
         options.body                = JSON.stringify(data);
@@ -152,13 +154,13 @@ const fetchFunc = async (url : string, data : FetchFuncOptions | FormData = {}, 
         options.body = data;
     }
 
-    const response : Response = await fetch(url, options);
+    const response: Response = await fetch(url, options);
 
     if (!response.ok && !isRecursion) {
         let sendData = {};
 
         if (data instanceof FormData) {
-            let index : number = 0;
+            let index: number = 0;
 
             for (const [key, value] of data.entries()) {
                 const obj = {};
@@ -175,15 +177,15 @@ const fetchFunc = async (url : string, data : FetchFuncOptions | FormData = {}, 
             sendData = data;
         }
 
-        const contactUsLink       = location.origin + '/index.php?route=information/contact',
-              message             = `<div>Схоже, що виникла технічна помилка. Перезавантажте сторінку або ж зверніться до <a class="link-primary" href="${contactUsLink}">тех. підтримки</a> за допомогою!</div>`,
-              fetch_data          = {
+        const contactUsLink      = location.origin + '/index.php?route=information/contact',
+              message            = `<div>Схоже, що виникла технічна помилка. Перезавантажте сторінку або ж зверніться до <a class="link-primary" href="${contactUsLink}">тех. підтримки</a> за допомогою!</div>`,
+              fetch_data         = {
                   url,
                   data:    sendData,
                   method,
                   headers: options.headers
               },
-              formData : FormData = getFormDataInstance();
+              formData: FormData = getFormDataInstance();
 
         formData.set('fetch_data', JSON.stringify(fetch_data));
         formData.set('message', message);
@@ -206,9 +208,9 @@ const fetchFunc = async (url : string, data : FetchFuncOptions | FormData = {}, 
     return await response.json();
 };
 
-const scrollToAnchor = (selector : string) : void => {
-    findArrayElems(selector).forEach((link : HTMLElement) : void => {
-        link.addEventListener('click', function (e : Event) : void {
+const scrollToAnchor = (selector: string): void => {
+    findArrayElems(selector).forEach((link: HTMLElement): void => {
+        link.addEventListener('click', function (e: Event): void {
             e.preventDefault();
 
             findElem((this as HTMLLinkElement).href.replace(/^(.*)(?=#)/, ''))?.scrollIntoView({
@@ -218,7 +220,7 @@ const scrollToAnchor = (selector : string) : void => {
     })
 };
 
-const toggleLoader = (classNameLoader : string, isShowLoader : boolean) : void => {
+const toggleLoader = (classNameLoader: string, isShowLoader: boolean): void => {
     const loaderContainer = <HTMLElement | null>findElem(classNameLoader);
 
     if (isShowLoader) {
@@ -230,9 +232,9 @@ const toggleLoader = (classNameLoader : string, isShowLoader : boolean) : void =
     }
 };
 
-const stripUnit = (value : number | string) : number => {
+const stripUnit = (value: number | string): number => {
     // Ensure the value is a string, then remove any non-digit characters except the decimal point
-    const numericValue : number = parseFloat(value as string);
+    const numericValue: number = parseFloat(value as string);
 
     // If the numeric conversion is unsuccessful, return the original value
     if (isNaN(numericValue)) {
@@ -242,27 +244,27 @@ const stripUnit = (value : number | string) : number => {
     return numericValue;
 };
 
-const getBaseDocumentFontSize = () : number => {
-    const doc : HTMLElement = document.documentElement;
-    const computedStyle     = window.getComputedStyle(doc);
+const getBaseDocumentFontSize = (): number => {
+    const doc: HTMLElement = document.documentElement;
+    const computedStyle    = window.getComputedStyle(doc);
 
     return stripUnit(computedStyle.fontSize) || 16;
 };
 
 // Function to convert pixels to rems
-const toRem = (pxValue : number | string, baseUnitSize : null | number | string = null, sizeUnit : string = 'rem') : string => {
+const toRem = (pxValue: number | string, baseUnitSize: null | number | string = null, sizeUnit: string = 'rem'): string => {
     if (!baseUnitSize) {
         baseUnitSize = getBaseDocumentFontSize();
     }
 
-    const numericPxValue : number      = stripUnit(pxValue);
-    const numericBaseUnitSize : number = stripUnit(baseUnitSize);
+    const numericPxValue: number      = stripUnit(pxValue);
+    const numericBaseUnitSize: number = stripUnit(baseUnitSize);
 
     // Calculate rem value
     return `${numericPxValue / numericBaseUnitSize}${sizeUnit}`;
 };
 
-const normalizeNumber = (value : string | number) : number => {
+const normalizeNumber = (value: string | number): number => {
     if (typeof value == 'string') {
         value = parseFloat(value);
     } else {
@@ -276,7 +278,7 @@ const normalizeNumber = (value : string | number) : number => {
     return value;
 };
 
-const togglePage = (loaderClassName : string, isBlockingPage : boolean) : void => {
+const togglePage = (loaderClassName: string, isBlockingPage: boolean): void => {
     blockBody(isBlockingPage);
     toggleLoader(loaderClassName, isBlockingPage);
 };

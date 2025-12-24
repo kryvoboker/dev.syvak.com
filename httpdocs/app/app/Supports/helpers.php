@@ -120,3 +120,42 @@ if (!function_exists('breadcrumb')) {
         return ['title' => $title, 'url' => $url];
     }
 }
+
+if (!function_exists('try_detect_page_type')) {
+    /**
+     * @return string|null
+     */
+    function try_detect_page_type(): ?string
+    {
+        $route_name = request()->route()?->getName();
+
+        if ($route_name === null) {
+            return null;
+        }
+
+        return match (true) {
+            str_ends_with($route_name, '.home')     => config('page-type.home'),
+            str_ends_with($route_name, '.product')  => config('page-type.product'),
+            str_ends_with($route_name, '.category') => config('page-type.category'),
+            default                                 => null,
+        };
+    }
+}
+
+if (!function_exists('localizedRoute')) {
+    /**
+     * @param BackedEnum|string $route
+     * @param array             $parameters
+     * @param bool              $absolute
+     *
+     * @return string
+     */
+    function localizedRoute(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
+    {
+        $locale = config('localization.locale_parameter');
+
+        return route($route, array_merge([
+            $locale => app()->getLocale(),
+        ], $parameters), $absolute);
+    }
+}

@@ -19,34 +19,49 @@ class HeaderService
     {
         $category     = new Category();
         $app_settings = get_app_settings();
-        $categories   = $category->getActiveCategoriesWithDescriptionsByLanguageId(
+        $categories   = $category->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
             $app_settings->language_id
-        );
+        )
+            ->map(function (Category $category) {
+                return [
+                    'id'           => (int)$category->id,
+                    'descriptions' => $category->categoryDescription->first()->toArray(),
+                    'slug'         => $category->slugs->first()->slug,
+                ];
+            });
         $languages    = new Language()->getActiveLanguages();
+        $logo_width   = (int)($app_settings->image_sizes['logo']['width'] ?? config('app.images.logo_width'));
+        $logo_height  = (int)($app_settings->image_sizes['logo']['height'] ?? config('app.images.logo_height'));
+        $socials      = $app_settings->socials[app()->getLocale()] ?? [];
 
         return [
-            'logo_urls'                => multiple_convert_img_and_get_url(
-                config('app.images.path_to_logo'),
-                (int)($app_settings->image_sizes['logo']['width'] ?? config('app.images.logo_width')),
-                (int)($app_settings->image_sizes['logo']['height'] ?? config('app.images.logo_height')),
-                is_square: false
-            ),
+            'logo_data'                => [
+                'urls'   => multiple_convert_img_and_get_url(
+                    config('app.images.path_to_logo'),
+                    $logo_width,
+                    $logo_height,
+                    is_square: false
+                ),
+                'width'  => $logo_width,
+                'height' => $logo_height,
+            ],
             'breadcrumbs'              => $params['breadcrumbs'] ?? [],
             'categories'               => $categories,
             'hoodie_category'          => $categories->firstWhere('id', (int)config('app.categories.hoodie_id')),
             'exclusive_gifts_category' => $categories->firstWhere('id', (int)config('app.categories.exclusive_gifts_id')),
             'languages'                => $languages,
             'menu_data'                => $this->processCreateMainMenu($categories, $languages),
+            'socials'                  => $socials,
         ];
     }
 
     /**
-     * @param Collection<Category> $categories
-     * @param Collection<Language> $languages
+     * @param Collection<Category>|\Illuminate\Support\Collection<Category> $categories
+     * @param Collection<Language>                                          $languages
      *
      * @return array
      */
-    private function processCreateMainMenu(Collection $categories, Collection $languages): array
+    private function processCreateMainMenu(Collection|\Illuminate\Support\Collection $categories, Collection $languages): array
     {
         return [
             'categories'       => $categories,

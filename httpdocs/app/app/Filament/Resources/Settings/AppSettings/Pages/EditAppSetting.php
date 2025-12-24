@@ -60,7 +60,6 @@ class EditAppSetting extends EditRecord
     public function mount(int|string|null $record = null): void
     {
         // Get first settings record or create if not exists
-        /** @var AppSetting $settings_record */
         $settings_record = AppSetting::firstOrCreate(
             [],
             [
