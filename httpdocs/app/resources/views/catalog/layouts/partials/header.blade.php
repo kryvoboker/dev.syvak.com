@@ -1,9 +1,14 @@
 @include('catalog.pages.partials.common.main-mob-menu')
+@include('catalog.pages.partials.search.mob-search')
 
 <nav>
     <div class="container">
         <div class="flex items-center justify-between gap-x-1">
-            <button type="button" class="burger-menu open-main-mob-menu-btn" aria-label="Toggle main mobile menu">
+            <button class="burger-menu open-main-mob-menu-btn"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                    aria-controls="{{ __('catalog/default.labels.toggle_main_menu') }}">
                 <span class="icon-[qlementine-icons--menu-burger-16] custom-icon"></span>
             </button>
 
@@ -36,7 +41,11 @@
             @endif
 
             <div class="hidden lg:flex lg:items-center lg:justify-between lg:gap-x-8 uppercase">
-                <button type="button">
+                <button class="btn btn-circle"
+                        type="button"
+                        aria-haspopup="dialog"
+                        aria-expanded="false"
+                        aria-controls="{{ __('catalog/default.labels.toggle_catalog_menu') }}">
                     {{ __('catalog/default.buttons.catalog') }}
                 </button>
 

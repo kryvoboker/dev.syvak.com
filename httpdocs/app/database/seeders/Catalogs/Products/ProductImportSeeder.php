@@ -6,9 +6,9 @@ namespace Database\Seeders\Catalogs\Products;
 
 use App\Models\Catalogs\Products\Product;
 use App\Models\Settings\Language;
-use App\Services\SeoSlug\EnSeoSlugService;
-use App\Services\SeoSlug\UaSeoSlugService;
 use App\Supports\Services\Ai\AiTranslationService;
+use App\Supports\Services\SeoSlug\EnSeoSlugService;
+use App\Supports\Services\SeoSlug\UaSeoSlugService;
 use Illuminate\Database\Seeder;
 use Throwable;
 

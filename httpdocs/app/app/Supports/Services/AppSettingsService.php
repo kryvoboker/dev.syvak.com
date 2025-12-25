@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Supports\Services;
 
 use App\Data\AppSettingsData;
 use App\Models\Settings\AppSetting;

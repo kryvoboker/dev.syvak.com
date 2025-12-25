@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Middleware\User;
 
 use App\Models\Settings\Currency;
-use App\Services\AppSettingsService;
+use App\Supports\Services\AppSettingsService;
+use App\Supports\Services\Currency\ConvertPrice;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
@@ -39,6 +40,8 @@ class SetCommonPreferences
                 'app.currency.default_format_locale'          => $currency->format_locale,
                 'app.currency.default_decimal_places'         => $currency->decimal_places,
             ]);
+
+            app(ConvertPrice::class)->setDefaultCurrency($currency);
         }
 
         if (!empty($app_settings_service->timezone) && in_array($app_settings_service->timezone, timezone_identifiers_list())) {

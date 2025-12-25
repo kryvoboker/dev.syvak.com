@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Images;
+namespace App\Supports\Services\Images;
 
 use App\Jobs\ConvertImagePrototypeJob;
 use Illuminate\Http\Request;

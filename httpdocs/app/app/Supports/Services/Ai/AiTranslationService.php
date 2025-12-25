@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Supports\Services\Ai;
 
 use App\Services\Ai\OpenAiTranslatorService;
-use App\Services\Translations\Product\ProductAttributeTextAiTranslatorService;
-use App\Services\Translations\Product\ProductDescriptionAiTranslatorService;
-use App\Services\Translations\Product\ProductNameAiTranslatorService;
+use App\Supports\Services\Translations\Product\ProductAttributeTextAiTranslatorService;
+use App\Supports\Services\Translations\Product\ProductDescriptionAiTranslatorService;
+use App\Supports\Services\Translations\Product\ProductNameAiTranslatorService;
 use Throwable;
 
 final readonly class AiTranslationService

@@ -17,8 +17,8 @@ RUN apt-get update \
         nano \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime
-RUN echo "date.timezone=${TZ}" > /usr/local/etc/php/conf.d/99-timezone.ini
+RUN ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
+  && echo "date.timezone=${TZ}" > /usr/local/etc/php/conf.d/99-timezone.ini
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
@@ -42,7 +42,7 @@ COPY --from=nodejs /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # Re-create symlinks exactly like in official node image
 RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
- && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+  && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
 # Composer from composer stage
 COPY --from=composer /usr/bin/composer /usr/bin/composer

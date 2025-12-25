@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Data\AppSettingsData;
-use App\Services\AppSettingsService;
-use App\Services\Images\ImageUrlBuilderService;
+use App\Supports\Services\AppSettingsService;
+use App\Supports\Services\Currency\ConvertPrice;
+use App\Supports\Services\Images\ImageUrlBuilderService;
+use Illuminate\Support\Str;
 
 if (!function_exists('clear_telephone')) {
     /**
@@ -38,7 +40,7 @@ if (!function_exists('parse_telephone')) {
         $telephone = clear_telephone($telephone, true);
 
         $mask         = '+38 (___) ___-__-__';
-        $phone_length = \Illuminate\Support\Str::length($telephone);
+        $phone_length = Str::length($telephone);
 
         for ($index_number = 0; $index_number < $phone_length; $index_number++) {
             $mask = preg_replace('/_/', $telephone[$index_number], $mask, 1);
@@ -157,5 +159,75 @@ if (!function_exists('localizedRoute')) {
         return route($route, array_merge([
             $locale => app()->getLocale(),
         ], $parameters), $absolute);
+    }
+}
+
+if (!function_exists('decode_html_entities')) {
+    /**
+     * @param string|null $string
+     *
+     * @return string
+     */
+    function decode_html_entities(?string $string): string
+    {
+        return html_entity_decode((string)$string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+}
+
+if (!function_exists('escape_special_html')) {
+    /**
+     * @param string|null $html_string
+     *
+     * @return string
+     */
+    function escape_special_html(?string $html_string): string
+    {
+        $prepared_html = Str::replaceMatches('/<script>.*?<\/script>/s', function ($match) {
+            if (isset($match[0])) {
+                return Str::replace(['<', '>'], ['&lt;', '&gt;'], $match[0], false);
+            }
+
+            return '';
+        }, decode_html_entities($html_string));
+
+        return Str::replace("'", '&apos;', $prepared_html, false);
+    }
+}
+
+if (!function_exists('convert_price')) {
+    /**
+     * @param float  $price
+     * @param string $code_from
+     * @param string $code_to
+     *
+     * @return float
+     */
+    function convert_price(float $price, string $code_from, string $code_to): float
+    {
+        return app(ConvertPrice::class)->convert(
+            price    : $price,
+            code_from: $code_from,
+            code_to  : $code_to
+        );
+    }
+}
+
+if (!function_exists('format_price')) {
+    /**
+     * @param float|int   $price
+     * @param string|null $currency_code
+     * @param float|int   $exchange_rate
+     * @param bool        $is_formatting
+     *
+     * @return string|float
+     */
+    function format_price(float|int $price, ?string $currency_code = null, float|int $exchange_rate = 0, bool $is_formatting = true): string|float
+    {
+        return app(ConvertPrice::class)->format(
+            price          : $price,
+            currency_code  : $currency_code,
+            exchange_rate  : $exchange_rate,
+            is_formatting  : $is_formatting
+        );
     }
 }

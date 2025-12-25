@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Translations\Product;
+namespace App\Supports\Services\Translations\Product;
 
 use App\Abstratcts\Ai\AiDbCachedTranslatorAbstract;
-use App\Models\Catalogs\Products\ProductAttributeTextHash;
+use App\Models\Catalogs\Products\ProductDescriptionHash;
 use App\Services\Ai\OpenAiTranslatorService;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstract
+class ProductDescriptionAiTranslatorService extends AiDbCachedTranslatorAbstract
 {
     /**
      * @inheritDoc
@@ -17,7 +17,6 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
     public function __construct(
         OpenAiTranslatorService $ai,
         private readonly int    $product_id,
-        private readonly int    $attribute_id,
     ) {
         parent::__construct($ai);
     }
@@ -27,15 +26,11 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
      */
     protected function findCached(string $hash): ?string
     {
-        $product_attribute_text_hash = ProductAttributeTextHash::getAttributeTextHash(
-            $this->product_id,
-            $this->attribute_id,
-            $hash
-        );
+        $product_description_hash = ProductDescriptionHash::getDescriptionHash($this->product_id, $hash);
 
-        $this->setProductAttributeTextHash($product_attribute_text_hash);
+        $this->setProductDescriptionHash($product_description_hash);
 
-        $ai_answer_cache = $product_attribute_text_hash
+        $ai_answer_cache = $product_description_hash
             ?->aiAnswerCache()
             ->first();
 
@@ -47,17 +42,16 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
      */
     protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model
     {
-        $product_attribute_text_hash = $this->getProductAttributeTextHash();
+        $product_description_hash = $this->getProductDescriptionHash();
 
-        if ($product_attribute_text_hash === null) {
-            $product_attribute_text_hash = ProductAttributeTextHash::create([
-                'product_id'   => $this->product_id,
-                'attribute_id' => $this->attribute_id,
-                'hash'         => $hash,
+        if ($product_description_hash === null) {
+            $product_description_hash = ProductDescriptionHash::create([
+                'product_id' => $this->product_id,
+                'hash'       => $hash,
             ]);
         }
 
-        return $product_attribute_text_hash
+        return $product_description_hash
             ?->aiAnswerCache()
             ->updateOrCreate(
                 [],

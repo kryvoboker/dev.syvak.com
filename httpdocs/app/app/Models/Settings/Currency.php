@@ -91,6 +91,19 @@ class Currency extends Model
     }
 
     /**
+     * @param string $code
+     *
+     * @return self|null
+     */
+    public function getActiveCurreyncyByCode(string $code): ?self
+    {
+        return self::query()
+            ->where('code', $code)
+            ->where('is_active', true)
+            ->first();
+    }
+
+    /**
      * @return Currency|null
      */
     public function getDefaultActiveCurrency(): ?self

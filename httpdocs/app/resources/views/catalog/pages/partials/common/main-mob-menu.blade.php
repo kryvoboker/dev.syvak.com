@@ -3,16 +3,21 @@
      role="dialog"
      tabindex="-1">
     <div class="drawer-header flex-col items-stretch pt-38px px-4 pb-6">
-        <button type="button" class="size-8 btn btn-text btn-circle btn-sm ms-auto mb-4"
-                aria-label="Close"
+        <button type="button" class="size-8 btn btn-text btn-circle ms-auto mb-4"
+                aria-expanded="true"
+                aria-controls="{{ __('catalog/default.aria_labels.close_mob_main_menu') }}"
                 data-overlay="#main-mob-menu">
             <span class="icon-[iconamoon--close] custom-icon size-8"></span>
         </button>
 
         <div class="flex items-center justify-between gap-x-2 border-y border-y-opacity-light-gray-40% py-18px">
-            <x-catalog::common.language-swithcer class="hidden md:inline-flex" :languages="$header_data['languages']"/>
+            <x-catalog::common.language-swithcer class="inline-flex" :languages="$header_data['languages']"/>
 
-            <button type="button">
+            <button class="open-mob-search-btn btn btn-text btn-circle"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                    aria-controls="{{ __('catalog/default.placeholders.search') }}">
                 <span class="icon-[si--search-line] custom-icon"></span>
             </button>
         </div>

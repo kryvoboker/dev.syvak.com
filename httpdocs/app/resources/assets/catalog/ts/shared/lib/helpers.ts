@@ -127,6 +127,7 @@ const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, me
     type TypeHeaders = {
         "X-Requested-With": string,
         contentType?: string,
+        "X-CSRF-TOKEN"?: string
     };
 
     type TypeOptions = {
@@ -137,6 +138,7 @@ const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, me
 
     const headers: TypeHeaders = {
               'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRF-TOKEN':     (<HTMLMetaElement | null>findElem('meta[name="csrf-token"]'))?.content || ''
           },
           contentType          = 'application/json;charset=utf-8';
 

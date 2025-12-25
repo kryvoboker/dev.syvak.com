@@ -8,6 +8,8 @@ use App\Models\Catalogs\Categories\Category;
 use App\Models\Trait\HasSlugsTrait;
 use App\Models\Trait\SlugTrait;
 use Database\Factories\Catalogs\Products\ProductFactory;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -189,5 +191,45 @@ class Product extends Model
             ->first();
 
         return $discount;
+    }
+
+    /**
+     * @param string $keyword
+     * @param int    $per_page
+     *
+     * @return LengthAwarePaginator
+     */
+    public function search(string $keyword, int $per_page): LengthAwarePaginator
+    {
+        $app_settings = get_app_settings();
+
+        return self::query()
+            ->with([
+                'slugs'              => function ($query) use ($app_settings) {
+                    $query->where('language_id', $app_settings->language_id);
+                },
+                'productDescription' => function ($query) use ($app_settings) {
+                    $query->where('language_id', $app_settings->language_id);
+                },
+                'productDiscount'    => function ($query) {
+                    $current_date_time = now(config('app.timezone'));
+
+                    $query
+                        ->where('date_start', '<=', $current_date_time)
+                        ->where('date_end', '>=', $current_date_time)
+                        ->orderBy('priority');
+                }
+            ])
+            ->where('quantity', '>', (int)config('app.products.minimum_stock_quantity'))
+            ->where(function (Builder $query) use ($keyword) {
+                $query->whereHas('productDescription', function ($query_2) use ($keyword) {
+                    $query_2->whereLike('name', "%$keyword%");
+                })
+                    ->orWhereLike('model', "%$keyword%")
+                    ->orWhereLike('sku', "%$keyword%");
+            })
+            ->orderByDesc('date_added')
+            ->paginate($per_page)
+            ->withQueryString();
     }
 }

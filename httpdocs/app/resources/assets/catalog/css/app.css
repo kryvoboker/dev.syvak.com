@@ -55,14 +55,15 @@
     --text-90px: calc(90 / var(--base-font-size) * 1rem);
     --text-122px: calc(122 / var(--base-font-size) * 1rem);
 
-    --color-white: rgba(255,251,254,1); /* #FFFBFE */
-    --color-black: rgba(12,18,12,1); /* #0C120C */
-    --color-light-black: rgba(12,18,12,0.20); /* #0C120C33 */
-    --color-light-gray: rgba(136,136,136,1); /* #888888 */
+    --color-white: rgb(255,251,254); /* #FFFBFE */
+    --color-black: rgb(12,18,12); /* #0C120C */
+    --color-light-black: rgba(12,18,12,.2); /* #0C120C33 */
+    --color-light-gray: rgb(136,136,136); /* #888888 */
     --color-opacity-light-gray-40\%: rgba(136,136,136,.4); /* #888888 */
-    --color-dark-gray: rgba(136,136,136,0.40); /* #88888866 */
-    --color-light-red: rgba(212,4,28,1); /* #D4041C */
-    --color-dark-red: rgba(212,4,28,0.70); /* #D4041CB3 */
+    --color-dark-gray: rgba(136,136,136,.4); /* #88888866 */
+    --color-light-red: rgb(212,4,28); /* #D4041CFF */
+    --color-dark-red: rgba(212,4,28,.7); /* #D4041CB3 */
+    --color-dark-green: rgb(0, 135, 95); /* #00875FFF */
 
     --spacing-0\.8em: 0.8em;
     --spacing-0\.9em: 0.9em;
@@ -181,7 +182,7 @@
         }
 
         &::placeholder {
-            @apply text-11px md:text-sm lg:text-base bp1920px:text-lg text-dark-gray font-light tracking-0.04em;
+            @apply text-sm lg:text-base bp1920px:text-lg text-dark-gray font-light tracking-0.04em;
         }
     }
 
@@ -192,6 +193,27 @@
     .dark-btn:active,
     .dark-btn:hover {
         @apply text-black border-light-gray bg-light-gray cursor-pointer duration-500 ease-in-out;
+    }
+
+    ._error, ._success {
+        @apply hidden rounded p-1 mt-1;
+    }
+
+    ._error {
+        @apply text-light-red;
+    }
+
+    ._success {
+        @apply text-dark-green;
+    }
+
+    ._was-validated label:has(:valid) + ._success,
+    ._was-validated label:has(:invalid) + ._error,
+    ._was-validated .choices:has(:invalid) + ._error,
+    ._was-validated :has(:invalid) ~ ._error,
+    ._was-validated :invalid ~ ._error,
+    ._was-validated :valid ~ ._success {
+        @apply inline-block;
     }
 }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\SeoSlug;
+namespace App\Supports\Services\SeoSlug;
 
 use Illuminate\Support\Str;
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Pages\HomeController;
+use App\Http\Controllers\Pages\SearchProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/' . app()->getLocale());
@@ -11,9 +13,10 @@ Route::redirect('/', '/' . app()->getLocale());
 Route::prefix('{locale}')
     ->name('localized.catalog.')
     ->group(function () {
-        Route::get('/', [\App\Http\Controllers\Pages\HomeController::class, 'index'])->name('home');
+        Route::get('/', [HomeController::class, 'index'])->name('home');
 
-        Route::get('/category/{slug}', function (string $locale, string $slug) {
+        Route::get('/category/{slug}', function (string $locale, string $slug) {})->name('category.show');
 
-        })->name('category.show');
+        Route::get('/product/{slug}', function (string $locale, string $slug) {})->name('product.show');
+        Route::get('/search', [SearchProductController::class, 'index'])->name('search.index');
     });

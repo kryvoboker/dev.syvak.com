@@ -32,7 +32,13 @@ class HeaderService
         $languages    = new Language()->getActiveLanguages();
         $logo_width   = (int)($app_settings->image_sizes['logo']['width'] ?? config('app.images.logo_width'));
         $logo_height  = (int)($app_settings->image_sizes['logo']['height'] ?? config('app.images.logo_height'));
-        $socials      = $app_settings->socials[app()->getLocale()] ?? [];
+        $socials      = array_map(function ($item) {
+            if (isset($item['svg_icon'])) {
+                $item['svg_icon'] = escape_special_html($item['svg_icon']);
+            }
+
+            return $item;
+        }, $app_settings->socials[app()->getLocale()] ?? []);
 
         return [
             'logo_data'                => [

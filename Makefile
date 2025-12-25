@@ -1,4 +1,7 @@
-up-dev:
+set-node:
+	bash -c "source ~/.nvm/nvm.sh && nvm use 24.11.0"
+
+up-dev: set-node
 	docker compose -f .docker/dev/docker-compose.yml up -d
 
 down-dev:
@@ -9,7 +12,7 @@ build-dev:
 
 restart-dev: down-dev up-dev
 
-up-prod:
+up-prod: set-node
 	docker compose -f .docker/prod/docker-compose.yml up -d
 
 down-prod:

@@ -139,12 +139,14 @@ return [
         'coordinates' => '/^-?\d{1,2}\.\d+,\s?-?\d{1,3}\.\d+$/',
     ],
     'currency'                  => [
-        'json_url'                => env('CURRENCY_JSON_URL'),
-        'default_currency_code'   => env('DEFAULT_CURRENCY_CODE'),
-        'default_exchange_rate'   => (float)env('DEFAULT_EXCHANGE_RATE'),
-        'default_currency_symbol' => env('DEFAULT_CURRENCY_SYMBOL'),
-        'default_format_locale'   => env('DEFAULT_CURRENCY_FORMAT_LOCALE', 'en_US'),
-        'default_decimal_places'  => (int)env('DEFAULT_CURRENCY_DECIMAL_PLACES', 2),
+        'json_url'                   => env('CURRENCY_JSON_URL'),
+        'default_currency_code'      => env('DEFAULT_CURRENCY_CODE'),
+        'default_exchange_rate'      => (float)env('DEFAULT_EXCHANGE_RATE'),
+        'default_currency_symbol'    => env('DEFAULT_CURRENCY_SYMBOL'),
+        'default_format_locale'      => env('DEFAULT_CURRENCY_FORMAT_LOCALE', 'en_US'),
+        'default_decimal_places'     => (int)env('DEFAULT_CURRENCY_DECIMAL_PLACES', 2),
+        'default_decimal_separator'  => env('DEFAULT_DECIMAL_SEPARATOR'),
+        'default_thousand_separator' => env('DEFAULT_THOUSAND_SEPARATOR'),
     ],
     'images'                    => [
         'image_version'                => env('IMAGE_VERSION'),
@@ -207,6 +209,10 @@ return [
     'categories'                => [
         'hoodie_id'          => (int)env('CATEGORY_HOODIE_ID'),
         'exclusive_gifts_id' => (int)env('CATEGORY_EXCLUSIVE_GIFTS_ID'),
+    ],
+    'products'                  => [
+        'minimum_stock_quantity'   => (int)env('PRODUCT_MINIMUM_STOCK_QUANTITY'),
+        'search_products_per_page' => (int)env('SEARCH_PRODUCTS_PER_PAGE'),
     ],
 
 ];

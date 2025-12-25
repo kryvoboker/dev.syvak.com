@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Translations\Product;
+namespace App\Supports\Services\Translations\Product;
 
 use App\Abstratcts\Ai\AiDbCachedTranslatorAbstract;
 use App\Models\Catalogs\Products\ProductNameHash;
