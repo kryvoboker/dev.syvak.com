@@ -1,7 +1,7 @@
 set-node:
 	bash -c "source ~/.nvm/nvm.sh && nvm use 24.11.0"
 
-up-dev: set-node
+up-dev:
 	docker compose -f .docker/dev/docker-compose.yml up -d
 
 down-dev:
@@ -12,7 +12,7 @@ build-dev:
 
 restart-dev: down-dev up-dev
 
-up-prod: set-node
+up-prod:
 	docker compose -f .docker/prod/docker-compose.yml up -d
 
 down-prod:
@@ -23,11 +23,11 @@ build-prod:
 
 restart-prod: down-prod up-prod
 
-vite:
-	cd httpdocs/app && npm run dev
+vite: set-node
+	cd app-code/app && npm run dev
 
-vite-build:
-	cd httpdocs/app \
+vite-build: set-node
+	cd app-code/app \
 	&& npm run build
 
 spfdb:
