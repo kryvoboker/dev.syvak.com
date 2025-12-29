@@ -154,10 +154,10 @@ if (!function_exists('localizedRoute')) {
      */
     function localizedRoute(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
     {
-        $locale = config('localization.locale_parameter');
+        $locale_key = config('localization.locale_parameter');
 
         return route($route, array_merge([
-            $locale => app()->getLocale(),
+            $locale_key => app()->getLocale(),
         ], $parameters), $absolute);
     }
 }

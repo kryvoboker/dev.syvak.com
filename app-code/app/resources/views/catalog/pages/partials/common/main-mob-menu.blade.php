@@ -10,7 +10,7 @@
             <span class="icon-[iconamoon--close] custom-icon size-8"></span>
         </button>
 
-        <div class="flex items-center justify-between gap-x-2 border-y border-y-opacity-light-gray-40% py-18px">
+        <div class="flex md:hidden items-center justify-between gap-x-2 border-y border-y-opacity-light-gray-40% py-18px">
             <x-catalog::common.language-swithcer class="inline-flex" :languages="$header_data['languages']"/>
 
             <button class="open-mob-search-btn btn btn-text btn-circle"

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Pages;
 use App\Actions\SearchProductAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Search\SearchProductIndexRequest;
+use App\Http\Requests\Search\SearchProductShowRequest;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
@@ -23,7 +24,7 @@ class SearchProductController extends Controller
     {
         $search_products                   = $search_product_action->handle(
             $request->query('keyword'),
-            (int)config('app.products.search_products_per_page')
+            (int)($request->query('per_page') ?: config('app.products.search_products_per_page'))
         );
         $not_found_img_sizes               = get_app_settings()->image_sizes->firstWhere('name', 'search_not_found') ?? [];
         $search_not_found_img_data['urls'] = multiple_convert_img_and_get_url(
@@ -38,16 +39,19 @@ class SearchProductController extends Controller
 
         if ($request->ajax()) {
             $rendered_html = view('catalog::components.common.search-result', [
-                'products_data'         => $search_products->toArray($request),
-                'search_not_found_data' => $search_not_found_img_data,
+                'products_data'             => $search_products->toArray($request),
+                'search_not_found_img_data' => $search_not_found_img_data,
             ])->render();
 
             return response()->json([
-                'success' => true,
-                'html'    => $rendered_html,
+                'success'        => true,
+                'html'           => $rendered_html,
+                'total_products' => $search_products->count(),
             ]);
         }
 
         return null;
     }
+
+    public function show(SearchProductShowRequest $request) {}
 }

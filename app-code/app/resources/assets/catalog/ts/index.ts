@@ -12,5 +12,21 @@ document.addEventListener('DOMContentLoaded', (): void => {
         .then(module => module.handleMainMobMenu());
 
     import('@ts-features/search/mob-search.ts')
-        .then(module => module.handleMobSearch());
+        .then(module => {
+            module.handleMobSearch({
+                openSearchBtn:    '.open-mob-search-btn',
+                searchContainer:  '.mob-search-container',
+                searchInput:      '.mob-search-input',
+                searchResults:    '.mob-search-results',
+                searchForm:       '.mob-search-form',
+            });
+
+            module.handleMobSearch({
+                openSearchBtn:    '.open-pc-search-btn',
+                searchContainer:  '.pc-search-container',
+                searchInput:      '.pc-search-input',
+                searchResults:    '.pc-search-results',
+                searchForm:       '.pc-search-form',
+            })
+        });
 });

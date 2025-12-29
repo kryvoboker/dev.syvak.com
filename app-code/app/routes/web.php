@@ -18,5 +18,7 @@ Route::prefix('{locale}')
         Route::get('/category/{slug}', function (string $locale, string $slug) {})->name('category.show');
 
         Route::get('/product/{slug}', function (string $locale, string $slug) {})->name('product.show');
+
         Route::get('/search', [SearchProductController::class, 'index'])->name('search.index');
+        Route::get('/search/show', [SearchProductController::class, 'show'])->name('search.show');
     });

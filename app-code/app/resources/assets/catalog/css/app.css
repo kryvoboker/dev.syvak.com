@@ -5,7 +5,9 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 @import "flyonui/variants.css";
-@plugin "flyonui";
+@plugin "flyonui" {
+    themes: dark;
+}
 @source "../../../../node_modules/flyonui/flyonui.js";
 @plugin "@iconify/tailwind4";
 
@@ -69,7 +71,9 @@
     --spacing-1\.4em: 1.4em;
     --spacing-18px: calc(18 / var(--base-font-size) * 1rem);
     --spacing-19px: calc(19 / var(--base-font-size) * 1rem);
+    --spacing-20px: calc(20 / var(--base-font-size) * 1rem);
     --spacing-38px: calc(38 / var(--base-font-size) * 1rem);
+    --spacing-92px: calc(92 / var(--base-font-size) * 1rem);
 
     --tracking-0\.02em: 0.02em;
     --tracking-0\.028em: 0.028em;
@@ -83,7 +87,7 @@
     }
 
     .main {
-        @apply shrink grow basis-auto relative;
+        @apply shrink grow basis-auto;
     }
 }
 
@@ -214,6 +218,10 @@
     ._was-validated :valid ~ ._success {
         @apply inline-block;
     }
+}
+
+.drawer-body {
+    @apply bp1920px:text-lg;
 }
 
 @utility custom-icon {

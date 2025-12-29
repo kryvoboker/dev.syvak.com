@@ -1,5 +1,5 @@
-<div class="overlay overlay-open:translate-x-0 drawer drawer-start hidden mob-search bg-black"
-     id="mob-search"
+<div class="overlay overlay-open:translate-x-0 drawer drawer-start hidden mob-search-container bg-black"
+     id="mob-search-container"
      role="dialog"
      tabindex="-1">
     <div class="loader fixed top-0 left-0 hidden items-center justify-center size-full bg-black/70 z-10">
@@ -21,7 +21,7 @@
                     type="button"
                     aria-expanded="true"
                     aria-controls="{{ __('catalog/default.aria_labels.close_mob_search') }}"
-                    data-overlay="#mob-search">
+                    data-overlay="#mob-search-container">
                 <span class="icon-[iconamoon--close] custom-icon size-8"></span>
             </button>
         </div>
@@ -29,7 +29,8 @@
         <div class="flex flex-col gap-y-1 border-y border-y-opacity-light-gray-40% py-2">
             <form class="mob-search-form _needs-validation"
                   novalidate
-                  action="{{ localizedRoute('localized.catalog.search.index') }}"
+                  data-ajax-search-url="{{ localizedRoute('localized.catalog.search.index') }}"
+                  action="{{ localizedRoute('localized.catalog.search.show') }}"
                   method="GET">
                 <div class="flex space-x-4">
                     <button class="mob-search-btn icon-[si--search-line] custom-icon my-auto size-6 shrink-0" type="submit"></button>
