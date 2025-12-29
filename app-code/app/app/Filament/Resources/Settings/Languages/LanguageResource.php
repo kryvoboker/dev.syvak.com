@@ -4,23 +4,29 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Languages;
 
+use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Resources\Settings\Languages\Pages\CreateLanguage;
 use App\Filament\Resources\Settings\Languages\Pages\EditLanguage;
 use App\Filament\Resources\Settings\Languages\Pages\ListLanguages;
 use App\Filament\Resources\Settings\Languages\Schemas\LanguageForm;
 use App\Filament\Resources\Settings\Languages\Tables\LanguagesTable;
+use App\Filament\Resources\Trait\TotalItemsTrait;
 use App\Models\Settings\Language;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class LanguageResource extends Resource
 {
+    use TotalItemsTrait;
+
     protected static ?string                $model                = Language::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::Language;
     protected static ?string                $recordTitleAttribute = 'name';
+    protected static string|null|UnitEnum   $navigationGroup      = AdminNavigationGroupEnum::Settings;
 
     public static function form(Schema $schema): Schema
     {
@@ -76,15 +82,5 @@ class LanguageResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('admin/settings/languages.labels.plural_model');
-    }
-
-    /**
-     * For the name of the parent menu item for the menu group
-     *
-     * @return string|null
-     */
-    public static function getNavigationGroup(): ?string
-    {
-        return __('admin/default.menu.item_settings');
     }
 }

@@ -4,22 +4,28 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products;
 
+use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\CreateProduct;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\EditProduct;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\ListProducts;
 use App\Filament\Resources\Catalogs\Products\Products\Schemas\ProductForm;
 use App\Filament\Resources\Catalogs\Products\Products\Tables\ProductsTable;
+use App\Filament\Resources\Trait\TotalItemsTrait;
 use App\Models\Catalogs\Products\Product;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ProductResource extends Resource
 {
-    protected static ?string $model = Product::class;
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::ShoppingCart;
+    use TotalItemsTrait;
+
+    protected static ?string                $model           = Product::class;
+    protected static string|BackedEnum|null $navigationIcon  = Heroicon::ShoppingCart;
+    protected static string|null|UnitEnum   $navigationGroup = AdminNavigationGroupEnum::Catalog;
 
     public static function form(Schema $schema): Schema
     {
@@ -41,9 +47,9 @@ class ProductResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListProducts::route('/'),
+            'index'  => ListProducts::route('/'),
             'create' => CreateProduct::route('/create'),
-            'edit' => EditProduct::route('/{record}/edit'),
+            'edit'   => EditProduct::route('/{record}/edit'),
         ];
     }
 
@@ -75,15 +81,5 @@ class ProductResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('admin/catalogs/products/products.labels.plural_model');
-    }
-
-    /**
-     * For the name of the parent menu item for the menu group
-     *
-     * @return string|null
-     */
-    public static function getNavigationGroup(): ?string
-    {
-        return __('admin/default.menu.item_catalog');
     }
 }

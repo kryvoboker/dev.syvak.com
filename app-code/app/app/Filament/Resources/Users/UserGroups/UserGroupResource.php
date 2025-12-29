@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\UserGroups;
 
+use App\Filament\Navigation\AdminNavigationGroupEnum;
+use App\Filament\Resources\Trait\TotalItemsTrait;
 use App\Filament\Resources\Users\UserGroups\Pages\CreateUserGroup;
 use App\Filament\Resources\Users\UserGroups\Pages\EditUserGroup;
 use App\Filament\Resources\Users\UserGroups\Pages\ListUserGroups;
@@ -15,14 +17,16 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class UserGroupResource extends Resource
 {
-    protected static ?string $model = UserGroup::class;
+    use TotalItemsTrait;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;
-
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string                $model                = UserGroup::class;
+    protected static string|BackedEnum|null $navigationIcon       = Heroicon::UserGroup;
+    protected static ?string                $recordTitleAttribute = 'name';
+    protected static string|null|UnitEnum   $navigationGroup      = AdminNavigationGroupEnum::Users;
 
     public static function form(Schema $schema): Schema
     {
@@ -44,9 +48,9 @@ class UserGroupResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListUserGroups::route('/'),
+            'index'  => ListUserGroups::route('/'),
             'create' => CreateUserGroup::route('/create'),
-            'edit' => EditUserGroup::route('/{record}/edit'),
+            'edit'   => EditUserGroup::route('/{record}/edit'),
         ];
     }
 
@@ -78,15 +82,5 @@ class UserGroupResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('admin/users/user_groups.labels.plural_model');
-    }
-
-    /**
-     * For the name of the parent menu item for the menu group
-     *
-     * @return string|null
-     */
-    public static function getNavigationGroup(): ?string
-    {
-        return __('admin/default.menu.item_users');
     }
 }

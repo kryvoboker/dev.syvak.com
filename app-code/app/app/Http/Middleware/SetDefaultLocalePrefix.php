@@ -35,6 +35,8 @@ class SetDefaultLocalePrefix
             app()->setLocale($locale);
             url()->defaults(['locale' => $locale]);
 
+            config(['app.locale' => $locale]);
+
             return $next($request);
         }
 
@@ -56,6 +58,8 @@ class SetDefaultLocalePrefix
         session()->put('locale', $locale);
         app()->setLocale($locale);
         url()->defaults(['locale' => $locale]);
+
+        config(['app.locale' => $locale]);
 
         return $next($request);
     }

@@ -4,22 +4,28 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes;
 
+use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\Pages\CreateAttribute;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\Pages\EditAttribute;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\Pages\ListAttributes;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas\AttributeForm;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\Tables\AttributesTable;
+use App\Filament\Resources\Trait\TotalItemsTrait;
 use App\Models\Catalogs\Attributes\Attribute;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class AttributeResource extends Resource
 {
-    protected static ?string                $model          = Attribute::class;
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
+    use TotalItemsTrait;
+
+    protected static ?string                $model           = Attribute::class;
+    protected static string|BackedEnum|null $navigationIcon  = Heroicon::Tag;
+    protected static string|null|UnitEnum   $navigationGroup = AdminNavigationGroupEnum::Catalog;
 
     public static function form(Schema $schema): Schema
     {
@@ -75,15 +81,5 @@ class AttributeResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('admin/catalogs/attributes/attributes.labels.plural_model');
-    }
-
-    /**
-     * For the name of the parent menu item for the menu group
-     *
-     * @return string|null
-     */
-    public static function getNavigationGroup(): ?string
-    {
-        return __('admin/default.menu.item_catalog');
     }
 }

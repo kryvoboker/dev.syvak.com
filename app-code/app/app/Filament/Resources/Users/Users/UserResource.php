@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Users;
 
+use App\Filament\Navigation\AdminNavigationGroupEnum;
+use App\Filament\Resources\Trait\TotalItemsTrait;
 use App\Filament\Resources\Users\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Users\Pages\ListUsers;
@@ -15,12 +17,16 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class UserResource extends Resource
 {
+    use TotalItemsTrait;
+
     protected static ?string                $model                = User::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::User;
     protected static ?string                $recordTitleAttribute = 'full_name';
+    protected static string|null|UnitEnum   $navigationGroup      = AdminNavigationGroupEnum::Users;
 
     public static function form(Schema $schema): Schema
     {
@@ -76,15 +82,5 @@ class UserResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('admin/users/users.labels.plural_model');
-    }
-
-    /**
-     * For the name of the parent menu item for the menu group
-     *
-     * @return string|null
-     */
-    public static function getNavigationGroup(): ?string
-    {
-        return __('admin/default.menu.item_users');
     }
 }

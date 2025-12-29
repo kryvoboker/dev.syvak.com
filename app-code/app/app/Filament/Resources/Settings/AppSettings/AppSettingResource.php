@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\AppSettings;
 
+use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Resources\Settings\AppSettings\Pages\EditAppSetting;
 use App\Filament\Resources\Settings\AppSettings\Schemas\AppSettingForm;
 use App\Models\Settings\AppSetting;
@@ -12,13 +13,15 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class AppSettingResource extends Resource
 {
     protected static ?string                $model                = AppSetting::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::Cog6Tooth;
+    protected static string|null|UnitEnum   $navigationGroup      = AdminNavigationGroupEnum::Settings;
     protected static ?string                $recordTitleAttribute = 'timezone';
-    protected static ?int                   $navigationSort       = 10;
+    protected static ?int                   $navigationSort       = 99;
 
     /**
      * Should register navigation
@@ -67,16 +70,6 @@ class AppSettingResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('admin/settings/app_settings.navigation_label');
-    }
-
-    /**
-     * For the name of the parent menu item for the menu group
-     *
-     * @return string|null
-     */
-    public static function getNavigationGroup(): ?string
-    {
-        return __('admin/default.menu.item_settings');
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Http\Middleware\LogFilamentErrors;
 use App\Http\Middleware\SetDefaultLocalePrefix;
 use App\Http\Middleware\User\SetCommonPreferences;
@@ -13,6 +14,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -30,6 +32,11 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AlyoAdminPanelProvider extends PanelProvider
 {
+    /**
+     * @param Panel $panel
+     *
+     * @return Panel
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -48,22 +55,32 @@ class AlyoAdminPanelProvider extends PanelProvider
 
                     return view('filament.hooks.language-switcher', [
                         'languages'      => $languages,
-                        'current_locale'  => app()->getLocale(),
+                        'current_locale' => app()->getLocale(),
                     ]);
                 },
             )
             ->plugins([
                 FilamentShieldPlugin::make()
-                    ->navigationGroup(__('admin/default.menu.item_users')),
+                    ->navigationSort(99)
+                    ->navigationGroup(AdminNavigationGroupEnum::Users),
             ])
             // Show group menu list if user visited page from group
             ->collapsibleNavigationGroups()
             // Show group menu list if user visited page from group
-            ->sidebarCollapsibleOnDesktop(true)
+            ->sidebarCollapsibleOnDesktop()
+
             ->navigationGroups([
-                __('admin/default.menu.item_catalog'),
-                __('admin/default.menu.item_users'),
-                __('admin/default.menu.item_settings'),
+                NavigationGroup::make()
+                    ->label(fn() => AdminNavigationGroupEnum::Catalog->getLabel())
+                    ->collapsed(),
+
+                NavigationGroup::make()
+                    ->label(fn() => AdminNavigationGroupEnum::Users->getLabel())
+                    ->collapsed(),
+
+                NavigationGroup::make()
+                    ->label(fn() => AdminNavigationGroupEnum::Settings->getLabel())
+                    ->collapsed(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
