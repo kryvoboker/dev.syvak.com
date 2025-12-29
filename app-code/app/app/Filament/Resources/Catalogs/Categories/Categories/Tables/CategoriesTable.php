@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Categories\Categories\Tables;
 
+use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Categories\Category;
-use App\Models\Settings\Language;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +21,8 @@ use Illuminate\Support\Str;
 
 class CategoriesTable
 {
+    use LanguageTrait;
+
     /**
      * @param Table $table
      *
@@ -29,14 +30,7 @@ class CategoriesTable
      */
     public static function configure(Table $table): Table
     {
-        $language = new Language();
-
-        // Get current locale language ID (adjust based on your logic)
-        $current_language_id = $language->getLanguageByCode(app()->getLocale())?->id;
-
-        if ($current_language_id === null) {
-            $current_language_id = $language->getDefaultLanguage()?->id;
-        }
+        $current_language_id = self::getCurrentLanguageId();
 
         return $table
             ->modifyQueryUsing(function (Builder $query) {
@@ -54,14 +48,8 @@ class CategoriesTable
                     ->sortable()
                     ->limit(50)
                     ->getStateUsing(function (Category $record) use ($current_language_id) {
-                        if ($current_language_id === null) {
-                            Notification::make()
-                                ->title(__('admin/default.errors.title'))
-                                ->body(__('admin/default.errors.no_language'))
-                                ->danger()
-                                ->send();
-
-                            return '-';
+                        if (($returned_value = self::validateLanguageIdIsNotNull($current_language_id)) !== null) {
+                            return $returned_value;
                         }
 
                         // Try to get description for current locale

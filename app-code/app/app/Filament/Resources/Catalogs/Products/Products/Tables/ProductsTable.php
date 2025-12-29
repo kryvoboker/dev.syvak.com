@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Tables;
 
+use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Products\Product;
-use App\Models\Settings\Language;
+use App\Supports\Services\Currency\ConvertPrice;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -20,10 +20,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use NumberFormatter;
 
 class ProductsTable
 {
+    use LanguageTrait;
+
     /**
      * @param Table $table
      *
@@ -31,14 +32,7 @@ class ProductsTable
      */
     public static function configure(Table $table): Table
     {
-        $language = new Language();
-
-        // Get current locale language ID (adjust based on your logic)
-        $current_language_id = $language->getLanguageByCode(app()->getLocale())?->id;
-
-        if ($current_language_id === null) {
-            $current_language_id = $language->getDefaultLanguage()?->id;
-        }
+        $current_language_id = self::getCurrentLanguageId();
 
         return $table
             ->modifyQueryUsing(function (Builder $query) {
@@ -59,14 +53,8 @@ class ProductsTable
                     ->sortable()
                     ->limit(50)
                     ->getStateUsing(function (Product $record) use ($current_language_id) {
-                        if ($current_language_id === null) {
-                            Notification::make()
-                                ->title(__('admin/default.errors.title'))
-                                ->body(__('admin/default.errors.no_language'))
-                                ->danger()
-                                ->send();
-
-                            return '-';
+                        if (($returned_value = self::validateLanguageIdIsNotNull($current_language_id)) !== null) {
+                            return $returned_value;
                         }
 
                         $description = $record->productDescription
@@ -120,33 +108,17 @@ class ProductsTable
                     ->getStateUsing(function (Product $record) {
                         $discount = new Product()->getLastActualAndLastModifiedDiscountFromModel($record);
 
-                        $currency = config('app.currency.default_currency_code');
+                        $currency      = config('app.currency.default_currency_code');
+                        $exchange_rate = (float)config('app.currency.default_exchange_rate');
 
-                        $number_formatter = new NumberFormatter(
-                            config('app.currency.default_format_locale'),
-                            NumberFormatter::CURRENCY
-                        );
-
-                        $number_formatter->setAttribute(
-                            NumberFormatter::FRACTION_DIGITS,
-                            (int)config('app.currency.default_decimal_places')
-                        );
+                        $convert_price = app(ConvertPrice::class);
 
                         if ($discount === null || $discount->price <= 0) {
-                            return $number_formatter->formatCurrency(
-                                $record->price,
-                                $currency
-                            );
+                            return $convert_price->format($record->price, $currency, $exchange_rate);
                         }
 
-                        $old_price = $number_formatter->formatCurrency(
-                            $record->price,
-                            $currency
-                        );
-                        $new_price = $number_formatter->formatCurrency(
-                            $discount->price,
-                            $currency
-                        );
+                        $old_price = $convert_price->format($record->price, $currency, $exchange_rate);
+                        $new_price = $convert_price->format($discount->price, $currency, $exchange_rate);
 
                         return '<span style="font-size: 1rem; text-decoration: line-through; color: #9ca3af;"><del>' . $old_price . '</del></span><br>' .
                             '<span style="font-size: 1.3rem; color: #ef4444; font-weight: 600;">' . $new_price . '</span>';
@@ -173,6 +145,7 @@ class ProductsTable
 
                 IconColumn::make('is_active')
                     ->label(__('admin/default.columns.is_active'))
+                    ->sortable()
                     ->boolean(),
 
                 TextColumn::make('slugs')

@@ -18,8 +18,6 @@ return [
 
     // Text
     'texts'            => [
-        'cant_delete_default_user_group'     => 'Cannot delete default user group',
-        'cant_delete_last_active_user_group' => 'Cannot delete last active user group',
     ],
 
     // Error

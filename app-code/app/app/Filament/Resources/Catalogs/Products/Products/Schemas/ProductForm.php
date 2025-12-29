@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
+use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\MetaTextTrait;
+use App\Filament\Resources\Trait\SlugTrait;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryPath;
@@ -12,39 +15,39 @@ use App\Models\Users\UserGroup;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
 use Throwable;
 
 class ProductForm
 {
+    use LanguageTrait, SlugTrait, MetaTextTrait;
+
     public static function configure(Schema $schema): Schema
     {
-        $active_languages = new Language()->getActiveLanguages();
+        $active_languages = self::getAcriveLanguages();
 
         return $schema
             ->components([
                 Tabs::make('ProductTabs')
                     ->tabs([
-                        self::createGeneralTab(),
-                        self::createTranslationsTab($active_languages),
-                        self::createCategoriesTab($active_languages),
-                        self::createImagesTab(),
-                        self::createDiscountsTab(),
-                        self::createAttributesTab($active_languages),
-                        self::createSlugsTab($active_languages),
+                        self::createGeneralTabs(),
+                        self::createTranslationsTabs($active_languages),
+                        self::createMetaTextsTabs($active_languages),
+                        self::createCategoriesTabs($active_languages),
+                        self::createImagesTabs(),
+                        self::createDiscountsTabs(),
+                        self::createAttributesTabs($active_languages),
+                        self::createSlugsTabs($active_languages),
                     ])
                     ->activeTab(1)
                     ->contained(false)
@@ -58,7 +61,7 @@ class ProductForm
      *
      * @return Tabs\Tab
      */
-    protected static function createGeneralTab(): Tabs\Tab
+    protected static function createGeneralTabs(): Tabs\Tab
     {
         return Tabs\Tab::make(__('admin/default.tabs.general'))
             ->schema([
@@ -79,8 +82,7 @@ class ProductForm
 
                         TextInput::make('ean')
                             ->label(__('admin/default.labels.ean'))
-                            ->maxLength(255)
-                            ->rules(['nullable', 'string', 'numeric', 'max:255'])
+                            ->rules(['nullable', 'string', 'numeric', 'max_digits::255'])
                             ->default(null),
                     ])
                     ->columns(3),
@@ -176,100 +178,15 @@ class ProductForm
     }
 
     /**
-     * Create translations tab with language tabs
-     *
-     * @param Collection<Language> $active_languages
-     *
-     * @return Tabs\Tab
-     */
-    protected static function createTranslationsTab(Collection $active_languages): Tabs\Tab
-    {
-        return Tabs\Tab::make(__('admin/default.tabs.translations'))
-            ->schema([
-                Section::make(__('admin/default.sections.translations'))
-                    ->schema([
-                        Tabs::make('LanguageTabs')
-                            ->tabs(self::createLanguageTabs($active_languages))
-                            ->activeTab(1)
-                            ->contained(false)
-                            ->persistTabInQueryString(),
-                    ])
-                    ->columnSpanFull(),
-            ]);
-    }
-
-    /**
-     * Create language tabs for translations
-     *
-     * @param Collection<Language> $active_languages
-     *
-     * @return array<Tabs\Tab>
-     */
-    protected static function createLanguageTabs(Collection $active_languages): array
-    {
-        $tabs            = [];
-        $total_languages = $active_languages->count();
-
-        foreach ($active_languages as $language) {
-            $tabs[] = Tabs\Tab::make($language->name)
-                ->schema([
-                    Hidden::make("descriptions.$language->id.language_id")
-                        ->default($language->id),
-
-                    TextInput::make("descriptions.$language->id.name")
-                        ->label(__('admin/default.labels.name'))
-                        ->maxLength(255)
-                        ->rules(['required', 'string', 'max:255'])
-                        ->columnSpanFull()
-                        ->required(),
-
-                    RichEditor::make("descriptions.$language->id.description")
-                        ->label(__('admin/default.labels.description'))
-                        ->toolbarButtons([
-                            ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                            ['h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify', 'textColor'],
-                            ['blockquote', 'bulletList', 'orderedList'],
-                            ['table'],
-                            ['undo', 'redo', 'clearFormatting'],
-                        ])
-                        ->rules(['nullable'])
-                        ->columnSpanFull(),
-
-                    TextInput::make("descriptions.$language->id.meta_title")
-                        ->label(__('admin/default.labels.meta_title'))
-                        ->rules(['nullable', 'string', 'max:255'])
-                        ->maxLength(255)
-                        ->columnSpanFull(),
-
-                    TextInput::make("descriptions.$language->id.meta_description")
-                        ->label(__('admin/default.labels.meta_description'))
-                        ->rules(['nullable', 'string', 'max:255'])
-                        ->maxLength(255)
-                        ->columnSpanFull(),
-
-                    TextInput::make("descriptions.$language->id.meta_keywords")
-                        ->label(__('admin/default.labels.meta_keywords'))
-                        ->rules(['nullable', 'string', 'max:255'])
-                        ->maxLength(255)
-                        ->columnSpanFull(),
-                ])
-                ->badge($language->code)
-                ->columns(min($total_languages, 4));
-        }
-
-        return $tabs;
-    }
-
-    /**
      * Create categories tab
      *
      * @param Collection<Language> $active_languages
      *
      * @return Tabs\Tab
      */
-    protected static function createCategoriesTab(Collection $active_languages): Tabs\Tab
+    protected static function createCategoriesTabs(Collection $active_languages): Tabs\Tab
     {
-        $current_language_id = self::tryGetCurrentLanguageId($active_languages);
+        $current_language_id = self::tryGetCurrentLanguageIdFromActiveLangs($active_languages);
 
         if ($current_language_id === null) {
             return Tabs\Tab::make(__('admin/default.tabs.categories'))
@@ -392,7 +309,7 @@ class ProductForm
      *
      * @return Tabs\Tab
      */
-    protected static function createImagesTab(): Tabs\Tab
+    protected static function createImagesTabs(): Tabs\Tab
     {
         return Tabs\Tab::make(__('admin/default.tabs.images'))
             ->schema([
@@ -440,7 +357,7 @@ class ProductForm
     /**
      * @return Tab
      */
-    protected static function createDiscountsTab(): Tabs\Tab
+    protected static function createDiscountsTabs(): Tabs\Tab
     {
         return Tabs\Tab::make(__('admin/default.tabs.discounts'))
             ->schema([
@@ -515,19 +432,9 @@ class ProductForm
      *
      * @return Tabs\Tab
      */
-    protected static function createAttributesTab(Collection $active_languages): Tabs\Tab
+    protected static function createAttributesTabs(Collection $active_languages): Tabs\Tab
     {
-        /** @var Language $language */
-        $language            = $active_languages->where('is_default', true)->first();
-        $current_language_id = $language?->id;
-
-        if ($current_language_id === null) {
-            Notification::make()
-                ->title(__('admin/default.errors.title'))
-                ->body(__('admin/default.errors.no_language'))
-                ->danger()
-                ->send();
-        }
+        $current_language_id = self::tryGetCurrentLanguageIdFromActiveLangs($active_languages);
 
         return Tabs\Tab::make(__('admin/default.tabs.attributes'))
             ->schema([
@@ -614,53 +521,6 @@ class ProductForm
                                 return $data;
                             }),
                     ])
-                    ->columnSpanFull(),
-            ]);
-    }
-
-    /**
-     * @param Collection $active_languages
-     *
-     * @return int|null
-     */
-    private static function tryGetCurrentLanguageId(Collection $active_languages): ?int
-    {
-        /** @var Language $language */
-        $language            = $active_languages->where('is_default', true)->first();
-        $current_language_id = $language?->id;
-
-        if ($current_language_id === null) {
-            Notification::make()
-                ->title(__('admin/default.errors.title'))
-                ->body(__('admin/default.errors.no_language'))
-                ->danger()
-                ->send();
-        }
-
-        return $current_language_id;
-    }
-
-    /**
-     * @param Collection<Language> $active_languages
-     *
-     * @return Tabs\Tab
-     */
-    protected static function createSlugsTab(Collection $active_languages): Tabs\Tab
-    {
-        $schema_fields = [];
-
-        foreach ($active_languages as $language) {
-            $schema_fields[] = TextInput::make("slugs.$language->id.name")
-                ->hiddenLabel()
-                ->prefix($language->code)
-                ->maxLength(500)
-                ->rules(['nullable', 'string', 'max:500']);
-        }
-
-        return Tabs\Tab::make(__('admin/default.tabs.slugs'))
-            ->schema([
-                Section::make(__('admin/default.sections.slugs'))
-                    ->schema($schema_fields)
                     ->columnSpanFull(),
             ]);
     }

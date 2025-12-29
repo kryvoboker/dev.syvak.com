@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas;
 
+use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Settings\Language;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
@@ -11,10 +12,12 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class AttributeForm
 {
+    use LanguageTrait;
+
     /**
      * @param Schema $schema
      *
@@ -22,7 +25,7 @@ class AttributeForm
      */
     public static function configure(Schema $schema): Schema
     {
-        $active_languages = new Language()->getActiveLanguages();
+        $active_languages = self::getAcriveLanguages();
 
         return $schema
             ->components([

@@ -4,6 +4,7 @@ return [
     // Menu items
     'menu'         => [
         'item_catalog'  => 'Catalog',
+        'info_pages'    => 'Info Pages',
         'item_users'    => 'Users',
         'item_settings' => 'Settings',
     ],
@@ -22,6 +23,7 @@ return [
 
     // Columns
     'columns'      => [
+        'title'             => 'Title',
         'name'              => 'Name',
         'lastname'          => 'Last Name',
         'email'             => 'Email',
@@ -37,6 +39,7 @@ return [
         'image'             => 'Image',
         'is_active'         => 'Is Active',
         'is_default'        => 'Is Default',
+        'is_noindex'        => 'Is Noindex Page',
         'created_at'        => 'Created At',
         'updated_at'        => 'Updated At',
         'date_available'    => 'Date Available',
@@ -77,6 +80,7 @@ return [
         'meta_keywords'         => 'Meta Keywords',
         'images'                => 'Images',
         'sort_order'            => 'Sort Order',
+        'is_noindex'            => 'Is Noindex Page',
         'discounts'             => 'Discounts',
         'user_group'            => 'User Group',
         'discount_quantity'     => 'Quantity',
@@ -145,6 +149,7 @@ return [
         'default'                 => 'Default',
         'default_only'            => 'Default Only',
         'name'                    => 'Name',
+        'title'                   => 'Title',
         'model'                   => 'Model',
         'sku'                     => 'SKU',
         'ean'                     => 'EAN',
@@ -176,6 +181,7 @@ return [
         'all'                    => 'All',
         'all_users'              => 'All Users',
         'name'                   => 'Flowers',
+        'title'                  => 'My Info Page Title',
         'model'                  => 'PL-1001',
         'sku'                    => 'VA-0001',
         'ean'                    => '1234567890123',

@@ -10,7 +10,7 @@ use App\Filament\Resources\Catalogs\Products\Products\Pages\EditProduct;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\ListProducts;
 use App\Filament\Resources\Catalogs\Products\Products\Schemas\ProductForm;
 use App\Filament\Resources\Catalogs\Products\Products\Tables\ProductsTable;
-use App\Filament\Resources\Trait\TotalItemsTrait;
+use App\Filament\Resources\Trait\TotalModelItemsTrait;
 use App\Models\Catalogs\Products\Product;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use UnitEnum;
 
 class ProductResource extends Resource
 {
-    use TotalItemsTrait;
+    use TotalModelItemsTrait;
 
     protected static ?string                $model           = Product::class;
     protected static string|BackedEnum|null $navigationIcon  = Heroicon::ShoppingCart;

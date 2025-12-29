@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Tables;
 
+use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Attributes\Attribute;
-use App\Models\Settings\Language;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class AttributesTable
 {
+    use LanguageTrait;
+
     /**
      * @param Table $table
      *
@@ -24,6 +26,8 @@ class AttributesTable
      */
     public static function configure(Table $table): Table
     {
+        $current_language_id = self::getCurrentLanguageId();
+
         return $table
             ->modifyQueryUsing(function (Builder $query) {
                 // Eager load descriptions to avoid N+1 problem
@@ -35,24 +39,9 @@ class AttributesTable
                     ->searchable(['name'])
                     ->sortable()
                     ->limit(50)
-                    ->getStateUsing(function (Attribute $record) {
-                        $language = new Language();
-
-                        // Get current locale language ID (adjust based on your logic)
-                        $current_language_id = $language->getLanguageByCode(app()->getLocale())?->id;
-
-                        if ($current_language_id === null) {
-                            $current_language_id = $language->getDefaultLanguage()?->id;
-                        }
-
-                        if ($current_language_id === null) {
-                            Notification::make()
-                                ->title(__('admin/default.errors.title'))
-                                ->body(__('admin/default.errors.no_language'))
-                                ->danger()
-                                ->send();
-
-                            return '-';
+                    ->getStateUsing(function (Attribute $record) use ($current_language_id) {
+                        if (($returned_value = self::validateLanguageIdIsNotNull($current_language_id)) !== null) {
+                            return $returned_value;
                         }
 
                         // Try to get description for current locale

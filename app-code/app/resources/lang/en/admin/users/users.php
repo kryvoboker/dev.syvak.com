@@ -19,7 +19,6 @@ return [
 
     // Text
     'texts'            => [
-        'cant_delete_special_user' => 'Cannot delete special user!',
     ],
 
     // Error

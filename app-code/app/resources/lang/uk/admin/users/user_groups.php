@@ -18,8 +18,6 @@ return [
 
     // Text
     'texts'            => [
-        'cant_delete_default_user_group'     => 'Не можна видалити групу користувачів за замовчуванням',
-        'cant_delete_last_active_user_group' => 'Не можна видалити останню активну групу користувачів',
     ],
 
     // Error

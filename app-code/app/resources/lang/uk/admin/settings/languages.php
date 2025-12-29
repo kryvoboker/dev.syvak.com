@@ -24,13 +24,11 @@ return [
     'texts'            => [
         'cant_delete_default_language'     => 'Не можна видалити мову за замовчуванням',
         'cant_delete_last_active_language' => 'Не можна видалити останню активну мову',
-        'cant_delete_special_user'         => 'Не можна видалити спеціального користувача!',
     ],
 
     // Error
     'errors'           => [
         'cant_delete_default_language'     => 'Будь ласка, встановіть іншу мову за замовчуванням перед видаленням цієї!',
         'cant_delete_last_active_language' => 'У системі має лишатися принаймні одна активна мова!',
-        'cant_delete_special_user'         => 'Будь ласка, не намагайтеся видаляти цей спеціальний обліковий запис користувача!',
     ],
 ];

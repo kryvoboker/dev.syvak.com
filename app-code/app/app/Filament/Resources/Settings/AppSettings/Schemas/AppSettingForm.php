@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\AppSettings\Schemas;
 
-use App\Models\Settings\Language;
+use App\Filament\Resources\Trait\LanguageTrait;
 use Carbon\Carbon;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -18,6 +18,8 @@ use Illuminate\Support\Collection;
 
 class AppSettingForm
 {
+    use LanguageTrait;
+
     /**
      * Configure application settings form schema
      *
@@ -27,7 +29,7 @@ class AppSettingForm
      */
     public static function configure(Schema $schema): Schema
     {
-        $languages = new Language()->getActiveLanguages();
+        $active_languages = self::getAcriveLanguages();
 
         return $schema
             ->components([
@@ -36,14 +38,14 @@ class AppSettingForm
                         // SEO Tab with language tabs inside
                         Tabs\Tab::make(__('admin/settings/app_settings.tabs.seo'))
                             ->schema([
-                                self::createLanguageTabs($languages, 'seo'),
+                                self::createLanguageTabs($active_languages, 'seo'),
                             ])
                             ->columns(1),
 
                         // Contact Information Tab with language tabs inside
                         Tabs\Tab::make(__('admin/settings/app_settings.tabs.contacts'))
                             ->schema([
-                                self::createLanguageTabs($languages, 'contacts'),
+                                self::createLanguageTabs($active_languages, 'contacts'),
                             ])
                             ->columns(1),
 

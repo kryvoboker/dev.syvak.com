@@ -10,7 +10,7 @@ use App\Filament\Resources\Catalogs\Attributes\Attributes\Pages\EditAttribute;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\Pages\ListAttributes;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas\AttributeForm;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\Tables\AttributesTable;
-use App\Filament\Resources\Trait\TotalItemsTrait;
+use App\Filament\Resources\Trait\TotalModelItemsTrait;
 use App\Models\Catalogs\Attributes\Attribute;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use UnitEnum;
 
 class AttributeResource extends Resource
 {
-    use TotalItemsTrait;
+    use TotalModelItemsTrait;
 
     protected static ?string                $model           = Attribute::class;
     protected static string|BackedEnum|null $navigationIcon  = Heroicon::Tag;

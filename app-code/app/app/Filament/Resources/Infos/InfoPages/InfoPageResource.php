@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\Users\Users;
+namespace App\Filament\Resources\Infos\InfoPages;
 
 use App\Filament\Navigation\AdminNavigationGroupEnum;
+use App\Filament\Resources\Infos\InfoPages\Pages\CreateInfoPage;
+use App\Filament\Resources\Infos\InfoPages\Pages\EditInfoPage;
+use App\Filament\Resources\Infos\InfoPages\Pages\ListInfoPages;
+use App\Filament\Resources\Infos\InfoPages\Schemas\InfoPageForm;
+use App\Filament\Resources\Infos\InfoPages\Tables\InfoPagesTable;
 use App\Filament\Resources\Trait\TotalModelItemsTrait;
-use App\Filament\Resources\Users\Users\Pages\CreateUser;
-use App\Filament\Resources\Users\Users\Pages\EditUser;
-use App\Filament\Resources\Users\Users\Pages\ListUsers;
-use App\Filament\Resources\Users\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Users\Tables\UsersTable;
-use App\Models\Users\User;
+use App\Models\Infos\InfoPage;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -19,23 +19,22 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
-class UserResource extends Resource
+class InfoPageResource extends Resource
 {
     use TotalModelItemsTrait;
 
-    protected static ?string                $model                = User::class;
-    protected static string|BackedEnum|null $navigationIcon       = Heroicon::User;
-    protected static ?string                $recordTitleAttribute = 'full_name';
-    protected static string|null|UnitEnum   $navigationGroup      = AdminNavigationGroupEnum::Users;
+    protected static ?string                $model           = InfoPage::class;
+    protected static string|BackedEnum|null $navigationIcon  = Heroicon::InformationCircle;
+    protected static string|null|UnitEnum   $navigationGroup = AdminNavigationGroupEnum::InfoPages;
 
     public static function form(Schema $schema): Schema
     {
-        return UserForm::configure($schema);
+        return InfoPageForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return UsersTable::configure($table);
+        return InfoPagesTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -48,9 +47,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListUsers::route('/'),
-            'create' => CreateUser::route('/create'),
-            'edit'   => EditUser::route('/{record}/edit'),
+            'index'  => ListInfoPages::route('/'),
+            'create' => CreateInfoPage::route('/create'),
+            'edit'   => EditInfoPage::route('/{record}/edit'),
         ];
     }
 
@@ -61,7 +60,7 @@ class UserResource extends Resource
      */
     public static function getNavigationLabel(): string
     {
-        return __('admin/users/users.navigation_label');
+        return __('admin/infos/info_pages.navigation_label');
     }
 
     /**
@@ -71,7 +70,7 @@ class UserResource extends Resource
      */
     public static function getModelLabel(): string
     {
-        return __('admin/users/users.labels.model');
+        return __('admin/infos/info_pages.labels.model');
     }
 
     /**
@@ -81,6 +80,6 @@ class UserResource extends Resource
      */
     public static function getPluralModelLabel(): string
     {
-        return __('admin/users/users.labels.plural_model');
+        return __('admin/infos/info_pages.labels.plural_model');
     }
 }

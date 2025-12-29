@@ -1,0 +1,18 @@
+<?php
+
+return [
+    // Navigation
+    'navigation_label' => 'Info Pages',
+
+    // Labels
+    'labels'           => [
+        'model'        => 'Info Page',
+        'plural_model' => 'Info Pages',
+        'position'     => 'Position on Page',
+    ],
+
+    // Columns
+    'columns'          => [
+        'position' => 'Position',
+    ],
+];
