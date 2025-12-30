@@ -76,14 +76,10 @@ services:
     env_file:
       - ../../.docker/prod/env/.env
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dev-syvak-nginx.rule=Host(`dev.syvak.com`)"
-      - "traefik.http.routers.dev-syvak-nginx.entrypoints=web"
-      - "traefik.http.services.dev-syvak-nginx.loadbalancer.server.port=80"
-#      - "traefik.http.routers.dev-syvak-nginx.rule=Host(`dev.syvak.rkw-dev.com`)"
-#      - "traefik.http.routers.dev-syvak-nginx.entrypoints=web,websecure"
-#      - "traefik.http.routers.dev-syvak-nginx.tls=true"
-#      - "traefik.http.routers.dev-syvak-nginx.tls.certresolver=traefikResolver"
+      - "traefik.http.routers.dev-syvak-nginx.rule=Host(`dev.syvak.rkw-dev.com`)"
+      - "traefik.http.routers.dev-syvak-nginx.entrypoints=web,websecure"
+      - "traefik.http.routers.dev-syvak-nginx.tls=true"
+      - "traefik.http.routers.dev-syvak-nginx.tls.certresolver=traefikResolver"
     volumes:
 #      - ../../app-code/app:/var/www/app:ro
 #      - ../../app-code/httpdocs:/var/www/html:ro
