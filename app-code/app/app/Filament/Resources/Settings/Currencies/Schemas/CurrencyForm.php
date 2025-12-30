@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Currencies\Schemas;
 
+use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class CurrencyForm
 {
+    use ToggleCheckboxFormTrait;
+
     /**
      * @param Schema $schema
      *
@@ -74,22 +76,15 @@ class CurrencyForm
                     ->step(0.000001)
                     ->placeholder('1.000000'),
 
-                Toggle::make('is_active')
-                    ->label(__('admin/default.labels.is_active'))
-                    ->helperText(__('admin/settings/currencies.helpers.is_active'))
-                    ->default(false),
+                self::getIsActiveField([
+                    'helper_text' => __('admin/settings/currencies.helpers.is_active'),
+                    'default'     => false,
+                ]),
 
-                Toggle::make('is_default')
-                    ->label(__('admin/default.labels.is_default'))
-                    ->helperText(__('admin/settings/currencies.helpers.is_default'))
-                    ->default(false)
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        // Ensure only one default currency
-                        if ($state) {
-                            $set('is_active', true);
-                        }
-                    }),
+                self::getIsDefaultField([
+                    'helper_text' => __('admin/settings/currencies.helpers.is_default'),
+                    'default'     => false,
+                ]),
             ]);
     }
 }

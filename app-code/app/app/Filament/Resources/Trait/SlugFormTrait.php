@@ -10,7 +10,7 @@ use Filament\Schemas\Components\Section;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Schemas\Components\Tabs;
 
-trait SlugTrait
+trait SlugFormTrait
 {
     /**
      * @param Collection<Language> $active_languages

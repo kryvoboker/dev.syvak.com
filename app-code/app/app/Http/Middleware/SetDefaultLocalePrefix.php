@@ -24,7 +24,7 @@ class SetDefaultLocalePrefix
         $path_info = ltrim($request->getPathInfo(), '/');
 
         // Skip redirect for Livewire update requests
-        $is_livewire_update = str_contains($path_info, 'livewire/update');
+        $is_livewire_update = str_contains($path_info, 'livewire/update') || str_contains($path_info, 'livewire/upload-file');
         $locale = $request->route('locale');
 
         if ($is_livewire_update) {

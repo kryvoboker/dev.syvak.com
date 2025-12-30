@@ -10,7 +10,7 @@ use App\Filament\Resources\Settings\Languages\Pages\EditLanguage;
 use App\Filament\Resources\Settings\Languages\Pages\ListLanguages;
 use App\Filament\Resources\Settings\Languages\Schemas\LanguageForm;
 use App\Filament\Resources\Settings\Languages\Tables\LanguagesTable;
-use App\Filament\Resources\Trait\TotalModelItemsTrait;
+use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
 use App\Models\Settings\Language;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use UnitEnum;
 
 class LanguageResource extends Resource
 {
-    use TotalModelItemsTrait;
+    use TotalModelItemsResourceTrait;
 
     protected static ?string                $model                = Language::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::Language;

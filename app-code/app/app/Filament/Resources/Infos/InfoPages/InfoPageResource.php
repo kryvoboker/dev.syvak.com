@@ -10,7 +10,7 @@ use App\Filament\Resources\Infos\InfoPages\Pages\EditInfoPage;
 use App\Filament\Resources\Infos\InfoPages\Pages\ListInfoPages;
 use App\Filament\Resources\Infos\InfoPages\Schemas\InfoPageForm;
 use App\Filament\Resources\Infos\InfoPages\Tables\InfoPagesTable;
-use App\Filament\Resources\Trait\TotalModelItemsTrait;
+use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
 use App\Models\Infos\InfoPage;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use UnitEnum;
 
 class InfoPageResource extends Resource
 {
-    use TotalModelItemsTrait;
+    use TotalModelItemsResourceTrait;
 
     protected static ?string                $model           = InfoPage::class;
     protected static string|BackedEnum|null $navigationIcon  = Heroicon::InformationCircle;

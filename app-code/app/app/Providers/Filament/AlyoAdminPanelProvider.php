@@ -75,6 +75,10 @@ class AlyoAdminPanelProvider extends PanelProvider
                     ->collapsed(),
 
                 NavigationGroup::make()
+                    ->label(fn() => AdminNavigationGroupEnum::InfoPages->getLabel())
+                    ->collapsed(),
+
+                NavigationGroup::make()
                     ->label(fn() => AdminNavigationGroupEnum::Users->getLabel())
                     ->collapsed(),
 

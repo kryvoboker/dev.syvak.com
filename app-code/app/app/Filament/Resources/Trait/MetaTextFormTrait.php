@@ -13,7 +13,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Illuminate\Database\Eloquent\Collection;
 
-trait MetaTextTrait
+trait MetaTextFormTrait
 {
     /**
      * @param Collection $active_languages

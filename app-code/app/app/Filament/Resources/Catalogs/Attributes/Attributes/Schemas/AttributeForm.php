@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas;
 
 use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\SortOrderFormTrait;
+use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use App\Models\Settings\Language;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class AttributeForm
 {
-    use LanguageTrait;
+    use LanguageTrait, ToggleCheckboxFormTrait, SortOrderFormTrait;
 
     /**
      * @param Schema $schema
@@ -37,16 +38,9 @@ class AttributeForm
                             ->contained(false)
                             ->persistTabInQueryString(),
 
-                        Toggle::make('is_active')
-                            ->label(__('admin/default.labels.is_active'))
-                            ->default(true)
-                            ->required(),
+                        self::getIsActiveField(),
 
-                        TextInput::make('sort_order')
-                            ->label(__('admin/default.labels.sort_order'))
-                            ->numeric()
-                            ->default(1)
-                            ->required(),
+                        self::getSortOrderField(),
                     ])
                     ->columnSpanFull(),
             ]);

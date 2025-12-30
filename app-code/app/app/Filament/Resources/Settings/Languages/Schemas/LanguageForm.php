@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Languages\Schemas;
 
+use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class LanguageForm
 {
+    use ToggleCheckboxFormTrait;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -30,22 +32,15 @@ class LanguageForm
                     ->maxLength(100)
                     ->placeholder('English'),
 
-                Toggle::make('is_active')
-                    ->label(__('admin/default.labels.is_active'))
-                    ->helperText(__('admin/settings/languages.helpers.is_active'))
-                    ->default(false),
+                self::getIsActiveField([
+                    'helper_text' => __('admin/settings/languages.helpers.is_active'),
+                    'default'     => false,
+                ]),
 
-                Toggle::make('is_default')
-                    ->label(__('admin/default.labels.is_default'))
-                    ->helperText(__('admin/settings/languages.helpers.is_default'))
-                    ->default(false)
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        // Ensure only one default language
-                        if ($state) {
-                            $set('is_active', true);
-                        }
-                    }),
+                self::getIsDefaultField([
+                    'helper_text' => __('admin/settings/languages.helpers.is_default'),
+                    'default'     => false,
+                ]),
             ]);
     }
 }

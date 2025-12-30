@@ -10,7 +10,7 @@ use App\Filament\Resources\Catalogs\Categories\Categories\Pages\EditCategory;
 use App\Filament\Resources\Catalogs\Categories\Categories\Pages\ListCategories;
 use App\Filament\Resources\Catalogs\Categories\Categories\Schemas\CategoryForm;
 use App\Filament\Resources\Catalogs\Categories\Categories\Tables\CategoriesTable;
-use App\Filament\Resources\Trait\TotalModelItemsTrait;
+use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
 use App\Models\Catalogs\Categories\Category;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use UnitEnum;
 
 class CategoryResource extends Resource
 {
-    use TotalModelItemsTrait;
+    use TotalModelItemsResourceTrait;
 
     protected static ?string                $model           = Category::class;
     protected static string|BackedEnum|null $navigationIcon  = Heroicon::Bookmark;

@@ -2,7 +2,7 @@
 
 return [
     // Navigation
-    'navigation_label' => 'Info Pages',
+    'navigation_label' => 'Dynamic Pages',
 
     // Labels
     'labels'           => [

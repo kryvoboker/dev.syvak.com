@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Infos\InfoPages\Schemas;
 
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Filament\Resources\Trait\MetaTextTrait;
-use App\Filament\Resources\Trait\SlugTrait;
+use App\Filament\Resources\Trait\MetaTextFormTrait;
+use App\Filament\Resources\Trait\SlugFormTrait;
+use App\Filament\Resources\Trait\SortOrderFormTrait;
+use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 
 class InfoPageForm
 {
-    use LanguageTrait, SlugTrait, MetaTextTrait;
+    use LanguageTrait, SlugFormTrait, MetaTextFormTrait, ToggleCheckboxFormTrait, SortOrderFormTrait;
 
     public static function configure(Schema $schema): Schema
     {
@@ -63,21 +63,11 @@ class InfoPageForm
                             ->placeholder(__('admin/infos/info_pages.placeholders.position'))
                             ->helperText(__('admin/infos/info_pages.helpers.position')),
 
-                        Toggle::make('is_active')
-                            ->label(__('admin/default.labels.is_active'))
-                            ->default(true)
-                            ->required(),
+                        self::getIsActiveField(),
 
-                        TextInput::make('sort_order')
-                            ->label(__('admin/default.labels.sort_order'))
-                            ->numeric()
-                            ->default(1)
-                            ->required(),
+                        self::getSortOrderField(),
 
-                        Toggle::make('is_noindex')
-                            ->label(__('admin/default.labels.is_noindex'))
-                            ->default(false)
-                            ->required(),
+                        self::getIsNoIndexField(),
                     ])
             ]);
     }

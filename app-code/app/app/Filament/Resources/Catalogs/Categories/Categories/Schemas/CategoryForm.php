@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Categories\Categories\Schemas;
 
-use App\Filament\Resources\Trait\MetaTextTrait;
+use App\Filament\Resources\Trait\ImageFormTrait;
+use App\Filament\Resources\Trait\MetaTextFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Filament\Resources\Trait\SlugTrait;
+use App\Filament\Resources\Trait\SlugFormTrait;
+use App\Filament\Resources\Trait\SortOrderFormTrait;
+use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Settings\Language;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -22,7 +22,7 @@ use Illuminate\Validation\Rule;
 
 class CategoryForm
 {
-    use LanguageTrait, SlugTrait, MetaTextTrait;
+    use LanguageTrait, SlugFormTrait, MetaTextFormTrait, ToggleCheckboxFormTrait, SortOrderFormTrait, ImageFormTrait;
 
     /**
      * @param Schema $schema
@@ -97,16 +97,9 @@ class CategoryForm
                             ->placeholder(__('admin/default.placeholders.select_parent_category'))
                             ->helperText(__('admin/default.helpers.parent_category')),
 
-                        Toggle::make('is_active')
-                            ->label(__('admin/default.labels.is_active'))
-                            ->default(true)
-                            ->required(),
+                        self::getIsActiveField(),
 
-                        TextInput::make('sort_order')
-                            ->label(__('admin/default.labels.sort_order'))
-                            ->numeric()
-                            ->default(1)
-                            ->required(),
+                        self::getSortOrderField(),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -121,39 +114,24 @@ class CategoryForm
             ->schema([
                 Section::make(__('admin/default.sections.images'))
                     ->schema([
-                        FileUpload::make('icon')
-                            ->label(__('admin/default.labels.icon'))
-                            ->image() // accept images only
-                            ->directory(config('app.images.category.image_path'))
-                            ->maxSize((int)config('app.images.category.upload.max_size_kb'))
-                            ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png', 'image/svg+xml']), 'max:' . (int)config('app.images.category.upload.max_size_kb')])
-                            ->preserveFilenames() // not generate unique names
-                            ->imageEditor()
-                            ->imageEditorViewportWidth((int)config('app.images.category.preview_in_page_in_admin.width'))
-                            ->imageEditorViewportHeight((int)config('app.images.category.preview_in_page_in_admin.height'))
-                            ->imageEditorAspectRatios([
-                                '1:1'  => '1:1',
-                                '4:3'  => '4:3',
-                                '16:9' => '16:9',
-                            ])
-                            ->nullable()
-                            ->default(null),
+                        self::getImageField([
+                            'field_name'   => 'icon',
+                            'label'        => __('admin/default.labels.icon'),
+                            'directory'    => config('app.images.category.image_path'),
+                            'max_size'     => (int)config('app.images.category.upload.max_size_kb'),
+                            'rules'        => ['nullable', Rule::file()::types(['image/jpeg', 'image/png', 'image/svg+xml']), 'max:' . (int)config('app.images.category.upload.max_size_kb')],
+                            'image_width'  => (int)config('app.images.category.preview_in_page_in_admin.width'),
+                            'image_height' => (int)config('app.images.category.preview_in_page_in_admin.height'),
+                        ]),
 
-                        FileUpload::make('preview_image')
-                            ->label(__('admin/default.labels.image'))
-                            ->image() // accept images only
-                            ->directory(config('app.images.category.image_path'))
-                            ->maxSize((int)config('app.images.category.upload.max_size_kb'))
-                            ->rules(['image', 'max:' . (int)config('app.images.category.upload.max_size_kb')])
-                            ->preserveFilenames() // not generate unique names
-                            ->imageEditor()
-                            ->imageEditorViewportWidth((int)config('app.images.category.preview_in_page_in_admin.width'))
-                            ->imageEditorViewportHeight((int)config('app.images.category.preview_in_page_in_admin.height'))
-                            ->imageEditorAspectRatios([
-                                '1:1'  => '1:1',
-                                '4:3'  => '4:3',
-                                '16:9' => '16:9',
-                            ]),
+                        self::getImageField([
+                            'field_name'   => 'preview_image',
+                            'directory'    => config('app.images.category.image_path'),
+                            'max_size'     => (int)config('app.images.category.upload.max_size_kb'),
+                            'rules'        => ['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . (int)config('app.images.category.upload.max_size_kb')],
+                            'image_width'  => (int)config('app.images.category.preview_in_page_in_admin.width'),
+                            'image_height' => (int)config('app.images.category.preview_in_page_in_admin.height'),
+                        ]),
                     ])
                     ->columns()
             ]);

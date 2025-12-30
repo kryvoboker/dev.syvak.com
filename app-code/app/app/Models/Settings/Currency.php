@@ -95,7 +95,7 @@ class Currency extends Model
      *
      * @return self|null
      */
-    public function getActiveCurreyncyByCode(string $code): ?self
+    public function getActiveCurrencyByCode(string $code): ?self
     {
         return self::query()
             ->where('code', $code)

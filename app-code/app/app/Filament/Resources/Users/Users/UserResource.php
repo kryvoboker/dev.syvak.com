@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\Users;
 
 use App\Filament\Navigation\AdminNavigationGroupEnum;
-use App\Filament\Resources\Trait\TotalModelItemsTrait;
+use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
 use App\Filament\Resources\Users\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Users\Pages\ListUsers;
@@ -21,7 +21,7 @@ use UnitEnum;
 
 class UserResource extends Resource
 {
-    use TotalModelItemsTrait;
+    use TotalModelItemsResourceTrait;
 
     protected static ?string                $model                = User::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::User;

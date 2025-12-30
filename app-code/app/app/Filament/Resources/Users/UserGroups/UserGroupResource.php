@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\UserGroups;
 
 use App\Filament\Navigation\AdminNavigationGroupEnum;
-use App\Filament\Resources\Trait\TotalModelItemsTrait;
+use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
 use App\Filament\Resources\Users\UserGroups\Pages\CreateUserGroup;
 use App\Filament\Resources\Users\UserGroups\Pages\EditUserGroup;
 use App\Filament\Resources\Users\UserGroups\Pages\ListUserGroups;
@@ -21,7 +21,7 @@ use UnitEnum;
 
 class UserGroupResource extends Resource
 {
-    use TotalModelItemsTrait;
+    use TotalModelItemsResourceTrait;
 
     protected static ?string                $model                = UserGroup::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::UserGroup;

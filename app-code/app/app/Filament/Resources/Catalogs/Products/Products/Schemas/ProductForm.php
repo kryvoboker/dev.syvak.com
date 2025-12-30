@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
+use App\Filament\Resources\Trait\ImageFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Filament\Resources\Trait\MetaTextTrait;
-use App\Filament\Resources\Trait\SlugTrait;
+use App\Filament\Resources\Trait\MetaTextFormTrait;
+use App\Filament\Resources\Trait\SlugFormTrait;
+use App\Filament\Resources\Trait\SortOrderFormTrait;
+use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryPath;
@@ -14,11 +17,11 @@ use App\Models\Settings\Language;
 use App\Models\Users\UserGroup;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -30,7 +33,7 @@ use Throwable;
 
 class ProductForm
 {
-    use LanguageTrait, SlugTrait, MetaTextTrait;
+    use LanguageTrait, SlugFormTrait, MetaTextFormTrait, ToggleCheckboxFormTrait, SortOrderFormTrait, ImageFormTrait;
 
     public static function configure(Schema $schema): Schema
     {
@@ -122,23 +125,7 @@ class ProductForm
 
                 Section::make(__('admin/default.sections.image'))
                     ->schema([
-                        FileUpload::make('image')
-                            ->label(__('admin/default.labels.image'))
-                            ->image() // accept images only
-                            ->directory(config('app.images.product.image_path'))
-                            ->maxSize((int)config('app.images.product.upload.max_size_kb'))
-                            ->rules(['nullable', 'image', 'max:' . (int)config('app.images.product.upload.max_size_kb')])
-                            ->preserveFilenames() // not generate unique names
-                            ->imageEditor()
-                            ->imageEditorViewportWidth((int)config('app.images.product.preview_in_page_in_admin.width'))
-                            ->imageEditorViewportHeight((int)config('app.images.product.preview_in_page_in_admin.height'))
-                            ->imageEditorAspectRatios([
-                                '1:1'  => '1:1',
-                                '4:3'  => '4:3',
-                                '16:9' => '16:9',
-                            ])
-                            ->nullable()
-                            ->default(null),
+                        self::getImageField(),
                     ])
                     ->columns(1),
 
@@ -168,10 +155,7 @@ class ProductForm
                                     ->required(),
                             ]),
 
-                        Toggle::make('is_active')
-                            ->label(__('admin/default.labels.is_active'))
-                            ->default(true)
-                            ->required(),
+                        self::getIsActiveField(),
                     ])
                     ->columns(1),
             ]);
@@ -318,29 +302,11 @@ class ProductForm
                         Repeater::make('images')
                             ->label(__('admin/default.labels.images'))
                             ->schema([
-                                FileUpload::make('image')
-                                    ->label(__('admin/default.labels.image'))
-                                    ->image() // accept images only
-                                    ->directory(config('app.images.product.image_path'))
-                                    ->maxSize((int)config('app.images.product.upload.max_size_kb'))
-                                    ->rules(['image', 'max:' . (int)config('app.images.product.upload.max_size_kb')])
-                                    ->preserveFilenames() // not generate unique names
-                                    ->imageEditor()
-                                    ->imageEditorViewportWidth((int)config('app.images.product.preview_in_page_in_admin.width'))
-                                    ->imageEditorViewportHeight((int)config('app.images.product.preview_in_page_in_admin.height'))
-                                    ->imageEditorAspectRatios([
-                                        '1:1'  => '1:1',
-                                        '4:3'  => '4:3',
-                                        '16:9' => '16:9',
-                                    ])
-                                    ->required(),
+                                self::getImageField(),
 
-                                TextInput::make('sort_order')
-                                    ->label(__('admin/default.labels.sort_order'))
-                                    ->numeric()
-                                    ->rules(['nullable', 'numeric', 'min:0'])
-                                    ->default(0)
-                                    ->required(),
+                                self::getSortOrderField([
+                                    'rules' => ['nullable', 'numeric', 'min:0'],
+                                ]),
                             ])
                             ->columns()
                             ->defaultItems(0)

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\UserGroups\Schemas;
 
+use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class UserGroupForm
 {
+    use ToggleCheckboxFormTrait;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -27,15 +29,15 @@ class UserGroupForm
                     ->rows(5)
                     ->columnSpanFull(),
 
-                Toggle::make('is_active')
-                    ->label(__('admin/default.labels.is_active'))
-                    ->helperText(__('admin/users/user_groups.helpers.is_active'))
-                    ->default(false),
+                self::getIsActiveField([
+                    'helper_text' => __('admin/users/user_groups.helpers.is_active'),
+                    'default'     => false,
+                ]),
 
-                Toggle::make('is_default')
-                    ->label(__('admin/default.labels.is_default'))
-                    ->helperText(__('admin/users/user_groups.helpers.is_default'))
-                    ->default(false),
+                self::getIsDefaultField([
+                    'helper_text' => __('admin/users/user_groups.helpers.is_default'),
+                    'default'     => false,
+                ]),
             ]);
     }
 }

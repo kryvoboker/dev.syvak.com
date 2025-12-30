@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Users\Schemas;
 
+use App\Filament\Resources\Trait\ImageFormTrait;
+use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use App\Models\Users\User;
 use App\Models\Users\UserGroup;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rule;
 
 class UserForm
 {
+    use ToggleCheckboxFormTrait, ImageFormTrait;
+
     /**
      * @param Schema $schema
      *
@@ -61,23 +64,15 @@ class UserForm
                     ->rules(['nullable', 'string', 'max:20', Rule::unique('users', 'telephone')->ignore($record?->id), 'regex:' . config('app.regex_validate_conditions.telephone')])
                     ->default(null),
 
-                FileUpload::make('avatar')
-                    ->label(__('admin/default.labels.avatar'))
-                    ->image() // accept images only
-                    ->directory(config('app.images.user.image_path')) // store under avatars folder
-                    ->preserveFilenames() // not generate unique names
-                    ->maxSize((int)config('app.images.user.upload.max_size_kb'))
-                    ->rules(['nullable', 'image', 'max:' . (int)config('app.images.user.upload.max_size_kb')])
-                    ->imageEditor()
-                    ->imageEditorViewportWidth((int)config('app.images.user.preview_in_page_in_admin.width'))
-                    ->imageEditorViewportHeight((int)config('app.images.user.preview_in_page_in_admin.height'))
-                    ->imageEditorAspectRatios([
-                        '1:1'  => '1:1',
-                        '4:3'  => '4:3',
-                        '16:9' => '16:9',
-                    ])
-                    ->nullable()
-                    ->default(null),
+                self::getImageField([
+                    'field_name'   => 'avatar',
+                    'label'        => __('admin/default.labels.avatar'),
+                    'directory'    => config('app.images.user.image_path'),
+                    'max_size'     => (int)config('app.images.user.upload.max_size_kb'),
+                    'rules'        => ['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . (int)config('app.images.user.upload.max_size_kb')],
+                    'image_width'  => (int)config('app.images.user.preview_in_page_in_admin.width'),
+                    'image_height' => (int)config('app.images.user.preview_in_page_in_admin.height'),
+                ]),
 
                 DateTimePicker::make('email_verified_at')
                     ->label(__('admin/default.labels.email_verified_at'))
@@ -98,10 +93,10 @@ class UserForm
                     ->rules(['nullable', 'required_with:password'])
                     ->default(null),
 
-                Toggle::make('is_active')
-                    ->label(__('admin/default.labels.is_active'))
-                    ->helperText(__('admin/users/users.helpers.is_active'))
-                    ->default(false),
+                self::getIsActiveField([
+                    'helper_text' => __('admin/users/users.helpers.is_active'),
+                    'default'     => false,
+                ]),
 
                 Select::make('user_group_id')
                     ->label(__('admin/default.labels.user_group'))

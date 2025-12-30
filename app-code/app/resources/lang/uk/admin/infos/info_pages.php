@@ -2,7 +2,7 @@
 
 return [
     // Navigation
-    'navigation_label' => 'Інформаційні сторінки',
+    'navigation_label' => 'Динамічні сторінки',
 
     // Labels
     'labels'           => [

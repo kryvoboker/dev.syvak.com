@@ -10,7 +10,7 @@ use App\Filament\Resources\Settings\Currencies\Pages\EditCurrency;
 use App\Filament\Resources\Settings\Currencies\Pages\ListCurrencies;
 use App\Filament\Resources\Settings\Currencies\Schemas\CurrencyForm;
 use App\Filament\Resources\Settings\Currencies\Tables\CurrenciesTable;
-use App\Filament\Resources\Trait\TotalModelItemsTrait;
+use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
 use App\Models\Settings\Currency;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -21,7 +21,7 @@ use UnitEnum;
 
 class CurrencyResource extends Resource
 {
-    use TotalModelItemsTrait;
+    use TotalModelItemsResourceTrait;
 
     protected static ?string                $model                = Currency::class;
     protected static string|BackedEnum|null $navigationIcon       = Heroicon::CurrencyDollar;
