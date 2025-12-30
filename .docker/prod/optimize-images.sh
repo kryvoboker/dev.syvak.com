@@ -87,7 +87,7 @@ optimize_php_fpm() {
 optimize_nginx() {
     print_info "Optimizing Nginx image..."
     slim build \
-        --target dev-syvak-nginx:1.0 \
+        --target dev-syvak-nginx:1.0-alpine \
         --tag dev-syvak-nginx:1.0-alpine-slim \
         --http-probe=true \
         --http-probe-cmd GET:/ \
@@ -105,7 +105,7 @@ optimize_nginx() {
 optimize_cron() {
     print_info "Optimizing Cron image..."
     slim build \
-        --target dev-syvak-cron:1.0 \
+        --target dev-syvak-cron:1.0-alpine \
         --tag dev-syvak-cron:1.0-alpine-slim \
         --http-probe=false \
         --include-path /usr/local/bin \

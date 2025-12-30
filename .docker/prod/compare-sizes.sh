@@ -107,24 +107,20 @@ compare_service() {
 
 # Compare all services
 compare_service "PHP-FPM" \
-    "dev-strateg-php-fpm:1.0" \
-    "dev-strateg-php-fpm:1.0-slim"
+    "dev-syvak-php-fpm:1.0" \
+    "dev-syvak-php-fpm:1.0-slim"
 
 compare_service "Nginx" \
-    "dev-strateg-nginx:1.0" \
-    "dev-strateg-nginx:1.0-slim"
+    "dev-syvak-nginx:1.0-alpine" \
+    "dev-syvak-nginx:1.0-alpine-slim"
 
 compare_service "Cron" \
-    "dev-strateg-cron:1.0" \
-    "dev-strateg-cron:1.0-slim"
+    "dev-syvak-cron:1.0-alpine" \
+    "dev-syvak-cron:1.0-alpine-slim"
 
 compare_service "MariaDB" \
-    "dev-strateg-mariadb:1.0" \
-    "dev-strateg-mariadb:1.0-slim"
-
-compare_service "Memcached" \
-    "dev-strateg-memcached:1.0" \
-    "dev-strateg-memcached:1.0-slim"
+    "dev-syvak-mariadb:1.0" \
+    "dev-syvak-mariadb:1.0-slim"
 
 # Summary table
 echo -e "${CYAN}======================================"
@@ -135,30 +131,25 @@ echo ""
 printf "%-15s %-20s %-20s %-15s\n" "Service" "Regular" "Slim" "Reduction"
 printf "%-15s %-20s %-20s %-15s\n" "-------" "-------" "----" "---------"
 
-php_reg=$(get_size_bytes "dev-strateg-php-fpm:1.0")
-php_slim=$(get_size_bytes "dev-strateg-php-fpm:1.0-slim")
+php_reg=$(get_size_bytes "dev-syvak-php-fpm:1.0")
+php_slim=$(get_size_bytes "dev-syvak-php-fpm:1.0-slim")
 php_red=$(calc_reduction "$php_reg" "$php_slim")
 printf "%-15s %-20s %-20s %-15s\n" "PHP-FPM" "${php_reg:-N/A}" "${php_slim:-N/A}" "$php_red"
 
-nginx_reg=$(get_size_bytes "dev-strateg-nginx:1.0")
-nginx_slim=$(get_size_bytes "dev-strateg-nginx:1.0-slim")
+nginx_reg=$(get_size_bytes "dev-syvak-nginx:1.0-alpine")
+nginx_slim=$(get_size_bytes "dev-syvak-nginx:1.0-alpine-slim")
 nginx_red=$(calc_reduction "$nginx_reg" "$nginx_slim")
 printf "%-15s %-20s %-20s %-15s\n" "Nginx" "${nginx_reg:-N/A}" "${nginx_slim:-N/A}" "$nginx_red"
 
-cron_reg=$(get_size_bytes "dev-strateg-cron:1.0")
-cron_slim=$(get_size_bytes "dev-strateg-cron:1.0-slim")
+cron_reg=$(get_size_bytes "dev-syvak-cron:1.0-alpine")
+cron_slim=$(get_size_bytes "dev-syvak-cron:1.0-slim")
 cron_red=$(calc_reduction "$cron_reg" "$cron_slim")
 printf "%-15s %-20s %-20s %-15s\n" "Cron" "${cron_reg:-N/A}" "${cron_slim:-N/A}" "$cron_red"
 
-mariadb_reg=$(get_size_bytes "dev-strateg-mariadb:1.0")
-mariadb_slim=$(get_size_bytes "dev-strateg-mariadb:1.0-slim")
+mariadb_reg=$(get_size_bytes "dev-syvak-mariadb:1.0")
+mariadb_slim=$(get_size_bytes "dev-syvak-mariadb:1.0-slim")
 mariadb_red=$(calc_reduction "$mariadb_reg" "$mariadb_slim")
 printf "%-15s %-20s %-20s %-15s\n" "MariaDB" "${mariadb_reg:-N/A}" "${mariadb_slim:-N/A}" "$mariadb_red"
-
-memcached_reg=$(get_size_bytes "dev-strateg-memcached:1.0")
-memcached_slim=$(get_size_bytes "dev-strateg-memcached:1.0-slim")
-memcached_red=$(calc_reduction "$memcached_reg" "$memcached_slim")
-printf "%-15s %-20s %-20s %-15s\n" "Memcached" "${memcached_reg:-N/A}" "${memcached_slim:-N/A}" "$memcached_red"
 
 echo ""
 echo -e "${CYAN}======================================"
@@ -166,7 +157,7 @@ echo -e "All Images"
 echo -e "======================================${NC}"
 echo ""
 
-docker images | grep -E "REPOSITORY|dev-strateg" | head -20
+docker images | grep -E "REPOSITORY|dev-syvak" | head -20
 
 echo ""
 echo -e "${GREEN}✓ Comparison complete!${NC}"
