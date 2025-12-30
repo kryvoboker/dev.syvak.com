@@ -5,12 +5,20 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Categories\Categories\Pages;
 
 use App\Filament\Resources\Catalogs\Categories\Categories\CategoryResource;
+use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Categories\Category;
+use Exception;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class CreateCategory extends CreateRecord
 {
+    use ProcessSlugsTrait;
+
     protected static string    $resource      = CategoryResource::class;
     protected array            $descriptions  = [];
     protected array            $slugs         = [];
@@ -27,7 +35,7 @@ class CreateCategory extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Store descriptions temporarily
+        // Store related data temporarily
         $this->descriptions  = trim_strs_in_arr($data['descriptions'] ?? []);
         $this->preview_image = $data['preview_image'] ?? null;
         $this->icon          = $data['icon'] ?? null;
@@ -39,11 +47,52 @@ class CreateCategory extends CreateRecord
     }
 
     /**
-     * Handle record creation after attribute is created
+     * Handle record creation with transaction
+     *
+     * @param array $data
+     *
+     * @return Model
+     * @throws Halt
+     */
+    protected function handleRecordCreation(array $data): Model
+    {
+        try {
+            return DB::transaction(function () use ($data) {
+                // Create main record
+                $this->record = static::getModel()::create($data);
+
+                // Create image
+                $this->createImage();
+
+                // Process slugs
+                if ($this->updateOrCreateSlugs() === false) {
+                    throw new Exception('Failed to create slugs');
+                }
+
+                // Create descriptions
+                $this->createDescriptions();
+
+                // Rebuild category paths
+                $this->record->rebuildPaths();
+
+                return $this->record;
+            });
+        } catch (Exception|Throwable $e) {
+            Log::channel('stack')->error('Failed to create Category: ' . $e->getMessage(), [
+                'data'      => $data,
+                'exception' => $e,
+            ]);
+
+            $this->halt();
+        }
+    }
+
+    /**
+     * Create image for the record
      *
      * @return void
      */
-    protected function afterCreate(): void
+    protected function createImage(): void
     {
         if (!empty($this->preview_image) || !empty($this->icon)) {
             $this->record->categoryImage()->create([
@@ -51,18 +100,15 @@ class CreateCategory extends CreateRecord
                 'preview_image' => $this->preview_image,
             ]);
         }
+    }
 
-        foreach ($this->slugs as $language_id => $slug_data) {
-            if (empty($slug_data['name'])) {
-                continue;
-            }
-
-            $this->record->slugs()->create([
-                'language_id' => (int)$language_id,
-                'slug'        => $slug_data['name'],
-            ]);
-        }
-
+    /**
+     * Create descriptions for the record
+     *
+     * @return void
+     */
+    protected function createDescriptions(): void
+    {
         $descriptions_data = [];
 
         foreach ($this->descriptions as $language_id => $description) {
@@ -70,11 +116,11 @@ class CreateCategory extends CreateRecord
                 $descriptions_data[] = [
                     'language_id'      => (int)$language_id,
                     'name'             => $description['name'],
-                    'description'      => $description['description'],
-                    'h1_title'         => $description['h1_title'],
-                    'meta_title'       => $description['meta_title'],
-                    'meta_description' => $description['meta_description'],
-                    'meta_keywords'    => $description['meta_keywords'],
+                    'description'      => $description['description'] ?? null,
+                    'h1_title'         => $description['h1_title'] ?? null,
+                    'meta_title'       => $description['meta_title'] ?? null,
+                    'meta_description' => $description['meta_description'] ?? null,
+                    'meta_keywords'    => $description['meta_keywords'] ?? null,
                 ];
             }
         }
@@ -82,9 +128,6 @@ class CreateCategory extends CreateRecord
         if (!empty($descriptions_data)) {
             $this->record->categoryDescription()->createMany($descriptions_data);
         }
-
-        // Rebuild category paths
-        $this->record->rebuildPaths();
     }
 
     /**

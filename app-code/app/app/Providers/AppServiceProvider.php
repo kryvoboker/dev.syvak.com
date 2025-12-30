@@ -7,6 +7,9 @@ namespace App\Providers;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
+use DateTimeInterface;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -61,6 +64,34 @@ class AppServiceProvider extends ServiceProvider
 
         if (File::isDirectory($catalog_path)) {
             View::addNamespace('catalog', $catalog_path);
+        }
+
+        if (app()->isLocal() && app()->hasDebugModeEnabled() === true) {
+            // Check SQL queries in the local environment for remote debugging
+            DB::listen(function (QueryExecuted $query) {
+                $bindings = $query->bindings;
+
+                // Replace placeholders with quoted bindings for readable SQL.
+                $sql_template = str_replace('?', '%s', $query->sql);
+
+                $sql = vsprintf($sql_template, array_map(function ($binding) {
+                    if (is_string($binding)) {
+                        return "'" . addslashes($binding) . "'";
+                    }
+
+                    if ($binding instanceof DateTimeInterface) {
+                        return "'" . $binding->format('Y-m-d H:i:s') . "'";
+                    }
+
+                    if (is_bool($binding)) {
+                        return $binding ? '1' : '0';
+                    }
+
+                    return $binding === null ? 'NULL' : $binding;
+                }, $bindings)) ?: $query->sql;
+
+                $res = $sql;
+            });
         }
     }
 }

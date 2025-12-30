@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Infos\InfoPages\Schemas;
 
+use App\Enums\PositionInPageEnum;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Filament\Resources\Trait\MetaTextFormTrait;
 use App\Filament\Resources\Trait\SlugFormTrait;
@@ -48,13 +49,14 @@ class InfoPageForm
             ->schema([
                 Section::make(__('admin/default.sections.basic_info'))
                     ->schema([
-                        Select::make('position')
+                        Select::make('positions')
                             ->label(__('admin/infos/info_pages.columns.position'))
+                            ->multiple()
                             ->options(function () {
                                 $positions = [];
 
-                                foreach (config('app.positions_in_page') as $position) {
-                                    $positions[$position] = Str::ucfirst($position);
+                                foreach (PositionInPageEnum::cases() as $position) {
+                                    $positions[$position->value] = Str::ucfirst($position->value);
                                 }
 
                                 return $positions;

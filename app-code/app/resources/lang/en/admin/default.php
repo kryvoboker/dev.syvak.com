@@ -204,5 +204,6 @@ return [
         'validation_duplicate_categories' => 'The selected categories contain duplicates. Please remove the duplicates and try again.',
         'something_went_wrong'            => 'Something went wrong. Please try again later.',
         'category_path_not_found'         => 'Category path <b>:id</b> not found!',
+        'create_or_update_slugs_failed'   => 'Creating or updating slugs (SEO URLs) failed for some languages. Please check the slugs and try again. Perhaps one of the slugs (SEO URLs) already exists.',
     ]
 ];

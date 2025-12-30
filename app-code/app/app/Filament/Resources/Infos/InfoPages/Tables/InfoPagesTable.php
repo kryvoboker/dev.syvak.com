@@ -61,7 +61,7 @@ class InfoPagesTable
                     }),
 
 
-                TextColumn::make('position')
+                TextColumn::make('positions')
                     ->label(__('admin/infos/info_pages.columns.position'))
                     ->sortable()
                     ->searchable(),

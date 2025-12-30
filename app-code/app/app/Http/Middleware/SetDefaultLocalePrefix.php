@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetDefaultLocalePrefix
@@ -21,10 +22,10 @@ class SetDefaultLocalePrefix
      */
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
-        $path_info = ltrim($request->getPathInfo(), '/');
+        $path_info = Str::ltrim($request->getPathInfo(), '/');
 
         // Skip redirect for Livewire update requests
-        $is_livewire_update = str_contains($path_info, 'livewire/update') || str_contains($path_info, 'livewire/upload-file');
+        $is_livewire_update = Str::contains($path_info, ['livewire/update', 'livewire/upload-file']);
         $locale = $request->route('locale');
 
         if ($is_livewire_update) {

@@ -15,4 +15,14 @@ return [
     'columns'          => [
         'position' => 'Position',
     ],
+
+    // Placeholders
+    'placeholders'     => [
+        'position' => 'Select position on page',
+    ],
+
+    // Helpers
+    'helpers'          => [
+        'position' => 'Use this field to determine where on the page the link to this info page will appear (top, bottom, etc.).',
+    ],
 ];

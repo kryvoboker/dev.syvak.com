@@ -218,6 +218,5 @@ return [
     'frontend'                  => [
         'max_viewport_width' => (int)env('MAX_VIEWPORT_WIDTH'),
     ],
-    'positions_in_page'         => explode(',', env('POSITIONS_IN_PAGE'))
 
 ];

@@ -5,16 +5,24 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Categories\Categories\Pages;
 
 use App\Filament\Resources\Catalogs\Categories\Categories\CategoryResource;
+use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryDescription;
 use App\Models\Slug;
+use Exception;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
+use Throwable;
 
 class EditCategory extends EditRecord
 {
+    use ProcessSlugsTrait;
+
     protected static string               $resource      = CategoryResource::class;
     protected array                       $descriptions  = [];
     protected array                       $slugs         = [];
@@ -63,16 +71,7 @@ class EditCategory extends EditRecord
 
         $data['descriptions'] = $descriptions;
 
-        $slugs = $this->record->slugs()
-            ->get()
-            ->keyBy('language_id')
-            ->map(fn(Slug $slug): array => [
-                'language_id' => $slug->language_id,
-                'name'        => $slug->slug,
-            ])
-            ->toArray();
-
-        $data['slugs'] = $slugs;
+        $this->getSlugs($data);
 
         return $data;
     }
@@ -97,11 +96,57 @@ class EditCategory extends EditRecord
     }
 
     /**
-     * Handle after save
+     * Handle record update with transaction
+     *
+     * @param Model|Category $record
+     * @param array          $data
+     *
+     * @return Model
+     * @throws Halt
+     */
+    protected function handleRecordUpdate(Model|Category $record, array $data): Model
+    {
+        try {
+            return DB::transaction(function () use ($record, $data) {
+                // Update main record
+                $record->update($data);
+
+                // Update image
+                $this->updateImage();
+
+                // Process slugs
+                if ($this->updateOrCreateSlugs() === false) {
+                    throw new Exception('Failed to update slugs');
+                }
+
+                // Update descriptions
+                $this->updateDescriptions();
+
+                // Rebuild category paths
+                $record->rebuildPaths();
+
+                // Rebuild paths for all children
+                $this->rebuildChildrenPaths($record->id);
+
+                return $record;
+            });
+        } catch (Exception|Throwable $e) {
+            Log::channel('stack')->error('Failed to update Category: ' . $e->getMessage(), [
+                'record_id' => $record->id,
+                'data'      => $data,
+                'exception' => $e,
+            ]);
+
+            $this->halt();
+        }
+    }
+
+    /**
+     * Update image for the record
      *
      * @return void
      */
-    protected function afterSave(): void
+    protected function updateImage(): void
     {
         $category_images = $this->record->categoryImage();
 
@@ -111,23 +156,21 @@ class EditCategory extends EditRecord
                 [
                     'icon'          => $this->icon,
                     'preview_image' => $this->preview_image,
-                ]);
+                ]
+            );
         } else if ($category_images->exists()) {
             // If both images are empty, delete the record if it exists
             $category_images->delete();
         }
+    }
 
-        foreach ($this->slugs as $language_id => $slug_data) {
-            if (empty($slug_data['name'])) {
-                continue;
-            }
-
-            $this->record->slugs()->updateOrCreate(
-                ['language_id' => (int)$language_id],
-                ['slug' => $slug_data['name']]
-            );
-        }
-
+    /**
+     * Update descriptions for the record
+     *
+     * @return void
+     */
+    protected function updateDescriptions(): void
+    {
         // Collect language IDs with non-empty names
         $language_ids_to_keep = [];
         $descriptions_to_sync = [];
@@ -148,9 +191,13 @@ class EditCategory extends EditRecord
         }
 
         // Delete descriptions for languages that are not in the list or have empty names
-        $this->record->categoryDescription()
-            ->whereNotIn('language_id', $language_ids_to_keep)
-            ->delete();
+        if (!empty($language_ids_to_keep)) {
+            $this->record->categoryDescription()
+                ->whereNotIn('language_id', $language_ids_to_keep)
+                ->delete();
+        } else {
+            $this->record->categoryDescription()->delete();
+        }
 
         // Update or create descriptions
         foreach ($descriptions_to_sync as $language_id => $description_data) {
@@ -159,12 +206,6 @@ class EditCategory extends EditRecord
                 $description_data
             );
         }
-
-        // Rebuild category paths if parent changed
-        $this->record->rebuildPaths();
-
-        // Rebuild paths for all children
-        $this->rebuildChildrenPaths($this->record->id);
     }
 
     /**

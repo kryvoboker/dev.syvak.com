@@ -60,7 +60,7 @@ if (!function_exists('trim_strs_in_arr')) {
     {
         return array_map(function ($item) {
             if (is_string($item)) {
-                return trim($item);
+                return Str::trim($item);
             }
 
             return $item;
