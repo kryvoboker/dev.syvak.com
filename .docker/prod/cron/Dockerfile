@@ -1,0 +1,79 @@
+FROM composer:2.9.2 AS composer
+
+FROM php:8.4-cli-alpine3.22 AS base
+
+RUN apk add --no-cache curl ca-certificates unzip zip tzdata dos2unix
+
+ENV TZ=Europe/Kyiv
+
+# Set time zone in container
+RUN cp /usr/share/zoneinfo/Europe/Kyiv /etc/localtime \
+    && echo "Europe/Kyiv" > /etc/timezone
+
+RUN echo "date.timezone=${TZ}" > /usr/local/etc/php/conf.d/99-timezone.ini
+
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
+RUN install-php-extensions gd zip mysqli pdo pdo_mysql sockets intl bcmath \
+    && rm -f /usr/local/bin/install-php-extensions
+
+FROM base AS supercronic
+
+# Install supercronic (cron for containers)
+RUN curl -fsSLO "https://github.com/aptible/supercronic/releases/download/v0.2.33/supercronic-linux-amd64" \
+    && chmod +x supercronic-linux-amd64 \
+    && mv supercronic-linux-amd64 /usr/local/bin/supercronic
+
+FROM base AS production
+
+# Copy supercronic binary from supercronic stage and Composer from composer stage
+COPY --from=supercronic /usr/local/bin/supercronic /usr/local/bin/supercronic
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+# Import UID and GID
+ARG UID=1000
+ARG GID=1000
+ARG UMASK=0002
+
+ENV UID=${UID}
+ENV GID=${GID}
+ENV UMASK=${UMASK}
+
+ENV USERNAME=www-data
+
+# Configure composer cache directory
+ENV HOME=/home/${USERNAME}
+ENV COMPOSER_HOME=${HOME}/.composer
+ENV COMPOSER_CACHE_DIR=${COMPOSER_HOME}/cache
+
+# Create www-data user with proper shell
+RUN deluser ${USERNAME} 2>/dev/null || true \
+    && delgroup ${USERNAME} 2>/dev/null || true \
+    && addgroup -g ${GID} ${USERNAME} \
+    && adduser -D -u ${UID} -G ${USERNAME} -s /bin/sh ${USERNAME}
+
+# Create crontab directory with proper permissions
+RUN mkdir -p /etc/crontabs /var/log/cron ${COMPOSER_CACHE_DIR} \
+    && chown ${USERNAME}:${USERNAME} /etc/crontabs /var/log/cron ${COMPOSER_CACHE_DIR} \
+    && chmod -R 775 /var/log/cron ${COMPOSER_CACHE_DIR}
+
+# Copy entrypoint script
+COPY .docker/dev/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+COPY --chown=${USERNAME}:${USERNAME} app-code/app /var/www/app
+COPY --chown=${USERNAME}:${USERNAME} app-code/httpdocs /var/www/html
+
+WORKDIR /var/www/app
+
+USER ${USERNAME}
+
+RUN /usr/bin/composer install  \
+    --no-dev  \
+    --optimize-autoloader  \
+    --prefer-dist  \
+    --no-scripts  \
+    --no-interaction
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
