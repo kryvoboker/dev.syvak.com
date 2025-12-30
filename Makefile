@@ -120,10 +120,6 @@ compare-sizes:
 # Install docker-slim
 install-slim:
 	echo "Installing docker-slim..."
-	curl -L -o /tmp/ds.tar.gz https://github.com/slimtoolkit/slim/releases/download/1.36.2/dist_linux.tar.gz
-	tar -xvzf /tmp/ds.tar.gz -C /tmp
-	sudo mv /tmp/dist_linux/* /usr/local/bin/
-	sudo chmod +x /usr/local/bin/slim
-	rm -rf /tmp/dist_linux /tmp/ds.tar.gz
+	wget https://github.com/slimtoolkit/slim/releases/latest/download/dist_linux.tar.gz
 	echo "docker-slim installed successfully!"
-	slim version
+	slim --version
