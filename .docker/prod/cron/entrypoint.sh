@@ -1,16 +1,19 @@
 #!/bin/sh
 set -e
 
-# Fix line endings in crontab file (CRLF -> LF)
+# Copy and fix crontab if needed
 if [ -f /etc/crontabs/crontab ]; then
-    echo "Fixing line endings in crontab file..."
-    dos2unix /etc/crontabs/crontab
-    chmod 0600 /etc/crontabs/crontab
+    echo "Processing crontab file..."
+    cp /etc/crontabs/crontab /tmp/crontab.tmp
+    dos2unix /tmp/crontab.tmp
+    chmod 0600 /tmp/crontab.tmp
     echo "Crontab file prepared successfully"
+    # Start supercronic with processed file
+    exec /usr/local/bin/supercronic /tmp/crontab.tmp
 fi
 
 # Apply umask for runtime
 umask "${UMASK:-0002}"
 
-# Start supercronic
-exec /usr/local/bin/supercronic /etc/crontabs/crontab
+echo "ERROR: Crontab file not found!"
+exit 1
