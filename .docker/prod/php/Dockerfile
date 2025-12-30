@@ -75,7 +75,7 @@ RUN mkdir -p ${NPM_CONFIG_PREFIX} ${NPM_CONFIG_CACHE} ${COMPOSER_CACHE_DIR} \
   && chmod -R 775 ${COMPOSER_HOME} ${NPM_CONFIG_CACHE} ${NPM_CONFIG_PREFIX}
 
 # Copy and set permissions for entrypoint script
-COPY .docker/dev/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY .docker/prod/php/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && chown ${USERNAME}:${USERNAME} /usr/local/bin/entrypoint.sh

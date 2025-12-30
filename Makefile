@@ -55,6 +55,7 @@ optimize-php:
 		--include-path /usr/bin \
 		--include-path /var/www \
 		--include-path /home/www-data \
+		--include-path /tmp \
 		--include-exe php-fpm \
 		--include-exe php \
 		--include-exe composer \
@@ -77,7 +78,18 @@ optimize-nginx:
 		--include-path /var/cache/nginx \
 		--include-path /var/log/nginx \
 		--include-path /var/www \
+		--include-path /var/run/nginx \
+		--include-path /tmp \
+		--include-path /lib \
+		--include-path /usr/lib \
+		--include-path /usr/local/lib \
 		--include-exe nginx \
+		--include-exe /bin/sh \
+		--include-exe /bin/bash \
+		--preserve-path /var/cache/nginx \
+		--preserve-path /var/log/nginx \
+		--preserve-path /var/run/nginx \
+		--preserve-path /tmp \
 		--continue-after 30
 
 optimize-cron:
@@ -91,6 +103,7 @@ optimize-cron:
 		--include-path /usr/bin \
 		--include-path /var/www \
 		--include-path /etc/crontabs \
+		--include-path /tmp \
 		--include-exe php \
 		--include-exe supercronic \
 		--include-exe composer \

@@ -58,7 +58,7 @@ RUN mkdir -p /etc/crontabs /var/log/cron ${COMPOSER_CACHE_DIR} \
     && chmod -R 775 /var/log/cron ${COMPOSER_CACHE_DIR}
 
 # Copy entrypoint script
-COPY .docker/dev/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY .docker/prod/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 

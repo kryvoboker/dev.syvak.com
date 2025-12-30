@@ -31,7 +31,7 @@ RUN chown -R ${USERNAME}:${USERNAME} /var/lib/mysql \
     && chown -R ${USERNAME}:${USERNAME} /etc/mysql
 
 # Copy custom entrypoint
-COPY .docker/dev/mariadb/entrypoint.sh /usr/local/bin/custom-entrypoint.sh
+COPY .docker/prod/mariadb/entrypoint.sh /usr/local/bin/custom-entrypoint.sh
 RUN chmod +x /usr/local/bin/custom-entrypoint.sh
 
 USER ${USERNAME}

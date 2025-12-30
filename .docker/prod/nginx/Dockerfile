@@ -27,10 +27,13 @@ RUN deluser ${USERNAME} 2>/dev/null || true \
 
 # Set proper permissions for nginx directories
 RUN chown -R ${USERNAME}:${USERNAME} /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
-    && chmod -R 755 /var/cache/nginx /var/log/nginx
+    && chmod -R 755 /var/cache/nginx /var/log/nginx \
+    && mkdir -p /var/run/nginx \
+    && chown -R ${USERNAME}:${USERNAME} /var/run/nginx \
+    && chmod -R 755 /var/run/nginx
 
 # Copy and set permissions for entrypoint script
-COPY .docker/dev/nginx/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY .docker/prod/nginx/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && chown ${USERNAME}:${USERNAME} /usr/local/bin/entrypoint.sh
