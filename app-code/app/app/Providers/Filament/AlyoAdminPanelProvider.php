@@ -108,7 +108,7 @@ class AlyoAdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
                 SetDefaultLocalePrefix::class,
                 SetCommonPreferences::class,
-                LogFilamentErrors::class
+                LogFilamentErrors::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

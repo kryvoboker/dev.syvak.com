@@ -4,49 +4,37 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Languages\Tables;
 
+use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
+use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
+use App\Filament\Resources\Trait\Tables\DateTableTrait;
 use App\Models\Settings\Language;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 
 class LanguagesTable
 {
+    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait;
+
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('code')
-                    ->label(__('admin/default.columns.code'))
-                    ->searchable()
-                    ->sortable()
-                    ->badge(),
+                self::getCodeTableField(),
 
-                TextColumn::make('name')
-                    ->label(__('admin/default.columns.name'))
-                    ->searchable()
-                    ->sortable(),
+                self::getNameTableField(),
 
-                IconColumn::make('is_active')
-                    ->label(__('admin/default.columns.is_active'))
-                    ->boolean()
-                    ->sortable(),
+                self::getIsActiveTableField(),
 
-                IconColumn::make('is_default')
-                    ->label(__('admin/default.columns.is_default'))
-                    ->boolean()
-                    ->sortable(),
+                self::getIsDefaultTableField(),
 
-                TextColumn::make('created_at')
-                    ->label(__('admin/default.columns.created_at'))
-                    ->dateTime()
-                    ->sortable()
-                    ->date(config('app.datetime_format'), config('app.timezone')),
+                self::getCreatedAtTableField([
+                    'isToggledHiddenByDefault' => false,
+                ]),
             ])
             ->filters([
                 TernaryFilter::make('is_active')

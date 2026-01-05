@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Infos\InfoPages\Tables;
 
 use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
+use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
+use App\Filament\Resources\Trait\Tables\DateTableTrait;
+use App\Filament\Resources\Trait\Tables\NumericTableTrait;
+use App\Filament\Resources\Trait\Tables\SlugTableTrait;
 use App\Models\Infos\InfoPage;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -20,7 +24,7 @@ use Illuminate\Support\Str;
 
 class InfoPagesTable
 {
-    use LanguageTrait;
+    use LanguageTrait, CommonTextTableTrait, NumericTableTrait, BooleanTableTrait, DateTableTrait, SlugTableTrait;
 
     /**
      * @param Table $table
@@ -40,12 +44,11 @@ class InfoPagesTable
                 ]);
             })
             ->columns([
-                TextColumn::make('infoPageDescription.title')
-                    ->label(__('admin/default.columns.title'))
-                    ->limit(50)
-                    ->searchable()
-                    ->sortable()
-                    ->getStateUsing(function (InfoPage $record) use ($current_language_id) {
+                self::getNameTableField([
+                    'filed_name'         => 'infoPageDescription.title',
+                    'label'              => __('admin/default.columns.title'),
+                    'searchable'         => ['title'],
+                    'get_state_using_cb' => function (InfoPage $record) use ($current_language_id) {
                         if (($returned_value = self::validateLanguageIdIsNotNull($current_language_id)) !== null) {
                             return $returned_value;
                         }
@@ -58,29 +61,22 @@ class InfoPagesTable
                         }
 
                         return $info_page_description?->title ?? '-';
-                    }),
-
+                    },
+                ]),
 
                 TextColumn::make('positions')
                     ->label(__('admin/infos/info_pages.columns.position'))
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('sort_order')
-                    ->label(__('admin/default.columns.sort_order'))
-                    ->numeric()
-                    ->sortable(),
+                self::getSortOrderTableField(),
 
-                IconColumn::make('is_active')
-                    ->label(__('admin/default.columns.is_active'))
-                    ->sortable()
-                    ->boolean(),
+                self::getIsActiveTableField(),
 
-                TextColumn::make('slugs')
-                    ->label(__('admin/default.columns.slug'))
-                    ->sortable()
-                    ->limit(50)
-                    ->getStateUsing(function (InfoPage $info_page) use ($current_language_id) {
+                self::getSlugTableField([
+                    'filed_name'         => 'slugs.slug',
+                    'searchable'         => ['slug'],
+                    'get_state_using_cb' => function (InfoPage $info_page) use ($current_language_id) {
                         if ($current_language_id === null) {
                             return '-';
                         }
@@ -89,25 +85,14 @@ class InfoPagesTable
                             ->firstWhere('language_id', $current_language_id)?->slug;
 
                         return $slug ?? '-';
-                    })
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    },
+                ]),
 
-                IconColumn::make('is_noindex')
-                    ->label(__('admin/default.columns.is_noindex'))
-                    ->sortable()
-                    ->boolean(),
+                self::getIsNoIndexTableField(),
 
-                TextColumn::make('created_at')
-                    ->label(__('admin/default.columns.created_at'))
-                    ->date(config('app.datetime_format'), config('app.timezone'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::getCreatedAtTableField(),
 
-                TextColumn::make('updated_at')
-                    ->label(__('admin/default.columns.updated_at'))
-                    ->date(config('app.datetime_format'), config('app.timezone'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::getUpdatedAtTableField(),
             ])
             ->filters([
                 TernaryFilter::make('is_active')

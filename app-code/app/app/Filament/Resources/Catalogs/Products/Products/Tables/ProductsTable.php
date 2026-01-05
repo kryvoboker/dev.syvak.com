@@ -5,25 +5,27 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Products\Products\Tables;
 
 use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
+use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
+use App\Filament\Resources\Trait\Tables\DateTableTrait;
+use App\Filament\Resources\Trait\Tables\ImageTableTrait;
+use App\Filament\Resources\Trait\Tables\SlugTableTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Supports\Services\Currency\ConvertPrice;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductsTable
 {
-    use LanguageTrait;
+    use LanguageTrait, CommonTextTableTrait, BooleanTableTrait, DateTableTrait, ImageTableTrait, SlugTableTrait;
 
     /**
      * @param Table $table
@@ -47,12 +49,10 @@ class ProductsTable
                 ]);
             })
             ->columns([
-                TextColumn::make('productDescription.name')
-                    ->label(__('admin/default.columns.name'))
-                    ->searchable()
-                    ->sortable()
-                    ->limit(50)
-                    ->getStateUsing(function (Product $record) use ($current_language_id) {
+                self::getNameTableField([
+                    'filed_name'         => 'productDescription.name',
+                    'searchable'         => ['name'],
+                    'get_state_using_cb' => function (Product $record) use ($current_language_id) {
                         if (($returned_value = self::validateLanguageIdIsNotNull($current_language_id)) !== null) {
                             return $returned_value;
                         }
@@ -65,7 +65,8 @@ class ProductsTable
                         }
 
                         return $description?->name ?? '-';
-                    }),
+                    },
+                ]),
 
                 TextColumn::make('model')
                     ->label(__('admin/default.columns.model'))
@@ -91,16 +92,7 @@ class ProductsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                ImageColumn::make('image')
-                    ->label(__('admin/default.columns.image'))
-                    ->imageSize((int)config('app.images.product.preview_in_list_in_admin.width'))
-                    ->checkFileExistence()
-                    ->defaultImageUrl(Storage::url(config('app.images.product.no_image')))
-                    ->extraImgAttributes([
-                        'decoding' => 'async',
-                        'loading'  => 'lazy',
-                        'style'    => 'object-fit: contain;',
-                    ]),
+                self::getImageTableField(),
 
                 TextColumn::make('price')
                     ->label(__('admin/default.columns.price'))
@@ -131,28 +123,16 @@ class ProductsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('date_available')
-                    ->label(__('admin/default.columns.date_available'))
-                    ->date(config('app.datetime_format'), config('app.timezone'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::getDateAvailableTableField(),
 
-                TextColumn::make('date_added')
-                    ->label(__('admin/default.columns.date_added'))
-                    ->date(config('app.datetime_format'), config('app.timezone'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::getDateAddedTableField(),
 
-                IconColumn::make('is_active')
-                    ->label(__('admin/default.columns.is_active'))
-                    ->sortable()
-                    ->boolean(),
+                self::getIsActiveTableField(),
 
-                TextColumn::make('slugs')
-                    ->label(__('admin/default.columns.slug'))
-                    ->sortable()
-                    ->limit(50)
-                    ->getStateUsing(function (Product $product) use ($current_language_id) {
+                self::getSlugTableField([
+                    'filed_name'         => 'slugs.slug',
+                    'searchable'         => ['slug'],
+                    'get_state_using_cb' => function (Product $product) use ($current_language_id) {
                         if ($current_language_id === null) {
                             return '-';
                         }
@@ -161,20 +141,12 @@ class ProductsTable
                             ->firstWhere('language_id', $current_language_id)?->slug;
 
                         return $slug ?? '-';
-                    })
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    },
+                ]),
 
-                TextColumn::make('created_at')
-                    ->label(__('admin/default.columns.created_at'))
-                    ->date(config('app.datetime_format'), config('app.timezone'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::getCreatedAtTableField(),
 
-                TextColumn::make('updated_at')
-                    ->label(__('admin/default.columns.updated_at'))
-                    ->date(config('app.datetime_format'), config('app.timezone'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::getUpdatedAtTableField(),
             ])
             ->filters([
                 TernaryFilter::make('is_active')

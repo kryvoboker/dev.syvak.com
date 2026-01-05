@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Categories\Categories\Tables;
 
+use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
+use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
+use App\Filament\Resources\Trait\Tables\DateTableTrait;
+use App\Filament\Resources\Trait\Tables\ImageTableTrait;
+use App\Filament\Resources\Trait\Tables\SlugTableTrait;
 use App\Models\Catalogs\Categories\Category;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +24,7 @@ use Illuminate\Support\Str;
 
 class CategoriesTable
 {
-    use LanguageTrait;
+    use LanguageTrait, CommonTextTableTrait, SortOrderFormTrait, DateTableTrait, BooleanTableTrait, ImageTableTrait, SlugTableTrait;
 
     /**
      * @param Table $table
@@ -42,12 +45,10 @@ class CategoriesTable
                 ]);
             })
             ->columns([
-                TextColumn::make('categoryDescription.name')
-                    ->label(__('admin/default.columns.name'))
-                    ->searchable(['name'])
-                    ->sortable()
-                    ->limit(50)
-                    ->getStateUsing(function (Category $record) use ($current_language_id) {
+                self::getNameTableField([
+                    'filed_name'         => 'categoryDescription.name',
+                    'searchable'         => ['name'],
+                    'get_state_using_cb' => function (Category $record) use ($current_language_id) {
                         if (($returned_value = self::validateLanguageIdIsNotNull($current_language_id)) !== null) {
                             return $returned_value;
                         }
@@ -62,39 +63,35 @@ class CategoriesTable
                         }
 
                         return $description?->name ?? '-';
-                    }),
+                    },
+                ]),
 
-                ImageColumn::make('icon')
-                    ->label(__('admin/default.columns.image'))
-                    ->imageSize((int)config('app.images.category.preview_in_list_in_admin.width'))
-                    ->checkFileExistence()
-                    ->extraImgAttributes([
+                self::getImageTableField([
+                    'field_name'           => 'icon',
+                    'image_size'           => (int)config('app.images.category.preview_in_list_in_admin.width'),
+                    'default_image_url'    => config('app.images.category.no_image'),
+                    'extra_img_attributes' => [
                         'decoding' => 'async',
                         'loading'  => 'lazy',
                         'style'    => 'object-fit: contain; background-color: #f9f9f9;',
-                    ])
-                    ->getStateUsing(function (Category $category) {
+                    ],
+                    'get_state_using_cb'   => function (Category $category) {
                         $category_image = $category->categoryImage()->first();
 
                         return $category_image?->icon
                             ? Storage::url($category_image->icon)
                             : null;
-                    }),
+                    },
+                ]),
 
-                TextColumn::make('sort_order')
-                    ->label(__('admin/default.columns.sort_order'))
-                    ->numeric()
-                    ->sortable(),
+                self::getSortOrderFormField(),
 
-                IconColumn::make('is_active')
-                    ->label(__('admin/default.columns.is_active'))
-                    ->boolean(),
+                self::getIsActiveTableField(),
 
-                TextColumn::make('slugs')
-                    ->label(__('admin/default.columns.slug'))
-                    ->sortable()
-                    ->limit(50)
-                    ->getStateUsing(function (Category $category) use ($current_language_id) {
+                self::getSlugTableField([
+                    'filed_name'         => 'slugs.slug',
+                    'searchable'         => ['slug'],
+                    'get_state_using_cb' => function (Category $category) use ($current_language_id) {
                         if ($current_language_id === null) {
                             return '-';
                         }
@@ -103,14 +100,10 @@ class CategoriesTable
                             ->firstWhere('language_id', $current_language_id)?->slug;
 
                         return $slug ?? '-';
-                    })
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    },
+                ]),
 
-                TextColumn::make('created_at')
-                    ->label(__('admin/default.columns.created_at'))
-                    ->date(config('app.datetime_format'), config('app.timezone'))
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::getCreatedAtTableField(),
             ])
             ->filters([
                 Filter::make('name')

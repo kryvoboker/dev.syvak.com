@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Pages;
 use App\Http\Controllers\Controller;
 use App\Services\HeaderService;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -20,6 +21,8 @@ class HomeController extends Controller
             'header_data' => app(HeaderService::class)(),
             'page_type'   => try_detect_page_type()
         ];
+
+        Log::channel('stack')->debug(__CLASS__);
 
         return view('catalog.pages.home', $data);
     }

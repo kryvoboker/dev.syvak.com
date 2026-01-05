@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Infos\InfoPages\Schemas;
 
 use App\Enums\PositionInPageEnum;
+use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
+use App\Filament\Resources\Trait\Forms\SlugFormTrait;
+use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
+use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Filament\Resources\Trait\MetaTextFormTrait;
-use App\Filament\Resources\Trait\SlugFormTrait;
-use App\Filament\Resources\Trait\SortOrderFormTrait;
-use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -29,9 +29,9 @@ class InfoPageForm
                 Tabs::make('InfoPagesTabs')
                     ->tabs([
                         self::createGeneralTab(),
-                        self::createTranslationsTabs($active_languages),
-                        self::createMetaTextsTabs($active_languages),
-                        self::createSlugsTabs($active_languages),
+                        self::createTranslationsFormTabs($active_languages),
+                        self::createMetaTextsFormTabs($active_languages),
+                        self::createSlugsFormTabs($active_languages),
                     ])
                     ->activeTab(1)
                     ->contained(false)
@@ -65,11 +65,11 @@ class InfoPageForm
                             ->placeholder(__('admin/infos/info_pages.placeholders.position'))
                             ->helperText(__('admin/infos/info_pages.helpers.position')),
 
-                        self::getIsActiveField(),
+                        self::getIsActiveFormField(),
 
-                        self::getSortOrderField(),
+                        self::getSortOrderFormField(),
 
-                        self::getIsNoIndexField(),
+                        self::getIsNoIndexFormField(),
                     ])
             ]);
     }

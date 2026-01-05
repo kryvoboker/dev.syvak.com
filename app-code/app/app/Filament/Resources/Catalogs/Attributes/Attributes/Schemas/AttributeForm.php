@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas;
 
+use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
+use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Filament\Resources\Trait\SortOrderFormTrait;
-use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use App\Models\Settings\Language;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
@@ -38,9 +38,9 @@ class AttributeForm
                             ->contained(false)
                             ->persistTabInQueryString(),
 
-                        self::getIsActiveField(),
+                        self::getIsActiveFormField(),
 
-                        self::getSortOrderField(),
+                        self::getSortOrderFormField(),
                     ])
                     ->columnSpanFull(),
             ]);

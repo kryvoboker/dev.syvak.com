@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use LaravelLang\Config\Constants\RouteName;
 use LaravelLang\LocaleList\Locale;
 
 return [

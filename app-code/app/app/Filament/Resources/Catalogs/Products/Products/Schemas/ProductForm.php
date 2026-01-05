@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
-use App\Filament\Resources\Trait\ImageFormTrait;
+use App\Filament\Resources\Trait\Forms\ImageFormTrait;
+use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
+use App\Filament\Resources\Trait\Forms\SlugFormTrait;
+use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
+use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Filament\Resources\Trait\MetaTextFormTrait;
-use App\Filament\Resources\Trait\SlugFormTrait;
-use App\Filament\Resources\Trait\SortOrderFormTrait;
-use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryPath;
@@ -17,8 +17,6 @@ use App\Models\Settings\Language;
 use App\Models\Users\UserGroup;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Field;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -44,13 +42,13 @@ class ProductForm
                 Tabs::make('ProductTabs')
                     ->tabs([
                         self::createGeneralTabs(),
-                        self::createTranslationsTabs($active_languages),
-                        self::createMetaTextsTabs($active_languages),
+                        self::createTranslationsFormTabs($active_languages),
+                        self::createMetaTextsFormTabs($active_languages),
                         self::createCategoriesTabs($active_languages),
                         self::createImagesTabs(),
                         self::createDiscountsTabs(),
                         self::createAttributesTabs($active_languages),
-                        self::createSlugsTabs($active_languages),
+                        self::createSlugsFormTabs($active_languages),
                     ])
                     ->activeTab(1)
                     ->contained(false)
@@ -125,7 +123,7 @@ class ProductForm
 
                 Section::make(__('admin/default.sections.image'))
                     ->schema([
-                        self::getImageField(),
+                        self::getImageFormField(),
                     ])
                     ->columns(1),
 
@@ -155,7 +153,7 @@ class ProductForm
                                     ->required(),
                             ]),
 
-                        self::getIsActiveField(),
+                        self::getIsActiveFormField(),
                     ])
                     ->columns(1),
             ]);
@@ -302,9 +300,9 @@ class ProductForm
                         Repeater::make('images')
                             ->label(__('admin/default.labels.images'))
                             ->schema([
-                                self::getImageField(),
+                                self::getImageFormField(),
 
-                                self::getSortOrderField([
+                                self::getSortOrderFormField([
                                     'rules' => ['nullable', 'numeric', 'min:0'],
                                 ]),
                             ])

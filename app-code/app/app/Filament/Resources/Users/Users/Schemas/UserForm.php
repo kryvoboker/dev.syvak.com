@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Users\Schemas;
 
-use App\Filament\Resources\Trait\ImageFormTrait;
-use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
+use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
+use App\Filament\Resources\Trait\Forms\ImageFormTrait;
+use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Models\Users\User;
 use App\Models\Users\UserGroup;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
 
 class UserForm
 {
-    use ToggleCheckboxFormTrait, ImageFormTrait;
+    use CommonTextFormTrait, ToggleCheckboxFormTrait, ImageFormTrait;
 
     /**
      * @param Schema $schema
@@ -32,12 +32,7 @@ class UserForm
 
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->label(__('admin/default.labels.name'))
-                    ->maxLength(255)
-                    ->placeholder('John')
-                    ->rules(['string', 'max:255'])
-                    ->required(),
+                self::getNameFormField(),
 
                 TextInput::make('lastname')
                     ->label(__('admin/default.labels.lastname'))
@@ -64,7 +59,7 @@ class UserForm
                     ->rules(['nullable', 'string', 'max:20', Rule::unique('users', 'telephone')->ignore($record?->id), 'regex:' . config('app.regex_validate_conditions.telephone')])
                     ->default(null),
 
-                self::getImageField([
+                self::getImageFormField([
                     'field_name'   => 'avatar',
                     'label'        => __('admin/default.labels.avatar'),
                     'directory'    => config('app.images.user.image_path'),
@@ -90,10 +85,10 @@ class UserForm
                 TextInput::make('password_confirmation')
                     ->label(__('admin/default.labels.password_confirmation'))
                     ->password()
-                    ->rules(['nullable', 'required_with:password'])
+                    ->rules(['nullable', 'required_with:password', 'confirmed'])
                     ->default(null),
 
-                self::getIsActiveField([
+                self::getIsActiveFormField([
                     'helper_text' => __('admin/users/users.helpers.is_active'),
                     'default'     => false,
                 ]),

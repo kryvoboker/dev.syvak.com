@@ -95,10 +95,12 @@ class AppSettingForm
                                         TextInput::make('name')
                                             ->label(__('admin/default.labels.name'))
                                             ->rules(['required', 'string', 'max:255']),
+
                                         TextInput::make('width')
                                             ->label(__('admin/default.labels.width'))
                                             ->numeric()
                                             ->rules(['required', 'numeric']),
+
                                         TextInput::make('height')
                                             ->label(__('admin/default.labels.height'))
                                             ->numeric()

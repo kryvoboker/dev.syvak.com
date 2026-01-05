@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Categories\Categories\Schemas;
 
-use App\Filament\Resources\Trait\ImageFormTrait;
-use App\Filament\Resources\Trait\MetaTextFormTrait;
+use App\Filament\Resources\Trait\Forms\ImageFormTrait;
+use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
+use App\Filament\Resources\Trait\Forms\SlugFormTrait;
+use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
+use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Filament\Resources\Trait\SlugFormTrait;
-use App\Filament\Resources\Trait\SortOrderFormTrait;
-use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Settings\Language;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\Rule;
 
 class CategoryForm
@@ -38,10 +38,10 @@ class CategoryForm
                 Tabs::make('ProductTabs')
                     ->tabs([
                         self::createGeneralTab($active_languages),
-                        self::createTranslationsTabs($active_languages),
-                        self::createMetaTextsTabs($active_languages),
+                        self::createTranslationsFormTabs($active_languages),
+                        self::createMetaTextsFormTabs($active_languages),
                         self::createImagesTab(),
-                        self::createSlugsTabs($active_languages),
+                        self::createSlugsFormTabs($active_languages),
                     ])
                     ->activeTab(1)
                     ->contained(false)
@@ -97,9 +97,9 @@ class CategoryForm
                             ->placeholder(__('admin/default.placeholders.select_parent_category'))
                             ->helperText(__('admin/default.helpers.parent_category')),
 
-                        self::getIsActiveField(),
+                        self::getIsActiveFormField(),
 
-                        self::getSortOrderField(),
+                        self::getSortOrderFormField(),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -114,7 +114,7 @@ class CategoryForm
             ->schema([
                 Section::make(__('admin/default.sections.images'))
                     ->schema([
-                        self::getImageField([
+                        self::getImageFormField([
                             'field_name'   => 'icon',
                             'label'        => __('admin/default.labels.icon'),
                             'directory'    => config('app.images.category.image_path'),
@@ -124,7 +124,7 @@ class CategoryForm
                             'image_height' => (int)config('app.images.category.preview_in_page_in_admin.height'),
                         ]),
 
-                        self::getImageField([
+                        self::getImageFormField([
                             'field_name'   => 'preview_image',
                             'directory'    => config('app.images.category.image_path'),
                             'max_size'     => (int)config('app.images.category.upload.max_size_kb'),

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Currencies\Schemas;
 
-use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
+use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
+use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class CurrencyForm
 {
-    use ToggleCheckboxFormTrait;
+    use CommonTextFormTrait, ToggleCheckboxFormTrait;
 
     /**
      * @param Schema $schema
@@ -30,12 +31,11 @@ class CurrencyForm
                     ->placeholder('USD')
                     ->rules(['alpha', 'uppercase', 'size:3']),
 
-                TextInput::make('name')
-                    ->label(__('admin/default.labels.name'))
-                    ->helperText(__('admin/settings/currencies.helpers.name'))
-                    ->required()
-                    ->maxLength(100)
-                    ->placeholder('US Dollar'),
+                self::getNameFormField([
+                    'helper_text' => __('admin/settings/currencies.helpers.name'),
+                    'max_length'  => 100,
+                    'placeholder' => 'US Dollar',
+                ]),
 
                 TextInput::make('format_locale')
                     ->label(__('admin/default.labels.format_locale'))
@@ -76,12 +76,12 @@ class CurrencyForm
                     ->step(0.000001)
                     ->placeholder('1.000000'),
 
-                self::getIsActiveField([
+                self::getIsActiveFormField([
                     'helper_text' => __('admin/settings/currencies.helpers.is_active'),
                     'default'     => false,
                 ]),
 
-                self::getIsDefaultField([
+                self::getIsDefaultFormField([
                     'helper_text' => __('admin/settings/currencies.helpers.is_default'),
                     'default'     => false,
                 ]),

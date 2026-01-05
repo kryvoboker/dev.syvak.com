@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Languages\Schemas;
 
-use App\Filament\Resources\Trait\ToggleCheckboxFormTrait;
+use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -32,12 +32,12 @@ class LanguageForm
                     ->maxLength(100)
                     ->placeholder('English'),
 
-                self::getIsActiveField([
+                self::getIsActiveFormField([
                     'helper_text' => __('admin/settings/languages.helpers.is_active'),
                     'default'     => false,
                 ]),
 
-                self::getIsDefaultField([
+                self::getIsDefaultFormField([
                     'helper_text' => __('admin/settings/languages.helpers.is_default'),
                     'default'     => false,
                 ]),
