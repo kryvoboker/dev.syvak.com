@@ -220,7 +220,7 @@ class Category extends Model
     /**
      * @param int $language_id
      *
-     * @return Collection
+     * @return Collection<Category>
      */
     public function getActiveCategoriesWithDescriptionsAndPathByLanguageId(int $language_id): Collection
     {

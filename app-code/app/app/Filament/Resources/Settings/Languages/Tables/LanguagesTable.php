@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Languages\Tables;
 
+use App\Filament\Resources\Trait\Filters\BooleanFilterTrait;
 use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
 use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
 use App\Filament\Resources\Trait\Tables\DateTableTrait;
@@ -12,13 +13,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 
 class LanguagesTable
 {
-    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait;
+    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait, BooleanFilterTrait;
 
     public static function configure(Table $table): Table
     {
@@ -26,7 +26,10 @@ class LanguagesTable
             ->columns([
                 self::getCodeTableField(),
 
-                self::getNameTableField(),
+                self::getTextTableField([
+                    'filed_name' => 'name',
+                    'label'      => __('admin/default.columns.name'),
+                ]),
 
                 self::getIsActiveTableField(),
 
@@ -37,14 +40,9 @@ class LanguagesTable
                 ]),
             ])
             ->filters([
-                TernaryFilter::make('is_active')
-                    ->label(__('admin/default.filters.active'))
-                    ->trueLabel(__('admin/default.filters.active_only'))
-                    ->falseLabel(__('admin/default.filters.inactive_only')),
+                self::getIsActiveFilterField(),
 
-                TernaryFilter::make('is_default')
-                    ->label(__('admin/default.filters.default'))
-                    ->trueLabel(__('admin/default.filters.default_only')),
+                self::getIsDefaultFilterField(),
             ])
             ->recordActions([
                 EditAction::make(),

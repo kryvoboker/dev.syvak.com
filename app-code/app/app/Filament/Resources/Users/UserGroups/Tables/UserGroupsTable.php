@@ -28,7 +28,10 @@ class UserGroupsTable
     {
         return $table
             ->columns([
-                self::getNameTableField(),
+                self::getTextTableField([
+                    'filed_name' => 'name',
+                    'label'      => __('admin/default.columns.name'),
+                ]),
 
                 self::getIsActiveTableField(),
 

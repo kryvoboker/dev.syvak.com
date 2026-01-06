@@ -31,7 +31,9 @@ class CurrencyForm
                     ->placeholder('USD')
                     ->rules(['alpha', 'uppercase', 'size:3']),
 
-                self::getNameFormField([
+                self::getTextFormField([
+                    'field_name'  => 'name',
+                    'label'       => __('admin/default.labels.name'),
                     'helper_text' => __('admin/settings/currencies.helpers.name'),
                     'max_length'  => 100,
                     'placeholder' => 'US Dollar',

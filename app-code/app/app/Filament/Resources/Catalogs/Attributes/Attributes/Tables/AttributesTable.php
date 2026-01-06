@@ -35,8 +35,9 @@ class AttributesTable
                 return $query->with('attributeDescription');
             })
             ->columns([
-                self::getNameTableField([
+                self::getTextTableField([
                     'filed_name'         => 'attributeDescription.name',
+                    'label'              => __('admin/default.columns.name'),
                     'searchable'         => ['name'],
                     'get_state_using_cb' => function (Attribute $record) use ($current_language_id) {
                         if (($returned_value = self::validateLanguageIdIsNotNull($current_language_id)) !== null) {
@@ -56,7 +57,10 @@ class AttributesTable
                     },
                 ]),
 
-                self::getSortOrderTableField(),
+                self::getNumericTableField([
+                    'sort_order' => 'sort_order',
+                    'label'      => __('admin/default.columns.sort_order'),
+                ]),
 
                 self::getIsActiveTableField(),
 

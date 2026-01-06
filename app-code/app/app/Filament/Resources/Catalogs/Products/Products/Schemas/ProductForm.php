@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
+use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
+use App\Filament\Resources\Trait\Forms\DateFormTrait;
 use App\Filament\Resources\Trait\Forms\ImageFormTrait;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
+use App\Filament\Resources\Trait\Forms\NumericFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
 use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
 use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
@@ -16,10 +19,8 @@ use App\Models\Catalogs\Categories\CategoryPath;
 use App\Models\Settings\Language;
 use App\Models\Users\UserGroup;
 use Closure;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -31,7 +32,10 @@ use Throwable;
 
 class ProductForm
 {
-    use LanguageTrait, SlugFormTrait, MetaTextFormTrait, ToggleCheckboxFormTrait, SortOrderFormTrait, ImageFormTrait;
+    use LanguageTrait, SlugFormTrait, MetaTextFormTrait,
+        ToggleCheckboxFormTrait, SortOrderFormTrait,
+        ImageFormTrait, DateFormTrait, CommonTextFormTrait,
+        NumericFormTrait;
 
     public static function configure(Schema $schema): Schema
     {
@@ -68,56 +72,55 @@ class ProductForm
             ->schema([
                 Section::make(__('admin/default.sections.basic_info'))
                     ->schema([
-                        TextInput::make('model')
-                            ->label(__('admin/default.labels.model'))
-                            ->maxLength(255)
-                            ->rules(['required', 'string', 'max:255'])
-                            ->unique(ignoreRecord: true)
-                            ->required(),
+                        self::getTextFormField([
+                            'field_name' => 'model',
+                            'label'      => __('admin/default.labels.model'),
+                            'max_length' => 255,
+                            'rules'      => ['required', 'string', 'max:255'],
+                            'unique'     => [
+                                'ignore_record' => true,
+                            ],
+                        ]),
 
-                        TextInput::make('sku')
-                            ->label(__('admin/default.labels.sku'))
-                            ->maxLength(255)
-                            ->rules(['required', 'string', 'max:255'])
-                            ->required(),
+                        self::getTextFormField([
+                            'field_name' => 'sku',
+                            'label'      => __('admin/default.labels.sku'),
+                            'max_length' => 255,
+                            'rules'      => ['required', 'string', 'max:255'],
+                        ]),
 
-                        TextInput::make('ean')
-                            ->label(__('admin/default.labels.ean'))
-                            ->rules(['nullable', 'string', 'numeric', 'max_digits::255'])
-                            ->default(null),
+                        self::getTextFormField([
+                            'field_name' => 'ean',
+                            'label'      => __('admin/default.labels.ean'),
+                            'rules'      => ['nullable', 'string', 'numeric', 'max_digits::255'],
+                        ]),
                     ])
                     ->columns(3),
 
                 Section::make(__('admin/default.sections.stock'))
                     ->schema([
-                        TextInput::make('quantity')
-                            ->label(__('admin/default.labels.quantity'))
-                            ->numeric()
-                            ->rules(['required', 'numeric', 'min:0'])
-                            ->minValue(0)
-                            ->default(0)
-                            ->required(),
+                        self::getNumericFormField([
+                            'field_name' => 'quantity',
+                            'label'      => __('admin/default.labels.quantity'),
+                        ]),
 
-                        TextInput::make('minimum')
-                            ->label(__('admin/default.labels.minimum'))
-                            ->numeric()
-                            ->rules(['required', 'numeric', 'min:1'])
-                            ->minValue(1)
-                            ->default(1)
-                            ->required(),
+                        self::getNumericFormField([
+                            'field_name' => 'minimum',
+                            'label'      => __('admin/default.labels.minimum'),
+                            'rules'      => ['required', 'numeric', 'min:1'],
+                            'min_value'  => 1,
+                            'default'    => 1,
+                        ]),
                     ])
                     ->columns(),
 
                 Section::make(__('admin/default.sections.pricing'))
                     ->schema([
-                        TextInput::make('price')
-                            ->label(__('admin/default.labels.price'))
-                            ->numeric()
-                            ->minValue(0)
-                            ->rules(['required', 'numeric', 'min:0'])
-                            ->prefix(config('app.currency.default_currency_symbol'))
-                            ->default(0.0)
-                            ->required(),
+                        self::getPriceFormField([
+                            'field_name' => 'price',
+                            'label'      => __('admin/default.labels.price'),
+                            'rules'      => ['nullable', 'numeric', 'min:0'],
+                        ]),
                     ])
                     ->columns(1),
 
@@ -129,28 +132,16 @@ class ProductForm
 
                 Section::make(__('admin/default.sections.settings'))
                     ->schema([
-                        TextInput::make('viewed')
-                            ->label(__('admin/default.labels.viewed'))
-                            ->numeric()
-                            ->rules(['required', 'numeric', 'min:0'])
-                            ->minValue(0)
-                            ->default(0)
-                            ->disabled()
-                            ->dehydrated(false),
+                        self::getNumericFormField([
+                            'field_name' => 'viewed',
+                            'label'      => __('admin/default.labels.viewed'),
+                        ]),
 
                         Grid::make()
                             ->schema([
-                                DateTimePicker::make('date_available')
-                                    ->label(__('admin/default.labels.date_available'))
-                                    ->rules(['required', 'date'])
-                                    ->default(now(config('app.timezone')))
-                                    ->required(),
+                                self::getDateAvailableFormField(),
 
-                                DateTimePicker::make('date_added')
-                                    ->label(__('admin/default.labels.date_added'))
-                                    ->rules(['required', 'date'])
-                                    ->default(now(config('app.timezone')))
-                                    ->required(),
+                                self::getDateAddedFormField(),
                             ]),
 
                         self::getIsActiveFormField(),
@@ -344,39 +335,31 @@ class ProductForm
                                     ->rules(['required', 'numeric', Rule::exists('user_groups', 'id')])
                                     ->required(),
 
-                                TextInput::make('quantity')
-                                    ->label(__('admin/default.labels.discount_quantity'))
-                                    ->numeric()
-                                    ->minValue(1)
-                                    ->rules(['required', 'numeric', 'min:1'])
-                                    ->default(1)
-                                    ->required(),
+                                self::getNumericFormField([
+                                    'field_name' => 'quantity',
+                                    'label'      => __('admin/default.labels.discount_quantity'),
+                                    'rules'      => ['required', 'numeric', 'min:1'],
+                                    'min_value'  => 1,
+                                    'default'    => 1,
+                                ]),
 
-                                TextInput::make('priority')
-                                    ->label(__('admin/default.labels.priority'))
-                                    ->numeric()
-                                    ->rules(['required', 'numeric', 'min:0'])
-                                    ->minValue(0)
-                                    ->default(1)
-                                    ->required(),
+                                self::getNumericFormField([
+                                    'field_name' => 'priority',
+                                    'label'      => __('admin/default.labels.priority'),
+                                    'rules'      => ['required', 'numeric', 'min:1'],
+                                    'min_value'  => 1,
+                                    'default'    => 1,
+                                ]),
 
-                                TextInput::make('price')
-                                    ->label(__('admin/default.labels.discount_price'))
-                                    ->numeric()
-                                    ->rules(['required', 'numeric', 'min:0'])
-                                    ->minValue(0)
-                                    ->prefix(config('app.currency.default_currency_symbol'))
-                                    ->required(),
+                                self::getPriceFormField([
+                                    'field_name' => 'price',
+                                    'label'      => __('admin/default.labels.discount_price'),
+                                    'rules'      => ['nullable', 'numeric', 'min:0'],
+                                ]),
 
-                                DateTimePicker::make('date_start')
-                                    ->label(__('admin/default.labels.date_start'))
-                                    ->rules(['required', 'date'])
-                                    ->required(),
+                                self::getDateStartFormField(),
 
-                                DateTimePicker::make('date_end')
-                                    ->label(__('admin/default.labels.date_end'))
-                                    ->rules(['required', 'date'])
-                                    ->required(),
+                                self::getDateEndFormField(),
                             ])
                             ->columns(3)
                             ->defaultItems(0)
@@ -466,11 +449,12 @@ class ProductForm
                                         // Auto-validate uniqueness on change
                                     }),
 
-                                TextInput::make('text')
-                                    ->label(__('admin/default.labels.attribute_text'))
-                                    ->maxLength(255)
-                                    ->rules(['required', 'string', 'max:255'])
-                                    ->required(),
+                                self::getTextFormField([
+                                    'field_name' => 'text',
+                                    'label'      => __('admin/default.labels.attribute_text'),
+                                    'max_length' => 255,
+                                    'rules'      => ['required', 'string', 'max:255'],
+                                ]),
                             ])
                             ->columns(3)
                             ->defaultItems(0)

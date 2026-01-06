@@ -17,7 +17,10 @@ class UserGroupForm
     {
         return $schema
             ->components([
-                self::getNameFormField([
+                self::getTextFormField([
+                    'field_name'  => 'name',
+                    'label'       => __('admin/default.labels.name'),
+                    'max_length'  => 255,
                     'placeholder' => 'RRC Users',
                 ]),
 

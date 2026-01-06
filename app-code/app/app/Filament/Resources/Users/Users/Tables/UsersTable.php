@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Users\Tables;
 
+use App\Filament\Resources\Trait\Filters\BooleanFilterTrait;
 use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
 use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
 use App\Filament\Resources\Trait\Tables\DateTableTrait;
@@ -12,15 +13,13 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class UsersTable
 {
-    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait, ImageTableTrait;
+    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait, ImageTableTrait, BooleanFilterTrait;
 
     /**
      * @param Table $table
@@ -31,23 +30,29 @@ class UsersTable
     {
         return $table
             ->columns([
-                self::getNameTableField(),
+                self::getTextTableField([
+                    'filed_name' => 'name',
+                    'label'      => __('admin/default.columns.name'),
+                ]),
 
-                TextColumn::make('lastname')
-                    ->label(__('admin/default.columns.lastname'))
-                    ->searchable(),
+                self::getTextTableField([
+                    'filed_name' => 'lastname',
+                    'label'      => __('admin/default.columns.lastname'),
+                ]),
 
-                TextColumn::make('email')
-                    ->label(__('admin/default.columns.email'))
-                    ->searchable(),
+                self::getTextTableField([
+                    'filed_name' => 'email',
+                    'label'      => __('admin/default.columns.email'),
+                ]),
 
-                TextColumn::make('telephone')
-                    ->label(__('admin/default.columns.telephone'))
-                    ->formatStateUsing(function ($state) {
+                self::getTextTableField([
+                    'filed_name'                   => 'telephone',
+                    'label'                        => __('admin/default.columns.telephone'),
+                    'format_state_using_cb'        => function ($state) {
                         return parse_telephone($state);
-                    })
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    },
+                    'is_toggled_hidden_by_default' => true,
+                ]),
 
                 self::getImageTableField([
                     'field_name'        => 'avatar',
@@ -64,10 +69,7 @@ class UsersTable
                 self::getCreatedAtTableField(),
             ])
             ->filters([
-                TernaryFilter::make('is_active')
-                    ->label(__('admin/default.filters.active'))
-                    ->trueLabel(__('admin/default.filters.active_only'))
-                    ->falseLabel(__('admin/default.filters.inactive_only')),
+                self::getIsActiveFilterField(),
             ])
             ->recordActions([
                 EditAction::make(),

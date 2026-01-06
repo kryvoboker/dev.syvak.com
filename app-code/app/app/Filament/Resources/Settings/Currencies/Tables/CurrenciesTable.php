@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Currencies\Tables;
 
+use App\Filament\Resources\Trait\Filters\BooleanFilterTrait;
 use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
 use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
 use App\Filament\Resources\Trait\Tables\DateTableTrait;
@@ -12,14 +13,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 
 class CurrenciesTable
 {
-    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait;
+    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait, BooleanFilterTrait;
 
     /**
      * @param Table $table
@@ -32,34 +31,39 @@ class CurrenciesTable
             ->columns([
                 self::getCodeTableField(),
 
-                self::getNameTableField(),
+                self::getTextTableField([
+                    'filed_name' => 'name',
+                    'label'      => __('admin/default.columns.name'),
+                ]),
 
-                TextColumn::make('format_locale')
-                    ->label(__('admin/default.columns.format_locale'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable()
-                    ->sortable(),
+                self::getTextTableField([
+                    'filed_name'                   => 'format_locale',
+                    'label'                        => __('admin/default.columns.format_locale'),
+                    'is_toggled_hidden_by_default' => true,
+                ]),
 
-                TextColumn::make('symbol_left')
-                    ->label(__('admin/settings/currencies.columns.symbol_left'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable()
-                    ->sortable(),
+                self::getTextTableField([
+                    'filed_name'                   => 'symbol_left',
+                    'label'                        => __('admin/settings/currencies.columns.symbol_left'),
+                    'is_toggled_hidden_by_default' => true,
+                ]),
 
-                TextColumn::make('symbol_right')
-                    ->label(__('admin/settings/currencies.columns.symbol_right'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable()
-                    ->sortable(),
+                self::getTextTableField([
+                    'filed_name'                   => 'symbol_right',
+                    'label'                        => __('admin/settings/currencies.columns.symbol_right'),
+                    'is_toggled_hidden_by_default' => true,
+                ]),
 
-                TextColumn::make('decimal_places')
-                    ->label(__('admin/settings/currencies.columns.decimal_places'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable(),
+                self::getTextTableField([
+                    'filed_name'                   => 'decimal_places',
+                    'label'                        => __('admin/settings/currencies.columns.decimal_places'),
+                    'is_toggled_hidden_by_default' => true,
+                ]),
 
-                TextColumn::make('exchange_rate')
-                    ->label(__('admin/settings/currencies.columns.exchange_rate'))
-                    ->sortable(),
+                self::getTextTableField([
+                    'filed_name' => 'exchange_rate',
+                    'label'      => __('admin/settings/currencies.columns.exchange_rate'),
+                ]),
 
                 self::getIsActiveTableField(),
 
@@ -70,10 +74,7 @@ class CurrenciesTable
                 ]),
             ])
             ->filters([
-                TernaryFilter::make('is_active')
-                    ->label(__('admin/default.filters.active'))
-                    ->trueLabel(__('admin/default.filters.active_only'))
-                    ->falseLabel(__('admin/default.filters.inactive_only')),
+                self::getIsActiveFilterField(),
             ])
             ->recordActions([
                 EditAction::make(),

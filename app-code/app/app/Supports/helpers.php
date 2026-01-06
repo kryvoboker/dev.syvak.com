@@ -249,3 +249,29 @@ if (!function_exists('replace_currency_symbol_to_code')) {
         );
     }
 }
+
+if (!function_exists('str_more_or_equal_length')) {
+    /**
+     * @param string|null $string
+     * @param int|null    $length
+     *
+     * @return bool
+     */
+    function str_more_or_equal_length(?string $string, ?int $length): bool
+    {
+        return $string !== null && $length !== null && Str::length(Str::trim($string)) >= $length;
+    }
+}
+
+if (!function_exists('num_more_or_equal_num')) {
+    /**
+     * @param mixed    $num
+     * @param int|null $num_for_comparison
+     *
+     * @return bool
+     */
+    function num_more_or_equal_num(mixed $num, ?int $num_for_comparison): bool
+    {
+        return is_numeric($num) && $num_for_comparison !== null && $num >= $num_for_comparison;
+    }
+}

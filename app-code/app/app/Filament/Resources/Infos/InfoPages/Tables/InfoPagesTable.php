@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Infos\InfoPages\Tables;
 
+use App\Filament\Resources\Trait\Filters\BooleanFilterTrait;
+use App\Filament\Resources\Trait\Filters\CommonTextFilterTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
 use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
@@ -14,17 +16,16 @@ use App\Models\Infos\InfoPage;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class InfoPagesTable
 {
-    use LanguageTrait, CommonTextTableTrait, NumericTableTrait, BooleanTableTrait, DateTableTrait, SlugTableTrait;
+    use LanguageTrait, CommonTextTableTrait, NumericTableTrait,
+        BooleanTableTrait, DateTableTrait, SlugTableTrait,
+        BooleanFilterTrait, CommonTextFilterTrait;
 
     /**
      * @param Table $table
@@ -44,7 +45,7 @@ class InfoPagesTable
                 ]);
             })
             ->columns([
-                self::getNameTableField([
+                self::getTextTableField([
                     'filed_name'         => 'infoPageDescription.title',
                     'label'              => __('admin/default.columns.title'),
                     'searchable'         => ['title'],
@@ -69,12 +70,14 @@ class InfoPagesTable
                     ->sortable()
                     ->searchable(),
 
-                self::getSortOrderTableField(),
+                self::getNumericTableField([
+                    'sort_order' => 'sort_order',
+                    'label'      => __('admin/default.columns.sort_order'),
+                ]),
 
                 self::getIsActiveTableField(),
 
                 self::getSlugTableField([
-                    'filed_name'         => 'slugs.slug',
                     'searchable'         => ['slug'],
                     'get_state_using_cb' => function (InfoPage $info_page) use ($current_language_id) {
                         if ($current_language_id === null) {
@@ -95,32 +98,17 @@ class InfoPagesTable
                 self::getUpdatedAtTableField(),
             ])
             ->filters([
-                TernaryFilter::make('is_active')
-                    ->label(__('admin/default.filters.active'))
-                    ->placeholder(__('admin/default.placeholders.all'))
-                    ->trueLabel(__('admin/default.filters.active_only'))
-                    ->falseLabel(__('admin/default.filters.inactive_only')),
+                self::getIsActiveFilterField(),
 
-                Filter::make('title')
-                    ->label(__('admin/default.filters.title'))
-                    ->schema([
-                        TextInput::make('title')
-                            ->label(__('admin/default.filters.title'))
-                            ->placeholder(__('admin/default.placeholders.title'))
-                            ->minLength(3)
-                            ->maxLength(255)
-                            ->afterStateUpdated(function ($state, $set) {
-                                // Clear invalid input
-                                if ($state === null || Str::length(Str::trim($state)) < 3) {
-                                    $set('title', null);
-                                }
-                            }),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
+                self::getTextFilterField([
+                    'field_name'   => 'title',
+                    'filter_label' => __('admin/default.filters.title'),
+                    'placeholder'  => __('admin/default.placeholders.title'),
+                    'query_cb'     => function (Builder $query, array $data): Builder {
                         $search = $data['title'] ?? null;
 
                         // Apply validation in query
-                        if ($search === null || Str::length(Str::trim($search)) < 3) {
+                        if (str_more_or_equal_length($search, 3) === false) {
                             return $query;
                         }
 
@@ -132,16 +120,8 @@ class InfoPagesTable
                                 return $query->where('title', 'LIKE', "%$search%");
                             }
                         );
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        $search = $data['title'] ?? null;
-
-                        if ($search === null || Str::length(Str::trim($search)) < 3) {
-                            return null;
-                        }
-
-                        return __('admin/default.filters.title') . ': ' . Str::trim($search);
-                    }),
+                    },
+                ]),
             ])
             ->recordActions([
                 EditAction::make(),
