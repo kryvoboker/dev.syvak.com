@@ -62,18 +62,11 @@ COPY .docker/prod/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-COPY --chown=${USERNAME}:${USERNAME} app-code/app /var/www/app
-COPY --chown=${USERNAME}:${USERNAME} app-code/httpdocs /var/www/html
+COPY --chown=${USERNAME}:${USERNAME} app-code/app /var/webroot/sites/syvak.com/app
+COPY --chown=${USERNAME}:${USERNAME} app-code/httpdocs /var/webroot/sites/syvak.com/httpdocs
 
-WORKDIR /var/www/app
+WORKDIR /var/webroot/sites/syvak.com/app
 
 USER ${USERNAME}
-
-RUN /usr/bin/composer install  \
-    --no-dev  \
-    --optimize-autoloader  \
-    --prefer-dist  \
-    --no-scripts  \
-    --no-interaction
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

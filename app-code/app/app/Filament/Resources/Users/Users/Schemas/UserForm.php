@@ -7,17 +7,18 @@ namespace App\Filament\Resources\Users\Users\Schemas;
 use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
 use App\Filament\Resources\Trait\Forms\DateFormTrait;
 use App\Filament\Resources\Trait\Forms\ImageFormTrait;
+use App\Filament\Resources\Trait\Forms\SelectFormTrait;
 use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Models\Users\User;
 use App\Models\Users\UserGroup;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rule;
 
 class UserForm
 {
-    use CommonTextFormTrait, ToggleCheckboxFormTrait, ImageFormTrait, DateFormTrait;
+    use CommonTextFormTrait, ToggleCheckboxFormTrait, ImageFormTrait,
+        DateFormTrait, SelectFormTrait;
 
     /**
      * @param Schema $schema
@@ -45,6 +46,7 @@ class UserForm
                     'max_length'  => 255,
                     'placeholder' => 'Doe',
                     'rules'       => ['nullable', 'string', 'max:255'],
+                    'required'    => false,
                 ]),
 
                 self::getEmailFormField([
@@ -87,15 +89,15 @@ class UserForm
                     'default'     => false,
                 ]),
 
-                Select::make('user_group_id')
-                    ->label(__('admin/default.labels.user_group'))
-                    ->options(function () use ($user_group) {
+                self::getSelectFormField([
+                    'field_name' => 'user_group_id',
+                    'label'      => __('admin/default.labels.user_group'),
+                    'options'    => function () use ($user_group) {
                         return $user_group->getAllActiveUserGroups()->pluck('name', 'id');
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->rules(['nullable', Rule::exists('user_groups', 'id')])
-                    ->required(),
+                    },
+                    'rules'      => [Rule::exists('user_groups', 'id')],
+                    'preload'    => true,
+                ]),
             ]);
     }
 }

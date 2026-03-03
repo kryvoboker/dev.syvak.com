@@ -20,7 +20,7 @@ trait DateTableTrait
             ->label($params['label'] ?? __('admin/default.columns.created_at'))
             ->date($params['datetime_format'] ?? config('app.datetime_format'), $params['timezone'] ?? config('app.timezone'))
             ->sortable($params['sortable'] ?? true)
-            ->toggleable(isToggledHiddenByDefault: $params['isToggledHiddenByDefault'] ?? true);
+            ->toggleable(isToggledHiddenByDefault: $params['is_toggled_hidden_by_default'] ?? true);
     }
 
     /**
@@ -34,7 +34,7 @@ trait DateTableTrait
             ->label($params['label'] ?? __('admin/default.columns.date_available'))
             ->date($params['datetime_format'] ?? config('app.datetime_format'), $params['timezone'] ?? config('app.timezone'))
             ->sortable($params['sortable'] ?? true)
-            ->toggleable(isToggledHiddenByDefault: $params['isToggledHiddenByDefault'] ?? true);
+            ->toggleable(isToggledHiddenByDefault: $params['is_toggled_hidden_by_default'] ?? true);
     }
 
     /**
@@ -48,7 +48,7 @@ trait DateTableTrait
             ->label($params['label'] ?? __('admin/default.columns.date_added'))
             ->date($params['datetime_format'] ?? config('app.datetime_format'), $params['timezone'] ?? config('app.timezone'))
             ->sortable($params['sortable'] ?? true)
-            ->toggleable(isToggledHiddenByDefault: $params['isToggledHiddenByDefault'] ?? true);
+            ->toggleable(isToggledHiddenByDefault: $params['is_toggled_hidden_by_default'] ?? true);
     }
 
     /**
@@ -62,7 +62,7 @@ trait DateTableTrait
             ->label($params['label'] ?? __('admin/default.columns.updated_at'))
             ->date($params['datetime_format'] ?? config('app.datetime_format'), $params['timezone'] ?? config('app.timezone'))
             ->sortable($params['sortable'] ?? true)
-            ->toggleable(isToggledHiddenByDefault: $params['isToggledHiddenByDefault'] ?? true);
+            ->toggleable(isToggledHiddenByDefault: $params['is_toggled_hidden_by_default'] ?? true);
     }
 
     /**
@@ -76,6 +76,6 @@ trait DateTableTrait
             ->label($params['label'] ?? __('admin/default.columns.email_verified_at'))
             ->date($params['datetime_format'] ?? config('app.datetime_format'), $params['timezone'] ?? config('app.timezone'))
             ->sortable($params['sortable'] ?? true)
-            ->toggleable(isToggledHiddenByDefault: $params['isToggledHiddenByDefault'] ?? true);
+            ->toggleable(isToggledHiddenByDefault: $params['is_toggled_hidden_by_default'] ?? true);
     }
 }

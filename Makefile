@@ -1,27 +1,34 @@
-set-node:
-	bash -c "source ~/.nvm/nvm.sh && nvm use 24.11.0"
+DEV_DOCKER_COMPOSE_FILE=.docker/dev/docker-compose.yml
+PROD_DOCKER_COMPOSE_FILE=.docker/prod/docker-compose.yml
+SLIM_DOCKER_COMPOSE_FILE=.docker/prod/docker-compose.slim.yml
+PART_OF_CONTAINER_NAME=dev-syvak
 
 up-dev:
-	docker compose -f .docker/dev/docker-compose.yml up -d
+	docker compose -f $(DEV_DOCKER_COMPOSE_FILE) up -d
 
 down-dev:
-	docker compose -f .docker/dev/docker-compose.yml down
+	docker compose -f $(DEV_DOCKER_COMPOSE_FILE) down
 
 build-dev:
-	docker compose -f .docker/dev/docker-compose.yml build
+	docker compose -f $(DEV_DOCKER_COMPOSE_FILE) build
 
 restart-dev: down-dev up-dev
+rebuild-dev: down-dev build-dev up-dev
 
 up-prod:
-	docker compose -f .docker/prod/docker-compose.yml up -d
+	docker compose -f $(PROD_DOCKER_COMPOSE_FILE) up -d
 
 down-prod:
-	docker compose -f .docker/prod/docker-compose.yml down
+	docker compose -f $(PROD_DOCKER_COMPOSE_FILE) down
 
 build-prod:
-	docker compose -f .docker/prod/docker-compose.yml build
+	docker compose -f $(PROD_DOCKER_COMPOSE_FILE) build
 
 restart-prod: down-prod up-prod
+rebuild-prod: down-prod build-prod up-prod
+
+set-node:
+	bash -c "source ~/.nvm/nvm.sh && nvm use 25.6.1"
 
 vite: set-node
 	cd app-code/app && npm run dev
@@ -29,9 +36,6 @@ vite: set-node
 vite-build: set-node
 	cd app-code/app \
 	&& npm run build
-
-spfdb:
-	chown -R ${id -u}:${id -g} db
 
 # If after slim you get the error “missing shared library / extension”, add --include-path /usr/lib/x86_64-linux-gnu (often required for GD/ICU).
 
@@ -43,8 +47,8 @@ optimize-all:
 optimize-php:
 	echo "Optimizing PHP-FPM image..."
 	slim build \
-		--target dev-syvak-php-fpm:1.0 \
-		--tag dev-syvak-php-fpm:1.0-slim \
+		--target $(PART_OF_CONTAINER_NAME)-php-fpm:1.0 \
+		--tag $(PART_OF_CONTAINER_NAME)-php-fpm:1.0-slim \
 		--http-probe=false \
 		--include-path /bin/bash \
 		--include-path /bin/ls \
@@ -66,37 +70,11 @@ optimize-php:
 		--include-exe ls \
 		--continue-after 60
 
-optimize-nginx:
-	echo "Optimizing Nginx image..."
-	slim build \
-		--target dev-syvak-nginx:1.0-alpine \
-		--tag dev-syvak-nginx:1.0-alpine-slim \
-		--http-probe=true \
-		--http-probe-cmd GET:/ \
-		--include-path /etc/nginx \
-		--include-path /usr/share/nginx \
-		--include-path /var/cache/nginx \
-		--include-path /var/log/nginx \
-		--include-path /var/www \
-		--include-path /var/run/nginx \
-		--include-path /tmp \
-		--include-path /lib \
-		--include-path /usr/lib \
-		--include-path /usr/local/lib \
-		--include-exe nginx \
-		--include-exe /bin/sh \
-		--include-exe /bin/bash \
-		--preserve-path /var/cache/nginx \
-		--preserve-path /var/log/nginx \
-		--preserve-path /var/run/nginx \
-		--preserve-path /tmp \
-		--continue-after 30
-
 optimize-cron:
 	echo "Optimizing Cron image..."
 	slim build \
-		--target dev-syvak-cron:1.0-alpine \
-		--tag dev-syvak-cron:1.0-alpine-slim \
+		--target $(PART_OF_CONTAINER_NAME)-cron:1.0-alpine \
+		--tag $(PART_OF_CONTAINER_NAME)-cron:1.0-alpine-slim \
 		--http-probe=false \
 		--include-path /usr/local/bin \
 		--include-path /usr/local/lib \
@@ -123,7 +101,7 @@ restart-prod-slim: down-prod-slim up-prod-slim
 
 # Show image sizes
 show-sizes:
-	docker images | grep dev-syvak
+	docker images | grep $(PART_OF_CONTAINER_NAME)
 
 # Compare sizes with detailed breakdown
 compare-sizes:

@@ -6,7 +6,6 @@ namespace App\Filament\Resources\Users\UserGroups\Schemas;
 
 use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
 use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
-use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 
 class UserGroupForm
@@ -24,10 +23,13 @@ class UserGroupForm
                     'placeholder' => 'RRC Users',
                 ]),
 
-                Textarea::make('description')
-                    ->default(null)
-                    ->rows(5)
-                    ->columnSpanFull(),
+                self::getTextAreaFormField([
+                    'field_name'          => 'description',
+                    'label'               => __('admin/default.labels.description'),
+                    'max_length'          => 1000,
+                    'rows'                => 5,
+                    'is_column_span_full' => true,
+                ]),
 
                 self::getIsActiveFormField([
                     'helper_text' => __('admin/users/user_groups.helpers.is_active'),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Infos\InfoPages\Tables;
 
+use App\Enums\PositionInPageEnum;
 use App\Filament\Resources\Trait\Filters\BooleanFilterTrait;
 use App\Filament\Resources\Trait\Filters\CommonTextFilterTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
@@ -16,7 +17,6 @@ use App\Models\Infos\InfoPage;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -46,7 +46,7 @@ class InfoPagesTable
             })
             ->columns([
                 self::getTextTableField([
-                    'filed_name'         => 'infoPageDescription.title',
+                    'field_name'         => 'infoPageDescription.title',
                     'label'              => __('admin/default.columns.title'),
                     'searchable'         => ['title'],
                     'get_state_using_cb' => function (InfoPage $record) use ($current_language_id) {
@@ -65,13 +65,24 @@ class InfoPagesTable
                     },
                 ]),
 
-                TextColumn::make('positions')
-                    ->label(__('admin/infos/info_pages.columns.position'))
-                    ->sortable()
-                    ->searchable(),
+                self::getTextTableField([
+                    'field_name'            => 'positions',
+                    'label'                 => __('admin/infos/info_pages.columns.position'),
+                    'searchable'            => ['positions'],
+                    'format_state_using_cb' => function ($state): string {
+                        if (empty($state)) {
+                            return '-';
+                        }
+
+                        return collect($state)
+                            ->map(fn(PositionInPageEnum $enum) => Str::ucfirst($enum->value))
+                            ->join(', ');
+                    },
+                    'badge'                 => true,
+                ]),
 
                 self::getNumericTableField([
-                    'sort_order' => 'sort_order',
+                    'field_name' => 'sort_order',
                     'label'      => __('admin/default.columns.sort_order'),
                 ]),
 

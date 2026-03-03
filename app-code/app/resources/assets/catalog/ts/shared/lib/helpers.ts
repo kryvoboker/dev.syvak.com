@@ -223,7 +223,7 @@ const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, me
     const response: Response = await fetch(url, options);
 
     if (!response.ok) {
-        throw new Error(response.statusText);
+        throw new Error(`Network response was not ok: ${response.statusText}`);
     }
 
     return await response.json();

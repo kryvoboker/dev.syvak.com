@@ -12,30 +12,33 @@
         }
     ],
     "require": {
-        "php": "^8.4",
+        "php": "^8.5",
         "ext-intl": "*",
-        "bezhansalleh/filament-shield": "^4.0",
-        "filament/filament": "^4.0",
+        "bezhansalleh/filament-shield": "^4.1",
+        "filament/filament": "^4.8",
         "intervention/image-laravel": "^1.5",
-        "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1",
-        "laravel-lang/lang": "^14.0",
-        "livewire/livewire": "^3.6",
+        "laravel/framework": "^v12.53",
+        "laravel/tinker": "^2.11",
+        "laravel-lang/lang": "^14.7",
+        "livewire/livewire": "^3.7",
         "nyholm/psr7": "^1.8",
         "openai-php/client": "^0.18.0",
-        "spatie/laravel-data": "^4.18",
-        "spatie/laravel-permission": "^6.23"
+        "spatie/laravel-data": "^4.20",
+        "spatie/laravel-permission": "^6.24",
+        "ext-pdo": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",
-        "buggregator/trap": "^1.13.18",
-        "fakerphp/faker": "^1.23",
-        "laravel/pail": "^1.2.2",
-        "laravel/pint": "^1.24",
-        "laravel/sail": "^1.41",
+        "buggregator/trap": "^1.15",
+        "fakerphp/faker": "^1.24",
+        "laravel/boost": "^1.8",
+        "laravel/pail": "^1.2",
+        "laravel/pint": "^1.27",
+        "laravel/sail": "^1.53",
         "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^11.5.3"
+        "nunomaduro/collision": "^8.9",
+        "larastan/larastan": "^3.9",
+        "phpunit/phpunit": "^11.5"
     },
     "autoload": {
         "psr-4": {
@@ -73,7 +76,8 @@
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php artisan lang:update"
+            "@php artisan lang:update",
+            "@php artisan boost:update --ansi"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""

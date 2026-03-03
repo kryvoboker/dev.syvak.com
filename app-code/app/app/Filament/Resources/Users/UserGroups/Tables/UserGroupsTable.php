@@ -29,7 +29,7 @@ class UserGroupsTable
         return $table
             ->columns([
                 self::getTextTableField([
-                    'filed_name' => 'name',
+                    'field_name' => 'name',
                     'label'      => __('admin/default.columns.name'),
                 ]),
 

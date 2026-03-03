@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 COMPOSE_FILE=".docker/prod/docker-compose.yml"
-PROJECT_DIR="/home/kamaz/www/psyholodzhy-opencart"
+PROJECT_DIR="/home/kamaz/www/dev-syvak"
 
 # Function to print colored messages
 print_success() {
@@ -34,16 +34,13 @@ check_slim_installation() {
         print_error "docker-slim (slim) is not installed!"
         print_info "Installing docker-slim..."
 
-        curl -L -o /tmp/ds.tar.gz https://github.com/slimtoolkit/slim/releases/download/1.40.11/dist_linux.tar.gz
-        tar -xvzf /tmp/ds.tar.gz -C /tmp
-        sudo mv /tmp/dist_linux/* /usr/local/bin/
-        sudo chmod +x /usr/local/bin/slim
-        rm -rf /tmp/dist_linux /tmp/ds.tar.gz
+        wget https://github.com/slimtoolkit/slim/releases/latest/download/dist_linux.tar.gz
+        slim --version
 
         print_success "docker-slim installed successfully!"
     else
         print_success "docker-slim is already installed"
-        slim version
+        slim --version
     fi
 }
 

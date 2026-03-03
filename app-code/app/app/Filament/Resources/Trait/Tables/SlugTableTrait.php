@@ -22,6 +22,6 @@ trait SlugTableTrait
             ->sortable($params['sortable'] ?? true)
             ->limit($params['limit'] ?? 50)
             ->getStateUsing($params['get_state_using_cb'] ?? null)
-            ->toggleable(isToggledHiddenByDefault: $params['isToggledHiddenByDefault'] ?? true);
+            ->toggleable(isToggledHiddenByDefault: $params['is_toggled_hidden_by_default'] ?? true);
     }
 }

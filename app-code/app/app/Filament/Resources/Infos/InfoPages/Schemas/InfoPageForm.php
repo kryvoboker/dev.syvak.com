@@ -6,19 +6,21 @@ namespace App\Filament\Resources\Infos\InfoPages\Schemas;
 
 use App\Enums\PositionInPageEnum;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
+use App\Filament\Resources\Trait\Forms\SelectFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
 use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
 use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
-use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class InfoPageForm
 {
-    use LanguageTrait, SlugFormTrait, MetaTextFormTrait, ToggleCheckboxFormTrait, SortOrderFormTrait;
+    use LanguageTrait, SlugFormTrait, MetaTextFormTrait,
+        ToggleCheckboxFormTrait, SortOrderFormTrait, SelectFormTrait;
 
     public static function configure(Schema $schema): Schema
     {
@@ -45,25 +47,23 @@ class InfoPageForm
      */
     protected static function createGeneralTab(): Tabs\Tab
     {
+        $positions = collect(PositionInPageEnum::cases())
+            ->mapWithKeys(fn(PositionInPageEnum $position) => [
+                $position->value => Str::ucfirst($position->value),
+            ])->toArray();
+
         return Tabs\Tab::make(__('admin/default.tabs.general'))
             ->schema([
                 Section::make(__('admin/default.sections.basic_info'))
                     ->schema([
-                        Select::make('positions')
-                            ->label(__('admin/infos/info_pages.columns.position'))
-                            ->multiple()
-                            ->options(function () {
-                                $positions = [];
-
-                                foreach (PositionInPageEnum::cases() as $position) {
-                                    $positions[$position->value] = Str::ucfirst($position->value);
-                                }
-
-                                return $positions;
-                            })
-                            ->nullable()
-                            ->placeholder(__('admin/infos/info_pages.placeholders.position'))
-                            ->helperText(__('admin/infos/info_pages.helpers.position')),
+                        self::getMultipleSelectFormField([
+                            'field_name'  => 'positions',
+                            'label'       => __('admin/infos/info_pages.columns.position'),
+                            'placeholder' => __('admin/infos/info_pages.placeholders.position'),
+                            'helper_text' => __('admin/infos/info_pages.helpers.position'),
+                            'options'     => $positions,
+                            'rules'       => ['array', Rule::in(array_keys($positions))],
+                        ]),
 
                         self::getIsActiveFormField(),
 

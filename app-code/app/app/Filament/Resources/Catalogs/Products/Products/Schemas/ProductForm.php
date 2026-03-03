@@ -9,6 +9,7 @@ use App\Filament\Resources\Trait\Forms\DateFormTrait;
 use App\Filament\Resources\Trait\Forms\ImageFormTrait;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
 use App\Filament\Resources\Trait\Forms\NumericFormTrait;
+use App\Filament\Resources\Trait\Forms\SelectFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
 use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
 use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
@@ -20,7 +21,6 @@ use App\Models\Settings\Language;
 use App\Models\Users\UserGroup;
 use Closure;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -35,7 +35,7 @@ class ProductForm
     use LanguageTrait, SlugFormTrait, MetaTextFormTrait,
         ToggleCheckboxFormTrait, SortOrderFormTrait,
         ImageFormTrait, DateFormTrait, CommonTextFormTrait,
-        NumericFormTrait;
+        NumericFormTrait, SelectFormTrait;
 
     public static function configure(Schema $schema): Schema
     {
@@ -89,11 +89,7 @@ class ProductForm
                             'rules'      => ['required', 'string', 'max:255'],
                         ]),
 
-                        self::getTextFormField([
-                            'field_name' => 'ean',
-                            'label'      => __('admin/default.labels.ean'),
-                            'rules'      => ['nullable', 'string', 'numeric', 'max_digits::255'],
-                        ]),
+                        self::getEanField(),
                     ])
                     ->columns(3),
 
@@ -170,35 +166,38 @@ class ProductForm
             ->schema([
                 Section::make(__('admin/default.sections.categories'))
                     ->schema([
-                        Select::make('categories')
-                            ->label(__('admin/default.labels.categories'))
-                            ->multiple()
-                            ->relationship('categories', 'id')
-                            ->options(function () use ($current_language_id) {
+                        self::getMultipleSelectFormField([
+                            'field_name'                => 'categories',
+                            'label'                     => __('admin/default.labels.categories'),
+                            'helper_text'               => __('admin/default.helpers.categories'),
+                            'relationship'              => [
+                                'name'  => 'categories',
+                                'title' => 'id',
+                            ],
+                            'options'                   => function () use ($current_language_id) {
                                 if ($current_language_id === null) {
                                     return [];
                                 }
 
                                 return self::getCategoryHierarchy($current_language_id);
-                            })
-                            ->getOptionLabelUsing(function ($value) use ($current_language_id) {
+                            },
+                            'get_option_label_using_cb' => function ($value) use ($current_language_id) {
                                 if ($value === null || $current_language_id === null) {
                                     return '-';
                                 }
 
                                 return self::getCategoryFullPath($value, $current_language_id);
-                            })
-                            ->searchable()
-                            ->preload()
-                            ->helperText(__('admin/default.helpers.categories'))
-                            ->distinct()
-                            ->rules([
+                            },
+                            'rules'                     => [
                                 fn(): Closure => function (string $attribute, $value, Closure $fail) {
                                     if (is_array($value) && count($value) !== count(array_unique($value))) {
                                         $fail(__('admin/default.errors.validation_duplicate_categories'));
                                     }
                                 },
-                            ]),
+                            ],
+                            'preload'                   => true,
+                            'distinct'                  => true,
+                        ]),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -321,9 +320,10 @@ class ProductForm
                         Repeater::make('discounts')
                             ->label(__('admin/default.labels.discounts'))
                             ->schema([
-                                Select::make('user_group_id')
-                                    ->label(__('admin/default.labels.user_group'))
-                                    ->options(function () {
+                                self::getSelectFormField([
+                                    'field_name' => 'user_group_id',
+                                    'label'      => __('admin/default.labels.user_group'),
+                                    'options'    => function () {
                                         return new UserGroup()
                                             ->getActiveUserGroups()
                                             ->mapWithKeys(function (UserGroup $user_group) {
@@ -331,9 +331,10 @@ class ProductForm
 
                                                 return [$user_group->id => $name];
                                             });
-                                    })
-                                    ->rules(['required', 'numeric', Rule::exists('user_groups', 'id')])
-                                    ->required(),
+                                    },
+                                    'rules'      => ['required', 'numeric', Rule::exists('user_groups', 'id')],
+                                    'required'   => true,
+                                ]),
 
                                 self::getNumericFormField([
                                     'field_name' => 'quantity',
@@ -390,9 +391,10 @@ class ProductForm
                         Repeater::make('attributes')
                             ->label(__('admin/default.labels.attributes'))
                             ->schema([
-                                Select::make('attribute_id')
-                                    ->label(__('admin/default.labels.attribute'))
-                                    ->options(function () use ($current_language_id) {
+                                self::getSelectFormField([
+                                    'field_name'                => 'attribute_id',
+                                    'label'                     => __('admin/default.labels.attribute'),
+                                    'options'                   => function () use ($current_language_id) {
                                         if ($current_language_id === null) {
                                             return [];
                                         }
@@ -409,8 +411,8 @@ class ProductForm
 
                                                 return [$attribute->id => $name];
                                             });
-                                    })
-                                    ->getOptionLabelUsing(function ($attribute_id) use ($current_language_id) {
+                                    },
+                                    'get_option_label_using_cb' => function ($attribute_id) use ($current_language_id) {
                                         if ($attribute_id === null || $current_language_id === null) {
                                             return '-';
                                         }
@@ -430,30 +432,34 @@ class ProductForm
                                         return $description?->name
                                             ?? $attribute->attributeDescription->first()?->name
                                             ?? "Attribute #$attribute->id";
-                                    })
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                    },
+                                    'after_state_updated_cb'    => function ($state, $set, $get) {
                                         // Auto-validate uniqueness on change
-                                    }),
+                                    },
+                                    'rules'                     => ['required', 'numeric', Rule::exists('attributes', 'id')],
+                                    'live'                      => true,
+                                    'preload'                   => true,
+                                    'required'                  => true,
+                                ]),
 
-                                Select::make('language_id')
-                                    ->label(__('admin/default.labels.language'))
-                                    ->options($active_languages->pluck('name', 'id'))
-                                    ->default($current_language_id)
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                self::getSelectFormField([
+                                    'field_name'             => 'language_id',
+                                    'label'                  => __('admin/default.labels.language'),
+                                    'options'                => $active_languages->pluck('name', 'id'),
+                                    'after_state_updated_cb' => function ($state, $set, $get) {
                                         // Auto-validate uniqueness on change
-                                    }),
+                                    },
+                                    'rules'                  => ['required', 'numeric', Rule::exists('attributes', 'id')],
+                                    'default'                => $current_language_id,
+                                    'live'                   => true,
+                                    'preload'                => true,
+                                    'required'               => true,
+                                ]),
 
                                 self::getTextFormField([
                                     'field_name' => 'text',
                                     'label'      => __('admin/default.labels.attribute_text'),
-                                    'max_length' => 255,
-                                    'rules'      => ['required', 'string', 'max:255'],
+                                    'required'   => true,
                                 ]),
                             ])
                             ->columns(3)

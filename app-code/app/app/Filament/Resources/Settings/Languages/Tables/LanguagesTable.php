@@ -27,7 +27,7 @@ class LanguagesTable
                 self::getCodeTableField(),
 
                 self::getTextTableField([
-                    'filed_name' => 'name',
+                    'field_name' => 'name',
                     'label'      => __('admin/default.columns.name'),
                 ]),
 
@@ -36,7 +36,7 @@ class LanguagesTable
                 self::getIsDefaultTableField(),
 
                 self::getCreatedAtTableField([
-                    'isToggledHiddenByDefault' => false,
+                    'is_toggled_hidden_by_default' => false,
                 ]),
             ])
             ->filters([

@@ -31,7 +31,7 @@ trait DateFormTrait
     {
         return DateTimePicker::make($params['field_name'] ?? 'email_verified_at')
             ->label($params['label'] ?? __('admin/default.labels.email_verified_at'))
-            ->rules($params['rules'] ?? ['required', 'date'])
+            ->rules($params['rules'] ?? ['nullable', 'date'])
             ->default(now(config('app.timezone')))
             ->required($params['required'] ?? false);
     }

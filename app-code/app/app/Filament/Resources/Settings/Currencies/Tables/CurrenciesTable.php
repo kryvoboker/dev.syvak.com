@@ -32,36 +32,36 @@ class CurrenciesTable
                 self::getCodeTableField(),
 
                 self::getTextTableField([
-                    'filed_name' => 'name',
+                    'field_name' => 'name',
                     'label'      => __('admin/default.columns.name'),
                 ]),
 
                 self::getTextTableField([
-                    'filed_name'                   => 'format_locale',
+                    'field_name'                   => 'format_locale',
                     'label'                        => __('admin/default.columns.format_locale'),
                     'is_toggled_hidden_by_default' => true,
                 ]),
 
                 self::getTextTableField([
-                    'filed_name'                   => 'symbol_left',
+                    'field_name'                   => 'symbol_left',
                     'label'                        => __('admin/settings/currencies.columns.symbol_left'),
                     'is_toggled_hidden_by_default' => true,
                 ]),
 
                 self::getTextTableField([
-                    'filed_name'                   => 'symbol_right',
+                    'field_name'                   => 'symbol_right',
                     'label'                        => __('admin/settings/currencies.columns.symbol_right'),
                     'is_toggled_hidden_by_default' => true,
                 ]),
 
                 self::getTextTableField([
-                    'filed_name'                   => 'decimal_places',
+                    'field_name'                   => 'decimal_places',
                     'label'                        => __('admin/settings/currencies.columns.decimal_places'),
                     'is_toggled_hidden_by_default' => true,
                 ]),
 
                 self::getTextTableField([
-                    'filed_name' => 'exchange_rate',
+                    'field_name' => 'exchange_rate',
                     'label'      => __('admin/settings/currencies.columns.exchange_rate'),
                 ]),
 
@@ -70,7 +70,7 @@ class CurrenciesTable
                 self::getIsDefaultTableField(),
 
                 self::getCreatedAtTableField([
-                    'isToggledHiddenByDefault' => false,
+                    'is_toggled_hidden_by_default' => false,
                 ]),
             ])
             ->filters([

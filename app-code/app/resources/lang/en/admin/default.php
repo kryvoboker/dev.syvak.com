@@ -112,6 +112,7 @@ return [
     'helpers'      => [
         'categories'      => 'Select the categories',
         'parent_category' => 'Select the parent category under which this category will be nested. Leave empty to make it a top-level category.',
+        'svg_icon'        => 'You can paste an SVG icon code here. Make sure the SVG code does not contain any <code>&lt;script&gt;</code> tags for security reasons.',
     ],
 
     // Tabs

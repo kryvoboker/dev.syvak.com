@@ -1,45 +1,63 @@
 FROM composer:2.9.2 AS composer
 
-FROM php:8.4-cli-alpine3.22 AS base
+FROM php:8.5-cli-alpine3.22 AS php-cli
 
-RUN apk add --no-cache curl ca-certificates unzip zip tzdata dos2unix
+RUN apk add --no-cache \
+    curl \
+    ca-certificates \
+    unzip \
+    zip \
+    tzdata \
+    dos2unix
 
 ENV TZ=Europe/Kyiv
 
 # Set time zone in container
 RUN cp /usr/share/zoneinfo/Europe/Kyiv /etc/localtime \
-    && echo "Europe/Kyiv" > /etc/timezone
+  && echo "Europe/Kyiv" > /etc/timezone
 
 RUN echo "date.timezone=${TZ}" > /usr/local/etc/php/conf.d/99-timezone.ini
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions gd zip mysqli pdo pdo_mysql sockets intl bcmath \
-    && rm -f /usr/local/bin/install-php-extensions
+RUN install-php-extensions  \
+    gd \
+    zip \
+    mysqli \
+    pdo \
+    pdo_mysql \
+    sockets \
+    intl \
+    bcmath \
+  && rm -f /usr/local/bin/install-php-extensions
 
-FROM base AS supercronic
+FROM php-cli AS supercronic
+
+ARG TARGETARCH
 
 # Install supercronic (cron for containers)
-RUN curl -fsSLO "https://github.com/aptible/supercronic/releases/download/v0.2.33/supercronic-linux-amd64" \
-    && chmod +x supercronic-linux-amd64 \
-    && mv supercronic-linux-amd64 /usr/local/bin/supercronic
+# Latest releases available at https://github.com/aptible/supercronic/releases
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.43/supercronic-linux-${TARGETARCH} \
+    SUPERCRONIC_SHA1SUM=f97b92132b61a8f827c3faf67106dc0e4467ccf2 \
+    SUPERCRONIC=supercronic-linux-${TARGETARCH}
 
-FROM base AS development
+RUN curl -fsSLO "$SUPERCRONIC_URL" \
+  && echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - \
+  && chmod +x "$SUPERCRONIC" \
+  && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
+  && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
+
+FROM php-cli AS development
 
 # Copy supercronic binary from supercronic stage and Composer from composer stage
 COPY --from=supercronic /usr/local/bin/supercronic /usr/local/bin/supercronic
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 # Import UID and GID
-ARG UID=1000
-ARG GID=1000
-ARG UMASK=0002
-
-ENV UID=${UID}
-ENV GID=${GID}
-ENV UMASK=${UMASK}
-
-ENV USERNAME=www-data
+ARG UID
+ARG GID
+ARG UMASK
+ARG USERNAME
 
 # Configure composer cache directory
 ENV HOME=/home/${USERNAME}
@@ -48,21 +66,21 @@ ENV COMPOSER_CACHE_DIR=${COMPOSER_HOME}/cache
 
 # Create www-data user with proper shell
 RUN deluser ${USERNAME} 2>/dev/null || true \
-    && delgroup ${USERNAME} 2>/dev/null || true \
-    && addgroup -g ${GID} ${USERNAME} \
-    && adduser -D -u ${UID} -G ${USERNAME} -s /bin/sh ${USERNAME}
+  && delgroup ${USERNAME} 2>/dev/null || true \
+  && addgroup -g ${GID} ${USERNAME} \
+  && adduser -D -u ${UID} -G ${USERNAME} -s /bin/sh ${USERNAME}
 
 # Create crontab directory with proper permissions
-RUN mkdir -p /etc/crontabs /var/log/cron ${COMPOSER_CACHE_DIR} \
-    && chown ${USERNAME}:${USERNAME} /etc/crontabs /var/log/cron ${COMPOSER_CACHE_DIR} \
-    && chmod -R 775 /var/log/cron ${COMPOSER_CACHE_DIR}
+RUN mkdir -p /etc/crontabs/ /var/log/cron/ ${COMPOSER_CACHE_DIR}/ \
+  && chown ${UID}:${GID} /etc/crontabs/ /var/log/cron/ ${COMPOSER_CACHE_DIR}/ \
+  && chmod -R 755 /var/log/cron/ ${COMPOSER_CACHE_DIR}/
 
 # Copy entrypoint script
-COPY .docker/dev/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --chown=${UID}:${GID} .docker/dev/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-WORKDIR /var/www/app
+WORKDIR /var/webroot/sites/syvak.com/app
 
 USER ${USERNAME}
 

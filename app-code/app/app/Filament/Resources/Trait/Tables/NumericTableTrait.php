@@ -18,7 +18,7 @@ trait NumericTableTrait
     {
         $numeric_params = $params['numeric_params'] ?? [];
 
-        return TextColumn::make($params['filed_name'])
+        return TextColumn::make($params['field_name'])
             ->label($params['label'])
             ->numeric(...$numeric_params)
             ->sortable($params['sortable'] ?? true)

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas;
 
+use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
 use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
 use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Settings\Language;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class AttributeForm
 {
-    use LanguageTrait, ToggleCheckboxFormTrait, SortOrderFormTrait;
+    use LanguageTrait, CommonTextFormTrait, ToggleCheckboxFormTrait, SortOrderFormTrait;
 
     /**
      * @param Schema $schema
@@ -63,11 +63,11 @@ class AttributeForm
                     Hidden::make("descriptions.$language->id.language_id")
                         ->default($language->id),
 
-                    TextInput::make("descriptions.$language->id.name")
-                        ->label(__('admin/default.labels.name'))
-                        ->maxLength(255)
-                        ->rules(['required', 'string', 'max:255'])
-                        ->required(),
+                    self::getTextFormField([
+                        'field_name' => "descriptions.$language->id.name",
+                        'label'      => __('admin/default.labels.name'),
+                        'rules'      => ['required', 'string', 'max:255'],
+                    ]),
                 ])
                 ->badge($language->code);
         }

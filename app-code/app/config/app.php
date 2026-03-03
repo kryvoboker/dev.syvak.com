@@ -214,6 +214,7 @@ return [
     'products'                  => [
         'minimum_stock_quantity'   => (int)env('PRODUCT_MINIMUM_STOCK_QUANTITY'),
         'search_products_per_page' => (int)env('SEARCH_PRODUCTS_PER_PAGE'),
+        'ean_max_length'           => (int)env('PRODUCT_EAN_MAX_LENGTH'),
     ],
     'frontend'                  => [
         'max_viewport_width' => (int)env('MAX_VIEWPORT_WIDTH'),

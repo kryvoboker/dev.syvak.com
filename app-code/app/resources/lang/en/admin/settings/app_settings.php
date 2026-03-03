@@ -47,7 +47,6 @@ return [
         'iframe_map'        => 'Embedded map iframe code',
         'timezone'          => 'Application timezone',
         'image_sizes'       => 'Image size configurations',
-        'svg_icon'          => 'You can paste an SVG icon code here. Make sure the SVG code does not contain any <code>&lt;script&gt;</code> tags for security reasons.',
     ],
 
     // Columns

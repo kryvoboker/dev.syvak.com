@@ -6,12 +6,12 @@ namespace App\Filament\Resources\Catalogs\Categories\Categories\Tables;
 
 use App\Filament\Resources\Trait\Filters\CommonTextFilterTrait;
 use App\Filament\Resources\Trait\Filters\SlugFilterTrait;
-use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
 use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
 use App\Filament\Resources\Trait\Tables\DateTableTrait;
 use App\Filament\Resources\Trait\Tables\ImageTableTrait;
+use App\Filament\Resources\Trait\Tables\NumericTableTrait;
 use App\Filament\Resources\Trait\Tables\SlugTableTrait;
 use App\Models\Catalogs\Categories\Category;
 use Filament\Actions\BulkActionGroup;
@@ -24,7 +24,7 @@ use Illuminate\Support\Str;
 
 class CategoriesTable
 {
-    use LanguageTrait, CommonTextTableTrait, SortOrderFormTrait,
+    use LanguageTrait, CommonTextTableTrait, NumericTableTrait,
         DateTableTrait, BooleanTableTrait, ImageTableTrait,
         SlugTableTrait, CommonTextFilterTrait, SlugFilterTrait;
 
@@ -48,7 +48,7 @@ class CategoriesTable
             })
             ->columns([
                 self::getTextTableField([
-                    'filed_name'         => 'categoryDescription.name',
+                    'field_name'         => 'categoryDescription.name',
                     'label'              => __('admin/default.columns.name'),
                     'searchable'         => ['name'],
                     'get_state_using_cb' => function (Category $record) use ($current_language_id) {
@@ -87,7 +87,10 @@ class CategoriesTable
                     },
                 ]),
 
-                self::getSortOrderFormField(),
+                self::getNumericTableField([
+                    'field_name' => 'sort_order',
+                    'label'      => __('admin/default.columns.sort_order'),
+                ]),
 
                 self::getIsActiveTableField(),
 
@@ -112,7 +115,7 @@ class CategoriesTable
                     'filter_label' => __('admin/default.filters.name'),
                     'field_name'   => 'name',
                     'placeholder'  => __('admin/default.placeholders.name'),
-                    'query_cb' => function (Builder $query, array $data): Builder {
+                    'query_cb'     => function (Builder $query, array $data): Builder {
                         $search = $data['name'] ?? null;
 
                         // Apply validation in query

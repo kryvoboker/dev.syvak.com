@@ -12,7 +12,6 @@ RUN apt-get update \
         unzip  \
         zip  \
         tzdata  \
-        nano \
     && rm -rf /var/lib/apt/lists/*
 
 RUN ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
@@ -24,11 +23,9 @@ RUN install-php-extensions gd zip mysqli pdo pdo_mysql xdebug xhprof sockets int
     && rm -f /usr/local/bin/install-php-extensions
 
 RUN echo "xhprof.output_dir = /tmp/xhprof" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini \
-    && echo "xhprof.collect_additional_info = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini \
-    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.client_host = host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    && echo "xhprof.collect_additional_info = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini
 
-RUN docker-php-ext-enable xdebug xhprof
+RUN docker-php-ext-enable xhprof
 
 FROM node:24.11.0-bookworm-slim AS nodejs
 
@@ -87,11 +84,11 @@ WORKDIR /var/www/app
 
 USER ${USERNAME}
 
-RUN /usr/bin/composer install  \
-    --no-dev  \
-    --optimize-autoloader  \
-    --prefer-dist  \
-    --no-scripts  \
-    --no-interaction
+#RUN /usr/bin/composer install  \
+#    --no-dev  \
+#    --optimize-autoloader  \
+#    --prefer-dist  \
+#    --no-scripts  \
+#    --no-interaction
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

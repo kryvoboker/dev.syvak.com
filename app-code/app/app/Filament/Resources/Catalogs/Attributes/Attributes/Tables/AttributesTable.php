@@ -36,7 +36,7 @@ class AttributesTable
             })
             ->columns([
                 self::getTextTableField([
-                    'filed_name'         => 'attributeDescription.name',
+                    'field_name'         => 'attributeDescription.name',
                     'label'              => __('admin/default.columns.name'),
                     'searchable'         => ['name'],
                     'get_state_using_cb' => function (Attribute $record) use ($current_language_id) {
@@ -58,7 +58,7 @@ class AttributesTable
                 ]),
 
                 self::getNumericTableField([
-                    'sort_order' => 'sort_order',
+                    'field_name' => 'sort_order',
                     'label'      => __('admin/default.columns.sort_order'),
                 ]),
 

@@ -21,6 +21,8 @@ trait CommonTextTableTrait
             ->searchable($params['searchable'] ?? true)
             ->sortable($params['sortable'] ?? true)
             ->limit($params['limit'] ?? 50)
+            ->html($params['html'] ?? false)
+            ->badge($params['badge'] ?? false)
             ->getStateUsing($params['get_state_using_cb'] ?? null)
             ->formatStateUsing($params['format_state_using_cb'] ?? null)
             ->toggleable(isToggledHiddenByDefault: $params['is_toggled_hidden_by_default'] ?? false);

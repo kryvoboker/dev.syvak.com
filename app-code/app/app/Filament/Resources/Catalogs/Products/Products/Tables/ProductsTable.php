@@ -20,7 +20,6 @@ use App\Supports\Services\Currency\ConvertPrice;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -55,7 +54,7 @@ class ProductsTable
             })
             ->columns([
                 self::getTextTableField([
-                    'filed_name'         => 'productDescription.name',
+                    'field_name'         => 'productDescription.name',
                     'label'              => __('admin/default.columns.name'),
                     'searchable'         => ['name'],
                     'get_state_using_cb' => function (Product $record) use ($current_language_id) {
@@ -75,38 +74,39 @@ class ProductsTable
                 ]),
 
                 self::getTextTableField([
-                    'filed_name' => 'model',
+                    'field_name' => 'model',
                     'label'      => __('admin/default.columns.model'),
                 ]),
 
                 self::getTextTableField([
-                    'filed_name' => 'sku',
+                    'field_name' => 'sku',
                     'label'      => __('admin/default.columns.sku'),
                 ]),
 
                 self::getTextTableField([
-                    'filed_name'                   => 'ean',
+                    'field_name'                   => 'ean',
                     'label'                        => __('admin/default.columns.ean'),
                     'is_toggled_hidden_by_default' => true,
                 ]),
 
                 self::getNumericTableField([
-                    'sort_order' => 'quantity',
+                    'field_name' => 'quantity',
                     'label'      => __('admin/default.columns.quantity'),
                 ]),
 
                 self::getNumericTableField([
-                    'sort_order'                   => 'minimum',
+                    'field_name'                   => 'minimum',
                     'label'                        => __('admin/default.columns.minimum'),
                     'is_toggled_hidden_by_default' => true,
                 ]),
 
                 self::getImageTableField(),
 
-                TextColumn::make('price')
-                    ->label(__('admin/default.columns.price'))
-                    ->html()
-                    ->getStateUsing(function (Product $record) {
+                self::getTextTableField([
+                    'field_name'         => 'price',
+                    'label'              => __('admin/default.columns.price'),
+                    'html'               => true,
+                    'get_state_using_cb' => function (Product $record) {
                         $discount = new Product()->getLastActualAndLastModifiedDiscountFromModel($record);
 
                         $currency      = config('app.currency.default_currency_code');
@@ -121,13 +121,13 @@ class ProductsTable
                         $old_price = $convert_price->format($record->price, $currency, $exchange_rate);
                         $new_price = $convert_price->format($discount->price, $currency, $exchange_rate);
 
-                        return '<span style="font-size: 1rem; text-decoration: line-through; color: #9ca3af;"><del>' . $old_price . '</del></span><br>' .
-                            '<span style="font-size: 1.3rem; color: #ef4444; font-weight: 600;">' . $new_price . '</span>';
-                    })
-                    ->sortable(),
+                        return '<span style="font-size: 1rem; text-decoration: line-through; color: rgb(156,163,175);"><del>' . $old_price . '</del></span><br>' .
+                            '<span style="font-size: 1.3rem; color: rgb(239,68,68); font-weight: 600;">' . $new_price . '</span>';
+                    }
+                ]),
 
                 self::getNumericTableField([
-                    'sort_order'                   => 'viewed',
+                    'field_name'                   => 'viewed',
                     'label'                        => __('admin/default.columns.viewed'),
                     'is_toggled_hidden_by_default' => true,
                 ]),
@@ -139,7 +139,7 @@ class ProductsTable
                 self::getIsActiveTableField(),
 
                 self::getSlugTableField([
-                    'filed_name'         => 'slugs.slug',
+                    'field_name'         => 'slugs.slug',
                     'searchable'         => ['slug'],
                     'get_state_using_cb' => function (Product $product) use ($current_language_id) {
                         if ($current_language_id === null) {

@@ -6,6 +6,8 @@ use App\Data\AppSettingsData;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Str;
 
 if (!function_exists('clear_telephone')) {
@@ -273,5 +275,17 @@ if (!function_exists('num_more_or_equal_num')) {
     function num_more_or_equal_num(mixed $num, ?int $num_for_comparison): bool
     {
         return is_numeric($num) && $num_for_comparison !== null && $num >= $num_for_comparison;
+    }
+}
+
+if (!function_exists('get_now_date')) {
+    /**
+     * @param string|null $time_zone
+     *
+     * @return Carbon|CarbonInterface
+     */
+    function get_now_date(?string $time_zone = null): Carbon|CarbonInterface
+    {
+        return now($time_zone ?: config('app.timezone'));
     }
 }

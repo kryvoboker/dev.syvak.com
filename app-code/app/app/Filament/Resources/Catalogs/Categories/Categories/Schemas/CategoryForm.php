@@ -6,13 +6,13 @@ namespace App\Filament\Resources\Catalogs\Categories\Categories\Schemas;
 
 use App\Filament\Resources\Trait\Forms\ImageFormTrait;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
+use App\Filament\Resources\Trait\Forms\SelectFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
 use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
 use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Settings\Language;
-use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -22,7 +22,8 @@ use Illuminate\Validation\Rule;
 
 class CategoryForm
 {
-    use LanguageTrait, SlugFormTrait, MetaTextFormTrait, ToggleCheckboxFormTrait, SortOrderFormTrait, ImageFormTrait;
+    use LanguageTrait, SlugFormTrait, MetaTextFormTrait, ToggleCheckboxFormTrait,
+        SortOrderFormTrait, ImageFormTrait, SelectFormTrait;
 
     /**
      * @param Schema $schema
@@ -68,9 +69,12 @@ class CategoryForm
             ->schema([
                 Section::make(__('admin/default.sections.basic_info'))
                     ->schema([
-                        Select::make('parent_id')
-                            ->label(__('admin/default.labels.parent_category'))
-                            ->options(function (?Category $record) use ($current_language_id) {
+                        self::getSelectFormField([
+                            'field_name'  => 'parent_id',
+                            'label'       => __('admin/default.labels.parent_category'),
+                            'helper_text' => __('admin/default.helpers.parent_category'),
+                            'placeholder' => __('admin/default.placeholders.select_parent_category'),
+                            'options'     => function (?Category $record) use ($current_language_id) {
                                 $query = Category::query()
                                     ->with([
                                         'categoryDescription' => function (HasMany $query) use ($current_language_id) {
@@ -91,11 +95,9 @@ class CategoryForm
 
                                         return [$category->id => $name];
                                     });
-                            })
-                            ->searchable()
-                            ->nullable()
-                            ->placeholder(__('admin/default.placeholders.select_parent_category'))
-                            ->helperText(__('admin/default.helpers.parent_category')),
+                            },
+                            'rules'       => ['numeric', Rule::exists('categories', 'id')],
+                        ]),
 
                         self::getIsActiveFormField(),
 
