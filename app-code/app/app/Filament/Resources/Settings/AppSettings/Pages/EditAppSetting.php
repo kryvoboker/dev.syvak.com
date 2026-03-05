@@ -14,8 +14,6 @@ class EditAppSetting extends EditRecord
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -24,8 +22,6 @@ class EditAppSetting extends EditRecord
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {
@@ -34,8 +30,6 @@ class EditAppSetting extends EditRecord
 
     /**
      * Get breadcrumbs
-     *
-     * @return array
      */
     public function getBreadcrumbs(): array
     {
@@ -52,10 +46,6 @@ class EditAppSetting extends EditRecord
 
     /**
      * Mount the page and get or create settings record
-     *
-     * @param int|string|null $record
-     *
-     * @return void
      */
     public function mount(int|string|null $record = null): void
     {
@@ -76,7 +66,7 @@ class EditAppSetting extends EditRecord
                 'iframe_map'        => null,
                 'timezone'          => config('app.timezone'),
                 'image_sizes'       => [],
-            ]
+            ],
         );
 
         parent::mount($settings_record->id);
@@ -84,8 +74,6 @@ class EditAppSetting extends EditRecord
 
     /**
      * Get redirect URL after save
-     *
-     * @return string|null
      */
     protected function getRedirectUrl(): ?string
     {

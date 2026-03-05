@@ -14,12 +14,9 @@ class ProductFactory extends Factory
 {
     protected $model = Product::class;
 
-    /**
-     * @return array
-     */
     public function definition(): array
     {
-        $sku = (string)$this->faker->unique()->numberBetween(10000, 99999);
+        $sku = (string) $this->faker->unique()->numberBetween(10000, 99999);
 
         return [
             'model'          => $sku,

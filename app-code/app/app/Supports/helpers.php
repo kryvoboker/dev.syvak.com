@@ -10,33 +10,22 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Str;
 
-if (!function_exists('clear_telephone')) {
-    /**
-     * @param string|null $telephone
-     * @param bool        $is_delete_first_nums
-     *
-     * @return string
-     */
+if (! function_exists('clear_telephone')) {
     function clear_telephone(?string $telephone, bool $is_delete_first_nums = false): string
     {
-        if (!isset($telephone)) {
+        if (! isset($telephone)) {
             return '';
         }
 
         if ($is_delete_first_nums) {
-            return (string)(preg_replace(['/\D+/', '/^38/'], '', $telephone) ?: $telephone);
+            return (string) (preg_replace(['/\D+/', '/^38/'], '', $telephone) ?: $telephone);
         }
 
-        return (string)(preg_replace('/\D+/', '', $telephone) ?: $telephone);
+        return (string) (preg_replace('/\D+/', '', $telephone) ?: $telephone);
     }
 }
 
-if (!function_exists('parse_telephone')) {
-    /**
-     * @param string $telephone
-     *
-     * @return string
-     */
+if (! function_exists('parse_telephone')) {
     function parse_telephone(string $telephone): string
     {
         $telephone = clear_telephone($telephone, true);
@@ -52,12 +41,7 @@ if (!function_exists('parse_telephone')) {
     }
 }
 
-if (!function_exists('trim_strs_in_arr')) {
-    /**
-     * @param array $arr
-     *
-     * @return array
-     */
+if (! function_exists('trim_strs_in_arr')) {
     function trim_strs_in_arr(array $arr): array
     {
         return array_map(function ($item) {
@@ -70,15 +54,9 @@ if (!function_exists('trim_strs_in_arr')) {
     }
 }
 
-if (!function_exists('convert_img_and_get_url')) {
+if (! function_exists('convert_img_and_get_url')) {
     /**
-     * @param string|null $path
-     * @param int         $width
-     * @param int|null    $height
-     * @param bool        $is_square
-     * @param string      $bg_color HEX or transparent color
-     *
-     * @return string
+     * @param  string  $bg_color  HEX or transparent color
      */
     function convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): string
     {
@@ -86,15 +64,9 @@ if (!function_exists('convert_img_and_get_url')) {
     }
 }
 
-if (!function_exists('multiple_convert_img_and_get_url')) {
+if (! function_exists('multiple_convert_img_and_get_url')) {
     /**
-     * @param string|null $path
-     * @param int         $width
-     * @param int|null    $height
-     * @param bool        $is_square
-     * @param string      $bg_color HEX or transparent color
-     *
-     * @return array
+     * @param  string  $bg_color  HEX or transparent color
      */
     function multiple_convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
     {
@@ -102,33 +74,21 @@ if (!function_exists('multiple_convert_img_and_get_url')) {
     }
 }
 
-if (!function_exists('get_app_settings')) {
-    /**
-     * @return AppSettingsData|null
-     */
+if (! function_exists('get_app_settings')) {
     function get_app_settings(): ?AppSettingsData
     {
         return app(AppSettingsService::class)->getSettings();
     }
 }
 
-if (!function_exists('breadcrumb')) {
-    /**
-     * @param string      $title
-     * @param string|null $url
-     *
-     * @return array
-     */
+if (! function_exists('breadcrumb')) {
     function breadcrumb(string $title, ?string $url = null): array
     {
         return ['title' => $title, 'url' => $url];
     }
 }
 
-if (!function_exists('try_detect_page_type')) {
-    /**
-     * @return string|null
-     */
+if (! function_exists('try_detect_page_type')) {
     function try_detect_page_type(): ?string
     {
         $route_name = request()->route()?->getName();
@@ -146,17 +106,14 @@ if (!function_exists('try_detect_page_type')) {
     }
 }
 
-if (!function_exists('localizedRoute')) {
-    /**
-     * @param BackedEnum|string $route
-     * @param array             $parameters
-     * @param bool              $absolute
-     *
-     * @return string
-     */
+if (! function_exists('localizedRoute')) {
     function localizedRoute(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
     {
         $locale_key = config('localization.locale_parameter');
+
+        if (Str::startsWith($route, 'localized.') === false) {
+            $route = 'localized.' . $route;
+        }
 
         return route($route, array_merge([
             $locale_key => app()->getLocale(),
@@ -164,24 +121,14 @@ if (!function_exists('localizedRoute')) {
     }
 }
 
-if (!function_exists('decode_html_entities')) {
-    /**
-     * @param string|null $string
-     *
-     * @return string
-     */
+if (! function_exists('decode_html_entities')) {
     function decode_html_entities(?string $string): string
     {
-        return html_entity_decode((string)$string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return html_entity_decode((string) $string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 }
 
-if (!function_exists('escape_special_html')) {
-    /**
-     * @param string|null $html_string
-     *
-     * @return string
-     */
+if (! function_exists('escape_special_html')) {
     function escape_special_html(?string $html_string): string
     {
         $prepared_html = Str::replaceMatches('/<script>.*?<\/script>/s', function ($match) {
@@ -196,94 +143,55 @@ if (!function_exists('escape_special_html')) {
     }
 }
 
-if (!function_exists('convert_price')) {
-    /**
-     * @param float  $price
-     * @param string $code_from
-     * @param string $code_to
-     *
-     * @return float
-     */
+if (! function_exists('convert_price')) {
     function convert_price(float $price, string $code_from, string $code_to): float
     {
         return app(ConvertPrice::class)->convert(
             price    : $price,
             code_from: $code_from,
-            code_to  : $code_to
+            code_to  : $code_to,
         );
     }
 }
 
-if (!function_exists('format_price')) {
-    /**
-     * @param float|int   $price
-     * @param string|null $currency_code
-     * @param float|int   $exchange_rate
-     * @param bool        $is_formatting
-     *
-     * @return string|float
-     */
+if (! function_exists('format_price')) {
     function format_price(float|int $price, ?string $currency_code = null, float|int $exchange_rate = 0, bool $is_formatting = true): string|float
     {
         return app(ConvertPrice::class)->format(
             price        : $price,
             currency_code: $currency_code,
             exchange_rate: $exchange_rate,
-            is_formatting: $is_formatting
+            is_formatting: $is_formatting,
         );
     }
 }
 
-if (!function_exists('replace_currency_symbol_to_code')) {
-    /**
-     * @param string      $price_string
-     * @param string|null $currency_symbol
-     * @param string|null $currency_code
-     *
-     * @return string
-     */
+if (! function_exists('replace_currency_symbol_to_code')) {
     function replace_currency_symbol_to_code(string $price_string, ?string $currency_symbol = null, ?string $currency_code = null): string
     {
         return app(ConvertPrice::class)->replaceCurrencySymbolToCode(
             price_string   : $price_string,
             currency_symbol: $currency_symbol,
-            currency_code  : $currency_code
+            currency_code  : $currency_code,
         );
     }
 }
 
-if (!function_exists('str_more_or_equal_length')) {
-    /**
-     * @param string|null $string
-     * @param int|null    $length
-     *
-     * @return bool
-     */
+if (! function_exists('str_more_or_equal_length')) {
     function str_more_or_equal_length(?string $string, ?int $length): bool
     {
         return $string !== null && $length !== null && Str::length(Str::trim($string)) >= $length;
     }
 }
 
-if (!function_exists('num_more_or_equal_num')) {
-    /**
-     * @param mixed    $num
-     * @param int|null $num_for_comparison
-     *
-     * @return bool
-     */
+if (! function_exists('num_more_or_equal_num')) {
     function num_more_or_equal_num(mixed $num, ?int $num_for_comparison): bool
     {
         return is_numeric($num) && $num_for_comparison !== null && $num >= $num_for_comparison;
     }
 }
 
-if (!function_exists('get_now_date')) {
-    /**
-     * @param string|null $time_zone
-     *
-     * @return Carbon|CarbonInterface
-     */
+if (! function_exists('get_now_date')) {
     function get_now_date(?string $time_zone = null): Carbon|CarbonInterface
     {
         return now($time_zone ?: config('app.timezone'));

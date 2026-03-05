@@ -12,25 +12,25 @@ use Illuminate\Database\Eloquent\Model;
 class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstract
 {
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function __construct(
         OpenAiTranslatorService $ai,
-        private readonly int    $product_id,
-        private readonly int    $attribute_id,
+        private readonly int $product_id,
+        private readonly int $attribute_id,
     ) {
         parent::__construct($ai);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function findCached(string $hash): ?string
     {
         $product_attribute_text_hash = ProductAttributeTextHash::getAttributeTextHash(
             $this->product_id,
             $this->attribute_id,
-            $hash
+            $hash,
         );
 
         $this->setProductAttributeTextHash($product_attribute_text_hash);
@@ -43,7 +43,7 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model
     {

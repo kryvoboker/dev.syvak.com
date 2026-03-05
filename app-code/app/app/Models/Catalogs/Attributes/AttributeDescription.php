@@ -27,7 +27,7 @@ class AttributeDescription extends Model
     }
 
     /**
-     * @return BelongsTo<Attribute>
+     * @return BelongsTo<Attribute, $this>
      */
     public function attribute(): BelongsTo
     {

@@ -16,8 +16,8 @@ use Illuminate\Support\Str;
 final class EnSeoSlugService
 {
     /**
-     * @param string $text    Source text (EN mixed ok)
-     * @param int    $max_len Optional max length (0 = no limit)
+     * @param  string  $text  Source text (EN mixed ok)
+     * @param  int  $max_len  Optional max length (0 = no limit)
      */
     public static function make(string $text, int $max_len = 0): string
     {

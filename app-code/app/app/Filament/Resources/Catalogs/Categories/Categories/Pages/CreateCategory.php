@@ -13,25 +13,27 @@ use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use LogicException;
 use Throwable;
 
 class CreateCategory extends CreateRecord
 {
     use ProcessSlugsTrait;
 
-    protected static string    $resource      = CategoryResource::class;
-    protected array            $descriptions  = [];
-    protected array            $slugs         = [];
-    protected ?string          $preview_image = null;
-    protected ?string          $icon          = null;
-    public null|Model|Category $record        = null;
+    protected static string $resource = CategoryResource::class;
+
+    protected array $descriptions = [];
+
+    protected array $slugs = [];
+
+    protected ?string $preview_image = null;
+
+    protected ?string $icon = null;
+
+    public ?Model $record = null;
 
     /**
      * Mutate form data before creating record
-     *
-     * @param array $data
-     *
-     * @return array
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
@@ -49,9 +51,7 @@ class CreateCategory extends CreateRecord
     /**
      * Handle record creation with transaction
      *
-     * @param array $data
      *
-     * @return Model
      * @throws Halt
      */
     protected function handleRecordCreation(array $data): Model
@@ -73,7 +73,7 @@ class CreateCategory extends CreateRecord
                 $this->createDescriptions();
 
                 // Rebuild category paths
-                $this->record->rebuildPaths();
+                $this->getCategoryRecord()->rebuildPaths();
 
                 return $this->record;
             });
@@ -84,18 +84,18 @@ class CreateCategory extends CreateRecord
             ]);
 
             $this->halt();
+
+            throw $e;
         }
     }
 
     /**
      * Create image for the record
-     *
-     * @return void
      */
     protected function createImage(): void
     {
-        if (!empty($this->preview_image) || !empty($this->icon)) {
-            $this->record->categoryImage()->create([
+        if (! empty($this->preview_image) || ! empty($this->icon)) {
+            $this->getCategoryRecord()->categoryImage()->create([
                 'icon'          => $this->icon,
                 'preview_image' => $this->preview_image,
             ]);
@@ -104,17 +104,15 @@ class CreateCategory extends CreateRecord
 
     /**
      * Create descriptions for the record
-     *
-     * @return void
      */
     protected function createDescriptions(): void
     {
         $descriptions_data = [];
 
         foreach ($this->descriptions as $language_id => $description) {
-            if (!empty($description['name'])) {
+            if (! empty($description['name'])) {
                 $descriptions_data[] = [
-                    'language_id'      => (int)$language_id,
+                    'language_id'      => (int) $language_id,
                     'name'             => $description['name'],
                     'description'      => $description['description'] ?? null,
                     'h1_title'         => $description['h1_title'] ?? null,
@@ -125,15 +123,22 @@ class CreateCategory extends CreateRecord
             }
         }
 
-        if (!empty($descriptions_data)) {
-            $this->record->categoryDescription()->createMany($descriptions_data);
+        if (! empty($descriptions_data)) {
+            $this->getCategoryRecord()->categoryDescription()->createMany($descriptions_data);
         }
+    }
+
+    private function getCategoryRecord(): Category
+    {
+        if (! $this->record instanceof Category) {
+            throw new LogicException('Category record is not initialized.');
+        }
+
+        return $this->record;
     }
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -142,8 +147,6 @@ class CreateCategory extends CreateRecord
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {

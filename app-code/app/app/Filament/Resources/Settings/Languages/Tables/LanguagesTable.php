@@ -4,45 +4,63 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Languages\Tables;
 
-use App\Filament\Resources\Trait\Filters\BooleanFilterTrait;
-use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
-use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
-use App\Filament\Resources\Trait\Tables\DateTableTrait;
 use App\Models\Settings\Language;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 
 class LanguagesTable
 {
-    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait, BooleanFilterTrait;
-
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                self::getCodeTableField(),
+                TextColumn::make('code')
+                    ->label(__('admin/default.columns.code'))
+                    ->searchable()
+                    ->sortable()
+                    ->badge(),
 
-                self::getTextTableField([
-                    'field_name' => 'name',
-                    'label'      => __('admin/default.columns.name'),
-                ]),
+                TextColumn::make('name')
+                    ->label(__('admin/default.columns.name'))
+                    ->searchable()
+                    ->sortable()
+                    ->limit(50),
 
-                self::getIsActiveTableField(),
+                IconColumn::make('is_active')
+                    ->label(__('admin/default.labels.is_active'))
+                    ->boolean()
+                    ->sortable(),
 
-                self::getIsDefaultTableField(),
+                IconColumn::make('is_default')
+                    ->label(__('admin/default.labels.is_default'))
+                    ->boolean()
+                    ->sortable(),
 
-                self::getCreatedAtTableField([
-                    'is_toggled_hidden_by_default' => false,
-                ]),
+                TextColumn::make('created_at')
+                    ->label(__('admin/default.columns.created_at'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
-                self::getIsActiveFilterField(),
+                TernaryFilter::make('is_active')
+                    ->label(__('admin/default.filters.active'))
+                    ->placeholder(__('admin/default.placeholders.all'))
+                    ->trueLabel(__('admin/default.filters.active_only'))
+                    ->falseLabel(__('admin/default.filters.inactive_only')),
 
-                self::getIsDefaultFilterField(),
+                TernaryFilter::make('is_default')
+                    ->label(__('admin/default.filters.default'))
+                    ->placeholder(__('admin/default.placeholders.all'))
+                    ->trueLabel(__('admin/default.filters.default'))
+                    ->falseLabel(__('admin/default.filters.default')),
             ])
             ->recordActions([
                 EditAction::make(),

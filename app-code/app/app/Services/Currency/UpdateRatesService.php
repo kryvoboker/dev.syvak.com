@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\Log;
 
 class UpdateRatesService
 {
-    public function handle(): string|null
+    public function handle(): ?string
     {
         $currency = new Currency();
 
         $default_active_currency = $currency->getDefaultActiveCurrency();
 
-        if (!$default_active_currency) {
+        if (! $default_active_currency) {
             return __('admin/settings/currencies.error_absent_default_currency');
         }
 
@@ -36,7 +36,7 @@ class UpdateRatesService
 
             $json = $response->json();
 
-            if (!$json) {
+            if (! $json) {
                 return null;
             }
         } catch (Exception $e) {
@@ -61,11 +61,11 @@ class UpdateRatesService
         unset($currency);
 
         $currencies->each(function (Currency $currency) use ($currencies_data) {
-            if (!isset($currencies_data[$currency->code])) {
+            if (! isset($currencies_data[$currency->code])) {
                 return;
             }
 
-            $currency->exchange_rate = (float)$currencies_data[$currency->code];
+            $currency->exchange_rate = (float) $currencies_data[$currency->code];
             $currency->save();
         });
 

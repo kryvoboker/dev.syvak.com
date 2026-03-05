@@ -17,10 +17,6 @@ final readonly class AiTranslationService
     ) {}
 
     /**
-     * @param int    $product_id
-     * @param string $prompt
-     *
-     * @return string
      * @throws Throwable
      */
     public function productName(int $product_id, string $prompt): string
@@ -29,10 +25,6 @@ final readonly class AiTranslationService
     }
 
     /**
-     * @param int    $product_id
-     * @param string $prompt
-     *
-     * @return string
      * @throws Throwable
      */
     public function productDescription(int $product_id, string $prompt): string
@@ -41,11 +33,6 @@ final readonly class AiTranslationService
     }
 
     /**
-     * @param int    $product_id
-     * @param int    $attribute_id
-     * @param string $prompt
-     *
-     * @return string
      * @throws Throwable
      */
     public function productAttributeText(int $product_id, int $attribute_id, string $prompt): string

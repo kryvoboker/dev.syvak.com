@@ -4,72 +4,87 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Users\Tables;
 
-use App\Filament\Resources\Trait\Filters\BooleanFilterTrait;
-use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
-use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
-use App\Filament\Resources\Trait\Tables\DateTableTrait;
-use App\Filament\Resources\Trait\Tables\ImageTableTrait;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class UsersTable
 {
-    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait, ImageTableTrait, BooleanFilterTrait;
-
-    /**
-     * @param Table $table
-     *
-     * @return Table
-     */
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                self::getTextTableField([
-                    'field_name' => 'name',
-                    'label'      => __('admin/default.columns.name'),
-                ]),
+                TextColumn::make('name')
+                    ->label(__('admin/default.columns.name'))
+                    ->searchable()
+                    ->sortable()
+                    ->limit(50),
 
-                self::getTextTableField([
-                    'field_name' => 'lastname',
-                    'label'      => __('admin/default.columns.lastname'),
-                ]),
+                TextColumn::make('lastname')
+                    ->label(__('admin/default.columns.lastname'))
+                    ->searchable()
+                    ->sortable()
+                    ->limit(50),
 
-                self::getTextTableField([
-                    'field_name' => 'email',
-                    'label'      => __('admin/default.columns.email'),
-                ]),
+                TextColumn::make('email')
+                    ->label(__('admin/default.columns.email'))
+                    ->searchable()
+                    ->sortable()
+                    ->limit(50),
 
-                self::getTextTableField([
-                    'field_name'                   => 'telephone',
-                    'label'                        => __('admin/default.columns.telephone'),
-                    'format_state_using_cb'        => function ($state) {
+                TextColumn::make('telephone')
+                    ->label(__('admin/default.columns.telephone'))
+                    ->searchable()
+                    ->sortable()
+                    ->limit(50)
+                    ->formatStateUsing(function ($state) {
                         return parse_telephone($state);
-                    },
-                    'is_toggled_hidden_by_default' => true,
-                ]),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-                self::getImageTableField([
-                    'field_name'        => 'avatar',
-                    'label'             => __('admin/default.columns.avatar'),
-                    'image_size'        => (int)config('app.images.user.preview_in_list_in_admin.width'),
-                    'circular'          => true,
-                    'default_image_url' => Storage::url(config('app.images.user.no_image')),
-                ]),
+                ImageColumn::make('avatar')
+                    ->label(__('admin/default.columns.avatar'))
+                    ->imageSize((int) config('app.images.user.preview_in_list_in_admin.width'))
+                    ->circular()
+                    ->checkFileExistence()
+                    ->defaultImageUrl(Storage::url(config('app.images.user.no_image')))
+                    ->extraImgAttributes([
+                        'decoding' => 'async',
+                        'loading'  => 'lazy',
+                        'style'    => 'object-fit: contain;',
+                    ]),
 
-                self::getIsActiveTableField(),
+                IconColumn::make('is_active')
+                    ->label(__('admin/default.labels.is_active'))
+                    ->boolean()
+                    ->sortable(),
 
-                self::getEmailVerifiedAtTableField(),
+                TextColumn::make('email_verified_at')
+                    ->label(__('admin/default.columns.email_verified_at'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-                self::getCreatedAtTableField(),
+                TextColumn::make('created_at')
+                    ->label(__('admin/default.columns.created_at'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                self::getIsActiveFilterField(),
+                TernaryFilter::make('is_active')
+                    ->label(__('admin/default.filters.active'))
+                    ->placeholder(__('admin/default.placeholders.all'))
+                    ->trueLabel(__('admin/default.filters.active_only'))
+                    ->falseLabel(__('admin/default.filters.inactive_only')),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -15,10 +15,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyFoundationResponse;
 class LogFilamentErrors
 {
     /**
-     * @param Request                                       $request
-     * @param Closure(Request): (SymfonyFoundationResponse) $next
-     *
-     * @return JsonResponse|Response|RedirectResponse
+     * @param  Closure(Request): (SymfonyFoundationResponse)  $next
      */
     public function handle(Request $request, Closure $next): JsonResponse|Response|RedirectResponse
     {

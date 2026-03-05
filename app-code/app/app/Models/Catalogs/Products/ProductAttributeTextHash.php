@@ -32,7 +32,7 @@ class ProductAttributeTextHash extends Model
     }
 
     /**
-     * @return BelongsTo<Product>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
@@ -40,20 +40,13 @@ class ProductAttributeTextHash extends Model
     }
 
     /**
-     * @return BelongsTo<Attribute>
+     * @return BelongsTo<Attribute, $this>
      */
     public function attribute(): BelongsTo
     {
         return $this->belongsTo(Attribute::class);
     }
 
-    /**
-     * @param int    $product_id
-     * @param int    $attribute_id
-     * @param string $hash
-     *
-     * @return self|null
-     */
     public static function getAttributeTextHash(int $product_id, int $attribute_id, string $hash): ?self
     {
         return self::query()

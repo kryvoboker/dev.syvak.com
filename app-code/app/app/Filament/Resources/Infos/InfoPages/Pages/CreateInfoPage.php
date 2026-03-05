@@ -13,22 +13,21 @@ use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use LogicException;
 use Throwable;
 
 class CreateInfoPage extends CreateRecord
 {
     use ProcessSlugsTrait;
 
-    protected static string    $resource     = InfoPageResource::class;
-    protected array            $descriptions = [];
-    protected array            $slugs        = [];
-    public null|Model|InfoPage $record       = null;
+    protected static string $resource = InfoPageResource::class;
 
-    /**
-     * @param array $data
-     *
-     * @return array
-     */
+    protected array $descriptions = [];
+
+    protected array $slugs = [];
+
+    public ?Model $record = null;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Store related data temporarily
@@ -43,9 +42,7 @@ class CreateInfoPage extends CreateRecord
     /**
      * Handle record creation with transaction.
      *
-     * @param array $data
      *
-     * @return Model
      * @throws Halt
      */
     protected function handleRecordCreation(array $data): Model
@@ -72,22 +69,22 @@ class CreateInfoPage extends CreateRecord
             ]);
 
             $this->halt();
+
+            throw $e;
         }
     }
 
     /**
      * Create descriptions for the record.
-     *
-     * @return void
      */
     protected function createDescriptions(): void
     {
         $descriptions_data = [];
 
         foreach ($this->descriptions as $language_id => $description) {
-            if (!empty($description['name'])) {
+            if (! empty($description['name'])) {
                 $descriptions_data[] = [
-                    'language_id'      => (int)$language_id,
+                    'language_id'      => (int) $language_id,
                     'title'            => $description['name'],
                     'description'      => $description['description'] ?? null,
                     'meta_title'       => $description['meta_title'] ?? null,
@@ -97,8 +94,17 @@ class CreateInfoPage extends CreateRecord
             }
         }
 
-        if (!empty($descriptions_data)) {
-            $this->record->infoPageDescription()->createMany($descriptions_data);
+        if (! empty($descriptions_data)) {
+            $this->getInfoPageRecord()->infoPageDescription()->createMany($descriptions_data);
         }
+    }
+
+    private function getInfoPageRecord(): InfoPage
+    {
+        if (! $this->record instanceof InfoPage) {
+            throw new LogicException('Info page record is not initialized.');
+        }
+
+        return $this->record;
     }
 }

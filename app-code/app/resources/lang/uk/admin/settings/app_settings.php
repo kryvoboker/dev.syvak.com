@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Налаштування застосунку',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'             => 'Параметр застосунку',
         'plural_model'      => 'Параметри застосунку',
         'titles'            => 'Заголовки сайту',
@@ -25,7 +27,7 @@ return [
     ],
 
     // Tabs
-    'tabs'             => [
+    'tabs' => [
         'seo'      => 'SEO',
         'contacts' => 'Контакти',
         'map'      => 'Карта',
@@ -33,7 +35,7 @@ return [
     ],
 
     // Helpers
-    'helpers'          => [
+    'helpers' => [
         'titles'            => 'Заголовки сайту для різних сторінок',
         'meta_titles'       => 'SEO мета-заголовки для сторінок',
         'meta_descriptions' => 'SEO мета-описи для сторінок',
@@ -50,12 +52,12 @@ return [
     ],
 
     // Columns
-    'columns'          => [
+    'columns' => [
         'timezone' => 'Часовий пояс',
     ],
 
     // Placeholders
-    'placeholders'     => [
+    'placeholders' => [
         'contact_emails' => 'info@example.com, support@example.com',
         'contact_phones' => '+380123456789, +380987654321',
         'work_time'      => 'Пн-Пт: 9:00-18:00, Сб: 10:00-15:00',

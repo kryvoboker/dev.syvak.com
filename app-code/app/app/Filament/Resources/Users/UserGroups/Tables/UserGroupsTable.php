@@ -4,41 +4,43 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\UserGroups\Tables;
 
-use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
-use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
-use App\Filament\Resources\Trait\Tables\DateTableTrait;
 use App\Models\Users\UserGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 
 class UserGroupsTable
 {
-    use CommonTextTableTrait, BooleanTableTrait, DateTableTrait;
-
-    /**
-     * @param Table $table
-     *
-     * @return Table
-     */
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                self::getTextTableField([
-                    'field_name' => 'name',
-                    'label'      => __('admin/default.columns.name'),
-                ]),
+                TextColumn::make('name')
+                    ->label(__('admin/default.columns.name'))
+                    ->searchable()
+                    ->sortable()
+                    ->limit(50),
 
-                self::getIsActiveTableField(),
+                IconColumn::make('is_active')
+                    ->label(__('admin/default.labels.is_active'))
+                    ->boolean()
+                    ->sortable(),
 
-                self::getIsDefaultTableField(),
+                IconColumn::make('is_default')
+                    ->label(__('admin/default.labels.is_default'))
+                    ->boolean()
+                    ->sortable(),
 
-                self::getCreatedAtTableField(),
-
+                TextColumn::make('created_at')
+                    ->label(__('admin/default.columns.created_at'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

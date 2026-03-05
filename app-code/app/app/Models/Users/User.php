@@ -19,7 +19,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     use HasPanelShield {
         HasPanelShield::canAccessPanel as shieldCanAccessPanel;
@@ -67,11 +67,6 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    /**
-     * @param Panel $panel
-     *
-     * @return bool
-     */
     public function canAccessPanel(Panel $panel): bool
     {
         if ($this->is_active === false) {
@@ -81,9 +76,6 @@ class User extends Authenticatable implements FilamentUser
         return $this->shieldCanAccessPanel($panel);
     }
 
-    /**
-     * @return void
-     */
     protected static function booted(): void
     {
         static::saving(function (User $user) {
@@ -95,20 +87,15 @@ class User extends Authenticatable implements FilamentUser
         });
     }
 
-    /**
-     * @return Attribute
-     */
     public function telephone(): Attribute
     {
         return Attribute::make(
-            set: fn(?string $value) => $value === null ? null : clear_telephone($value),
+            set: fn (?string $value) => $value === null ? null : clear_telephone($value),
         );
     }
 
     /**
      * For \App\Filament\Resources\Users\UserResource
-     *
-     * @return string
      */
     public function getFullNameAttribute(): string
     {
@@ -117,8 +104,6 @@ class User extends Authenticatable implements FilamentUser
 
     /**
      * For \App\Filament\Resources\Users\UserForm
-     *
-     * @return string|null
      */
     public function getAvatarUrlAttribute(): ?string
     {

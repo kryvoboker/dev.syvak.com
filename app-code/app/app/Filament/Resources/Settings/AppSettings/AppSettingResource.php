@@ -17,16 +17,18 @@ use UnitEnum;
 
 class AppSettingResource extends Resource
 {
-    protected static ?string                $model                = AppSetting::class;
-    protected static string|BackedEnum|null $navigationIcon       = Heroicon::Cog6Tooth;
-    protected static string|null|UnitEnum   $navigationGroup      = AdminNavigationGroupEnum::Settings;
-    protected static ?string                $recordTitleAttribute = 'timezone';
-    protected static ?int                   $navigationSort       = 99;
+    protected static ?string $model = AppSetting::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Cog6Tooth;
+
+    protected static string|null|UnitEnum $navigationGroup = AdminNavigationGroupEnum::Settings;
+
+    protected static ?string $recordTitleAttribute = 'timezone';
+
+    protected static ?int $navigationSort = 99;
 
     /**
      * Should register navigation
-     *
-     * @return bool
      */
     public static function shouldRegisterNavigation(): bool
     {
@@ -35,8 +37,6 @@ class AppSettingResource extends Resource
 
     /**
      * Get navigation URL
-     *
-     * @return string
      */
     public static function getNavigationUrl(): string
     {
@@ -64,8 +64,6 @@ class AppSettingResource extends Resource
 
     /**
      * Signature in the navigation menu (left panel)
-     *
-     * @return string
      */
     public static function getNavigationLabel(): string
     {
@@ -74,8 +72,6 @@ class AppSettingResource extends Resource
 
     /**
      * A single model name (e.g. in headings, "Create X" button)
-     *
-     * @return string
      */
     public static function getModelLabel(): string
     {
@@ -84,8 +80,6 @@ class AppSettingResource extends Resource
 
     /**
      * Plural model name (e.g. in lists, section headings)
-     *
-     * @return string
      */
     public static function getPluralModelLabel(): string
     {
@@ -94,8 +88,6 @@ class AppSettingResource extends Resource
 
     /**
      * Can create records
-     *
-     * @return bool
      */
     public static function canCreate(): bool
     {
@@ -104,10 +96,6 @@ class AppSettingResource extends Resource
 
     /**
      * Can delete records
-     *
-     * @param AppSetting|Model $record
-     *
-     * @return bool
      */
     public static function canDelete(AppSetting|Model $record): bool
     {
@@ -116,8 +104,6 @@ class AppSettingResource extends Resource
 
     /**
      * Can delete any records
-     *
-     * @return bool
      */
     public static function canDeleteAny(): bool
     {

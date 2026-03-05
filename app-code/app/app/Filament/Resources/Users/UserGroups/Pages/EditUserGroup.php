@@ -34,8 +34,6 @@ class EditUserGroup extends EditRecord
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -44,8 +42,6 @@ class EditUserGroup extends EditRecord
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {

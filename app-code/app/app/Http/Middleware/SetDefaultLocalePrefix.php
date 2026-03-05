@@ -15,43 +15,41 @@ class SetDefaultLocalePrefix
     /**
      * Handle an incoming request.
      *
-     * @param Request                      $request
-     * @param Closure(Request): (Response) $next
-     *
-     * @return Response|RedirectResponse
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
         $path_info = Str::ltrim($request->getPathInfo(), '/');
+        $is_livewire_request = Str::startsWith($path_info, ['livewire-', 'livewire/']);
 
-        // Skip redirect for Livewire update requests
-        $is_livewire_update = Str::contains($path_info, ['livewire/update', 'livewire/upload-file']);
-        $locale = $request->route('locale');
+        $locale             = $request->route('locale');
 
-        if ($is_livewire_update) {
+        if ($is_livewire_request) {
+            $resolved_locale = $locale ?: session('locale', config('app.locale', 'en'));
+
             session()->put(
                 'locale',
-                $locale ?: session('locale', config('app.locale', 'en'))
+                $resolved_locale,
             );
-            app()->setLocale($locale);
-            url()->defaults(['locale' => $locale]);
+            app()->setLocale($resolved_locale);
+            url()->defaults(['locale' => $resolved_locale]);
 
-            config(['app.locale' => $locale]);
+            config(['app.locale' => $resolved_locale]);
 
             return $next($request);
         }
 
         // If locale is missing or invalid, redirect with locale
-        if (!$locale || !in_array($locale, config('app.locales', ['en']))) {
-            $locale = session('locale', config('app.locale', 'en'));
-            $route = $request->route();
+        if (! $locale || ! in_array($locale, config('app.locales', ['en']))) {
+            $locale     = session('locale', config('app.locale', 'en'));
+            $route      = $request->route();
             $route_name = $route?->getName();
 
             if ($route_name) {
                 return redirect()->route(
                     $route_name,
                     array_merge($route->parameters(), ['locale' => $locale]),
-                    Response::HTTP_TEMPORARY_REDIRECT
+                    Response::HTTP_TEMPORARY_REDIRECT,
                 );
             }
         }

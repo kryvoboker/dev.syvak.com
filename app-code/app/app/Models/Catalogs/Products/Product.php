@@ -20,7 +20,8 @@ class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
-    use SlugTrait, HasSlugsTrait;
+
+    use HasSlugsTrait, SlugTrait;
 
     protected $fillable = [
         'model',
@@ -53,7 +54,7 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductNameHash>
+     * @return HasMany<ProductNameHash, $this>
      */
     public function productNameHash(): HasMany
     {
@@ -61,7 +62,7 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductDescriptionHash>
+     * @return HasMany<ProductDescriptionHash, $this>
      */
     public function productDescriptionHash(): HasMany
     {
@@ -69,7 +70,7 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductAttributeTextHash>
+     * @return HasMany<ProductAttributeTextHash, $this>
      */
     public function productAttributeTextHash(): HasMany
     {
@@ -77,23 +78,20 @@ class Product extends Model
     }
 
     /**
-     * @return HasOne<ProductNameHash>
+     * @return HasOne<ProductNameHash, $this>
      */
     public function latestProductNameHash(): HasOne
     {
         return $this->hasOne(ProductNameHash::class)->latestOfMany('updated_at');
     }
 
-    /**
-     * @return HasOne
-     */
     public function lagestProductDescriptionHash(): HasOne
     {
         return $this->hasOne(ProductDescriptionHash::class)->latestOfMany('updated_at');
     }
 
     /**
-     * @return HasOne<ProductAttributeTextHash>
+     * @return HasOne<ProductAttributeTextHash, $this>
      */
     public function latestProductAttributeTextHash(): HasOne
     {
@@ -101,7 +99,7 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductDescription>
+     * @return HasMany<ProductDescription, $this>
      */
     public function productDescription(): HasMany
     {
@@ -109,7 +107,7 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductDiscount>
+     * @return HasMany<ProductDiscount, $this>
      */
     public function productDiscount(): HasMany
     {
@@ -117,7 +115,7 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductImage>
+     * @return HasMany<ProductImage, $this>
      */
     public function productImage(): HasMany
     {
@@ -125,7 +123,7 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductToAttribute>
+     * @return HasMany<ProductToAttribute, $this>
      */
     public function productToAttribute(): HasMany
     {
@@ -148,8 +146,6 @@ class Product extends Model
      * $category = Category::with('products')->find(1);
      * $product = Product::with('categories')->find(1);
      * ```
-     *
-     * @return BelongsToMany
      */
     public function categories(): BelongsToMany
     {
@@ -157,15 +153,10 @@ class Product extends Model
             Category::class,
             'category_product',
             'product_id',
-            'category_id'
+            'category_id',
         )->withTimestamps();
     }
 
-    /**
-     * @param string $model
-     *
-     * @return Product|null
-     */
     public function getProductByModel(string $model): ?Product
     {
         return self::query()
@@ -173,12 +164,7 @@ class Product extends Model
             ->first();
     }
 
-    /**
-     * @param Product $product
-     *
-     * @return ProductDiscount|null
-     */
-    public function getLastActualAndLastModifiedDiscountFromModel(self $product): null|ProductDiscount
+    public function getLastActualAndLastModifiedDiscountFromModel(self $product): ?ProductDiscount
     {
         $current_date_time = now(config('app.timezone'));
 
@@ -193,25 +179,19 @@ class Product extends Model
         return $discount;
     }
 
-    /**
-     * @param string $keyword
-     * @param int    $per_page
-     *
-     * @return LengthAwarePaginator
-     */
     public function search(string $keyword, int $per_page): LengthAwarePaginator
     {
         $app_settings = get_app_settings();
 
         return self::query()
             ->with([
-                'slugs'              => function ($query) use ($app_settings) {
+                'slugs' => function ($query) use ($app_settings) {
                     $query->where('language_id', $app_settings->language_id);
                 },
                 'productDescription' => function ($query) use ($app_settings) {
                     $query->where('language_id', $app_settings->language_id);
                 },
-                'productDiscount'    => function ($query) use ($app_settings) {
+                'productDiscount' => function ($query) use ($app_settings) {
                     $current_date_time = now(config('app.timezone'));
 
                     $query
@@ -219,9 +199,9 @@ class Product extends Model
                         ->where('date_start', '<=', $current_date_time)
                         ->where('date_end', '>=', $current_date_time)
                         ->orderBy('priority');
-                }
+                },
             ])
-            ->where('quantity', '>', (int)config('app.products.minimum_stock_quantity'))
+            ->where('quantity', '>', (int) config('app.products.minimum_stock_quantity'))
             ->where(function (Builder $query) use ($keyword) {
                 $query->whereHas('productDescription', function ($query_2) use ($keyword) {
                     $query_2->whereLike('name', "%$keyword%");

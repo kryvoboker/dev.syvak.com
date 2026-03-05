@@ -14,26 +14,31 @@ use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use LogicException;
 use Throwable;
 
 class CreateProduct extends CreateRecord
 {
     use ProcessSlugsTrait;
 
-    protected static string   $resource           = ProductResource::class;
-    protected array           $descriptions       = [];
-    protected array           $images             = [];
-    protected array           $discounts          = [];
-    protected array           $product_attributes = [];
-    protected array           $slugs              = [];
-    public null|Model|Product $record             = null;
+    protected static string $resource = ProductResource::class;
+
+    protected array $descriptions = [];
+
+    protected array $images = [];
+
+    protected array $discounts = [];
+
+    protected array $product_attributes = [];
+
+    protected array $slugs = [];
+
+    public ?Model $record = null;
 
     /**
      * Mutate form data before creating record
      *
-     * @param array $data
      *
-     * @return array
      * @throws Halt
      */
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -51,7 +56,7 @@ class CreateProduct extends CreateRecord
         // Remove from main data
         unset(
             $data['descriptions'], $data['images'], $data['discounts'],
-            $data['attributes'], $data['slugs']
+            $data['attributes'], $data['slugs'],
         );
 
         return $data;
@@ -60,10 +65,8 @@ class CreateProduct extends CreateRecord
     /**
      * Validate that attribute-language pairs are unique
      *
-     * @param array $attributes
      *
-     * @return void
-     * @throws Notification|Halt
+     * @throws Halt
      */
     protected function validateAttributeLanguagePairs(array $attributes): void
     {
@@ -94,9 +97,7 @@ class CreateProduct extends CreateRecord
     /**
      * Handle record creation with transaction
      *
-     * @param array $data
      *
-     * @return Model
      * @throws Halt
      */
     protected function handleRecordCreation(array $data): Model
@@ -132,22 +133,22 @@ class CreateProduct extends CreateRecord
             ]);
 
             $this->halt();
+
+            throw $e;
         }
     }
 
     /**
      * Create descriptions for the record
-     *
-     * @return void
      */
     protected function createDescriptions(): void
     {
         $descriptions_data = [];
 
         foreach ($this->descriptions as $language_id => $description) {
-            if (!empty($description['name'])) {
+            if (! empty($description['name'])) {
                 $descriptions_data[] = [
-                    'language_id'      => (int)$language_id,
+                    'language_id'      => (int) $language_id,
                     'name'             => $description['name'],
                     'description'      => $description['description'] ?? null,
                     'meta_title'       => $description['meta_title'] ?? null,
@@ -157,22 +158,20 @@ class CreateProduct extends CreateRecord
             }
         }
 
-        if (!empty($descriptions_data)) {
-            $this->record->productDescription()->createMany($descriptions_data);
+        if (! empty($descriptions_data)) {
+            $this->getProductRecord()->productDescription()->createMany($descriptions_data);
         }
     }
 
     /**
      * Create images for the record
-     *
-     * @return void
      */
     protected function createImages(): void
     {
         $images_data = [];
 
         foreach ($this->images as $image) {
-            if (!empty($image['image'])) {
+            if (! empty($image['image'])) {
                 $images_data[] = [
                     'image'      => $image['image'],
                     'sort_order' => $image['sort_order'] ?? 0,
@@ -180,22 +179,20 @@ class CreateProduct extends CreateRecord
             }
         }
 
-        if (!empty($images_data)) {
-            $this->record->productImage()->createMany($images_data);
+        if (! empty($images_data)) {
+            $this->getProductRecord()->productImage()->createMany($images_data);
         }
     }
 
     /**
      * Create discounts for the record
-     *
-     * @return void
      */
     protected function createDiscounts(): void
     {
         $discounts_data = [];
 
         foreach ($this->discounts as $discount) {
-            if (!empty($discount['price'])) {
+            if (! empty($discount['price'])) {
                 $discounts_data[] = [
                     'customer_group_id' => $discount['customer_group_id'],
                     'quantity'          => $discount['quantity'],
@@ -207,22 +204,20 @@ class CreateProduct extends CreateRecord
             }
         }
 
-        if (!empty($discounts_data)) {
-            $this->record->productDiscount()->createMany($discounts_data);
+        if (! empty($discounts_data)) {
+            $this->getProductRecord()->productDiscount()->createMany($discounts_data);
         }
     }
 
     /**
      * Create attributes for the record
-     *
-     * @return void
      */
     protected function createAttributes(): void
     {
         $attributes_data = [];
 
         foreach ($this->product_attributes as $attribute) {
-            if (!empty($attribute['attribute_id']) && !empty($attribute['text'])) {
+            if (! empty($attribute['attribute_id']) && ! empty($attribute['text'])) {
                 $attributes_data[] = [
                     'attribute_id' => $attribute['attribute_id'],
                     'language_id'  => $attribute['language_id'],
@@ -231,15 +226,13 @@ class CreateProduct extends CreateRecord
             }
         }
 
-        if (!empty($attributes_data)) {
-            $this->record->productToAttribute()->createMany($attributes_data);
+        if (! empty($attributes_data)) {
+            $this->getProductRecord()->productToAttribute()->createMany($attributes_data);
         }
     }
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -248,11 +241,18 @@ class CreateProduct extends CreateRecord
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {
         return __('admin/catalogs/products/products.navigation_label');
+    }
+
+    private function getProductRecord(): Product
+    {
+        if (! $this->record instanceof Product) {
+            throw new LogicException('Product record is not initialized.');
+        }
+
+        return $this->record;
     }
 }

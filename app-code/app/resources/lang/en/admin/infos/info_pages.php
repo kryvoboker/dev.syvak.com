@@ -1,28 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Dynamic Pages',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'        => 'Info Page',
         'plural_model' => 'Info Pages',
         'position'     => 'Position on Page',
     ],
 
     // Columns
-    'columns'          => [
+    'columns' => [
         'position' => 'Position',
     ],
 
     // Placeholders
-    'placeholders'     => [
+    'placeholders' => [
         'position' => 'Select position on page',
     ],
 
     // Helpers
-    'helpers'          => [
+    'helpers' => [
         'position' => 'Use this field to determine where on the page the link to this info page will appear (top, bottom, etc.).',
     ],
 ];

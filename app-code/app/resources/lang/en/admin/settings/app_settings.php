@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Application Settings',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'             => 'Application Setting',
         'plural_model'      => 'Application Settings',
         'titles'            => 'Site Titles',
@@ -25,7 +27,7 @@ return [
     ],
 
     // Tabs
-    'tabs'             => [
+    'tabs' => [
         'seo'      => 'SEO',
         'contacts' => 'Contacts',
         'map'      => 'Map',
@@ -33,7 +35,7 @@ return [
     ],
 
     // Helpers
-    'helpers'          => [
+    'helpers' => [
         'titles'            => 'Site titles for different pages',
         'meta_titles'       => 'SEO meta titles for pages',
         'meta_descriptions' => 'SEO meta descriptions for pages',
@@ -50,12 +52,12 @@ return [
     ],
 
     // Columns
-    'columns'          => [
+    'columns' => [
         'timezone' => 'Timezone',
     ],
 
     // Placeholders
-    'placeholders'     => [
+    'placeholders' => [
         'contact_emails' => 'info@example.com, support@example.com',
         'contact_phones' => '+380123456789, +380987654321',
         'work_time'      => 'Mon-Fri: 9:00-18:00, Sat: 10:00-15:00',

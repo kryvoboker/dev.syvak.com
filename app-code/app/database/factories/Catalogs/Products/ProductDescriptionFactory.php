@@ -14,9 +14,6 @@ class ProductDescriptionFactory extends Factory
 {
     protected $model = ProductDescription::class;
 
-    /**
-     * @return array
-     */
     public function definition(): array
     {
         return [

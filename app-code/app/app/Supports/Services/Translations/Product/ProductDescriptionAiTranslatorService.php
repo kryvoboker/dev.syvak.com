@@ -12,17 +12,17 @@ use Illuminate\Database\Eloquent\Model;
 class ProductDescriptionAiTranslatorService extends AiDbCachedTranslatorAbstract
 {
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function __construct(
         OpenAiTranslatorService $ai,
-        private readonly int    $product_id,
+        private readonly int $product_id,
     ) {
         parent::__construct($ai);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function findCached(string $hash): ?string
     {
@@ -38,7 +38,7 @@ class ProductDescriptionAiTranslatorService extends AiDbCachedTranslatorAbstract
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model
     {

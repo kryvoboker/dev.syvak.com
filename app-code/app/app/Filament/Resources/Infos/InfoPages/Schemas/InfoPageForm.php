@@ -6,11 +6,11 @@ namespace App\Filament\Resources\Infos\InfoPages\Schemas;
 
 use App\Enums\PositionInPageEnum;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
-use App\Filament\Resources\Trait\Forms\SelectFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
-use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
-use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -19,8 +19,7 @@ use Illuminate\Validation\Rule;
 
 class InfoPageForm
 {
-    use LanguageTrait, SlugFormTrait, MetaTextFormTrait,
-        ToggleCheckboxFormTrait, SortOrderFormTrait, SelectFormTrait;
+    use LanguageTrait, MetaTextFormTrait, SlugFormTrait;
 
     public static function configure(Schema $schema): Schema
     {
@@ -42,13 +41,10 @@ class InfoPageForm
             ]);
     }
 
-    /**
-     * @return Tabs\Tab
-     */
     protected static function createGeneralTab(): Tabs\Tab
     {
         $positions = collect(PositionInPageEnum::cases())
-            ->mapWithKeys(fn(PositionInPageEnum $position) => [
+            ->mapWithKeys(fn (PositionInPageEnum $position) => [
                 $position->value => Str::ucfirst($position->value),
             ])->toArray();
 
@@ -56,21 +52,35 @@ class InfoPageForm
             ->schema([
                 Section::make(__('admin/default.sections.basic_info'))
                     ->schema([
-                        self::getMultipleSelectFormField([
-                            'field_name'  => 'positions',
-                            'label'       => __('admin/infos/info_pages.columns.position'),
-                            'placeholder' => __('admin/infos/info_pages.placeholders.position'),
-                            'helper_text' => __('admin/infos/info_pages.helpers.position'),
-                            'options'     => $positions,
-                            'rules'       => ['array', Rule::in(array_keys($positions))],
-                        ]),
+                        Select::make('positions')
+                            ->label(__('admin/infos/info_pages.columns.position'))
+                            ->placeholder(__('admin/infos/info_pages.placeholders.position'))
+                            ->helperText(__('admin/infos/info_pages.helpers.position'))
+                            ->multiple()
+                            ->options($positions)
+                            ->searchable()
+                            ->nullable()
+                            ->preload(false)
+                            ->live(false)
+                            ->rules(['nullable', 'array', Rule::in(array_keys($positions))]),
 
-                        self::getIsActiveFormField(),
+                        Toggle::make('is_active')
+                            ->label(__('admin/default.labels.is_active'))
+                            ->default(true)
+                            ->required(),
 
-                        self::getSortOrderFormField(),
+                        TextInput::make('sort_order')
+                            ->label(__('admin/default.labels.sort_order'))
+                            ->numeric()
+                            ->rules(['numeric', 'min:0'])
+                            ->default(1)
+                            ->required(),
 
-                        self::getIsNoIndexFormField(),
-                    ])
+                        Toggle::make('is_noindex')
+                            ->label(__('admin/default.labels.is_noindex'))
+                            ->default(false)
+                            ->required(),
+                    ]),
             ]);
     }
 }

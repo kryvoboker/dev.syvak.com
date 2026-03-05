@@ -11,18 +11,15 @@ class SearchProductShowRequest extends FormRequest
     /**
      * @return array<string, array>
      */
-	public function rules(): array
-	{
-		return [
+    public function rules(): array
+    {
+        return [
 
-		];
-	}
+        ];
+    }
 
-    /**
-     * @return bool
-     */
-	public function authorize(): bool
-	{
-		return true;
-	}
+    public function authorize(): bool
+    {
+        return true;
+    }
 }

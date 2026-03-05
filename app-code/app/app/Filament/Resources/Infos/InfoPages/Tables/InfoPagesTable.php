@@ -5,33 +5,25 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Infos\InfoPages\Tables;
 
 use App\Enums\PositionInPageEnum;
-use App\Filament\Resources\Trait\Filters\BooleanFilterTrait;
-use App\Filament\Resources\Trait\Filters\CommonTextFilterTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Filament\Resources\Trait\Tables\BooleanTableTrait;
-use App\Filament\Resources\Trait\Tables\CommonTextTableTrait;
-use App\Filament\Resources\Trait\Tables\DateTableTrait;
-use App\Filament\Resources\Trait\Tables\NumericTableTrait;
-use App\Filament\Resources\Trait\Tables\SlugTableTrait;
 use App\Models\Infos\InfoPage;
+use App\Models\Infos\InfoPageDescription;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class InfoPagesTable
 {
-    use LanguageTrait, CommonTextTableTrait, NumericTableTrait,
-        BooleanTableTrait, DateTableTrait, SlugTableTrait,
-        BooleanFilterTrait, CommonTextFilterTrait;
+    use LanguageTrait;
 
-    /**
-     * @param Table $table
-     *
-     * @return Table
-     */
     public static function configure(Table $table): Table
     {
         $current_language_id = self::getCurrentLanguageId();
@@ -45,11 +37,12 @@ class InfoPagesTable
                 ]);
             })
             ->columns([
-                self::getTextTableField([
-                    'field_name'         => 'infoPageDescription.title',
-                    'label'              => __('admin/default.columns.title'),
-                    'searchable'         => ['title'],
-                    'get_state_using_cb' => function (InfoPage $record) use ($current_language_id) {
+                TextColumn::make('infoPageDescription.title')
+                    ->label(__('admin/default.columns.title'))
+                    ->searchable(['title'])
+                    ->sortable()
+                    ->limit(50)
+                    ->getStateUsing(function (InfoPage $record) use ($current_language_id) {
                         if (($returned_value = self::validateLanguageIdIsNotNull($current_language_id)) !== null) {
                             return $returned_value;
                         }
@@ -61,36 +54,43 @@ class InfoPagesTable
                             $info_page_description = $record->infoPageDescription()->first();
                         }
 
+                        /** @var InfoPageDescription|null $info_page_description */
                         return $info_page_description?->title ?? '-';
-                    },
-                ]),
+                    }),
 
-                self::getTextTableField([
-                    'field_name'            => 'positions',
-                    'label'                 => __('admin/infos/info_pages.columns.position'),
-                    'searchable'            => ['positions'],
-                    'format_state_using_cb' => function ($state): string {
+                TextColumn::make('positions')
+                    ->label(__('admin/infos/info_pages.columns.position'))
+                    ->searchable(['positions'])
+                    ->sortable()
+                    ->limit(50)
+                    ->badge()
+                    ->formatStateUsing(function ($state): string {
                         if (empty($state)) {
                             return '-';
                         }
 
                         return collect($state)
-                            ->map(fn(PositionInPageEnum $enum) => Str::ucfirst($enum->value))
+                            ->map(fn (PositionInPageEnum $enum) => Str::ucfirst($enum->value))
                             ->join(', ');
-                    },
-                    'badge'                 => true,
-                ]),
+                    }),
 
-                self::getNumericTableField([
-                    'field_name' => 'sort_order',
-                    'label'      => __('admin/default.columns.sort_order'),
-                ]),
+                TextColumn::make('sort_order')
+                    ->label(__('admin/default.columns.sort_order'))
+                    ->numeric()
+                    ->sortable(),
 
-                self::getIsActiveTableField(),
+                IconColumn::make('is_active')
+                    ->label(__('admin/default.labels.is_active'))
+                    ->boolean()
+                    ->sortable(),
 
-                self::getSlugTableField([
-                    'searchable'         => ['slug'],
-                    'get_state_using_cb' => function (InfoPage $info_page) use ($current_language_id) {
+                TextColumn::make('slugs.slug')
+                    ->label(__('admin/default.columns.slug'))
+                    ->searchable(['slug'])
+                    ->sortable()
+                    ->limit(50)
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->getStateUsing(function (InfoPage $info_page) use ($current_language_id) {
                         if ($current_language_id === null) {
                             return '-';
                         }
@@ -99,26 +99,43 @@ class InfoPagesTable
                             ->firstWhere('language_id', $current_language_id)?->slug;
 
                         return $slug ?? '-';
-                    },
-                ]),
+                    }),
 
-                self::getIsNoIndexTableField(),
+                IconColumn::make('is_noindex')
+                    ->label(__('admin/default.labels.is_noindex'))
+                    ->boolean()
+                    ->sortable(),
 
-                self::getCreatedAtTableField(),
+                TextColumn::make('created_at')
+                    ->label(__('admin/default.columns.created_at'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-                self::getUpdatedAtTableField(),
+                TextColumn::make('updated_at')
+                    ->label(__('admin/default.columns.updated_at'))
+                    ->date(config('app.datetime_format'), config('app.timezone'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                self::getIsActiveFilterField(),
+                TernaryFilter::make('is_active')
+                    ->label(__('admin/default.filters.active'))
+                    ->placeholder(__('admin/default.placeholders.all'))
+                    ->trueLabel(__('admin/default.filters.active_only'))
+                    ->falseLabel(__('admin/default.filters.inactive_only')),
 
-                self::getTextFilterField([
-                    'field_name'   => 'title',
-                    'filter_label' => __('admin/default.filters.title'),
-                    'placeholder'  => __('admin/default.placeholders.title'),
-                    'query_cb'     => function (Builder $query, array $data): Builder {
+                Filter::make('title')
+                    ->label(__('admin/default.filters.title'))
+                    ->schema([
+                        TextInput::make('title')
+                            ->label(__('admin/default.filters.title'))
+                            ->placeholder(__('admin/default.placeholders.title'))
+                            ->minLength(3)
+                            ->maxLength(255),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
                         $search = $data['title'] ?? null;
-
-                        // Apply validation in query
                         if (str_more_or_equal_length($search, 3) === false) {
                             return $query;
                         }
@@ -129,10 +146,18 @@ class InfoPagesTable
                             'infoPageDescription',
                             function (Builder $query) use ($search) {
                                 return $query->where('title', 'LIKE', "%$search%");
-                            }
+                            },
                         );
-                    },
-                ]),
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        $search = $data['title'] ?? null;
+
+                        if (str_more_or_equal_length($search, 3) === false) {
+                            return null;
+                        }
+
+                        return __('admin/default.filters.title') . ': ' . Str::trim($search);
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),

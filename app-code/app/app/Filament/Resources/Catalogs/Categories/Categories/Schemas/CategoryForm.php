@@ -4,32 +4,25 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Categories\Categories\Schemas;
 
-use App\Filament\Resources\Trait\Forms\ImageFormTrait;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
-use App\Filament\Resources\Trait\Forms\SelectFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
-use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
-use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Settings\Language;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\Rule;
 
 class CategoryForm
 {
-    use LanguageTrait, SlugFormTrait, MetaTextFormTrait, ToggleCheckboxFormTrait,
-        SortOrderFormTrait, ImageFormTrait, SelectFormTrait;
+    use LanguageTrait, MetaTextFormTrait, SlugFormTrait;
 
-    /**
-     * @param Schema $schema
-     *
-     * @return Schema
-     */
     public static function configure(Schema $schema): Schema
     {
         $active_languages = self::getAcriveLanguages();
@@ -52,9 +45,7 @@ class CategoryForm
     }
 
     /**
-     * @param Collection<Language> $active_languages
-     *
-     * @return Tabs\Tab
+     * @param  Collection<Language>  $active_languages
      */
     protected static function createGeneralTab(Collection $active_languages): Tabs\Tab
     {
@@ -69,17 +60,14 @@ class CategoryForm
             ->schema([
                 Section::make(__('admin/default.sections.basic_info'))
                     ->schema([
-                        self::getSelectFormField([
-                            'field_name'  => 'parent_id',
-                            'label'       => __('admin/default.labels.parent_category'),
-                            'helper_text' => __('admin/default.helpers.parent_category'),
-                            'placeholder' => __('admin/default.placeholders.select_parent_category'),
-                            'options'     => function (?Category $record) use ($current_language_id) {
+                        Select::make('parent_id')
+                            ->label(__('admin/default.labels.parent_category'))
+                            ->helperText(__('admin/default.helpers.parent_category'))
+                            ->placeholder(__('admin/default.placeholders.select_parent_category'))
+                            ->options(function (?Category $record) use ($current_language_id) {
                                 $query = Category::query()
                                     ->with([
-                                        'categoryDescription' => function (HasMany $query) use ($current_language_id) {
-                                            $query->where('language_id', $current_language_id);
-                                        }
+                                        'categoryDescription' => fn ($query) => $query->where('language_id', $current_language_id),
                                     ])
                                     ->where('is_active', true)
                                     ->orderBy('sort_order');
@@ -95,47 +83,70 @@ class CategoryForm
 
                                         return [$category->id => $name];
                                     });
-                            },
-                            'rules'       => ['numeric', Rule::exists('categories', 'id')],
-                        ]),
+                            })
+                            ->searchable()
+                            ->nullable()
+                            ->preload(false)
+                            ->live(false)
+                            ->rules(['nullable', 'numeric', Rule::exists('categories', 'id')]),
 
-                        self::getIsActiveFormField(),
+                        Toggle::make('is_active')
+                            ->label(__('admin/default.labels.is_active'))
+                            ->default(true)
+                            ->required(),
 
-                        self::getSortOrderFormField(),
+                        TextInput::make('sort_order')
+                            ->label(__('admin/default.labels.sort_order'))
+                            ->numeric()
+                            ->rules(['numeric', 'min:0'])
+                            ->default(1)
+                            ->required(),
                     ])
                     ->columnSpanFull(),
             ]);
     }
 
-    /**
-     * @return Tabs\Tab
-     */
     protected static function createImagesTab(): Tabs\Tab
     {
         return Tabs\Tab::make(__('admin/default.tabs.images'))
             ->schema([
                 Section::make(__('admin/default.sections.images'))
                     ->schema([
-                        self::getImageFormField([
-                            'field_name'   => 'icon',
-                            'label'        => __('admin/default.labels.icon'),
-                            'directory'    => config('app.images.category.image_path'),
-                            'max_size'     => (int)config('app.images.category.upload.max_size_kb'),
-                            'rules'        => ['nullable', Rule::file()::types(['image/jpeg', 'image/png', 'image/svg+xml']), 'max:' . (int)config('app.images.category.upload.max_size_kb')],
-                            'image_width'  => (int)config('app.images.category.preview_in_page_in_admin.width'),
-                            'image_height' => (int)config('app.images.category.preview_in_page_in_admin.height'),
-                        ]),
+                        FileUpload::make('icon')
+                            ->label(__('admin/default.labels.icon'))
+                            ->image()
+                            ->directory(config('app.images.category.image_path'))
+                            ->maxSize((int) config('app.images.category.upload.max_size_kb'))
+                            ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png', 'image/svg+xml']), 'max:' . (int) config('app.images.category.upload.max_size_kb')])
+                            ->preserveFilenames()
+                            ->imageEditor()
+                            ->imageEditorViewportWidth((int) config('app.images.category.preview_in_page_in_admin.width'))
+                            ->imageEditorViewportHeight((int) config('app.images.category.preview_in_page_in_admin.height'))
+                            ->imageEditorAspectRatios([
+                                '1:1'  => '1:1',
+                                '4:3'  => '4:3',
+                                '16:9' => '16:9',
+                            ])
+                            ->nullable(),
 
-                        self::getImageFormField([
-                            'field_name'   => 'preview_image',
-                            'directory'    => config('app.images.category.image_path'),
-                            'max_size'     => (int)config('app.images.category.upload.max_size_kb'),
-                            'rules'        => ['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . (int)config('app.images.category.upload.max_size_kb')],
-                            'image_width'  => (int)config('app.images.category.preview_in_page_in_admin.width'),
-                            'image_height' => (int)config('app.images.category.preview_in_page_in_admin.height'),
-                        ]),
+                        FileUpload::make('preview_image')
+                            ->label(__('admin/default.labels.image'))
+                            ->image()
+                            ->directory(config('app.images.category.image_path'))
+                            ->maxSize((int) config('app.images.category.upload.max_size_kb'))
+                            ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . (int) config('app.images.category.upload.max_size_kb')])
+                            ->preserveFilenames()
+                            ->imageEditor()
+                            ->imageEditorViewportWidth((int) config('app.images.category.preview_in_page_in_admin.width'))
+                            ->imageEditorViewportHeight((int) config('app.images.category.preview_in_page_in_admin.height'))
+                            ->imageEditorAspectRatios([
+                                '1:1'  => '1:1',
+                                '4:3'  => '4:3',
+                                '16:9' => '16:9',
+                            ])
+                            ->nullable(),
                     ])
-                    ->columns()
+                    ->columns(),
             ]);
     }
 }

@@ -8,13 +8,10 @@ use Illuminate\Support\Facades\Cache;
 
 final class OpenAiRateLimiterService
 {
-    /**
-     * @return void
-     */
     public function throttle(): void
     {
-        $maxCalls = (int)config('open-ai.api_max_calls', 1);
-        $waitSec  = (int)config('open-ai.api_wait_time_seconds', 1);
+        $maxCalls = (int) config('open-ai.api_max_calls', 1);
+        $waitSec  = (int) config('open-ai.api_wait_time_seconds', 1);
 
         if ($maxCalls < 1) {
             $maxCalls = 1;
@@ -25,7 +22,7 @@ final class OpenAiRateLimiterService
 
         // A window of some time is enough to keep a counter between requests
         $key = config('open-ai.api_call_counter_cache_key');
-        $ttl = (int)config('open-ai.api_call_counter_cache_ttl_seconds');
+        $ttl = (int) config('open-ai.api_call_counter_cache_ttl_seconds');
 
         $count = Cache::increment($key);
 

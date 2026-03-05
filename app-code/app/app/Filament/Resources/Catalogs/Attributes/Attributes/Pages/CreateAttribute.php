@@ -8,19 +8,18 @@ use App\Filament\Resources\Catalogs\Attributes\Attributes\AttributeResource;
 use App\Models\Catalogs\Attributes\Attribute;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use LogicException;
 
 class CreateAttribute extends CreateRecord
 {
-    protected static string     $resource     = AttributeResource::class;
-    protected array             $descriptions = [];
-    public null|Model|Attribute $record       = null;
+    protected static string $resource = AttributeResource::class;
+
+    protected array $descriptions = [];
+
+    public ?Model $record = null;
 
     /**
      * Mutate form data before creating record
-     *
-     * @param array $data
-     *
-     * @return array
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
@@ -34,33 +33,29 @@ class CreateAttribute extends CreateRecord
 
     /**
      * Handle record creation after attribute is created
-     *
-     * @return void
      */
     protected function afterCreate(): void
     {
-        if (!empty($this->descriptions)) {
+        if (! empty($this->descriptions)) {
             $descriptions_data = [];
 
             foreach ($this->descriptions as $language_id => $description) {
-                if (!empty($description['name'])) {
+                if (! empty($description['name'])) {
                     $descriptions_data[] = [
-                        'language_id' => (int)$language_id,
+                        'language_id' => (int) $language_id,
                         'name'        => $description['name'],
                     ];
                 }
             }
 
-            if (!empty($descriptions_data)) {
-                $this->record->attributeDescription()->createMany($descriptions_data);
+            if (! empty($descriptions_data)) {
+                $this->getAttributeRecord()->attributeDescription()->createMany($descriptions_data);
             }
         }
     }
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -69,11 +64,18 @@ class CreateAttribute extends CreateRecord
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {
         return __('admin/catalogs/attributes/attributes.navigation_label');
+    }
+
+    private function getAttributeRecord(): Attribute
+    {
+        if (! $this->record instanceof Attribute) {
+            throw new LogicException('Attribute record is not initialized.');
+        }
+
+        return $this->record;
     }
 }

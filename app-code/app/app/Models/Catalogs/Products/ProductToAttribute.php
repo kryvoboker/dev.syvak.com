@@ -30,7 +30,7 @@ class ProductToAttribute extends Model
     }
 
     /**
-     * @return BelongsTo<Product>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
@@ -38,7 +38,7 @@ class ProductToAttribute extends Model
     }
 
     /**
-     * @return BelongsTo<Attribute>
+     * @return BelongsTo<Attribute, $this>
      */
     public function attribute(): BelongsTo
     {

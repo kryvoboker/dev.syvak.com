@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\SearchProductController;
 use Illuminate\Support\Facades\Route;

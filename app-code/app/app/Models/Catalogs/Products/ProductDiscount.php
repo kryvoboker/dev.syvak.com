@@ -25,18 +25,18 @@ class ProductDiscount extends Model
     protected function casts(): array
     {
         return [
-            'product_id'         => 'integer',
-            'user_group_id'  => 'integer',
-            'quantity'           => 'integer',
-            'priority'           => 'integer',
-            'price'              => 'float',
-            'date_start'         => 'datetime',
-            'date_end'           => 'datetime',
+            'product_id'    => 'integer',
+            'user_group_id' => 'integer',
+            'quantity'      => 'integer',
+            'priority'      => 'integer',
+            'price'         => 'float',
+            'date_start'    => 'datetime',
+            'date_end'      => 'datetime',
         ];
     }
 
     /**
-     * @return BelongsTo<Product>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {

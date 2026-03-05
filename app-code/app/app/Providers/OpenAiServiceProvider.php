@@ -17,7 +17,7 @@ class OpenAiServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Client::class, function () {
-            $key = (string)config('open-ai.api_key');
+            $key = (string) config('open-ai.api_key');
 
             if ($key === '') {
                 throw new RuntimeException('OpenAi API key is empty!');

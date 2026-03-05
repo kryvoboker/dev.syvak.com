@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Товари',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'            => 'Товар',
         'plural_model'     => 'Товари',
         'add_discount'     => 'Додати знижку',
@@ -15,13 +17,13 @@ return [
     ],
 
     // Pages
-    'pages'            => [
+    'pages' => [
         'create' => 'Створити товар',
         'edit'   => 'Редагувати товар',
     ],
 
     // Errors
-    'errors'           => [
+    'errors' => [
         'duplicate_attribute_language' => 'Комбінація атрибуту та мови повинна бути унікальною!',
     ],
 ];

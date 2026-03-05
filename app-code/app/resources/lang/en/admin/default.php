@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Menu items
-    'menu'         => [
+    'menu' => [
         'item_catalog'  => 'Catalog',
         'info_pages'    => 'Info Pages',
         'item_users'    => 'Users',
@@ -10,7 +12,7 @@ return [
     ],
 
     // Texts
-    'texts'        => [
+    'texts' => [
         'language'  => 'Language',
         'facebook'  => 'Facebook',
         'twitter'   => 'Twitter',
@@ -22,7 +24,7 @@ return [
     ],
 
     // Columns
-    'columns'      => [
+    'columns' => [
         'title'             => 'Title',
         'name'              => 'Name',
         'lastname'          => 'Last Name',
@@ -52,7 +54,7 @@ return [
     ],
 
     // Labels
-    'labels'       => [
+    'labels' => [
         'model'                 => 'Model',
         'sku'                   => 'SKU',
         'ean'                   => 'EAN',
@@ -109,14 +111,14 @@ return [
     ],
 
     // Helpers
-    'helpers'      => [
+    'helpers' => [
         'categories'      => 'Select the categories',
         'parent_category' => 'Select the parent category under which this category will be nested. Leave empty to make it a top-level category.',
         'svg_icon'        => 'You can paste an SVG icon code here. Make sure the SVG code does not contain any <code>&lt;script&gt;</code> tags for security reasons.',
     ],
 
     // Tabs
-    'tabs'         => [
+    'tabs' => [
         'general'      => 'General',
         'translations' => 'Translations',
         'categories'   => 'Categories',
@@ -128,7 +130,7 @@ return [
     ],
 
     // Sections
-    'sections'     => [
+    'sections' => [
         'basic_info'        => 'Basic Information',
         'stock'             => 'Stock',
         'pricing'           => 'Pricing',
@@ -145,7 +147,7 @@ return [
     ],
 
     // Filters
-    'filters'      => [
+    'filters' => [
         'active'                  => 'Active',
         'default'                 => 'Default',
         'default_only'            => 'Default Only',
@@ -194,17 +196,17 @@ return [
     ],
 
     // Success
-    'success'      => [
+    'success' => [
         'title' => 'Success',
     ],
 
     // Errors
-    'errors'       => [
+    'errors' => [
         'title'                           => 'Error',
         'no_language'                     => 'No default language configured. Please configure languages in settings!',
         'validation_duplicate_categories' => 'The selected categories contain duplicates. Please remove the duplicates and try again.',
         'something_went_wrong'            => 'Something went wrong. Please try again later.',
         'category_path_not_found'         => 'Category path <b>:id</b> not found!',
         'create_or_update_slugs_failed'   => 'Creating or updating slugs (SEO URLs) failed for some languages. Please check the slugs and try again. Perhaps one of the slugs (SEO URLs) already exists.',
-    ]
+    ],
 ];

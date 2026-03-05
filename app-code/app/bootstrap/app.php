@@ -7,6 +7,7 @@ use App\Http\Middleware\User\SetCommonPreferences;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -33,7 +34,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             }
 
             // Return null to let Laravel handle other errors by default
-            return null;
+
         });
     })->create();
 
@@ -42,14 +43,17 @@ $app = Application::configure(basePath: dirname(__DIR__))
  */
 
 /*$app_env      = 'production';
+$time_zone     = 'Europe/Kiev';
 $new_storage_path = '/var/webroot/sites/syvak.com/app/storage';
 $new_public_path  = '/var/webroot/sites/syvak.com/app/httpdocs';
 
 $_ENV['APP_ENV']          = $app_env;
+$_ENV['TZ']          = $time_zone;
 $_ENV['NEW_STORAGE_PATH'] = $new_storage_path;
 $_ENV['NEW_PUBLIC_PATH']  = $new_public_path;
 
 putenv("APP_ENV=$app_env");
+putenv("TZ=$time_zone");
 putenv("NEW_STORAGE_PATH=$new_storage_path");
 putenv("NEW_PUBLIC_PATH=$new_public_path");
 

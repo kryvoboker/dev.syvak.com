@@ -44,69 +44,48 @@ class AppSetting extends Model
         ];
     }
 
-    /**
-     * @return Attribute
-     */
     public function titles(): Attribute
     {
         return Attribute::make(
-            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
         );
     }
 
-    /**
-     * @return Attribute
-     */
     public function metaTitles(): Attribute
     {
         return Attribute::make(
-            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
         );
     }
 
-    /**
-     * @return Attribute
-     */
     public function metaDescriptions(): Attribute
     {
         return Attribute::make(
-            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
         );
     }
 
-    /**
-     * @return Attribute
-     */
     public function metaKeywords(): Attribute
     {
         return Attribute::make(
-            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
         );
     }
 
-    /**
-     * @return Attribute
-     */
     public function workTime(): Attribute
     {
         return Attribute::make(
-            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
         );
     }
 
-    /**
-     * @return Attribute
-     */
     public function contactAddresses(): Attribute
     {
         return Attribute::make(
-            set: fn($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
         );
     }
 
-    /**
-     * @return self|null
-     */
     public function getAppSettings(): ?self
     {
         return self::first();

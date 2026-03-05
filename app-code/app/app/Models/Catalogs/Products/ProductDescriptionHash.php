@@ -29,19 +29,13 @@ class ProductDescriptionHash extends Model
     }
 
     /**
-     * @return BelongsTo<Product>
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * @param int    $product_id
-     * @param string $hash
-     *
-     * @return self|null
-     */
     public static function getDescriptionHash(int $product_id, string $hash): ?self
     {
         return self::query()

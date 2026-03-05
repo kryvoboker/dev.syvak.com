@@ -8,11 +8,6 @@ use Illuminate\Support\Str;
 
 final class AiPromptHasherService
 {
-    /**
-     * @param string $prompt
-     *
-     * @return string
-     */
     public static function normalize(string $prompt): string
     {
         $prompt = Str::trim($prompt);
@@ -20,11 +15,6 @@ final class AiPromptHasherService
         return Str::lower($prompt);
     }
 
-    /**
-     * @param string $prompt
-     *
-     * @return string
-     */
     public static function hash(string $prompt): string
     {
         return hash('sha256', self::normalize($prompt));

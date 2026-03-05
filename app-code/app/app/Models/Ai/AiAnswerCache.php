@@ -16,9 +16,6 @@ class AiAnswerCache extends Model
         'answer',
     ];
 
-    /**
-     * @return MorphTo
-     */
     public function hashable(): MorphTo
     {
         return $this->morphTo();

@@ -26,7 +26,6 @@ class UpdateCurrencyRatesCommand extends Command
     protected $description = 'Update app currency exchange rates from external source';
 
     /**
-     * @return int
      * @throws Exception
      */
     public function handle(): int

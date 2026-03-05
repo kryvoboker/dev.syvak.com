@@ -193,6 +193,76 @@
         @apply text-11px md:text-sm lg:text-base bp1920px:text-lg font-light tracking-0.04em;
     }
 
+    .footer {
+        @apply border-t border-opacity-light-gray-40% pt-10 pb-8 md:pt-14 md:pb-10 lg:pt-16 lg:pb-6;
+    }
+
+    .footer-main-grid {
+        @apply grid grid-cols-1 gap-y-10 md:grid-cols-2 md:gap-x-12 md:gap-y-10 lg:grid-cols-4 lg:gap-x-12;
+    }
+
+    .footer-subscribe {
+        @apply flex flex-col gap-4;
+    }
+
+    .footer-contacts,
+    .footer-menu,
+    .footer-info {
+        @apply flex flex-col gap-4;
+    }
+
+    .footer-title {
+        @apply text-accent uppercase;
+    }
+
+    .footer-list {
+        @apply flex flex-col gap-2 md:gap-3;
+    }
+
+    .footer-link {
+        @apply inline-flex uppercase tracking-0.04em transition-colors duration-300 ease-in-out hover:text-light-gray;
+    }
+
+    .footer-phone {
+        @apply text-32px md:text-42px lg:text-[3rem] leading-none tracking-normal;
+    }
+
+    .footer-subscribe-btn {
+        @apply inline-flex items-center justify-between gap-3 border border-opacity-light-gray-40% bg-white px-4 py-2 text-black md:px-5 md:py-3;
+    }
+
+    .footer-subscribe-btn-arrow {
+        @apply inline-flex size-12 items-center justify-center border border-light-black text-32px leading-none;
+    }
+
+    .footer-socials {
+        @apply flex items-center gap-4;
+    }
+
+    .footer-social-link {
+        @apply inline-flex items-center justify-center text-white transition-opacity duration-300 ease-in-out hover:opacity-70;
+    }
+
+    .footer-social-link svg {
+        @apply size-10 lg:size-12;
+    }
+
+    .footer-socials-inline {
+        @apply md:flex lg:hidden;
+    }
+
+    .footer-brand-row {
+        @apply hidden mt-10 md:mt-12 lg:mt-16 md:flex md:items-end md:justify-between;
+    }
+
+    .footer-brand-link {
+        @apply inline-block font-inter font-semibold uppercase leading-none tracking-0.05em text-[4.6rem] md:text-[8.75rem] lg:text-[13.5rem];
+    }
+
+    .footer-socials-desktop {
+        @apply hidden lg:flex;
+    }
+
     .dark-btn:active,
     .dark-btn:hover {
         @apply text-black border-light-gray bg-light-gray cursor-pointer duration-500 ease-in-out;

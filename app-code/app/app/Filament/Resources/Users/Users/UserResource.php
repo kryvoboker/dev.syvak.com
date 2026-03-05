@@ -17,16 +17,20 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class UserResource extends Resource
 {
     use TotalModelItemsResourceTrait;
 
-    protected static ?string                $model                = User::class;
-    protected static string|BackedEnum|null $navigationIcon       = Heroicon::User;
-    protected static ?string                $recordTitleAttribute = 'full_name';
-    protected static string|null|UnitEnum   $navigationGroup      = AdminNavigationGroupEnum::Users;
+    protected static ?string $model = User::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::User;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static string|null|UnitEnum $navigationGroup = AdminNavigationGroupEnum::Users;
 
     public static function form(Schema $schema): Schema
     {
@@ -56,8 +60,6 @@ class UserResource extends Resource
 
     /**
      * Signature in the navigation menu (left panel)
-     *
-     * @return string
      */
     public static function getNavigationLabel(): string
     {
@@ -66,8 +68,6 @@ class UserResource extends Resource
 
     /**
      * A single model name (e.g. in headings, "Create X" button)
-     *
-     * @return string
      */
     public static function getModelLabel(): string
     {
@@ -76,11 +76,24 @@ class UserResource extends Resource
 
     /**
      * Plural model name (e.g. in lists, section headings)
-     *
-     * @return string
      */
     public static function getPluralModelLabel(): string
     {
         return __('admin/users/users.labels.plural_model');
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'name',
+            'lastname',
+            'email',
+            'telephone',
+        ];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return trim((string) $record->getAttribute('name') . ' ' . (string) $record->getAttribute('lastname'));
     }
 }

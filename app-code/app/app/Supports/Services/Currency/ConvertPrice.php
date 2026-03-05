@@ -13,20 +13,14 @@ use RuntimeException;
 final class ConvertPrice
 {
     private Currency $default_currency;
-    /**
-     * @var null|Collection<string, Currency> $currencies
-     */
-    private ?Collection $currencies = null;
-    private string      $locale;
 
     /**
-     * @param float|int   $price
-     * @param string|null $currency_code
-     * @param float|int   $exchange_rate
-     * @param bool        $is_formatting
-     *
-     * @return string|float
+     * @var null|Collection<string, Currency>
      */
+    private ?Collection $currencies = null;
+
+    private string $locale;
+
     public function format(float|int $price, ?string $currency_code = null, float|int $exchange_rate = 0, bool $is_formatting = true): string|float
     {
         $this->setValues();
@@ -49,19 +43,19 @@ final class ConvertPrice
 
         $decimal_place = $currency->decimal_places;
 
-        if (!$exchange_rate) {
-            $exchange_rate = (float)$currency->exchange_rate;
+        if (! $exchange_rate) {
+            $exchange_rate = (float) $currency->exchange_rate;
         }
 
         $amount = $exchange_rate ? $price * $exchange_rate : $price;
 
-        if (!$decimal_place) {
+        if (! $decimal_place) {
             $amount = ceil($amount);
         } else {
             $amount = round($amount, $decimal_place);
         }
 
-        if (!$is_formatting) {
+        if (! $is_formatting) {
             return $amount;
         }
 
@@ -69,24 +63,17 @@ final class ConvertPrice
             $amount,
             $currency_code,
             $this->locale,
-            $decimal_place
+            $decimal_place,
         );
     }
 
-    /**
-     * @param float  $price
-     * @param string $code_from
-     * @param string $code_to
-     *
-     * @return float
-     */
     public function convert(float $price, string $code_from, string $code_to): float
     {
         $this->setValues();
 
         if ($this->default_currency->code == $code_from) {
             $code_from = $this->default_currency->exchange_rate;
-        } else if ($this->currencies->has($code_from)) {
+        } elseif ($this->currencies->has($code_from)) {
             $code_from = $this->currencies->get($code_from)->exchange_rate;
         } else {
             $currency = new Currency()->getActiveCurrencyByCode($code_from);
@@ -102,7 +89,7 @@ final class ConvertPrice
 
         if ($this->default_currency->code == $code_to) {
             $code_to = $this->default_currency->exchange_rate;
-        } else if ($this->currencies->has($code_to)) {
+        } elseif ($this->currencies->has($code_to)) {
             $code_to = $this->currencies->get($code_to)->exchange_rate;
         } else {
             $currency = new Currency()->getActiveCurrencyByCode($code_to);
@@ -119,18 +106,15 @@ final class ConvertPrice
         return $price * ($code_to / $code_from);
     }
 
-    /**
-     * @return void
-     */
     private function setValues(): void
     {
-        if (!isset($this->locale)) {
+        if (! isset($this->locale)) {
             $this->locale = app()->getLocale();
         }
 
-        if (!isset($this->default_currency)) {
+        if (! isset($this->default_currency)) {
             $currency = new Currency()->getActiveCurrencyByCode(
-                config('app.currency.default_currency_code')
+                config('app.currency.default_currency_code'),
             );
 
             if ($currency === null) {
@@ -149,13 +133,6 @@ final class ConvertPrice
         }
     }
 
-    /**
-     * @param string      $price_string
-     * @param string|null $currency_symbol
-     * @param string|null $currency_code
-     *
-     * @return string
-     */
     public function replaceCurrencySymbolToCode(string $price_string, ?string $currency_symbol = null, ?string $currency_code = null): string
     {
         if ($currency_symbol === null) {
@@ -169,11 +146,6 @@ final class ConvertPrice
         return Str::replace($currency_symbol, $currency_code, $price_string, caseSensitive: false);
     }
 
-    /**
-     * @param Currency $default_currency
-     *
-     * @return ConvertPrice
-     */
     public function setDefaultCurrency(Currency $default_currency): ConvertPrice
     {
         $this->default_currency = $default_currency;
