@@ -12,10 +12,6 @@ use Throwable;
 class SearchProductAction
 {
     /**
-     * @param string $keyword
-     * @param int    $per_page
-     *
-     * @return AnonymousResourceCollection|SearchProductResource
      * @throws Throwable
      */
     public function handle(string $keyword, int $per_page): AnonymousResourceCollection|SearchProductResource

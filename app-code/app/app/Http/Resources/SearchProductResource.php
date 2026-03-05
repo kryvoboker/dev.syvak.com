@@ -25,23 +25,23 @@ class SearchProductResource extends JsonResource
         $price                = format_price(
             $this->price,
             config('app.currency.default_currency_code'),
-            (float)config('app.currency.default_exchange_rate')
+            (float) config('app.currency.default_exchange_rate'),
         );
 
         return [
-            'id'           => $this->id,
-            'sku'          => escape_special_html($this->sku),
-            'price'        => replace_currency_symbol_to_code($price),
-            'image_data'   => [
-                'urls'   => multiple_convert_img_and_get_url(
+            'id'         => $this->id,
+            'sku'        => escape_special_html($this->sku),
+            'price'      => replace_currency_symbol_to_code($price),
+            'image_data' => [
+                'urls' => multiple_convert_img_and_get_url(
                     $this->image,
-                    (int)$search_product_sizes['width'],
-                    (int)$search_product_sizes['height'],
+                    (int) $search_product_sizes['width'],
+                    (int) $search_product_sizes['height'],
                 ),
-                'width'  => (int)$search_product_sizes['width'],
-                'height' => (int)$search_product_sizes['height'],
+                'width'  => (int) $search_product_sizes['width'],
+                'height' => (int) $search_product_sizes['height'],
             ],
-            'link'         => $this->whenLoaded('slugs', function () {
+            'link' => $this->whenLoaded('slugs', function () {
                 $slug = $this->slugs->first()?->slug;
 
                 return $slug ? localizedRoute('localized.catalog.product.show', compact('slug')) : '';
@@ -55,14 +55,14 @@ class SearchProductResource extends JsonResource
                     'description' => escape_special_html($product_description?->description),
                 ];
             }),
-            'discount'     => $this->whenLoaded('productDiscount', function () {
+            'discount' => $this->whenLoaded('productDiscount', function () {
                 $product_discount = $this->productDiscount->first();
 
                 if ($product_discount !== null) {
                     $discounted_price = format_price(
                         $product_discount->price,
                         config('app.currency.default_currency_code'),
-                        (float)config('app.currency.default_exchange_rate')
+                        (float) config('app.currency.default_exchange_rate'),
                     );
 
                     return [
@@ -73,8 +73,8 @@ class SearchProductResource extends JsonResource
                     ];
                 }
 
-                return null;
-            })
+                return [];
+            }),
         ];
     }
 }

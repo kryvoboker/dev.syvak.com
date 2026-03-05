@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\NullHandler;
@@ -7,6 +9,8 @@ use Monolog\Handler\SocketHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Handler\TelegramBotHandler;
+use Monolog\Processor\MemoryPeakUsageProcessor;
+use Monolog\Processor\MemoryUsageProcessor;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Monolog\Processor\UidProcessor;
 use Monolog\Processor\WebProcessor;
@@ -60,7 +64,7 @@ return [
 
         'stack' => [
             'driver'            => 'stack',
-            'channels'          => explode(',', (string)env('LOG_STACK', 'single')),
+            'channels'          => explode(',', (string) env('LOG_STACK', 'single')),
             'ignore_exceptions' => false,
         ],
 
@@ -97,7 +101,7 @@ return [
                 'port'             => env('PAPERTRAIL_PORT'),
                 'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
             ],
-            'processors'   => [PsrLogMessageProcessor::class],
+            'processors' => [PsrLogMessageProcessor::class],
         ],
 
         'stderr' => [
@@ -107,8 +111,8 @@ return [
             'handler_with' => [
                 'stream' => 'php://stderr',
             ],
-            'formatter'    => env('LOG_STDERR_FORMATTER'),
-            'processors'   => [PsrLogMessageProcessor::class],
+            'formatter'  => env('LOG_STDERR_FORMATTER'),
+            'processors' => [PsrLogMessageProcessor::class],
         ],
 
         'syslog' => [
@@ -141,11 +145,15 @@ return [
             'formatter_with' => [
                 'dateFormat' => 'Y-m-d H:i:s',
             ],
-            'processors'     => [UidProcessor::class, WebProcessor::class],
-            'handler_with'   => [
+            'processors' => [
+                UidProcessor::class,
+                WebProcessor::class,
+                MemoryPeakUsageProcessor::class,
+                MemoryUsageProcessor::class,
+            ],
+            'handler_with' => [
                 'connectionString' => env('LOG_SOCKET_URL', '127.0.0.1:9913'),
             ],
-//            'tap'            => [\App\Logging\CustomizeFormatter::class],
         ],
 
         'monolog_telegram_bot' => [
@@ -154,19 +162,24 @@ return [
             'handler'        => TelegramBotHandler::class,
             'formatter'      => LineFormatter::class,
             'formatter_with' => [
-                'format'                     => "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
+                'format'                     => '[%datetime%] ' . config('app.name') . " - %channel%.%level_name%: %message% %context% %extra%\n",
                 'dateFormat'                 => 'Y-m-d H:i:s',
                 'allowInlineLineBreaks'      => true,
                 'ignoreEmptyContextAndExtra' => true,
             ],
-            'processors'     => [UidProcessor::class, WebProcessor::class, PsrLogMessageProcessor::class],
-            'handler_with'   => [
-                'apiKey'               => config('buggregator.telegram_token'),
-                'channel'              => config('buggregator.kamaz_id'),
+            'processors' => [
+                UidProcessor::class,
+                WebProcessor::class,
+                PsrLogMessageProcessor::class,
+                MemoryPeakUsageProcessor::class,
+                MemoryUsageProcessor::class,
+            ],
+            'handler_with' => [
+                'apiKey'               => config('monolog.telegram_token'),
+                'channel'              => config('monolog.kamaz_id'),
                 'splitLongMessages'    => true,
                 'delayBetweenMessages' => 1,
             ],
-//            'tap'            => [\App\Logging\CustomizeFormatter::class],
         ],
 
     ],

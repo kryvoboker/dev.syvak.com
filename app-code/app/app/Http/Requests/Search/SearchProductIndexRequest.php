@@ -11,18 +11,15 @@ class SearchProductIndexRequest extends FormRequest
     /**
      * @return array<string, array>
      */
-	public function rules(): array
-	{
-		return [
-			'keyword' => ['required', 'string', 'min:3', 'max:255'],
-		];
-	}
+    public function rules(): array
+    {
+        return [
+            'keyword' => ['required', 'string', 'min:3', 'max:255'],
+        ];
+    }
 
-    /**
-     * @return bool
-     */
-	public function authorize(): bool
-	{
-		return true;
-	}
+    public function authorize(): bool
+    {
+        return true;
+    }
 }

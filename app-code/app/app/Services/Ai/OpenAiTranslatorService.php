@@ -13,7 +13,7 @@ use Throwable;
 final readonly class OpenAiTranslatorService
 {
     public function __construct(
-        private Client                   $client,
+        private Client $client,
         private OpenAiRateLimiterService $rateLimiter,
     ) {}
 
@@ -22,12 +22,12 @@ final readonly class OpenAiTranslatorService
      */
     public function translate(string $prompt): string
     {
-        $model                       = (string)config('open-ai.api_model');
-        $max_tokens                  = (int)config('open-ai.api_max_tokens');
-        $system                      = (string)config('open-ai.system_prompt');
-        $max_retries                 = (int)config('open-ai.api_max_retries');
-        $max_retry_wait_time_seconds = (int)config('open-ai.api_max_retry_wait_time_seconds');
-        $fallback_wait               = (int)config('open-ai.api_wait_time_seconds');
+        $model                       = (string) config('open-ai.api_model');
+        $max_tokens                  = (int) config('open-ai.api_max_tokens');
+        $system                      = (string) config('open-ai.system_prompt');
+        $max_retries                 = (int) config('open-ai.api_max_retries');
+        $max_retry_wait_time_seconds = (int) config('open-ai.api_max_retry_wait_time_seconds');
+        $fallback_wait               = (int) config('open-ai.api_wait_time_seconds');
 
         $attempts = 0;
 
@@ -76,8 +76,8 @@ final readonly class OpenAiTranslatorService
 
                 throw new RuntimeException(
                     "OpenAI translation failed after $max_retries attempts: " . $e->getMessage(),
-                    (int)$e->getCode(),
-                    $e
+                    (int) $e->getCode(),
+                    $e,
                 );
             }
         }
@@ -85,10 +85,6 @@ final readonly class OpenAiTranslatorService
 
     /**
      * We try to extract "Retry-After" either from the response or from the error text.
-     *
-     * @param Throwable $e
-     *
-     * @return int|null
      */
     private function extractRetryAfterSeconds(Throwable $e): ?int
     {
@@ -97,10 +93,10 @@ final readonly class OpenAiTranslatorService
             $resp = $e->getResponse();
 
             if ($resp && method_exists($resp, 'getHeaderLine')) {
-                $ra = (string)$resp->getHeaderLine('Retry-After');
+                $ra = (string) $resp->getHeaderLine('Retry-After');
 
                 if ($ra !== '' && ctype_digit($ra)) {
-                    return (int)$ra;
+                    return (int) $ra;
                 }
             }
         }
@@ -109,8 +105,8 @@ final readonly class OpenAiTranslatorService
         $msg = $e->getMessage();
         $m   = Str::match('~retry[- ]after[: ]+(\d+)~i', $msg);
 
-        if (!empty($m)) {
-            return (int)$m[1];
+        if (! empty($m)) {
+            return (int) $m[1];
         }
 
         return null;

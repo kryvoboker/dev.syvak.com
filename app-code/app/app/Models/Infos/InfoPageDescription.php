@@ -31,7 +31,7 @@ class InfoPageDescription extends Model
     }
 
     /**
-     * @return BelongsTo<InfoPage>
+     * @return BelongsTo<InfoPage, $this>
      */
     public function infoPage(): BelongsTo
     {

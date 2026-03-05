@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas;
 
-use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
-use App\Filament\Resources\Trait\Forms\SortOrderFormTrait;
-use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Settings\Language;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -17,13 +16,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 class AttributeForm
 {
-    use LanguageTrait, CommonTextFormTrait, ToggleCheckboxFormTrait, SortOrderFormTrait;
+    use LanguageTrait;
 
-    /**
-     * @param Schema $schema
-     *
-     * @return Schema
-     */
     public static function configure(Schema $schema): Schema
     {
         $active_languages = self::getAcriveLanguages();
@@ -38,9 +32,17 @@ class AttributeForm
                             ->contained(false)
                             ->persistTabInQueryString(),
 
-                        self::getIsActiveFormField(),
+                        Toggle::make('is_active')
+                            ->label(__('admin/default.labels.is_active'))
+                            ->default(true)
+                            ->required(),
 
-                        self::getSortOrderFormField(),
+                        TextInput::make('sort_order')
+                            ->label(__('admin/default.labels.sort_order'))
+                            ->numeric()
+                            ->rules(['numeric', 'min:0'])
+                            ->default(1)
+                            ->required(),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -49,9 +51,8 @@ class AttributeForm
     /**
      * Create language tabs for specific section
      *
-     * @param Collection<Language> $active_languages
-     *
-     * @return array<Tabs>
+     * @param  Collection<Language>  $active_languages
+     * @return array<Tabs\Tab>
      */
     protected static function createLanguageTabs(Collection $active_languages): array
     {
@@ -63,11 +64,11 @@ class AttributeForm
                     Hidden::make("descriptions.$language->id.language_id")
                         ->default($language->id),
 
-                    self::getTextFormField([
-                        'field_name' => "descriptions.$language->id.name",
-                        'label'      => __('admin/default.labels.name'),
-                        'rules'      => ['required', 'string', 'max:255'],
-                    ]),
+                    TextInput::make("descriptions.$language->id.name")
+                        ->label(__('admin/default.labels.name'))
+                        ->maxLength(255)
+                        ->rules(['required', 'string', 'max:255'])
+                        ->required(),
                 ])
                 ->badge($language->code);
         }

@@ -17,7 +17,7 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 use Throwable;
 
-class ConvertImagePrototypeJob implements ShouldQueue, ShouldBeUnique
+class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -30,8 +30,8 @@ class ConvertImagePrototypeJob implements ShouldQueue, ShouldBeUnique
     public function __construct(
         public readonly string $original_relative_path,
         public readonly string $prototype_relative_path,
-        public readonly int    $width,
-        public readonly int    $height,
+        public readonly int $width,
+        public readonly int $height,
     ) {}
 
     /**
@@ -42,16 +42,13 @@ class ConvertImagePrototypeJob implements ShouldQueue, ShouldBeUnique
     {
         return sha1(
             $this->prototype_relative_path . '|' .
-            $this->width . 'x' . $this->height
+            $this->width . 'x' . $this->height,
         );
     }
 
-    /**
-     * @return void
-     */
     public function handle(): void
     {
-        if (!Storage::fileExists($this->prototype_relative_path)) {
+        if (! Storage::fileExists($this->prototype_relative_path)) {
             return;
         }
 
@@ -60,17 +57,11 @@ class ConvertImagePrototypeJob implements ShouldQueue, ShouldBeUnique
         $this->convertTo('avif', Storage::path($this->prototype_relative_path));
     }
 
-    /**
-     * @param string $format
-     * @param string $prototype_abs
-     *
-     * @return void
-     */
     private function convertTo(string $format, string $prototype_abs): void
     {
         $format = Str::lower($format);
 
-        if (!in_array($format, ['webp', 'avif'], true)) {
+        if (! in_array($format, ['webp', 'avif'], true)) {
             return;
         }
 
@@ -85,11 +76,6 @@ class ConvertImagePrototypeJob implements ShouldQueue, ShouldBeUnique
         $this->performConversion($format, $prototype_abs, $target_abs);
     }
 
-    /**
-     * @param string $format
-     *
-     * @return string
-     */
     private function buildTargetPath(string $format): string
     {
         // Target path: cache/(webp|avif)/[original path] + name_w_h.format
@@ -106,27 +92,15 @@ class ConvertImagePrototypeJob implements ShouldQueue, ShouldBeUnique
         return Str::trim("images/cache/$format/$dir/$file", '/');
     }
 
-    /**
-     * @param string $target_abs
-     *
-     * @return void
-     */
     private function ensureDirectoryExists(string $target_abs): void
     {
         $target_dir = dirname($target_abs);
 
-        if (!Storage::directoryExists($target_dir)) {
+        if (! Storage::directoryExists($target_dir)) {
             Storage::makeDirectory($target_dir);
         }
     }
 
-    /**
-     * @param string $format
-     * @param string $prototype_abs
-     * @param string $target_abs
-     *
-     * @return void
-     */
     private function performConversion(string $format, string $prototype_abs, string $target_abs): void
     {
         $manager    = new ImageManager(new Driver());
@@ -134,7 +108,7 @@ class ConvertImagePrototypeJob implements ShouldQueue, ShouldBeUnique
         $target_abs = Storage::path($target_abs);
 
         if ($format === 'webp') {
-            $img->toWebp(quality: (int)config('app.images.webp_quality'))->save($target_abs);
+            $img->toWebp(quality: (int) config('app.images.webp_quality'))->save($target_abs);
 
             return;
         }
@@ -142,7 +116,7 @@ class ConvertImagePrototypeJob implements ShouldQueue, ShouldBeUnique
         // AVIF: support depends on driver/build (GD/Imagick + libavif)
         // If not supported - exit without error
         try {
-            $img->toAvif(quality: (int)config('app.images.avif_quality'))->save($target_abs);
+            $img->toAvif(quality: (int) config('app.images.avif_quality'))->save($target_abs);
         } catch (Throwable $e) {
             Log::channel('stack')->warning('AVIF conversion not supported on this server.', [
                 'error' => $e->getMessage(),

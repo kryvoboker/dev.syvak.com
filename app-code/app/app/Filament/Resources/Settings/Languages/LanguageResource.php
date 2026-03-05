@@ -23,10 +23,13 @@ class LanguageResource extends Resource
 {
     use TotalModelItemsResourceTrait;
 
-    protected static ?string                $model                = Language::class;
-    protected static string|BackedEnum|null $navigationIcon       = Heroicon::Language;
-    protected static ?string                $recordTitleAttribute = 'name';
-    protected static string|null|UnitEnum   $navigationGroup      = AdminNavigationGroupEnum::Settings;
+    protected static ?string $model = Language::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Language;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static string|null|UnitEnum $navigationGroup = AdminNavigationGroupEnum::Settings;
 
     public static function form(Schema $schema): Schema
     {
@@ -56,8 +59,6 @@ class LanguageResource extends Resource
 
     /**
      * Signature in the navigation menu (left panel)
-     *
-     * @return string
      */
     public static function getNavigationLabel(): string
     {
@@ -66,8 +67,6 @@ class LanguageResource extends Resource
 
     /**
      * A single model name (e.g. in headings, "Create X" button)
-     *
-     * @return string
      */
     public static function getModelLabel(): string
     {
@@ -76,8 +75,6 @@ class LanguageResource extends Resource
 
     /**
      * Plural model name (e.g. in lists, section headings)
-     *
-     * @return string
      */
     public static function getPluralModelLabel(): string
     {

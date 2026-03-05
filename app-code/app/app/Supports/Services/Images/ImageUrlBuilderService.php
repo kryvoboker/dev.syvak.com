@@ -20,19 +20,14 @@ final readonly class ImageUrlBuilderService
     ) {}
 
     /**
-     * @param string|null $path
-     * @param int         $width
-     * @param int|null    $height
-     * @param bool        $is_square
-     * @param string      $bg_color HEX or transparent color
-     *
+     * @param  string  $bg_color  HEX or transparent color
      * @return string[]
      */
     public function multipleUrl(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
     {
-        $total_sizes_for_generate = (int)config('app.images.total_sizes_for_generate');
-        $path                     = (string)$path;
-        $height                   ??= $width;
+        $total_sizes_for_generate = (int) config('app.images.total_sizes_for_generate');
+        $path                     = (string) $path;
+        $height ??= $width;
 
         $this->checkSourceImage($path);
 
@@ -50,26 +45,23 @@ final readonly class ImageUrlBuilderService
     /**
      * Generate URL for image with specified dimensions.
      *
-     * @param string|null $path     Original path (relative to public), e.g: "images/products/2025/12/ABC123.jpg"
-     * @param int         $width    Required width
-     * @param int|null    $height   Required height (defaults to width)
-     * @param bool        $is_square
-     * @param string      $bg_color HEX or transparent color
-     *
-     * @return string
+     * @param  string|null  $path  Original path (relative to public), e.g: "images/products/2025/12/ABC123.jpg"
+     * @param  int  $width  Required width
+     * @param  int|null  $height  Required height (defaults to width)
+     * @param  string  $bg_color  HEX or transparent color
      */
     public function url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): string
     {
-        $path   = (string)$path;
+        $path = (string) $path;
         $height ??= $width;
-        $path   = Str::ltrim($path, '/');
+        $path = Str::ltrim($path, '/');
 
         $this->validateArgs($path, $width, $height);
 
         if (
             Storage::fileExists($path) === false ||
-            $width > (int)config('app.images.max_image_width_for_convert') ||
-            $height > (int)config('app.images.max_image_height_for_convert')
+            $width > (int) config('app.images.max_image_width_for_convert') ||
+            $height > (int) config('app.images.max_image_height_for_convert')
         ) {
             return $path;
         }
@@ -115,7 +107,7 @@ final readonly class ImageUrlBuilderService
         $prototype_rel = $this->prototypeRelativePath($path, $width, $height);
 
         // If prototype not created yet - create it
-        if (!$this->publicFileExists($prototype_rel)) {
+        if (! $this->publicFileExists($prototype_rel)) {
             $this->createPrototype($path, $prototype_rel, $width, $height, $is_square, $bg_color);
         }
 
@@ -131,14 +123,6 @@ final readonly class ImageUrlBuilderService
         return $this->assetVersioned($prototype_rel);
     }
 
-    /**
-     * @param int $original_width
-     * @param int $original_height
-     * @param int $target_width
-     * @param int $target_height
-     *
-     * @return void
-     */
     private function calculateAspectionSizes(int $original_width, int $original_height, int &$target_width, int &$target_height): void
     {
         if ($original_width == $original_height) {
@@ -150,20 +134,13 @@ final readonly class ImageUrlBuilderService
 
         if ($original_width > $original_height) {
             $k             = min($original_width, $target_width) / max($original_width, $target_width);
-            $target_height = (int)round($original_height * $k);
+            $target_height = (int) round($original_height * $k);
         } else {
             $k            = min($original_height, $target_height) / max($original_height, $target_height);
-            $target_width = (int)round($original_width * $k);
+            $target_width = (int) round($original_width * $k);
         }
     }
 
-    /**
-     * @param string $path
-     * @param int    $width
-     * @param int    $height
-     *
-     * @return void
-     */
     private function validateArgs(string &$path, int $width, int $height): void
     {
         if ($width < 1 || $height < 1) {
@@ -178,11 +155,6 @@ final readonly class ImageUrlBuilderService
         $this->checkSourceImage($path);
     }
 
-    /**
-     * @param string $path
-     *
-     * @return void
-     */
     private function checkSourceImage(string &$path): void
     {
         if (Storage::fileExists($path) === false) {
@@ -190,30 +162,20 @@ final readonly class ImageUrlBuilderService
         }
     }
 
-    /**
-     * @param string $mime
-     *
-     * @return bool
-     */
     private function clientSupports(string $mime): bool
     {
         $supported_formats = $this->request->header('X-Supported-Image-Formats', '');
         $formats_array     = explode(',', $supported_formats);
-        $accept            = (string)$this->request->header('Accept', '');
+        $accept            = (string) $this->request->header('Accept', '');
 
         return Str::contains($accept, $mime) || Arr::some($formats_array, function (string $format) use ($mime) {
-                return Str::contains($mime, $format);
-            });
+            return Str::contains($mime, $format);
+        });
     }
 
-    /**
-     * @param string $public_relative
-     *
-     * @return string
-     */
     private function assetVersioned(string $public_relative): string
     {
-        $v   = (string)config('app.images.image_version');
+        $v   = (string) config('app.images.image_version');
         $url = asset("storage/$public_relative");
 
         // Add version to query string
@@ -222,35 +184,20 @@ final readonly class ImageUrlBuilderService
         return $url . $sep . 'v=' . rawurlencode($v);
     }
 
-    /**
-     * @param string $public_relative
-     *
-     * @return bool
-     */
     private function publicFileExists(string $public_relative): bool
     {
         return Storage::fileExists($public_relative);
     }
 
-    /**
-     * @param string $public_relative_file
-     *
-     * @return void
-     */
     private function ensureDirFor(string $public_relative_file): void
     {
         $dir = dirname($public_relative_file);
 
-        if (!Storage::directoryExists($dir)) {
+        if (! Storage::directoryExists($dir)) {
             Storage::makeDirectory($dir);
         }
     }
 
-    /**
-     * @param string $path
-     *
-     * @return array
-     */
     private function splitPath(string $path): array
     {
         // "images/products/2025/12/ABC.jpg" -> ["images/products/2025/12", "ABC", "jpg"]
@@ -265,13 +212,6 @@ final readonly class ImageUrlBuilderService
         return [$dir === '.' ? '' : $dir, $name, $ext];
     }
 
-    /**
-     * @param string $original_path
-     * @param int    $w
-     * @param int    $h
-     *
-     * @return string
-     */
     private function prototypeRelativePath(string $original_path, int $w, int $h): string
     {
         [$dir, $name, $ext] = $this->splitPath($original_path);
@@ -285,18 +225,10 @@ final readonly class ImageUrlBuilderService
         return Str::trim("images/cache/prototype/$dir/$file", '/');
     }
 
-    /**
-     * @param string $format
-     * @param string $original_path
-     * @param int    $w
-     * @param int    $h
-     *
-     * @return string
-     */
     private function webRelativePath(string $format, string $original_path, int $w, int $h): string
     {
         [$dir, $name] = $this->splitPath($original_path);
-        $file = sprintf('%s_%d_%d.%s', $name, $w, $h, $format);
+        $file         = sprintf('%s_%d_%d.%s', $name, $w, $h, $format);
 
         if (empty($dir)) {
             return Str::trim("images/cache/$format/$file", '/');
@@ -309,14 +241,7 @@ final readonly class ImageUrlBuilderService
      * Create prototype of original format with required dimensions.
      * Implementation uses Intervention Image.
      *
-     * @param string $original_rel
-     * @param string $prototype_rel
-     * @param int    $w
-     * @param int    $h
-     * @param bool   $is_square
-     * @param string $bg_color HEX or transparent color
-     *
-     * @return void
+     * @param  string  $bg_color  HEX or transparent color
      */
     private function createPrototype(string $original_rel, string $prototype_rel, int $w, int $h, bool $is_square, string $bg_color = '000000'): void
     {
@@ -345,7 +270,7 @@ final readonly class ImageUrlBuilderService
                 $image_obj->pad($w, $h, $bg_color);
             }
 
-            $image_obj->save($dst, (int)config('app.images.prototype_quality'));
+            $image_obj->save($dst, (int) config('app.images.prototype_quality'));
 
             return;
         }
@@ -353,6 +278,6 @@ final readonly class ImageUrlBuilderService
         // Non-square: use cover to fill the dimensions
         $image_obj
             ->cover($w, $h)
-            ->save($dst, (int)config('app.images.prototype_quality'));
+            ->save($dst, (int) config('app.images.prototype_quality'));
     }
 }

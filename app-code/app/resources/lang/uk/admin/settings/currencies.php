@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Валюти',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'          => 'Валюта',
         'plural_model'   => 'Валюти',
         'code'           => 'Код валюти',
@@ -18,7 +20,7 @@ return [
     ],
 
     // Helpers
-    'helpers'          => [
+    'helpers' => [
         'name'           => 'Повна назва валюти (наприклад, Долар США, Євро, Українська гривня)',
         'code'           => 'Код ISO 4217 (наприклад, USD, EUR, UAH)',
         'format_locale'  => 'Локаль для форматування валюти (наприклад, en_US, de_DE)',
@@ -31,7 +33,7 @@ return [
     ],
 
     // Columns
-    'columns'          => [
+    'columns' => [
         'symbol_left'    => 'Символ зліва',
         'symbol_right'   => 'Символ справа',
         'decimal_places' => 'Десяткові знаки',
@@ -39,25 +41,25 @@ return [
     ],
 
     // Actions
-    'actions'          => [
+    'actions' => [
         'update_rates'             => 'Оновити курси',
         'modal_update_rates_title' => 'Оновити курси валют',
         'modal_update_rates_body'  => 'Система запросить нові курси обміну і оновить активні валюти.',
     ],
 
     // Notifications
-    'notifications'    => [
+    'notifications' => [
         'rates_updated_body' => 'Курси обміну успішно оновлені.',
     ],
 
     // Text
-    'texts'            => [
+    'texts' => [
         'cant_delete_default_currency'     => 'Неможливо видалити валюту за замовчуванням',
         'cant_delete_last_active_currency' => 'Неможливо видалити останню активну валюту',
     ],
 
     // Error
-    'errors'           => [
+    'errors' => [
         'cant_delete_default_currency'     => 'Будь ласка, встановіть іншу валюту за замовчуванням перед видаленням цієї!',
         'cant_delete_last_active_currency' => 'У системі має залишатися щонайменше одна активна валюта!',
         'failed_to_update_rates'           => 'Не вдалося оновити курси валют. Спробуйте пізніше!',

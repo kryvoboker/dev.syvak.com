@@ -11,20 +11,9 @@
 *~
 
 # Docker files (exclude from build context except needed ones)
-.docker/dev
-!.docker/dev/mariadb/
-!.docker/dev/memcached/
-!.docker/dev/php/
-!.docker/dev/nginx/
-!.docker/dev/cron/
-!.docker/dev/env/
-.docker/prod
-!.docker/prod/mariadb/
-!.docker/prod/memcached/
-!.docker/prod/php/
-!.docker/prod/nginx/
-!.docker/prod/cron/
-!.docker/prod/env/
+.docker/dev/docker-compose.yml
+.docker/prod/docker-compose.yml
+.docker/prod/docker-compose.slim.yml
 
 # Node.js
 app-code/app/node_modules

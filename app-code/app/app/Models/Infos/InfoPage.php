@@ -13,20 +13,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InfoPage extends Model
 {
-    use SlugTrait, HasSlugsTrait;
+    use HasSlugsTrait, SlugTrait;
 
     protected $fillable = [
         'positions',
         'sort_order',
         'is_active',
         'is_noindex',
-    ];
-
-    /**
-     * @var array{positions:PositionInPageEnum[]} $casts
-     */
-    protected $casts = [
-        'positions' => 'array',
     ];
 
     /**
@@ -42,17 +35,11 @@ class InfoPage extends Model
         ];
     }
 
-    /**
-     * @return HasMany<InfoPageDescription>
-     */
     public function infoPageDescription(): HasMany
     {
         return $this->hasMany(InfoPageDescription::class);
     }
 
-    /**
-     * @return Attribute
-     */
     public function positions(): Attribute
     {
         return Attribute::make(
@@ -67,7 +54,7 @@ class InfoPage extends Model
             },
             set: function (null|array|string $positions) {
                 if (empty($positions)) {
-                    return null;
+                    return;
                 }
 
                 $res = array_map(function (string $position) {
@@ -77,7 +64,7 @@ class InfoPage extends Model
                 $res = array_filter($res);
 
                 return $res ? json_encode($res) : null;
-            }
+            },
         );
     }
 }

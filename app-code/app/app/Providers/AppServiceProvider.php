@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Services\FooterService;
+use App\Services\HeaderService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
@@ -34,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
             ]);
         }
 
+        $this->app->singleton(HeaderService::class);
+        $this->app->singleton(FooterService::class);
         $this->app->singleton(ImageUrlBuilderService::class);
         $this->app->singleton(AppSettingsService::class);
         $this->app->singleton(ConvertPrice::class);

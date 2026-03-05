@@ -19,24 +19,20 @@ class AppSettingsData extends Data
         public ?Collection $socials,
         public ?Collection $work_time,
         public ?Collection $contact_addresses,
-        public ?string     $coordinates,
-        public ?string     $iframe_map,
-        public ?string     $timezone,
+        public ?string $coordinates,
+        public ?string $iframe_map,
+        public ?string $timezone,
         public ?Collection $image_sizes,
-        public ?int        $language_id,
-        public ?int        $user_group_id,
+        public ?int $language_id,
+        public ?int $user_group_id,
     ) {}
 
     /**
      * Cast arrays to collections when creating from array.
-     *
-     * @param array $data
-     *
-     * @return static
      */
-    public static function fromArray(array $data): static
+    public static function fromArray(array $data): self
     {
-        return new static(
+        return new self(
             titles           : isset($data['titles']) ? collect($data['titles']) : null,
             meta_titles      : isset($data['meta_titles']) ? collect($data['meta_titles']) : null,
             meta_descriptions: isset($data['meta_descriptions']) ? collect($data['meta_descriptions']) : null,

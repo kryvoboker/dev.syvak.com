@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Мови',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'        => 'Мова',
         'plural_model' => 'Мови',
         'code'         => 'Код мови',
@@ -13,7 +15,7 @@ return [
     ],
 
     // Helpers
-    'helpers'          => [
+    'helpers' => [
         'code'       => 'Код ISO 639-1 (наприклад: en, uk, ru)',
         'name'       => 'Повна назва мови (наприклад: Англійська, Українська)',
         'is_active'  => 'Увімкнути цю мову для користувачів',
@@ -21,13 +23,13 @@ return [
     ],
 
     // Text
-    'texts'            => [
+    'texts' => [
         'cant_delete_default_language'     => 'Не можна видалити мову за замовчуванням',
         'cant_delete_last_active_language' => 'Не можна видалити останню активну мову',
     ],
 
     // Error
-    'errors'           => [
+    'errors' => [
         'cant_delete_default_language'     => 'Будь ласка, встановіть іншу мову за замовчуванням перед видаленням цієї!',
         'cant_delete_last_active_language' => 'У системі має лишатися принаймні одна активна мова!',
     ],

@@ -1,27 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     /*
      * The package will use this format when working with dates. If this option
      * is an array, it will try to convert from the first format that works,
      * and will serialize dates using the first format from the array.
      */
-    'date_format'                                 => DATE_ATOM,
+    'date_format' => DATE_ATOM,
 
     /*
      * When transforming or casting dates, the following timezone will be used to
      * convert the date to the correct timezone. If set to null no timezone will
      * be passed.
      */
-    'date_timezone'                               => env('APP_TIMEZONE'),
+    'date_timezone' => env('APP_TIMEZONE'),
 
     /*
      * It is possible to enable certain features of the package, these would otherwise
      * be breaking changes, and thus they are disabled by default. In the next major
      * version of the package, these features will be enabled by default.
      */
-    'features'                                    => [
-        'cast_and_transform_iterables'                                => false,
+    'features' => [
+        'cast_and_transform_iterables' => false,
 
         /*
          * When trying to set a computed property value, the package will throw an exception.
@@ -35,7 +37,7 @@ return [
      * Global transformers will take complex types and transform them into simple
      * types.
      */
-    'transformers'                                => [
+    'transformers' => [
         DateTimeInterface::class                       => \Spatie\LaravelData\Transformers\DateTimeInterfaceTransformer::class,
         \Illuminate\Contracts\Support\Arrayable::class => \Spatie\LaravelData\Transformers\ArrayableTransformer::class,
         BackedEnum::class                              => Spatie\LaravelData\Transformers\EnumTransformer::class,
@@ -45,7 +47,7 @@ return [
      * Global casts will cast values into complex types when creating a data
      * object from simple types.
      */
-    'casts'                                       => [
+    'casts' => [
         DateTimeInterface::class => Spatie\LaravelData\Casts\DateTimeInterfaceCast::class,
         BackedEnum::class        => Spatie\LaravelData\Casts\EnumCast::class,
         //        Enumerable::class => Spatie\LaravelData\Casts\EnumerableCast::class,
@@ -56,7 +58,7 @@ return [
      * validation rules to properties of a data object based upon
      * the type of the property.
      */
-    'rule_inferrers'                              => [
+    'rule_inferrers' => [
         Spatie\LaravelData\RuleInferrers\SometimesRuleInferrer::class,
         Spatie\LaravelData\RuleInferrers\NullableRuleInferrer::class,
         Spatie\LaravelData\RuleInferrers\RequiredRuleInferrer::class,
@@ -69,7 +71,7 @@ return [
      * it cannot normalize the payload. The normalizers below are used for
      * every data object, unless overridden in a specific data object class.
      */
-    'normalizers'                                 => [
+    'normalizers' => [
         Spatie\LaravelData\Normalizers\ModelNormalizer::class,
         // Spatie\LaravelData\Normalizers\FormRequestNormalizer::class,
         Spatie\LaravelData\Normalizers\ArrayableNormalizer::class,
@@ -83,7 +85,7 @@ return [
      * this key can be set globally here for all data objects. You can pass in
      * `null` if you want to disable wrapping.
      */
-    'wrap'                                        => null,
+    'wrap' => null,
 
     /*
      * Adds a specific caster to the Symphony VarDumper component which hides
@@ -91,7 +93,7 @@ return [
      * by `dump` or `dd`. Can be 'enabled', 'disabled' or 'development'
      * which will only enable the caster locally.
      */
-    'var_dumper_caster_mode'                      => 'development',
+    'var_dumper_caster_mode' => 'development',
 
     /*
      * It is possible to skip the PHP reflection analysis of data objects
@@ -104,10 +106,10 @@ return [
      * in seconds if you want the cache to clear after a certain
      * timeframe.
      */
-    'structure_caching'                           => [
-        'enabled'              => true,
-        'directories'          => [app_path('Data')],
-        'cache'                => [
+    'structure_caching' => [
+        'enabled'     => true,
+        'directories' => [app_path('Data')],
+        'cache'       => [
             'store'    => env('CACHE_STORE', env('CACHE_DRIVER', 'file')),
             'prefix'   => 'laravel-data',
             'duration' => null,
@@ -124,14 +126,14 @@ return [
      * method. By default, only when a request is passed the data is being validated. This
      * behaviour can be changed to always validate or to completely disable validation.
      */
-    'validation_strategy'                         => \Spatie\LaravelData\Support\Creation\ValidationStrategy::OnlyRequests->value,
+    'validation_strategy' => \Spatie\LaravelData\Support\Creation\ValidationStrategy::OnlyRequests->value,
 
     /*
      * A data object can map the names of its properties when transforming (output) or when
      * creating (input). By default, the package will not map any names. You can set a
      * global strategy here, or override it on a specific data object.
      */
-    'name_mapping_strategy'                       => [
+    'name_mapping_strategy' => [
         'input'  => null,
         'output' => null,
     ],
@@ -140,7 +142,7 @@ return [
      * When using an invalid include, exclude, only or except partial, the package will
      * throw an exception. You can disable this behaviour by setting this option to true.
      */
-    'ignore_invalid_partials'                     => false,
+    'ignore_invalid_partials' => false,
 
     /*
      * When transforming a nested chain of data objects, the package can end up in an infinite
@@ -148,7 +150,7 @@ return [
      * set as a safety measure to prevent this from happening. When set to null, the
      * package will not enforce a maximum depth.
      */
-    'max_transformation_depth'                    => null,
+    'max_transformation_depth' => null,
 
     /*
      * When the maximum transformation depth is reached, the package will throw an exception.
@@ -161,7 +163,7 @@ return [
      * When using the `make:data` command, the package will use these settings to generate
      * the data classes. You can override these settings by passing options to the command.
      */
-    'commands'                                    => [
+    'commands' => [
 
         /*
          * Provides default configuration for the `make:data` command. These settings can be overridden with options
@@ -182,7 +184,7 @@ return [
              * to conflict with other related classes, controllers or models with a similar name without resorting
              * to adding an alias for the Data object. Set to a blank string (not null) to disable.
              */
-            'suffix'    => 'Data',
+            'suffix' => 'Data',
         ],
     ],
 
@@ -191,7 +193,7 @@ return [
      * these synths will automatically handle the data objects and their
      * properties when used in a Livewire component.
      */
-    'livewire'                                    => [
+    'livewire' => [
         'enable_synths' => false,
     ],
 ];

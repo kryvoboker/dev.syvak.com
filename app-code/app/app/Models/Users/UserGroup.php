@@ -28,9 +28,6 @@ class UserGroup extends Model
         ];
     }
 
-    /**
-     * @return void
-     */
     protected static function booted(): void
     {
         // Ensure only one default user group
@@ -49,7 +46,7 @@ class UserGroup extends Model
                     ->where('id', '!=', $user_group->id)
                     ->exists();
 
-                if (!$default_exists) {
+                if (! $default_exists) {
                     $user_group->is_default = true;
                 }
             }
@@ -69,9 +66,6 @@ class UserGroup extends Model
         });
     }
 
-    /**
-     * @return Collection
-     */
     public function getAllActiveUserGroups(): Collection
     {
         return self::query()
@@ -80,9 +74,6 @@ class UserGroup extends Model
             ->get();
     }
 
-    /**
-     * @return int|null
-     */
     public function getDefaultUserGroupId(): ?int
     {
         return self::query()
@@ -91,9 +82,6 @@ class UserGroup extends Model
             ->value('id');
     }
 
-    /**
-     * @return self|null
-     */
     public function getDefaultUserGroup(): ?self
     {
         return self::query()
@@ -102,9 +90,6 @@ class UserGroup extends Model
             ->first();
     }
 
-    /**
-     * @return Collection
-     */
     public function getActiveUserGroups(): Collection
     {
         return self::where('is_active', true)

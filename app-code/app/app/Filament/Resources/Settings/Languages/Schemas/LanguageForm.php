@@ -4,45 +4,50 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Languages\Schemas;
 
-use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
-use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class LanguageForm
 {
-    use CommonTextFormTrait, ToggleCheckboxFormTrait;
-
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                self::getTextFormField([
-                    'field_name'  => 'code',
-                    'label'       => __('admin/default.labels.code'),
-                    'helper_text' => __('admin/settings/languages.helpers.code'),
-                    'max_length'  => 10,
-                    'placeholder' => 'en',
-                    'rules'       => ['alpha', 'lowercase', 'max:10'],
-                    'unique'      => ['ignore_record' => true],
-                ]),
+                TextInput::make('code')
+                    ->label(__('admin/default.labels.code'))
+                    ->helperText(__('admin/settings/languages.helpers.code'))
+                    ->maxLength(10)
+                    ->placeholder('en')
+                    ->rules(['required', 'alpha', 'lowercase', 'max:10'])
+                    ->unique(ignoreRecord: true)
+                    ->required(),
 
-                self::getTextFormField([
-                    'field_name'  => 'name',
-                    'label'       => __('admin/default.labels.name'),
-                    'helper_text' => __('admin/settings/languages.helpers.name'),
-                    'max_length'  => 100,
-                    'placeholder' => 'English',
-                ]),
+                TextInput::make('name')
+                    ->label(__('admin/default.labels.name'))
+                    ->helperText(__('admin/settings/languages.helpers.name'))
+                    ->maxLength(100)
+                    ->placeholder('English')
+                    ->rules(['required', 'string', 'max:100'])
+                    ->required(),
 
-                self::getIsActiveFormField([
-                    'helper_text' => __('admin/settings/languages.helpers.is_active'),
-                    'default'     => false,
-                ]),
+                Toggle::make('is_active')
+                    ->label(__('admin/default.labels.is_active'))
+                    ->helperText(__('admin/settings/languages.helpers.is_active'))
+                    ->default(false)
+                    ->required(),
 
-                self::getIsDefaultFormField([
-                    'helper_text' => __('admin/settings/languages.helpers.is_default'),
-                    'default'     => false,
-                ]),
+                Toggle::make('is_default')
+                    ->label(__('admin/default.labels.is_default'))
+                    ->helperText(__('admin/settings/languages.helpers.is_default'))
+                    ->default(false)
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        if ($state) {
+                            $set('is_active', true);
+                        }
+                    })
+                    ->required(),
             ]);
     }
 }

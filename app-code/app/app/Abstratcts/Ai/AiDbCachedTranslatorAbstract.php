@@ -16,20 +16,16 @@ use Throwable;
 abstract class AiDbCachedTranslatorAbstract
 {
     private ?ProductNameHash $product_name_hash;
+
     private ?ProductDescriptionHash $product_description_hash;
+
     private ?ProductAttributeTextHash $product_attribute_text_hash;
 
-    /**
-     * @param OpenAiTranslatorService $ai
-     */
     public function __construct(
         protected OpenAiTranslatorService $ai,
     ) {}
 
     /**
-     * @param string $prompt
-     *
-     * @return string
      * @throws Throwable
      */
     public function translate(string $prompt): string
@@ -57,33 +53,16 @@ abstract class AiDbCachedTranslatorAbstract
         return $translated;
     }
 
-    /**
-     * @param string $hash
-     *
-     * @return string|null
-     */
     abstract protected function findCached(string $hash): ?string;
 
-    /**
-     * @param string $hash
-     * @param string $prompt
-     * @param string $translated_text
-     *
-     * @return Model
-     */
     abstract protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model;
 
-    /**
-     * @return ProductNameHash|null
-     */
     public function getProductNameHash(): ?ProductNameHash
     {
         return $this->product_name_hash;
     }
 
     /**
-     * @param ProductNameHash|null $product_name_hash
-     *
      * @return $this
      */
     public function setProductNameHash(?ProductNameHash $product_name_hash): AiDbCachedTranslatorAbstract
@@ -93,17 +72,12 @@ abstract class AiDbCachedTranslatorAbstract
         return $this;
     }
 
-    /**
-     * @return ProductDescriptionHash|null
-     */
     public function getProductDescriptionHash(): ?ProductDescriptionHash
     {
         return $this->product_description_hash;
     }
 
     /**
-     * @param ProductDescriptionHash|null $product_description_hash
-     *
      * @return $this
      */
     public function setProductDescriptionHash(?ProductDescriptionHash $product_description_hash): AiDbCachedTranslatorAbstract
@@ -113,17 +87,12 @@ abstract class AiDbCachedTranslatorAbstract
         return $this;
     }
 
-    /**
-     * @return ProductAttributeTextHash|null
-     */
     public function getProductAttributeTextHash(): ?ProductAttributeTextHash
     {
         return $this->product_attribute_text_hash;
     }
 
     /**
-     * @param ProductAttributeTextHash|null $product_attribute_text_hash
-     *
      * @return $this
      */
     public function setProductAttributeTextHash(?ProductAttributeTextHash $product_attribute_text_hash): AiDbCachedTranslatorAbstract

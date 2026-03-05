@@ -8,7 +8,6 @@ use App\Filament\Resources\Catalogs\Categories\Categories\CategoryResource;
 use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryDescription;
-use App\Models\Slug;
 use Exception;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -17,19 +16,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
+use LogicException;
 use Throwable;
 
 class EditCategory extends EditRecord
 {
     use ProcessSlugsTrait;
 
-    protected static string               $resource      = CategoryResource::class;
-    protected array                       $descriptions  = [];
-    protected array                       $slugs         = [];
-    protected ?string                     $preview_image = null;
-    protected ?string                     $icon          = null;
+    protected static string $resource = CategoryResource::class;
+
+    protected array $descriptions = [];
+
+    protected array $slugs = [];
+
+    protected ?string $preview_image = null;
+
+    protected ?string $icon = null;
+
     #[Locked]
-    public int|string|Model|Category|null $record        = null;
+    public int|string|Model|null $record = null;
 
     protected function getHeaderActions(): array
     {
@@ -40,14 +45,11 @@ class EditCategory extends EditRecord
 
     /**
      * Mutate form data before filling form
-     *
-     * @param array $data
-     *
-     * @return array
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $category_image = $this->record->categoryImage()->first();
+        $record         = $this->getCategoryRecord();
+        $category_image = $record->categoryImage()->first();
         $preview_image  = $category_image?->preview_image ?? null;
         $icon           = $category_image?->icon ?? null;
 
@@ -55,10 +57,10 @@ class EditCategory extends EditRecord
         $data['icon']          = $icon;
 
         // Load descriptions for each language
-        $descriptions = $this->record->categoryDescription()
+        $descriptions = $record->categoryDescription()
             ->get()
             ->keyBy('language_id')
-            ->map(fn(CategoryDescription $desc) => [
+            ->map(fn (CategoryDescription $desc) => [
                 'language_id'      => $desc->language_id,
                 'name'             => $desc->name,
                 'description'      => $desc->description,
@@ -78,10 +80,6 @@ class EditCategory extends EditRecord
 
     /**
      * Mutate form data before saving
-     *
-     * @param array $data
-     *
-     * @return array
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
@@ -98,14 +96,15 @@ class EditCategory extends EditRecord
     /**
      * Handle record update with transaction
      *
-     * @param Model|Category $record
-     * @param array          $data
      *
-     * @return Model
      * @throws Halt
      */
     protected function handleRecordUpdate(Model|Category $record, array $data): Model
     {
+        if (! $record instanceof Category) {
+            throw new LogicException('Category record has invalid type.');
+        }
+
         try {
             return DB::transaction(function () use ($record, $data) {
                 // Update main record
@@ -138,27 +137,27 @@ class EditCategory extends EditRecord
             ]);
 
             $this->halt();
+
+            throw $e;
         }
     }
 
     /**
      * Update image for the record
-     *
-     * @return void
      */
     protected function updateImage(): void
     {
-        $category_images = $this->record->categoryImage();
+        $category_images = $this->getCategoryRecord()->categoryImage();
 
-        if (!empty($this->preview_image) || !empty($this->icon)) {
+        if (! empty($this->preview_image) || ! empty($this->icon)) {
             $category_images->updateOrCreate(
                 [], // Empty array means "find the first related record"
                 [
                     'icon'          => $this->icon,
                     'preview_image' => $this->preview_image,
-                ]
+                ],
             );
-        } else if ($category_images->exists()) {
+        } elseif ($category_images->exists()) {
             // If both images are empty, delete the record if it exists
             $category_images->delete();
         }
@@ -166,8 +165,6 @@ class EditCategory extends EditRecord
 
     /**
      * Update descriptions for the record
-     *
-     * @return void
      */
     protected function updateDescriptions(): void
     {
@@ -176,10 +173,10 @@ class EditCategory extends EditRecord
         $descriptions_to_sync = [];
 
         foreach ($this->descriptions as $language_id => $description) {
-            if (!empty($description['name'])) {
-                $language_ids_to_keep[] = (int)$language_id;
+            if (! empty($description['name'])) {
+                $language_ids_to_keep[] = (int) $language_id;
 
-                $descriptions_to_sync[(int)$language_id] = [
+                $descriptions_to_sync[(int) $language_id] = [
                     'name'             => $description['name'],
                     'description'      => $description['description'] ?? null,
                     'h1_title'         => $description['h1_title'] ?? null,
@@ -191,29 +188,25 @@ class EditCategory extends EditRecord
         }
 
         // Delete descriptions for languages that are not in the list or have empty names
-        if (!empty($language_ids_to_keep)) {
-            $this->record->categoryDescription()
+        if (! empty($language_ids_to_keep)) {
+            $this->getCategoryRecord()->categoryDescription()
                 ->whereNotIn('language_id', $language_ids_to_keep)
                 ->delete();
         } else {
-            $this->record->categoryDescription()->delete();
+            $this->getCategoryRecord()->categoryDescription()->delete();
         }
 
         // Update or create descriptions
         foreach ($descriptions_to_sync as $language_id => $description_data) {
-            $this->record->categoryDescription()->updateOrCreate(
-                ['language_id' => (int)$language_id],
-                $description_data
+            $this->getCategoryRecord()->categoryDescription()->updateOrCreate(
+                ['language_id' => (int) $language_id],
+                $description_data,
             );
         }
     }
 
     /**
      * Rebuild paths for all children categories recursively
-     *
-     * @param int $parent_id
-     *
-     * @return void
      */
     protected function rebuildChildrenPaths(int $parent_id): void
     {
@@ -228,8 +221,6 @@ class EditCategory extends EditRecord
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -238,11 +229,18 @@ class EditCategory extends EditRecord
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {
         return __('admin/catalogs/categories/categories.navigation_label');
+    }
+
+    private function getCategoryRecord(): Category
+    {
+        if (! $this->record instanceof Category) {
+            throw new LogicException('Category record is not initialized.');
+        }
+
+        return $this->record;
     }
 }

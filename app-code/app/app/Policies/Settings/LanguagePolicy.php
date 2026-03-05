@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies\Settings;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Settings\Language;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class LanguagePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Language');
@@ -66,5 +66,4 @@ class LanguagePolicy
     {
         return $authUser->can('Reorder:Language');
     }
-
 }

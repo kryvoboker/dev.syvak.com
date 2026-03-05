@@ -5,14 +5,13 @@ FROM php:8.5-fpm-bookworm AS php-fpm
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Kyiv
 
-RUN apt-get update \
-  && apt-get -y install --no-install-recommends  \
-      curl  \
-      ca-certificates  \
-      unzip  \
-      zip  \
-      tzdata  \
-      nano \
+RUN apt update \
+  && apt -y install --no-install-recommends \
+      curl \
+      ca-certificates \
+      unzip \
+      zip \
+      tzdata \
   && rm -rf /var/lib/apt/lists/*
 
 RUN ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \

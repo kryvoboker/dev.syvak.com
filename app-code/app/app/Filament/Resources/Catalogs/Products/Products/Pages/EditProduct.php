@@ -11,7 +11,6 @@ use App\Models\Catalogs\Products\ProductDescription;
 use App\Models\Catalogs\Products\ProductDiscount;
 use App\Models\Catalogs\Products\ProductImage;
 use App\Models\Catalogs\Products\ProductToAttribute;
-use App\Models\Slug;
 use Exception;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -21,20 +20,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
+use LogicException;
 use Throwable;
 
 class EditProduct extends EditRecord
 {
     use ProcessSlugsTrait;
 
-    protected static string              $resource           = ProductResource::class;
-    protected array                      $descriptions       = [];
-    protected array                      $images             = [];
-    protected array                      $discounts          = [];
-    protected array                      $product_attributes = [];
-    protected array                      $slugs              = [];
+    protected static string $resource = ProductResource::class;
+
+    protected array $descriptions = [];
+
+    protected array $images = [];
+
+    protected array $discounts = [];
+
+    protected array $product_attributes = [];
+
+    protected array $slugs = [];
+
     #[Locked]
-    public Model|int|string|null|Product $record;
+    public int|string|Model|null $record = null;
 
     protected function getHeaderActions(): array
     {
@@ -45,18 +51,16 @@ class EditProduct extends EditRecord
 
     /**
      * Mutate form data before filling form
-     *
-     * @param array $data
-     *
-     * @return array
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        $record = $this->getProductRecord();
+
         // Load descriptions
-        $descriptions = $this->record->productDescription()
+        $descriptions = $record->productDescription()
             ->get()
             ->keyBy('language_id')
-            ->map(fn(ProductDescription $desc) => [
+            ->map(fn (ProductDescription $desc) => [
                 'language_id'      => $desc->language_id,
                 'name'             => $desc->name,
                 'description'      => $desc->description,
@@ -69,10 +73,10 @@ class EditProduct extends EditRecord
         $data['descriptions'] = $descriptions;
 
         // Load images
-        $images = $this->record->productImage()
+        $images = $record->productImage()
             ->orderBy('sort_order')
             ->get()
-            ->map(fn(ProductImage $img) => [
+            ->map(fn (ProductImage $img) => [
                 'id'         => $img->id,
                 'image'      => $img->image,
                 'sort_order' => $img->sort_order,
@@ -82,9 +86,9 @@ class EditProduct extends EditRecord
         $data['images'] = $images;
 
         // Load discounts
-        $discounts = $this->record->productDiscount()
+        $discounts = $record->productDiscount()
             ->get()
-            ->map(fn(ProductDiscount $disc) => [
+            ->map(fn (ProductDiscount $disc) => [
                 'id'            => $disc->id,
                 'user_group_id' => $disc->user_group_id,
                 'quantity'      => $disc->quantity,
@@ -98,9 +102,9 @@ class EditProduct extends EditRecord
         $data['discounts'] = $discounts;
 
         // Load attributes
-        $attributes = $this->record->productToAttribute()
+        $attributes = $record->productToAttribute()
             ->get()
-            ->map(fn(ProductToAttribute $attr) => [
+            ->map(fn (ProductToAttribute $attr) => [
                 'id'           => $attr->id,
                 'attribute_id' => $attr->attribute_id,
                 'language_id'  => $attr->language_id,
@@ -118,9 +122,7 @@ class EditProduct extends EditRecord
     /**
      * Mutate form data before saving
      *
-     * @param array $data
      *
-     * @return array
      * @throws Halt
      */
     protected function mutateFormDataBeforeSave(array $data): array
@@ -138,7 +140,7 @@ class EditProduct extends EditRecord
         // Remove from main data
         unset(
             $data['descriptions'], $data['images'], $data['discounts'],
-            $data['attributes'], $data['slugs']
+            $data['attributes'], $data['slugs'],
         );
 
         return $data;
@@ -147,10 +149,8 @@ class EditProduct extends EditRecord
     /**
      * Validate that attribute-language pairs are unique
      *
-     * @param array $attributes
      *
-     * @return void
-     * @throws Notification|Halt
+     * @throws Halt
      */
     protected function validateAttributeLanguagePairs(array $attributes): void
     {
@@ -180,14 +180,15 @@ class EditProduct extends EditRecord
     /**
      * Handle record update with transaction
      *
-     * @param Model|Product $record
-     * @param array         $data
      *
-     * @return Model
      * @throws Halt
      */
     protected function handleRecordUpdate(Model|Product $record, array $data): Model
     {
+        if (! $record instanceof Product) {
+            throw new LogicException('Product record has invalid type.');
+        }
+
         try {
             return DB::transaction(function () use ($record, $data) {
                 // Update main record
@@ -220,40 +221,40 @@ class EditProduct extends EditRecord
             ]);
 
             $this->halt();
+
+            throw $e;
         }
     }
 
     /**
      * Update descriptions for the record
-     *
-     * @return void
      */
     protected function updateDescriptions(): void
     {
         foreach ($this->descriptions as $language_id => $description) {
-            if (!empty($description['name'])) {
-                $this->record->productDescription()->updateOrCreate(
-                    ['language_id' => (int)$language_id],
+            if (! empty($description['name'])) {
+                $this->getProductRecord()->productDescription()->updateOrCreate(
+                    ['language_id' => (int) $language_id],
                     [
                         'name'             => $description['name'],
                         'description'      => $description['description'] ?? null,
                         'meta_title'       => $description['meta_title'] ?? null,
                         'meta_description' => $description['meta_description'] ?? null,
                         'meta_keywords'    => $description['meta_keywords'] ?? null,
-                    ]
+                    ],
                 );
             }
         }
 
         // Remove empty descriptions
         $filled_language_ids = collect($this->descriptions)
-            ->filter(fn($desc) => !empty($desc['name']))
+            ->filter(fn ($desc) => ! empty($desc['name']))
             ->keys()
-            ->map(fn($id) => (int)$id)
+            ->map(fn ($id) => (int) $id)
             ->toArray();
 
-        if (!empty($filled_language_ids)) {
-            $this->record->productDescription()
+        if (! empty($filled_language_ids)) {
+            $this->getProductRecord()->productDescription()
                 ->whereNotIn('language_id', $filled_language_ids)
                 ->delete();
         }
@@ -261,17 +262,15 @@ class EditProduct extends EditRecord
 
     /**
      * Update images for the record
-     *
-     * @return void
      */
     protected function updateImages(): void
     {
-        $this->record->productImage()->delete();
+        $this->getProductRecord()->productImage()->delete();
 
         $images_data = [];
 
         foreach ($this->images as $image) {
-            if (!empty($image['image'])) {
+            if (! empty($image['image'])) {
                 $images_data[] = [
                     'image'      => $image['image'],
                     'sort_order' => $image['sort_order'] ?? 0,
@@ -279,24 +278,22 @@ class EditProduct extends EditRecord
             }
         }
 
-        if (!empty($images_data)) {
-            $this->record->productImage()->createMany($images_data);
+        if (! empty($images_data)) {
+            $this->getProductRecord()->productImage()->createMany($images_data);
         }
     }
 
     /**
      * Update discounts for the record
-     *
-     * @return void
      */
     protected function updateDiscounts(): void
     {
-        $this->record->productDiscount()->delete();
+        $this->getProductRecord()->productDiscount()->delete();
 
         $discounts_data = [];
 
         foreach ($this->discounts as $discount) {
-            if (!empty($discount['price'])) {
+            if (! empty($discount['price'])) {
                 $discounts_data[] = [
                     'user_group_id' => $discount['user_group_id'],
                     'quantity'      => $discount['quantity'],
@@ -308,24 +305,22 @@ class EditProduct extends EditRecord
             }
         }
 
-        if (!empty($discounts_data)) {
-            $this->record->productDiscount()->createMany($discounts_data);
+        if (! empty($discounts_data)) {
+            $this->getProductRecord()->productDiscount()->createMany($discounts_data);
         }
     }
 
     /**
      * Update attributes for the record
-     *
-     * @return void
      */
     protected function updateAttributes(): void
     {
-        $this->record->productToAttribute()->delete();
+        $this->getProductRecord()->productToAttribute()->delete();
 
         $attributes_data = [];
 
         foreach ($this->product_attributes as $attribute) {
-            if (!empty($attribute['attribute_id']) && !empty($attribute['text'])) {
+            if (! empty($attribute['attribute_id']) && ! empty($attribute['text'])) {
                 $attributes_data[] = [
                     'attribute_id' => $attribute['attribute_id'],
                     'language_id'  => $attribute['language_id'],
@@ -334,15 +329,13 @@ class EditProduct extends EditRecord
             }
         }
 
-        if (!empty($attributes_data)) {
-            $this->record->productToAttribute()->createMany($attributes_data);
+        if (! empty($attributes_data)) {
+            $this->getProductRecord()->productToAttribute()->createMany($attributes_data);
         }
     }
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -351,11 +344,18 @@ class EditProduct extends EditRecord
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {
         return __('admin/catalogs/products/products.navigation_label');
+    }
+
+    private function getProductRecord(): Product
+    {
+        if (! $this->record instanceof Product) {
+            throw new LogicException('Product record is not initialized.');
+        }
+
+        return $this->record;
     }
 }

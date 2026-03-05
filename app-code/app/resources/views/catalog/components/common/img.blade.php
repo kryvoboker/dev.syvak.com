@@ -1,3 +1,5 @@
+@use(Illuminate\Support\Str;)
+
 @props([
     'class' => '',
     'urls_data' => [
@@ -16,7 +18,7 @@
     'alt' => '',
 ])
 
-<img class="{{ trim($class) }}"
+<img class="{{ Str::trim($class) }}"
      src="{{ $urls_data['original_thumb'] ?: $no_image_url }}"
      srcset="
         @if($urls_data['thumb_1x']) {{ $urls_data['thumb_1x'] }} {{ $size }}w, @endif
@@ -24,9 +26,9 @@
         @if($urls_data['thumb_3x']) {{ $urls_data['thumb_3x'] }} {{ $size * 3 }}w, @endif
         @if($urls_data['thumb_4x']) {{ $urls_data['thumb_4x'] }} {{ $size * 4 }}w @endif
      "
-     @if(!empty($sizes)) sizes="{{ trim($sizes) }}" @endif
-     @if(!empty($width)) width="{{ trim($width) }}" @endif
-     @if(!empty($height)) height="{{ trim($height) }}" @endif
-     decoding="{{ trim($decoding) }}"
-     loading="{{ trim($loading) }}"
-     alt="{{ trim($alt) }}"/>
+     @if(!empty($sizes)) sizes="{{ Str::trim($sizes) }}" @endif
+     @if(!empty($width)) width="{{ Str::trim($width) }}" @endif
+     @if(!empty($height)) height="{{ Str::trim($height) }}" @endif
+     decoding="{{ Str::trim($decoding) }}"
+     loading="{{ Str::trim($loading) }}"
+     alt="{{ Str::trim($alt) }}"/>

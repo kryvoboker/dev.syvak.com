@@ -15,23 +15,29 @@ use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use LogicException;
 use Throwable;
 
 class EditInfoPage extends EditRecord
 {
     use ProcessSlugsTrait;
 
-    protected static string               $resource     = InfoPageResource::class;
-    protected array                       $descriptions = [];
-    protected array                       $slugs        = [];
-    public string|int|null|Model|InfoPage $record       = null;
+    protected static string $resource = InfoPageResource::class;
+
+    protected array $descriptions = [];
+
+    protected array $slugs = [];
+
+    public int|string|Model|null $record = null;
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $descriptions = $this->record->infoPageDescription()
-            ->get()
+        /** @var \Illuminate\Support\Collection<int, InfoPageDescription> $descriptions_collection */
+        $descriptions_collection = $this->getInfoPageRecord()->infoPageDescription()->get();
+
+        $descriptions = $descriptions_collection
             ->keyBy('language_id')
-            ->map(fn(InfoPageDescription $descr) => [
+            ->map(fn (InfoPageDescription $descr): array => [
                 'name'             => $descr->title,
                 'description'      => $descr->description,
                 'meta_title'       => $descr->meta_title,
@@ -47,11 +53,6 @@ class EditInfoPage extends EditRecord
         return $data;
     }
 
-    /**
-     * @param array $data
-     *
-     * @return array
-     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         // Store related data temporarily
@@ -66,15 +67,16 @@ class EditInfoPage extends EditRecord
     /**
      * Handle record update with transaction.
      *
-     * @param Model|InfoPage $record
-     * @param array          $data
      *
-     * @return Model
      * @throws Halt
      * @throws Throwable
      */
     protected function handleRecordUpdate(Model|InfoPage $record, array $data): Model
     {
+        if (! $record instanceof InfoPage) {
+            throw new LogicException('Info page record has invalid type.');
+        }
+
         try {
             return DB::transaction(function () use ($record, $data) {
                 // Update main record
@@ -98,27 +100,27 @@ class EditInfoPage extends EditRecord
             ]);
 
             $this->halt();
+
+            throw $e;
         }
     }
 
     /**
      * Sync descriptions for the record.
-     *
-     * @return void
      */
     protected function syncDescriptions(): void
     {
         foreach ($this->descriptions as $language_id => $description) {
-            if (!empty($description['name'])) {
-                $this->record->infoPageDescription()->updateOrCreate(
-                    ['language_id' => (int)$language_id],
+            if (! empty($description['name'])) {
+                $this->getInfoPageRecord()->infoPageDescription()->updateOrCreate(
+                    ['language_id' => (int) $language_id],
                     [
                         'title'            => $description['name'],
                         'description'      => $description['description'] ?? null,
                         'meta_title'       => $description['meta_title'] ?? null,
                         'meta_description' => $description['meta_description'] ?? null,
                         'meta_keywords'    => $description['meta_keywords'] ?? null,
-                    ]
+                    ],
                 );
             }
         }
@@ -129,5 +131,14 @@ class EditInfoPage extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+    private function getInfoPageRecord(): InfoPage
+    {
+        if (! $this->record instanceof InfoPage) {
+            throw new LogicException('Info page record is not initialized.');
+        }
+
+        return $this->record;
     }
 }

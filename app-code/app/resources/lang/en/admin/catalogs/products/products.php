@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Products',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'            => 'Product',
         'plural_model'     => 'Products',
         'add_discount'     => 'Add Discount',
@@ -15,13 +17,13 @@ return [
     ],
 
     // Pages
-    'pages'            => [
+    'pages' => [
         'create' => 'Create Product',
         'edit'   => 'Edit Product',
     ],
 
     // Errors
-    'errors'           => [
+    'errors' => [
         'duplicate_attribute_language' => 'The combination of attribute and language must be unique!',
     ],
 ];

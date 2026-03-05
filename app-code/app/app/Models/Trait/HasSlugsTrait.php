@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 trait HasSlugsTrait
 {
     /**
-     * @return MorphMany<Slug>
+     * @return MorphMany<Slug, $this>
      */
     public function slugs(): MorphMany
     {
@@ -19,9 +19,6 @@ trait HasSlugsTrait
 
     /**
      * Get slug for specific language
-     *
-     * @param int $language_id
-     * @return string|null
      */
     public function getSlugByLanguageId(int $language_id): ?string
     {
@@ -33,10 +30,6 @@ trait HasSlugsTrait
 
     /**
      * Find model by slug and language
-     *
-     * @param string $slug
-     * @param int $language_id
-     * @return static|null
      */
     public static function findBySlug(string $slug, int $language_id): ?static
     {
@@ -46,6 +39,8 @@ trait HasSlugsTrait
             ->where('sluggable_type', static::class)
             ->first();
 
-        return $slug_record?->sluggable;
+        $sluggable = $slug_record?->sluggable;
+
+        return $sluggable instanceof static ? $sluggable : null;
     }
 }

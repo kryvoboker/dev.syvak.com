@@ -15,14 +15,13 @@ use Throwable;
 class ProductImportSeeder extends Seeder
 {
     /**
-     * @return void
      * @throws Throwable
      */
     public function run(): void
     {
         $path = database_path('seeders/Catalogs/Products/data/products_2025_12.json');
 
-        if (!is_file($path)) {
+        if (! is_file($path)) {
             $this->command?->error("Import file not found: $path!");
 
             return;
@@ -47,7 +46,7 @@ class ProductImportSeeder extends Seeder
         $items = json_decode(file_get_contents($path), true) ?? [];
 
         foreach ($items as $item) {
-            $sku = trim((string)($item['sku'] ?? ''));
+            $sku = trim((string) ($item['sku'] ?? ''));
 
             if ($sku === '') {
                 continue;
@@ -58,7 +57,7 @@ class ProductImportSeeder extends Seeder
                 [
                     'model'          => $sku,
                     'ean'            => $item['ean'] ?? null,
-                    'price'          => (float)($item['price'] ?? 0),
+                    'price'          => (float) ($item['price'] ?? 0),
                     'image'          => $item['image'] ?? null, // "images/products/2025/12/<sku>.<ext>"
                     'quantity'       => 0,
                     'minimum'        => 1,
@@ -66,10 +65,10 @@ class ProductImportSeeder extends Seeder
                     'is_active'      => true,
                     'date_available' => now(config('app.timezone')),
                     'date_added'     => now(config('app.timezone')),
-                ]
+                ],
             );
 
-            $product_name = html_entity_decode((string)($item['name'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+            $product_name = html_entity_decode((string) ($item['name'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
 
             $product->productDescription()->updateOrCreate(
                 [
@@ -79,12 +78,12 @@ class ProductImportSeeder extends Seeder
                 [
                     'name'        => $product_name,
                     'description' => null,
-                ]
+                ],
             );
 
             $product->slugs()->updateOrCreate(
                 ['language_id' => $current_language_id],
-                ['slug' => UaSeoSlugService::make($item['name'] ?? '', 500)]
+                ['slug' => UaSeoSlugService::make($item['name'] ?? '', 500)],
             );
 
             $languages->each(function (Language $lang) use ($ai_translation_service, $product, $product_name, $default_locale) {
@@ -100,12 +99,12 @@ class ProductImportSeeder extends Seeder
                     [
                         'name'        => $translated_name,
                         'description' => null,
-                    ]
+                    ],
                 );
 
                 $product->slugs()->updateOrCreate(
                     ['language_id' => $lang->id],
-                    ['slug' => EnSeoSlugService::make($translated_name, 500)]
+                    ['slug' => EnSeoSlugService::make($translated_name, 500)],
                 );
             });
         }

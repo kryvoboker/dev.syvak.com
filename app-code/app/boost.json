@@ -1,0 +1,12 @@
+{
+    "agents": [
+        "codex",
+        "copilot"
+    ],
+    "editors": [
+        "codex"
+    ],
+    "guidelines": [
+        "filament/filament"
+    ]
+}

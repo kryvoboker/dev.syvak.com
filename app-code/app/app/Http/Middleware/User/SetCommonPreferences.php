@@ -17,7 +17,7 @@ class SetCommonPreferences
     /**
      * Handle an incoming request.
      *
-     * @param Closure(Request): (Response) $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -30,7 +30,7 @@ class SetCommonPreferences
             'app_settings'       => $app_settings_service->getSettings(),
             'no_image_url'       => asset('storage/' . config('app.images.default_no_image')),
             'current_locale'     => app()->getLocale(),
-            'max_viewport_width' => (int)config('app.frontend.max_viewport_width'),
+            'max_viewport_width' => (int) config('app.frontend.max_viewport_width'),
         ]);
 
         if ($currency !== null) {
@@ -45,10 +45,12 @@ class SetCommonPreferences
             app(ConvertPrice::class)->setDefaultCurrency($currency);
         }
 
-        if (!empty($app_settings_service->timezone) && in_array($app_settings_service->timezone, timezone_identifiers_list())) {
-            config(['app.timezone' => $app_settings_service->timezone]);
+        $app_settings_timezone = $app_settings_service->getSettings()?->timezone;
 
-            date_default_timezone_set($app_settings_service->timezone);
+        if (filled($app_settings_timezone) && in_array($app_settings_timezone, timezone_identifiers_list(), true)) {
+            config(['app.timezone' => $app_settings_timezone]);
+
+            date_default_timezone_set($app_settings_timezone);
         }
 
         return $next($request);

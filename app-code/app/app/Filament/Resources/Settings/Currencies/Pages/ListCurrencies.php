@@ -19,8 +19,6 @@ class ListCurrencies extends ListRecords
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -29,8 +27,6 @@ class ListCurrencies extends ListRecords
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {
@@ -51,7 +47,7 @@ class ListCurrencies extends ListRecords
                 ->modalHeading(__('admin/default.success.title'))
                 ->modalDescription(__('admin/settings/currencies.actions.modal_update_rates_body'))
                 ->action(function (): void {
-                     $error_message = app(UpdateRatesService::class)->handle();
+                    $error_message = app(UpdateRatesService::class)->handle();
 
                     if ($error_message) {
                         Notification::make()

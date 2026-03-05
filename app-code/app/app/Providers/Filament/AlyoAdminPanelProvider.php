@@ -32,11 +32,6 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AlyoAdminPanelProvider extends PanelProvider
 {
-    /**
-     * @param Panel $panel
-     *
-     * @return Panel
-     */
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -60,9 +55,9 @@ class AlyoAdminPanelProvider extends PanelProvider
                 },
             )
             ->plugins([
-                FilamentShieldPlugin::make()
+                /*FilamentShieldPlugin::make()
                     ->navigationSort(99)
-                    ->navigationGroup(AdminNavigationGroupEnum::Users),
+                    ->navigationGroup(AdminNavigationGroupEnum::Users),*/
             ])
             // Show group menu list if user visited page from group
             ->collapsibleNavigationGroups()
@@ -71,19 +66,19 @@ class AlyoAdminPanelProvider extends PanelProvider
 
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label(fn() => AdminNavigationGroupEnum::Catalog->getLabel())
+                    ->label(AdminNavigationGroupEnum::Catalog->getLabel())
                     ->collapsed(),
 
                 NavigationGroup::make()
-                    ->label(fn() => AdminNavigationGroupEnum::InfoPages->getLabel())
+                    ->label(AdminNavigationGroupEnum::InfoPages->getLabel())
                     ->collapsed(),
 
                 NavigationGroup::make()
-                    ->label(fn() => AdminNavigationGroupEnum::Users->getLabel())
+                    ->label(AdminNavigationGroupEnum::Users->getLabel())
                     ->collapsed(),
 
                 NavigationGroup::make()
-                    ->label(fn() => AdminNavigationGroupEnum::Settings->getLabel())
+                    ->label(AdminNavigationGroupEnum::Settings->getLabel())
                     ->collapsed(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -111,7 +106,7 @@ class AlyoAdminPanelProvider extends PanelProvider
                 LogFilamentErrors::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+//                Authenticate::class,
             ]);
     }
 }

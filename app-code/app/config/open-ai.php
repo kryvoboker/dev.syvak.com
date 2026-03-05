@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'api_key'                            => env('OPEN_AI_API_KEY'),
     'api_model'                          => env('OPEN_AI_API_MODEL'),

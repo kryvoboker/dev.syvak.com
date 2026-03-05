@@ -1,28 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Динамічні сторінки',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'        => 'Інформаційна сторінка',
         'plural_model' => 'Інформаційні сторінки',
         'position'     => 'Позиція на сторінці',
     ],
 
     // Columns
-    'columns'          => [
+    'columns' => [
         'position' => 'Позиція',
     ],
 
     // Placeholders
-    'placeholders'     => [
+    'placeholders' => [
         'position' => 'Виберіть позацию на сторінці',
     ],
 
     // Helpers
-    'helpers'          => [
+    'helpers' => [
         'position' => 'Використовуйте це поле, щоб визначити в якій частині сторінки буде відображатися посилання на цю інфо сторінку (зверху, знизу і т.д.).',
     ],
 ];

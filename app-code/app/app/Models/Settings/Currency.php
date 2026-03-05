@@ -37,8 +37,6 @@ class Currency extends Model
 
     /**
      * Boot the model.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -58,7 +56,7 @@ class Currency extends Model
                     ->where('id', '!=', $currency->id)
                     ->exists();
 
-                if (!$default_exists) {
+                if (! $default_exists) {
                     $currency->is_default = true;
                 }
             }
@@ -78,9 +76,6 @@ class Currency extends Model
         });
     }
 
-    /**
-     * @return Collection
-     */
     public function getAllActiveCurrencies(): Collection
     {
         return self::query()
@@ -90,11 +85,6 @@ class Currency extends Model
             ->get();
     }
 
-    /**
-     * @param string $code
-     *
-     * @return self|null
-     */
     public function getActiveCurrencyByCode(string $code): ?self
     {
         return self::query()
@@ -103,9 +93,6 @@ class Currency extends Model
             ->first();
     }
 
-    /**
-     * @return Currency|null
-     */
     public function getDefaultActiveCurrency(): ?self
     {
         return self::query()
@@ -114,9 +101,6 @@ class Currency extends Model
             ->first();
     }
 
-    /**
-     * @return Collection
-     */
     public function getAllCurrencies(): Collection
     {
         return self::query()

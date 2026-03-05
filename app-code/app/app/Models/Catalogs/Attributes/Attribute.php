@@ -29,7 +29,7 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<ProductAttributeTextHash>
+     * @return HasMany<ProductAttributeTextHash, $this>
      */
     public function productAttributeTextHash(): HasMany
     {
@@ -37,7 +37,7 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<AttributeDescription>
+     * @return HasMany<AttributeDescription, $this>
      */
     public function attributeDescription(): HasMany
     {
@@ -45,16 +45,13 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<ProductToAttribute>
+     * @return HasMany<ProductToAttribute, $this>
      */
     public function productToAttribute(): HasMany
     {
         return $this->hasMany(ProductToAttribute::class);
     }
 
-    /**
-     * @return void
-     */
     protected static function booted(): void
     {
         // Delete related translations when attribute is deleted
@@ -63,11 +60,6 @@ class Attribute extends Model
         });
     }
 
-    /**
-     * @param int $language_id
-     *
-     * @return Collection
-     */
     public function getActiveAttributesWithDescriptionsByLanguageId(int $language_id): Collection
     {
         return self::query()
@@ -75,23 +67,17 @@ class Attribute extends Model
             ->with([
                 'attributeDescription' => function ($query) use ($language_id) {
                     $query->where('language_id', $language_id);
-                }
+                },
             ])
             ->get();
     }
 
-    /**
-     * @param int $attribute_id
-     * @param int $language_id
-     *
-     * @return self|null
-     */
     public function getActiveAttributeWithDescriptionByAttributeIdAndLanguageId(int $attribute_id, int $language_id): ?self
     {
         return self::with([
             'attributeDescription' => function ($query) use ($language_id) {
                 $query->where('language_id', $language_id);
-            }
+            },
         ])
             ->where('is_active', true)
             ->find($attribute_id);

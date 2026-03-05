@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -42,5 +44,5 @@ return [
         'decodeAnimation' => true,
         'blendingColor'   => 'ffffff',
         'strip'           => false,
-    ]
+    ],
 ];

@@ -11,13 +11,16 @@ use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
+use LogicException;
 
 class EditAttribute extends EditRecord
 {
-    protected static string                $resource     = AttributeResource::class;
-    protected array                        $descriptions = [];
+    protected static string $resource = AttributeResource::class;
+
+    protected array $descriptions = [];
+
     #[Locked]
-    public Model|int|string|null|Attribute $record;
+    public int|string|Model|null $record = null;
 
     protected function getHeaderActions(): array
     {
@@ -28,18 +31,14 @@ class EditAttribute extends EditRecord
 
     /**
      * Mutate form data before filling form
-     *
-     * @param array $data
-     *
-     * @return array
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Load descriptions for each language
-        $descriptions = $this->record->attributeDescription()
+        $descriptions = $this->getAttributeRecord()->attributeDescription()
             ->get()
             ->keyBy('language_id')
-            ->map(fn(AttributeDescription $desc) => [
+            ->map(fn (AttributeDescription $desc) => [
                 'language_id' => $desc->language_id,
                 'name'        => $desc->name,
             ])
@@ -52,10 +51,6 @@ class EditAttribute extends EditRecord
 
     /**
      * Mutate form data before saving
-     *
-     * @param array $data
-     *
-     * @return array
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
@@ -68,8 +63,6 @@ class EditAttribute extends EditRecord
 
     /**
      * Handle after save
-     *
-     * @return void
      */
     protected function afterSave(): void
     {
@@ -78,23 +71,23 @@ class EditAttribute extends EditRecord
         }
 
         foreach ($this->descriptions as $language_id => $description) {
-            if (!empty($description['name'])) {
-                $this->record->attributeDescription()->updateOrCreate(
-                    ['language_id' => (int)$language_id],
-                    ['name' => $description['name']]
+            if (! empty($description['name'])) {
+                $this->getAttributeRecord()->attributeDescription()->updateOrCreate(
+                    ['language_id' => (int) $language_id],
+                    ['name' => $description['name']],
                 );
             }
         }
 
         // Remove descriptions that are empty
         $filled_language_ids = collect($this->descriptions)
-            ->filter(fn($desc) => !empty($desc['name']))
+            ->filter(fn ($desc) => ! empty($desc['name']))
             ->keys()
-            ->map(fn($id) => (int)$id)
+            ->map(fn ($id) => (int) $id)
             ->toArray();
 
-        if (!empty($filled_language_ids)) {
-            $this->record->attributeDescription()
+        if (! empty($filled_language_ids)) {
+            $this->getAttributeRecord()->attributeDescription()
                 ->whereNotIn('language_id', $filled_language_ids)
                 ->delete();
         }
@@ -102,8 +95,6 @@ class EditAttribute extends EditRecord
 
     /**
      * Get page title
-     *
-     * @return string
      */
     public function getTitle(): string
     {
@@ -112,11 +103,18 @@ class EditAttribute extends EditRecord
 
     /**
      * Get page heading
-     *
-     * @return string|null
      */
     public function getHeading(): ?string
     {
         return __('admin/catalogs/attributes/attributes.navigation_label');
+    }
+
+    private function getAttributeRecord(): Attribute
+    {
+        if (! $this->record instanceof Attribute) {
+            throw new LogicException('Attribute record is not initialized.');
+        }
+
+        return $this->record;
     }
 }

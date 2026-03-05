@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Texts
-    'texts'        => [
+    'texts' => [
         'sku'                => 'Артикул: :sku',
         'products_not_found' => 'Товари не знайдено!',
     ],
 
     // Links
-    'links'        => [
+    'links' => [
         'home' => 'Головна',
     ],
 
     // Buttons
-    'buttons'      => [
+    'buttons' => [
         'catalog' => 'Каталог',
     ],
 
@@ -23,7 +25,7 @@ return [
     ],
 
     // Aria-Labels
-    'aria_labels'  => [
+    'aria_labels' => [
         'toggle_main_menu'      => 'Перемкнути головне меню',
         'toggle_catalog_menu'   => 'Перемкнути меню каталогу',
         'back_to_main_mob_menu' => 'Повернутися до головного меню',
@@ -32,7 +34,7 @@ return [
     ],
 
     // Errors
-    'errors'       => [
+    'errors' => [
         'keyword_required' => 'Пошукове слово є обов\'язковим!',
         'keyword_string'   => 'Пошукове слово повинно бути рядком!',
         'keyword_min'      => 'Пошук повинен містити щонайменше 3 символи!',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Infos\InfoPages\Pages;
 
 use App\Filament\Resources\Infos\InfoPages\InfoPageResource;

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     // Navigation
     'navigation_label' => 'Currencies',
 
     // Labels
-    'labels'           => [
+    'labels' => [
         'model'          => 'Currency',
         'plural_model'   => 'Currencies',
         'code'           => 'Currency Code',
@@ -18,7 +20,7 @@ return [
     ],
 
     // Helpers
-    'helpers'          => [
+    'helpers' => [
         'name'           => 'Full currency name (e.g., US Dollar, Euro, Ukrainian Hryvnia)',
         'code'           => 'ISO 4217 code (e.g., USD, EUR, UAH)',
         'format_locale'  => 'Locale for formatting currency (e.g., en_US, de_DE)',
@@ -31,7 +33,7 @@ return [
     ],
 
     // Columns
-    'columns'          => [
+    'columns' => [
         'symbol_left'    => 'Symbol Left',
         'symbol_right'   => 'Symbol Right',
         'decimal_places' => 'Decimal Places',
@@ -39,25 +41,25 @@ return [
     ],
 
     // Actions
-    'actions'          => [
+    'actions' => [
         'update_rates'             => 'Update Rates',
         'modal_update_rates_title' => 'Update Currency Rates',
         'modal_update_rates_body'  => 'The system will request new exchange rates and update active currencies.',
     ],
 
     // Notifications
-    'notifications'    => [
+    'notifications' => [
         'rates_updated_body' => 'Exchange rates have been successfully updated.',
     ],
 
     // Text
-    'texts'            => [
+    'texts' => [
         'cant_delete_default_currency'     => 'Cannot delete default currency',
         'cant_delete_last_active_currency' => 'Cannot delete last active currency',
     ],
 
     // Error
-    'errors'           => [
+    'errors' => [
         'cant_delete_default_currency'     => 'Please set another currency as default before deleting this one!',
         'cant_delete_last_active_currency' => 'At least one active currency must remain in the system!',
         'failed_to_update_rates'           => 'Failed to update currency rates. Please try again later!',

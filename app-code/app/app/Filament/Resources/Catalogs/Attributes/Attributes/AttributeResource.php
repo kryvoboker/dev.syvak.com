@@ -23,9 +23,11 @@ class AttributeResource extends Resource
 {
     use TotalModelItemsResourceTrait;
 
-    protected static ?string                $model           = Attribute::class;
-    protected static string|BackedEnum|null $navigationIcon  = Heroicon::Tag;
-    protected static string|null|UnitEnum   $navigationGroup = AdminNavigationGroupEnum::Catalog;
+    protected static ?string $model = Attribute::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
+
+    protected static string|null|UnitEnum $navigationGroup = AdminNavigationGroupEnum::Catalog;
 
     public static function form(Schema $schema): Schema
     {
@@ -55,8 +57,6 @@ class AttributeResource extends Resource
 
     /**
      * Signature in the navigation menu (left panel)
-     *
-     * @return string
      */
     public static function getNavigationLabel(): string
     {
@@ -65,8 +65,6 @@ class AttributeResource extends Resource
 
     /**
      * A single model name (e.g. in headings, "Create X" button)
-     *
-     * @return string
      */
     public static function getModelLabel(): string
     {
@@ -75,8 +73,6 @@ class AttributeResource extends Resource
 
     /**
      * Plural model name (e.g. in lists, section headings)
-     *
-     * @return string
      */
     public static function getPluralModelLabel(): string
     {

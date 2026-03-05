@@ -6,9 +6,9 @@ namespace App\Models\Settings;
 
 use App\Models\Slug;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
 
 class Language extends Model
@@ -32,7 +32,7 @@ class Language extends Model
     }
 
     /**
-     * @return HasMany<Slug>
+     * @return HasMany<Slug, $this>
      */
     public function slug(): HasMany
     {
@@ -41,8 +41,6 @@ class Language extends Model
 
     /**
      * Boot the model.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -62,7 +60,7 @@ class Language extends Model
                     ->where('id', '!=', $language->id)
                     ->exists();
 
-                if (!$default_exists) {
+                if (! $default_exists) {
                     $language->is_default = true;
                 }
             }
@@ -84,15 +82,11 @@ class Language extends Model
 
     /**
      * Get validation rules for the model.
-     *
-     * @param int|null $id
-     *
-     * @return array
      */
     public static function validationRules(?int $id = null): array
     {
         return [
-            'code'       => [
+            'code' => [
                 'required',
                 'string',
                 'max:10',
@@ -100,12 +94,12 @@ class Language extends Model
                 'lowercase',
                 Rule::unique('languages', 'code')->ignore($id),
             ],
-            'name'       => [
+            'name' => [
                 'required',
                 'string',
                 'max:100',
             ],
-            'is_active'  => [
+            'is_active' => [
                 'boolean',
             ],
             'is_default' => [
@@ -126,11 +120,6 @@ class Language extends Model
             ->get();
     }
 
-    /**
-     * @param string $code
-     *
-     * @return self|null
-     */
     public function getLanguageByCode(string $code): ?self
     {
         return self::query()
@@ -138,9 +127,6 @@ class Language extends Model
             ->first();
     }
 
-    /**
-     * @return self|null
-     */
     public function getDefaultLanguage(): ?self
     {
         return self::query()
@@ -148,11 +134,6 @@ class Language extends Model
             ->first();
     }
 
-    /**
-     * @param string $code
-     *
-     * @return Collection
-     */
     public function getActiveLanguagesWithoutExceptCode(string $code): Collection
     {
         return self::query()

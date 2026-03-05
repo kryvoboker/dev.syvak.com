@@ -4,99 +4,94 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Settings\Currencies\Schemas;
 
-use App\Filament\Resources\Trait\Forms\CommonTextFormTrait;
-use App\Filament\Resources\Trait\Forms\NumericFormTrait;
-use App\Filament\Resources\Trait\Forms\ToggleCheckboxFormTrait;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class CurrencyForm
 {
-    use CommonTextFormTrait, ToggleCheckboxFormTrait, NumericFormTrait;
-
-    /**
-     * @param Schema $schema
-     *
-     * @return Schema
-     */
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                self::getTextFormField([
-                    'field_name'  => 'code',
-                    'label'       => __('admin/default.labels.code'),
-                    'helper_text' => __('admin/settings/currencies.helpers.code'),
-                    'max_length'  => 3,
-                    'placeholder' => 'USD',
-                    'rules'       => ['alpha', 'uppercase', 'size:3'],
-                    'unique'      => ['ignore_record' => true],
-                ]),
+                TextInput::make('code')
+                    ->label(__('admin/default.labels.code'))
+                    ->helperText(__('admin/settings/currencies.helpers.code'))
+                    ->maxLength(3)
+                    ->placeholder('USD')
+                    ->rules(['required', 'alpha', 'uppercase', 'size:3'])
+                    ->unique(ignoreRecord: true)
+                    ->required(),
 
-                self::getTextFormField([
-                    'field_name'  => 'name',
-                    'label'       => __('admin/default.labels.name'),
-                    'helper_text' => __('admin/settings/currencies.helpers.name'),
-                    'max_length'  => 100,
-                    'placeholder' => 'US Dollar',
-                ]),
+                TextInput::make('name')
+                    ->label(__('admin/default.labels.name'))
+                    ->helperText(__('admin/settings/currencies.helpers.name'))
+                    ->maxLength(100)
+                    ->placeholder('US Dollar')
+                    ->rules(['required', 'string', 'max:100'])
+                    ->required(),
 
-                self::getTextFormField([
-                    'field_name'  => 'format_locale',
-                    'label'       => __('admin/default.labels.format_locale'),
-                    'helper_text' => __('admin/settings/currencies.helpers.format_locale'),
-                    'max_length'  => 10,
-                    'placeholder' => 'uk_UA',
-                ]),
+                TextInput::make('format_locale')
+                    ->label(__('admin/default.labels.format_locale'))
+                    ->helperText(__('admin/settings/currencies.helpers.format_locale'))
+                    ->maxLength(10)
+                    ->placeholder('uk_UA')
+                    ->rules(['required', 'string', 'max:10'])
+                    ->required(),
 
-                self::getTextFormField([
-                    'field_name'  => 'symbol_left',
-                    'label'       => __('admin/settings/currencies.labels.symbol_left'),
-                    'helper_text' => __('admin/settings/currencies.helpers.symbol_left'),
-                    'max_length'  => 10,
-                    'placeholder' => '$',
-                    'required'    => false,
-                ]),
+                TextInput::make('symbol_left')
+                    ->label(__('admin/settings/currencies.labels.symbol_left'))
+                    ->helperText(__('admin/settings/currencies.helpers.symbol_left'))
+                    ->maxLength(10)
+                    ->placeholder('$')
+                    ->rules(['nullable', 'string', 'max:10'])
+                    ->nullable(),
 
-                self::getTextFormField([
-                    'field_name'  => 'symbol_right',
-                    'label'       => __('admin/settings/currencies.labels.symbol_right'),
-                    'helper_text' => __('admin/settings/currencies.helpers.symbol_right'),
-                    'max_length'  => 10,
-                    'placeholder' => '€',
-                    'required'    => false,
-                ]),
+                TextInput::make('symbol_right')
+                    ->label(__('admin/settings/currencies.labels.symbol_right'))
+                    ->helperText(__('admin/settings/currencies.helpers.symbol_right'))
+                    ->maxLength(10)
+                    ->placeholder('€')
+                    ->rules(['nullable', 'string', 'max:10'])
+                    ->nullable(),
 
-                self::getNumericFormField([
-                    'field_name'  => 'decimal_places',
-                    'label'       => __('admin/settings/currencies.labels.decimal_places'),
-                    'helper_text' => __('admin/settings/currencies.helpers.decimal_places'),
-                    'placeholder' => 2,
-                    'default'     => 2,
-                    'min_value'   => 0,
-                    'max_value'   => 4,
-                    'required'    => true,
-                ]),
+                TextInput::make('decimal_places')
+                    ->label(__('admin/settings/currencies.labels.decimal_places'))
+                    ->helperText(__('admin/settings/currencies.helpers.decimal_places'))
+                    ->numeric()
+                    ->rules(['required', 'numeric', 'min:0', 'max:4'])
+                    ->minValue(0)
+                    ->maxValue(4)
+                    ->default(2)
+                    ->required(),
 
-                self::getNumericFormField([
-                    'field_name'  => 'exchange_rate',
-                    'label'       => __('admin/settings/currencies.labels.exchange_rate'),
-                    'helper_text' => __('admin/settings/currencies.helpers.exchange_rate'),
-                    'placeholder' => 1.000000,
-                    'default'     => 1.000000,
-                    'min_value'   => 0.000001,
-                    'step'        => 0.000001,
-                    'required'    => true,
-                ]),
+                TextInput::make('exchange_rate')
+                    ->label(__('admin/settings/currencies.labels.exchange_rate'))
+                    ->helperText(__('admin/settings/currencies.helpers.exchange_rate'))
+                    ->numeric()
+                    ->rules(['required', 'numeric', 'min:0.000001'])
+                    ->minValue(0.000001)
+                    ->step(0.000001)
+                    ->default(1.000000)
+                    ->required(),
 
-                self::getIsActiveFormField([
-                    'helper_text' => __('admin/settings/currencies.helpers.is_active'),
-                    'default'     => false,
-                ]),
+                Toggle::make('is_active')
+                    ->label(__('admin/default.labels.is_active'))
+                    ->helperText(__('admin/settings/currencies.helpers.is_active'))
+                    ->default(false)
+                    ->required(),
 
-                self::getIsDefaultFormField([
-                    'helper_text' => __('admin/settings/currencies.helpers.is_default'),
-                    'default'     => false,
-                ]),
+                Toggle::make('is_default')
+                    ->label(__('admin/default.labels.is_default'))
+                    ->helperText(__('admin/settings/currencies.helpers.is_default'))
+                    ->default(false)
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        if ($state) {
+                            $set('is_active', true);
+                        }
+                    })
+                    ->required(),
             ]);
     }
 }

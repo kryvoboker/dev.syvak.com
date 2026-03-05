@@ -6,7 +6,7 @@ namespace App\Models\Catalogs\Categories;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CategoryPath extends Model
 {
@@ -28,19 +28,11 @@ class CategoryPath extends Model
         ];
     }
 
-    /**
-     * @return BelongsToMany<Category>
-     */
-    public function category(): BelongsToMany
+    public function category(): BelongsTo
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
-    /**
-     * @param int $category_id
-     *
-     * @return Collection
-     */
     public function getPathIdsByCategoryId(int $category_id): Collection
     {
         return self::query()
