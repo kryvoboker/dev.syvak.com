@@ -6,6 +6,11 @@ namespace App\Providers;
 
 use App\Services\FooterService;
 use App\Services\HeaderService;
+use App\Services\Modules\ModuleCacheService;
+use App\Services\Modules\ModuleDefinitionSyncService;
+use App\Services\Modules\ModuleDiscoveryService;
+use App\Services\Modules\ModuleInstanceService;
+use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
@@ -41,6 +46,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ImageUrlBuilderService::class);
         $this->app->singleton(AppSettingsService::class);
         $this->app->singleton(ConvertPrice::class);
+        $this->app->singleton(ModuleCacheService::class);
+        $this->app->singleton(ModuleDiscoveryService::class);
+        $this->app->singleton(ModuleDefinitionSyncService::class);
+        $this->app->singleton(ModuleInstanceService::class);
+        $this->app->singleton(ModuleRuntimeResolverService::class);
     }
 
     /**

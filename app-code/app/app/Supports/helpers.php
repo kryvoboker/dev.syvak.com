@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Data\AppSettingsData;
+use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
@@ -195,5 +196,12 @@ if (! function_exists('get_now_date')) {
     function get_now_date(?string $time_zone = null): Carbon|CarbonInterface
     {
         return now($time_zone ?: config('app.timezone'));
+    }
+}
+
+if (! function_exists('resolve_modules_for_context')) {
+    function resolve_modules_for_context(?string $placement = null, ?string $context_key = null): \Illuminate\Support\Collection
+    {
+        return app(ModuleRuntimeResolverService::class)->resolve($placement, $context_key);
     }
 }
