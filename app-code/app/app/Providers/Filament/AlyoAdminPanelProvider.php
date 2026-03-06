@@ -55,9 +55,9 @@ class AlyoAdminPanelProvider extends PanelProvider
                 },
             )
             ->plugins([
-                /*FilamentShieldPlugin::make()
+                FilamentShieldPlugin::make()
                     ->navigationSort(99)
-                    ->navigationGroup(AdminNavigationGroupEnum::Users),*/
+                    ->navigationGroup(AdminNavigationGroupEnum::Users),
             ])
             // Show group menu list if user visited page from group
             ->collapsibleNavigationGroups()
@@ -110,7 +110,7 @@ class AlyoAdminPanelProvider extends PanelProvider
                 LogFilamentErrors::class,
             ])
             ->authMiddleware([
-//                Authenticate::class,
+                Authenticate::class,
             ]);
     }
 }
