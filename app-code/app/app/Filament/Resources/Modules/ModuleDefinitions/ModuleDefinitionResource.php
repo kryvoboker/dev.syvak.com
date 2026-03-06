@@ -76,7 +76,7 @@ class ModuleDefinitionResource extends Resource
         return false;
     }
 
-    public static function canDelete(ModuleDefinition|Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return false;
     }
