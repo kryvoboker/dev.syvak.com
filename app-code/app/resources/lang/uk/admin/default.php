@@ -8,6 +8,7 @@ return [
         'item_catalog'  => 'Каталог',
         'info_pages'    => 'Інформаційні сторінки',
         'item_users'    => 'Користувачі',
+        'item_modules'  => 'Модулі',
         'item_settings' => 'Налаштування',
     ],
 

@@ -19,10 +19,10 @@ class SetDefaultLocalePrefix
      */
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
-        $path_info = Str::ltrim($request->getPathInfo(), '/');
+        $path_info           = Str::ltrim($request->getPathInfo(), '/');
         $is_livewire_request = Str::startsWith($path_info, ['livewire-', 'livewire/']);
 
-        $locale             = $request->route('locale');
+        $locale = $request->route('locale');
 
         if ($is_livewire_request) {
             $resolved_locale = $locale ?: session('locale', config('app.locale', 'en'));

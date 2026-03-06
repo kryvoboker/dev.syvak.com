@@ -10,7 +10,7 @@ use App\Models\Settings\Language;
 use App\Models\Users\UserGroup;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Throwable;
+use Illuminate\Support\Facades\Log;
 
 final class AppSettingsService
 {
@@ -27,9 +27,6 @@ final class AppSettingsService
         return $this->app_settings_data;
     }
 
-    /**
-     * @throws Throwable
-     */
     public function setSettings(): void
     {
         $this->removeSettings();
@@ -40,19 +37,14 @@ final class AppSettingsService
             return;
         }
 
-        $language_id = new Language()->getLanguageByCode($locale)?->id;
-
-        throw_if(
-            $language_id === null,
-            message: "Language with code $locale not found!",
-        );
-
+        $language_id   = $this->resolveLanguageId($locale);
         $user_group_id = Auth::user()?->user_group_id ?: new UserGroup()->getDefaultUserGroupId();
 
-        throw_if(
-            $user_group_id === null,
-            message: 'The user group ID is not set!',
-        );
+        if ($user_group_id === null) {
+            Log::channel('stack')->warning('Unable to resolve default user group ID while building app settings.', [
+                'locale' => $locale,
+            ]);
+        }
 
         $this->app_settings_data = AppSettingsData::fromArray(array_merge(
             new AppSetting()->getAppSettings()?->toArray() ?? [],
@@ -64,6 +56,23 @@ final class AppSettingsService
             self::TTL,
             fn () => $this->app_settings_data,
         );
+    }
+
+    private function resolveLanguageId(string $locale): ?int
+    {
+        $language_model = new Language();
+        $language_id    = $language_model->getLanguageByCode($locale)?->id
+            ?: $language_model->getDefaultLanguage()?->id
+            ?: Language::query()->where('is_active', true)->orderByDesc('is_default')->orderBy('name')->value('id')
+            ?: Language::query()->value('id');
+
+        if ($language_id === null) {
+            Log::channel('stack')->warning('Unable to resolve language ID while building app settings.', [
+                'locale' => $locale,
+            ]);
+        }
+
+        return $language_id;
     }
 
     public function removeSettings(): void

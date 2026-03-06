@@ -12,6 +12,7 @@ enum AdminNavigationGroupEnum: string implements HasLabel
     case Catalog   = 'catalog';
     case InfoPages = 'info_pages';
     case Users     = 'users';
+    case Modules   = 'modules';
     case Settings  = 'settings';
 
     public function getLabel(): string|Htmlable|null
@@ -20,6 +21,7 @@ enum AdminNavigationGroupEnum: string implements HasLabel
             self::Catalog   => __('admin/default.menu.item_catalog'),
             self::InfoPages => __('admin/default.menu.info_pages'),
             self::Users     => __('admin/default.menu.item_users'),
+            self::Modules   => __('admin/default.menu.item_modules'),
             self::Settings  => __('admin/default.menu.item_settings'),
         };
     }
