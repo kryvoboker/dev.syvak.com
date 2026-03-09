@@ -21,6 +21,16 @@
 </head>
 
 <body>
+@php
+    $page_type = $page_type ?? try_detect_page_type();
+@endphp
+
+<script>
+    window.app_params = @json([
+        'page_type' => $page_type,
+    ]);
+</script>
+
 <div class="wrapper">
     @include('catalog.layouts.partials.header')
 

@@ -9,12 +9,14 @@ use App\Services\FooterService;
 use App\Services\HeaderService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\View\View;
+use Modules\Carousel\Services\CarouselModuleDataService;
 
 class HomeController extends Controller
 {
     public function index(): View|Factory
     {
         $header_data = app(HeaderService::class)();
+        $page_type   = try_detect_page_type();
 
         $data = [
             'header_data' => $header_data,
@@ -22,7 +24,8 @@ class HomeController extends Controller
                 // Footer uses category links too; pass already loaded categories from header.
                 'categories' => $header_data['categories'],
             ]),
-            'page_type' => try_detect_page_type(),
+            'carousel_modules_data' => app(CarouselModuleDataService::class)->resolveForPlacement('hero', $page_type),
+            'page_type'             => $page_type,
         ];
 
         return view('catalog.pages.home', $data);

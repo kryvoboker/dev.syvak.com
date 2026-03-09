@@ -9,13 +9,13 @@ use App\Models\Modules\ModuleInstance;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Throwable;
 
 class ModuleInstanceService
 {
     public function __construct(
         private readonly ModuleCacheService $module_cache_service,
+        private readonly ModuleInstanceSettingsNormalizerService $module_instance_settings_normalizer_service,
     ) {}
 
     public function setGlobalState(ModuleDefinition $definition, bool $is_enabled): ModuleDefinition
@@ -42,20 +42,20 @@ class ModuleInstanceService
     {
         Log::channel('daily')->info('Creating module instance from definition.', [
             'definition_id' => $definition->id,
-            'slug'          => $definition->slug,
+            'nwidart_name'  => $definition->nwidart_name,
         ]);
 
         try {
+            $attributes = $this->module_instance_settings_normalizer_service->normalizeForDefinition($definition, $attributes);
+
             /** @var ModuleInstance $instance */
             $instance = DB::transaction(function () use ($definition, $attributes): ModuleInstance {
                 $next_sort_order = ((int) $definition->instances()->max('sort_order')) + 1;
                 $default_name    = trim($definition->name . ' ' . $next_sort_order);
                 $name            = (string) Arr::get($attributes, 'name', $default_name);
-                $slug            = $this->generateUniqueSlug((string) Arr::get($attributes, 'slug', Str::slug($name)));
 
                 return $definition->instances()->create([
                     'name'        => $name,
-                    'slug'        => $slug,
                     'placement'   => Arr::get($attributes, 'placement'),
                     'context_key' => Arr::get($attributes, 'context_key'),
                     'is_enabled'  => (bool) Arr::get($attributes, 'is_enabled', true),
@@ -86,21 +86,21 @@ class ModuleInstanceService
         Log::channel('daily')->info('Duplicating module instance.', [
             'instance_id'     => $instance->id,
             'definition_id'   => $instance->module_definition_id,
-            'instance_slug'   => $instance->slug,
-            'definition_slug' => $instance->definition?->slug,
+            'instance_name'   => $instance->name,
+            'definition_name' => $instance->definition?->name,
         ]);
 
         try {
+            $attributes = $this->module_instance_settings_normalizer_service->normalizeForInstance($instance, $attributes);
+
             /** @var ModuleInstance $duplicated_instance */
             $duplicated_instance = DB::transaction(function () use ($instance, $attributes): ModuleInstance {
                 $definition      = $instance->definition()->firstOrFail();
                 $next_sort_order = ((int) $definition->instances()->max('sort_order')) + 1;
                 $duplicated_name = (string) Arr::get($attributes, 'name', $instance->name . ' Copy');
-                $duplicated_slug = $this->generateUniqueSlug((string) Arr::get($attributes, 'slug', Str::slug($duplicated_name)));
 
                 return $definition->instances()->create([
                     'name'        => $duplicated_name,
-                    'slug'        => $duplicated_slug,
                     'placement'   => Arr::get($attributes, 'placement', $instance->placement),
                     'context_key' => Arr::get($attributes, 'context_key', $instance->context_key),
                     'is_enabled'  => (bool) Arr::get($attributes, 'is_enabled', $instance->is_enabled),
@@ -124,18 +124,25 @@ class ModuleInstanceService
     }
 
     /**
-     * @param  array<string, mixed>  $settings
+     * @param  array<string, mixed>  $attributes
      */
-    public function updateSettings(ModuleInstance $instance, array $settings): ModuleInstance
+    public function update(ModuleInstance $instance, array $attributes): ModuleInstance
     {
-        Log::channel('daily')->info('Updating module instance settings.', [
-            'instance_id'    => $instance->id,
-            'definition_id'  => $instance->module_definition_id,
-            'settings_count' => count($settings),
+        Log::channel('daily')->info('Updating module instance.', [
+            'instance_id'   => $instance->id,
+            'definition_id' => $instance->module_definition_id,
         ]);
 
+        $attributes = $this->module_instance_settings_normalizer_service->normalizeForInstance($instance, $attributes);
+
         $instance->forceFill([
-            'settings' => $settings,
+            'name'        => Arr::get($attributes, 'name', $instance->name),
+            'placement'   => Arr::get($attributes, 'placement', $instance->placement),
+            'context_key' => Arr::get($attributes, 'context_key', $instance->context_key),
+            'is_enabled'  => (bool) Arr::get($attributes, 'is_enabled', $instance->is_enabled),
+            'sort_order'  => (int) Arr::get($attributes, 'sort_order', $instance->sort_order),
+            'settings'    => Arr::get($attributes, 'settings', $instance->settings ?? []),
+            'meta'        => Arr::get($attributes, 'meta', $instance->meta ?? []),
         ])->save();
 
         $this->module_cache_service->flush();
@@ -143,18 +150,32 @@ class ModuleInstanceService
         return $instance->refresh();
     }
 
-    private function generateUniqueSlug(string $base_slug): string
+    public function setInstanceState(ModuleInstance $instance, bool $is_enabled): ModuleInstance
     {
-        $prepared_slug = Str::slug($base_slug);
-        $prepared_slug = filled($prepared_slug) ? $prepared_slug : Str::random(12);
-        $candidate     = $prepared_slug;
-        $counter       = 2;
+        Log::channel('daily')->info('Changing module instance state.', [
+            'instance_id'   => $instance->id,
+            'definition_id' => $instance->module_definition_id,
+            'is_enabled'    => $is_enabled,
+        ]);
 
-        while (ModuleInstance::query()->where('slug', $candidate)->exists()) {
-            $candidate = $prepared_slug . '-' . $counter;
-            $counter++;
-        }
+        $instance->forceFill([
+            'is_enabled' => $is_enabled,
+        ])->save();
 
-        return $candidate;
+        $this->module_cache_service->flush();
+
+        return $instance->refresh();
+    }
+
+    public function delete(ModuleInstance $instance): void
+    {
+        Log::channel('daily')->info('Deleting module instance.', [
+            'instance_id'   => $instance->id,
+            'definition_id' => $instance->module_definition_id,
+        ]);
+
+        $instance->delete();
+
+        $this->module_cache_service->flush();
     }
 }

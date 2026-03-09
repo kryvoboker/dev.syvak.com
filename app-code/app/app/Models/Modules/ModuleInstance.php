@@ -16,7 +16,6 @@ class ModuleInstance extends Model
     protected $fillable = [
         'module_definition_id',
         'name',
-        'slug',
         'placement',
         'context_key',
         'is_enabled',
