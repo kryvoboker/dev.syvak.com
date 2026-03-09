@@ -1,6 +1,11 @@
+import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
+import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
+
 document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsDropdownCollection = [];
     window.$hsOverlayCollection = [];
+
+    const pageType = getAppParam<string>($PAGE_TYPE_KEY);
 
     import('@ts-shared/lib/validateForm.ts')
         .then(module => module.handleValidateForms());
@@ -29,4 +34,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
                 searchForm:       '.pc-search-form',
             })
         });
+
+    if (pageType === 'home') {
+        import('@ts-features/carousel/mainCarousel.ts')
+            .then(module => module.handleMainCarousel());
+    }
 });

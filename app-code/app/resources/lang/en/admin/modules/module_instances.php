@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 return [
     'labels' => [
+        'model'         => 'Module Settings',
+        'plural_model'  => 'Module Settings',
         'name'          => 'Name',
-        'slug'          => 'Slug',
         'placement'     => 'Placement',
         'context_key'   => 'Context Key',
         'is_enabled'    => 'Enabled',
@@ -17,7 +18,6 @@ return [
     ],
     'columns' => [
         'name'        => 'Name',
-        'slug'        => 'Slug',
         'placement'   => 'Placement',
         'context_key' => 'Context Key',
         'is_enabled'  => 'Enabled',
@@ -39,5 +39,9 @@ return [
     'notifications' => [
         'created'    => 'Module instance created.',
         'duplicated' => 'Module instance duplicated.',
+    ],
+    'pages' => [
+        'create_title' => 'Create settings for module ":module"',
+        'edit_title'   => 'Edit settings for module ":module"',
     ],
 ];

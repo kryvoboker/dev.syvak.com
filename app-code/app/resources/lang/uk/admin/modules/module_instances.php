@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 return [
     'labels' => [
+        'model'         => 'Налаштування модуля',
+        'plural_model'  => 'Налаштування модулів',
         'name'          => 'Назва',
-        'slug'          => 'Slug',
         'placement'     => 'Розміщення',
         'context_key'   => 'Ключ контексту',
         'is_enabled'    => 'Увімкнений',
@@ -17,7 +18,6 @@ return [
     ],
     'columns' => [
         'name'        => 'Назва',
-        'slug'        => 'Slug',
         'placement'   => 'Розміщення',
         'context_key' => 'Ключ контексту',
         'is_enabled'  => 'Увімкнений',
@@ -39,5 +39,9 @@ return [
     'notifications' => [
         'created'    => 'Екземпляр модуля створено.',
         'duplicated' => 'Екземпляр модуля дубльовано.',
+    ],
+    'pages' => [
+        'create_title' => 'Створення налаштувань для модуля ":module"',
+        'edit_title'   => 'Редагування налаштувань модуля ":module"',
     ],
 ];

@@ -113,14 +113,22 @@ class ModuleServicesTest extends TestCase
         ], $summary);
 
         $existing_definition->refresh();
+        $existing_definition_settings_schema = is_array($existing_definition->settings_schema) ? $existing_definition->settings_schema : [];
+        $existing_definition_meta            = is_array($existing_definition->meta) ? $existing_definition->meta : [];
 
         $this->assertFalse($existing_definition->is_enabled);
         $this->assertSame('/var/modules/Carousel', $existing_definition->module_path);
         $this->assertSame('Fresh description', $existing_definition->description);
-        $this->assertSame('keep', $existing_definition->settings_schema['legacy']);
-        $this->assertSame('slider', $existing_definition->settings_schema['layout']);
-        $this->assertSame('catalog', $existing_definition->meta['owner']);
-        $this->assertSame('10', $existing_definition->meta['priority']);
+        $this->assertArrayHasKey('legacy', $existing_definition_settings_schema);
+        $this->assertArrayHasKey('layout', $existing_definition_settings_schema);
+        $this->assertArrayHasKey('owner', $existing_definition_meta);
+        $this->assertArrayHasKey('priority', $existing_definition_meta);
+        /** @var array{legacy: string, layout: string} $existing_definition_settings_schema */
+        /** @var array{owner: string, priority: string} $existing_definition_meta */
+        $this->assertSame('keep', $existing_definition_settings_schema['legacy']);
+        $this->assertSame('slider', $existing_definition_settings_schema['layout']);
+        $this->assertSame('catalog', $existing_definition_meta['owner']);
+        $this->assertSame('10', $existing_definition_meta['priority']);
 
         $this->assertDatabaseHas('module_definitions', [
             'nwidart_name'             => 'HeroBanner',
@@ -139,11 +147,11 @@ class ModuleServicesTest extends TestCase
     public function test_module_instance_service_can_toggle_definition_and_duplicate_isolated_instances(): void
     {
         $definition = ModuleDefinition::query()->create([
-            'name'                     => 'Carousel',
-            'slug'                     => 'carousel',
-            'nwidart_name'             => 'Carousel',
-            'module_path'              => '/var/modules/Carousel',
-            'description'              => 'Carousel',
+            'name'                     => 'Promo Banner',
+            'slug'                     => 'promo-banner',
+            'nwidart_name'             => 'PromoBanner',
+            'module_path'              => '/var/modules/PromoBanner',
+            'description'              => 'Promo Banner',
             'is_installed'             => true,
             'is_enabled'               => true,
             'is_enabled_in_filesystem' => true,
@@ -161,8 +169,7 @@ class ModuleServicesTest extends TestCase
         $this->assertFalse($definition->is_enabled);
 
         $instance = $service->createFromDefinition($definition, [
-            'name'        => 'Carousel Home',
-            'slug'        => 'carousel-home',
+            'name'        => 'Promo Banner Home',
             'placement'   => 'home.hero',
             'context_key' => 'homepage',
             'settings'    => ['slides' => '5'],
@@ -170,23 +177,30 @@ class ModuleServicesTest extends TestCase
         ]);
 
         $duplicate = $service->duplicate($instance, [
-            'name'        => 'Carousel Product',
-            'slug'        => 'carousel-product',
+            'name'        => 'Promo Banner Product',
             'context_key' => 'product.card',
         ]);
 
-        $service->updateSettings($duplicate, [
-            'slides' => '2',
+        $service->update($duplicate, [
+            'settings' => [
+                'slides' => '2',
+            ],
         ]);
 
         $instance->refresh();
         $duplicate->refresh();
+        $instance_settings  = is_array($instance->settings) ? $instance->settings : [];
+        $duplicate_settings = is_array($duplicate->settings) ? $duplicate->settings : [];
 
         $this->assertNotSame($instance->id, $duplicate->id);
         $this->assertSame('homepage', $instance->context_key);
         $this->assertSame('product.card', $duplicate->context_key);
-        $this->assertSame('5', $instance->settings['slides']);
-        $this->assertSame('2', $duplicate->settings['slides']);
+        $this->assertArrayHasKey('slides', $instance_settings);
+        $this->assertArrayHasKey('slides', $duplicate_settings);
+        /** @var array{slides: string} $instance_settings */
+        /** @var array{slides: string} $duplicate_settings */
+        $this->assertSame('5', $instance_settings['slides']);
+        $this->assertSame('2', $duplicate_settings['slides']);
     }
 
     public function test_module_runtime_resolver_returns_only_enabled_instances_for_requested_context(): void
@@ -221,7 +235,6 @@ class ModuleServicesTest extends TestCase
 
         $enabled_definition->instances()->create([
             'name'        => 'Homepage Carousel',
-            'slug'        => 'homepage-carousel',
             'placement'   => 'home.hero',
             'context_key' => 'homepage',
             'is_enabled'  => true,
@@ -232,7 +245,6 @@ class ModuleServicesTest extends TestCase
 
         $enabled_definition->instances()->create([
             'name'        => 'Disabled Carousel',
-            'slug'        => 'disabled-carousel',
             'placement'   => 'home.hero',
             'context_key' => 'homepage',
             'is_enabled'  => false,
@@ -243,7 +255,6 @@ class ModuleServicesTest extends TestCase
 
         $disabled_definition->instances()->create([
             'name'        => 'Disabled Definition Instance',
-            'slug'        => 'disabled-definition-instance',
             'placement'   => 'home.hero',
             'context_key' => 'homepage',
             'is_enabled'  => true,
@@ -259,7 +270,7 @@ class ModuleServicesTest extends TestCase
         $this->assertCount(1, $resolved_modules);
         $this->assertSame('carousel', $resolved_modules->first()->slug);
         $this->assertCount(1, $resolved_modules->first()->instances);
-        $this->assertSame('homepage-carousel', $resolved_modules->first()->instances->first()->slug);
+        $this->assertSame('Homepage Carousel', $resolved_modules->first()->instances->first()->name);
     }
 
     private function createModuleDefinitionsTable(): void
@@ -287,7 +298,6 @@ class ModuleServicesTest extends TestCase
             $table->id();
             $table->foreignId('module_definition_id')->constrained('module_definitions')->cascadeOnDelete();
             $table->string('name', 255);
-            $table->string('slug', 255)->unique();
             $table->string('placement', 255)->nullable();
             $table->string('context_key', 255)->nullable();
             $table->boolean('is_enabled')->default(true);
