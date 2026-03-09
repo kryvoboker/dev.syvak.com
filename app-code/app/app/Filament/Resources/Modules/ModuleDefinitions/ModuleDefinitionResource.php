@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Modules\ModuleDefinitions;
 
 use App\Filament\Navigation\AdminNavigationGroupEnum;
-use App\Filament\Resources\Modules\ModuleDefinitions\Pages\EditModuleDefinition;
 use App\Filament\Resources\Modules\ModuleDefinitions\Pages\ListModuleDefinitions;
-use App\Filament\Resources\Modules\ModuleDefinitions\RelationManagers\ModuleInstancesRelationManager;
-use App\Filament\Resources\Modules\ModuleDefinitions\Schemas\ModuleDefinitionForm;
-use App\Filament\Resources\Modules\ModuleDefinitions\Tables\ModuleDefinitionsTable;
 use App\Models\Modules\ModuleDefinition;
 use BackedEnum;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
+/**
+ * Navigation resource for the grouped modules screen.
+ *
+ * Editors do not manage module definitions directly, so this resource exists
+ * only to register the sidebar entry and route the custom list page.
+ */
 class ModuleDefinitionResource extends Resource
 {
     protected static ?string $model = ModuleDefinition::class;
@@ -31,28 +31,10 @@ class ModuleDefinitionResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
-    public static function form(Schema $schema): Schema
-    {
-        return ModuleDefinitionForm::configure($schema);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return ModuleDefinitionsTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            ModuleInstancesRelationManager::class,
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
             'index' => ListModuleDefinitions::route('/'),
-            'edit'  => EditModuleDefinition::route('/{record}/edit'),
         ];
     }
 
