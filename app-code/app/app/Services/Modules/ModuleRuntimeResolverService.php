@@ -8,10 +8,10 @@ use App\Models\Modules\ModuleDefinition;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
-class ModuleRuntimeResolverService
+readonly class ModuleRuntimeResolverService
 {
     public function __construct(
-        private readonly ModuleCacheService $module_cache_service,
+        private ModuleCacheService $module_cache_service,
     ) {}
 
     /**
@@ -19,17 +19,18 @@ class ModuleRuntimeResolverService
      */
     public function resolve(?string $placement = null, ?string $context_key = null): Collection
     {
+        $modules_placements = config('app.modules_placements');
+
+        if (in_array($placement, $modules_placements)) {
+            $placement = array_search($placement, $modules_placements);;
+        }
+
         $cache_key = 'runtime:' . ($placement ?? 'all') . ':' . ($context_key ?? 'all');
 
         /** @var Collection<int, ModuleDefinition> $resolved_modules */
         $resolved_modules = $this->module_cache_service->remember(
             $cache_key,
             function () use ($placement, $context_key): Collection {
-                Log::channel('daily')->info('Resolving module runtime payload.', [
-                    'placement'   => $placement,
-                    'context_key' => $context_key,
-                ]);
-
                 $definitions = ModuleDefinition::query()
                     ->enabled()
                     ->ordered()

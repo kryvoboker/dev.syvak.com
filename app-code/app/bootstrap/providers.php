@@ -7,4 +7,5 @@ return [
     App\Providers\Filament\AlyoAdminPanelProvider::class,
     App\Providers\OpenAiServiceProvider::class,
     Barryvdh\Debugbar\ServiceProvider::class,
+    App\Providers\ModuleProvidersServiceProvider::class,
 ];

@@ -94,6 +94,6 @@ class UserResource extends Resource
 
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return trim((string) $record->getAttribute('name') . ' ' . (string) $record->getAttribute('lastname'));
+        return trim($record->getAttribute('name') . ' ' . $record->getAttribute('lastname'));
     }
 }

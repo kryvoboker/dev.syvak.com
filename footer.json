@@ -1,0 +1,862 @@
+{
+  "config": {
+    "orientation": "vertical",
+    "gravity": "left",
+    "width": "match_parent",
+    "height": "wrap_content",
+    "name": "Frame",
+    "stroke": "1,#0c120c,ltrb",
+    "cornerRadius": "0",
+    "padding": [
+      76,
+      80,
+      80,
+      52
+    ],
+    "background": "#0c120c"
+  },
+  "layout": "linearLayout",
+  "children": [
+    {
+      "config": {
+        "orientation": "horizontal",
+        "gravity": "top",
+        "width": "1626",
+        "height": "wrap_content",
+        "name": "Frame 266",
+        "cornerRadius": "0",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "layout": "linearLayout",
+      "children": [
+        {
+          "config": {
+            "orientation": "horizontal",
+            "gravity": "left",
+            "width": "match_parent",
+            "height": "wrap_content",
+            "name": "Frame 265",
+            "cornerRadius": "0",
+            "padding": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "layout": "linearLayout",
+          "children": [
+            {
+              "config": {
+                "orientation": "vertical",
+                "gravity": "left",
+                "width": "297",
+                "height": "wrap_content",
+                "name": "navigate",
+                "cornerRadius": "0",
+                "padding": [
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "layout": "linearLayout",
+              "children": [
+                {
+                  "type": "text",
+                  "config": {
+                    "text": "/ підписка на новинки /",
+                    "gravity": "left",
+                    "textSize": 18,
+                    "color": "#888888",
+                    "width": "wrap_content",
+                    "height": "wrap_content"
+                  }
+                },
+                {
+                  "layout": "linearLayout",
+                  "config": {
+                    "height": "0",
+                    "weight": 1,
+                    "width": "0",
+                    "orientation": "horizontal"
+                  },
+                  "children": []
+                },
+                {
+                  "config": {
+                    "orientation": "horizontal",
+                    "gravity": "center",
+                    "width": "match_parent",
+                    "height": "wrap_content",
+                    "name": "confirm btn",
+                    "cornerRadius": "0",
+                    "padding": [
+                      16,
+                      8,
+                      16,
+                      8
+                    ],
+                    "background": "#fffbfe"
+                  },
+                  "layout": "linearLayout",
+                  "children": [
+                    {
+                      "type": "text",
+                      "config": {
+                        "text": "TELEGRAM",
+                        "gravity": "left",
+                        "textSize": 18,
+                        "color": "#0c120c",
+                        "width": "wrap_content",
+                        "height": "wrap_content"
+                      }
+                    },
+                    {
+                      "layout": "linearLayout",
+                      "config": {
+                        "height": "0",
+                        "width": "0",
+                        "weight": 1,
+                        "orientation": "horizontal"
+                      },
+                      "children": []
+                    },
+                    {
+                      "config": {
+                        "orientation": "horizontal",
+                        "gravity": "center",
+                        "width": "32",
+                        "height": "wrap_content",
+                        "name": "icon",
+                        "stroke": "1,#0c120c,ltrb",
+                        "cornerRadius": "0",
+                        "padding": [
+                          4,
+                          4,
+                          4,
+                          4
+                        ]
+                      },
+                      "layout": "linearLayout",
+                      "children": [
+                        {
+                          "config": {
+                            "orientation": "horizontal",
+                            "width": "28",
+                            "height": "wrap_content",
+                            "name": "arrow-left",
+                            "cornerRadius": "0",
+                            "padding": [
+                              0,
+                              0,
+                              0,
+                              0
+                            ]
+                          },
+                          "layout": "linearLayout",
+                          "children": [
+                            {
+                              "type": "image",
+                              "config": {
+                                "url": "https://assets.juspay.in/hyper/images/geddit/net_banking_icon.png",
+                                "name": "arrow-left",
+                                "width": "20",
+                                "height": "wrap_content"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "layout": "linearLayout",
+                  "config": {
+                    "height": "0",
+                    "weight": 1,
+                    "width": "0",
+                    "orientation": "horizontal"
+                  },
+                  "children": []
+                },
+                {
+                  "type": "text",
+                  "config": {
+                    "text": "ТВОЯ ПІДТРИМКА — ЦЕ СИЛА. ПРИЄДНУЙСЯ ДО ТИХ, ХТО НОСИТЬ ЗІ ЗМІСТОМ.",
+                    "gravity": "left",
+                    "textSize": 18,
+                    "color": "#fffbfe",
+                    "width": "297",
+                    "height": "wrap_content"
+                  }
+                }
+              ]
+            },
+            {
+              "layout": "linearLayout",
+              "config": {
+                "height": "0",
+                "width": "0",
+                "weight": 1,
+                "orientation": "horizontal"
+              },
+              "children": []
+            },
+            {
+              "config": {
+                "orientation": "horizontal",
+                "gravity": "top",
+                "width": "match_parent",
+                "height": "wrap_content",
+                "name": "Frame 264",
+                "cornerRadius": "0",
+                "padding": [
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "layout": "linearLayout",
+              "children": [
+                {
+                  "config": {
+                    "orientation": "vertical",
+                    "gravity": "left",
+                    "width": "match_parent",
+                    "height": "wrap_content",
+                    "name": "list / 2",
+                    "cornerRadius": "0",
+                    "padding": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "layout": "linearLayout",
+                  "children": [
+                    {
+                      "type": "text",
+                      "config": {
+                        "text": "/ контакти /",
+                        "gravity": "left",
+                        "textSize": 18,
+                        "color": "#888888",
+                        "width": "wrap_content",
+                        "height": "wrap_content"
+                      }
+                    },
+                    {
+                      "layout": "linearLayout",
+                      "config": {
+                        "height": "0",
+                        "weight": 1,
+                        "width": "0",
+                        "orientation": "horizontal"
+                      },
+                      "children": []
+                    },
+                    {
+                      "config": {
+                        "orientation": "vertical",
+                        "gravity": "left",
+                        "width": "match_parent",
+                        "height": "wrap_content",
+                        "name": "navigate",
+                        "cornerRadius": "0",
+                        "padding": [
+                          0,
+                          0,
+                          0,
+                          0
+                        ]
+                      },
+                      "layout": "linearLayout",
+                      "children": [
+                        {
+                          "type": "text",
+                          "config": {
+                            "text": "+38 (095) 380-11-73",
+                            "gravity": "left",
+                            "textSize": 32,
+                            "color": "#fffbfe",
+                            "width": "wrap_content",
+                            "height": "wrap_content"
+                          }
+                        },
+                        {
+                          "layout": "linearLayout",
+                          "config": {
+                            "height": "0",
+                            "weight": 1,
+                            "width": "0",
+                            "orientation": "horizontal"
+                          },
+                          "children": []
+                        },
+                        {
+                          "type": "text",
+                          "config": {
+                            "text": "ДЕ НАС ЗНАЙТИ",
+                            "gravity": "left",
+                            "textSize": 18,
+                            "color": "#fffbfe",
+                            "width": "wrap_content",
+                            "height": "wrap_content"
+                          }
+                        },
+                        {
+                          "layout": "linearLayout",
+                          "config": {
+                            "height": "0",
+                            "weight": 1,
+                            "width": "0",
+                            "orientation": "horizontal"
+                          },
+                          "children": []
+                        },
+                        {
+                          "type": "text",
+                          "config": {
+                            "text": "КОНТАКТИ",
+                            "gravity": "left",
+                            "textSize": 18,
+                            "color": "#fffbfe",
+                            "width": "wrap_content",
+                            "height": "wrap_content"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "layout": "linearLayout",
+                  "config": {
+                    "height": "0",
+                    "width": "0",
+                    "weight": 1,
+                    "orientation": "horizontal"
+                  },
+                  "children": []
+                },
+                {
+                  "config": {
+                    "orientation": "vertical",
+                    "gravity": "left",
+                    "width": "96",
+                    "height": "wrap_content",
+                    "name": "list / 1",
+                    "cornerRadius": "0",
+                    "padding": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "layout": "linearLayout",
+                  "children": [
+                    {
+                      "type": "text",
+                      "config": {
+                        "text": "/ меню /",
+                        "gravity": "left",
+                        "textSize": 18,
+                        "color": "#888888",
+                        "width": "wrap_content",
+                        "height": "wrap_content"
+                      }
+                    },
+                    {
+                      "layout": "linearLayout",
+                      "config": {
+                        "height": "0",
+                        "weight": 1,
+                        "width": "0",
+                        "orientation": "horizontal"
+                      },
+                      "children": []
+                    },
+                    {
+                      "config": {
+                        "orientation": "vertical",
+                        "gravity": "left",
+                        "width": "match_parent",
+                        "height": "wrap_content",
+                        "name": "navigate",
+                        "cornerRadius": "0",
+                        "padding": [
+                          0,
+                          0,
+                          0,
+                          0
+                        ]
+                      },
+                      "layout": "linearLayout",
+                      "children": [
+                        {
+                          "type": "text",
+                          "config": {
+                            "text": "ЖІНКИ",
+                            "gravity": "left",
+                            "textSize": 18,
+                            "color": "#fffbfe",
+                            "width": "wrap_content",
+                            "height": "wrap_content"
+                          }
+                        },
+                        {
+                          "layout": "linearLayout",
+                          "config": {
+                            "height": "0",
+                            "weight": 1,
+                            "width": "0",
+                            "orientation": "horizontal"
+                          },
+                          "children": []
+                        },
+                        {
+                          "type": "text",
+                          "config": {
+                            "text": "ЧОЛОВІКИ",
+                            "gravity": "left",
+                            "textSize": 18,
+                            "color": "#fffbfe",
+                            "width": "wrap_content",
+                            "height": "wrap_content"
+                          }
+                        },
+                        {
+                          "layout": "linearLayout",
+                          "config": {
+                            "height": "0",
+                            "weight": 1,
+                            "width": "0",
+                            "orientation": "horizontal"
+                          },
+                          "children": []
+                        },
+                        {
+                          "type": "text",
+                          "config": {
+                            "text": "ДІТИ",
+                            "gravity": "left",
+                            "textSize": 18,
+                            "color": "#fffbfe",
+                            "width": "wrap_content",
+                            "height": "wrap_content"
+                          }
+                        },
+                        {
+                          "layout": "linearLayout",
+                          "config": {
+                            "height": "0",
+                            "weight": 1,
+                            "width": "0",
+                            "orientation": "horizontal"
+                          },
+                          "children": []
+                        },
+                        {
+                          "type": "text",
+                          "config": {
+                            "text": "ПРО НАС",
+                            "gravity": "left",
+                            "textSize": 18,
+                            "color": "#fffbfe",
+                            "width": "wrap_content",
+                            "height": "wrap_content"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "layout": "linearLayout",
+          "config": {
+            "height": "0",
+            "width": "0",
+            "weight": 1,
+            "orientation": "horizontal"
+          },
+          "children": []
+        },
+        {
+          "config": {
+            "orientation": "vertical",
+            "gravity": "left",
+            "width": "wrap_content",
+            "height": "wrap_content",
+            "name": "list / 3",
+            "cornerRadius": "0",
+            "padding": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "layout": "linearLayout",
+          "children": [
+            {
+              "type": "text",
+              "config": {
+                "text": "/ інформація /",
+                "gravity": "left",
+                "textSize": 18,
+                "color": "#888888",
+                "width": "wrap_content",
+                "height": "wrap_content"
+              }
+            },
+            {
+              "layout": "linearLayout",
+              "config": {
+                "height": "0",
+                "weight": 1,
+                "width": "0",
+                "orientation": "horizontal"
+              },
+              "children": []
+            },
+            {
+              "config": {
+                "orientation": "vertical",
+                "gravity": "left",
+                "width": "wrap_content",
+                "height": "wrap_content",
+                "name": "navigate",
+                "cornerRadius": "0",
+                "padding": [
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "layout": "linearLayout",
+              "children": [
+                {
+                  "type": "text",
+                  "config": {
+                    "text": "ПОЛІТИКА КОНФЕДЕНЦІЙНОСТІ",
+                    "gravity": "left",
+                    "textSize": 18,
+                    "color": "#fffbfe",
+                    "width": "wrap_content",
+                    "height": "wrap_content"
+                  }
+                },
+                {
+                  "layout": "linearLayout",
+                  "config": {
+                    "height": "0",
+                    "weight": 1,
+                    "width": "0",
+                    "orientation": "horizontal"
+                  },
+                  "children": []
+                },
+                {
+                  "type": "text",
+                  "config": {
+                    "text": "ДОСТАВКА ТА ПОВЕРНЕННЯ",
+                    "gravity": "left",
+                    "textSize": 18,
+                    "color": "#fffbfe",
+                    "width": "wrap_content",
+                    "height": "wrap_content"
+                  }
+                },
+                {
+                  "layout": "linearLayout",
+                  "config": {
+                    "height": "0",
+                    "weight": 1,
+                    "width": "0",
+                    "orientation": "horizontal"
+                  },
+                  "children": []
+                },
+                {
+                  "type": "text",
+                  "config": {
+                    "text": "УМОВИ ВИКОРИСТАННЯ",
+                    "gravity": "left",
+                    "textSize": 18,
+                    "color": "#fffbfe",
+                    "width": "wrap_content",
+                    "height": "wrap_content"
+                  }
+                },
+                {
+                  "layout": "linearLayout",
+                  "config": {
+                    "height": "0",
+                    "weight": 1,
+                    "width": "0",
+                    "orientation": "horizontal"
+                  },
+                  "children": []
+                },
+                {
+                  "type": "text",
+                  "config": {
+                    "text": "СПІВРОБІТНИЦТВО",
+                    "gravity": "left",
+                    "textSize": 18,
+                    "color": "#fffbfe",
+                    "width": "wrap_content",
+                    "height": "wrap_content"
+                  }
+                },
+                {
+                  "layout": "linearLayout",
+                  "config": {
+                    "height": "0",
+                    "weight": 1,
+                    "width": "0",
+                    "orientation": "horizontal"
+                  },
+                  "children": []
+                },
+                {
+                  "type": "text",
+                  "config": {
+                    "text": "ДОГОВІР ПУБЛІЧНОЇ ОФЕРТИ",
+                    "gravity": "left",
+                    "textSize": 18,
+                    "color": "#fffbfe",
+                    "width": "wrap_content",
+                    "height": "wrap_content"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "layout": "linearLayout",
+      "config": {
+        "height": "0",
+        "weight": 1,
+        "width": "0",
+        "orientation": "horizontal"
+      },
+      "children": []
+    },
+    {
+      "config": {
+        "orientation": "horizontal",
+        "gravity": "center",
+        "width": "match_parent",
+        "height": "wrap_content",
+        "name": "Frame 267",
+        "cornerRadius": "0",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "layout": "linearLayout",
+      "children": [
+        {
+          "type": "image",
+          "config": {
+            "url": "https://assets.juspay.in/hyper/images/geddit/net_banking_icon.png",
+            "name": "logo",
+            "width": "430",
+            "height": "wrap_content"
+          }
+        },
+        {
+          "layout": "linearLayout",
+          "config": {
+            "height": "0",
+            "width": "0",
+            "weight": 1,
+            "orientation": "horizontal"
+          },
+          "children": []
+        },
+        {
+          "config": {
+            "orientation": "horizontal",
+            "gravity": "center_vertical",
+            "width": "wrap_content",
+            "height": "wrap_content",
+            "name": "icons",
+            "cornerRadius": "0",
+            "padding": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "layout": "linearLayout",
+          "children": [
+            {
+              "config": {
+                "orientation": "horizontal",
+                "gravity": "center_vertical",
+                "width": "wrap_content",
+                "height": "wrap_content",
+                "name": "icons",
+                "cornerRadius": "0",
+                "padding": [
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "layout": "linearLayout",
+              "children": [
+                {
+                  "config": {
+                    "orientation": "horizontal",
+                    "width": "40",
+                    "height": "wrap_content",
+                    "name": "Facebook",
+                    "cornerRadius": "0",
+                    "padding": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "layout": "linearLayout",
+                  "children": [
+                    {
+                      "type": "image",
+                      "config": {
+                        "url": "https://assets.juspay.in/hyper/images/geddit/net_banking_icon.png",
+                        "name": "facebook",
+                        "width": "35",
+                        "height": "wrap_content"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "layout": "linearLayout",
+              "config": {
+                "height": "0",
+                "width": "0",
+                "weight": 1,
+                "orientation": "horizontal"
+              },
+              "children": []
+            },
+            {
+              "config": {
+                "orientation": "horizontal",
+                "gravity": "center_vertical",
+                "width": "wrap_content",
+                "height": "wrap_content",
+                "name": "icons",
+                "cornerRadius": "0",
+                "padding": [
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "layout": "linearLayout",
+              "children": [
+                {
+                  "config": {
+                    "orientation": "horizontal",
+                    "width": "40",
+                    "height": "wrap_content",
+                    "name": "Instagram",
+                    "cornerRadius": "0",
+                    "padding": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "layout": "linearLayout",
+                  "children": [
+                    {
+                      "type": "image",
+                      "config": {
+                        "url": "https://assets.juspay.in/hyper/images/geddit/net_banking_icon.png",
+                        "name": "instagram",
+                        "width": "31",
+                        "height": "wrap_content"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "layout": "linearLayout",
+              "config": {
+                "height": "0",
+                "width": "0",
+                "weight": 1,
+                "orientation": "horizontal"
+              },
+              "children": []
+            },
+            {
+              "config": {
+                "orientation": "horizontal",
+                "width": "40",
+                "height": "wrap_content",
+                "name": "TikTok Icon",
+                "cornerRadius": "0",
+                "padding": [
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "layout": "linearLayout",
+              "children": [
+                {
+                  "type": "image",
+                  "config": {
+                    "url": "https://assets.juspay.in/hyper/images/geddit/net_banking_icon.png",
+                    "name": "tiktok",
+                    "width": "28",
+                    "height": "wrap_content"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

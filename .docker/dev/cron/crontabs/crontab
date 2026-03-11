@@ -1,2 +1,3 @@
 # Run every day at 4 AM
-0 4 * * * /usr/local/bin/php -f /var/webroot/sites/syvak.com/app/artisan app:update-currency-rates-command >> /var/log/cron/cron.log 2>&1
+0 4 * * * /usr/local/bin/php -f /var/webroot/sites/syvak.com/app/artisan app:update-currency-rates-command >> /var/log/cron.log 2>&1
+0 * * * * timeout 60 /usr/local/bin/php -f /var/webroot/sites/syvak.com/app/artisan php artisan schedule:run >> /var/log/cron.log 2>&1

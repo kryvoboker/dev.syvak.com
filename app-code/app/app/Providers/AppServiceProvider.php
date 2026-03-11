@@ -10,6 +10,8 @@ use App\Services\Modules\ModuleCacheService;
 use App\Services\Modules\ModuleDefinitionSyncService;
 use App\Services\Modules\ModuleDiscoveryService;
 use App\Services\Modules\ModuleInstanceService;
+use App\Services\Modules\ModuleProviderRegistrarService;
+use App\Services\Modules\ModuleProviderResolverService;
 use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
@@ -51,6 +53,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleDefinitionSyncService::class);
         $this->app->singleton(ModuleInstanceService::class);
         $this->app->singleton(ModuleRuntimeResolverService::class);
+        $this->app->singleton(ModuleProviderResolverService::class);
+        $this->app->singleton(ModuleProviderRegistrarService::class);
     }
 
     /**

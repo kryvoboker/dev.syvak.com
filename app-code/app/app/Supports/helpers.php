@@ -9,6 +9,8 @@ use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 if (! function_exists('clear_telephone')) {
@@ -90,19 +92,41 @@ if (! function_exists('breadcrumb')) {
 }
 
 if (! function_exists('try_detect_page_type')) {
-    function try_detect_page_type(): ?string
+    function try_detect_page_type(?Request $request = null): ?string
     {
-        $route_name = request()->route()?->getName();
+        if ($request === null) {
+            $request = request();
+        }
+
+        $route_name = $request?->route()?->getName();
 
         if ($route_name === null) {
             return null;
         }
 
-        return match (true) {
-            str_ends_with($route_name, '.home')     => config('page-type.home'),
-            str_ends_with($route_name, '.product')  => config('page-type.product'),
-            str_ends_with($route_name, '.category') => config('page-type.category'),
-            default                                 => null,
+        if (is_string($route_name) && filled($route_name)) {
+            return match (true) {
+                Str::endsWith($route_name, '.home') => (string) config('page-type.home'),
+                Str::endsWith($route_name, '.product'),
+                Str::endsWith($route_name, '.product.show') => (string) config('page-type.product'),
+                Str::endsWith($route_name, '.category'),
+                Str::endsWith($route_name, '.category.show') => (string) config('page-type.category'),
+                default                                      => null,
+            };
+        }
+
+        $segments = collect(explode('/', Str::trim($request->path(), '/')))
+            ->filter(fn (string $segment): bool => filled($segment))
+            ->values();
+
+        if ($segments->count() === 1) {
+            return (string) config('page-type.home');
+        }
+
+        return match ($segments->get(1)) {
+            'product'  => (string) config('page-type.product'),
+            'category' => (string) config('page-type.category'),
+            default    => null,
         };
     }
 }
@@ -200,7 +224,7 @@ if (! function_exists('get_now_date')) {
 }
 
 if (! function_exists('resolve_modules_for_context')) {
-    function resolve_modules_for_context(?string $placement = null, ?string $context_key = null): \Illuminate\Support\Collection
+    function resolve_modules_for_context(?string $placement = null, ?string $context_key = null): Collection
     {
         return app(ModuleRuntimeResolverService::class)->resolve($placement, $context_key);
     }

@@ -151,6 +151,19 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Smart Wire Keys
+    |---------------------------------------------------------------------------
+    |
+    | Livewire uses loops and keys used within loops to generate smart keys that
+    | are applied to nested components that don't have them. This makes using
+    | nested components more reliable by ensuring that they all have keys.
+    |
+    */
+
+    'smart_wire_keys' => true,
+
+    /*
+    |---------------------------------------------------------------------------
     | Pagination Theme
     |---------------------------------------------------------------------------
     |
@@ -161,4 +174,22 @@ return [
     */
 
     'pagination_theme' => 'tailwind',
+
+    /*
+    |---------------------------------------------------------------------------
+    | Payload Guards
+    |---------------------------------------------------------------------------
+    |
+    | These settings protect against malicious or oversized payloads that could
+    | cause denial of service. The default values should feel reasonable for
+    | most web applications. Each can be set to null to disable the limit.
+    |
+    */
+
+    'payload' => [
+        'max_size' => 5 * 1024,   // 5MB - maximum request payload size in bytes
+        'max_nesting_depth' => 10,   // Maximum depth of dot-notation property paths
+        'max_calls' => 50,           // Maximum method calls per request
+        'max_components' => 20,      // Maximum components per batch request
+    ],
 ];

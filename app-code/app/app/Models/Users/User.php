@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser
@@ -38,6 +39,7 @@ class User extends Authenticatable implements FilamentUser
         'email_verified_at',
         'telephone',
         'avatar',
+        'avatar_file_name',
         'is_active',
         'password',
     ];
@@ -99,7 +101,7 @@ class User extends Authenticatable implements FilamentUser
      */
     public function getFullNameAttribute(): string
     {
-        return trim($this->name . ' ' . ($this->lastname ?? ''));
+        return Str::trim($this->name . ' ' . ($this->lastname ?? ''));
     }
 
     /**
