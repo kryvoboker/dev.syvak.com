@@ -22,6 +22,7 @@ return new class() extends Migration
                 ->after('email');
 
             $table->string('avatar', 600)->nullable()->after('telephone');
+            $table->string('avatar_file_name')->nullable()->after('avatar');
 
             $table->boolean('is_active')
                 ->nullable(false)

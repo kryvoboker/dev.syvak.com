@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
 
 class UserForm
 {
@@ -60,13 +61,23 @@ class UserForm
                     ->label(__('admin/default.labels.avatar'))
                     ->image()
                     ->directory(config('app.images.user.image_path'))
-                    ->maxSize((int) config('app.images.user.upload.max_size_kb'))
-                    ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . (int) config('app.images.user.upload.max_size_kb')])
-                    ->preserveFilenames()
+                    ->maxSize((int)config('app.images.user.upload.max_size_kb'))
+                    ->imagePreviewHeight('250')
+                    ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png'])
+                    ->mimeTypeMap([
+                        'jpg'  => 'image/jpeg',
+                        'jpeg' => 'image/jpeg',
+                        'png'  => 'image/png',
+                    ])
+                    ->rules([
+                        'nullable',
+                        Rule::file()::types(['image/jpeg', 'image/jpg', 'image/png'])->max((int) config('app.images.user.upload.max_size_kb')),
+                    ])
+                    ->storeFileNamesIn('avatar_file_name')
                     ->imageEditor()
-                    ->imageEditorViewportWidth((int) config('app.images.user.preview_in_page_in_admin.width'))
-                    ->imageEditorViewportHeight((int) config('app.images.user.preview_in_page_in_admin.height'))
-                    ->imageEditorAspectRatios([
+                    ->imageEditorViewportWidth((int)config('app.images.user.preview_in_page_in_admin.width'))
+                    ->imageEditorViewportHeight((int)config('app.images.user.preview_in_page_in_admin.height'))
+                    ->imageEditorAspectRatioOptions([
                         '1:1'  => '1:1',
                         '4:3'  => '4:3',
                         '16:9' => '16:9',
@@ -106,7 +117,7 @@ class UserForm
                     ->searchable()
                     ->nullable()
                     ->preload()
-                    ->live(false)
+                    ->live()
                     ->rules([Rule::exists('user_groups', 'id')]),
             ]);
     }

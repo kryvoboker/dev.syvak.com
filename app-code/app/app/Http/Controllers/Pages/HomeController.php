@@ -19,12 +19,13 @@ class HomeController extends Controller
         $page_type   = try_detect_page_type();
 
         $data = [
-            'header_data' => $header_data,
-            'footer_data' => app(FooterService::class)([
+            'header_data'           => $header_data,
+            'footer_data'           => app(FooterService::class)([
                 // Footer uses category links too; pass already loaded categories from header.
                 'categories' => $header_data['categories'],
             ]),
-            'carousel_modules_data' => app(CarouselModuleDataService::class)->resolveForPlacement('hero', $page_type),
+            'carousel_modules_data' => app(CarouselModuleDataService::class)
+                ->resolveForPlacement(config('app.modules_placements.top'), $page_type),
             'page_type'             => $page_type,
         ];
 

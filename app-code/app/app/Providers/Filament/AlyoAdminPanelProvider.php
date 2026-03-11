@@ -19,6 +19,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
@@ -42,6 +43,7 @@ class AlyoAdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
+            ->maxContentWidth(Width::Full)
             ->viteTheme('resources/assets/filament/alyo-admin/theme.css')
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
