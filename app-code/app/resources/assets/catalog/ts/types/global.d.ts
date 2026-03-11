@@ -1,8 +1,10 @@
-import { HSDropdown, HSOverlay } from "flyonui/flyonui"
 import type HSCarousel from "flyonui/src/js/plugins/carousel"
+import type HSDropdown from "flyonui/src/js/plugins/dropdown"
+import type HSOverlay  from "flyonui/src/js/plugins/overlay"
 
 interface AppParams {
     page_type?: string | null;
+
     [key: string]: unknown;
 }
 

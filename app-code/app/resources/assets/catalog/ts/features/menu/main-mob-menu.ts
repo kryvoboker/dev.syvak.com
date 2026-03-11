@@ -12,6 +12,7 @@ export const handleMainMobMenu = (): void => {
     const modalInstance = new HSOverlay(menuContainerEl);
 
     openMenuBtn?.addEventListener('click', (): void => {
-        modalInstance.open();
+        modalInstance.open()
+                     ?.catch((error: Error): void => console.error(error.message));
     });
 };
