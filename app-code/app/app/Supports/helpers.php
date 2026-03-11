@@ -37,7 +37,7 @@ if (! function_exists('parse_telephone')) {
         $phone_length = Str::length($telephone);
 
         for ($index_number = 0; $index_number < $phone_length; $index_number++) {
-            $mask = preg_replace('/_/', $telephone[$index_number], $mask, 1);
+            $mask = Str::replaceMatches('/_/', $telephone[$index_number], $mask, 1);
         }
 
         return $mask;

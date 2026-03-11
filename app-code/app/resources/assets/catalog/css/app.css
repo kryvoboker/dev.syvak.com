@@ -1,4 +1,4 @@
-@layer theme, base, app, components, utilities;
+@layer theme, base, utilities, components, app;
 
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
@@ -6,7 +6,7 @@
 
 @import "flyonui/variants.css";
 @plugin "flyonui" {
-    themes: dark;
+    themes: black;
 }
 @source "../../../../node_modules/flyonui/flyonui.js";
 @plugin "@iconify/tailwind4";
@@ -73,6 +73,7 @@
     --text-82px: calc(82 / var(--base-font-size) * 1rem);
     --text-90px: calc(90 / var(--base-font-size) * 1rem);
     --text-122px: calc(122 / var(--base-font-size) * 1rem);
+    --text-192px: calc(192 / var(--base-font-size) * 1rem);
 
     --color-white: rgb(255,251,254); /* #FFFBFE */
     --color-black: rgb(12,18,12); /* #0C120C */
@@ -90,6 +91,7 @@
     --spacing-19px: calc(19 / var(--base-font-size) * 1rem);
     --spacing-20px: calc(20 / var(--base-font-size) * 1rem);
     --spacing-38px: calc(38 / var(--base-font-size) * 1rem);
+    --spacing-52px: calc(52 / var(--base-font-size) * 1rem);
     --spacing-92px: calc(92 / var(--base-font-size) * 1rem);
 
     --tracking-0\.02em: 0.02em;
@@ -142,8 +144,8 @@
     }
 
     body {
-        @apply font-inter font-normal text-sm lg:text-base bp1920px:text-lg leading-1.4em
-        tracking-normal lg:tracking-0.02em bp1920px:tracking-normal text-white bg-black;
+        @apply font-inter font-normal text-sm lg:text-base 2xl:text-lg leading-1.4em
+        tracking-normal lg:tracking-0.02em 2xl:tracking-normal text-white bg-black;
     }
 
     h1, h2, h3, h4 {
@@ -151,19 +153,19 @@
     }
 
     h1 {
-        @apply text-42px md:text-64px lg:text-82px bp1920px:text-122px font-semibold -tracking-0.05em leading-0.8em;
+        @apply text-42px md:text-64px lg:text-82px 2xl:text-122px font-semibold -tracking-0.05em leading-0.8em;
     }
 
     h2 {
-        @apply text-32px md:text-44px lg:text-6xl bp1920px:text-90px font-normal tracking-normal leading-0.9em;
+        @apply text-32px md:text-44px lg:text-6xl 2xl:text-90px font-normal tracking-normal leading-0.9em;
     }
 
     h3 {
-        @apply text-26px md:text-32px bp1920px:text-64px font-normal tracking-0.028em leading-0.9em;
+        @apply text-26px md:text-32px 2xl:text-64px font-normal tracking-0.028em leading-0.9em;
     }
 
     h4 {
-        @apply text-lg md:text-2xl bp1920px:text-4xl font-bold tracking-normal leading-none;
+        @apply text-lg md:text-2xl 2xl:text-4xl font-bold tracking-normal leading-none;
     }
 
     .default-btn,
@@ -172,12 +174,12 @@
     }
 
     h5 {
-        @apply text-xl bp1920px:text-32px uppercase;
+        @apply text-xl 2xl:text-32px uppercase;
     }
 
     .default-btn,
     h6 {
-        @apply text-lg bp1920px:text-2xl;
+        @apply text-lg 2xl:text-2xl;
     }
 
     .default-btn {
@@ -202,20 +204,20 @@
         }
 
         &::placeholder {
-            @apply text-sm lg:text-base bp1920px:text-lg text-opacity-light-gray-40% font-light tracking-0.04em;
+            @apply text-sm lg:text-base 2xl:text-lg text-opacity-light-gray-40% font-light tracking-0.04em;
         }
     }
 
     .text-accent {
-        @apply text-11px md:text-sm lg:text-base bp1920px:text-lg font-light tracking-0.04em;
+        @apply text-11px md:text-sm lg:text-base 2xl:text-lg font-light tracking-0.04em;
     }
 
     .footer {
-        @apply border-t border-opacity-light-gray-40% pt-10 pb-8 md:pt-14 md:pb-10 lg:pt-16 lg:pb-6;
+        @apply border-t border-opacity-light-gray-40% max-md:overflow-hidden pt-4 pb-4 md:pt-7 md:pb-0 lg:pt-15 2xl:pt-20 2xl:mb-52px;
     }
 
     .footer-main-grid {
-        @apply grid grid-cols-1 gap-y-10 md:grid-cols-2 md:gap-x-12 md:gap-y-10 lg:grid-cols-4 lg:gap-x-12;
+        @apply grid grid-cols-1 gap-y-6 md:grid-cols-2 md:gap-x-12 md:gap-y-8 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-0 2xl:grid-cols-4 2xl:gap-x-12;
     }
 
     .footer-subscribe {
@@ -229,7 +231,7 @@
     }
 
     .footer-title {
-        @apply text-accent uppercase;
+        @apply text-light-gray lowercase;
     }
 
     .footer-list {
@@ -237,19 +239,19 @@
     }
 
     .footer-link {
-        @apply inline-flex uppercase tracking-0.04em transition-colors duration-300 ease-in-out hover:text-light-gray;
+        @apply inline-flex uppercase tracking-0.04em transition-colors duration-300 ease-in-out hover:text-light-gray opacity-70;
     }
 
     .footer-phone {
-        @apply text-32px md:text-42px lg:text-[3rem] leading-none tracking-normal;
+        @apply text-xl 2xl:text-32px leading-none tracking-normal opacity-100;
     }
 
     .footer-subscribe-btn {
-        @apply inline-flex items-center justify-between gap-3 border border-opacity-light-gray-40% bg-white px-4 py-2 text-black md:px-5 md:py-3;
+        @apply inline-flex items-center justify-between gap-3 border border-opacity-light-gray-40% bg-white px-4 py-2 text-black md:px-4 md:py-3;
     }
 
     .footer-subscribe-btn-arrow {
-        @apply inline-flex size-12 items-center justify-center border border-light-black text-32px leading-none;
+        @apply inline-flex size-12 items-center justify-center border border-black text-32px leading-none;
     }
 
     .footer-socials {
@@ -264,20 +266,24 @@
         @apply size-10 lg:size-12;
     }
 
+    .footer-support-text {
+        max-width: calc(496 / var(--base-font-size) * 1rem);
+    }
+
     .footer-socials-inline {
-        @apply md:flex lg:hidden;
+        @apply md:flex 2xl:hidden;
     }
 
     .footer-brand-row {
-        @apply hidden mt-10 md:mt-12 lg:mt-16 md:flex md:items-end md:justify-between;
+        @apply hidden mt-5 md:flex md:items-end md:justify-center 2xl:justify-between md:w-full;
     }
 
     .footer-brand-link {
-        @apply inline-block font-inter font-semibold uppercase leading-none tracking-0.05em text-[4.6rem] md:text-[8.75rem] lg:text-[13.5rem];
+        @apply inline-block font-semibold uppercase leading-none tracking-[28%] 2xl:tracking-0.05em text-192px 2xl:text-[7.25rem] max-md:-mb-5;
     }
 
     .footer-socials-desktop {
-        @apply hidden lg:flex;
+        @apply hidden 2xl:flex;
     }
 
     .dark-btn:active,
@@ -351,7 +357,7 @@
 
     .home-main-carousel-content {
         min-height: inherit;
-        @apply flex w-full flex-col justify-between gap-10 pt-24 pb-10 md:pt-30 md:pb-14 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-10 lg:pt-34 lg:pb-16 bp1920px:pt-38 bp1920px:pb-20;
+        @apply flex w-full flex-col justify-between gap-10 pt-24 pb-10 md:pt-30 md:pb-14 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-10 lg:pt-34 lg:pb-16 2xl:pt-38 2xl:pb-20;
     }
 
     .home-main-carousel-copy {
@@ -365,7 +371,7 @@
 
     .home-main-carousel-description {
         max-width: var(--home-main-carousel-description-max-width);
-        @apply text-11px font-light uppercase tracking-0.04em text-light-gray md:text-sm lg:text-base bp1920px:text-lg;
+        @apply text-11px font-light uppercase tracking-0.04em text-light-gray md:text-sm lg:text-base 2xl:text-lg;
     }
 
     .home-main-carousel-cta {
@@ -402,7 +408,7 @@
 }
 
 .drawer-body {
-    @apply bp1920px:text-lg;
+    @apply 2xl:text-lg;
 }
 
 @utility custom-icon {

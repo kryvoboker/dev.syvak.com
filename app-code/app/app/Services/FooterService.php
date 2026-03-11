@@ -51,7 +51,6 @@ class FooterService
             'button_text'    => 'TELEGRAM',
             'button_url'     => '#',
             'support_text'   => 'ТВОЯ ПІДТРИМКА — ЦЕ СИЛА ДЛЯ МИТЦЯ. ПРИЄДНУЙСЯ ДО ТИХ, ХТО НОСИТЬ ЗІ ЗМІСТОМ.',
-            'arrow_icon_svg' => '&nearr;',
         ];
     }
 
