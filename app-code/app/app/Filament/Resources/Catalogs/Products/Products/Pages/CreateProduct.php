@@ -32,6 +32,8 @@ class CreateProduct extends CreateRecord
 
     protected array $product_attributes = [];
 
+    protected array $category_ids = [];
+
     protected array $slugs = [];
 
     public ?Model $record = null;
@@ -49,6 +51,7 @@ class CreateProduct extends CreateRecord
         $this->images             = $data['images'] ?? [];
         $this->discounts          = $data['discounts'] ?? [];
         $this->product_attributes = trim_strs_in_arr($data['attributes'] ?? []);
+        $this->category_ids       = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
         $this->slugs              = trim_strs_in_arr($data['slugs'] ?? []);
 
         // Validate unique attribute-language pairs
@@ -130,7 +133,7 @@ class CreateProduct extends CreateRecord
 
             app(ProductCategorySyncService::class)->syncWithRetry(
                 $this->getProductRecord(),
-                $data['categories'] ?? [],
+                $this->category_ids,
             );
 
             return $record;
