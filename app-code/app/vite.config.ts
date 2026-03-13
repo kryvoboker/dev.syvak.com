@@ -32,8 +32,22 @@ export default defineConfig(async (): Promise<UserConfig> => {
     const moduleAliases: Record<string, string> = {};
 
     for (const loadedModuleConfig of loadedModuleConfigs) {
-        Object.assign(moduleAliases, loadedModuleConfig.config.alias ?? {});
+        const rawAliases: Record<string, unknown> = loadedModuleConfig.config.alias ?? {};
+
+        for (const [aliasKey, aliasPath] of Object.entries(rawAliases)) {
+            if (typeof aliasPath !== 'string' || aliasPath.trim() === '') {
+                continue;
+            }
+
+            moduleAliases[aliasKey] = aliasPath;
+        }
     }
+
+    const baseAliases: Record<string, string> = {
+        '@ts-shared':   path.resolve(__dirname, './resources/assets/catalog/ts/shared'),
+        '@ts-features': path.resolve(__dirname, './resources/assets/catalog/ts/features'),
+        '@ts-stores':   path.resolve(__dirname, './resources/assets/catalog/ts/stores'),
+    };
 
     const refreshGlobs: string[] = [
         ... baseRefreshGlobs,
@@ -89,10 +103,8 @@ export default defineConfig(async (): Promise<UserConfig> => {
         ],
         resolve: {
             alias: {
-                '@ts-shared':   path.resolve(__dirname, './resources/assets/catalog/ts/shared'),
-                '@ts-features': path.resolve(__dirname, './resources/assets/catalog/ts/features'),
-                '@ts-stores':   path.resolve(__dirname, './resources/assets/catalog/ts/stores'),
                 ... moduleAliases,
+                ... baseAliases,
             },
         },
     };
