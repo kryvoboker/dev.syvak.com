@@ -175,8 +175,10 @@ return [
                 MemoryUsageProcessor::class,
             ],
             'handler_with' => [
-                'apiKey'               => config('monolog.telegram_token'),
-                'channel'              => config('monolog.kamaz_id'),
+                // Use env() here because config() lookups inside config files can resolve to null
+                // when another config file has not been loaded yet.
+                'apiKey'               => env('MONOLOG_TELEGRAM_BOT_API_KEY'),
+                'channel'              => env('MONOLOG_TELEGRAM_CHAT_ID'),
                 'splitLongMessages'    => true,
                 'delayBetweenMessages' => 1,
             ],
