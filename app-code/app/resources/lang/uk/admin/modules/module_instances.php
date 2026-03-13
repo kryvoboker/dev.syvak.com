@@ -44,4 +44,38 @@ return [
         'create_title' => 'Створення налаштувань для модуля ":module"',
         'edit_title'   => 'Редагування налаштувань модуля ":module"',
     ],
+    'products_carousel' => [
+        'sections' => [
+            'source_mode'           => 'Режим джерела товарів',
+            'category_based_window' => 'Показати товари з категорій',
+            'category_products'     => 'Вибрані товари з вибраних категорій',
+            'manual_only_window'    => 'Тільки вибіркові товари',
+        ],
+        'labels' => [
+            'module_name'                            => 'Назва модуля',
+            'source_mode'                            => 'Режим джерела товарів',
+            'categories_tree'                        => 'Дерево категорій',
+            'use_selected_products_only'             => 'Показати тільки визначені товари',
+            'search_products_in_selected_categories' => 'Живий пошук у вибраних категоріях',
+            'search_all_active_products'             => 'Живий пошук серед усіх активних товарів',
+            'selected_products'                      => 'Вибрані товари',
+        ],
+        'options' => [
+            'source_mode' => [
+                'category_based' => 'Показати товари з категорій',
+                'manual_only'    => 'Тільки вибіркові товари',
+            ],
+        ],
+        'actions' => [
+            'select_all_categories' => 'Відмітити все',
+            'clear_all_categories'  => 'Зняти всі відмітки',
+        ],
+        'helpers' => [
+            'category_based_window'                  => 'Оберіть активні категорії в дереві. Дочірні категорії відображаються всередині батьківських.',
+            'manual_only_window'                     => 'Оберіть будь-які активні товари з усього активного каталогу.',
+            'search_products_in_selected_categories' => 'Введіть частину назви, моделі або SKU. Пошук працює тільки в межах вибраних категорій.',
+            'search_all_active_products'             => 'Введіть частину назви, моделі або SKU. Пошук працює серед усіх активних товарів.',
+            'selected_products'                      => 'Використовуйте toggle checkbox, щоб залишити або прибрати товари у фінальному списку модуля.',
+        ],
+    ],
 ];
