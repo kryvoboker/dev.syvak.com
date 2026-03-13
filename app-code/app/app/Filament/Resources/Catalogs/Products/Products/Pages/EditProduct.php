@@ -11,6 +11,7 @@ use App\Models\Catalogs\Products\ProductDescription;
 use App\Models\Catalogs\Products\ProductDiscount;
 use App\Models\Catalogs\Products\ProductImage;
 use App\Models\Catalogs\Products\ProductToAttribute;
+use App\Services\Catalogs\Products\ProductCategorySyncService;
 use Exception;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -113,6 +114,10 @@ class EditProduct extends EditRecord
             ->toArray();
 
         $data['attributes'] = $attributes;
+        $data['categories'] = $record->categories()
+            ->pluck('categories.id')
+            ->map(fn (mixed $category_id): int => (int) $category_id)
+            ->all();
 
         $this->getSlugs($data);
 
@@ -140,7 +145,7 @@ class EditProduct extends EditRecord
         // Remove from main data
         unset(
             $data['descriptions'], $data['images'], $data['discounts'],
-            $data['attributes'], $data['slugs'],
+            $data['attributes'], $data['categories'], $data['slugs'],
         );
 
         return $data;
@@ -190,7 +195,7 @@ class EditProduct extends EditRecord
         }
 
         try {
-            return DB::transaction(function () use ($record, $data) {
+            DB::transaction(function () use ($record, $data): void {
                 // Update main record
                 $record->update($data);
 
@@ -210,10 +215,15 @@ class EditProduct extends EditRecord
                 if ($this->updateOrCreateSlugs() === false) {
                     throw new Exception('Failed to update slugs');
                 }
-
-                return $record;
             });
-        } catch (Exception|Throwable $e) {
+
+            app(ProductCategorySyncService::class)->syncWithRetry(
+                $record,
+                $data['categories'] ?? [],
+            );
+
+            return $record;
+        } catch (Throwable $e) {
             Log::channel('stack')->error('Failed to update Product: ' . $e->getMessage(), [
                 'record_id' => $record->id,
                 'data'      => $data,

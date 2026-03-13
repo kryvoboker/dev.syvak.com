@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Pages;
 use App\Filament\Resources\Catalogs\Products\Products\ProductResource;
 use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Products\Product;
+use App\Services\Catalogs\Products\ProductCategorySyncService;
 use Exception;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -56,7 +57,7 @@ class CreateProduct extends CreateRecord
         // Remove from main data
         unset(
             $data['descriptions'], $data['images'], $data['discounts'],
-            $data['attributes'], $data['slugs'],
+            $data['attributes'], $data['categories'], $data['slugs'],
         );
 
         return $data;
@@ -103,7 +104,7 @@ class CreateProduct extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         try {
-            return DB::transaction(function () use ($data) {
+            $record = DB::transaction(function () use ($data) {
                 // Create main record
                 $this->record = static::getModel()::create($data);
 
@@ -126,7 +127,14 @@ class CreateProduct extends CreateRecord
 
                 return $this->record;
             });
-        } catch (Exception|Throwable $e) {
+
+            app(ProductCategorySyncService::class)->syncWithRetry(
+                $this->getProductRecord(),
+                $data['categories'] ?? [],
+            );
+
+            return $record;
+        } catch (Throwable $e) {
             Log::channel('stack')->error('Failed to create Product: ' . $e->getMessage(), [
                 'data'      => $data,
                 'exception' => $e,
