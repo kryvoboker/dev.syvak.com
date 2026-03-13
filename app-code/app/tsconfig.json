@@ -55,7 +55,9 @@
     "include": [
         "./resources/assets/catalog/ts/**/*.ts",
         "./vite.config.ts",
-        "./vite-env.d.ts"
+        "./vite-env.d.ts",
+        "./Modules/**/vite.config.module.ts",
+        "vite-plugins/**/*",
     ],
     "exclude": [
         "node_modules",
