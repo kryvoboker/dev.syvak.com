@@ -16,6 +16,8 @@ class ProductCategorySyncService
 {
     /**
      * @param  array<int|string, mixed>|mixed  $category_ids
+     *
+     * @throws Throwable
      */
     public function syncWithRetry(Product $product, mixed $category_ids): void
     {
