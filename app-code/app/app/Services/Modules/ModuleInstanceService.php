@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class ModuleInstanceService
+readonly class ModuleInstanceService
 {
     public function __construct(
-        private readonly ModuleCacheService $module_cache_service,
-        private readonly ModuleInstanceSettingsNormalizerService $module_instance_settings_normalizer_service,
+        private ModuleCacheService                      $module_cache_service,
+        private ModuleInstanceSettingsNormalizerService $module_instance_settings_normalizer_service,
     ) {}
 
     public function setGlobalState(ModuleDefinition $definition, bool $is_enabled): ModuleDefinition
@@ -36,7 +36,9 @@ class ModuleInstanceService
     }
 
     /**
-     * @param  array<string, mixed>  $attributes
+     * @param array<string, mixed> $attributes
+     *
+     * @throws Throwable
      */
     public function createFromDefinition(ModuleDefinition $definition, array $attributes = []): ModuleInstance
     {
@@ -79,7 +81,9 @@ class ModuleInstanceService
     }
 
     /**
-     * @param  array<string, mixed>  $attributes
+     * @param array<string, mixed> $attributes
+     *
+     * @throws Throwable
      */
     public function duplicate(ModuleInstance $instance, array $attributes = []): ModuleInstance
     {

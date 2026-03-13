@@ -13,7 +13,9 @@ use Throwable;
 class ModuleProviderRegistrarService
 {
     /**
-     * @param  list<class-string>  $provider_classes
+     * @param list<class-string> $provider_classes
+     *
+     * @throws Throwable
      */
     public function register(array $provider_classes): void
     {

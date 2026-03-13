@@ -9,6 +9,7 @@ use App\Services\Modules\ModuleProviderResolverService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Registers module providers that require the middleware-after-session strategy.
@@ -19,7 +20,9 @@ use Symfony\Component\HttpFoundation\Response;
 class RegisterModuleProvidersAfterSession
 {
     /**
-     * @param  Closure(Request): Response  $next
+     * @param Closure(Request): Response $next
+     *
+     * @throws Throwable
      */
     public function handle(Request $request, Closure $next): Response
     {

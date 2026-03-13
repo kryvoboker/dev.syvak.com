@@ -8,10 +8,10 @@ use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
 use Filament\Schemas\Components\Component;
 
-class ModuleInstanceFormSchemaResolverService
+readonly class ModuleInstanceFormSchemaResolverService
 {
     public function __construct(
-        private readonly ModuleClassResolverService $module_class_resolver_service,
+        private ModuleClassResolverService $module_class_resolver_service,
     ) {}
 
     /**
