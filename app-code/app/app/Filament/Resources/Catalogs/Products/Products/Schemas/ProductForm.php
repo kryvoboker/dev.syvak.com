@@ -132,7 +132,7 @@ class ProductForm
                             ->imageEditor()
                             ->imageEditorViewportWidth((int) config('app.images.product.preview_in_page_in_admin.width'))
                             ->imageEditorViewportHeight((int) config('app.images.product.preview_in_page_in_admin.height'))
-                            ->imageEditorAspectRatios([
+                            ->imageEditorAspectRatioOptions([
                                 '1:1'  => '1:1',
                                 '4:3'  => '4:3',
                                 '16:9' => '16:9',
@@ -197,7 +197,6 @@ class ProductForm
                             ->label(__('admin/default.labels.categories'))
                             ->helperText(__('admin/default.helpers.categories'))
                             ->multiple()
-                            ->relationship('categories', 'id')
                             ->options(function () use ($current_language_id) {
                                 return self::getCategoryHierarchy($current_language_id);
                             })
@@ -284,9 +283,11 @@ class ProductForm
             $description = $category->categoryDescription
                 ->firstWhere('language_id', $language_id);
 
-            $name = $description?->name
-                ?? $category->categoryDescription->first()?->name
-                ?? "Category #$category->id";
+            $name = is_string($description->name ?? null) && filled($description->name)
+                ? $description->name
+                : (is_string($category->categoryDescription->first()->name ?? null) && filled($category->categoryDescription->first()->name)
+                    ? $category->categoryDescription->first()->name
+                    : "Category #$category->id");
 
             $path[] = $name;
         }
@@ -316,7 +317,7 @@ class ProductForm
                                     ->imageEditor()
                                     ->imageEditorViewportWidth((int) config('app.images.product.preview_in_page_in_admin.width'))
                                     ->imageEditorViewportHeight((int) config('app.images.product.preview_in_page_in_admin.height'))
-                                    ->imageEditorAspectRatios([
+                                    ->imageEditorAspectRatioOptions([
                                         '1:1'  => '1:1',
                                         '4:3'  => '4:3',
                                         '16:9' => '16:9',
@@ -451,9 +452,11 @@ class ProductForm
                                                 $description = $attribute->attributeDescription
                                                     ->firstWhere('language_id', $current_language_id);
 
-                                                $name = $description?->name
-                                                    ?? $attribute->attributeDescription->first()?->name
-                                                    ?? "Attribute #$attribute->id";
+                                                $name = is_string($description->name ?? null) && filled($description->name)
+                                                    ? $description->name
+                                                    : (is_string($attribute->attributeDescription->first()->name ?? null) && filled($attribute->attributeDescription->first()->name)
+                                                        ? $attribute->attributeDescription->first()->name
+                                                        : "Attribute #$attribute->id");
 
                                                 return [$attribute->id => $name];
                                             });
@@ -475,9 +478,11 @@ class ProductForm
                                         $description = $attribute->attributeDescription
                                             ->firstWhere('language_id', $current_language_id);
 
-                                        return $description?->name
-                                            ?? $attribute->attributeDescription->first()?->name
-                                            ?? "Attribute #$attribute->id";
+                                        return is_string($description->name ?? null) && filled($description->name)
+                                            ? $description->name
+                                            : (is_string($attribute->attributeDescription->first()->name ?? null) && filled($attribute->attributeDescription->first()->name)
+                                                ? $attribute->attributeDescription->first()->name
+                                                : "Attribute #$attribute->id");
                                     })
                                     ->afterStateUpdated(function ($state, $set, $get): void {
                                         // Auto-validate uniqueness on change
