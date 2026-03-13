@@ -12,6 +12,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Container\CircularDependencyException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Single Filament entry point for module settings schemas.
@@ -33,10 +36,18 @@ class ModuleInstanceForm
      */
     public static function getComponents(?ModuleDefinition $definition = null, ?ModuleInstance $instance = null): array
     {
-        $custom_components = app(ModuleInstanceFormSchemaResolverService::class)
-            ->resolve($definition, $instance);
+        try {
+            $custom_components = app(ModuleInstanceFormSchemaResolverService::class)
+                ->resolve($definition, $instance);
+        } catch (BindingResolutionException|CircularDependencyException $e) {
+            Log::channel('stack')->error('Error resolving module instance form schema.', [
+                'definition_id' => $definition?->id,
+                'instance_id'   => $instance?->id,
+                'error_message' => $e->getMessage(),
+            ]);
+        }
 
-        if ($custom_components !== null) {
+        if (isset($custom_components)) {
             return $custom_components;
         }
 

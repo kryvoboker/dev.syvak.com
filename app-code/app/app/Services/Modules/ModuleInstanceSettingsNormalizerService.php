@@ -9,10 +9,10 @@ use App\Models\Modules\ModuleInstance;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 
-class ModuleInstanceSettingsNormalizerService
+readonly class ModuleInstanceSettingsNormalizerService
 {
     public function __construct(
-        private readonly ModuleClassResolverService $module_class_resolver_service,
+        private ModuleClassResolverService $module_class_resolver_service,
     ) {}
 
     /**

@@ -1,0 +1,11 @@
+{
+    "name": "ProductsCarousel",
+    "alias": "productscarousel",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ProductsCarousel\\Providers\\ProductsCarouselServiceProvider"
+    ],
+    "files": []
+}

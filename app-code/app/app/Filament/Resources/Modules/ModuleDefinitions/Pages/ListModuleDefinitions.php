@@ -9,10 +9,14 @@ use App\Filament\Resources\Modules\ModuleInstances\ModuleInstanceResource;
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
 use App\Services\Modules\ModuleInstanceService;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Custom modules list page with grouped definition and settings rows.
@@ -40,9 +44,6 @@ class ListModuleDefinitions extends ListRecords
         return __('admin/modules/module_definitions.navigation_label');
     }
 
-    /**
-     * @return \Illuminate\Support\Collection
-     */
     public function getDefinitions(): \Illuminate\Support\Collection
     {
         $search_value  = Str::lower(Str::squish($this->search));
@@ -181,6 +182,29 @@ class ListModuleDefinitions extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            Action::make('syncModuleDefinitions')
+                ->label(__('admin/modules/module_definitions.actions.sync_modules'))
+                ->icon(Heroicon::ArrowPath)
+                ->action(function (): void {
+                    try {
+                        $a = Artisan::call('app:sync-module-definitions');
+
+                        Notification::make()
+                            ->title(__('admin/default.success.title'))
+                            ->body(__('admin/modules/module_definitions.notifications.sync_completed'))
+                            ->success()
+                            ->send();
+                    } catch (Throwable $throwable) {
+                        report($throwable);
+
+                        Notification::make()
+                            ->title(__('admin/default.errors.title'))
+                            ->body(__('admin/modules/module_definitions.notifications.sync_failed'))
+                            ->danger()
+                            ->send();
+                    }
+                }),
+        ];
     }
 }

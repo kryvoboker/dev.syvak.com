@@ -100,6 +100,46 @@ class ModuleProviderResolverServiceTest extends TestCase
         $this->assertNotContains('Modules\\Carousel\\Providers\\CarouselServiceProvider', $eager_providers);
     }
 
+    public function test_resolver_returns_route_matched_provider_for_products_carousel_strategy(): void
+    {
+        $definition = ModuleDefinition::query()->create([
+            'name'                     => 'ProductsCarousel',
+            'slug'                     => 'products-carousel-route-matched',
+            'nwidart_name'             => 'ProductsCarousel',
+            'module_path'              => base_path('Modules/ProductsCarousel'),
+            'description'              => 'Products Carousel module',
+            'is_installed'             => true,
+            'is_enabled'               => true,
+            'is_enabled_in_filesystem' => true,
+            'sort_order'               => 2,
+            'settings_schema'          => [],
+            'meta'                     => [],
+        ]);
+
+        $definition->instances()->create([
+            'name'        => 'Products Carousel Home',
+            'placement'   => 'home',
+            'context_key' => null,
+            'is_enabled'  => true,
+            'sort_order'  => 1,
+            'settings'    => [
+                'shared' => [
+                    'page_types' => ['home'],
+                ],
+            ],
+            'meta' => [],
+        ]);
+
+        $request  = $this->makeAdminRequest();
+        $resolver = $this->app->make(ModuleProviderResolverService::class);
+
+        $route_matched_providers = $resolver->resolveForStrategy('route_matched', $request);
+        $eager_providers         = $resolver->resolveForStrategy('eager', $request);
+
+        $this->assertContains('Modules\\ProductsCarousel\\Providers\\ProductsCarouselServiceProvider', $route_matched_providers);
+        $this->assertNotContains('Modules\\ProductsCarousel\\Providers\\ProductsCarouselServiceProvider', $eager_providers);
+    }
+
     public function test_resolver_returns_middleware_after_session_provider_for_module_override(): void
     {
         $module_name = 'SessionModule';
