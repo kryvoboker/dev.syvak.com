@@ -9,6 +9,7 @@ use App\Services\Modules\ModuleProviderResolverService;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Throwable;
 
 /**
  * Registers module providers after all application providers are fully booted.
@@ -28,6 +29,8 @@ class ModuleProvidersServiceProvider extends ServiceProvider
      * This guarantees deterministic order:
      * 1) providers from bootstrap/providers.php
      * 2) active module providers needed for current request
+     *
+     * @throws Throwable
      */
     public function boot(): void
     {

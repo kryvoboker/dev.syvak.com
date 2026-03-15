@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\ProductsCarousel\Providers;
 
-use App\Models\Modules\ModuleDefinition;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -38,10 +34,8 @@ class ProductsCarouselServiceProvider extends ServiceProvider
             return;
         }
 
-        if (! $this->shouldBootForCurrentRequest()) {
-            return;
-        }
-
+        // Request-level lazy loading is handled by ModuleProvidersServiceProvider + resolver.
+        // If this provider was registered for current request, it should fully boot.
         $this->registerCommands();
         $this->registerCommandSchedules();
         $this->registerTranslations();
@@ -170,65 +164,5 @@ class ProductsCarouselServiceProvider extends ServiceProvider
         }
 
         return $paths;
-    }
-
-    /**
-     * Keep provider boot lazy for web requests:
-     * - allow boot in modules admin routes where module settings are managed;
-     * - allow boot for storefront requests only when ProductsCarousel is active for current page type.
-     */
-    private function shouldBootForCurrentRequest(): bool
-    {
-        if ($this->isModulesAdminRequest()) {
-            return $this->isProductsCarouselEnabledGlobally();
-        }
-
-        if ($this->isProductsCarouselEnabledGlobally() === false) {
-            return false;
-        }
-
-        $page_type = function_exists('try_detect_page_type')
-            ? try_detect_page_type()
-            : null;
-
-        if (blank($page_type)) {
-            return false;
-        }
-
-        return ModuleDefinition::query()
-            ->enabled()
-            ->where('nwidart_name', $this->name)
-            ->whereHas(
-                'instances',
-                function (Builder $query) use ($page_type): void {
-                    $query
-                        ->where('is_enabled', true)
-                        ->where(function (Builder $query) use ($page_type): void {
-                            $query->whereJsonContains('settings->shared->page_types', $page_type);
-                        });
-                },
-            )
-            ->exists();
-    }
-
-    private function isProductsCarouselEnabledGlobally(): bool
-    {
-        return ModuleDefinition::query()
-            ->enabled()
-            ->where('nwidart_name', $this->name)
-            ->exists();
-    }
-
-    private function isModulesAdminRequest(): bool
-    {
-        $route_name = request()->route()?->getName();
-
-        if (is_string($route_name) && Str::startsWith($route_name, 'filament.')) {
-            return true;
-        }
-
-        $request_path = Request::path();
-
-        return Str::contains($request_path, 'alyo-admin');
     }
 }

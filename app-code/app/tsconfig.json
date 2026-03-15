@@ -10,7 +10,10 @@
             ],
             "@ts-stores/*": [
                 "./resources/assets/catalog/ts/stores/*"
-            ]
+            ],
+            "@products-carousel-ts/*": [
+                "./Modules/ProductsCarousel/resources/assets/ts/*"
+            ],
         },
         "target": "ES2024",
         "useDefineForClassFields": true,
@@ -57,7 +60,8 @@
         "./vite.config.ts",
         "./vite-env.d.ts",
         "./Modules/**/vite.config.module.ts",
-        "vite-plugins/**/*",
+        "./Modules/**/resources/assets/ts/**/*.ts",
+        "vite-plugins/**/*"
     ],
     "exclude": [
         "node_modules",

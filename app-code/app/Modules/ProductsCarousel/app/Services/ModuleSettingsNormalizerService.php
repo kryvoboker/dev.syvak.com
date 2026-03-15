@@ -14,11 +14,11 @@ use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 /**
  * Normalizes and sanitizes ProductsCarousel settings before persisting module instance payloads.
  */
-class ModuleSettingsNormalizerService
+readonly class ModuleSettingsNormalizerService
 {
     public function __construct(
-        private readonly ProductsCarouselConfig $products_carousel_config,
-        private readonly ProductsCarouselProductSearchService $products_carousel_product_search_service,
+        private ProductsCarouselConfig               $products_carousel_config,
+        private ProductsCarouselProductSearchService $products_carousel_product_search_service,
     ) {}
 
     /**

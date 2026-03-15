@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "source": "figma-browser-manual",
+    "file_url": "https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=1700-11951&t=81u1l2YBUcecF51Q-0",
+    "captured_at": "2026-03-15",
+    "viewport_zoom": "98%",
+    "screenshot": "figma/modules/products/1920-screenshot.png",
+    "note": "Data extracted manually from browser UI (no dev-mode/rest api). Values marked as approximate were read visually from screenshot."
+  },
+  "frame": {
+    "name": "bestseller / 1920",
+    "node_id": "1700:11951",
+    "position": {
+      "x": 0,
+      "y": 1137
+    },
+    "size": {
+      "width": 1920,
+      "height": 833
+    },
+    "layout": {
+      "mode": "freeform",
+      "clip_content": true
+    }
+  },
+  "style": {
+    "fill": "var(--color-black)",
+    "stroke": {
+      "color": "var(--color-black)",
+      "weight": 1,
+      "align": "inside"
+    },
+    "selection_colors": [
+      "var(--color-white)",
+      "var(--color-opacity-light-gray-40%)",
+      "var(--color-light-gray)",
+      "var(--color-black)",
+      "var(--color-light-black)"
+    ]
+  },
+  "content": {
+    "section_title": {
+      "text": "ХІТИ КОЛЕКЦІЇ",
+      "language": "uk"
+    },
+    "section_description": {
+      "text": "ЕСТЕТИКА, НАПОВНЕНА ЗМІСТОМ. ЦІННІСТЬ, ЩО РОЗКРИВАЄТЬСЯ В КОЖНІЙ ДЕТАЛІ.",
+      "language": "uk",
+      "approximate": true
+    },
+    "carousel": {
+      "visible_items": 5,
+      "item_markers": ["01", "02", "03", "04", "05"],
+      "show_prev_arrow": true,
+      "show_next_arrow": true,
+      "show_dots": true
+    },
+    "cards_visible": [
+      {
+        "index": 1,
+        "title": "ФУТБОЛКА ГІРСЬКА КРОВ",
+        "price": "1 500 UAH",
+        "image_type": "product_photo",
+        "approximate": true
+      },
+      {
+        "index": 2,
+        "title": "ФУТБОЛКА ОБРАНА",
+        "price": "1 500 UAH",
+        "image_type": "product_photo",
+        "approximate": true
+      },
+      {
+        "index": 3,
+        "title": "TITLE TITLE TITLE TITLETITLE TITLE",
+        "price": "1 500 UAH",
+        "image_type": "product_photo",
+        "approximate": true
+      },
+      {
+        "index": 4,
+        "title": "ФУТБОЛКА МАКОВІЙ",
+        "price": "1 500 UAH",
+        "image_type": "product_photo",
+        "approximate": true
+      },
+      {
+        "index": 5,
+        "title": "TITLE ...",
+        "price": "1 500 UAH",
+        "image_type": "product_photo",
+        "partially_visible": true,
+        "approximate": true
+      }
+    ]
+  },
+  "implementation_hints": {
+    "module": "ProductsCarousel",
+    "frontend_pattern": "horizontal product slider with title, description, nav arrows and pagination dots",
+    "layout_target": "1920 desktop",
+    "expected_data_keys": [
+      "title",
+      "description",
+      "items[]: image, title, price, url",
+      "show_navigation",
+      "show_pagination"
+    ]
+  }
+}

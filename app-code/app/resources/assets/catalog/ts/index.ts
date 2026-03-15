@@ -2,8 +2,8 @@ import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
 import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
 
 document.addEventListener('DOMContentLoaded', (): void => {
-    window.$hsDropdownCollection = [];
-    window.$hsOverlayCollection = [];
+    window.$hsDropdownCollection = window.$hsDropdownCollection || [];
+    window.$hsOverlayCollection = window.$hsOverlayCollection || [];
 
     const pageType = getAppParam<string>($PAGE_TYPE_KEY);
 

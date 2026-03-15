@@ -26,13 +26,6 @@ class CarouselModuleDataService
             ->collapse()
             ->values();
 
-        if ($carousel_modules->isEmpty()) {
-            Log::channel('stack')->error('No active carousel modules were resolved for placement.', [
-                'placement' => $placement,
-                'page_type' => $page_type,
-            ]);
-        }
-
         /** @var array<int, array<string, mixed>> $resolved_modules */
         $resolved_modules = $carousel_modules->all();
 
@@ -53,7 +46,7 @@ class CarouselModuleDataService
                 $instance_settings = is_array($instance->settings) ? $instance->settings : [];
                 $shared_settings   = Arr::get($instance_settings, 'shared', []);
                 $slides            = collect(Arr::get($instance_settings, 'slides', []))
-                    ->filter(fn (mixed $slide): bool => is_array($slide) && (bool) Arr::get($slide, 'is_active', true))
+                    ->filter(fn (mixed $slide): bool => is_array($slide) && Arr::get($slide, 'is_active', true))
                     ->sortBy(fn (array $slide): int => (int) Arr::get($slide, 'sort_order', 0))
                     ->values()
                     ->map(fn (array $slide): array => $this->mapSlide($slide, $shared_settings))

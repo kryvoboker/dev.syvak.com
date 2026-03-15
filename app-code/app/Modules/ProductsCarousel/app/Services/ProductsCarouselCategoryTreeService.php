@@ -100,7 +100,7 @@ class ProductsCarouselCategoryTreeService
             return (int) $language_by_locale->id;
         }
 
-        $default_language = (new Language())->getDefaultLanguage();
+        $default_language = new Language()->getDefaultLanguage();
 
         if ($default_language !== null) {
             return (int) $default_language->id;
