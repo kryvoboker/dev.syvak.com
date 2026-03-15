@@ -24,12 +24,12 @@ use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 /**
  * Defines module-specific Filament form components for ProductsCarousel instance settings.
  */
-class ModuleInstanceFormSchema
+readonly class ModuleInstanceFormSchema
 {
     public function __construct(
-        private readonly ProductsCarouselConfig $products_carousel_config,
-        private readonly ProductsCarouselCategoryTreeService $products_carousel_category_tree_service,
-        private readonly ProductsCarouselProductSearchService $products_carousel_product_search_service,
+        private ProductsCarouselConfig               $products_carousel_config,
+        private ProductsCarouselCategoryTreeService  $products_carousel_category_tree_service,
+        private ProductsCarouselProductSearchService $products_carousel_product_search_service,
     ) {}
 
     /**
@@ -46,6 +46,14 @@ class ModuleInstanceFormSchema
                         ->label(__('admin/modules/module_instances.products_carousel.labels.module_name'))
                         ->maxLength(255)
                         ->required(),
+
+                    Select::make('settings.shared.page_types')
+                        ->label(__('admin/modules/module_instances.products_carousel.labels.page_types'))
+                        ->multiple()
+                        ->options($this->getPageTypeOptions())
+                        ->required()
+                        ->native(false)
+                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.page_types')),
 
                     Grid::make()
                         ->columns()
@@ -89,14 +97,6 @@ class ModuleInstanceFormSchema
                                 ->rows(3)
                                 ->maxLength(1000)
                                 ->helperText(__('admin/modules/module_instances.products_carousel.helpers.short_description_for_user')),
-
-                            Select::make('settings.shared.page_types')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.page_types'))
-                                ->multiple()
-                                ->options($this->getPageTypeOptions())
-                                ->required()
-                                ->native(false)
-                                ->helperText(__('admin/modules/module_instances.products_carousel.helpers.page_types')),
                         ]),
 
                     Section::make(__('admin/modules/module_instances.products_carousel.sections.source_mode'))

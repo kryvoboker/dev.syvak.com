@@ -31,6 +31,7 @@ readonly class ProductsCarouselModuleDataService
      *     name: string,
      *     module_name_for_user: string,
      *     short_description_for_user: string,
+     *     page_types: array<int, string>,
      *     placement: string|null,
      *     source_mode: string,
      *     products: array<int, array{
@@ -112,6 +113,10 @@ readonly class ProductsCarouselModuleDataService
                     'name'                        => $instance->name,
                     'module_name_for_user'        => (string) Arr::get($instance_settings, 'shared.module_name_for_user', ''),
                     'short_description_for_user'  => (string) Arr::get($instance_settings, 'shared.short_description_for_user', ''),
+                    'page_types'                  => collect(Arr::get($instance_settings, 'shared.page_types', []))
+                        ->filter(fn (mixed $page_type): bool => is_string($page_type) && filled($page_type))
+                        ->values()
+                        ->all(),
                     'placement'                   => $instance->placement,
                     'source_mode'                 => $source_mode,
                     'products'                    => $products_payload,

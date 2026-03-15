@@ -8,6 +8,7 @@
     @foreach($products_carousel_modules_data ?? [] as $products_carousel_module_data)
         @include('productscarousel::storefront.products-carousel', [
             'products_carousel_module_data' => $products_carousel_module_data,
+            'page_type' => $page_type ?? null,
         ])
     @endforeach
 @endsection
