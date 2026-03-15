@@ -1,5 +1,35 @@
 import { initCarousel }   from '@ts-features/carousel/lib/initCarousel.ts';
+import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
+import { getAppParam }    from '@ts-shared/lib/getAppParam.ts';
 import { findArrayElems } from '@ts-shared/lib/helpers.ts';
+
+function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
+    const pageType = getAppParam<string>($PAGE_TYPE_KEY);
+
+    if (typeof pageType !== 'string' || pageType.trim().length === 0) {
+        return true;
+    }
+
+    const allowedPageTypesRaw = carouselElement.dataset.pageTypes;
+
+    if (typeof allowedPageTypesRaw !== 'string' || allowedPageTypesRaw.trim().length === 0) {
+        return true;
+    }
+
+    try {
+        const allowedPageTypes = JSON.parse(allowedPageTypesRaw);
+
+        if (!Array.isArray(allowedPageTypes)) {
+            return true;
+        }
+
+        return allowedPageTypes
+            .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+            .includes(pageType);
+    } catch {
+        return true;
+    }
+}
 
 export function handleProductsCarousel(): void {
     const carouselElements = findArrayElems('[data-products-carousel]');
@@ -9,6 +39,10 @@ export function handleProductsCarousel(): void {
     }
 
     carouselElements.forEach((carouselElement: HTMLElement): void => {
+        if (!isPageTypeAllowed(carouselElement)) {
+            return;
+        }
+
         initCarousel(carouselElement);
     });
 }

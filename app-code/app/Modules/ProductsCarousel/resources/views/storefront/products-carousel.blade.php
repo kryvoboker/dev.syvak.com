@@ -2,10 +2,13 @@
     use Illuminate\Support\Str;
 
     $carousel_dom_id = 'products-carousel-' . ($products_carousel_module_data['instance_id'] ?? Str::random(6));
-
-    // Placeholder section copy from Figma export. Real module text bindings will be wired later.
-    $section_title = 'ХІТИ КОЛЕКЦІЇ';
-    $section_description = 'ЕСТЕТИКА, НАПОВНЕНА ЗМІСТОМ. ЦІННІСТЬ, ЩО РОЗКРИВАЄТЬСЯ В КОЖНІЙ ДЕТАЛІ.';
+    $section_title = (string) ($products_carousel_module_data['module_name_for_user'] ?? '');
+    $section_description = (string) ($products_carousel_module_data['short_description_for_user'] ?? '');
+    $current_page_type = (string) ($page_type ?? '');
+    $page_types = collect($products_carousel_module_data['page_types'] ?? [])
+        ->filter(fn (mixed $module_page_type): bool => is_string($module_page_type) && filled($module_page_type))
+        ->values()
+        ->all();
 
     $placeholder_products = [
         ['name' => 'ФУТБОЛКА ГІРСЬКА КРОВ', 'price' => '1 500 UAH'],
@@ -44,13 +47,19 @@
 
 <section class="products-carousel-section" aria-label="Products carousel section">
     <div class="container products-carousel-head">
-        <h2 class="products-carousel-title">{{ $section_title }}</h2>
-        <p class="products-carousel-description">{{ $section_description }}</p>
+        @if(filled($section_title))
+            <h2 class="products-carousel-title">{{ $section_title }}</h2>
+        @endif
+        @if(filled($section_description))
+            <p class="products-carousel-description">{{ $section_description }}</p>
+        @endif
     </div>
 
     <div id="{{ $carousel_dom_id }}"
          class="container products-carousel-root --prevent-on-load-init"
          data-products-carousel
+         data-page-types='@json($page_types)'
+         data-current-page-type="{{ $current_page_type }}"
          data-carousel='{"loadingClasses":"opacity-0,opacity-100 transition-opacity duration-500","isAutoHeight":true,"isInfiniteLoop":true,"slidesQty":{"xs":1,"sm":1,"md":2,"lg":3,"2xl":5}}'>
         <div class="carousel products-carousel-track">
             <div class="carousel-body products-carousel-body">
