@@ -1,2 +1,25 @@
 figma design link - https://www.figma.com/design/gcUrHK4jui7vuBwqrM8gTH/--S-Y-V-A-K--?node-id=344-3934&p=f&t=uAcYZrt8DprZDAyg-0
 copy figma design link - https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=344-3934
+
+For run Google Chrome in WSL 2:
+
+dbus-daemon --session --address=unix:path=$XDG_RUNTIME_DIR/bus --fork
+
+export XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir
+export WAYLAND_DISPLAY=wayland-0
+export DISPLAY=:0
+export DBUS_SESSION_BUS_ADDRESS=unix:path=/mnt/wslg/runtime-dir/bus
+
+google-chrome \
+  --remote-debugging-address=127.0.0.1 \
+  --remote-debugging-port=9222 \
+  --user-data-dir=/tmp/chrome-profile \
+  --no-sandbox \
+  --disable-dev-shm-usage \
+  https://www.figma.com
+
+
+For run Google Chrome only for mcp server:
+
+Xvfb :99 -screen 0 1920x1080x24 &
+export DISPLAY=:99

@@ -14,10 +14,10 @@ use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 /**
  * Provides active product search and filtering logic for ProductsCarousel admin selectors.
  */
-class ProductsCarouselProductSearchService
+readonly class ProductsCarouselProductSearchService
 {
     public function __construct(
-        private readonly ProductsCarouselConfig $products_carousel_config,
+        private ProductsCarouselConfig $products_carousel_config,
     ) {}
 
     /**
@@ -167,12 +167,12 @@ class ProductsCarouselProductSearchService
             ])
             ->when(filled($search_query), function (Builder $query) use ($search_query, $language_id): void {
                 $query->where(function (Builder $query) use ($search_query, $language_id): void {
-                    $query->whereLike('model', "%{$search_query}%")
-                        ->orWhereLike('sku', "%{$search_query}%")
+                    $query->whereLike('model', "%$search_query%")
+                        ->orWhereLike('sku', "%$search_query%")
                         ->orWhereHas('productDescription', function (Builder $query) use ($search_query, $language_id): void {
                             $query
                                 ->where('language_id', $language_id)
-                                ->whereLike('name', "%{$search_query}%");
+                                ->whereLike('name', "%$search_query%");
                         });
                 });
             })
@@ -181,7 +181,7 @@ class ProductsCarouselProductSearchService
     }
 
     /**
-     * @param  iterable<mixed>  $products
+     * @param array $products
      * @return array<int, string>
      */
     private function mapProductsToOptions(iterable $products): array
@@ -235,7 +235,7 @@ class ProductsCarouselProductSearchService
             return (int) $language_by_locale->id;
         }
 
-        $default_language = (new Language())->getDefaultLanguage();
+        $default_language = new Language()->getDefaultLanguage();
 
         if ($default_language !== null) {
             return (int) $default_language->id;

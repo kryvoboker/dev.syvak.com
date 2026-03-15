@@ -13,9 +13,9 @@ return [
     |
     */
     'allowed_strategies' => [
-        'eager',
-        'route_matched',
-        'middleware_after_session',
+        'eager'                    => 'eager',
+        'route_matched'            => 'route_matched',
+        'middleware_after_session' => 'middleware_after_session',
     ],
 
     /*
@@ -26,5 +26,5 @@ return [
     | Used when module-level strategy is missing or invalid.
     |
     */
-    'default_strategy' => 'route_matched',
+    'default_strategy'   => 'route_matched',
 ];

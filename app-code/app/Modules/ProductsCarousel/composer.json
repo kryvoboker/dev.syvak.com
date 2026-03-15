@@ -3,8 +3,8 @@
     "description": "",
     "authors": [
         {
-            "name": "Nicolas Widart",
-            "email": "n.widart@gmail.com"
+            "name": "Roman Kryvobok",
+            "email": "fast.kamaz@gmail.com"
         }
     ],
     "extra": {
@@ -17,14 +17,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Modules\\ProductsCarousel\\": "app/",
-            "Modules\\ProductsCarousel\\Database\\Factories\\": "database/factories/",
-            "Modules\\ProductsCarousel\\Database\\Seeders\\": "database/seeders/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Modules\\ProductsCarousel\\Tests\\": "tests/"
+            "Modules\\ProductsCarousel\\": "app/"
         }
     }
 }

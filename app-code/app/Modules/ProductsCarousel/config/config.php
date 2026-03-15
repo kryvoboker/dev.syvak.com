@@ -6,7 +6,7 @@ return [
     'name'        => 'ProductsCarousel',
     'description' => 'Localized storefront products carousel module.',
     'runtime'     => [
-        'provider_loading_strategy' => 'route_matched',
+        'provider_loading_strategy' => config('modules-runtime.allowed_strategies.route_matched'),
     ],
     'search' => [
         'result_limit' => 30,

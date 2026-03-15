@@ -10,6 +10,7 @@ use App\Services\HeaderService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\View\View;
 use Modules\Carousel\Services\CarouselModuleDataService;
+use Modules\ProductsCarousel\Services\ProductsCarouselModuleDataService;
 
 class HomeController extends Controller
 {
@@ -19,14 +20,16 @@ class HomeController extends Controller
         $page_type   = try_detect_page_type();
 
         $data = [
-            'header_data'           => $header_data,
-            'footer_data'           => app(FooterService::class)([
+            'header_data' => $header_data,
+            'footer_data' => app(FooterService::class)([
                 // Footer uses category links too; pass already loaded categories from header.
                 'categories' => $header_data['categories'],
             ]),
             'carousel_modules_data' => app(CarouselModuleDataService::class)
                 ->resolveForPlacement(config('app.modules_placements.top'), $page_type),
-            'page_type'             => $page_type,
+            'products_carousel_modules_data' => app(ProductsCarouselModuleDataService::class)
+                ->resolveForPlacement(config('app.modules_placements.bottom'), $page_type),
+            'page_type' => $page_type,
         ];
 
         return view('catalog.pages.home', $data);
