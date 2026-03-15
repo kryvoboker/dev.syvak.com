@@ -8,6 +8,7 @@ use App\Models\Catalogs\Categories\Category;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 
@@ -34,6 +35,8 @@ readonly class ModuleSettingsNormalizerService
             ->filter(fn (mixed $mode): bool => is_string($mode) && filled($mode))
             ->values()
             ->all();
+        $allowed_page_types = collect(config('page-type', []))->values()->all();
+        $shared_settings    = Arr::get($settings, 'shared', []);
 
         $default_source_mode = (string) $this->products_carousel_config->get('settings.default_source_mode', 'category_based');
         $source_mode         = (string) Arr::get($settings, 'source_mode', $default_source_mode);
@@ -82,16 +85,19 @@ readonly class ModuleSettingsNormalizerService
         $manual_only_selected_product_ids = $this->products_carousel_product_search_service->filterActiveProductIds(
             Arr::get($manual_only_settings, 'selected_product_ids', []),
         );
+        $normalized_shared_settings = $this->normalizeSharedSettings($shared_settings, $allowed_page_types);
 
         Log::channel('daily')->info('ProductsCarousel settings normalized.', [
             'source_mode'                     => $source_mode,
             'category_ids_count'              => count($active_category_ids),
             'category_mode_product_ids_count' => count($category_based_selected_product_ids),
             'manual_mode_product_ids_count'   => count($manual_only_selected_product_ids),
+            'shared_page_types_count'         => count($normalized_shared_settings['page_types']),
             'use_selected_products_only'      => $use_selected_products_only,
         ]);
 
         return [
+            'shared'         => $normalized_shared_settings,
             'source_mode'    => $source_mode,
             'category_based' => [
                 'category_ids'               => $active_category_ids,
@@ -102,6 +108,54 @@ readonly class ModuleSettingsNormalizerService
                 'selected_product_ids' => $manual_only_selected_product_ids,
             ],
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>|mixed  $shared_settings
+     * @param  array<int, string>  $allowed_page_types
+     * @return array{module_name_for_user: string, short_description_for_user: string, page_types: array<int, string>}
+     */
+    private function normalizeSharedSettings(mixed $shared_settings, array $allowed_page_types): array
+    {
+        $shared_settings = is_array($shared_settings) ? $shared_settings : [];
+
+        return [
+            'module_name_for_user'       => Str::squish((string) Arr::get($shared_settings, 'module_name_for_user')),
+            'short_description_for_user' => Str::squish((string) Arr::get($shared_settings, 'short_description_for_user')),
+            'page_types'                 => $this->normalizePageTypes(
+                Arr::get($shared_settings, 'page_types', $this->products_carousel_config->get('settings.default_page_types', [])),
+                $allowed_page_types,
+            ),
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $allowed_page_types
+     * @return array<int, string>
+     */
+    private function normalizePageTypes(mixed $page_types, array $allowed_page_types): array
+    {
+        $page_types = collect(is_array($page_types) ? $page_types : [$page_types])
+            ->filter(fn (mixed $page_type): bool => is_string($page_type) && filled($page_type))
+            ->map(fn (string $page_type): string => Str::trim($page_type))
+            ->unique()
+            ->values();
+
+        if ($page_types->isEmpty()) {
+            throw ValidationException::withMessages([
+                'settings.shared.page_types' => 'Select at least one page type.',
+            ]);
+        }
+
+        $invalid_page_types = $page_types->diff($allowed_page_types)->values();
+
+        if ($invalid_page_types->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'settings.shared.page_types' => 'The selected page types are invalid.',
+            ]);
+        }
+
+        return $page_types->all();
     }
 
     /**

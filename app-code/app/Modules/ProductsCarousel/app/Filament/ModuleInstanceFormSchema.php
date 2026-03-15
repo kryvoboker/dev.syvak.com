@@ -10,6 +10,7 @@ use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Component;
@@ -73,6 +74,30 @@ class ModuleInstanceFormSchema
 
                     Hidden::make('context_key')
                         ->default(null),
+
+                    Section::make(__('admin/modules/module_instances.products_carousel.sections.shared'))
+                        ->description(__('admin/modules/module_instances.products_carousel.helpers.shared'))
+                        ->columnSpanFull()
+                        ->schema([
+                            TextInput::make('settings.shared.module_name_for_user')
+                                ->label(__('admin/modules/module_instances.products_carousel.labels.module_name_for_user'))
+                                ->maxLength(255)
+                                ->helperText(__('admin/modules/module_instances.products_carousel.helpers.module_name_for_user')),
+
+                            Textarea::make('settings.shared.short_description_for_user')
+                                ->label(__('admin/modules/module_instances.products_carousel.labels.short_description_for_user'))
+                                ->rows(3)
+                                ->maxLength(1000)
+                                ->helperText(__('admin/modules/module_instances.products_carousel.helpers.short_description_for_user')),
+
+                            Select::make('settings.shared.page_types')
+                                ->label(__('admin/modules/module_instances.products_carousel.labels.page_types'))
+                                ->multiple()
+                                ->options($this->getPageTypeOptions())
+                                ->required()
+                                ->native(false)
+                                ->helperText(__('admin/modules/module_instances.products_carousel.helpers.page_types')),
+                        ]),
 
                     Section::make(__('admin/modules/module_instances.products_carousel.sections.source_mode'))
                         ->columnSpanFull()
@@ -268,5 +293,18 @@ class ModuleInstanceFormSchema
                         ]),
                 ]),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getPageTypeOptions(): array
+    {
+        /** @var array<string, string> $page_types */
+        $page_types = config('page-type', []);
+
+        return collect($page_types)
+            ->mapWithKeys(fn (string $value, string $key): array => [$value => ucfirst(str_replace('_', ' ', $key))])
+            ->all();
     }
 }

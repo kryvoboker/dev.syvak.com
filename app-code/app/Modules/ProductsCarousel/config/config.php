@@ -13,6 +13,9 @@ return [
     ],
     'settings' => [
         'default_source_mode'  => 'category_based',
+        'default_page_types'   => [
+            'home',
+        ],
         'allowed_source_modes' => [
             'category_based',
             'manual_only',
