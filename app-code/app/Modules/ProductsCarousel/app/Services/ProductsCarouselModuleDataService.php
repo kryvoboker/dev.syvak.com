@@ -29,6 +29,8 @@ readonly class ProductsCarouselModuleDataService
      * @return array<int, array{
      *     instance_id: int,
      *     name: string,
+     *     module_name_for_user: string,
+     *     short_description_for_user: string,
      *     placement: string|null,
      *     source_mode: string,
      *     products: array<int, array{
@@ -106,11 +108,13 @@ readonly class ProductsCarouselModuleDataService
                 ]);
 
                 return [
-                    'instance_id' => $instance->id,
-                    'name'        => $instance->name,
-                    'placement'   => $instance->placement,
-                    'source_mode' => $source_mode,
-                    'products'    => $products_payload,
+                    'instance_id'                 => $instance->id,
+                    'name'                        => $instance->name,
+                    'module_name_for_user'        => (string) Arr::get($instance_settings, 'shared.module_name_for_user', ''),
+                    'short_description_for_user'  => (string) Arr::get($instance_settings, 'shared.short_description_for_user', ''),
+                    'placement'                   => $instance->placement,
+                    'source_mode'                 => $source_mode,
+                    'products'                    => $products_payload,
                 ];
             })
             ->filter(fn (array $module_data): bool => $module_data['products'] !== [])
