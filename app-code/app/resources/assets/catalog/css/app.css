@@ -5,6 +5,7 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 @import "flyonui/variants.css";
+
 @plugin "flyonui" {
     themes: black;
 }
@@ -76,15 +77,14 @@
     --text-122px: calc(122 / var(--base-font-size) * 1rem);
     --text-192px: calc(192 / var(--base-font-size) * 1rem);
 
-    --color-white: rgb(255,251,254); /* #FFFBFE */
-    --color-black: rgb(12,18,12); /* #0C120C */
-    --color-light-black: rgba(12,18,12,.2); /* #0C120C33 */
-    --color-light-gray: rgb(136,136,136); /* #888888 */
-    --color-opacity-light-gray-40\%: rgba(136,136,136,.4); /* #888888 */
-    --color-light-red: rgb(212,4,28); /* #D4041CFF */
-    --color-dark-red: rgba(212,4,28,.7); /* #D4041CB3 */
+    --color-white: rgb(255, 251, 254); /* #FFFBFE */
+    --color-black: rgb(12, 18, 12); /* #0C120C */
+    --color-light-black: rgba(12, 18, 12, .2); /* #0C120C33 */
+    --color-light-gray: rgb(136, 136, 136); /* #888888 */
+    --color-opacity-light-gray-40\%: rgba(136, 136, 136, .4); /* #888888 */
+    --color-light-red: rgb(212, 4, 28); /* #D4041CFF */
+    --color-dark-red: rgba(212, 4, 28, .7); /* #D4041CB3 */
     --color-dark-green: rgb(0, 135, 95); /* #00875FFF */
-
     --spacing-0\.8em: 0.8em;
     --spacing-0\.9em: 0.9em;
     --spacing-1\.4em: 1.4em;
@@ -147,6 +147,23 @@
     body {
         @apply font-inter font-normal text-sm lg:text-base 2xl:text-lg leading-1.4em
         tracking-normal lg:tracking-0.02em 2xl:tracking-normal text-white bg-black;
+    }
+
+    :root::-webkit-scrollbar-thumb {
+        @apply lg:border lg:border-light-gray lg:rounded lg:bg-light-gray cursor-pointer;
+    }
+
+    :root::-webkit-scrollbar {
+        @apply lg:w-1 lg:bg-light-gray cursor-pointer;
+    }
+
+    /* 48rem - 768px */
+    @media (width >= 48rem) {
+        /*noinspection CssUnresolvedCustomProperty*/
+        :root {
+            scrollbar-color: var(--color-light-gray) var(--color-opacity-light-gray-40\%);
+            scrollbar-width: thin;
+        }
     }
 
     h1, h2, h3, h4 {
