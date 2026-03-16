@@ -328,7 +328,7 @@
 
     .home-main-carousel-slide {
         min-height: calc(100svh - var(--site-header-height));
-        @apply relative isolate;
+        @apply relative isolate w-full min-w-full shrink-0 basis-full;
     }
 
     .home-main-carousel-media,
@@ -387,6 +387,11 @@
 
     .home-main-carousel-nav {
         @apply pointer-events-auto inline-flex size-12 items-center justify-center rounded-full border border-white/50 bg-black/30 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white hover:text-black;
+    }
+
+    .home-main-carousel-controls .carousel-prev,
+    .home-main-carousel-controls .carousel-next {
+        @apply static;
     }
 
     .home-main-carousel-nav-icon {
@@ -473,6 +478,11 @@
 
     .products-carousel-nav {
         @apply pointer-events-auto inline-flex size-11 items-center justify-center rounded-full border border-white/50 bg-black/60 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white hover:text-black md:size-12;
+    }
+
+    .products-carousel-controls .carousel-prev,
+    .products-carousel-controls .carousel-next {
+        @apply static;
     }
 
     .products-carousel-nav-icon {

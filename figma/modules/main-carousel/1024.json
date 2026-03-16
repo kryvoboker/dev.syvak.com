@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "source": "figma-browser-manual",
+    "captured_at": "2026-03-15",
+    "figma_url": "https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=356-12271&t=M9e6DervnoIJqIQa-4",
+    "screenshot": "figma/modules/main-carousel/1024-screenshot.png"
+  },
+  "frame": {
+    "name": "Container in 1024 - main page",
+    "node_id": "356:12271",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "size": {
+      "width": 1024,
+      "height": 842
+    },
+    "layout": {
+      "mode": "freeform",
+      "clip_content": true
+    }
+  },
+  "style": {
+    "fill": "#0C120C",
+    "stroke": {
+      "color": "#0C120C",
+      "weight": 1,
+      "align": "inside"
+    },
+    "palette": [
+      "#FFFBFE",
+      "#0C120C",
+      "#888888",
+      "rgba(136,136,136,0.4)",
+      "rgba(12,18,12,0.2)",
+      "#D4041C",
+      "rgba(212,4,28,0.7)",
+      "#00875F"
+    ]
+  }
+}
