@@ -14,6 +14,9 @@
             "@products-carousel-ts/*": [
                 "./Modules/ProductsCarousel/resources/assets/ts/*"
             ],
+            "@carousel-ts/*": [
+                "./Modules/Carousel/resources/assets/ts/*"
+            ],
         },
         "target": "ES2024",
         "useDefineForClassFields": true,

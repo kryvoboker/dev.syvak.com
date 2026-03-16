@@ -9,7 +9,11 @@ use App\Models\Modules\ModuleInstance;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
+/**
+ * Resolves storefront-ready Carousel payload for the requested placement/page type.
+ */
 class CarouselModuleDataService
 {
     /**
@@ -26,6 +30,19 @@ class CarouselModuleDataService
             ->collapse()
             ->values();
 
+        if ($carousel_modules->isEmpty()) {
+            Log::channel('stack')->warning('No active carousel modules were resolved for placement.', [
+                'placement' => $placement,
+                'page_type' => $page_type,
+            ]);
+        }
+
+        Log::channel('daily')->info('Carousel modules resolved for storefront context.', [
+            'placement'              => $placement,
+            'page_type'              => $page_type,
+            'resolved_modules_count' => $carousel_modules->count(),
+        ]);
+
         /** @var array<int, array<string, mixed>> $resolved_modules */
         $resolved_modules = $carousel_modules->all();
 
@@ -33,7 +50,14 @@ class CarouselModuleDataService
     }
 
     /**
-     * @return array<int, array{instance_id: int, name: string, placement: string|null, open_links_in_new_tab: bool, slides: non-empty-array<int, non-empty-array<string, mixed>>}>
+     * @return array<int, array{
+     *     instance_id: int,
+     *     name: string,
+     *     placement: string|null,
+     *     page_types: array<int, string>,
+     *     open_links_in_new_tab: bool,
+     *     slides: non-empty-array<int, non-empty-array<string, mixed>>
+     * }>
      */
     private function mapDefinitionInstances(ModuleDefinition $definition, ?string $page_type): array
     {
@@ -45,7 +69,11 @@ class CarouselModuleDataService
             ->map(function (ModuleInstance $instance): array {
                 $instance_settings = is_array($instance->settings) ? $instance->settings : [];
                 $shared_settings   = Arr::get($instance_settings, 'shared', []);
-                $slides            = collect(Arr::get($instance_settings, 'slides', []))
+                $page_types        = collect(Arr::get($shared_settings, 'page_types', []))
+                    ->filter(fn (mixed $item): bool => is_string($item) && filled($item))
+                    ->values()
+                    ->all();
+                $slides = collect(Arr::get($instance_settings, 'slides', []))
                     ->filter(fn (mixed $slide): bool => is_array($slide) && Arr::get($slide, 'is_active', true))
                     ->sortBy(fn (array $slide): int => (int) Arr::get($slide, 'sort_order', 0))
                     ->values()
@@ -54,10 +82,23 @@ class CarouselModuleDataService
                     ->values()
                     ->all();
 
+                if ($slides === []) {
+                    Log::channel('stack')->warning('Carousel instance resolved without active slides.', [
+                        'instance_id' => $instance->id,
+                    ]);
+                }
+
+                Log::channel('daily')->info('Carousel instance payload prepared.', [
+                    'instance_id'         => $instance->id,
+                    'page_types_count'    => count($page_types),
+                    'loaded_slides_count' => count($slides),
+                ]);
+
                 return [
                     'instance_id'           => $instance->id,
                     'name'                  => $instance->name,
                     'placement'             => $instance->placement,
+                    'page_types'            => $page_types,
                     'open_links_in_new_tab' => (bool) Arr::get($shared_settings, 'open_links_in_new_tab', true),
                     'slides'                => $slides,
                 ];
@@ -83,6 +124,10 @@ class CarouselModuleDataService
         }
 
         if (! is_array($translation)) {
+            Log::channel('stack')->warning('Carousel slide skipped because translation payload is invalid.', [
+                'locale' => $current_locale,
+            ]);
+
             return [];
         }
 
@@ -93,15 +138,18 @@ class CarouselModuleDataService
         $desktop_height = min($desktop_image_settings['height'], $desktop_image_settings['max_height']);
         $mobile_width   = min($mobile_image_settings['width'], $mobile_image_settings['max_width']);
         $mobile_height  = min($mobile_image_settings['height'], $mobile_image_settings['max_height']);
+        $price          = $this->normalizePrice(Arr::get($translation, 'price'));
 
         return [
-            'title'         => (string) Arr::get($translation, 'title', ''),
-            'description'   => (string) Arr::get($translation, 'description', ''),
-            'button_text'   => (string) Arr::get($translation, 'button_text', ''),
-            'button_url'    => (string) Arr::get($translation, 'button_url', ''),
-            'image_url'     => (string) Arr::get($translation, 'image_url', ''),
-            'sort_order'    => (int) Arr::get($slide, 'sort_order', 0),
-            'desktop_image' => [
+            'title'           => (string) Arr::get($translation, 'title', ''),
+            'description'     => (string) Arr::get($translation, 'description', ''),
+            'button_text'     => (string) Arr::get($translation, 'button_text', ''),
+            'button_url'      => (string) Arr::get($translation, 'button_url', ''),
+            'image_url'       => (string) Arr::get($translation, 'image_url', ''),
+            'price'           => $price,
+            'formatted_price' => $price !== null ? format_price($price) : null,
+            'sort_order'      => (int) Arr::get($slide, 'sort_order', 0),
+            'desktop_image'   => [
                 'urls' => multiple_convert_img_and_get_url(
                     (string) Arr::get($translation, 'desktop_image'),
                     $desktop_width,
@@ -138,6 +186,31 @@ class CarouselModuleDataService
         }
 
         return $page_types->contains($page_type);
+    }
+
+    /**
+     * Normalizes a mixed slide price value to float when possible.
+     */
+    private function normalizePrice(mixed $price): ?float
+    {
+        if (is_int($price) || is_float($price)) {
+            return (float) $price;
+        }
+
+        if (! is_string($price)) {
+            return null;
+        }
+
+        $normalized_price = Str::of($price)
+            ->trim()
+            ->replace(',', '.')
+            ->toString();
+
+        if (! is_numeric($normalized_price)) {
+            return null;
+        }
+
+        return (float) $normalized_price;
     }
 
     /**

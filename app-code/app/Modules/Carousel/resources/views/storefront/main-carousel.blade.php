@@ -3,13 +3,23 @@
     $open_in_new_tab = $carousel_module_data['open_links_in_new_tab'] ?? true;
     $target = $open_in_new_tab ? '_blank' : '_self';
     $rel = $open_in_new_tab ? 'noopener noreferrer' : null;
+    $page_types = collect($carousel_module_data['page_types'] ?? [])
+        ->filter(fn (mixed $page_type): bool => is_string($page_type) && filled($page_type))
+        ->values()
+        ->all();
+    $slides_count = count($carousel_module_data['slides'] ?? []);
+    $is_interactive_carousel = $slides_count > 1;
 @endphp
 
 <section class="home-main-carousel-section" aria-label="Main carousel">
     <div id="{{ $carousel_dom_id }}"
-         class="home-main-carousel"
-         data-main-carousel
-         data-carousel='{"loadingClasses": "opacity-0, opacity-100 transition-opacity duration-500", "isAutoHeight": true, "isInfiniteLoop": true}'>
+         class="home-main-carousel --prevent-on-load-init"
+         @if($is_interactive_carousel)
+             data-main-carousel
+             data-slides-count="{{ $slides_count }}"
+             data-page-types='@json($page_types)'
+             data-carousel='{"loadingClasses":"opacity-0,opacity-100,transition-opacity,duration-500","isAutoHeight":true,"isInfiniteLoop":true,"isDraggable":true}'
+         @endif>
         <div class="carousel home-main-carousel-track">
             <div class="carousel-body home-main-carousel-body">
                 @foreach($carousel_module_data['slides'] as $slide)
@@ -74,7 +84,7 @@
             </div>
         </div>
 
-        @if(count($carousel_module_data['slides']) > 1)
+        @if($is_interactive_carousel)
             <div class="home-main-carousel-controls">
                 <button class="carousel-prev home-main-carousel-nav" type="button" aria-label="Previous slide">
                     <span class="icon-[material-symbols-light--arrow-back-rounded] home-main-carousel-nav-icon"></span>

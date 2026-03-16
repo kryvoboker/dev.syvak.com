@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "source": "figma-browser-manual",
+    "captured_at": "2026-03-15",
+    "figma_url": "https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=356-12306&t=M9e6DervnoIJqIQa-4",
+    "screenshot": "figma/modules/main-carousel/360-screenshot.png",
+    "note": "Node opened by direct link; exact container height was not reliably readable from current a11y snapshot, width is inferred from breakpoint name."
+  },
+  "frame": {
+    "name": "Container in 360 - main page",
+    "node_id": "356:12306",
+    "size": {
+      "width": 360,
+      "height": null
+    }
+  },
+  "style": {
+    "palette": [
+      "#FFFBFE",
+      "#0C120C",
+      "#888888",
+      "rgba(136,136,136,0.4)",
+      "rgba(12,18,12,0.2)",
+      "#D4041C",
+      "rgba(212,4,28,0.7)",
+      "#00875F"
+    ]
+  }
+}
