@@ -1,8 +1,14 @@
-.home-main-carousel-pagination .active,
-.home-main-carousel-pagination button[aria-current='true'] {
-    @apply bg-white;
+@theme {
+    --spacing-463px: calc(463 / var(--base-font-size) * 1rem);
 }
 
-.home-main-carousel-pagination > * {
-    @apply size-2 rounded-full border border-white/70 bg-transparent transition-colors duration-300 ease-in-out;
+@layer app {
+    .home-main-carousel-pagination .active,
+    .home-main-carousel-pagination button[aria-current='true'] {
+        @apply bg-white;
+    }
+
+    .home-main-carousel-pagination > * {
+        @apply size-2 rounded-full border border-white/70 bg-transparent transition-colors duration-300 ease-in-out;
+    }
 }

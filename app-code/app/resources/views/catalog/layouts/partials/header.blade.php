@@ -2,11 +2,11 @@
 @include('catalog.pages.partials.search.mob-search')
 @include('catalog.pages.partials.search.pc-search')
 
-<header class="header sticky top-0 border-y border-y-opacity-light-gray-40% backdrop-blur-[6px]">
+<header class="header sticky top-0 border-y border-y-opacity-light-gray-40% backdrop-blur-[6px] z-10">
     <nav>
         <div class="container">
             <div class="flex items-center justify-between gap-x-1">
-                <button class="burger-menu open-main-mob-menu-btn"
+                <button class="burger-menu open-main-mob-menu-btn lg:hidden"
                         type="button"
                         aria-haspopup="dialog"
                         aria-expanded="false"
