@@ -30,13 +30,6 @@ class CarouselModuleDataService
             ->collapse()
             ->values();
 
-        if ($carousel_modules->isEmpty()) {
-            Log::channel('stack')->warning('No active carousel modules were resolved for placement.', [
-                'placement' => $placement,
-                'page_type' => $page_type,
-            ]);
-        }
-
         Log::channel('daily')->info('Carousel modules resolved for storefront context.', [
             'placement'              => $placement,
             'page_type'              => $page_type,
@@ -144,8 +137,8 @@ class CarouselModuleDataService
             'title'           => (string) Arr::get($translation, 'title', ''),
             'description'     => (string) Arr::get($translation, 'description', ''),
             'button_text'     => (string) Arr::get($translation, 'button_text', ''),
-            'button_url'      => (string) Arr::get($translation, 'button_url', ''),
-            'image_url'       => (string) Arr::get($translation, 'image_url', ''),
+            'button_url'      => sanitaze_url((string) Arr::get($translation, 'button_url', '')),
+            'image_url'       => sanitaze_url((string) Arr::get($translation, 'image_url', '')),
             'price'           => $price,
             'formatted_price' => $price !== null ? format_price($price) : null,
             'sort_order'      => (int) Arr::get($slide, 'sort_order', 0),

@@ -24,6 +24,8 @@ export const moduleViteConfig: ModuleViteConfig = {
     moduleName: 'ProductsCarousel',
     refresh:    [
         'Modules/ProductsCarousel/resources/views/**',
+        'Modules/ProductsCarousel/resources/assets/css/**',
+        'Modules/ProductsCarousel/resources/assets/ts/**',
         'Modules/ProductsCarousel/app/**',
         'Modules/ProductsCarousel/routes/**',
     ],

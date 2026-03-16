@@ -10,6 +10,7 @@
         'thumb_4x' => '',
     ],
     'size' => 0,
+    'max_density' => 4,
     'sizes' => '',
     'width' => '',
     'height' => '',
@@ -18,14 +19,53 @@
     'alt' => '',
 ])
 
+@php
+    $normalized_size = max((int) $size, 0);
+    $resolved_max_density = $max_density;
+
+    if (
+        blank($resolved_max_density)
+        && $attributes->has('max_density')
+    ) {
+        $resolved_max_density = $attributes->get('max_density');
+    }
+
+    if (
+        blank($resolved_max_density)
+        && $attributes->has('max-density')
+    ) {
+        $resolved_max_density = $attributes->get('max-density');
+    }
+
+    $normalized_max_density = max(min((int) $resolved_max_density, 4), 1);
+
+    $srcset = collect([
+        ['key' => 'thumb_1x', 'density' => 1],
+        ['key' => 'thumb_2x', 'density' => 2],
+        ['key' => 'thumb_3x', 'density' => 3],
+        ['key' => 'thumb_4x', 'density' => 4],
+    ])
+        ->filter(fn (array $candidate): bool => $candidate['density'] <= $normalized_max_density)
+        ->map(function (array $candidate) use ($urls_data, $normalized_size): ?string {
+            $candidate_url = (string) ($urls_data[$candidate['key']] ?? '');
+
+            if (blank($candidate_url) || $normalized_size <= 0) {
+                return null;
+            }
+
+            $candidate_width = $normalized_size * (int) $candidate['density'];
+
+            return "{$candidate_url} {$candidate_width}w";
+        })
+        ->filter()
+        ->implode(', ');
+
+    $src = (string) ($urls_data['original_thumb'] ?: $urls_data['thumb_1x'] ?: $no_image_url);
+@endphp
+
 <img class="{{ Str::trim($class) }}"
-     src="{{ $urls_data['original_thumb'] ?: $no_image_url }}"
-     srcset="
-        @if($urls_data['thumb_1x']) {{ $urls_data['thumb_1x'] }} {{ $size }}w, @endif
-        @if($urls_data['thumb_2x']) {{ $urls_data['thumb_2x'] }} {{ $size * 2 }}w, @endif
-        @if($urls_data['thumb_3x']) {{ $urls_data['thumb_3x'] }} {{ $size * 3 }}w, @endif
-        @if($urls_data['thumb_4x']) {{ $urls_data['thumb_4x'] }} {{ $size * 4 }}w @endif
-     "
+     src="{{ $src }}"
+     @if(filled($srcset)) srcset="{{ $srcset }}" @endif
      @if(!empty($sizes)) sizes="{{ Str::trim($sizes) }}" @endif
      @if(!empty($width)) width="{{ Str::trim($width) }}" @endif
      @if(!empty($height)) height="{{ Str::trim($height) }}" @endif

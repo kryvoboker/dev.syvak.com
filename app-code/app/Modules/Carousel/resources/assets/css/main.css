@@ -1,0 +1,8 @@
+.home-main-carousel-pagination .active,
+.home-main-carousel-pagination button[aria-current='true'] {
+    @apply bg-white;
+}
+
+.home-main-carousel-pagination > * {
+    @apply size-2 rounded-full border border-white/70 bg-transparent transition-colors duration-300 ease-in-out;
+}

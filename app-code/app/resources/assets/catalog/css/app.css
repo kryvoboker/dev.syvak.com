@@ -15,6 +15,7 @@
 @source '../../../../../storage/framework/views/*.php';
 @source '../../../views/catalog/**/*.blade.php';
 @source '../../../../Modules/**/*.blade.php';
+@source '../../../../Modules/**/*.ts';
 @source '../ts/**/*.ts';
 
 @source "./_source.txt";
@@ -310,105 +311,6 @@
     ._was-validated :invalid ~ ._error,
     ._was-validated :valid ~ ._success {
         @apply inline-block;
-    }
-
-    .home-main-carousel-section {
-        @apply relative overflow-hidden border-b border-opacity-light-gray-40%;
-    }
-
-    .home-main-carousel {
-        @apply relative;
-    }
-
-    .home-main-carousel-track,
-    .home-main-carousel-body,
-    .home-main-carousel-slide {
-        @apply h-full;
-    }
-
-    .home-main-carousel-slide {
-        min-height: calc(100svh - var(--site-header-height));
-        @apply relative isolate w-full min-w-full shrink-0 basis-full;
-    }
-
-    .home-main-carousel-media,
-    .home-main-carousel-media-link,
-    .home-main-carousel-image {
-        @apply absolute inset-0 size-full;
-    }
-
-    .home-main-carousel-media-link {
-        @apply block;
-    }
-
-    .home-main-carousel-media::after {
-        content: '';
-        @apply absolute inset-0 bg-black/70;
-    }
-
-    .home-main-carousel-image {
-        @apply object-cover object-center;
-    }
-
-    .home-main-carousel-content-wrap {
-        min-height: inherit;
-        @apply relative z-10 flex items-stretch;
-    }
-
-    .home-main-carousel-content {
-        min-height: inherit;
-        @apply flex w-full flex-col justify-between gap-10 pt-24 pb-10 md:pt-30 md:pb-14 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-10 lg:pt-34 lg:pb-16 2xl:pt-38 2xl:pb-20;
-    }
-
-    .home-main-carousel-copy {
-        max-width: var(--home-main-carousel-copy-max-width);
-        @apply flex flex-col gap-8 md:gap-10 lg:gap-12;
-    }
-
-    .home-main-carousel-title {
-        max-width: var(--home-main-carousel-title-max-width);
-    }
-
-    .home-main-carousel-description {
-        max-width: var(--home-main-carousel-description-max-width);
-        @apply text-11px font-light uppercase tracking-0.04em text-light-gray md:text-sm lg:text-base 2xl:text-lg;
-    }
-
-    .home-main-carousel-cta {
-        width: var(--home-main-carousel-cta-size);
-        height: var(--home-main-carousel-cta-size);
-        @apply inline-flex shrink-0 items-center justify-center self-end rounded-full border border-white/80 p-6 text-center text-sm uppercase tracking-0.04em transition-colors duration-300 ease-in-out hover:border-white hover:bg-white hover:text-black md:text-base lg:text-xl;
-    }
-
-    .home-main-carousel-controls {
-        padding-inline: var(--container-padding);
-        @apply pointer-events-none absolute inset-x-0 bottom-6 z-20 flex items-center justify-between gap-4 md:bottom-8 lg:bottom-10;
-    }
-
-    .home-main-carousel-nav {
-        @apply pointer-events-auto inline-flex size-12 items-center justify-center rounded-full border border-white/50 bg-black/30 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white hover:text-black;
-    }
-
-    .home-main-carousel-controls .carousel-prev,
-    .home-main-carousel-controls .carousel-next {
-        @apply static;
-    }
-
-    .home-main-carousel-nav-icon {
-        @apply text-2xl;
-    }
-
-    .home-main-carousel-pagination {
-        @apply pointer-events-auto mx-auto flex items-center gap-2;
-    }
-
-    .home-main-carousel-pagination .active,
-    .home-main-carousel-pagination button[aria-current='true'] {
-        @apply bg-white;
-    }
-
-    .home-main-carousel-pagination > * {
-        @apply size-2 rounded-full border border-white/70 bg-transparent transition-colors duration-300 ease-in-out;
     }
 
     .products-carousel-section {
