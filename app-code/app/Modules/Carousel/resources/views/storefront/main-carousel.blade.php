@@ -16,10 +16,10 @@
          class="home-main-carousel --prevent-on-load-init"
          @if($is_interactive_carousel)
              data-main-carousel
-             data-slides-count="{{ $slides_count }}"
-             data-page-types='@json($page_types)'
-             data-carousel='{"loadingClasses":"opacity-0,opacity-100,transition-opacity,duration-500","isAutoHeight":true,"isInfiniteLoop":true,"isDraggable":true}'
-         @endif>
+         data-slides-count="{{ $slides_count }}"
+         data-page-types='@json($page_types)'
+         data-carousel='{ "isAutoHeight": true, "loadingClasses": "opacity-0", "isDraggable": true, "dotsItemClasses": "carousel-dot carousel-active:bg-primary" }'
+        @endif>
         <div class="carousel home-main-carousel-track">
             <div class="carousel-body home-main-carousel-body">
                 @foreach($carousel_module_data['slides'] as $slide)
@@ -30,7 +30,7 @@
                         $has_copy = $has_title || $has_description;
                         $has_button = filled($slide['button_text']) && filled($slide['button_url']);
                     @endphp
-                    <article class="carousel-slide home-main-carousel-slide">
+                    <div class="carousel-slide home-main-carousel-slide">
                         <div class="home-main-carousel-media">
                             @if($has_image_link)
                                 <a class="home-main-carousel-media-link"
@@ -38,19 +38,35 @@
                                    target="{{ $target }}"
                                    @if($rel) rel="{{ $rel }}" @endif
                                    aria-label="{{ $slide['title'] ?: $carousel_module_data['name'] }}">
-                            @endif
-                                <picture>
-                                    <source media="(min-width: 48rem)"
-                                            srcset="{{ $slide['desktop_image']['urls']['thumb_1x'] ?? $slide['desktop_image']['urls']['original_thumb'] }}">
-                                    <img class="home-main-carousel-image"
-                                         src="{{ $slide['mobile_image']['urls']['thumb_1x'] ?? $slide['mobile_image']['urls']['original_thumb'] }}"
-                                         alt="{{ $slide['title'] ?: $carousel_module_data['name'] }}"
-                                         width="{{ $slide['mobile_image']['width'] }}"
-                                         height="{{ $slide['mobile_image']['height'] }}"
-                                         loading="eager"
-                                         decoding="async">
-                                </picture>
-                            @if($has_image_link)
+                                    <picture>
+                                        @if($slide['desktop_image']['urls']['thumb_4x'])
+                                            <source media="(min-width: 80rem)"
+                                                    srcset="{{ $slide['desktop_image']['urls']['thumb_4x'] }}">
+                                        @endif
+
+                                        @if($slide['desktop_image']['urls']['thumb_3x'])
+                                            <source media="(min-width: 64rem)"
+                                                    srcset="{{ $slide['desktop_image']['urls']['thumb_3x'] }}">
+                                        @endif
+
+                                        @if($slide['desktop_image']['urls']['thumb_2x'])
+                                            <source media="(min-width: 48rem)"
+                                                    srcset="{{ $slide['desktop_image']['urls']['thumb_2x'] }}">
+                                        @endif
+
+                                        <x-catalog::common.img
+                                            class="object-contain"
+                                            :urls_data="$slide['mobile_image']['urls']"
+                                            :size="$slide['mobile_image']['width']"
+                                            :max-density="2"
+                                            sizes="100vw"
+                                            width="{{ $slide['mobile_image']['width'] * 4 }}"
+                                            height="{{ $slide['mobile_image']['height'] * 4 }}"
+                                            loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                                            decoding="async"
+                                            alt="{{ $slide['title'] ?: $carousel_module_data['name'] }}"
+                                        />
+                                    </picture>
                                 </a>
                             @endif
                         </div>
@@ -60,7 +76,7 @@
                                 @if($has_copy)
                                     <div class="home-main-carousel-copy">
                                         @if($has_title)
-                                            <h1 class="home-main-carousel-title">{{ $slide['title'] }}</h1>
+                                            <div class="home-main-carousel-title">{{ $slide['title'] }}</div>
                                         @endif
 
                                         @if($has_description)
@@ -79,7 +95,7 @@
                                 @endif
                             </div>
                         </div>
-                    </article>
+                    </div>
                 @endforeach
             </div>
         </div>

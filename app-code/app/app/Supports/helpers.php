@@ -229,3 +229,21 @@ if (! function_exists('resolve_modules_for_context')) {
         return app(ModuleRuntimeResolverService::class)->resolve($placement, $context_key);
     }
 }
+
+if (! function_exists('sanitaze_url')) {
+    function sanitaze_url(?string $url): string
+    {
+        if ($url === null) {
+            return '';
+        }
+
+        $sanitized_url = filter_var($url, FILTER_SANITIZE_URL);
+
+        // Ensure the URL has a valid scheme (http or https)
+        if (Str::startsWith($sanitized_url, ['http://', 'https://']) === false) {
+            $sanitized_url = (request()?->isSecure() ? 'https://' : 'http://') . $sanitized_url;
+        }
+
+        return $sanitized_url;
+    }
+}

@@ -52,7 +52,8 @@
         "types": [
             "node",
             "@types/node",
-            "./resources/assets/catalog/ts/types/global.d.ts"
+            "./resources/assets/catalog/ts/types/global.d.ts",
+            "./Modules/**/resources/assets/ts/types/**/*.d.ts",
         ],
         "typeRoots": [
             "node_modules/@types"
