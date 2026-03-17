@@ -60,7 +60,7 @@
          data-products-carousel
          data-page-types='@json($page_types)'
          data-current-page-type="{{ $current_page_type }}"
-         data-carousel='{"loadingClasses":"opacity-0,opacity-100 transition-opacity duration-500","isAutoHeight":true,"isInfiniteLoop":true,"slidesQty":{"xs":1,"sm":1,"md":2,"lg":3,"2xl":5}}'>
+         data-carousel='{"loadingClasses":"opacity-0,opacity-100 transition-opacity duration-500","isAutoHeight":true,"isInfiniteLoop":true,"slidesQty":{"xs":1,"sm":1,"md":2,"lg":3,"2xl":5}, "dotsItemClasses": "carousel-dot size-1.5 bg-light-gray carousel-active:size-2.5 carousel-active:ease-in-out carousel-active:duration-200"}'>
         <div class="carousel products-carousel-track">
             <div class="carousel-body products-carousel-body">
                 @foreach($products as $product)
