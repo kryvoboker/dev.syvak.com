@@ -23,10 +23,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Modules\Carousel\Support\CarouselConfig;
 
-class ModuleInstanceFormSchema
+readonly class ModuleInstanceFormSchema
 {
     public function __construct(
-        private readonly CarouselConfig $carousel_config,
+        private CarouselConfig $carousel_config,
     ) {}
 
     /**
@@ -251,12 +251,10 @@ class ModuleInstanceFormSchema
                                         ->acceptedFileTypes((array) $this->carousel_config->get('uploads.accepted_mime_types', []))
                                         ->maxSize((int) $this->carousel_config->get('uploads.max_size_kb', 5120))
                                         ->rules([
-                                            'required',
                                             Rule::file()::types(['jpg', 'jpeg', 'png'])
                                                 ->max((int) $this->carousel_config->get('uploads.max_size_kb', 5120)),
                                         ])
-                                        ->helperText('Required field. Upload a desktop slide image for this language.')
-                                        ->required(),
+                                        ->helperText('Optional. Upload a desktop slide image for this language. If empty, the storefront fallback strategy will be applied.'),
 
                                     FileUpload::make("translations.$language_code.mobile_image")
                                         ->label('Mobile image')
@@ -267,12 +265,10 @@ class ModuleInstanceFormSchema
                                         ->acceptedFileTypes((array) $this->carousel_config->get('uploads.accepted_mime_types', []))
                                         ->maxSize((int) $this->carousel_config->get('uploads.max_size_kb', 5120))
                                         ->rules([
-                                            'required',
                                             Rule::file()::types(['jpg', 'jpeg', 'png'])
                                                 ->max((int) $this->carousel_config->get('uploads.max_size_kb', 5120)),
                                         ])
-                                        ->helperText('Required field. Upload a mobile slide image for this language.')
-                                        ->required(),
+                                        ->helperText('Optional. Upload a mobile slide image for this language. If empty, the storefront fallback strategy will be applied.'),
                                 ]),
                         ]),
                 ]);

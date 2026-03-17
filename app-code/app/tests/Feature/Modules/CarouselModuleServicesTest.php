@@ -165,6 +165,41 @@ class CarouselModuleServicesTest extends TestCase
         $this->assertSame('', $normalized_settings['slides'][0]['translations']['uk']['image_url']);
     }
 
+    public function test_carousel_settings_normalizer_accepts_missing_images_for_all_languages(): void
+    {
+        $settings = [
+            'shared' => [
+                'page_types'    => ['home'],
+                'desktop_image' => [
+                    'width'      => 1220,
+                    'height'     => 720,
+                    'max_width'  => 1920,
+                    'max_height' => 1080,
+                ],
+                'mobile_image' => [
+                    'width'      => 360,
+                    'height'     => 640,
+                    'max_width'  => 768,
+                    'max_height' => 1280,
+                ],
+            ],
+            'slides' => [
+                [
+                    'is_active'    => true,
+                    'sort_order'   => 1,
+                    'translations' => $this->makeTextOnlyTranslations(),
+                ],
+            ],
+        ];
+
+        $normalized_settings = $this->app->make(ModuleSettingsNormalizerService::class)->normalize($settings);
+
+        $this->assertNull($normalized_settings['slides'][0]['translations']['uk']['desktop_image']);
+        $this->assertNull($normalized_settings['slides'][0]['translations']['uk']['mobile_image']);
+        $this->assertNull($normalized_settings['slides'][0]['translations']['en']['desktop_image']);
+        $this->assertNull($normalized_settings['slides'][0]['translations']['en']['mobile_image']);
+    }
+
     public function test_carousel_settings_normalizer_resolves_livewire_temp_image_markers_for_all_languages(): void
     {
         $this->putLivewireTemporaryImage('uk-desktop-temp.jpg');
@@ -231,6 +266,86 @@ class CarouselModuleServicesTest extends TestCase
             $this->assertSame('image/jpeg', Storage::mimeType($desktop_image));
             $this->assertSame('image/jpeg', Storage::mimeType($mobile_image));
         }
+    }
+
+    public function test_carousel_module_data_service_uses_image_fallback_locale_when_current_locale_images_are_missing(): void
+    {
+        app()->setLocale('uk');
+
+        $definition = ModuleDefinition::query()->create([
+            'name'                     => 'Carousel',
+            'slug'                     => 'carousel-fallback',
+            'nwidart_name'             => 'Carousel',
+            'module_path'              => '/var/modules/Carousel',
+            'description'              => 'Carousel',
+            'is_installed'             => true,
+            'is_enabled'               => true,
+            'is_enabled_in_filesystem' => true,
+            'sort_order'               => 1,
+            'settings_schema'          => [],
+            'meta'                     => [],
+        ]);
+
+        $settings                                                     = $this->makeCarouselSettings(['home']);
+        $settings['slides'][0]['translations']['uk']['desktop_image'] = null;
+        $settings['slides'][0]['translations']['uk']['mobile_image']  = null;
+
+        $definition->instances()->create([
+            'name'        => 'Homepage Carousel',
+            'placement'   => 'hero',
+            'context_key' => null,
+            'is_enabled'  => true,
+            'sort_order'  => 1,
+            'settings'    => $settings,
+            'meta'        => [],
+        ]);
+
+        $resolved_modules = $this->app->make(CarouselModuleDataService::class)->resolveForPlacement('hero', 'home');
+
+        $this->assertCount(1, $resolved_modules);
+        $this->assertSame('Main slide uk', $resolved_modules[0]['slides'][0]['title']);
+        $this->assertNotEmpty($resolved_modules[0]['slides'][0]['desktop_image']['urls']);
+        $this->assertNotEmpty($resolved_modules[0]['slides'][0]['mobile_image']['urls']);
+    }
+
+    public function test_carousel_module_data_service_keeps_text_only_slide_when_all_images_are_missing(): void
+    {
+        app()->setLocale('uk');
+
+        $definition = ModuleDefinition::query()->create([
+            'name'                     => 'Carousel',
+            'slug'                     => 'carousel-text-only',
+            'nwidart_name'             => 'Carousel',
+            'module_path'              => '/var/modules/Carousel',
+            'description'              => 'Carousel',
+            'is_installed'             => true,
+            'is_enabled'               => true,
+            'is_enabled_in_filesystem' => true,
+            'sort_order'               => 1,
+            'settings_schema'          => [],
+            'meta'                     => [],
+        ]);
+
+        $settings                              = $this->makeCarouselSettings(['home']);
+        $settings['slides'][0]['translations'] = $this->makeTextOnlyTranslations();
+
+        $definition->instances()->create([
+            'name'        => 'Text only Carousel',
+            'placement'   => 'hero',
+            'context_key' => null,
+            'is_enabled'  => true,
+            'sort_order'  => 1,
+            'settings'    => $settings,
+            'meta'        => [],
+        ]);
+
+        $resolved_modules = $this->app->make(CarouselModuleDataService::class)->resolveForPlacement('hero', 'home');
+
+        $this->assertCount(1, $resolved_modules);
+        $this->assertCount(1, $resolved_modules[0]['slides']);
+        $this->assertSame([], $resolved_modules[0]['slides'][0]['desktop_image']['urls']);
+        $this->assertSame([], $resolved_modules[0]['slides'][0]['mobile_image']['urls']);
+        $this->assertSame('Text only slide uk', $resolved_modules[0]['slides'][0]['title']);
     }
 
     private function seedLanguages(): void
@@ -348,6 +463,35 @@ class CarouselModuleServicesTest extends TestCase
                 'image_url'     => '',
                 'desktop_image' => 'images/modules/carousel/desktop-slide.png',
                 'mobile_image'  => 'images/modules/carousel/mobile-slide.png',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array<string, string|null>>
+     */
+    private function makeTextOnlyTranslations(): array
+    {
+        return [
+            'uk' => [
+                'language_code' => 'uk',
+                'title'         => 'Text only slide uk',
+                'description'   => 'Description uk',
+                'button_text'   => '',
+                'button_url'    => '',
+                'image_url'     => '',
+                'desktop_image' => null,
+                'mobile_image'  => null,
+            ],
+            'en' => [
+                'language_code' => 'en',
+                'title'         => 'Text only slide en',
+                'description'   => 'Description en',
+                'button_text'   => '',
+                'button_url'    => '',
+                'image_url'     => '',
+                'desktop_image' => null,
+                'mobile_image'  => null,
             ],
         ];
     }
