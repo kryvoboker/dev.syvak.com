@@ -27,8 +27,8 @@ use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 readonly class ModuleInstanceFormSchema
 {
     public function __construct(
-        private ProductsCarouselConfig               $products_carousel_config,
-        private ProductsCarouselCategoryTreeService  $products_carousel_category_tree_service,
+        private ProductsCarouselConfig $products_carousel_config,
+        private ProductsCarouselCategoryTreeService $products_carousel_category_tree_service,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
     ) {}
 
@@ -97,6 +97,113 @@ readonly class ModuleInstanceFormSchema
                                 ->rows(3)
                                 ->maxLength(1000)
                                 ->helperText(__('admin/modules/module_instances.products_carousel.helpers.short_description_for_user')),
+
+                            Grid::make(2)
+                                ->schema([
+                                    TextInput::make('settings.shared.min_quantity')
+                                        ->label(__('admin/modules/module_instances.products_carousel.labels.min_quantity'))
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default((int) $this->products_carousel_config->get('settings.default_min_quantity', 1))
+                                        ->required()
+                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.min_quantity')),
+
+                                    TextInput::make('settings.shared.products_limit')
+                                        ->label(__('admin/modules/module_instances.products_carousel.labels.products_limit'))
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default((int) $this->products_carousel_config->get('settings.default_products_limit', 15))
+                                        ->required()
+                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.products_limit')),
+
+                                    TextInput::make('settings.shared.product_image_width')
+                                        ->label(__('admin/modules/module_instances.products_carousel.labels.product_image_width'))
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default((int) $this->products_carousel_config->get('settings.default_image_width', 420))
+                                        ->required()
+                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.product_image_width')),
+
+                                    TextInput::make('settings.shared.product_image_height')
+                                        ->label(__('admin/modules/module_instances.products_carousel.labels.product_image_height'))
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default((int) $this->products_carousel_config->get('settings.default_image_height', 420))
+                                        ->required()
+                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.product_image_height')),
+                                ]),
+                        ]),
+
+                    Section::make(__('admin/modules/module_instances.products_carousel.sections.sorting'))
+                        ->description(__('admin/modules/module_instances.products_carousel.helpers.sorting'))
+                        ->columnSpanFull()
+                        ->schema([
+                            Radio::make('settings.shared.sort_mode')
+                                ->label(__('admin/modules/module_instances.products_carousel.labels.sort_mode'))
+                                ->options($this->getSortModeOptions())
+                                ->default((string) $this->products_carousel_config->get('settings.default_sort_mode', 'custom'))
+                                ->live()
+                                ->inline(false)
+                                ->required(),
+
+                            Grid::make(2)
+                                ->visible(function (callable $get): bool {
+                                    return (string) $get('settings.shared.sort_mode') === 'custom';
+                                })
+                                ->schema([
+                                    Radio::make('settings.shared.custom_sort.price')
+                                        ->label(__('admin/modules/module_instances.products_carousel.labels.custom_sort_price'))
+                                        ->options($this->getSortDirectionOptions())
+                                        ->default('none')
+                                        ->inline(false)
+                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.custom_sort_options'))
+                                        ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
+                                            if (filled($state)) {
+                                                return;
+                                            }
+
+                                            $component->state($this->resolveSortDirectionState($get, 'price'));
+                                        }),
+
+                                    Radio::make('settings.shared.custom_sort.name')
+                                        ->label(__('admin/modules/module_instances.products_carousel.labels.custom_sort_name'))
+                                        ->options($this->getSortDirectionOptions())
+                                        ->default('none')
+                                        ->inline(false)
+                                        ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
+                                            if (filled($state)) {
+                                                return;
+                                            }
+
+                                            $component->state($this->resolveSortDirectionState($get, 'name'));
+                                        }),
+
+                                    Radio::make('settings.shared.custom_sort.date_added')
+                                        ->label(__('admin/modules/module_instances.products_carousel.labels.custom_sort_date_added'))
+                                        ->options($this->getSortDirectionOptions())
+                                        ->default('none')
+                                        ->inline(false)
+                                        ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
+                                            if (filled($state)) {
+                                                return;
+                                            }
+
+                                            $component->state($this->resolveSortDirectionState($get, 'date_added'));
+                                        }),
+
+                                    Radio::make('settings.shared.custom_sort.quantity')
+                                        ->label(__('admin/modules/module_instances.products_carousel.labels.custom_sort_quantity'))
+                                        ->options($this->getSortDirectionOptions())
+                                        ->default('none')
+                                        ->inline(false)
+                                        ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
+                                            if (filled($state)) {
+                                                return;
+                                            }
+
+                                            $component->state($this->resolveSortDirectionState($get, 'quantity'));
+                                        }),
+                                ]),
                         ]),
 
                     Section::make(__('admin/modules/module_instances.products_carousel.sections.source_mode'))
@@ -306,5 +413,50 @@ readonly class ModuleInstanceFormSchema
         return collect($page_types)
             ->mapWithKeys(fn (string $value, string $key): array => [$value => ucfirst(str_replace('_', ' ', $key))])
             ->all();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getSortModeOptions(): array
+    {
+        return [
+            'custom' => __('admin/modules/module_instances.products_carousel.options.sort_mode.custom'),
+            'random' => __('admin/modules/module_instances.products_carousel.options.sort_mode.random'),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getSortDirectionOptions(): array
+    {
+        return [
+            'none' => __('admin/modules/module_instances.products_carousel.options.sort_direction.none'),
+            'asc'  => __('admin/modules/module_instances.products_carousel.options.sort_direction.asc'),
+            'desc' => __('admin/modules/module_instances.products_carousel.options.sort_direction.desc'),
+        ];
+    }
+
+    private function resolveSortDirectionState(callable $get, string $field): string
+    {
+        $state = (string) $get('settings.shared.custom_sort.' . $field);
+
+        if (in_array($state, ['none', 'asc', 'desc'], true)) {
+            return $state;
+        }
+
+        $legacy_sort_options = collect((array) $get('settings.shared.custom_sort_options'))
+            ->filter(fn (mixed $sort_option): bool => is_string($sort_option) && filled($sort_option));
+
+        if ($legacy_sort_options->contains($field . '_asc')) {
+            return 'asc';
+        }
+
+        if ($legacy_sort_options->contains($field . '_desc')) {
+            return 'desc';
+        }
+
+        return 'none';
     }
 }
