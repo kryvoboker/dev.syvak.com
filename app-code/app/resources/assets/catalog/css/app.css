@@ -240,6 +240,10 @@
         @apply text-11px md:text-sm lg:text-base 2xl:text-lg font-light tracking-0.04em;
     }
 
+    .section-title {
+        @apply text-32px md:text-44px lg:text-6xl 2xl:text-90px;
+    }
+
     .footer {
         @apply border-t border-opacity-light-gray-40% max-md:overflow-hidden pt-4 pb-4 md:pt-7 md:pb-0 lg:pt-15 2xl:pt-20 2xl:mb-52px;
     }
@@ -336,86 +340,14 @@
         @apply inline-block;
     }
 
-    .products-carousel-section {
-        @apply relative overflow-hidden border-b border-opacity-light-gray-40% pt-12 pb-10 md:pt-16 md:pb-12 lg:pt-20 lg:pb-14 2xl:pt-24 2xl:pb-16;
+    .carousel-nav {
+        @apply pointer-events-auto inline-flex size-14 items-center justify-center rounded-full border border-white/50
+        bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white
+        backdrop-blur-xs hover:text-black carousel-disabled:opacity-50;
     }
 
-    .products-carousel-head {
-        @apply mb-8 flex flex-col gap-4 md:mb-10 md:gap-5 lg:mb-12 lg:flex-row lg:items-start lg:justify-between lg:gap-8;
-    }
-
-    .products-carousel-title {
-        @apply text-32px md:text-44px lg:text-6xl 2xl:text-90px;
-    }
-
-    .products-carousel-description {
-        max-width: calc(860 / var(--base-font-size) * 1rem);
-        @apply text-11px font-light uppercase tracking-0.04em text-light-gray md:text-sm lg:text-base 2xl:text-lg;
-    }
-
-    .products-carousel-root {
-        @apply relative;
-    }
-
-    .products-carousel-track {
-        @apply overflow-hidden border border-light-black bg-black;
-    }
-
-    .products-carousel-body {
-        @apply h-full -mx-2 md:-mx-2.5 lg:-mx-3;
-    }
-
-    .products-carousel-slide {
-        @apply h-full px-2 pb-1 md:px-2.5 lg:px-3;
-    }
-
-    .products-carousel-card {
-        @apply flex h-full flex-col gap-3 md:gap-4 lg:gap-5;
-    }
-
-    .products-carousel-card-image-wrap {
-        @apply overflow-hidden bg-black;
-    }
-
-    .products-carousel-card-image {
-        @apply aspect-square w-full object-cover object-center transition-transform duration-500 ease-in-out;
-    }
-
-    .products-carousel-card:hover .products-carousel-card-image {
-        @apply scale-105;
-    }
-
-    .products-carousel-card-content {
-        @apply flex min-h-20 flex-col gap-2;
-    }
-
-    .products-carousel-card-title {
-        @apply line-clamp-2 font-inter text-base leading-1.4em font-normal uppercase tracking-0.04em md:text-lg lg:text-xl 2xl:text-2xl;
-    }
-
-    .products-carousel-card-price {
-        @apply text-sm uppercase tracking-0.04em text-light-gray md:text-base 2xl:text-lg;
-    }
-
-    .products-carousel-controls {
-        @apply pointer-events-none absolute inset-x-2 top-1/2 z-20 flex -translate-y-1/2 items-center justify-between md:inset-x-2.5 lg:inset-x-3;
-    }
-
-    .products-carousel-nav {
-        @apply pointer-events-auto inline-flex size-11 items-center justify-center rounded-full border border-white/50 bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white hover:text-black md:size-12;
-    }
-
-    .products-carousel-controls .carousel-prev,
-    .products-carousel-controls .carousel-next {
-        @apply static;
-    }
-
-    .products-carousel-nav-icon {
-        @apply text-2xl;
-    }
-
-    .products-carousel-pagination {
-        @apply mt-6 flex items-center justify-center gap-2 md:mt-8 md:gap-3;
+    .carousel-pagination {
+        @apply flex items-center justify-center gap-x-2;
     }
 }
 

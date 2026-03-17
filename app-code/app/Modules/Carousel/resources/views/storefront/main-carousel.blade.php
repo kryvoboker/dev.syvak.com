@@ -26,7 +26,7 @@
                  data-main-carousel
              data-slides-count="{{ $slides_count }}"
              data-page-types='@json($page_types)'
-             data-carousel='{ "isAutoHeight": true, "loadingClasses": "opacity-0", "dotsItemClasses": "carousel-dot size-1.5 bg-light-gray carousel-active:size-2.5 carousel-active:ease-in-out carousel-active:duration-200", "isDraggable": true, "isInfiniteLoop": true, "isAutoPlay": false }'
+             data-carousel='{ "isAutoHeight": true, "loadingClasses": "opacity-0, opacity-100", "dotsItemClasses": "carousel-dot size-1.5 bg-light-gray carousel-active:size-2.5 carousel-active:ease-in-out carousel-active:duration-200", "isDraggable": true, "isInfiniteLoop": true, "isAutoPlay": false }'
             @endif>
             <div class="carousel home-main-carousel-track rounded-none">
                 <div class="carousel-body home-main-carousel-body">
@@ -61,10 +61,10 @@
 
                         <div class="carousel-slide relative flex flex-col items-center home-main-carousel-slide">
                             <div class="home-main-carousel-media w-full h-full"
-                                @if($is_not_current_device_desktop && $has_slide_image_for_current_device)
-                                    @style("max-height: calc($max_height / var(--base-font-size) * 1rem)")
+                            @if($is_not_current_device_desktop && $has_slide_image_for_current_device)
+                                @style("max-height: calc($max_height / var(--base-font-size) * 1rem)")
                                 @else
-                                    @style("height: calc($max_height / var(--base-font-size) * 1rem)")
+                                @style("height: calc($max_height / var(--base-font-size) * 1rem)")
                                 @endif
                             >
                                 @if($has_image_link)
@@ -73,6 +73,43 @@
                                        target="{{ $target }}"
                                        @if($rel) rel="{{ $rel }}" @endif
                                        aria-label="{{ $slide['title'] ?: $carousel_module_data['name'] }}">
+                                        @if($has_slide_image)
+                                            <picture>
+                                                @if(filled($desktop_image_urls['thumb_4x'] ?? ''))
+                                                    <source media="(min-width: 80rem)"
+                                                            srcset="{{ $desktop_image_urls['thumb_4x'] }}">
+                                                @endif
+
+                                                @if(filled($desktop_image_urls['thumb_3x'] ?? ''))
+                                                    <source media="(min-width: 64rem)"
+                                                            srcset="{{ $desktop_image_urls['thumb_3x'] }}">
+                                                @endif
+
+                                                @if(filled($desktop_image_urls['thumb_2x'] ?? ''))
+                                                    <source media="(min-width: 48rem)"
+                                                            srcset="{{ $desktop_image_urls['thumb_2x'] }}">
+                                                @endif
+
+                                                <x-catalog::common.img
+                                                    class="object-contain"
+                                                    :urls_data="$image_urls_data"
+                                                    :size="$image_width"
+                                                    :max-density="2"
+                                                    sizes="100vw"
+                                                    width="{{ $image_width }}"
+                                                    height="{{ $image_height }}"
+                                                    loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                                                    alt="{{ $slide['title'] ?: $carousel_module_data['name'] }}"
+                                                />
+                                            </picture>
+                                        @else
+                                            <div class="w-full h-full">
+
+                                            </div>
+                                        @endif
+                                    </a>
+                                @else
+                                    <div class="home-main-carousel-media-link flex items-center justify-center w-full h-full">
                                         @if($has_slide_image)
                                             <picture>
                                                 @if(filled($desktop_image_urls['thumb_4x'] ?? ''))
@@ -108,7 +145,7 @@
 
                                             </div>
                                         @endif
-                                    </a>
+                                    </div>
                                 @endif
                             </div>
 
@@ -152,21 +189,15 @@
 
             @if($is_interactive_carousel)
                 <!-- Next Slide -->
-                <button class="carousel-next start-0 carousel-disabled:opacity-50 size-14
-                             bg-black/80 flex items-center justify-center border border-light-gray
-                               hover:border-white hover:bg-white hover:text-black ease-in duration-200
-                               rounded-full shadow-base-300/20 shadow-sm"
+                <button class="carousel-next start-0 carousel-nav"
                         type="button">
                     <span class="icon-[mynaui--arrow-left] size-6"></span>
                 </button>
 
-                <div class="carousel-pagination flex items-center justify-center gap-x-2"></div>
+                <div class="carousel-pagination"></div>
 
                 <!-- Previous Slide -->
-                <button class="carousel-prev end-0 carousel-disabled:opacity-50 size-14
-                             bg-black/80 flex items-center justify-center border border-light-gray
-                               hover:border-white hover:bg-white hover:text-black ease-in duration-200
-                               rounded-full shadow-base-300/20 shadow-sm"
+                <button class="carousel-prev end-0 carousel-nav"
                         type="button">
                     <span class="icon-[mynaui--arrow-right] size-6"></span>
                 </button>

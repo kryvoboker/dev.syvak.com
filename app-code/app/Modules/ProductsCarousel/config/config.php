@@ -12,13 +12,32 @@ return [
         'result_limit' => 30,
     ],
     'settings' => [
-        'default_source_mode'  => 'category_based',
-        'default_page_types'   => [
+        'default_source_mode' => 'category_based',
+        'default_page_types'  => [
             'home',
         ],
-        'allowed_source_modes' => [
+        'default_min_quantity'   => 1,
+        'default_products_limit' => 15,
+        'default_image_width'    => 420,
+        'default_image_height'   => 420,
+        'default_sort_mode'      => 'custom',
+        'allowed_source_modes'   => [
             'category_based',
             'manual_only',
+        ],
+        'allowed_sort_modes' => [
+            'custom',
+            'random',
+        ],
+        'allowed_sort_options' => [
+            'price_asc',
+            'price_desc',
+            'name_asc',
+            'name_desc',
+            'date_added_asc',
+            'date_added_desc',
+            'quantity_asc',
+            'quantity_desc',
         ],
     ],
 ];

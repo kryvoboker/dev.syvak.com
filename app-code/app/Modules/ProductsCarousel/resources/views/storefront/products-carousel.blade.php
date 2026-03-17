@@ -46,67 +46,80 @@
 @endphp
 
 <section class="products-carousel-section" aria-label="Products carousel section">
-    <div class="container products-carousel-head">
-        @if(filled($section_title))
-            <h2 class="products-carousel-title">{{ $section_title }}</h2>
-        @endif
-        @if(filled($section_description))
-            <p class="products-carousel-description">{{ $section_description }}</p>
-        @endif
-    </div>
-
-    <div id="{{ $carousel_dom_id }}"
-         class="container products-carousel-root --prevent-on-load-init"
-         data-products-carousel
-         data-page-types='@json($page_types)'
-         data-current-page-type="{{ $current_page_type }}"
-         data-carousel='{"loadingClasses":"opacity-0,opacity-100 transition-opacity duration-500","isAutoHeight":true,"isInfiniteLoop":true,"slidesQty":{"xs":1,"sm":1,"md":2,"lg":3,"2xl":5}, "dotsItemClasses": "carousel-dot size-1.5 bg-light-gray carousel-active:size-2.5 carousel-active:ease-in-out carousel-active:duration-200"}'>
-        <div class="carousel products-carousel-track">
-            <div class="carousel-body products-carousel-body">
-                @foreach($products as $product)
-                    @php
-                        $name = (string) ($product['name'] ?? 'Product name');
-                        $price = (string) ($product['price'] ?? '0 UAH');
-                        $url = (string) ($product['url'] ?? '#');
-                        $image_data = $product['image_data']['urls'] ?? [];
-                        $image_src = (string) ($image_data['thumb_1x'] ?? $image_data['original_thumb'] ?? $image_data['original'] ?? '');
-                        $image_width = (int) ($product['image_data']['width'] ?? 420);
-                        $image_height = (int) ($product['image_data']['height'] ?? 420);
-                    @endphp
-
-                    <article class="carousel-slide products-carousel-slide">
-                        <a href="{{ $url }}" class="products-carousel-card" aria-label="{{ $name }}">
-                            <div class="products-carousel-card-image-wrap">
-                                <img src="{{ $image_src }}"
-                                     alt="{{ $name }}"
-                                     class="products-carousel-card-image"
-                                     width="{{ $image_width }}"
-                                     height="{{ $image_height }}"
-                                     loading="lazy"
-                                     decoding="async">
-                            </div>
-
-                            <div class="products-carousel-card-content">
-                                <h3 class="products-carousel-card-title">{{ $name }}</h3>
-                                <p class="products-carousel-card-price">{{ $price }}</p>
-                            </div>
-                        </a>
-                    </article>
-                @endforeach
-            </div>
+    <div class="container">
+        <div class="flex gap-10 justify-between mb-8">
+            @if(filled($section_title))
+                <h2 class="section-title shrink-0">
+                    {{ $section_title }}
+                </h2>
+            @endif
+            @if(filled($section_description))
+                <p class="products-carousel-description">
+                    {{ $section_description }}
+                </p>
+            @endif
         </div>
 
-        @if($products->count() > 1)
-            <div class="products-carousel-controls">
-                <button class="carousel-prev products-carousel-nav" type="button" aria-label="Previous product">
-                    <span class="icon-[material-symbols-light--arrow-back-rounded] products-carousel-nav-icon"></span>
-                </button>
-                <button class="carousel-next products-carousel-nav" type="button" aria-label="Next product">
-                    <span class="icon-[material-symbols-light--arrow-forward-rounded] products-carousel-nav-icon"></span>
-                </button>
+        <div id="{{ $carousel_dom_id }}"
+             class="container --prevent-on-load-init relative"
+             data-products-carousel
+             data-page-types='@json($page_types)'
+             data-current-page-type="{{ $current_page_type }}"
+             data-carousel='{"loadingClasses":"opacity-0, opacity-100 transition-opacity easy duration-500","isAutoHeight":true,"isInfiniteLoop":true, "isDraggable": true, "slidesQty":{"xs":1,"sm":1,"md":2,"lg":3,"2xl":5}, "dotsItemClasses": "carousel-dot size-1.5 bg-light-gray carousel-active:size-2.5 carousel-active:ease-in-out carousel-active:duration-200", "isAutoPlay": false}'>
+            <div class="carousel products-carousel-track rounded-none">
+                <div class="carousel-body products-carousel-body">
+                    @foreach($products as $product)
+                        @php
+                            $name = (string) ($product['name'] ?? 'Product name');
+                            $price = (string) ($product['price'] ?? '0 UAH');
+                            $url = (string) ($product['url'] ?? '#');
+                            $image_urls_data = $product['image_data']['urls'] ?? [];
+                            $image_width = (int) ($product['image_data']['width'] ?? 420);
+                            $image_height = (int) ($product['image_data']['height'] ?? 420);
+                        @endphp
+
+                        <div class="carousel-slide products-carousel-slide">
+                            <a href="{{ $url }}" class="products-carousel-card" aria-label="{{ $name }}">
+                                <div class="flex items-center justify-center">
+                                    <x-catalog::common.img
+                                        class="object-contain transition-transform hover:scale-105 duration-500 ease-in-out"
+                                        :urls_data="$image_urls_data"
+                                        :size="$image_width"
+                                        :max-density="3"
+                                        sizes="100vw"
+                                        width="{{ $image_width }}"
+                                        height="{{ $image_height }}"
+                                        alt="{{ $name }}"
+                                    />
+                                </div>
+
+                                <div class="flex min-h-20 flex-col gap-2">
+                                    <h3 class="products-carousel-card-title">{{ $name }}</h3>
+                                    <p class="products-carousel-card-price">{{ $price }}</p>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
             </div>
 
-            <div class="carousel-pagination products-carousel-pagination"></div>
-        @endif
+            @if($products->count() > 1)
+                <button class="carousel-prev start-0 carousel-nav"
+                        @style("top: calc(($image_height / 2) / var(--base-font-size) * 1rem * -1); transform: translateY(calc(($image_height * 0.1) / var(--base-font-size) * 1rem));")
+                        type="button"
+                        aria-label="Previous product">
+                    <span class="icon-[mynaui--arrow-left] size-6"></span>
+                </button>
+
+                <button class="carousel-next end-0 carousel-nav"
+                        @style("top: calc(($image_height / 2) / var(--base-font-size) * 1rem * -1); transform: translateY(calc(($image_height * 0.1) / var(--base-font-size) * 1rem));")
+                        type="button"
+                        aria-label="Next product">
+                    <span class="icon-[mynaui--arrow-right] size-6"></span>
+                </button>
+
+                <div class="carousel-pagination"></div>
+            @endif
+        </div>
     </div>
 </section>

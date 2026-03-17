@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 
 /**
@@ -56,19 +57,6 @@ readonly class ProductsCarouselModuleDataService
             ->collapse()
             ->values();
 
-        if ($products_carousel_modules->isEmpty()) {
-            Log::channel('stack')->warning('No active products carousel modules were resolved for placement.', [
-                'placement' => $placement,
-                'page_type' => $page_type,
-            ]);
-        }
-
-        Log::channel('daily')->info('Products carousel modules resolved for storefront context.', [
-            'placement'              => $placement,
-            'page_type'              => $page_type,
-            'resolved_modules_count' => $products_carousel_modules->count(),
-        ]);
-
         /** @var array<int, array<string, mixed>> $resolved_modules */
         $resolved_modules = $products_carousel_modules->all();
 
@@ -86,9 +74,26 @@ readonly class ProductsCarouselModuleDataService
         return $instances
             ->filter(fn (ModuleInstance $instance): bool => $this->matchesPageType($instance, $page_type))
             ->map(function (ModuleInstance $instance): array {
-                $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-                $source_mode       = (string) Arr::get($instance_settings, 'source_mode', 'category_based');
-                $products          = $this->resolveProductsForInstance($instance, $source_mode, $instance_settings);
+                $instance_settings       = is_array($instance->settings) ? $instance->settings : [];
+                $source_mode             = (string) Arr::get($instance_settings, 'source_mode', 'category_based');
+                $runtime_shared_settings = $this->resolveRuntimeSharedSettings($instance_settings);
+                $products                = $this->resolveProductsForInstance(
+                    $instance,
+                    $source_mode,
+                    $instance_settings,
+                    $runtime_shared_settings,
+                );
+
+                Log::channel('daily')->info('ProductsCarousel runtime strategy resolved for instance.', [
+                    'instance_id'          => $instance->id,
+                    'source_mode'          => $source_mode,
+                    'sort_mode'            => $runtime_shared_settings['sort_mode'],
+                    'effective_sort_order' => $runtime_shared_settings['sort_sequence'],
+                    'min_quantity'         => $runtime_shared_settings['min_quantity'],
+                    'products_limit'       => $runtime_shared_settings['products_limit'],
+                    'product_image_width'  => $runtime_shared_settings['product_image_width'],
+                    'product_image_height' => $runtime_shared_settings['product_image_height'],
+                ]);
 
                 if ($products->isEmpty()) {
                     Log::channel('stack')->warning('ProductsCarousel instance resolved without products.', [
@@ -98,7 +103,11 @@ readonly class ProductsCarouselModuleDataService
                 }
 
                 $products_payload = $products
-                    ->map(fn (Product $product): array => $this->mapProductCard($product))
+                    ->map(fn (Product $product): array => $this->mapProductCard(
+                        $product,
+                        $runtime_shared_settings['product_image_width'],
+                        $runtime_shared_settings['product_image_height'],
+                    ))
                     ->values()
                     ->all();
 
@@ -109,17 +118,17 @@ readonly class ProductsCarouselModuleDataService
                 ]);
 
                 return [
-                    'instance_id'                 => $instance->id,
-                    'name'                        => $instance->name,
-                    'module_name_for_user'        => (string) Arr::get($instance_settings, 'shared.module_name_for_user', ''),
-                    'short_description_for_user'  => (string) Arr::get($instance_settings, 'shared.short_description_for_user', ''),
-                    'page_types'                  => collect(Arr::get($instance_settings, 'shared.page_types', []))
+                    'instance_id'                => $instance->id,
+                    'name'                       => $instance->name,
+                    'module_name_for_user'       => (string) Arr::get($instance_settings, 'shared.module_name_for_user', ''),
+                    'short_description_for_user' => (string) Arr::get($instance_settings, 'shared.short_description_for_user', ''),
+                    'page_types'                 => collect(Arr::get($instance_settings, 'shared.page_types', []))
                         ->filter(fn (mixed $page_type): bool => is_string($page_type) && filled($page_type))
                         ->values()
                         ->all(),
-                    'placement'                   => $instance->placement,
-                    'source_mode'                 => $source_mode,
-                    'products'                    => $products_payload,
+                    'placement'   => $instance->placement,
+                    'source_mode' => $source_mode,
+                    'products'    => $products_payload,
                 ];
             })
             ->filter(fn (array $module_data): bool => $module_data['products'] !== [])
@@ -129,22 +138,45 @@ readonly class ProductsCarouselModuleDataService
 
     /**
      * @param  array<string, mixed>  $instance_settings
+     * @param  array{
+     *      min_quantity: int,
+     *      products_limit: int,
+     *      product_image_width: int,
+     *      product_image_height: int,
+     *      sort_mode: string,
+     *      sort_sequence: array<int, string>
+     * }  $runtime_shared_settings
      * @return EloquentCollection<int, Product>
      */
-    private function resolveProductsForInstance(ModuleInstance $instance, string $source_mode, array $instance_settings): EloquentCollection
-    {
+    private function resolveProductsForInstance(
+        ModuleInstance $instance,
+        string $source_mode,
+        array $instance_settings,
+        array $runtime_shared_settings,
+    ): EloquentCollection {
         return match ($source_mode) {
-            'manual_only' => $this->resolveManualOnlyProducts($instance, $instance_settings),
-            default       => $this->resolveCategoryBasedProducts($instance, $instance_settings),
+            'manual_only' => $this->resolveManualOnlyProducts($instance, $instance_settings, $runtime_shared_settings),
+            default       => $this->resolveCategoryBasedProducts($instance, $instance_settings, $runtime_shared_settings),
         };
     }
 
     /**
      * @param  array<string, mixed>  $instance_settings
+     * @param  array{
+     *      min_quantity: int,
+     *      products_limit: int,
+     *      product_image_width: int,
+     *      product_image_height: int,
+     *      sort_mode: string,
+     *      sort_sequence: array<int, string>
+     * }  $runtime_shared_settings
      * @return EloquentCollection<int, Product>
      */
-    private function resolveCategoryBasedProducts(ModuleInstance $instance, array $instance_settings): EloquentCollection
-    {
+    private function resolveCategoryBasedProducts(
+        ModuleInstance $instance,
+        array $instance_settings,
+        array $runtime_shared_settings,
+    ): EloquentCollection {
         $category_ids = $this->normalizeIds(Arr::get($instance_settings, 'category_based.category_ids', []));
 
         if ($category_ids === []) {
@@ -162,7 +194,7 @@ readonly class ProductsCarouselModuleDataService
             $category_ids,
         );
 
-        $products_query = $this->buildBaseProductsQuery()
+        $products_query = $this->buildBaseProductsQuery($runtime_shared_settings['min_quantity'])
             ->whereHas('categories', function (Builder $query) use ($category_ids): void {
                 $query->whereIn('categories.id', $category_ids);
             });
@@ -176,34 +208,39 @@ readonly class ProductsCarouselModuleDataService
                 ->whereIn('id', $selected_product_ids)
                 ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')');
         } else {
-            $products_query->orderByDesc('date_added')->orderByDesc('id');
+            $this->applySortPipeline(
+                $products_query,
+                $runtime_shared_settings['sort_sequence'],
+                $this->resolveLanguageId(),
+            );
         }
 
-        $result_limit = max((int) $this->products_carousel_config->get('search.result_limit', 30), 1);
-
         $products = $products_query
-            ->limit($result_limit)
+            ->limit($runtime_shared_settings['products_limit'])
             ->get()
             ->filter(fn (mixed $product): bool => $product instanceof Product)
             ->values();
-
-        Log::channel('daily')->info('ProductsCarousel category-based products resolved.', [
-            'instance_id'                => $instance->id,
-            'categories_count'           => count($category_ids),
-            'use_selected_products_only' => $use_selected_products_only,
-            'selected_product_ids_count' => count($selected_product_ids),
-            'resolved_products_count'    => $products->count(),
-        ]);
 
         return new EloquentCollection($products->all());
     }
 
     /**
      * @param  array<string, mixed>  $instance_settings
+     * @param  array{
+     *      min_quantity: int,
+     *      products_limit: int,
+     *      product_image_width: int,
+     *      product_image_height: int,
+     *      sort_mode: string,
+     *      sort_sequence: array<int, string>
+     * }  $runtime_shared_settings
      * @return EloquentCollection<int, Product>
      */
-    private function resolveManualOnlyProducts(ModuleInstance $instance, array $instance_settings): EloquentCollection
-    {
+    private function resolveManualOnlyProducts(
+        ModuleInstance $instance,
+        array $instance_settings,
+        array $runtime_shared_settings,
+    ): EloquentCollection {
         $selected_product_ids = $this->products_carousel_product_search_service->filterActiveProductIds(
             Arr::get($instance_settings, 'manual_only.selected_product_ids', []),
         );
@@ -216,12 +253,19 @@ readonly class ProductsCarouselModuleDataService
             return new EloquentCollection();
         }
 
-        $products = $this->buildBaseProductsQuery()
+        $products = $this->buildBaseProductsQuery($runtime_shared_settings['min_quantity'])
             ->whereIn('id', $selected_product_ids)
             ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')')
+            ->limit($runtime_shared_settings['products_limit'])
             ->get()
             ->filter(fn (mixed $product): bool => $product instanceof Product)
             ->values();
+
+        Log::channel('daily')->info('ProductsCarousel selected products precedence applied.', [
+            'instance_id' => $instance->id,
+            'precedence'  => 'manual_selection_order',
+            'source_mode' => 'manual_only',
+        ]);
 
         Log::channel('daily')->info('ProductsCarousel manual-only products resolved.', [
             'instance_id'                => $instance->id,
@@ -232,12 +276,13 @@ readonly class ProductsCarouselModuleDataService
         return new EloquentCollection($products->all());
     }
 
-    private function buildBaseProductsQuery(): Builder
+    private function buildBaseProductsQuery(int $min_quantity): Builder
     {
         $language_id = $this->resolveLanguageId();
 
         return Product::query()
             ->where('is_active', true)
+            ->where('quantity', '>=', $min_quantity)
             ->with([
                 'productDescription' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
@@ -246,6 +291,214 @@ readonly class ProductsCarouselModuleDataService
                     $query->where('language_id', $language_id);
                 },
             ]);
+    }
+
+    /**
+     * @param  array<int, string>  $sort_sequence
+     */
+    private function applySortPipeline(Builder $products_query, array $sort_sequence, int $language_id): void
+    {
+        $product_table          = $products_query->getModel()->getTable();
+        $name_sort_join_applied = false;
+
+        foreach ($sort_sequence as $sort_option) {
+            $direction = Str::endsWith($sort_option, '_asc') ? 'asc' : 'desc';
+
+            if ($sort_option === 'name_asc' || $sort_option === 'name_desc') {
+                if ($name_sort_join_applied === false) {
+                    $products_query->leftJoin('product_descriptions as products_carousel_sort_description', function ($join) use ($language_id, $product_table): void {
+                        $join->on('products_carousel_sort_description.product_id', '=', $product_table . '.id')
+                            ->where('products_carousel_sort_description.language_id', '=', $language_id);
+                    });
+
+                    $products_query->addSelect($product_table . '.*');
+                    $name_sort_join_applied = true;
+                }
+
+                $products_query
+                    ->orderBy('products_carousel_sort_description.name', $direction)
+                    ->orderBy($product_table . '.id', $direction);
+
+                continue;
+            }
+
+            if ($sort_option === 'price_asc' || $sort_option === 'price_desc') {
+                $products_query
+                    ->orderBy('price', $direction)
+                    ->orderBy($product_table . '.id', $direction);
+
+                continue;
+            }
+
+            if ($sort_option === 'quantity_asc' || $sort_option === 'quantity_desc') {
+                $products_query
+                    ->orderBy('quantity', $direction)
+                    ->orderBy($product_table . '.id', $direction);
+
+                continue;
+            }
+
+            if ($sort_option === 'date_added_asc' || $sort_option === 'date_added_desc') {
+                $products_query
+                    ->orderBy('date_added', $direction)
+                    ->orderBy($product_table . '.id', $direction);
+            }
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $instance_settings
+     * @return array{
+     *      min_quantity: int,
+     *      products_limit: int,
+     *      product_image_width: int,
+     *      product_image_height: int,
+     *      sort_mode: string,
+     *      sort_sequence: array<int, string>
+     * }
+     */
+    private function resolveRuntimeSharedSettings(array $instance_settings): array
+    {
+        $shared_settings = Arr::get($instance_settings, 'shared', []);
+
+        if (! is_array($shared_settings)) {
+            $shared_settings = [];
+        }
+
+        $sort_mode = (string) Arr::get(
+            $shared_settings,
+            'sort_mode',
+            $this->products_carousel_config->get('settings.default_sort_mode', 'custom'),
+        );
+
+        $allowed_sort_modes = $this->getAllowedSortModes();
+
+        if (! in_array($sort_mode, $allowed_sort_modes, true)) {
+            $sort_mode = (string) $this->products_carousel_config->get('settings.default_sort_mode', 'custom');
+        }
+
+        $min_quantity = max(
+            (int) Arr::get($shared_settings, 'min_quantity', $this->products_carousel_config->get('settings.default_min_quantity', 1)),
+            1,
+        );
+        $products_limit = max(
+            (int) Arr::get($shared_settings, 'products_limit', $this->products_carousel_config->get('settings.default_products_limit', 15)),
+            1,
+        );
+        $product_image_width = max(
+            (int) Arr::get($shared_settings, 'product_image_width', $this->products_carousel_config->get('settings.default_image_width', 420)),
+            1,
+        );
+        $product_image_height = max(
+            (int) Arr::get($shared_settings, 'product_image_height', $this->products_carousel_config->get('settings.default_image_height', 420)),
+            1,
+        );
+
+        $sort_sequence = $sort_mode === 'random'
+            ? $this->generateRandomSortSequence()
+            : $this->resolveCustomSortSequence($instance_settings);
+
+        return [
+            'min_quantity'         => $min_quantity,
+            'products_limit'       => $products_limit,
+            'product_image_width'  => $product_image_width,
+            'product_image_height' => $product_image_height,
+            'sort_mode'            => $sort_mode,
+            'sort_sequence'        => $sort_sequence,
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function resolveCustomSortSequence(array $instance_settings): array
+    {
+        $allowed_sort_options = $this->getAllowedSortOptions();
+
+        $custom_sort_options = collect(Arr::get($instance_settings, 'shared.custom_sort_options', []))
+            ->filter(fn (mixed $option): bool => is_string($option) && filled($option))
+            ->values()
+            ->all();
+
+        $custom_sort_options = collect($allowed_sort_options)
+            ->intersect($custom_sort_options)
+            ->values()
+            ->all();
+
+        $custom_sort_options = $this->removeConflictingSortOptions($custom_sort_options);
+
+        if ($custom_sort_options !== []) {
+            return $custom_sort_options;
+        }
+
+        Log::channel('stack')->warning('ProductsCarousel custom sort mode has no valid options. Using fallback sort.', [
+            'fallback_sort_option' => 'date_added_desc',
+        ]);
+
+        return ['date_added_desc'];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function generateRandomSortSequence(): array
+    {
+        $grouped_sort_options = [
+            'price'      => ['price_asc', 'price_desc'],
+            'name'       => ['name_asc', 'name_desc'],
+            'date_added' => ['date_added_asc', 'date_added_desc'],
+            'quantity'   => ['quantity_asc', 'quantity_desc'],
+        ];
+
+        $randomized_fields = collect(array_keys($grouped_sort_options))
+            ->shuffle()
+            ->take(random_int(1, count($grouped_sort_options)))
+            ->values();
+
+        return $randomized_fields
+            ->map(function (string $field) use ($grouped_sort_options): string {
+                $field_options = $grouped_sort_options[$field];
+
+                return $field_options[random_int(0, count($field_options) - 1)];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  array<int, string>  $sort_options
+     * @return array<int, string>
+     */
+    private function removeConflictingSortOptions(array $sort_options): array
+    {
+        return collect($sort_options)
+            ->unique(function (string $sort_option): string {
+                return Str::beforeLast($sort_option, '_');
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getAllowedSortModes(): array
+    {
+        return collect($this->products_carousel_config->get('settings.allowed_sort_modes', []))
+            ->filter(fn (mixed $mode): bool => is_string($mode) && filled($mode))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getAllowedSortOptions(): array
+    {
+        return collect($this->products_carousel_config->get('settings.allowed_sort_options', []))
+            ->filter(fn (mixed $option): bool => is_string($option) && filled($option))
+            ->values()
+            ->all();
     }
 
     /**
@@ -259,11 +512,10 @@ readonly class ProductsCarouselModuleDataService
      *     url: string|null
      * }
      */
-    private function mapProductCard(Product $product): array
+    private function mapProductCard(Product $product, int $product_image_width, int $product_image_height): array
     {
         $product_description = $product->productDescription->first();
         $slug                = $product->slugs->first()?->slug;
-        $image_size_data     = $this->resolveProductImageSize();
 
         return [
             'id'    => (int) $product->id,
@@ -278,12 +530,12 @@ readonly class ProductsCarouselModuleDataService
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
                     (string) $product->image,
-                    $image_size_data['width'],
-                    $image_size_data['height'],
+                    $product_image_width,
+                    $product_image_height,
                     is_square: false,
                 ),
-                'width'  => $image_size_data['width'],
-                'height' => $image_size_data['height'],
+                'width'  => $product_image_width,
+                'height' => $product_image_height,
             ],
             'url' => filled($slug)
                 ? localizedRoute('localized.catalog.product.show', ['slug' => $slug])
@@ -305,20 +557,6 @@ readonly class ProductsCarouselModuleDataService
         }
 
         return $page_types->contains($page_type);
-    }
-
-    /**
-     * @return array{width: int, height: int}
-     */
-    private function resolveProductImageSize(): array
-    {
-        $app_settings       = get_app_settings();
-        $search_image_sizes = $app_settings?->image_sizes?->firstWhere('name', 'search_product') ?? [];
-
-        return [
-            'width'  => max((int) Arr::get($search_image_sizes, 'width', 420), 1),
-            'height' => max((int) Arr::get($search_image_sizes, 'height', 420), 1),
-        ];
     }
 
     /**
