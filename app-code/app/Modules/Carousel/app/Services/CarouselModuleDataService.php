@@ -108,13 +108,10 @@ class CarouselModuleDataService
      */
     private function mapSlide(array $slide, array $shared_settings): array
     {
-        $translations   = Arr::get($slide, 'translations', []);
-        $current_locale = app()->getLocale();
-        $translation    = Arr::get($translations, $current_locale);
-
-        if (! is_array($translation)) {
-            $translation = collect($translations)->first(fn (mixed $item): bool => is_array($item));
-        }
+        $translations                = Arr::get($slide, 'translations', []);
+        $current_locale              = app()->getLocale();
+        $primary_translation_payload = $this->resolvePrimaryTranslation($translations, $current_locale);
+        $translation                 = $primary_translation_payload['translation'];
 
         if (! is_array($translation)) {
             Log::channel('stack')->warning('Carousel slide skipped because translation payload is invalid.', [
@@ -127,11 +124,23 @@ class CarouselModuleDataService
         $desktop_image_settings = $this->normalizeImageSizeSettings(Arr::get($shared_settings, 'desktop_image', []));
         $mobile_image_settings  = $this->normalizeImageSizeSettings(Arr::get($shared_settings, 'mobile_image', []));
 
-        $desktop_width  = min($desktop_image_settings['width'], $desktop_image_settings['max_width']);
-        $desktop_height = min($desktop_image_settings['height'], $desktop_image_settings['max_height']);
-        $mobile_width   = min($mobile_image_settings['width'], $mobile_image_settings['max_width']);
-        $mobile_height  = min($mobile_image_settings['height'], $mobile_image_settings['max_height']);
-        $price          = $this->normalizePrice(Arr::get($translation, 'price'));
+        $desktop_width              = min($desktop_image_settings['width'], $desktop_image_settings['max_width']);
+        $desktop_height             = min($desktop_image_settings['height'], $desktop_image_settings['max_height']);
+        $mobile_width               = min($mobile_image_settings['width'], $mobile_image_settings['max_width']);
+        $mobile_height              = min($mobile_image_settings['height'], $mobile_image_settings['max_height']);
+        $price                      = $this->normalizePrice(Arr::get($translation, 'price'));
+        $desktop_image_path_payload = $this->resolveTranslationImagePath($translations, 'desktop_image', $current_locale);
+        $mobile_image_path_payload  = $this->resolveTranslationImagePath($translations, 'mobile_image', $current_locale);
+
+        Log::channel('daily')->info('Carousel slide fallback context resolved.', [
+            'slide_sort_order'                 => (int) Arr::get($slide, 'sort_order', 0),
+            'requested_locale'                 => $current_locale,
+            'primary_translation_locale'       => $primary_translation_payload['locale'],
+            'resolved_desktop_image_locale'    => $desktop_image_path_payload['locale'],
+            'resolved_mobile_image_locale'     => $mobile_image_path_payload['locale'],
+            'has_desktop_image_after_fallback' => filled($desktop_image_path_payload['path']),
+            'has_mobile_image_after_fallback'  => filled($mobile_image_path_payload['path']),
+        ]);
 
         return [
             'title'           => (string) Arr::get($translation, 'title', ''),
@@ -142,26 +151,131 @@ class CarouselModuleDataService
             'price'           => $price,
             'formatted_price' => $price !== null ? format_price($price) : null,
             'sort_order'      => (int) Arr::get($slide, 'sort_order', 0),
-            'desktop_image'   => [
-                'urls' => multiple_convert_img_and_get_url(
-                    (string) Arr::get($translation, 'desktop_image'),
-                    $desktop_width,
-                    $desktop_height,
-                    is_square: false,
-                ),
-                'width'  => $desktop_width,
-                'height' => $desktop_height,
-            ],
-            'mobile_image' => [
-                'urls' => multiple_convert_img_and_get_url(
-                    (string) Arr::get($translation, 'mobile_image'),
-                    $mobile_width,
-                    $mobile_height,
-                    is_square: false,
-                ),
-                'width'  => $mobile_width,
-                'height' => $mobile_height,
-            ],
+            'desktop_image'   => $this->buildImagePayload(
+                $desktop_image_path_payload['path'],
+                $desktop_width,
+                $desktop_height,
+                'desktop',
+                (int) Arr::get($slide, 'sort_order', 0),
+            ),
+            'mobile_image' => $this->buildImagePayload(
+                $mobile_image_path_payload['path'],
+                $mobile_width,
+                $mobile_height,
+                'mobile',
+                (int) Arr::get($slide, 'sort_order', 0),
+            ),
+        ];
+    }
+
+    /**
+     * @return array{locale: string|null, translation: array<string, mixed>|null}
+     */
+    private function resolvePrimaryTranslation(mixed $translations, string $current_locale): array
+    {
+        if (! is_array($translations)) {
+            return [
+                'locale'      => null,
+                'translation' => null,
+            ];
+        }
+
+        $current_translation = Arr::get($translations, $current_locale);
+
+        if (is_array($current_translation)) {
+            return [
+                'locale'      => $current_locale,
+                'translation' => $current_translation,
+            ];
+        }
+
+        foreach ($translations as $locale => $translation) {
+            if (is_array($translation)) {
+                return [
+                    'locale'      => is_string($locale) ? $locale : null,
+                    'translation' => $translation,
+                ];
+            }
+        }
+
+        return [
+            'locale'      => null,
+            'translation' => null,
+        ];
+    }
+
+    /**
+     * @return array{path: string|null, locale: string|null}
+     */
+    private function resolveTranslationImagePath(mixed $translations, string $image_field, string $current_locale): array
+    {
+        if (! is_array($translations)) {
+            return [
+                'path'   => null,
+                'locale' => null,
+            ];
+        }
+
+        $current_translation = Arr::get($translations, $current_locale, []);
+        $current_path        = is_array($current_translation)
+            ? Str::trim((string) Arr::get($current_translation, $image_field, ''))
+            : '';
+
+        if (filled($current_path)) {
+            return [
+                'path'   => $current_path,
+                'locale' => $current_locale,
+            ];
+        }
+
+        foreach ($translations as $locale => $translation) {
+            if (! is_array($translation)) {
+                continue;
+            }
+
+            $candidate_path = Str::trim((string) Arr::get($translation, $image_field, ''));
+
+            if (filled($candidate_path)) {
+                return [
+                    'path'   => $candidate_path,
+                    'locale' => is_string($locale) ? $locale : null,
+                ];
+            }
+        }
+
+        return [
+            'path'   => null,
+            'locale' => null,
+        ];
+    }
+
+    /**
+     * @return array{urls: array<string, string>, width: int, height: int}
+     */
+    private function buildImagePayload(?string $image_path, int $width, int $height, string $image_type, int $slide_sort_order): array
+    {
+        if (blank($image_path)) {
+            Log::channel('stack')->warning('Carousel slide image is missing after locale fallback.', [
+                'slide_sort_order' => $slide_sort_order,
+                'image_type'       => $image_type,
+            ]);
+
+            return [
+                'urls'   => [],
+                'width'  => $width,
+                'height' => $height,
+            ];
+        }
+
+        return [
+            'urls' => multiple_convert_img_and_get_url(
+                $image_path,
+                $width,
+                $height,
+                is_square: false,
+            ),
+            'width'  => $width,
+            'height' => $height,
         ];
     }
 

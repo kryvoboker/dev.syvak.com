@@ -97,75 +97,89 @@ class ModuleSettingsNormalizerService
             ]);
         }
 
+        $normalized_translations = $active_languages
+            ->mapWithKeys(function (Language $language) use ($translations, $index): array {
+                $language_code = (string) $language->code;
+                $translation   = Arr::get($translations, $language_code, []);
+
+                if (! is_array($translation)) {
+                    throw ValidationException::withMessages([
+                        "settings.slides.{$index}.translations.{$language_code}" => 'Translation payload must be an array.',
+                    ]);
+                }
+
+                $normalized_translation = [
+                    'language_code' => $language_code,
+                    'title'         => Str::squish((string) Arr::get($translation, 'title')),
+                    'description'   => Str::squish((string) Arr::get($translation, 'description')),
+                    'button_text'   => Str::squish((string) Arr::get($translation, 'button_text')),
+                    'button_url'    => Str::trim((string) Arr::get($translation, 'button_url')),
+                    'image_url'     => Str::trim((string) Arr::get($translation, 'image_url')),
+                    'desktop_image' => $this->normalizeImagePath(
+                        Arr::get($translation, 'desktop_image'),
+                        "settings.slides.{$index}.translations.{$language_code}.desktop_image",
+                    ),
+                    'mobile_image' => $this->normalizeImagePath(
+                        Arr::get($translation, 'mobile_image'),
+                        "settings.slides.{$index}.translations.{$language_code}.mobile_image",
+                    ),
+                ];
+
+                $validator = Validator::make($normalized_translation, [
+                    'title'         => ['nullable', 'string', 'max:255'],
+                    'description'   => ['nullable', 'string'],
+                    'button_text'   => ['nullable', 'string', 'max:255'],
+                    'button_url'    => ['nullable', 'url'],
+                    'image_url'     => ['nullable', 'url'],
+                    'desktop_image' => ['nullable', 'string'],
+                    'mobile_image'  => ['nullable', 'string'],
+                ]);
+
+                if ($validator->fails()) {
+                    throw ValidationException::withMessages(
+                        collect($validator->errors()->messages())
+                            ->mapWithKeys(fn (array $messages, string $key): array => [
+                                "settings.slides.{$index}.translations.{$language_code}.{$key}" => $messages,
+                            ])
+                            ->all(),
+                    );
+                }
+
+                return [$language_code => $normalized_translation];
+            })
+            ->all();
+
+        Log::channel('daily')->info('Carousel slide translation payload normalized.', [
+            'slide_index'                           => $index,
+            'translations_count'                    => count($normalized_translations),
+            'translations_with_desktop_image_count' => collect($normalized_translations)
+                ->filter(fn (array $translation): bool => filled($translation['desktop_image'] ?? null))
+                ->count(),
+            'translations_with_mobile_image_count' => collect($normalized_translations)
+                ->filter(fn (array $translation): bool => filled($translation['mobile_image'] ?? null))
+                ->count(),
+            'translations_without_any_slide_image_count' => collect($normalized_translations)
+                ->filter(fn (array $translation): bool => blank($translation['desktop_image'] ?? null) && blank($translation['mobile_image'] ?? null))
+                ->count(),
+        ]);
+
         return [
             'is_active'    => (bool) Arr::get($slide, 'is_active', true),
             'sort_order'   => max((int) Arr::get($slide, 'sort_order', $index + 1), 1),
-            'translations' => $active_languages
-                ->mapWithKeys(function (Language $language) use ($translations, $index): array {
-                    $language_code = (string) $language->code;
-                    $translation   = Arr::get($translations, $language_code, []);
-
-                    if (! is_array($translation)) {
-                        throw ValidationException::withMessages([
-                            "settings.slides.{$index}.translations.{$language_code}" => 'Translation payload must be an array.',
-                        ]);
-                    }
-
-                    $normalized_translation = [
-                        'language_code' => $language_code,
-                        'title'         => Str::squish((string) Arr::get($translation, 'title')),
-                        'description'   => Str::squish((string) Arr::get($translation, 'description')),
-                        'button_text'   => Str::squish((string) Arr::get($translation, 'button_text')),
-                        'button_url'    => Str::trim((string) Arr::get($translation, 'button_url')),
-                        'image_url'     => Str::trim((string) Arr::get($translation, 'image_url')),
-                        'desktop_image' => $this->normalizeImagePath(
-                            Arr::get($translation, 'desktop_image'),
-                            "settings.slides.{$index}.translations.{$language_code}.desktop_image",
-                        ),
-                        'mobile_image' => $this->normalizeImagePath(
-                            Arr::get($translation, 'mobile_image'),
-                            "settings.slides.{$index}.translations.{$language_code}.mobile_image",
-                        ),
-                    ];
-
-                    $validator = Validator::make($normalized_translation, [
-                        'title'         => ['nullable', 'string', 'max:255'],
-                        'description'   => ['nullable', 'string'],
-                        'button_text'   => ['nullable', 'string', 'max:255'],
-                        'button_url'    => ['nullable', 'url'],
-                        'image_url'     => ['nullable', 'url'],
-                        'desktop_image' => ['required', 'string'],
-                        'mobile_image'  => ['required', 'string'],
-                    ]);
-
-                    if ($validator->fails()) {
-                        throw ValidationException::withMessages(
-                            collect($validator->errors()->messages())
-                                ->mapWithKeys(fn (array $messages, string $key): array => [
-                                    "settings.slides.{$index}.translations.{$language_code}.{$key}" => $messages,
-                                ])
-                                ->all(),
-                        );
-                    }
-
-                    return [$language_code => $normalized_translation];
-                })
-                ->all(),
+            'translations' => $normalized_translations,
         ];
     }
 
     /**
      * @throws ValidationException
      */
-    private function normalizeImagePath(mixed $image_path, string $field): string
+    private function normalizeImagePath(mixed $image_path, string $field): ?string
     {
         $image_path = $this->resolveTemporaryImagePath($image_path, $field);
         $image_path = Str::trim((string) $image_path);
 
         if (blank($image_path)) {
-            throw ValidationException::withMessages([
-                $field => 'Image is required.',
-            ]);
+            return null;
         }
 
         if (Storage::fileExists($image_path) === false) {
