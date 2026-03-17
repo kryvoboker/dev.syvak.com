@@ -8,6 +8,8 @@ use App\Models\Settings\Currency;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use Closure;
+use Detection\Exception\MobileDetectException;
+use Detection\MobileDetect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,20 +19,29 @@ class SetCommonPreferences
     /**
      * Handle an incoming request.
      *
-     * @param  Closure(Request): (Response)  $next
+     * @param Closure(Request): (Response) $next
+     *
+     * @throws MobileDetectException
      */
     public function handle(Request $request, Closure $next): Response
     {
         $currency             = new Currency()->getDefaultActiveCurrency();
         $app_settings_service = app(AppSettingsService::class);
-
         $app_settings_service->setSettings();
+        $detect = new MobileDetect();
+
+        if ($detect->isMobile()) {
+            $device_type = $detect->isTablet() ? config('devices.types.tablet') : config('devices.types.mobile');
+        } else {
+            $device_type = config('devices.types.desktop');
+        }
 
         View::share([
-            'app_settings'       => $app_settings_service->getSettings(),
-            'no_image_url'       => asset('storage/' . config('app.images.default_no_image')),
-            'current_locale'     => app()->getLocale(),
-            'max_viewport_width' => (int) config('app.frontend.max_viewport_width'),
+            'app_settings'        => $app_settings_service->getSettings(),
+            'no_image_url'        => asset('storage/' . config('app.images.default_no_image')),
+            'current_locale'      => app()->getLocale(),
+            'max_viewport_width'  => (int)config('app.frontend.max_viewport_width'),
+            'current_device_type' => $device_type,
         ]);
 
         if ($currency !== null) {
@@ -40,6 +51,7 @@ class SetCommonPreferences
                 'app.currency.default_currency_exchange_rate' => $currency->exchange_rate,
                 'app.currency.default_format_locale'          => $currency->format_locale,
                 'app.currency.default_decimal_places'         => $currency->decimal_places,
+                'devices.current_device_type'                 => $device_type,
             ]);
 
             app(ConvertPrice::class)->setDefaultCurrency($currency);

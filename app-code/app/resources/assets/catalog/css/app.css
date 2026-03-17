@@ -60,6 +60,7 @@
 }
 
 @theme {
+    --breakpoint-bp425px: 26.5625rem;
     --breakpoint-bp1440px: 90rem;
     --breakpoint-bp1920px: 120rem;
 
@@ -75,6 +76,7 @@
     --text-82px: calc(82 / var(--base-font-size) * 1rem);
     --text-90px: calc(90 / var(--base-font-size) * 1rem);
     --text-122px: calc(122 / var(--base-font-size) * 1rem);
+    --text-150px: calc(150 / var(--base-font-size) * 1rem);
     --text-192px: calc(192 / var(--base-font-size) * 1rem);
 
     --color-white: rgb(255, 251, 254); /* #FFFBFE */
@@ -92,8 +94,16 @@
     --spacing-19px: calc(19 / var(--base-font-size) * 1rem);
     --spacing-20px: calc(20 / var(--base-font-size) * 1rem);
     --spacing-38px: calc(38 / var(--base-font-size) * 1rem);
+    --spacing-43px: calc(43 / var(--base-font-size) * 1rem);
+    --spacing-48px: calc(48 / var(--base-font-size) * 1rem);
     --spacing-52px: calc(52 / var(--base-font-size) * 1rem);
+    --spacing-58px: calc(58 / var(--base-font-size) * 1rem);
+    --spacing-70px: calc(70 / var(--base-font-size) * 1rem);
     --spacing-92px: calc(92 / var(--base-font-size) * 1rem);
+    --spacing-110px: calc(110 / var(--base-font-size) * 1rem);
+    --spacing-117px: calc(117 / var(--base-font-size) * 1rem);
+    --spacing-121px: calc(121 / var(--base-font-size) * 1rem);
+    --spacing-133px: calc(133 / var(--base-font-size) * 1rem);
 
     --tracking-0\.02em: 0.02em;
     --tracking-0\.028em: 0.028em;
@@ -296,10 +306,6 @@
         @apply hidden mt-5 md:flex md:items-end md:justify-center 2xl:justify-between md:w-full;
     }
 
-    .footer-brand-link {
-        @apply inline-block font-semibold uppercase leading-none tracking-[28%] 2xl:tracking-0.05em text-192px 2xl:text-[7.25rem] max-md:-mb-5;
-    }
-
     .footer-socials-desktop {
         @apply hidden 2xl:flex;
     }
@@ -396,7 +402,7 @@
     }
 
     .products-carousel-nav {
-        @apply pointer-events-auto inline-flex size-11 items-center justify-center rounded-full border border-white/50 bg-black/60 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white hover:text-black md:size-12;
+        @apply pointer-events-auto inline-flex size-11 items-center justify-center rounded-full border border-white/50 bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white hover:text-black md:size-12;
     }
 
     .products-carousel-controls .carousel-prev,
@@ -410,15 +416,6 @@
 
     .products-carousel-pagination {
         @apply mt-6 flex items-center justify-center gap-2 md:mt-8 md:gap-3;
-    }
-
-    .products-carousel-pagination > * {
-        @apply size-2 rounded-full border border-white/70 bg-transparent transition-colors duration-300 ease-in-out;
-    }
-
-    .products-carousel-pagination .active,
-    .products-carousel-pagination button[aria-current='true'] {
-        @apply bg-white;
     }
 }
 
