@@ -27,35 +27,22 @@
     --max-viewport-width-rem: calc(1920 / var(--base-font-size) * 1rem);
     --container-padding: calc(16 / var(--base-font-size) * 1rem);
     --site-header-height: calc(76 / var(--base-font-size) * 1rem);
-    --home-main-carousel-copy-max-width: calc(896 / var(--base-font-size) * 1rem);
-    --home-main-carousel-title-max-width: calc(272 / var(--base-font-size) * 1rem);
-    --home-main-carousel-description-max-width: calc(272 / var(--base-font-size) * 1rem);
-    --home-main-carousel-cta-size: calc(184 / var(--base-font-size) * 1rem);
 
     /* 48rem - 768px */
     @media (width >= 48rem) {
         --container-padding: calc(32 / var(--base-font-size) * 1rem);
         --site-header-height: calc(88 / var(--base-font-size) * 1rem);
-        --home-main-carousel-title-max-width: calc(448 / var(--base-font-size) * 1rem);
-        --home-main-carousel-description-max-width: calc(304 / var(--base-font-size) * 1rem);
-        --home-main-carousel-cta-size: calc(224 / var(--base-font-size) * 1rem);
     }
 
     /* 64rem - 1024px */
     @media (width >= 64rem) {
         --container-padding: calc(60 / var(--base-font-size) * 1rem);
         --site-header-height: calc(96 / var(--base-font-size) * 1rem);
-        --home-main-carousel-title-max-width: calc(768 / var(--base-font-size) * 1rem);
-        --home-main-carousel-description-max-width: calc(512 / var(--base-font-size) * 1rem);
-        --home-main-carousel-cta-size: calc(272 / var(--base-font-size) * 1rem);
     }
 
     /* 96rem - 1920px */
     @media (width >= 120rem) {
         --container-padding: calc(76 / var(--base-font-size) * 1rem);
-        --home-main-carousel-title-max-width: calc(960 / var(--base-font-size) * 1rem);
-        --home-main-carousel-description-max-width: calc(576 / var(--base-font-size) * 1rem);
-        --home-main-carousel-cta-size: calc(296 / var(--base-font-size) * 1rem);
     }
 }
 
@@ -96,9 +83,11 @@
     --spacing-38px: calc(38 / var(--base-font-size) * 1rem);
     --spacing-43px: calc(43 / var(--base-font-size) * 1rem);
     --spacing-48px: calc(48 / var(--base-font-size) * 1rem);
+    --spacing-50px: calc(50 / var(--base-font-size) * 1rem);
     --spacing-52px: calc(52 / var(--base-font-size) * 1rem);
     --spacing-58px: calc(58 / var(--base-font-size) * 1rem);
     --spacing-70px: calc(70 / var(--base-font-size) * 1rem);
+    --spacing-72px: calc(72 / var(--base-font-size) * 1rem);
     --spacing-92px: calc(92 / var(--base-font-size) * 1rem);
     --spacing-110px: calc(110 / var(--base-font-size) * 1rem);
     --spacing-117px: calc(117 / var(--base-font-size) * 1rem);
@@ -244,6 +233,10 @@
         @apply text-32px md:text-44px lg:text-6xl 2xl:text-90px;
     }
 
+    .prod-list__name {
+        @apply font-inter text-base leading-1.4em font-normal uppercase tracking-0.04em md:text-lg lg:text-xl 2xl:text-2xl text-ellipsis line-clamp-3;
+    }
+
     .footer {
         @apply border-t border-opacity-light-gray-40% max-md:overflow-hidden pt-4 pb-4 md:pt-7 md:pb-0 lg:pt-15 2xl:pt-20 2xl:mb-52px;
     }
@@ -347,7 +340,15 @@
     }
 
     .carousel-pagination {
-        @apply flex items-center justify-center gap-x-2;
+        @apply flex items-center justify-center gap-x-2 h-2.5;
+
+        & > * {
+            @apply carousel-dot size-1.5 bg-light-gray carousel-active:ease-in-out carousel-active:duration-200;
+        }
+
+        & > *.active {
+            @apply size-2.5;
+        }
     }
 }
 

@@ -18,18 +18,18 @@
     : (int) ($carousel_module_data['desctop_max_height'] ?? 0);
 @endphp
 
-<section class="home-main-carousel-section" aria-label="Main carousel">
+<section class="main-carousel-section carousel-section" aria-label="Main carousel">
     <div class="container">
         <div id="{{ $carousel_dom_id }}"
-             class="home-main-carousel --prevent-on-load-init relative"
+             class="main-carousel carousel --prevent-on-load-init relative"
              @if($is_interactive_carousel)
                  data-main-carousel
              data-slides-count="{{ $slides_count }}"
              data-page-types='@json($page_types)'
-             data-carousel='{ "isAutoHeight": true, "loadingClasses": "opacity-0, opacity-100", "dotsItemClasses": "carousel-dot size-1.5 bg-light-gray carousel-active:size-2.5 carousel-active:ease-in-out carousel-active:duration-200", "isDraggable": true, "isInfiniteLoop": true, "isAutoPlay": false }'
+             data-carousel='{ "isAutoHeight": true, "loadingClasses": "opacity-0, opacity-100", "isDraggable": true, "isInfiniteLoop": true, "isAutoPlay": false }'
             @endif>
-            <div class="carousel home-main-carousel-track rounded-none">
-                <div class="carousel-body home-main-carousel-body">
+            <div class="carousel main-carousel-track rounded-none">
+                <div class="main-carousel-body carousel-body">
                     @foreach($carousel_module_data['slides'] as $slide)
                         @php
                             $has_image_link = filled($slide['image_url']);
@@ -59,16 +59,16 @@
                                 : (int) ($slide['desktop_image']['height'] ?? 0);
                         @endphp
 
-                        <div class="carousel-slide relative flex flex-col items-center home-main-carousel-slide">
-                            <div class="home-main-carousel-media w-full h-full"
-                            @if($is_not_current_device_desktop && $has_slide_image_for_current_device)
+                        <div class="main-carousel-slide carousel-slide relative flex flex-col items-center w-full h-full">
+                            <div class="main-carousel-media w-full h-full"
+                                @if($is_not_current_device_desktop && $has_slide_image_for_current_device)
                                 @style("max-height: calc($max_height / var(--base-font-size) * 1rem)")
                                 @else
                                 @style("height: calc($max_height / var(--base-font-size) * 1rem)")
                                 @endif
                             >
                                 @if($has_image_link)
-                                    <a class="home-main-carousel-media-link flex items-center justify-center w-full h-full"
+                                    <a class="main-carousel-media-link flex items-center justify-center w-full h-full"
                                        href="{{ $slide['image_url'] }}"
                                        target="{{ $target }}"
                                        @if($rel) rel="{{ $rel }}" @endif
@@ -109,7 +109,7 @@
                                         @endif
                                     </a>
                                 @else
-                                    <div class="home-main-carousel-media-link flex items-center justify-center w-full h-full">
+                                    <div class="main-carousel-media flex items-center justify-center w-full h-full">
                                         @if($has_slide_image)
                                             <picture>
                                                 @if(filled($desktop_image_urls['thumb_4x'] ?? ''))
@@ -149,29 +149,30 @@
                                 @endif
                             </div>
 
-                            <div class="container home-main-carousel-content-wrap">
-                                <div class="home-main-carousel-content">
+                            <div class="main-carousel-content-wrap">
+                                <div class="main-carousel-content carousel-content">
                                     @if($has_copy)
                                         @if($has_title)
-                                            <div class="home-main-carousel-title absolute top-10 left-0 bp425px:left-1/2 bp425px:-translate-x-1/3 md:translate-x-0 md:top-2/12 md:left-10 w-full font-cormorant-garamond xl:max-w-1/2
-                                                        md:max-w-3/4 font-semibold text-42px md:text-64px lg:text-82px 2xl:text-122px leading-none
-                                                        -tracking-0.05em uppercase">
+                                            <div class="main-carousel-title absolute top-10 left-0 bp425px:left-1/2 bp425px:-translate-x-1/3 md:translate-x-0
+                                                        md:top-2/12 md:left-10 font-cormorant-garamond xl:max-w-1/2 md:max-w-3/4 font-semibold text-42px
+                                                        md:text-64px lg:text-82px 2xl:text-122px leading-none -tracking-0.05em uppercase">
                                                 {{ $slide['title'] }}
                                             </div>
                                         @endif
 
                                         @if($has_description)
-                                            <p class="home-main-carousel-description absolute bottom-20 left-0 md:left-1/12 lg:left-1/3 w-full md:max-w-2/5 lg:max-w-1/3 text-light-gray
-                                                      font-light tracking-0.04em uppercase">
+                                            <p class="main-carousel-description absolute bottom-20 left-0 md:left-1/12 lg:left-1/3 w-full md:max-w-2/5
+                                                      lg:max-w-1/3 text-light-gray font-light tracking-0.04em uppercase">
                                                 {{ $slide['description'] }}
                                             </p>
                                         @endif
                                     @endif
 
                                     @if($has_button)
-                                        <a class="home-main-carousel-cta absolute bottom-1/3 md:bottom-24 right-1/2 max-md:translate-x-1/2 md:right-6 flex items-center justify-center text-white
-                                                  text-sm lg:text-base xl:text-xl hover:bg-white hover:text-black duration-200 ease-in
-                                                  uppercase border border-white rounded-full px-43px py-110px md:px-58px md:py-121px lg:px-48px lg:py-117px xl:px-70px xl:py-133px"
+                                        <a class="main-carousel-btn absolute bottom-1/3 md:bottom-24 right-1/2 max-md:translate-x-1/2 md:right-6 flex items-center
+                                                  justify-center text-white text-sm lg:text-base xl:text-xl hover:bg-white hover:text-black duration-200
+                                                  ease-in uppercase border border-white rounded-full px-50px py-72px md:px-58px md:py-121px lg:px-48px
+                                                  lg:py-117px xl:px-70px xl:py-133px"
                                            href="{{ $slide['button_url'] }}"
                                            target="{{ $target }}"
                                            @if($rel) rel="{{ $rel }}" @endif>
@@ -189,15 +190,15 @@
 
             @if($is_interactive_carousel)
                 <!-- Next Slide -->
-                <button class="carousel-next start-0 carousel-nav"
+                <button class="main-carousel-next carousel-next start-0 carousel-nav"
                         type="button">
                     <span class="icon-[mynaui--arrow-left] size-6"></span>
                 </button>
 
-                <div class="carousel-pagination"></div>
+                <div class="main-carousel-pagination carousel-pagination"></div>
 
                 <!-- Previous Slide -->
-                <button class="carousel-prev end-0 carousel-nav"
+                <button class="main-carousel-prev carousel-prev end-0 carousel-nav"
                         type="button">
                     <span class="icon-[mynaui--arrow-right] size-6"></span>
                 </button>

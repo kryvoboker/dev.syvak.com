@@ -1,17 +1,26 @@
 import { findElem, toRem } from "@ts-shared/lib/helpers.ts";
 
-export const handleCssVars = () : void => {
-    const doc : HTMLElement = document.documentElement;
+type InitCallback = (doc: HTMLElement) => void;
 
-    const init = () : void => {
-        const headerEl : HTMLElement | null = findElem('header');
+export const handleCssVars = (initCb: InitCallback | null = null): void => {
+    const doc: HTMLElement = document.documentElement;
 
-        if (headerEl) {
-            doc.style.setProperty('--header-height', `${toRem(headerEl.offsetHeight)}`);
-        }
-    };
+    let init = null;
 
-    init();
+    if (typeof initCb === 'function') {
+        init = initCb;
+    } else {
+        init = (doc: HTMLElement): void => {
+            const headerEl: HTMLElement | null = findElem('header');
 
-    window.addEventListener('resize', init);
+            if (headerEl) {
+                doc.style.setProperty('--header-height', `${toRem(headerEl.offsetHeight)}`);
+            }
+        };
+    }
+
+
+    init(doc);
+
+    window.addEventListener('resize', (): void => init(doc));
 };
