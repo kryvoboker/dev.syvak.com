@@ -1,8 +1,7 @@
-import { initCarousel }                    from '@ts-features/carousel/lib/initCarousel.ts';
-import { $PAGE_TYPE_KEY }                  from '@ts-shared/lib/constants.ts';
-import { getAppParam }                     from '@ts-shared/lib/getAppParam.ts';
-import { findArrayElems, findElem, toRem } from '@ts-shared/lib/helpers.ts';
-import { handleCssVars }                   from "@ts-shared/lib/cssVars.ts";
+import { initCarousel }          from '@ts-features/carousel/lib/initCarousel.ts';
+import { $PAGE_TYPE_KEY }        from '@ts-shared/lib/constants.ts';
+import { getAppParam }           from '@ts-shared/lib/getAppParam.ts';
+import { findArrayElems, toRem } from '@ts-shared/lib/helpers.ts';
 
 function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
     const pageType = getAppParam<string>($PAGE_TYPE_KEY);
@@ -32,6 +31,33 @@ function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
     }
 }
 
+function setCardsHeight(): void {
+    const carouselsBodiesEls = <HTMLElement[] | []>findArrayElems('.products-carousel-body');
+    let minHeight: number    = 0;
+
+    carouselsBodiesEls.forEach((carouselBodyEl: HTMLElement): void => {
+        const slidersEls = <HTMLElement[] | []>findArrayElems('.products-carousel-slide', carouselBodyEl);
+
+        slidersEls.forEach((sliderElChildrenEl: HTMLElement): void => {
+            const children = <HTMLElement[] | []>Array.from(sliderElChildrenEl.children);
+
+            const sliderElChildrenElsHeight: number = children.reduce((acc2: number, sliderElChildEl: HTMLElement): number => {
+                return acc2 + sliderElChildEl.offsetHeight;
+            }, 0);
+
+            if (sliderElChildrenElsHeight > minHeight) {
+                minHeight = sliderElChildrenElsHeight;
+            }
+        });
+
+        if (minHeight > 0) {
+            carouselBodyEl.style.setProperty('height', `${toRem(minHeight)}`);
+
+            minHeight = 0;
+        }
+    });
+}
+
 export function handleProductsCarousel(): void {
     const carouselElements = <HTMLElement[] | []>findArrayElems('[data-products-carousel]');
 
@@ -46,28 +72,6 @@ export function handleProductsCarousel(): void {
 
         initCarousel(carouselElement);
 
-        const initCb = (doc: HTMLElement): void => {
-            const cardsEls        = <HTMLElement[] | []>findArrayElems('.products-carousel-card');
-            let minHeight: number = 0;
-
-            cardsEls.forEach((cardEl: HTMLElement): void => {
-                const imgContainerEl  = <HTMLElement | null>findElem('.products-carousel-img-container', cardEl);
-                const infoContainerEl = <HTMLElement | null>findElem('.products-carousel-info', cardEl);
-
-                if (imgContainerEl !== null && infoContainerEl !== null) {
-                    const totalSlideContainerHeight: number = imgContainerEl.offsetHeight + infoContainerEl.offsetHeight;
-
-                    if (totalSlideContainerHeight > minHeight) {
-                        minHeight = totalSlideContainerHeight;
-                    }
-                }
-            });
-
-            if (minHeight > 0) {
-                doc.style.setProperty('--products-carousel-card', `${toRem(minHeight)}`);
-            }
-        };
-
-        handleCssVars(initCb)
+        setTimeout((): void => setCardsHeight(), 100);
     });
 }

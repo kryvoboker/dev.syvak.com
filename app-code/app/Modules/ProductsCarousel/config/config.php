@@ -7,6 +7,11 @@ return [
     'description' => 'Localized storefront products carousel module.',
     'runtime'     => [
         'provider_loading_strategy' => config('modules-runtime.allowed_strategies.route_matched'),
+        'storefront'                => [
+            'data_service'  => 'Services\\ProductsCarouselModuleDataService',
+            'view'          => 'productscarousel::storefront.products-carousel',
+            'view_data_key' => 'products_carousel_module_data',
+        ],
     ],
     'search' => [
         'result_limit' => 30,

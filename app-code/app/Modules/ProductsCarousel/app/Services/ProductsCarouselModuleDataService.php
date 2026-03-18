@@ -105,10 +105,10 @@ readonly class ProductsCarouselModuleDataService
                         ->all(),
                     'placement'   => $instance->placement,
                     'source_mode' => $source_mode,
-                    'products'    => collect($products_payload),
+                    'products'    => $products_payload,
                 ];
             })
-            ->filter(fn (array $module_data): bool => $module_data['products']->isNotEmpty())
+            ->filter(fn (array $module_data): bool => $module_data['products'] !== [])
             ->values()
             ->all();
     }
@@ -228,8 +228,7 @@ readonly class ProductsCarouselModuleDataService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }                            $runtime_shared_settings
-     * @param  array<string, mixed> $instance_settings
-     *
+     * @param  array<string, mixed>  $instance_settings
      * @return EloquentCollection<int, Product>
      */
     private function resolveProductsForInstance(
@@ -244,7 +243,7 @@ readonly class ProductsCarouselModuleDataService
     }
 
     /**
-     * @param array<string, mixed> $instance_settings
+     * @param  array<string, mixed>  $instance_settings
      * @param array{
      *      min_quantity: int,
      *      products_limit: int,
@@ -253,7 +252,6 @@ readonly class ProductsCarouselModuleDataService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }                           $runtime_shared_settings
-     *
      * @return EloquentCollection<int, Product>
      */
     private function resolveCategoryBasedProducts(
@@ -304,7 +302,7 @@ readonly class ProductsCarouselModuleDataService
     }
 
     /**
-     * @param array<string, mixed> $instance_settings
+     * @param  array<string, mixed>  $instance_settings
      * @param array{
      *      min_quantity: int,
      *      products_limit: int,
@@ -313,7 +311,6 @@ readonly class ProductsCarouselModuleDataService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }                           $runtime_shared_settings
-     *
      * @return EloquentCollection<int, Product>
      */
     private function resolveManualOnlyProducts(
@@ -410,7 +407,9 @@ readonly class ProductsCarouselModuleDataService
     }
 
     /**
-     * @param array<string, mixed> $instance_settings
+     * @param  array<string, mixed>  $instance_settings
+     *
+     * @throws RandomException
      *
      * @return array{
      *      min_quantity: int,
@@ -420,7 +419,6 @@ readonly class ProductsCarouselModuleDataService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }
-     * @throws RandomException
      */
     private function resolveRuntimeSharedSettings(array $instance_settings): array
     {
@@ -513,8 +511,9 @@ readonly class ProductsCarouselModuleDataService
     }
 
     /**
-     * @return array<int, string>
      * @throws RandomException
+     *
+     * @return array<int, string>
      */
     private function generateRandomSortSequence(): array
     {
