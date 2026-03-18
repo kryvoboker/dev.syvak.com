@@ -7,6 +7,7 @@ namespace App\Services\Modules;
 use App\Models\Modules\ModuleDefinition;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 readonly class ModuleRuntimeResolverService
 {
@@ -19,11 +20,7 @@ readonly class ModuleRuntimeResolverService
      */
     public function resolve(?string $placement = null, ?string $context_key = null): Collection
     {
-        $modules_placements = config('app.modules_placements');
-
-        if (in_array($placement, $modules_placements)) {
-            $placement = array_search($placement, $modules_placements);;
-        }
+        $placement = $this->normalizePlacement($placement);
 
         $cache_key = 'runtime:' . ($placement ?? 'all') . ':' . ($context_key ?? 'all');
 
@@ -61,5 +58,37 @@ readonly class ModuleRuntimeResolverService
         );
 
         return $resolved_modules;
+    }
+
+    private function normalizePlacement(?string $placement): ?string
+    {
+        if (blank($placement)) {
+            return null;
+        }
+
+        $modules_placements = config('app.modules_placements', []);
+
+        if (! is_array($modules_placements)) {
+            return $placement;
+        }
+
+        $placement_keys       = array_map('strval', array_keys($modules_placements));
+        $normalized_placement = Str::lower(trim($placement));
+
+        foreach ($modules_placements as $placement_key => $placement_label) {
+            if (
+                Str::lower((string) $placement_key) === $normalized_placement
+                || Str::lower((string) $placement_label) === $normalized_placement
+            ) {
+                return (string) $placement_key;
+            }
+        }
+
+        Log::channel('stack')->warning('Module runtime resolver received unsupported placement value.', [
+            'placement'          => $placement,
+            'allowed_placements' => $placement_keys,
+        ]);
+
+        return $placement;
     }
 }

@@ -3,7 +3,7 @@
 
     /**
      * This entrypoint is intentionally explicit: each page/layout decides where
-     * modules are mounted by placement anchors (top|center|bottom), while actual
+     * modules are mounted by placement anchors (top|bottom), while actual
      * module selection is resolved dynamically from DB settings and page type.
      */
     $resolved_storefront_modules = app(StorefrontModulePlacementResolverService::class)

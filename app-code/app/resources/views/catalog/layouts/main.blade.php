@@ -24,7 +24,6 @@
 @php
     $page_type = $page_type ?? try_detect_page_type();
     $top_entrypoint_for_module = 'top';
-    $center_entrypoint_for_module = 'center';
     $bottom_entrypoint_for_module = 'bottom';
 @endphp
 
@@ -45,12 +44,6 @@
         ])
 
         @yield('content')
-
-        @include('catalog.components.modules.placement', [
-            'placement' => $center_entrypoint_for_module,
-            'page_type' => $page_type,
-            'entrypoint_name' => '$center_entrypoint_for_module',
-        ])
 
         @include('catalog.components.modules.placement', [
             'placement' => $bottom_entrypoint_for_module,

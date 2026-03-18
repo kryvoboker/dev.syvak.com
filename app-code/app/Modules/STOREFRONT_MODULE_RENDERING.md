@@ -2,7 +2,7 @@
 
 This document explains how modules are automatically connected to storefront pages based on:
 - `page_type` (for example: `home`, `category`, `product`)
-- `placement` (`top`, `center`, `bottom`)
+- `placement` (`top`, `bottom`)
 
 ## Why this exists
 
@@ -14,7 +14,6 @@ Now, module output is resolved dynamically at runtime.
 
 1. The layout defines explicit module anchors:
    - `$top_entrypoint_for_module`
-   - `$center_entrypoint_for_module`
    - `$bottom_entrypoint_for_module`
 2. Each anchor calls a shared Blade entrypoint:
    - `resources/views/catalog/components/modules/placement.blade.php`
@@ -71,7 +70,7 @@ This lifecycle controls provider registration. Storefront rendering is an additi
 
 ## How `page_type` and `placement` filtering works
 
-- `placement` is passed by the Blade anchor (`top|center|bottom`).
+- `placement` is passed by the Blade anchor (`top|bottom`).
 - `page_type` is detected by `try_detect_page_type()` and passed to the resolver.
 - `resolve_modules_for_context($placement)` returns active module definitions with enabled instances for that placement.
 - Module instance data services apply module-specific filtering logic (including `settings.shared.page_types`).
