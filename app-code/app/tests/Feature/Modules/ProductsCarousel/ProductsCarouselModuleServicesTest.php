@@ -131,6 +131,8 @@ class ProductsCarouselModuleServicesTest extends TestCase
         $this->assertSame(420, $normalized_settings['shared']['product_image_height']);
         $this->assertSame('custom', $normalized_settings['shared']['sort_mode']);
         $this->assertSame([], $normalized_settings['shared']['custom_sort_options']);
+        $this->assertArrayHasKey('translations', $normalized_settings['shared']);
+        $this->assertArrayHasKey('en', $normalized_settings['shared']['translations']);
     }
 
     public function test_normalizer_rejects_invalid_custom_sort_options(): void
@@ -207,6 +209,57 @@ class ProductsCarouselModuleServicesTest extends TestCase
         $this->assertSame('desc', $normalized_settings['shared']['custom_sort']['date_added']);
     }
 
+    public function test_normalizer_maps_legacy_shared_scalars_to_all_active_language_translations(): void
+    {
+        DB::table('languages')->insert([
+            'id'         => 2,
+            'code'       => 'uk',
+            'name'       => 'Ukrainian',
+            'is_active'  => true,
+            'is_default' => false,
+        ]);
+
+        DB::table('categories')->insert([
+            ['id' => 1, 'parent_id' => null, 'sort_order' => 1, 'is_active' => true],
+        ]);
+
+        $normalizer_service = app(ModuleSettingsNormalizerService::class);
+
+        $normalized_settings = $normalizer_service->normalize([
+            'source_mode' => 'category_based',
+            'shared'      => [
+                'page_types'                 => ['home'],
+                'module_name_for_user'       => 'Legacy title',
+                'short_description_for_user' => 'Legacy description',
+            ],
+            'category_based' => [
+                'category_ids'               => [1],
+                'use_selected_products_only' => false,
+                'selected_product_ids'       => [],
+            ],
+            'manual_only' => [
+                'selected_product_ids' => [],
+            ],
+        ]);
+
+        $this->assertSame(
+            'Legacy title',
+            $normalized_settings['shared']['translations']['en']['module_name_for_user'],
+        );
+        $this->assertSame(
+            'Legacy description',
+            $normalized_settings['shared']['translations']['en']['short_description_for_user'],
+        );
+        $this->assertSame(
+            'Legacy title',
+            $normalized_settings['shared']['translations']['uk']['module_name_for_user'],
+        );
+        $this->assertSame(
+            'Legacy description',
+            $normalized_settings['shared']['translations']['uk']['short_description_for_user'],
+        );
+    }
+
     public function test_category_scoped_search_returns_only_active_products_from_selected_categories(): void
     {
         DB::table('categories')->insert([
@@ -239,6 +292,58 @@ class ProductsCarouselModuleServicesTest extends TestCase
         $this->assertArrayHasKey(10, $results);
         $this->assertArrayNotHasKey(20, $results);
         $this->assertArrayNotHasKey(30, $results);
+    }
+
+    public function test_category_scoped_search_excludes_already_selected_products(): void
+    {
+        DB::table('categories')->insert([
+            ['id' => 1, 'parent_id' => null, 'sort_order' => 1, 'is_active' => true],
+        ]);
+
+        DB::table('products')->insert([
+            ['id' => 110, 'model' => 'FLOW-110', 'sku' => 'SKU-110', 'ean' => 110, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => true, 'date_available' => now(), 'date_added' => now()],
+            ['id' => 120, 'model' => 'FLOW-120', 'sku' => 'SKU-120', 'ean' => 120, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => true, 'date_available' => now(), 'date_added' => now()],
+        ]);
+
+        DB::table('product_descriptions')->insert([
+            ['product_id' => 110, 'language_id' => 1, 'name' => 'Flow Included', 'description' => 'd', 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
+            ['product_id' => 120, 'language_id' => 1, 'name' => 'Flow Excluded', 'description' => 'd', 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
+        ]);
+
+        DB::table('category_product')->insert([
+            ['category_id' => 1, 'product_id' => 110],
+            ['category_id' => 1, 'product_id' => 120],
+        ]);
+
+        $search_service = app(ProductsCarouselProductSearchService::class);
+
+        $results = $search_service->searchActiveByCategories('flow', [1], [120]);
+
+        $this->assertArrayHasKey(110, $results);
+        $this->assertArrayNotHasKey(120, $results);
+    }
+
+    public function test_global_search_excludes_already_selected_products(): void
+    {
+        DB::table('products')->insert([
+            ['id' => 210, 'model' => 'GLOBAL-210', 'sku' => 'SKU-210', 'ean' => 210, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => true, 'date_available' => now(), 'date_added' => now()],
+            ['id' => 220, 'model' => 'GLOBAL-220', 'sku' => 'SKU-220', 'ean' => 220, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => true, 'date_available' => now(), 'date_added' => now()],
+            ['id' => 230, 'model' => 'GLOBAL-230', 'sku' => 'SKU-230', 'ean' => 230, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => false, 'date_available' => now(), 'date_added' => now()],
+        ]);
+
+        DB::table('product_descriptions')->insert([
+            ['product_id' => 210, 'language_id' => 1, 'name' => 'Global Included', 'description' => 'd', 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
+            ['product_id' => 220, 'language_id' => 1, 'name' => 'Global Excluded', 'description' => 'd', 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
+            ['product_id' => 230, 'language_id' => 1, 'name' => 'Global Inactive', 'description' => 'd', 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
+        ]);
+
+        $search_service = app(ProductsCarouselProductSearchService::class);
+
+        $results = $search_service->searchAllActive('global', [220]);
+
+        $this->assertArrayHasKey(210, $results);
+        $this->assertArrayNotHasKey(220, $results);
+        $this->assertArrayNotHasKey(230, $results);
     }
 
     public function test_runtime_resolver_applies_min_quantity_and_products_limit_for_manual_mode(): void
@@ -280,6 +385,75 @@ class ProductsCarouselModuleServicesTest extends TestCase
 
         $this->assertCount(1, $products);
         $this->assertSame(20, (int) $products->first()->id);
+    }
+
+    public function test_runtime_resolver_uses_current_locale_shared_translation_with_fallback(): void
+    {
+        DB::table('languages')->insert([
+            'id'         => 2,
+            'code'       => 'uk',
+            'name'       => 'Ukrainian',
+            'is_active'  => true,
+            'is_default' => false,
+        ]);
+
+        $module_data_service = app(ProductsCarouselModuleDataService::class);
+        $reflection_method   = new \ReflectionMethod($module_data_service, 'resolveLocalizedSharedContent');
+        $reflection_method->setAccessible(true);
+
+        app()->setLocale('uk');
+
+        /** @var array<string, mixed> $localized_shared */
+        $localized_shared = $reflection_method->invoke(
+            $module_data_service,
+            [
+                'shared' => [
+                    'translations' => [
+                        'en' => [
+                            'module_name_for_user'       => 'English title',
+                            'short_description_for_user' => 'English description',
+                        ],
+                        'uk' => [
+                            'module_name_for_user'       => 'Український заголовок',
+                            'short_description_for_user' => 'Український опис',
+                        ],
+                    ],
+                ],
+            ],
+        );
+
+        $this->assertSame('Український заголовок', $localized_shared['module_name_for_user']);
+        $this->assertSame('Український опис', $localized_shared['short_description_for_user']);
+        $this->assertSame('uk', $localized_shared['requested_locale']);
+        $this->assertSame('uk', $localized_shared['resolved_locale']);
+        $this->assertFalse((bool) $localized_shared['fallback_used']);
+
+        app()->setLocale('uk');
+
+        /** @var array<string, mixed> $localized_shared_with_fallback */
+        $localized_shared_with_fallback = $reflection_method->invoke(
+            $module_data_service,
+            [
+                'shared' => [
+                    'translations' => [
+                        'en' => [
+                            'module_name_for_user'       => 'English title',
+                            'short_description_for_user' => 'English description',
+                        ],
+                        'uk' => [
+                            'module_name_for_user'       => '',
+                            'short_description_for_user' => '',
+                        ],
+                    ],
+                ],
+            ],
+        );
+
+        $this->assertSame('English title', $localized_shared_with_fallback['module_name_for_user']);
+        $this->assertSame('English description', $localized_shared_with_fallback['short_description_for_user']);
+        $this->assertSame('uk', $localized_shared_with_fallback['requested_locale']);
+        $this->assertSame('en', $localized_shared_with_fallback['resolved_locale']);
+        $this->assertTrue((bool) $localized_shared_with_fallback['fallback_used']);
     }
 
     private function createLanguagesTable(): void

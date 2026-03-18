@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
+use Random\RandomException;
 
 /**
  * Resolves storefront-ready ProductsCarousel payload for current placement/page.
@@ -74,33 +75,15 @@ readonly class ProductsCarouselModuleDataService
         return $instances
             ->filter(fn (ModuleInstance $instance): bool => $this->matchesPageType($instance, $page_type))
             ->map(function (ModuleInstance $instance): array {
-                $instance_settings       = is_array($instance->settings) ? $instance->settings : [];
-                $source_mode             = (string) Arr::get($instance_settings, 'source_mode', 'category_based');
-                $runtime_shared_settings = $this->resolveRuntimeSharedSettings($instance_settings);
-                $products                = $this->resolveProductsForInstance(
-                    $instance,
+                $instance_settings        = is_array($instance->settings) ? $instance->settings : [];
+                $source_mode              = (string) Arr::get($instance_settings, 'source_mode', 'category_based');
+                $runtime_shared_settings  = $this->resolveRuntimeSharedSettings($instance_settings);
+                $localized_shared_content = $this->resolveLocalizedSharedContent($instance_settings);
+                $products                 = $this->resolveProductsForInstance(
                     $source_mode,
                     $instance_settings,
                     $runtime_shared_settings,
                 );
-
-                Log::channel('daily')->info('ProductsCarousel runtime strategy resolved for instance.', [
-                    'instance_id'          => $instance->id,
-                    'source_mode'          => $source_mode,
-                    'sort_mode'            => $runtime_shared_settings['sort_mode'],
-                    'effective_sort_order' => $runtime_shared_settings['sort_sequence'],
-                    'min_quantity'         => $runtime_shared_settings['min_quantity'],
-                    'products_limit'       => $runtime_shared_settings['products_limit'],
-                    'product_image_width'  => $runtime_shared_settings['product_image_width'],
-                    'product_image_height' => $runtime_shared_settings['product_image_height'],
-                ]);
-
-                if ($products->isEmpty()) {
-                    Log::channel('stack')->warning('ProductsCarousel instance resolved without products.', [
-                        'instance_id' => $instance->id,
-                        'source_mode' => $source_mode,
-                    ]);
-                }
 
                 $products_payload = $products
                     ->map(fn (Product $product): array => $this->mapProductCard(
@@ -111,79 +94,175 @@ readonly class ProductsCarouselModuleDataService
                     ->values()
                     ->all();
 
-                Log::channel('daily')->info('ProductsCarousel instance payload prepared.', [
-                    'instance_id'        => $instance->id,
-                    'source_mode'        => $source_mode,
-                    'loaded_items_count' => count($products_payload),
-                ]);
-
                 return [
                     'instance_id'                => $instance->id,
                     'name'                       => $instance->name,
-                    'module_name_for_user'       => (string) Arr::get($instance_settings, 'shared.module_name_for_user', ''),
-                    'short_description_for_user' => (string) Arr::get($instance_settings, 'shared.short_description_for_user', ''),
+                    'module_name_for_user'       => $localized_shared_content['module_name_for_user'],
+                    'short_description_for_user' => $localized_shared_content['short_description_for_user'],
                     'page_types'                 => collect(Arr::get($instance_settings, 'shared.page_types', []))
                         ->filter(fn (mixed $page_type): bool => is_string($page_type) && filled($page_type))
                         ->values()
                         ->all(),
                     'placement'   => $instance->placement,
                     'source_mode' => $source_mode,
-                    'products'    => $products_payload,
+                    'products'    => collect($products_payload),
                 ];
             })
-            ->filter(fn (array $module_data): bool => $module_data['products'] !== [])
+            ->filter(fn (array $module_data): bool => $module_data['products']->isNotEmpty())
             ->values()
             ->all();
     }
 
     /**
      * @param  array<string, mixed>  $instance_settings
-     * @param  array{
+     * @return array{
+     *      module_name_for_user: string,
+     *      short_description_for_user: string,
+     *      requested_locale: string,
+     *      resolved_locale: string,
+     *      fallback_used: bool
+     * }
+     */
+    private function resolveLocalizedSharedContent(array $instance_settings): array
+    {
+        $requested_locale     = app()->getLocale();
+        $shared_settings      = Arr::get($instance_settings, 'shared', []);
+        $shared_settings      = is_array($shared_settings) ? $shared_settings : [];
+        $translations_payload = Arr::get($shared_settings, 'translations', []);
+        $translations_payload = is_array($translations_payload) ? $translations_payload : [];
+
+        $translations_by_locale = collect($translations_payload)
+            ->filter(fn (mixed $translation): bool => is_array($translation))
+            ->map(function (array $translation): array {
+                return [
+                    'module_name_for_user'       => Str::squish((string) Arr::get($translation, 'module_name_for_user')),
+                    'short_description_for_user' => Str::squish((string) Arr::get($translation, 'short_description_for_user')),
+                ];
+            });
+
+        $resolved_locale      = $requested_locale;
+        $fallback_used        = false;
+        $resolved_translation = $translations_by_locale->get($requested_locale, []);
+        $resolved_translation = is_array($resolved_translation) ? $resolved_translation : [];
+
+        $requested_has_values = filled((string) Arr::get($resolved_translation, 'module_name_for_user'))
+            || filled((string) Arr::get($resolved_translation, 'short_description_for_user'));
+
+        if ($requested_has_values === false) {
+            $default_locale = Language::query()
+                ->where('is_active', true)
+                ->orderByDesc('is_default')
+                ->orderBy('id')
+                ->value('code');
+
+            $default_translation = is_string($default_locale)
+                ? $translations_by_locale->get($default_locale, [])
+                : [];
+            $default_translation = is_array($default_translation) ? $default_translation : [];
+
+            $default_has_values = filled((string) Arr::get($default_translation, 'module_name_for_user'))
+                || filled((string) Arr::get($default_translation, 'short_description_for_user'));
+
+            if ($default_has_values) {
+                $resolved_translation = $default_translation;
+                $resolved_locale      = (string) $default_locale;
+                $fallback_used        = true;
+            }
+        }
+
+        $resolved_has_values = filled((string) Arr::get($resolved_translation, 'module_name_for_user'))
+            || filled((string) Arr::get($resolved_translation, 'short_description_for_user'));
+
+        if ($resolved_has_values === false) {
+            $first_filled_locale = null;
+
+            foreach ($translations_by_locale as $locale_code => $translation) {
+                if (
+                    filled((string) Arr::get($translation, 'module_name_for_user'))
+                    || filled((string) Arr::get($translation, 'short_description_for_user'))
+                ) {
+                    $first_filled_locale  = (string) $locale_code;
+                    $resolved_translation = $translation;
+                    $fallback_used        = true;
+
+                    break;
+                }
+            }
+
+            if (is_string($first_filled_locale) && filled($first_filled_locale)) {
+                $resolved_locale = $first_filled_locale;
+            }
+        }
+
+        $resolved_has_values = filled((string) Arr::get($resolved_translation, 'module_name_for_user'))
+            || filled((string) Arr::get($resolved_translation, 'short_description_for_user'));
+
+        if ($resolved_has_values === false) {
+            $legacy_module_name = Str::squish((string) Arr::get($shared_settings, 'module_name_for_user', ''));
+            $legacy_description = Str::squish((string) Arr::get($shared_settings, 'short_description_for_user', ''));
+
+            if (filled($legacy_module_name) || filled($legacy_description)) {
+                $resolved_translation = [
+                    'module_name_for_user'       => $legacy_module_name,
+                    'short_description_for_user' => $legacy_description,
+                ];
+                $fallback_used = true;
+            }
+        }
+
+        return [
+            'module_name_for_user'       => (string) Arr::get($resolved_translation, 'module_name_for_user', ''),
+            'short_description_for_user' => (string) Arr::get($resolved_translation, 'short_description_for_user', ''),
+            'requested_locale'           => $requested_locale,
+            'resolved_locale'            => $resolved_locale,
+            'fallback_used'              => $fallback_used,
+        ];
+    }
+
+    /**
+     * @param array{
      *      min_quantity: int,
      *      products_limit: int,
      *      product_image_width: int,
      *      product_image_height: int,
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
-     * }  $runtime_shared_settings
+     * }                            $runtime_shared_settings
+     * @param  array<string, mixed> $instance_settings
+     *
      * @return EloquentCollection<int, Product>
      */
     private function resolveProductsForInstance(
-        ModuleInstance $instance,
         string $source_mode,
         array $instance_settings,
         array $runtime_shared_settings,
     ): EloquentCollection {
         return match ($source_mode) {
-            'manual_only' => $this->resolveManualOnlyProducts($instance, $instance_settings, $runtime_shared_settings),
-            default       => $this->resolveCategoryBasedProducts($instance, $instance_settings, $runtime_shared_settings),
+            'manual_only' => $this->resolveManualOnlyProducts($instance_settings, $runtime_shared_settings),
+            default       => $this->resolveCategoryBasedProducts($instance_settings, $runtime_shared_settings),
         };
     }
 
     /**
-     * @param  array<string, mixed>  $instance_settings
-     * @param  array{
+     * @param array<string, mixed> $instance_settings
+     * @param array{
      *      min_quantity: int,
      *      products_limit: int,
      *      product_image_width: int,
      *      product_image_height: int,
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
-     * }  $runtime_shared_settings
+     * }                           $runtime_shared_settings
+     *
      * @return EloquentCollection<int, Product>
      */
     private function resolveCategoryBasedProducts(
-        ModuleInstance $instance,
         array $instance_settings,
         array $runtime_shared_settings,
     ): EloquentCollection {
         $category_ids = $this->normalizeIds(Arr::get($instance_settings, 'category_based.category_ids', []));
 
         if ($category_ids === []) {
-            Log::channel('stack')->warning('ProductsCarousel category-based mode has no categories selected.', [
-                'instance_id' => $instance->id,
-            ]);
-
             return new EloquentCollection();
         }
 
@@ -225,19 +304,19 @@ readonly class ProductsCarouselModuleDataService
     }
 
     /**
-     * @param  array<string, mixed>  $instance_settings
-     * @param  array{
+     * @param array<string, mixed> $instance_settings
+     * @param array{
      *      min_quantity: int,
      *      products_limit: int,
      *      product_image_width: int,
      *      product_image_height: int,
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
-     * }  $runtime_shared_settings
+     * }                           $runtime_shared_settings
+     *
      * @return EloquentCollection<int, Product>
      */
     private function resolveManualOnlyProducts(
-        ModuleInstance $instance,
         array $instance_settings,
         array $runtime_shared_settings,
     ): EloquentCollection {
@@ -246,10 +325,6 @@ readonly class ProductsCarouselModuleDataService
         );
 
         if ($selected_product_ids === []) {
-            Log::channel('stack')->warning('ProductsCarousel manual-only mode has no selected active products.', [
-                'instance_id' => $instance->id,
-            ]);
-
             return new EloquentCollection();
         }
 
@@ -260,18 +335,6 @@ readonly class ProductsCarouselModuleDataService
             ->get()
             ->filter(fn (mixed $product): bool => $product instanceof Product)
             ->values();
-
-        Log::channel('daily')->info('ProductsCarousel selected products precedence applied.', [
-            'instance_id' => $instance->id,
-            'precedence'  => 'manual_selection_order',
-            'source_mode' => 'manual_only',
-        ]);
-
-        Log::channel('daily')->info('ProductsCarousel manual-only products resolved.', [
-            'instance_id'                => $instance->id,
-            'selected_product_ids_count' => count($selected_product_ids),
-            'resolved_products_count'    => $products->count(),
-        ]);
 
         return new EloquentCollection($products->all());
     }
@@ -347,7 +410,8 @@ readonly class ProductsCarouselModuleDataService
     }
 
     /**
-     * @param  array<string, mixed>  $instance_settings
+     * @param array<string, mixed> $instance_settings
+     *
      * @return array{
      *      min_quantity: int,
      *      products_limit: int,
@@ -356,6 +420,7 @@ readonly class ProductsCarouselModuleDataService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }
+     * @throws RandomException
      */
     private function resolveRuntimeSharedSettings(array $instance_settings): array
     {
@@ -415,13 +480,22 @@ readonly class ProductsCarouselModuleDataService
     {
         $allowed_sort_options = $this->getAllowedSortOptions();
 
-        $custom_sort_options = collect(Arr::get($instance_settings, 'shared.custom_sort_options', []))
-            ->filter(fn (mixed $option): bool => is_string($option) && filled($option))
-            ->values()
-            ->all();
+        $custom_sort_options = collect(Arr::get($instance_settings, 'shared.custom_sort', []))
+            ->filter(function (mixed $option, mixed $key) use ($allowed_sort_options): bool {
+                if (! is_string($option) || ! is_string($key)) {
+                    return false;
+                }
 
-        $custom_sort_options = collect($allowed_sort_options)
-            ->intersect($custom_sort_options)
+                return in_array("{$key}_$option", $allowed_sort_options, true);
+            })
+            ->map(function (mixed $option, mixed $key): string {
+                if (! is_string($option) || ! is_string($key)) {
+                    return '';
+                }
+
+                return "{$key}_$option";
+            })
+            ->filter(fn (string $sort_option): bool => filled($sort_option))
             ->values()
             ->all();
 
@@ -435,11 +509,12 @@ readonly class ProductsCarouselModuleDataService
             'fallback_sort_option' => 'date_added_desc',
         ]);
 
-        return ['date_added_desc'];
+        return ['quantity_desc', 'date_added_desc'];
     }
 
     /**
      * @return array<int, string>
+     * @throws RandomException
      */
     private function generateRandomSortSequence(): array
     {
@@ -495,8 +570,14 @@ readonly class ProductsCarouselModuleDataService
      */
     private function getAllowedSortOptions(): array
     {
-        return collect($this->products_carousel_config->get('settings.allowed_sort_options', []))
-            ->filter(fn (mixed $option): bool => is_string($option) && filled($option))
+        $sort_options = $this->products_carousel_config->get('settings.allowed_sort_options', []);
+
+        if ($sort_options === []) {
+            return [];
+        }
+
+        return collect($sort_options)
+            ->filter(fn (mixed $sort_option): bool => filled($sort_option) && is_string($sort_option))
             ->values()
             ->all();
     }

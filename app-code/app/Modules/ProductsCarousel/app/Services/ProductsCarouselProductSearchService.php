@@ -8,7 +8,6 @@ use App\Models\Catalogs\Products\Product;
 use App\Models\Settings\Language;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 
 /**
@@ -22,13 +21,16 @@ readonly class ProductsCarouselProductSearchService
 
     /**
      * @param  array<int|string, mixed>  $category_ids
+     * @param  array<int|string, mixed>  $excluded_product_ids
      * @return array<int, string>
      */
-    public function searchActiveByCategories(string $search_query, array $category_ids): array
-    {
-        $started_at = microtime(true);
-
+    public function searchActiveByCategories(
+        string $search_query,
+        array $category_ids,
+        array $excluded_product_ids = [],
+    ): array {
         $normalized_category_ids = $this->normalizeIds($category_ids);
+        $excluded_product_ids    = $this->normalizeIds($excluded_product_ids);
 
         if ($normalized_category_ids === []) {
             return [];
@@ -38,35 +40,29 @@ readonly class ProductsCarouselProductSearchService
             ->whereHas('categories', function (Builder $query) use ($normalized_category_ids): void {
                 $query->whereIn('categories.id', $normalized_category_ids);
             })
+            ->when($excluded_product_ids !== [], function (Builder $query) use ($excluded_product_ids): void {
+                $query->whereNotIn('id', $excluded_product_ids);
+            })
             ->limit((int) $this->products_carousel_config->get('search.result_limit', 30))
             ->get();
-
-        Log::channel('daily')->info('ProductsCarousel category scoped product search executed.', [
-            'query'        => $search_query,
-            'categories'   => $normalized_category_ids,
-            'result_count' => $results->count(),
-            'elapsed_ms'   => (int) ((microtime(true) - $started_at) * 1000),
-        ]);
 
         return $this->mapProductsToOptions($results);
     }
 
     /**
+     * @param  array<int|string, mixed>  $excluded_product_ids
      * @return array<int, string>
      */
-    public function searchAllActive(string $search_query): array
+    public function searchAllActive(string $search_query, array $excluded_product_ids = []): array
     {
-        $started_at = microtime(true);
+        $excluded_product_ids = $this->normalizeIds($excluded_product_ids);
 
         $results = $this->buildBaseProductQuery(trim($search_query))
+            ->when($excluded_product_ids !== [], function (Builder $query) use ($excluded_product_ids): void {
+                $query->whereNotIn('id', $excluded_product_ids);
+            })
             ->limit((int) $this->products_carousel_config->get('search.result_limit', 30))
             ->get();
-
-        Log::channel('daily')->info('ProductsCarousel global product search executed.', [
-            'query'        => $search_query,
-            'result_count' => $results->count(),
-            'elapsed_ms'   => (int) ((microtime(true) - $started_at) * 1000),
-        ]);
 
         return $this->mapProductsToOptions($results);
     }
@@ -155,23 +151,16 @@ readonly class ProductsCarouselProductSearchService
 
     private function buildBaseProductQuery(string $search_query): Builder
     {
-        $language_id = $this->resolveLanguageId();
-
         return Product::query()
             ->select(['id', 'model', 'sku'])
             ->where('is_active', true)
-            ->with([
-                'productDescription' => function ($query) use ($language_id): void {
-                    $query->where('language_id', $language_id);
-                },
-            ])
-            ->when(filled($search_query), function (Builder $query) use ($search_query, $language_id): void {
-                $query->where(function (Builder $query) use ($search_query, $language_id): void {
+            ->with(['productDescription'])
+            ->when(filled($search_query), function (Builder $query) use ($search_query): void {
+                $query->where(function (Builder $query) use ($search_query): void {
                     $query->whereLike('model', "%$search_query%")
                         ->orWhereLike('sku', "%$search_query%")
-                        ->orWhereHas('productDescription', function (Builder $query) use ($search_query, $language_id): void {
+                        ->orWhereHas('productDescription', function (Builder $query) use ($search_query): void {
                             $query
-                                ->where('language_id', $language_id)
                                 ->whereLike('name', "%$search_query%");
                         });
                 });
@@ -181,7 +170,7 @@ readonly class ProductsCarouselProductSearchService
     }
 
     /**
-     * @param array $products
+     * @param  array  $products
      * @return array<int, string>
      */
     private function mapProductsToOptions(iterable $products): array

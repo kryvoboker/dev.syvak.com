@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\ProductsCarousel\Services;
 
 use App\Models\Catalogs\Categories\Category;
+use App\Models\Settings\Language;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -44,6 +46,7 @@ readonly class ModuleSettingsNormalizerService
             ->values()
             ->all();
         $allowed_page_types = collect(config('page-type', []))->values()->all();
+        $active_languages   = (new Language())->getActiveLanguages();
         $shared_settings    = Arr::get($settings, 'shared', []);
 
         $default_source_mode = (string) $this->products_carousel_config->get('settings.default_source_mode', 'category_based');
@@ -99,22 +102,30 @@ readonly class ModuleSettingsNormalizerService
             $allowed_page_types,
             $allowed_sort_modes,
             $allowed_sort_options,
+            $active_languages,
         );
 
         Log::channel('daily')->info('ProductsCarousel settings normalized.', [
-            'source_mode'                     => $source_mode,
-            'category_ids_count'              => count($active_category_ids),
-            'category_mode_product_ids_count' => count($category_based_selected_product_ids),
-            'manual_mode_product_ids_count'   => count($manual_only_selected_product_ids),
-            'shared_page_types_count'         => count($normalized_shared_settings['page_types']),
-            'use_selected_products_only'      => $use_selected_products_only,
-            'min_quantity'                    => $normalized_shared_settings['min_quantity'],
-            'products_limit'                  => $normalized_shared_settings['products_limit'],
-            'product_image_width'             => $normalized_shared_settings['product_image_width'],
-            'product_image_height'            => $normalized_shared_settings['product_image_height'],
-            'sort_mode'                       => $normalized_shared_settings['sort_mode'],
-            'custom_sort_options_count'       => count($normalized_shared_settings['custom_sort_options']),
-            'custom_sort'                     => $normalized_shared_settings['custom_sort'],
+            'source_mode'                       => $source_mode,
+            'category_ids_count'                => count($active_category_ids),
+            'category_mode_product_ids_count'   => count($category_based_selected_product_ids),
+            'manual_mode_product_ids_count'     => count($manual_only_selected_product_ids),
+            'shared_page_types_count'           => count($normalized_shared_settings['page_types']),
+            'use_selected_products_only'        => $use_selected_products_only,
+            'min_quantity'                      => $normalized_shared_settings['min_quantity'],
+            'products_limit'                    => $normalized_shared_settings['products_limit'],
+            'product_image_width'               => $normalized_shared_settings['product_image_width'],
+            'product_image_height'              => $normalized_shared_settings['product_image_height'],
+            'sort_mode'                         => $normalized_shared_settings['sort_mode'],
+            'custom_sort_options_count'         => count($normalized_shared_settings['custom_sort_options']),
+            'custom_sort'                       => $normalized_shared_settings['custom_sort'],
+            'shared_translations_locales_count' => count($normalized_shared_settings['translations']),
+            'filled_module_titles_count'        => collect($normalized_shared_settings['translations'])
+                ->filter(fn (array $translation): bool => filled($translation['module_name_for_user']))
+                ->count(),
+            'filled_module_descriptions_count' => collect($normalized_shared_settings['translations'])
+                ->filter(fn (array $translation): bool => filled($translation['short_description_for_user']))
+                ->count(),
         ]);
 
         return [
@@ -136,9 +147,12 @@ readonly class ModuleSettingsNormalizerService
      * @param  array<int, string>  $allowed_page_types
      * @param  array<int, string>  $allowed_sort_modes
      * @param  array<int, string>  $allowed_sort_options
+     * @param  Collection<int, Language>  $active_languages
      * @return array{
-     *      module_name_for_user: string,
-     *      short_description_for_user: string,
+     *      translations: array<string, array{
+     *          module_name_for_user: string,
+     *          short_description_for_user: string
+     *      }>,
      *      page_types: array<int, string>,
      *      min_quantity: int,
      *      products_limit: int,
@@ -154,12 +168,14 @@ readonly class ModuleSettingsNormalizerService
         array $allowed_page_types,
         array $allowed_sort_modes,
         array $allowed_sort_options,
+        Collection $active_languages,
     ): array {
         $shared_settings = is_array($shared_settings) ? $shared_settings : [];
         $sort_mode       = $this->normalizeSortMode(
             Arr::get($shared_settings, 'sort_mode', $this->products_carousel_config->get('settings.default_sort_mode', 'custom')),
             $allowed_sort_modes,
         );
+        $translations = $this->normalizeSharedTranslations($shared_settings, $active_languages);
 
         $custom_sort = $this->normalizeCustomSortMap(
             Arr::get($shared_settings, 'custom_sort', []),
@@ -178,9 +194,8 @@ readonly class ModuleSettingsNormalizerService
         );
 
         return [
-            'module_name_for_user'       => Str::squish((string) Arr::get($shared_settings, 'module_name_for_user')),
-            'short_description_for_user' => Str::squish((string) Arr::get($shared_settings, 'short_description_for_user')),
-            'page_types'                 => $this->normalizePageTypes(
+            'translations' => $translations,
+            'page_types'   => $this->normalizePageTypes(
                 Arr::get($shared_settings, 'page_types', $this->products_carousel_config->get('settings.default_page_types', [])),
                 $allowed_page_types,
             ),
@@ -204,6 +219,73 @@ readonly class ModuleSettingsNormalizerService
             'custom_sort'         => $custom_sort,
             'custom_sort_options' => $custom_sort_options,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $shared_settings
+     * @param  Collection<int, Language>  $active_languages
+     * @return array<string, array{module_name_for_user: string, short_description_for_user: string}>
+     */
+    private function normalizeSharedTranslations(array $shared_settings, Collection $active_languages): array
+    {
+        $shared_translations = Arr::get($shared_settings, 'translations', []);
+
+        if (! is_array($shared_translations)) {
+            Log::channel('stack')->warning('ProductsCarousel shared translations payload has invalid shape. Using legacy fallback.', [
+                'received_type' => gettype($shared_translations),
+            ]);
+
+            $shared_translations = [];
+        }
+
+        return $active_languages
+            ->mapWithKeys(function (Language $language) use ($shared_translations, $shared_settings): array {
+                $language_code        = (string) $language->code;
+                $language_translation = Arr::get($shared_translations, $language_code, []);
+
+                if (! is_array($language_translation)) {
+                    $language_translation = [];
+                }
+
+                $module_name_for_user       = Str::squish((string) Arr::get($language_translation, 'module_name_for_user'));
+                $short_description_for_user = Str::squish((string) Arr::get($language_translation, 'short_description_for_user'));
+
+                if (blank($module_name_for_user)) {
+                    $module_name_for_user = $this->resolveLegacySharedValue($shared_settings, 'module_name_for_user');
+                }
+
+                if (blank($short_description_for_user)) {
+                    $short_description_for_user = $this->resolveLegacySharedValue($shared_settings, 'short_description_for_user');
+                }
+
+                return [
+                    $language_code => [
+                        'module_name_for_user'       => $module_name_for_user,
+                        'short_description_for_user' => $short_description_for_user,
+                    ],
+                ];
+            })
+            ->all();
+    }
+
+    private function resolveLegacySharedValue(array $shared_settings, string $field): string
+    {
+        $legacy_scalar = Str::squish((string) Arr::get($shared_settings, $field));
+
+        if (filled($legacy_scalar)) {
+            return $legacy_scalar;
+        }
+
+        $translations_payload = Arr::get($shared_settings, 'translations', []);
+
+        if (! is_array($translations_payload)) {
+            return '';
+        }
+
+        return collect($translations_payload)
+            ->filter(fn (mixed $translation): bool => is_array($translation))
+            ->map(fn (array $translation): string => Str::squish((string) Arr::get($translation, $field)))
+            ->first(fn (string $value): bool => filled($value), '');
     }
 
     /**

@@ -1,42 +1,10 @@
+@theme {
+    --products-carousel-card: 100%;
+    --spacing-860px: calc(860 / var(--base-font-size) * 1rem);
+}
+
 @layer app {
-    .products-carousel-section {
-        @apply relative overflow-hidden border-b border-opacity-light-gray-40% pt-12 pb-10 md:pt-16 md:pb-12 lg:pt-20 lg:pb-14 2xl:pt-24 2xl:pb-16;
-    }
-
-    .products-carousel-head {
-        @apply mb-8 flex flex-col gap-4 md:mb-10 md:gap-5 lg:mb-12 lg:flex-row lg:items-start lg:justify-between lg:gap-8;
-    }
-
-    .products-carousel-description {
-        max-width: calc(860 / var(--base-font-size) * 1rem);
-        @apply hidden md:block font-light uppercase tracking-0.04em text-light-gray md:text-sm lg:text-base 2xl:text-lg;
-    }
-
-    .products-carousel-root {
-        @apply relative;
-    }
-
-    .products-carousel-track {
-        @apply overflow-hidden border border-light-black bg-black;
-    }
-
-    .products-carousel-body {
-        @apply h-full -mx-2 md:-mx-2.5 lg:-mx-3;
-    }
-
-    .products-carousel-slide {
-        @apply h-full px-2 pb-1 md:px-2.5 lg:px-3;
-    }
-
     .products-carousel-card {
-        @apply flex h-full flex-col gap-3 md:gap-4 lg:gap-5;
-    }
-
-    .products-carousel-card-title {
-        @apply line-clamp-2 font-inter text-base leading-1.4em font-normal uppercase tracking-0.04em md:text-lg lg:text-xl 2xl:text-2xl;
-    }
-
-    .products-carousel-card-price {
-        @apply text-sm uppercase tracking-0.04em text-light-gray md:text-base 2xl:text-lg;
+        max-height: var(--products-carousel-card);
     }
 }

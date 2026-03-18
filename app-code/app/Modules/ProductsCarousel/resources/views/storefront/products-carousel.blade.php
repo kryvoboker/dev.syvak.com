@@ -5,47 +5,11 @@
     $section_title = (string) ($products_carousel_module_data['module_name_for_user'] ?? '');
     $section_description = (string) ($products_carousel_module_data['short_description_for_user'] ?? '');
     $current_page_type = (string) ($page_type ?? '');
-    $page_types = collect($products_carousel_module_data['page_types'] ?? [])
-        ->filter(fn (mixed $module_page_type): bool => is_string($module_page_type) && filled($module_page_type))
-        ->values()
-        ->all();
-
-    $placeholder_products = [
-        ['name' => 'ФУТБОЛКА ГІРСЬКА КРОВ', 'price' => '1 500 UAH'],
-        ['name' => 'ФУТБОЛКА ОБРАНА', 'price' => '1 500 UAH'],
-        ['name' => 'ФУТБОЛКА МАКОВІЙ', 'price' => '1 500 UAH'],
-        ['name' => 'ФУТБОЛКА ДИКЕ ПОЛЕ', 'price' => '1 500 UAH'],
-        ['name' => 'ФУТБОЛКА СВІТЛОТІНЬ', 'price' => '1 500 UAH'],
-    ];
-
-    $products = collect($products_carousel_module_data['products'] ?? [])
-        ->filter(fn (mixed $product): bool => is_array($product))
-        ->values();
-
-    if ($products->isEmpty()) {
-        $products = collect($placeholder_products)
-            ->map(function (array $product): array {
-                return [
-                    'name' => $product['name'],
-                    'price' => $product['price'],
-                    'url' => '#',
-                    'image_data' => [
-                        'urls' => multiple_convert_img_and_get_url(
-                            config('app.images.product.no_image'),
-                            420,
-                            420,
-                            is_square: false,
-                        ),
-                        'width' => 420,
-                        'height' => 420,
-                    ],
-                ];
-            })
-            ->values();
-    }
 @endphp
 
-<section class="products-carousel-section" aria-label="Products carousel section">
+<section class="products-carousel-section relative overflow-hidden border-b border-opacity-light-gray-40% pt-12 pb-10 md:pt-16 md:pb-12
+                lg:pt-20 lg:pb-14 2xl:pt-24 2xl:pb-16"
+         aria-label="Products carousel section">
     <div class="container">
         <div class="flex gap-10 justify-between mb-8">
             @if(filled($section_title))
@@ -54,21 +18,22 @@
                 </h2>
             @endif
             @if(filled($section_description))
-                <p class="products-carousel-description">
+                <p class="products-carousel-description hidden md:block max-w-860px font-light uppercase tracking-0.04em text-light-gray
+                          md:text-sm lg:text-base 2xl:text-lg">
                     {{ $section_description }}
                 </p>
             @endif
         </div>
 
         <div id="{{ $carousel_dom_id }}"
-             class="container --prevent-on-load-init relative"
+             class="products-carousel-root --prevent-on-load-init relative"
              data-products-carousel
-             data-page-types='@json($page_types)'
+             data-page-types='@json($products_carousel_module_data['page_types'])'
              data-current-page-type="{{ $current_page_type }}"
-             data-carousel='{"loadingClasses":"opacity-0, opacity-100 transition-opacity easy duration-500","isAutoHeight":true,"isInfiniteLoop":true, "isDraggable": true, "slidesQty":{"xs":1,"sm":1,"md":2,"lg":3,"2xl":5}, "dotsItemClasses": "carousel-dot size-1.5 bg-light-gray carousel-active:size-2.5 carousel-active:ease-in-out carousel-active:duration-200", "isAutoPlay": false}'>
-            <div class="carousel products-carousel-track rounded-none">
-                <div class="carousel-body products-carousel-body">
-                    @foreach($products as $product)
+             data-carousel='{"loadingClasses":"opacity-0, opacity-100 transition-opacity easy duration-200","isAutoHeight":true,"isInfiniteLoop":true, "isDraggable": true, "slidesQty":{"xs":1,"sm":1,"md":2,"lg":3,"2xl":5}, "isAutoPlay": false}'>
+            <div class="carousel products-carousel-track rounded-none overflow-hidden border border-light-black bg-black">
+                <div class="carousel-body products-carousel-body h-full -mx-2 md:-mx-2.5 lg:-mx-3">
+                    @foreach($products_carousel_module_data['products'] as $product)
                         @php
                             $name = (string) ($product['name'] ?? 'Product name');
                             $price = (string) ($product['price'] ?? '0 UAH');
@@ -78,9 +43,19 @@
                             $image_height = (int) ($product['image_data']['height'] ?? 420);
                         @endphp
 
-                        <div class="carousel-slide products-carousel-slide">
-                            <a href="{{ $url }}" class="products-carousel-card" aria-label="{{ $name }}">
-                                <div class="flex items-center justify-center">
+                        <div class="carousel-slide products-carousel-slide h-full px-2 pb-1 md:px-2.5 lg:px-3">
+                            <div class="font-light text-light-gray mb-2">
+                                @if($loop->iteration < 10)
+                                    / 0{{ $loop->iteration }}
+                                @else
+                                    / {{ $loop->iteration }}
+                                @endif
+                            </div>
+
+                            <div class="products-carousel-card flex h-full flex-col gap-3 md:gap-4 lg:gap-5">
+                                <a class="products-carousel-img-container flex items-center justify-center overflow-hidden"
+                                   href="{{ $url }}"
+                                   aria-label="{{ $name }}">
                                     <x-catalog::common.img
                                         class="object-contain transition-transform hover:scale-105 duration-500 ease-in-out"
                                         :urls_data="$image_urls_data"
@@ -91,19 +66,32 @@
                                         height="{{ $image_height }}"
                                         alt="{{ $name }}"
                                     />
-                                </div>
+                                </a>
 
-                                <div class="flex min-h-20 flex-col gap-2">
-                                    <h3 class="products-carousel-card-title">{{ $name }}</h3>
-                                    <p class="products-carousel-card-price">{{ $price }}</p>
+                                <div class="products-carousel-info flex min-h-20 flex-col gap-2">
+                                    <a class="products-carousel-card-title prod-list__name"
+                                       href="{{ $url }}"
+                                       aria-label="{{ $name }}">
+                                        {{ $name }}
+                                    </a>
+                                    <div class="flex items-center justify-between gap-x-3">
+                                        <div class="products-carousel-card-price text-sm uppercase tracking-0.04em text-light-gray md:text-base 2xl:text-lg">
+                                            {{ $price }}
+                                        </div>
+
+                                        <button class="add-to-cart"
+                                                type="button">
+                                            <span class="icon-[solar--cart-5-linear] size-8"></span>
+                                        </button>
+                                    </div>
                                 </div>
-                            </a>
+                            </div>
                         </div>
                     @endforeach
                 </div>
             </div>
 
-            @if($products->count() > 1)
+            @if($products_carousel_module_data['products']->count() > 1)
                 <button class="carousel-prev start-0 carousel-nav"
                         @style("top: calc(($image_height / 2) / var(--base-font-size) * 1rem * -1); transform: translateY(calc(($image_height * 0.1) / var(--base-font-size) * 1rem));")
                         type="button"
@@ -118,7 +106,7 @@
                     <span class="icon-[mynaui--arrow-right] size-6"></span>
                 </button>
 
-                <div class="carousel-pagination"></div>
+                <div class="carousel-pagination mt-5"></div>
             @endif
         </div>
     </div>

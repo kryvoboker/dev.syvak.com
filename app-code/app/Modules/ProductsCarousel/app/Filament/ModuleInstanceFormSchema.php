@@ -6,6 +6,7 @@ namespace Modules\ProductsCarousel\Filament;
 
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
+use App\Models\Settings\Language;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
@@ -16,6 +17,8 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
 use Modules\ProductsCarousel\Services\ProductsCarouselCategoryTreeService;
 use Modules\ProductsCarousel\Services\ProductsCarouselProductSearchService;
@@ -37,6 +40,8 @@ readonly class ModuleInstanceFormSchema
      */
     public function getComponents(?ModuleDefinition $definition = null, ?ModuleInstance $instance = null): array
     {
+        $active_languages = new Language()->getActiveLanguages();
+
         return [
             Section::make()
                 ->columnSpanFull()
@@ -87,16 +92,10 @@ readonly class ModuleInstanceFormSchema
                         ->description(__('admin/modules/module_instances.products_carousel.helpers.shared'))
                         ->columnSpanFull()
                         ->schema([
-                            TextInput::make('settings.shared.module_name_for_user')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.module_name_for_user'))
-                                ->maxLength(255)
-                                ->helperText(__('admin/modules/module_instances.products_carousel.helpers.module_name_for_user')),
-
-                            Textarea::make('settings.shared.short_description_for_user')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.short_description_for_user'))
-                                ->rows(3)
-                                ->maxLength(1000)
-                                ->helperText(__('admin/modules/module_instances.products_carousel.helpers.short_description_for_user')),
+                            Tabs::make('SharedContentLanguageTabs')
+                                ->columnSpanFull()
+                                ->tabs($this->getSharedContentLanguageTabs($active_languages))
+                                ->contained(false),
 
                             Grid::make(2)
                                 ->schema([
@@ -299,6 +298,7 @@ readonly class ModuleInstanceFormSchema
                                             return $this->products_carousel_product_search_service->searchActiveByCategories(
                                                 $search,
                                                 (array) $get('settings.category_based.category_ids'),
+                                                (array) $get('settings.category_based.selected_product_ids'),
                                             );
                                         })
                                         ->getOptionLabelUsing(function ($value): ?string {
@@ -357,8 +357,11 @@ readonly class ModuleInstanceFormSchema
                                 ->searchable()
                                 ->live(debounce: 300)
                                 ->dehydrated(false)
-                                ->getSearchResultsUsing(function (string $search): array {
-                                    return $this->products_carousel_product_search_service->searchAllActive($search);
+                                ->getSearchResultsUsing(function (string $search, callable $get): array {
+                                    return $this->products_carousel_product_search_service->searchAllActive(
+                                        $search,
+                                        (array) $get('settings.manual_only.selected_product_ids'),
+                                    );
                                 })
                                 ->getOptionLabelUsing(function ($value): ?string {
                                     if (! is_numeric($value)) {
@@ -400,6 +403,61 @@ readonly class ModuleInstanceFormSchema
                         ]),
                 ]),
         ];
+    }
+
+    /**
+     * @param  Collection<int, Language>  $active_languages
+     * @return array<int, Tabs\Tab>
+     */
+    private function getSharedContentLanguageTabs(Collection $active_languages): array
+    {
+        return $active_languages
+            ->map(function (Language $language): Tabs\Tab {
+                $language_code = (string) $language->code;
+
+                return Tabs\Tab::make($language->name)
+                    ->badge($language_code)
+                    ->schema([
+                        TextInput::make("settings.shared.translations.$language_code.module_name_for_user")
+                            ->label(__('admin/modules/module_instances.products_carousel.labels.module_name_for_user'))
+                            ->maxLength(255)
+                            ->helperText(__('admin/modules/module_instances.products_carousel.helpers.module_name_for_user'))
+                            ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
+                                if (filled($state)) {
+                                    return;
+                                }
+
+                                $legacy_value = (string) $get('settings.shared.module_name_for_user');
+
+                                if (blank($legacy_value)) {
+                                    return;
+                                }
+
+                                $component->state($legacy_value);
+                            }),
+
+                        Textarea::make("settings.shared.translations.$language_code.short_description_for_user")
+                            ->label(__('admin/modules/module_instances.products_carousel.labels.short_description_for_user'))
+                            ->rows(3)
+                            ->maxLength(1000)
+                            ->helperText(__('admin/modules/module_instances.products_carousel.helpers.short_description_for_user'))
+                            ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
+                                if (filled($state)) {
+                                    return;
+                                }
+
+                                $legacy_value = (string) $get('settings.shared.short_description_for_user');
+
+                                if (blank($legacy_value)) {
+                                    return;
+                                }
+
+                                $component->state($legacy_value);
+                            }),
+                    ]);
+            })
+            ->values()
+            ->all();
     }
 
     /**
