@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\Modules\ProductsCarousel;
 
 use App\Models\Catalogs\Products\Product;
-use App\Models\Modules\ModuleInstance;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -361,9 +360,6 @@ class ProductsCarouselModuleServicesTest extends TestCase
         ]);
 
         $module_data_service = app(ProductsCarouselModuleDataService::class);
-        $module_instance     = new ModuleInstance([
-            'id' => 501,
-        ]);
 
         $reflection_method = new \ReflectionMethod($module_data_service, 'resolveManualOnlyProducts');
         $reflection_method->setAccessible(true);
@@ -371,7 +367,6 @@ class ProductsCarouselModuleServicesTest extends TestCase
         /** @var EloquentCollection<int, Product> $products */
         $products = $reflection_method->invoke(
             $module_data_service,
-            $module_instance,
             ['manual_only' => ['selected_product_ids' => [10, 20, 30]]],
             [
                 'min_quantity'         => 3,

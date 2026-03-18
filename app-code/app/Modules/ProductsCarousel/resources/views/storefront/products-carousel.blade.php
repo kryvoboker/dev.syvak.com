@@ -91,7 +91,7 @@
                 </div>
             </div>
 
-            @if($products_carousel_module_data['products']->count() > 1)
+            @if(count($products_carousel_module_data['products'] ?? []) > 1)
                 <button class="carousel-prev start-0 carousel-nav"
                         @style("top: calc(($image_height / 2) / var(--base-font-size) * 1rem * -1); transform: translateY(calc(($image_height * 0.1) / var(--base-font-size) * 1rem));")
                         type="button"

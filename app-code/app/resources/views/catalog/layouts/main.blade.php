@@ -17,12 +17,15 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" onload="this.rel='stylesheet'">
 
     @vite(['./resources/assets/catalog/css/app.css'])
-{{--    @stack('styles')--}}
+    {{--    @stack('styles')--}}
 </head>
 
 <body>
 @php
     $page_type = $page_type ?? try_detect_page_type();
+    $top_entrypoint_for_module = 'top';
+    $center_entrypoint_for_module = 'center';
+    $bottom_entrypoint_for_module = 'bottom';
 @endphp
 
 <script>
@@ -35,7 +38,25 @@
     @include('catalog.layouts.partials.header')
 
     <main class="main">
+        @include('catalog.components.modules.placement', [
+            'placement' => $top_entrypoint_for_module,
+            'page_type' => $page_type,
+            'entrypoint_name' => '$top_entrypoint_for_module',
+        ])
+
         @yield('content')
+
+        @include('catalog.components.modules.placement', [
+            'placement' => $center_entrypoint_for_module,
+            'page_type' => $page_type,
+            'entrypoint_name' => '$center_entrypoint_for_module',
+        ])
+
+        @include('catalog.components.modules.placement', [
+            'placement' => $bottom_entrypoint_for_module,
+            'page_type' => $page_type,
+            'entrypoint_name' => '$bottom_entrypoint_for_module',
+        ])
     </main>
 
     @include('catalog.layouts.partials.footer')
