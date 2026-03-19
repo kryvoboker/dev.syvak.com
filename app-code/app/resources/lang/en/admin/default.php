@@ -5,11 +5,12 @@ declare(strict_types=1);
 return [
     // Menu items
     'menu' => [
-        'item_catalog'  => 'Catalog',
-        'info_pages'    => 'Info Pages',
-        'item_users'    => 'Users',
-        'item_modules'  => 'Modules',
-        'item_settings' => 'Settings',
+        'item_catalog'       => 'Catalog',
+        'info_pages'         => 'Info Pages',
+        'item_users'         => 'Users',
+        'item_modules'       => 'Modules',
+        'item_settings'      => 'Settings',
+        'item_page_settings' => 'Page Settings',
     ],
 
     // Texts

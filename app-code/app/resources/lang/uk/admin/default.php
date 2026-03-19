@@ -5,11 +5,12 @@ declare(strict_types=1);
 return [
     // Menu items
     'menu' => [
-        'item_catalog'  => 'Каталог',
-        'info_pages'    => 'Інформаційні сторінки',
-        'item_users'    => 'Користувачі',
-        'item_modules'  => 'Модулі',
-        'item_settings' => 'Налаштування',
+        'item_catalog'       => 'Каталог',
+        'info_pages'         => 'Інформаційні сторінки',
+        'item_users'         => 'Користувачі',
+        'item_modules'       => 'Модулі',
+        'item_settings'      => 'Налаштування',
+        'item_page_settings' => 'Налаштування сторінок',
     ],
 
     // Texts
