@@ -163,15 +163,21 @@ class CategoryPageSettingsForm
 
                                         TextInput::make('config.min_price')
                                             ->numeric()
-                                            ->label(__('admin/settings/category_page_settings.labels.min_price')),
+                                            ->label(__('admin/settings/category_page_settings.labels.min_price'))
+                                            ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
+                                            ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
 
                                         TextInput::make('config.max_price')
                                             ->numeric()
-                                            ->label(__('admin/settings/category_page_settings.labels.max_price')),
+                                            ->label(__('admin/settings/category_page_settings.labels.max_price'))
+                                            ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
+                                            ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
 
                                         TextInput::make('config.step')
                                             ->numeric()
-                                            ->label(__('admin/settings/category_page_settings.labels.step')),
+                                            ->label(__('admin/settings/category_page_settings.labels.step'))
+                                            ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
+                                            ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
 
                                         Section::make(__('admin/settings/category_page_settings.labels.option_labels'))
                                             ->schema([
