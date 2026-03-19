@@ -22,7 +22,7 @@
     $products = [
         [
             'name' => 'Футболка Гірська Кров',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -31,7 +31,7 @@
         ],
         [
             'name' => 'Футболка Обрана',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -40,7 +40,7 @@
         ],
         [
             'name' => 'Title Title Title Titletitletitle Title',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -49,8 +49,8 @@
         ],
         [
             'name' => 'Футболка Маковій',
-            'price' => '1 500 UAH',
-            'old_price' => '1 500 UAH',
+            'price' => '1,500',
+            'old_price' => '900',
             'stock_text' => 'Немає в наявності',
             'url' => '#',
             'seed' => 'syvak-category-04',
@@ -58,7 +58,7 @@
         ],
         [
             'name' => 'Title Title Title Titletitletitle Title',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -67,7 +67,7 @@
         ],
         [
             'name' => 'Футболка Маковій',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -76,7 +76,7 @@
         ],
         [
             'name' => 'Футболка Обрана',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -85,7 +85,7 @@
         ],
         [
             'name' => 'Title Title Title Titletitletitle Title',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -94,7 +94,7 @@
         ],
         [
             'name' => 'Футболка Гірська Кров',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -103,7 +103,7 @@
         ],
         [
             'name' => 'Футболка Маковій',
-            'price' => '1 500 UAH',
+            'price' => '1,500',
             'old_price' => null,
             'stock_text' => 'Немає в наявності',
             'url' => '#',
@@ -132,9 +132,9 @@
          aria-label="Category products list">
     <div class="container">
         <div class="flex items-end justify-between gap-4 md:gap-6 mb-6 md:mb-7 lg:mb-8">
-            <h2 class="section-title">
+            <h1 class="section-title">
                 КОЛЕКЦІЇ
-            </h2>
+            </h1>
 
             <div class="flex items-center gap-x-1 md:gap-x-2 lg:gap-x-3">
                 <button class="open-category-filter-drawer-btn default-btn border border-opacity-light-gray-40% px-3 py-1.5 text-11px
@@ -185,12 +185,13 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 bp1920px:grid-cols-4 gap-x-2 gap-y-3 md:gap-x-3 md:gap-y-4 lg:gap-x-4 lg:gap-y-5">
+        <div class="grid grid-cols-2 md:grid-cols-3 bp1440px:grid-cols-4 gap-x-2 gap-y-3 md:gap-x-3 md:gap-y-4 lg:gap-x-4 lg:gap-y-5">
             @foreach($products as $product_index => $product)
                 @php
                     $name = (string) Arr::get($product, 'name', 'Product name');
-                    $price = (string) Arr::get($product, 'price', '0 UAH');
+                    $price = format_price((int) Arr::get($product, 'price', '0'));
                     $old_price = Arr::get($product, 'old_price');
+                    $old_price = filled($old_price) ? format_price((int) $old_price) : null;
                     $stock_text = (string) Arr::get($product, 'stock_text', '');
                     $url = (string) Arr::get($product, 'url', '#');
                     $layout = (string) Arr::get($product, 'layout', 'product');
@@ -201,16 +202,8 @@
                     $image_urls_data = $build_placeholder_urls($seed, $image_width, $image_height);
                 @endphp
 
-                <article class="products-carousel-card flex h-full flex-col gap-2 md:gap-3 lg:gap-4 {{ $is_mixed_layout ? 'col-span-2 md:col-span-1 bp1920px:col-span-2' : '' }}">
-                    <div class="font-light text-light-gray text-11px md:text-sm">
-                        @if(($product_index + 1) < 10)
-                            / 0{{ $product_index + 1 }}
-                        @else
-                            / {{ $product_index + 1 }}
-                        @endif
-                    </div>
-
-                    <a class="products-carousel-img-container flex items-center justify-center overflow-hidden"
+                <div class="category-card flex h-full flex-col gap-2 md:gap-3 lg:gap-4 {{ $is_mixed_layout ? 'col-span-2 md:col-span-1 bp1920px:col-span-2' : '' }}">
+                    <a class="category-img-container flex items-center justify-center overflow-hidden"
                        href="{{ $url }}"
                        aria-label="{{ $name }}">
                         <x-catalog::common.img
@@ -225,15 +218,15 @@
                         />
                     </a>
 
-                    <div class="products-carousel-info flex min-h-20 flex-col gap-2">
-                        <a class="products-carousel-card-title prod-list__name"
+                    <div class="category-info flex min-h-20 flex-col gap-2">
+                        <a class="category-card-title prod-list__name"
                            href="{{ $url }}"
                            aria-label="{{ $name }}">
                             {{ $name }}
                         </a>
 
                         <div class="flex items-center justify-between gap-x-3">
-                            <div class="products-carousel-card-price text-11px md:text-sm lg:text-base 2xl:text-lg uppercase tracking-0.04em text-light-gray">
+                            <div class="category-card-price text-11px md:text-sm lg:text-base 2xl:text-lg uppercase tracking-0.04em text-light-gray">
                                 {{ $price }}
                                 @if(filled($old_price))
                                     <span class="line-through text-light-gray/80">
@@ -255,7 +248,7 @@
                             </div>
                         @endif
                     </div>
-                </article>
+                </div>
             @endforeach
         </div>
 
