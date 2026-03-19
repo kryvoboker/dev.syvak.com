@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Currency;
 
-use App\Models\Settings\Currency;
+use App\Models\ApplicationSettings\Currency;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;

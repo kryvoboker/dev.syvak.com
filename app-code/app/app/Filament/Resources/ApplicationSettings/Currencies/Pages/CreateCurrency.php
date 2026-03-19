@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Resources\ApplicationSettings\Currencies\Pages;
+
+use App\Filament\Resources\ApplicationSettings\Currencies\CurrencyResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateCurrency extends CreateRecord
+{
+    protected static string $resource = CurrencyResource::class;
+
+    /**
+     * Get page title
+     */
+    public function getTitle(): string
+    {
+        return __('admin/settings/currencies.navigation_label');
+    }
+
+    /**
+     * Get page heading
+     */
+    public function getHeading(): ?string
+    {
+        return __('admin/settings/currencies.navigation_label');
+    }
+}

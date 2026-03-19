@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\ProductsCarousel\Services;
 
 use App\Models\Catalogs\Products\Product;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;

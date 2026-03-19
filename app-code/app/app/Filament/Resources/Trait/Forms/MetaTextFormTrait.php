@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Trait\Forms;
 
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Carousel\Services;
 
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;

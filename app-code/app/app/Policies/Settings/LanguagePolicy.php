@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies\Settings;
 
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
