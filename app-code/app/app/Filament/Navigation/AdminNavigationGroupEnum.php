@@ -7,14 +7,14 @@ namespace App\Filament\Navigation;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum AdminNavigationGroupEnum:string implements HasLabel
+enum AdminNavigationGroupEnum: string implements HasLabel
 {
     case Catalog             = 'catalog';
     case InfoPages           = 'info_pages';
     case Users               = 'users';
     case Modules             = 'modules';
-    case ApplicationSettings = 'application_settings';
     case PageSettings        = 'page_settings';
+    case ApplicationSettings = 'application_settings';
 
     public function getLabel(): string|Htmlable|null
     {
