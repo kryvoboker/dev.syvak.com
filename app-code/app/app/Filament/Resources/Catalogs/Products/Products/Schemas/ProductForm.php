@@ -10,7 +10,7 @@ use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryPath;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use App\Models\Users\UserGroup;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;

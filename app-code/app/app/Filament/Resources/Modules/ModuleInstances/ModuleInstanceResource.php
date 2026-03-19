@@ -113,7 +113,7 @@ class ModuleInstanceResource extends Resource
             return $instance->definition;
         }
 
-        $definition_id = (int) $request->integer('definition');
+        $definition_id = $request->integer('definition');
 
         if ($definition_id < 1) {
             $definition_id = self::resolveDefinitionIdFromReferer($request);

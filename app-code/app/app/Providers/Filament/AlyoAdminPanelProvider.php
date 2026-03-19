@@ -8,7 +8,7 @@ use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Http\Middleware\LogFilamentErrors;
 use App\Http\Middleware\SetDefaultLocalePrefix;
 use App\Http\Middleware\User\SetCommonPreferences;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -88,7 +88,7 @@ class AlyoAdminPanelProvider extends PanelProvider
                     ->collapsed(),
 
                 NavigationGroup::make()
-                    ->label(AdminNavigationGroupEnum::Settings->getLabel())
+                    ->label(AdminNavigationGroupEnum::ApplicationSettings->getLabel())
                     ->collapsed(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

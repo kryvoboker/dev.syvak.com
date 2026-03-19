@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Trait;
 
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 

@@ -1,0 +1,83 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Resources\ApplicationSettings\Currencies;
+
+use App\Filament\Navigation\AdminNavigationGroupEnum;
+use App\Filament\Resources\ApplicationSettings\Currencies\Pages\CreateCurrency;
+use App\Filament\Resources\ApplicationSettings\Currencies\Pages\EditCurrency;
+use App\Filament\Resources\ApplicationSettings\Currencies\Pages\ListCurrencies;
+use App\Filament\Resources\ApplicationSettings\Currencies\Schemas\CurrencyForm;
+use App\Filament\Resources\ApplicationSettings\Currencies\Tables\CurrenciesTable;
+use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
+use App\Models\ApplicationSettings\Currency;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use UnitEnum;
+
+class CurrencyResource extends Resource
+{
+    use TotalModelItemsResourceTrait;
+
+    protected static ?string $model = Currency::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::CurrencyDollar;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static string|null|UnitEnum $navigationGroup = AdminNavigationGroupEnum::ApplicationSettings;
+
+    public static function form(Schema $schema): Schema
+    {
+        return CurrencyForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return CurrenciesTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index'  => ListCurrencies::route('/'),
+            'create' => CreateCurrency::route('/create'),
+            'edit'   => EditCurrency::route('/{record}/edit'),
+        ];
+    }
+
+    /**
+     * Signature in the navigation menu (left panel)
+     */
+    public static function getNavigationLabel(): string
+    {
+        return __('admin/settings/currencies.navigation_label');
+    }
+
+    /**
+     * A single model name (e.g. in headings, "Create X" button)
+     */
+    public static function getModelLabel(): string
+    {
+        return __('admin/settings/currencies.labels.model');
+    }
+
+    /**
+     * Plural model name (e.g. in lists, section headings)
+     */
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin/settings/currencies.labels.plural_model');
+    }
+}

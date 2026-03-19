@@ -7,7 +7,7 @@ namespace Modules\ProductsCarousel\Services;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Arr;

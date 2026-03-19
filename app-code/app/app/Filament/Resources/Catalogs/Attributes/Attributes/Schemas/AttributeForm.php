@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Schemas;
 
 use App\Filament\Resources\Trait\LanguageTrait;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;

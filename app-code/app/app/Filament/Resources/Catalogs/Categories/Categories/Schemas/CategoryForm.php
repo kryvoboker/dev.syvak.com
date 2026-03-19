@@ -8,7 +8,7 @@ use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Categories\Category;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;

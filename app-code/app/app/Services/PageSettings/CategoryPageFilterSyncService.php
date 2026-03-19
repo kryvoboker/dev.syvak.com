@@ -6,9 +6,9 @@ namespace App\Services\PageSettings;
 
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Categories\Category;
-use App\Models\Settings\Language;
-use App\Models\Settings\PageSettings\PageSetting;
-use App\Models\Settings\PageSettings\PageSettingItem;
+use App\Models\PageSettings\PageSetting;
+use App\Models\PageSettings\PageSettingItem;
+use App\Models\ApplicationSettings\Language;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

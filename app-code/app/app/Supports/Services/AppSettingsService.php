@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Supports\Services;
 
 use App\Data\AppSettingsData;
-use App\Models\Settings\AppSetting;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\AppSetting;
+use App\Models\ApplicationSettings\Language;
 use App\Models\Users\UserGroup;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;

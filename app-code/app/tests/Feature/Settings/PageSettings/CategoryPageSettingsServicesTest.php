@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Settings\PageSettings;
 
-use App\Models\Settings\PageSettings\PageSetting;
+use App\Models\PageSettings\PageSetting;
 use App\Services\PageSettings\CategoryPageFilterSyncService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Database\Schema\Blueprint;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Supports\Services\Currency;
 
-use App\Models\Settings\Currency;
+use App\Models\ApplicationSettings\Currency;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders\Catalogs\Products;
 
 use App\Models\Catalogs\Products\Product;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use App\Supports\Services\Ai\AiTranslationService;
 use App\Supports\Services\SeoSlug\EnSeoSlugService;
 use App\Supports\Services\SeoSlug\UaSeoSlugService;

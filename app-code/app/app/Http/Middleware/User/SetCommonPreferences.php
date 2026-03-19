@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware\User;
 
-use App\Models\Settings\Currency;
+use App\Models\ApplicationSettings\Currency;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use Closure;

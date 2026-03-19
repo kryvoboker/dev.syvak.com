@@ -6,7 +6,7 @@ namespace Modules\ProductsCarousel\Filament;
 
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
-use App\Models\Settings\Language;
+use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
