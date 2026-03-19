@@ -13,6 +13,7 @@ enum AdminNavigationGroupEnum: string implements HasLabel
     case InfoPages           = 'info_pages';
     case Users               = 'users';
     case Modules             = 'modules';
+    case Wiki                = 'wiki';
     case PageSettings        = 'page_settings';
     case ApplicationSettings = 'application_settings';
 
@@ -23,6 +24,7 @@ enum AdminNavigationGroupEnum: string implements HasLabel
             self::InfoPages           => __('admin/default.menu.info_pages'),
             self::Users               => __('admin/default.menu.item_users'),
             self::Modules             => __('admin/default.menu.item_modules'),
+            self::Wiki                => __('admin/default.menu.wiki'),
             self::ApplicationSettings => __('admin/default.menu.item_application_settings'),
             self::PageSettings        => __('admin/default.menu.item_page_settings'),
         };

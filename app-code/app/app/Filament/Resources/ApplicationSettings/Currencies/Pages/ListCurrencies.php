@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ApplicationSettings\Currencies\Pages;
 
+use App\Filament\Pages\Wiki\ApplicationCurrenciesWikiPage;
 use App\Filament\Resources\ApplicationSettings\Currencies\CurrencyResource;
 use App\Services\Currency\UpdateRatesService;
 use Filament\Actions\Action;
@@ -62,6 +63,10 @@ class ListCurrencies extends ListRecords
                             ->send();
                     }
                 }),
+            Action::make('open_wiki')
+                ->label(__('admin/wiki.actions.open_wiki'))
+                ->icon(Heroicon::BookOpen)
+                ->url(fn (): string => ApplicationCurrenciesWikiPage::getUrl(), shouldOpenInNewTab: true),
 
             // Standard button for creating currency
             CreateAction::make(),
