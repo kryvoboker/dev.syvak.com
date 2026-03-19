@@ -93,6 +93,7 @@
     --spacing-117px: calc(117 / var(--base-font-size) * 1rem);
     --spacing-121px: calc(121 / var(--base-font-size) * 1rem);
     --spacing-133px: calc(133 / var(--base-font-size) * 1rem);
+    --spacing-496px: calc(496 / var(--base-font-size) * 1rem);
 
     --tracking-0\.02em: 0.02em;
     --tracking-0\.028em: 0.028em;
@@ -237,16 +238,22 @@
         @apply font-inter text-base leading-1.4em font-normal uppercase tracking-0.04em md:text-lg lg:text-xl 2xl:text-2xl text-ellipsis line-clamp-3;
     }
 
-    .footer {
-        @apply border-t border-opacity-light-gray-40% max-md:overflow-hidden pt-4 pb-4 md:pt-7 md:pb-0 lg:pt-15 2xl:pt-20 2xl:mb-52px;
+    .carousel-nav {
+        @apply pointer-events-auto inline-flex size-14 items-center justify-center rounded-full border border-white/50
+        bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white
+        backdrop-blur-xs hover:text-black carousel-disabled:opacity-50;
     }
 
-    .footer-main-grid {
-        @apply grid grid-cols-1 gap-y-6 md:grid-cols-2 md:gap-x-12 md:gap-y-8 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-0 2xl:grid-cols-4 2xl:gap-x-12;
-    }
+    .carousel-pagination {
+        @apply flex items-center justify-center gap-x-2 h-2.5;
 
-    .footer-subscribe {
-        @apply flex flex-col gap-4;
+        & > * {
+            @apply carousel-dot size-1.5 bg-light-gray carousel-active:ease-in-out carousel-active:duration-200;
+        }
+
+        & > *.active {
+            @apply size-2.5;
+        }
     }
 
     .footer-contacts,
@@ -267,18 +274,6 @@
         @apply inline-flex uppercase tracking-0.04em transition-colors duration-300 ease-in-out hover:text-light-gray opacity-70;
     }
 
-    .footer-phone {
-        @apply text-xl 2xl:text-32px leading-none tracking-normal opacity-100;
-    }
-
-    .footer-subscribe-btn {
-        @apply inline-flex items-center justify-between gap-3 border border-opacity-light-gray-40% bg-white px-4 py-2 text-black md:px-4 md:py-3;
-    }
-
-    .footer-subscribe-btn-arrow {
-        @apply inline-flex size-12 items-center justify-center border border-black text-32px leading-none;
-    }
-
     .footer-socials {
         @apply flex items-center gap-4;
     }
@@ -287,24 +282,8 @@
         @apply inline-flex items-center justify-center text-white transition-opacity duration-300 ease-in-out hover:opacity-70;
     }
 
-    .footer-social-link svg {
+    .footer-social-link > svg {
         @apply size-10 lg:size-12;
-    }
-
-    .footer-support-text {
-        max-width: calc(496 / var(--base-font-size) * 1rem);
-    }
-
-    .footer-socials-inline {
-        @apply md:flex 2xl:hidden;
-    }
-
-    .footer-brand-row {
-        @apply hidden mt-5 md:flex md:items-end md:justify-center 2xl:justify-between md:w-full;
-    }
-
-    .footer-socials-desktop {
-        @apply hidden 2xl:flex;
     }
 
     .dark-btn:active,
@@ -331,24 +310,6 @@
     ._was-validated :invalid ~ ._error,
     ._was-validated :valid ~ ._success {
         @apply inline-block;
-    }
-
-    .carousel-nav {
-        @apply pointer-events-auto inline-flex size-14 items-center justify-center rounded-full border border-white/50
-        bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white
-        backdrop-blur-xs hover:text-black carousel-disabled:opacity-50;
-    }
-
-    .carousel-pagination {
-        @apply flex items-center justify-center gap-x-2 h-2.5;
-
-        & > * {
-            @apply carousel-dot size-1.5 bg-light-gray carousel-active:ease-in-out carousel-active:duration-200;
-        }
-
-        & > *.active {
-            @apply size-2.5;
-        }
     }
 }
 
