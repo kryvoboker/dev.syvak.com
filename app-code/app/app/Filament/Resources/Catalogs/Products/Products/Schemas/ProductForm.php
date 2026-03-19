@@ -504,7 +504,7 @@ class ProductForm
                                     ->nullable(false)
                                     ->preload()
                                     ->live()
-                                    ->rules(['required', 'numeric', Rule::exists('attributes', 'id')])
+                                    ->rules(['required', 'numeric', Rule::exists('languages', 'id')])
                                     ->default($current_language_id)
                                     ->required(),
 

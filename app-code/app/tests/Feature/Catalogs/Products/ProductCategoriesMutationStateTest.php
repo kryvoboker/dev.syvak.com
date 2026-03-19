@@ -6,6 +6,7 @@ namespace Tests\Feature\Catalogs\Products;
 
 use App\Filament\Resources\Catalogs\Products\Products\Pages\CreateProduct;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\EditProduct;
+use Filament\Support\Exceptions\Halt;
 use Tests\TestCase;
 
 class ProductCategoriesMutationStateTest extends TestCase
@@ -43,6 +44,46 @@ class ProductCategoriesMutationStateTest extends TestCase
         $this->assertArrayNotHasKey('categories', $mutated_data);
         $this->assertSame([1, 5, 7], $page->getCategoryIdsForTest());
     }
+
+    public function test_create_page_allows_unique_attribute_language_pairs(): void
+    {
+        $page = new TestableCreateProductPage();
+
+        $page->callValidateAttributeLanguagePairs([
+            [
+                'attribute_id' => 10,
+                'language_id'  => 1,
+                'text'         => 'Foo',
+            ],
+            [
+                'attribute_id' => 10,
+                'language_id'  => 2,
+                'text'         => 'Bar',
+            ],
+        ]);
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function test_create_page_rejects_duplicate_attribute_language_pairs(): void
+    {
+        $this->expectException(Halt::class);
+
+        $page = new TestableCreateProductPage();
+
+        $page->callValidateAttributeLanguagePairs([
+            [
+                'attribute_id' => 10,
+                'language_id'  => 1,
+                'text'         => 'Foo',
+            ],
+            [
+                'attribute_id' => 10,
+                'language_id'  => 1,
+                'text'         => 'Bar',
+            ],
+        ]);
+    }
 }
 
 class TestableCreateProductPage extends CreateProduct
@@ -62,6 +103,16 @@ class TestableCreateProductPage extends CreateProduct
     public function getCategoryIdsForTest(): array
     {
         return $this->category_ids;
+    }
+
+    /**
+     * @param  array<int, array{attribute_id?: int|string, language_id?: int|string, text?: string}>  $attributes
+     *
+     * @throws Halt
+     */
+    public function callValidateAttributeLanguagePairs(array $attributes): void
+    {
+        $this->validateAttributeLanguagePairs($attributes);
     }
 }
 
