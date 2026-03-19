@@ -27,6 +27,11 @@ return [
         'get_value'                 => 'GET value',
         'get_extra'                 => 'Extra GET params',
         'config'                    => 'Configuration',
+        'selection_mode'            => 'Selection mode',
+        'filter_mode'               => 'Filter mode',
+        'min_price'                 => 'Min price',
+        'max_price'                 => 'Max price',
+        'step'                      => 'Step',
         'key'                       => 'Key',
         'value'                     => 'Value',
         'sorting_title'             => 'Sorting block title',
@@ -37,6 +42,7 @@ return [
         'filters_apply_button_text' => 'Apply button text',
         'filters_clear_button_text' => 'Clear button text',
         'option_labels'             => 'Option labels',
+        'option_label_value'        => 'Option label',
     ],
 
     'actions' => [

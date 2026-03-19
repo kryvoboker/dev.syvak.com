@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\PageSettings;
 
+use App\Models\ApplicationSettings\Language;
 use App\Models\PageSettings\PageSetting;
 use App\Models\PageSettings\PageSettingItem;
 use App\Models\PageSettings\PageSettingTranslation;
-use App\Models\ApplicationSettings\Language;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -196,15 +196,6 @@ class PageSettingsBootstrapService
                 'drawer_title'      => '',
                 'apply_button_text' => '',
                 'clear_button_text' => '',
-            ],
-            'option_labels' => [
-                'default'     => '',
-                'newest'      => '',
-                'bestsellers' => '',
-                'price_asc'   => '',
-                'price_desc'  => '',
-                'price'       => '',
-                'stock'       => '',
             ],
         ];
     }

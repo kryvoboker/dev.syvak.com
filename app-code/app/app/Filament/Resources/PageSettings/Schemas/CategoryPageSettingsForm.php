@@ -10,6 +10,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 
@@ -48,11 +49,6 @@ class CategoryPageSettingsForm
 
                     TextInput::make("localized_content.$language_code.filters.clear_button_text")
                         ->label(__('admin/settings/category_page_settings.labels.filters_clear_button_text')),
-
-                    KeyValue::make("localized_content.$language_code.option_labels")
-                        ->label(__('admin/settings/category_page_settings.labels.option_labels'))
-                        ->keyLabel(__('admin/settings/category_page_settings.labels.key'))
-                        ->valueLabel(__('admin/settings/category_page_settings.labels.value')),
                 ])
                 ->columns(1);
         }
@@ -96,10 +92,16 @@ class CategoryPageSettingsForm
                                             ->keyLabel(__('admin/settings/category_page_settings.labels.key'))
                                             ->valueLabel(__('admin/settings/category_page_settings.labels.value')),
 
-                                        KeyValue::make('config')
-                                            ->label(__('admin/settings/category_page_settings.labels.config'))
-                                            ->keyLabel(__('admin/settings/category_page_settings.labels.key'))
-                                            ->valueLabel(__('admin/settings/category_page_settings.labels.value')),
+                                        TextInput::make('config.selection')
+                                            ->label(__('admin/settings/category_page_settings.labels.selection_mode')),
+
+                                        Section::make(__('admin/settings/category_page_settings.labels.option_labels'))
+                                            ->schema([
+                                                self::buildOptionLabelTabs(
+                                                    $active_languages,
+                                                    'sorting_item_option_labels_tabs',
+                                                ),
+                                            ]),
                                     ])
                                     ->defaultItems(0)
                                     ->addable(false)
@@ -107,7 +109,7 @@ class CategoryPageSettingsForm
                                     ->reorderable(false)
                                     ->collapsible()
                                     ->collapsed(false)
-                                    ->columns(2),
+                                    ->columns(),
                             ])
                             ->columns(1),
 
@@ -156,10 +158,28 @@ class CategoryPageSettingsForm
                                             ->keyLabel(__('admin/settings/category_page_settings.labels.key'))
                                             ->valueLabel(__('admin/settings/category_page_settings.labels.value')),
 
-                                        KeyValue::make('config')
-                                            ->label(__('admin/settings/category_page_settings.labels.config'))
-                                            ->keyLabel(__('admin/settings/category_page_settings.labels.key'))
-                                            ->valueLabel(__('admin/settings/category_page_settings.labels.value')),
+                                        TextInput::make('config.mode')
+                                            ->label(__('admin/settings/category_page_settings.labels.filter_mode')),
+
+                                        TextInput::make('config.min_price')
+                                            ->numeric()
+                                            ->label(__('admin/settings/category_page_settings.labels.min_price')),
+
+                                        TextInput::make('config.max_price')
+                                            ->numeric()
+                                            ->label(__('admin/settings/category_page_settings.labels.max_price')),
+
+                                        TextInput::make('config.step')
+                                            ->numeric()
+                                            ->label(__('admin/settings/category_page_settings.labels.step')),
+
+                                        Section::make(__('admin/settings/category_page_settings.labels.option_labels'))
+                                            ->schema([
+                                                self::buildOptionLabelTabs(
+                                                    $active_languages,
+                                                    'filter_item_option_labels_tabs',
+                                                ),
+                                            ]),
                                     ])
                                     ->defaultItems(0)
                                     ->addable(false)
@@ -167,7 +187,7 @@ class CategoryPageSettingsForm
                                     ->reorderable(false)
                                     ->collapsible()
                                     ->collapsed(false)
-                                    ->columns(2),
+                                    ->columns(),
                             ])
                             ->columns(1),
 
@@ -184,5 +204,28 @@ class CategoryPageSettingsForm
                     ->persistTabInQueryString()
                     ->columnSpanFull(),
             ]);
+    }
+
+    private static function buildOptionLabelTabs(
+        $active_languages,
+        string $tabs_name,
+    ): Tabs {
+        $tabs = [];
+
+        foreach ($active_languages as $language) {
+            $language_code = (string) $language->code;
+
+            $tabs[] = Tabs\Tab::make($language->name)
+                ->badge($language_code)
+                ->schema([
+                    TextInput::make("config.labels.$language_code")
+                        ->label(__('admin/settings/category_page_settings.labels.option_label_value')),
+                ]);
+        }
+
+        return Tabs::make($tabs_name)
+            ->tabs($tabs)
+            ->activeTab(1)
+            ->contained(false);
     }
 }

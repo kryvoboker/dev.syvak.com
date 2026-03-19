@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PageSettings\Pages;
 
 use App\Filament\Resources\PageSettings\CategoryPageSettingResource;
+use App\Models\ApplicationSettings\Language;
 use App\Models\PageSettings\PageSetting;
 use App\Models\PageSettings\PageSettingItem;
 use App\Models\PageSettings\PageSettingTranslation;
-use App\Models\ApplicationSettings\Language;
 use App\Services\PageSettings\CategoryPageFilterSyncService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Filament\Actions\Action;
@@ -178,7 +178,6 @@ class EditCategoryPageSettings extends EditRecord
                     'apply_button_text' => (string) Arr::get($content, 'filters.apply_button_text', ''),
                     'clear_button_text' => (string) Arr::get($content, 'filters.clear_button_text', ''),
                 ],
-                'option_labels' => $this->normalizeStringMap((array) Arr::get($content, 'option_labels', [])),
             ];
         }
 
@@ -194,7 +193,7 @@ class EditCategoryPageSettings extends EditRecord
             ->where('type', $type)
             ->sortBy('sort_order')
             ->values()
-            ->map(function (PageSettingItem $item): array {
+            ->map(function (PageSettingItem $item) use ($record): array {
                 $get_payload    = is_array($item->get) ? $item->get : [];
                 $config_payload = is_array($item->config) ? $item->config : [];
 
@@ -209,7 +208,10 @@ class EditCategoryPageSettings extends EditRecord
                         'value' => Arr::get($get_payload, 'value'),
                         'extra' => $this->normalizeStringMap((array) Arr::get($get_payload, 'extra', [])),
                     ],
-                    'config' => $this->normalizeStringMap($config_payload),
+                    'config' => $this->normalizeItemConfigForForm(
+                        $config_payload,
+                        $this->resolveLegacyOptionLabelsForItem($record, (string) $item->code),
+                    ),
                 ];
             })
             ->all();
@@ -242,9 +244,6 @@ class EditCategoryPageSettings extends EditRecord
                             'apply_button_text' => (string) Arr::get($language_content, 'filters.apply_button_text', ''),
                             'clear_button_text' => (string) Arr::get($language_content, 'filters.clear_button_text', ''),
                         ],
-                        'option_labels' => $this->normalizeStringMap(
-                            (array) Arr::get($language_content, 'option_labels', []),
-                        ),
                     ],
                 ],
             );
@@ -288,7 +287,7 @@ class EditCategoryPageSettings extends EditRecord
                     'value' => Arr::get($row, 'get.value'),
                     'extra' => $this->normalizeStringMap((array) Arr::get($row, 'get.extra', [])),
                 ],
-                'config' => $this->normalizeStringMap((array) Arr::get($row, 'config', [])),
+                'config' => $this->normalizeItemConfigFromForm((array) Arr::get($row, 'config', [])),
             ]);
 
             $item->save();
@@ -336,5 +335,75 @@ class EditCategoryPageSettings extends EditRecord
                 ];
             })
             ->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $config_payload
+     * @param  array<string, string>  $legacy_labels
+     * @return array<string, mixed>
+     */
+    private function normalizeItemConfigForForm(array $config_payload, array $legacy_labels = []): array
+    {
+        $normalized_config = [];
+
+        foreach ($config_payload as $config_key => $config_value) {
+            if (is_scalar($config_value) || $config_value === null) {
+                $normalized_config[(string) $config_key] = $config_value;
+            }
+        }
+
+        $labels = $this->normalizeStringMap((array) Arr::get($config_payload, 'labels', []));
+
+        if ($labels === [] && $legacy_labels !== []) {
+            $labels = $legacy_labels;
+        }
+
+        $normalized_config['labels'] = $labels;
+
+        return $normalized_config;
+    }
+
+    /**
+     * @param  array<string, mixed>  $config_payload
+     * @return array<string, mixed>
+     */
+    private function normalizeItemConfigFromForm(array $config_payload): array
+    {
+        $normalized_config = [];
+
+        foreach ($config_payload as $config_key => $config_value) {
+            if ($config_key === 'labels') {
+                continue;
+            }
+
+            if (is_scalar($config_value) || $config_value === null) {
+                $normalized_config[(string) $config_key] = $config_value;
+            }
+        }
+
+        $normalized_config['labels'] = $this->normalizeStringMap((array) Arr::get($config_payload, 'labels', []));
+
+        return $normalized_config;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function resolveLegacyOptionLabelsForItem(PageSetting $record, string $item_code): array
+    {
+        $legacy_labels = [];
+
+        foreach ($record->translations as $translation) {
+            $language_code = (string) $translation->language?->code;
+            $label         = (string) Arr::get((array) $translation->content, "option_labels.$item_code", '');
+
+            if (blank($language_code) || blank($label)) {
+                continue;
+            }
+
+            $legacy_labels[$language_code] = $label;
+        }
+
+        return $legacy_labels;
     }
 }

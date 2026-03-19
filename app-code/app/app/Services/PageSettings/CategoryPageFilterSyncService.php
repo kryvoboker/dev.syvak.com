@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\PageSettings;
 
+use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Attributes\Attribute;
-use App\Models\Catalogs\Categories\Category;
 use App\Models\PageSettings\PageSetting;
 use App\Models\PageSettings\PageSettingItem;
-use App\Models\ApplicationSettings\Language;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -78,7 +77,6 @@ class CategoryPageFilterSyncService
         $payloads = [
             $this->buildPriceFilterPayload(),
             $this->buildStockFilterPayload(),
-            ...$this->buildCategoryFilterPayloads($language_id),
             ...$this->buildAttributeFilterPayloads($language_id),
         ];
 
@@ -171,42 +169,6 @@ class CategoryPageFilterSyncService
                 'mode' => 'boolean',
             ],
         ];
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private function buildCategoryFilterPayloads(int $language_id): array
-    {
-        $categories = Category::query()
-            ->where('is_active', true)
-            ->with([
-                'categoryDescription' => function ($query) use ($language_id): void {
-                    $query->where('language_id', $language_id);
-                },
-            ])
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
-
-        return $categories->map(function (Category $category): array {
-            $category_name = (string) optional($category->categoryDescription->first())->name;
-
-            return [
-                'code'        => 'category_' . (int) $category->id,
-                'source_type' => 'category',
-                'source_id'   => (int) $category->id,
-                'is_enabled'  => true,
-                'get'         => [
-                    'key'   => 'category',
-                    'value' => (string) $category->id,
-                    'extra' => [],
-                ],
-                'config' => [
-                    'label' => $category_name,
-                ],
-            ];
-        })->values()->all();
     }
 
     /**
