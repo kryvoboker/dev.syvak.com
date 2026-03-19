@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\PageSettings\Schemas;
+namespace App\Filament\Resources\PageSettings\Category\Schemas;
 
 use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\KeyValue;

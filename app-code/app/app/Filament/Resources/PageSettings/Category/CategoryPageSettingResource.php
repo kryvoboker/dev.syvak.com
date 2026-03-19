@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\PageSettings;
+namespace App\Filament\Resources\PageSettings\Category;
 
 use App\Filament\Navigation\AdminNavigationGroupEnum;
-use App\Filament\Resources\PageSettings\Pages\EditCategoryPageSettings;
-use App\Filament\Resources\PageSettings\Schemas\CategoryPageSettingsForm;
+use App\Filament\Resources\PageSettings\Category\Pages\EditCategoryPageSettings;
+use App\Filament\Resources\PageSettings\Category\Schemas\CategoryPageSettingsForm;
 use App\Models\PageSettings\PageSetting;
 use BackedEnum;
 use Filament\Resources\Resource;
