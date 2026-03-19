@@ -137,6 +137,15 @@ return [
         'top'    => 'Top',
         'bottom' => 'Bottom',
     ],
+    'page_settings' => [
+        'category' => [
+            'filter_modes' => [
+                'range'    => 'Range',
+                'boolean'  => 'Boolean',
+                'multiple' => 'Multiple',
+            ],
+        ],
+    ],
     'socials_list'              => explode(',', env('SOCIALS_LIST')),
     'regex_validate_conditions' => [
         'email'       => '/^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/',

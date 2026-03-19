@@ -203,6 +203,10 @@ class CategoryPageSettingsServicesTest extends TestCase
         $this->assertSame('price_from', $price_item_get['extra']['from_key']);
         $this->assertSame('price_to', $price_item_get['extra']['to_key']);
         $this->assertSame(80.0, (float) $price_item_config['min_price']);
+        $this->assertContains(
+            (string) $price_item_config['mode'],
+            array_keys((array) config('app.page_settings.category.filter_modes', [])),
+        );
     }
 
     private function createLanguagesTable(): void
