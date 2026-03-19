@@ -81,7 +81,7 @@
 
                                         <button class="add-to-cart"
                                                 type="button">
-                                            <span class="icon-[solar--cart-5-linear] size-8"></span>
+                                            <span class="icon-[solar--cart-5-linear] custom-icon"></span>
                                         </button>
                                     </div>
                                 </div>
