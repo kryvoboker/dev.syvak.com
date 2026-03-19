@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "frame_name": "2 in 1024 - catalog",
+    "node_id": "356:13444",
+    "source_url": "https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=356-13444&t=qSHJcQVEDgsMuMuj-4",
+    "breakpoint": 1024,
+    "frame_size": {
+      "width": 1024,
+      "height": 1686
+    },
+    "screenshot": "figma/pages/category/screenshots/1024.png"
+  },
+  "block": {
+    "section_title": "КОЛЕКЦІЇ",
+    "controls_row": {
+      "position": "top-right",
+      "controls": [
+        {
+          "type": "button",
+          "role": "filter",
+          "label": "ФІЛЬТР"
+        },
+        {
+          "type": "dropdown",
+          "role": "sort",
+          "label": "СОРТУВАННЯ",
+          "options": [
+            "По умолчанию",
+            "Сначала новые",
+            "Бестселлеры",
+            "Сначала дешевые",
+            "Сначала дорогие"
+          ]
+        }
+      ]
+    },
+    "products_layout": {
+      "base_grid": {
+        "columns": 3,
+        "gap": {
+          "x": 12,
+          "y": 12
+        }
+      },
+      "composition_pattern": [
+        "row_1: 3 product cards",
+        "row_2: 2 product cards + 1 mixed photo card",
+        "row_3: 3 product cards"
+      ],
+      "mixed_photo_card": {
+        "spans_columns": 1,
+        "visual_weight": "same width as standard card"
+      }
+    },
+    "product_card": {
+      "image_ratio": "portrait",
+      "name_lines": 2,
+      "meta_row": "price + cart icon",
+      "stock_row": "status text under price"
+    },
+    "list_footer": {
+      "show_more": {
+        "label": "ПОКАЗАТИ ЩЕ",
+        "icon": "arrow-down"
+      }
+    }
+  },
+  "implementation_notes": {
+    "ignore_for_now": [
+      "stickers/badges like Новинка"
+    ],
+    "height_policy": "content-driven, no rigid fixed height"
+  }
+}

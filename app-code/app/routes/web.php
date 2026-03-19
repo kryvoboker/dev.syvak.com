@@ -17,7 +17,12 @@ Route::prefix('{locale}')
     ->group(function () {
         Route::get('/', [HomeController::class, 'index'])->name('home');
 
-        Route::get('/category/{slug}', function (string $locale, string $slug) {})->name('category.show');
+        Route::get('/category/{slug}', function (string $locale, string $slug) {
+            return view('catalog.pages.category', [
+                'category_slug' => $slug,
+                'page_type'     => try_detect_page_type(),
+            ]);
+        })->name('category.show');
 
         Route::get('/product/{slug}', function (string $locale, string $slug) {})->name('product.show');
 

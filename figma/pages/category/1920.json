@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "frame_name": "2 in 1920 - catalog",
+    "node_id": "356:13393",
+    "source_url": "https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=356-13393&t=qSHJcQVEDgsMuMuj-4",
+    "breakpoint": 1920,
+    "frame_size": {
+      "width": 1920,
+      "height": 2006
+    },
+    "screenshot": "figma/pages/category/screenshots/1920.png"
+  },
+  "block": {
+    "section_title": "КОЛЕКЦІЇ",
+    "theme": {
+      "background": "--color-black",
+      "text": "--color-white",
+      "muted_text": "--color-light-gray",
+      "divider": "--color-opacity-light-gray-40%"
+    },
+    "controls_row": {
+      "position": "top-right",
+      "controls": [
+        {
+          "type": "button",
+          "role": "filter",
+          "label": "ФІЛЬТР"
+        },
+        {
+          "type": "dropdown",
+          "role": "sort",
+          "label": "СОРТУВАННЯ",
+          "options": [
+            "По умолчанию",
+            "Сначала новые",
+            "Бестселлеры",
+            "Сначала дешевые",
+            "Сначала дорогие"
+          ]
+        }
+      ]
+    },
+    "products_layout": {
+      "base_grid": {
+        "columns": 4,
+        "gap": {
+          "x": 16,
+          "y": 16
+        }
+      },
+      "composition_pattern": [
+        "row_1: 4 product cards",
+        "row_2: 2 product cards + 1 wide promo card",
+        "row_3: 4 product cards"
+      ],
+      "wide_promo_card": {
+        "spans_columns": 2,
+        "aspect_ratio": "landscape",
+        "purpose": "editorial mixed photo"
+      }
+    },
+    "product_card": {
+      "image_ratio": "portrait",
+      "fields": [
+        "name",
+        "price",
+        "old_price (optional)",
+        "stock_text",
+        "add_to_cart_icon"
+      ],
+      "name_style": "uppercase multiline",
+      "price_style": "main + strike-through old price"
+    },
+    "list_footer": {
+      "show_more": {
+        "label": "ПОКАЗАТИ ЩЕ",
+        "icon": "arrow-down"
+      }
+    }
+  },
+  "implementation_notes": {
+    "ignore_for_now": [
+      "stickers/badges like Новинка"
+    ],
+    "height_policy": "content-driven, no rigid fixed height"
+  }
+}
