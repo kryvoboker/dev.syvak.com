@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsDropdownCollection = window.$hsDropdownCollection || [];
     window.$hsOverlayCollection = window.$hsOverlayCollection || [];
+    const pageType = window.app_params?.page_type ?? null;
 
     import('@ts-shared/lib/validateForm.ts')
         .then(module => module.handleValidateForms());
@@ -29,4 +30,13 @@ document.addEventListener('DOMContentLoaded', (): void => {
                 searchForm:       '.pc-search-form',
             })
         });
+
+    /**
+     * TODO: replace hardcoded category check with final runtime page-type
+     * strategy if project-level routing/page context changes.
+     */
+    if (pageType === 'category') {
+        import('@ts-features/category/products-list.ts')
+            .then(module => module.handleCategoryProductsList());
+    }
 });
