@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Modules\ModuleDefinitions\Pages;
 
+use App\Filament\Pages\Wiki\ModulesWikiPage;
 use App\Filament\Resources\Modules\ModuleDefinitions\ModuleDefinitionResource;
 use App\Filament\Resources\Modules\ModuleInstances\ModuleInstanceResource;
 use App\Models\Modules\ModuleDefinition;
@@ -205,6 +206,10 @@ class ListModuleDefinitions extends ListRecords
                             ->send();
                     }
                 }),
+            Action::make('open_wiki')
+                ->label(__('admin/wiki.actions.open_wiki'))
+                ->icon(Heroicon::BookOpen)
+                ->url(fn (): string => ModulesWikiPage::getUrl(), shouldOpenInNewTab: true),
         ];
     }
 }

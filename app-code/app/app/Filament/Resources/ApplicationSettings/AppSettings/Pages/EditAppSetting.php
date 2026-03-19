@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ApplicationSettings\AppSettings\Pages;
 
+use App\Filament\Pages\Wiki\ApplicationSettingsWikiPage;
 use App\Filament\Resources\ApplicationSettings\AppSettings\AppSettingResource;
 use App\Models\ApplicationSettings\AppSetting;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 
 class EditAppSetting extends EditRecord
 {
@@ -41,7 +44,12 @@ class EditAppSetting extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            Action::make('open_wiki')
+                ->label(__('admin/wiki.actions.open_wiki'))
+                ->icon(Heroicon::BookOpen)
+                ->url(fn (): string => ApplicationSettingsWikiPage::getUrl(), shouldOpenInNewTab: true),
+        ];
     }
 
     /**
