@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Pages\CategoryController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\SearchProductController;
 use Illuminate\Support\Facades\Route;
@@ -17,12 +18,7 @@ Route::prefix('{locale}')
     ->group(function () {
         Route::get('/', [HomeController::class, 'index'])->name('home');
 
-        Route::get('/category/{slug}', function (string $locale, string $slug) {
-            return view('catalog.pages.category', [
-                'category_slug' => $slug,
-                'page_type'     => try_detect_page_type(),
-            ]);
-        })->name('category.show');
+        Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 
         Route::get('/product/{slug}', function (string $locale, string $slug) {})->name('product.show');
 
