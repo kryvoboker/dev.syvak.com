@@ -6,13 +6,16 @@ namespace App\Filament\Resources\PageSettings\Category\Schemas;
 
 use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rule;
 
 class CategoryPageSettingsForm
 {
@@ -158,8 +161,23 @@ class CategoryPageSettingsForm
                                             ->keyLabel(__('admin/settings/category_page_settings.labels.key'))
                                             ->valueLabel(__('admin/settings/category_page_settings.labels.value')),
 
-                                        TextInput::make('config.mode')
-                                            ->label(__('admin/settings/category_page_settings.labels.filter_mode')),
+                                        Select::make('config.mode')
+                                            ->label(__('admin/settings/category_page_settings.labels.filter_mode'))
+                                            ->options(self::getFilterModeOptions())
+                                            ->helperText(__('admin/settings/category_page_settings.labels.filter_mode_helper'))
+                                            ->hint(__('admin/settings/category_page_settings.labels.filter_mode_hint'))
+                                            ->searchable()
+                                            ->rules([
+                                                'required',
+                                                Rule::in(array_keys(self::getFilterModeOptions())),
+                                            ])
+                                            ->required(),
+
+                                        Placeholder::make('config.mode_description')
+                                            ->label(__('admin/settings/category_page_settings.labels.filter_mode_description'))
+                                            ->content(fn (callable $get): string => self::getFilterModeDescription((string) $get('config.mode')))
+                                            ->hidden(fn (callable $get): bool => blank((string) $get('config.mode')))
+                                            ->dehydrated(false),
 
                                         TextInput::make('config.min_price')
                                             ->numeric()
@@ -233,5 +251,33 @@ class CategoryPageSettingsForm
             ->tabs($tabs)
             ->activeTab(1)
             ->contained(false);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function getFilterModeOptions(): array
+    {
+        $filter_modes = (array) config('app.page_settings.category.filter_modes', []);
+
+        return collect($filter_modes)
+            ->keys()
+            ->mapWithKeys(function (mixed $mode_value): array {
+                $mode = (string) $mode_value;
+
+                return [
+                    $mode => (string) __("admin/settings/category_page_settings.filter_mode_options.$mode"),
+                ];
+            })
+            ->all();
+    }
+
+    private static function getFilterModeDescription(string $mode): string
+    {
+        if (! array_key_exists($mode, self::getFilterModeOptions())) {
+            return '';
+        }
+
+        return (string) __("admin/settings/category_page_settings.filter_mode_descriptions.$mode");
     }
 }

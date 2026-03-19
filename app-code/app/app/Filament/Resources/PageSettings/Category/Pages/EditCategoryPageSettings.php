@@ -58,6 +58,10 @@ class EditCategoryPageSettings extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('open_wiki')
+                ->label(__('admin/settings/category_page_settings.actions.open_wiki'))
+                ->url(fn (): string => CategoryPageSettingResource::getUrl('wiki'), shouldOpenInNewTab: true),
+
             Action::make('sync_filters')
                 ->label(__('admin/settings/category_page_settings.actions.sync_filters'))
                 ->action(function (): void {
@@ -390,6 +394,12 @@ class EditCategoryPageSettings extends EditRecord
             if (is_scalar($config_value) || $config_value === null) {
                 $normalized_config[$config_key] = $config_value;
             }
+        }
+
+        $allowed_filter_modes = array_keys((array) config('app.page_settings.category.filter_modes', []));
+
+        if (isset($normalized_config['mode']) && ! in_array((string) $normalized_config['mode'], $allowed_filter_modes, true)) {
+            unset($normalized_config['mode']);
         }
 
         $normalized_config['labels'] = $this->normalizeStringMap((array)Arr::get($config_payload, 'labels', []));
