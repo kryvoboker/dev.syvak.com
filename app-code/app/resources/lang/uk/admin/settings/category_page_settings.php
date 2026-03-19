@@ -27,6 +27,11 @@ return [
         'get_value'                 => 'GET значення',
         'get_extra'                 => 'Додаткові GET параметри',
         'config'                    => 'Конфігурація',
+        'selection_mode'            => 'Режим вибору',
+        'filter_mode'               => 'Режим фільтра',
+        'min_price'                 => 'Мінімальна ціна',
+        'max_price'                 => 'Максимальна ціна',
+        'step'                      => 'Крок',
         'key'                       => 'Ключ',
         'value'                     => 'Значення',
         'sorting_title'             => 'Заголовок блоку сортування',
@@ -37,6 +42,7 @@ return [
         'filters_apply_button_text' => 'Текст кнопки застосування',
         'filters_clear_button_text' => 'Текст кнопки очищення',
         'option_labels'             => 'Підписи опцій',
+        'option_label_value'        => 'Підпис опції',
     ],
 
     'actions' => [

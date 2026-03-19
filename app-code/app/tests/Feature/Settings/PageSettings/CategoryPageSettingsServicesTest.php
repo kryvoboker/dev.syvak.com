@@ -59,6 +59,17 @@ class CategoryPageSettingsServicesTest extends TestCase
             'code'            => 'newest',
         ]);
         $this->assertDatabaseCount('page_setting_translations', 2);
+
+        $translation_content = DB::table('page_setting_translations')
+            ->where('page_setting_id', $page_setting->id)
+            ->where('language_id', 1)
+            ->value('content');
+
+        $this->assertIsString($translation_content);
+
+        $decoded_translation_content = json_decode($translation_content, true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertArrayNotHasKey('option_labels', $decoded_translation_content);
     }
 
     public function test_filter_sync_is_idempotent_and_generates_expected_get_contracts(): void
@@ -166,7 +177,7 @@ class CategoryPageSettingsServicesTest extends TestCase
             'type'            => PageSetting::ITEM_TYPE_FILTER,
             'code'            => 'stock',
         ]);
-        $this->assertDatabaseHas('page_setting_items', [
+        $this->assertDatabaseMissing('page_setting_items', [
             'page_setting_id' => $page_setting->id,
             'type'            => PageSetting::ITEM_TYPE_FILTER,
             'code'            => 'category_11',
