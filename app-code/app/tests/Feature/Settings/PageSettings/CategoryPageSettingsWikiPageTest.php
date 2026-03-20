@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Settings\PageSettings;
 
+use App\Filament\Pages\Wiki\CategoryPageSettingsWikiPage;
 use App\Filament\Resources\PageSettings\Category\CategoryPageSettingResource;
-use App\Filament\Resources\PageSettings\Category\Pages\CategoryPageSettingsWiki;
 use App\Filament\Resources\PageSettings\Category\Pages\EditCategoryPageSettings;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\File;
@@ -14,12 +14,11 @@ use Tests\TestCase;
 
 class CategoryPageSettingsWikiPageTest extends TestCase
 {
-    public function test_resource_registers_wiki_page(): void
+    public function test_resource_does_not_register_wiki_page_anymore(): void
     {
         $pages = CategoryPageSettingResource::getPages();
 
-        $this->assertArrayHasKey('wiki', $pages);
-        $this->assertSame(CategoryPageSettingsWiki::class, $pages['wiki']->getPage());
+        $this->assertArrayNotHasKey('wiki', $pages);
     }
 
     public function test_edit_page_contains_open_wiki_header_action(): void
@@ -39,16 +38,21 @@ class CategoryPageSettingsWikiPageTest extends TestCase
         $this->assertContains('open_wiki', $action_names);
     }
 
-    public function test_wiki_view_exists_and_contains_main_blocks(): void
+    public function test_standalone_wiki_page_is_discoverable_in_wiki_group(): void
     {
-        $view_path = resource_path('views/filament/resources/page-settings/category/pages/category-page-settings-wiki.blade.php');
+        $this->assertStringContainsString('/wiki/page-settings-categories', CategoryPageSettingsWikiPage::getUrl());
+    }
+
+    public function test_shared_wiki_view_exists_and_contains_main_blocks(): void
+    {
+        $view_path = resource_path('views/filament/pages/wiki/page.blade.php');
 
         $this->assertFileExists($view_path);
 
         $view_content = File::get($view_path);
 
-        $this->assertStringContainsString('wiki.intro_title', $view_content);
-        $this->assertStringContainsString('wiki.table.field', $view_content);
+        $this->assertStringContainsString('admin/wiki.common.examples_title', $view_content);
+        $this->assertStringContainsString('getTableHeadings', $view_content);
         $this->assertStringContainsString('getWikiSections', $view_content);
     }
 }

@@ -11,6 +11,12 @@ return [
         'examples_title'                 => 'Практичні приклади',
         'screenshot_missing_title'       => 'Скріншот не знайдено',
         'screenshot_missing_description' => 'Додайте файл скріншота за шляхом нижче, щоб показати його в цьому розділі wiki.',
+        'table'                          => [
+            'field'      => 'Поле',
+            'purpose'    => 'Призначення',
+            'how_to_use' => 'Як використовувати',
+            'example'    => 'Приклад',
+        ],
     ],
 
     'navigation' => [
@@ -18,6 +24,87 @@ return [
     ],
 
     'pages' => [
+        'page_settings_category' => [
+            'title'             => 'Wiki: Налаштування сторінок / Категорії',
+            'navigation_label'  => 'Налаштування сторінок: Категорії',
+            'description'       => 'Повний гід по налаштуванню сортувань та фільтрів на сторінці категорії.',
+            'intro_title'       => 'Як працюють налаштування сторінки категорії',
+            'intro_description' => 'Використовуйте цю сторінку, щоб керувати UI сортування/фільтрів і GET-контрактом для storefront.',
+            'examples'          => [
+                'Вмикайте лише ті опції сортування, які реально підтримує бізнес-логіка каталогу.',
+                'Для фільтра ціни задавайте явні min/max/step, щоб уникнути шумних діапазонів.',
+                'Підтримуйте локалізовані підписи для всіх активних мов.',
+            ],
+            'sections' => [
+                [
+                    'title'                  => 'Блок сортування',
+                    'description'            => 'Керує глобальним вмиканням сортування та доступними варіантами.',
+                    'screenshot'             => 'sorting-tab.png',
+                    'screenshot_description' => 'Вкладка налаштувань сортування на формі налаштувань сторінки категорії.',
+                    'fields'                 => [
+                        [
+                            'label'   => 'Enable sorting',
+                            'purpose' => 'Глобальний перемикач сортування на storefront.',
+                            'how'     => 'Увімкни, якщо на сторінці категорії має показуватись dropdown сортування.',
+                            'example' => 'Увімкнено для категорій з великим каталогом товарів.',
+                        ],
+                        [
+                            'label'   => 'Sorting items',
+                            'purpose' => 'Набір дозволених опцій сортування та їх GET-параметри.',
+                            'how'     => 'Зберігай стабільні ключі й значення, які очікує бекенд.',
+                            'example' => 'newest => ?sort=newest, cheap_first => ?sort=price_asc.',
+                        ],
+                    ],
+                ],
+                [
+                    'title'                  => 'Блок фільтрів',
+                    'description'            => 'Керує фільтрами, GET-контрактом і режимами роботи фільтрів.',
+                    'screenshot'             => 'filters-tab.png',
+                    'screenshot_description' => 'Вкладка налаштувань фільтрів із параметрами URL-контракту.',
+                    'fields'                 => [
+                        [
+                            'label'   => 'Enable filtering',
+                            'purpose' => 'Глобальний перемикач UI та обробки фільтрів.',
+                            'how'     => 'Вимикай для сторінок, де потрібен лише статичний список товарів.',
+                            'example' => 'Disabled для промо-сторінок, Enabled для каталогу.',
+                        ],
+                        [
+                            'label'   => 'GET key / value / extra',
+                            'purpose' => 'Формує URL-контракт для бекенд-фільтрації.',
+                            'how'     => 'Налаштовуй детерміновані ключі та значення для кожного елемента фільтра.',
+                            'example' => 'in_stock => key=stock, value=1, extra=toggle.',
+                        ],
+                        [
+                            'label'   => 'Filter mode + price range config',
+                            'purpose' => 'Задає поведінку фільтра за типом (range, checkbox, toggle).',
+                            'how'     => 'Для ціни заповнюй min/max/step; для інших фільтрів залишай лише mode + GET.',
+                            'example' => 'Price range: min=100, max=10000, step=100.',
+                        ],
+                    ],
+                ],
+                [
+                    'title'                  => 'Блок локалізованого контенту',
+                    'description'            => 'Керує підписами і helper-текстами сортування/фільтрів для кожної мови.',
+                    'screenshot'             => 'localized-tab.png',
+                    'screenshot_description' => 'Мовні вкладки з текстами інтерфейсу для сортування та фільтрів.',
+                    'fields'                 => [
+                        [
+                            'label'   => 'Sorting title and description',
+                            'purpose' => 'Тексти для блоку сортування на storefront.',
+                            'how'     => 'Заповнюй у вкладці кожної активної мови.',
+                            'example' => 'EN: “Sort products”, UK: “Сортування товарів”.',
+                        ],
+                        [
+                            'label'   => 'Filters title, drawer title and buttons',
+                            'purpose' => 'Тексти для drawer фільтрів і кнопок керування.',
+                            'how'     => 'Використовуй короткі й зрозумілі формулювання.',
+                            'example' => 'Apply: “Показати товари”, Clear: “Скинути фільтри”.',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+
         'catalog_products' => [
             'title'             => 'Wiki: Каталог / Товари',
             'navigation_label'  => 'Каталог: Товари',
@@ -32,7 +119,7 @@ return [
                 [
                     'title'                  => 'Базові поля товару',
                     'description'            => 'Ключові поля, що впливають на видимість і бізнес-логіку.',
-                    'screenshot'             => 'product-base-fields.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Основний блок даних у формі товару.',
                     'items'                  => [
                         'Модель, SKU, EAN, кількість, мінімальна кількість.',
@@ -43,7 +130,7 @@ return [
                 [
                     'title'                  => 'Переклади та SEO',
                     'description'            => 'Локалізований контент і SEO URL для кожної мови.',
-                    'screenshot'             => 'product-translations.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Вкладки перекладів та налаштування slug.',
                     'items'                  => [
                         'Назва, опис і SEO-поля вказуються окремо для кожної мови.',
@@ -67,7 +154,7 @@ return [
                 [
                     'title'                  => 'Структура категорій',
                     'description'            => 'Будуйте ієрархію через поле батьківської категорії.',
-                    'screenshot'             => 'category-tree.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Керування деревом категорій.',
                     'items'                  => [
                         'Використовуйте батьківську категорію для вкладених гілок.',
@@ -77,7 +164,7 @@ return [
                 [
                     'title'                  => 'Локалізований контент',
                     'description'            => 'Заголовки, описи та slug-и для кожної активної мови.',
-                    'screenshot'             => 'category-translations.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Мовні вкладки з полями перекладу.',
                     'items'                  => [
                         'Назву та опис заповнюйте в кожній мовній вкладці.',
@@ -101,7 +188,7 @@ return [
                 [
                     'title'                  => 'Життєвий цикл атрибутів',
                     'description'            => 'Створення, редагування та контроль активності атрибутів.',
-                    'screenshot'             => 'attribute-list.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Список атрибутів та дії.',
                     'items'                  => [
                         'Назва атрибуту й прапорець активності визначають доступність.',
@@ -111,7 +198,7 @@ return [
                 [
                     'title'                  => 'Переклади атрибутів',
                     'description'            => 'Локалізовані назви використовуються у формах і фільтрах.',
-                    'screenshot'             => 'attribute-translations.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Вкладка перекладів атрибутів.',
                     'items'                  => [
                         'Для стабільного UX заповнюйте всі активні мови.',
@@ -134,7 +221,7 @@ return [
                 [
                     'title'                  => 'Контентні блоки',
                     'description'            => 'Налаштування заголовка, вмісту та активності сторінки.',
-                    'screenshot'             => 'info-page-content.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Основна форма інформаційної сторінки.',
                     'items'                  => [
                         'Локалізовані заголовок і контент.',
@@ -144,7 +231,7 @@ return [
                 [
                     'title'                  => 'SEO налаштування',
                     'description'            => 'Мета-поля і slug-и для поведінки в пошуку.',
-                    'screenshot'             => 'info-page-seo.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Блок мета-полів і slug.',
                     'items'                  => [
                         'Meta title/description/keywords на кожну мову.',
@@ -168,7 +255,7 @@ return [
                 [
                     'title'                  => 'Поля облікового запису',
                     'description'            => 'Базові профільні та авторизаційні поля.',
-                    'screenshot'             => 'users-main.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Форма профілю користувача.',
                     'items'                  => [
                         'Ім’я, прізвище, email, телефон, аватар.',
@@ -191,7 +278,7 @@ return [
                 [
                     'title'                  => 'Метадані групи',
                     'description'            => 'Назва і контекст групи для адміністраторів.',
-                    'screenshot'             => 'user-groups-main.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Форма групи користувачів.',
                     'items'                  => [
                         'Використовуйте зрозумілі назви груп під ACL-ролі.',
@@ -214,7 +301,7 @@ return [
                 [
                     'title'                  => 'Визначення та інстанси',
                     'description'            => 'Різниця між глобальним станом модуля і станом інстансу.',
-                    'screenshot'             => 'modules-list.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Список визначень і пов’язаних інстансів.',
                     'items'                  => [
                         'Глобальна активація/деактивація впливає на всі інстанси.',
@@ -238,7 +325,7 @@ return [
                 [
                     'title'                  => 'Поля валюти',
                     'description'            => 'Код, символ, locale-формат і прапорці за замовчуванням.',
-                    'screenshot'             => 'currencies-main.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Список валют і базові поля форми.',
                     'items'                  => [
                         'Код і locale визначають формат показу цін.',
@@ -262,7 +349,7 @@ return [
                 [
                     'title'                  => 'Поля мови',
                     'description'            => 'Назва, код, locale-формат, активність і значення за замовчуванням.',
-                    'screenshot'             => 'languages-main.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Список мов та форма редагування.',
                     'items'                  => [
                         'Код мови має відповідати конвенціям локалізації проєкту.',
@@ -286,7 +373,7 @@ return [
                 [
                     'title'                  => 'Локалізовані блоки',
                     'description'            => 'Заголовки, контакти, адреси і соцмережі по мовах.',
-                    'screenshot'             => 'app-settings-localized.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Мовні вкладки у глобальних налаштуваннях.',
                     'items'                  => [
                         'Заповнюйте телефон/email/соцмережі для потрібних мов.',
@@ -296,7 +383,7 @@ return [
                 [
                     'title'                  => 'Технічні параметри',
                     'description'            => 'Timezone, карта і пресети розмірів зображень.',
-                    'screenshot'             => 'app-settings-technical.png',
+                    'screenshot'             => 'main.png',
                     'screenshot_description' => 'Спільні нелокалізовані налаштування.',
                     'items'                  => [
                         'Timezone впливає на дати і планувальник.',

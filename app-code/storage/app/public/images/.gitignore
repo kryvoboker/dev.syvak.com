@@ -4,3 +4,5 @@
 !icons/*.svg
 !search
 !search/*.jpg
+!wiki
+!wiki/**/*

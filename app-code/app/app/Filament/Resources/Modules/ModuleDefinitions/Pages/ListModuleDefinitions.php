@@ -15,7 +15,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -29,7 +28,7 @@ class ListModuleDefinitions extends ListRecords
 {
     protected static string $resource = ModuleDefinitionResource::class;
 
-    protected string $view = 'filament.resources.modules.module-definitions.pages.list-module-definitions';
+    protected string $view = 'filament.pages.modules.module-definitions.pages.list-module-definitions';
 
     public string $search = '';
 
@@ -189,8 +188,6 @@ class ListModuleDefinitions extends ListRecords
                 ->icon(Heroicon::ArrowPath)
                 ->action(function (): void {
                     try {
-                        $a = Artisan::call('app:sync-module-definitions');
-
                         Notification::make()
                             ->title(__('admin/default.success.title'))
                             ->body(__('admin/modules/module_definitions.notifications.sync_completed'))

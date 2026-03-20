@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use App\Filament\Navigation\AdminNavigationGroupEnum;
-use App\Filament\Resources\PageSettings\Category\CategoryPageSettingResource;
 use App\Http\Middleware\LogFilamentErrors;
 use App\Http\Middleware\SetDefaultLocalePrefix;
 use App\Http\Middleware\User\SetCommonPreferences;
@@ -15,13 +14,11 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
-use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
@@ -76,14 +73,6 @@ class AlyoAdminPanelProvider extends PanelProvider
                 AdminNavigationGroupEnum::Wiki->getLabel(),
                 AdminNavigationGroupEnum::PageSettings->getLabel(),
                 AdminNavigationGroupEnum::ApplicationSettings->getLabel(),
-            ])
-            ->navigationItems([
-                NavigationItem::make('wiki_page_settings_categories')
-                    ->label(__('admin/wiki.navigation.page_settings_category'))
-                    ->group(AdminNavigationGroupEnum::Wiki->getLabel())
-                    ->sort(500)
-                    ->icon(Heroicon::BookOpen)
-                    ->url(fn (): string => CategoryPageSettingResource::getUrl('wiki')),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
