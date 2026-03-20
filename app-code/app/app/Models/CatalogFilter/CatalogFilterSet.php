@@ -17,6 +17,7 @@ class CatalogFilterSet extends Model
     protected $fillable = [
         'code',
         'context_type',
+        'context_types',
         'is_enabled',
         'is_price_filter_enabled',
         'is_attribute_filtering_enabled',
@@ -34,6 +35,7 @@ class CatalogFilterSet extends Model
     {
         return [
             'context_type'                   => CatalogFilterContextTypeEnum::class,
+            'context_types'                  => 'array',
             'is_enabled'                     => 'boolean',
             'is_price_filter_enabled'        => 'boolean',
             'is_attribute_filtering_enabled' => 'boolean',

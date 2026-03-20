@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\CatalogFilter\Pages;
 
+use App\Filament\Pages\Wiki\CatalogFilterWikiPage;
 use App\Filament\Resources\Catalogs\CatalogFilter\CatalogFilterSetResource;
 use App\Models\CatalogFilter\CatalogFilterSet;
 use App\Services\CatalogFilter\CatalogFilterBootstrapService;
@@ -42,6 +43,10 @@ class EditCatalogFilterSet extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('open_wiki')
+                ->label(__('admin/wiki.actions.open_wiki'))
+                ->url(fn (): string => CatalogFilterWikiPage::getUrl(), shouldOpenInNewTab: true),
+
             Action::make('refresh_index_status')
                 ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.refresh_index_status'))
                 ->action(function (): void {
@@ -134,8 +139,13 @@ class EditCatalogFilterSet extends EditRecord
         $record = $this->getRecord();
         $record->loadMissing('indexMeta');
 
+        $selected_context_types = is_array($record->context_types) && $record->context_types !== []
+            ? $record->context_types
+            : [(string) $record->getRawOriginal('context_type')];
+
         $index_meta = $record->indexMeta;
 
+        Arr::set($data, 'context_types', $selected_context_types);
         Arr::set($data, 'index_meta.active_index_version', $index_meta?->active_index_version);
         Arr::set($data, 'index_meta.building_index_version', $index_meta?->building_index_version);
         Arr::set($data, 'index_meta.last_status', $index_meta?->getRawOriginal('last_status'));
@@ -146,6 +156,29 @@ class EditCatalogFilterSet extends EditRecord
         Arr::set($data, 'index_meta.last_incremental_sync_at', $index_meta?->getRawOriginal('last_incremental_sync_at'));
         Arr::set($data, 'index_meta.rebuild_lock_key', $index_meta?->rebuild_lock_key);
         Arr::set($data, 'index_meta.rebuild_lock_acquired_at', $index_meta?->getRawOriginal('rebuild_lock_acquired_at'));
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $selected_context_types = collect((array) Arr::get($data, 'context_types', []))
+            ->map(fn (mixed $context_type): string => (string) $context_type)
+            ->filter(fn (string $context_type): bool => filled($context_type))
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($selected_context_types === []) {
+            $selected_context_types = ['category'];
+        }
+
+        Arr::set($data, 'context_types', $selected_context_types);
+        Arr::set($data, 'context_type', $selected_context_types[0]);
 
         return $data;
     }

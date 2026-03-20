@@ -25,10 +25,13 @@ class CatalogFilterSetForm
                             ->disabled()
                             ->dehydrated(),
 
-                        Select::make('context_type')
+                        Select::make('context_types')
                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.context_type'))
+                            ->multiple()
                             ->options(self::getContextOptions())
-                            ->rules(['required', Rule::in(array_keys(self::getContextOptions()))])
+                            ->searchable()
+                            ->preload()
+                            ->rules(['required', 'array'])
                             ->required(),
 
                         Toggle::make('is_enabled')

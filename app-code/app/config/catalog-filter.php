@@ -47,6 +47,7 @@ return [
     ],
     'defaults' => [
         'context'                         => 'category',
+        'contexts'                        => ['category'],
         'set_code'                        => 'default_category',
         'is_enabled'                      => true,
         'is_price_filter_enabled'         => true,

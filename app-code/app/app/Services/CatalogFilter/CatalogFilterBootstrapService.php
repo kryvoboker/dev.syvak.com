@@ -14,14 +14,16 @@ class CatalogFilterBootstrapService
     public function bootstrapDefaultCategorySet(): CatalogFilterSet
     {
         try {
-            $defaults = (array) config('catalog-filter.defaults', []);
+            $defaults               = (array) config('catalog-filter.defaults', []);
+            $selected_context_types = $this->normalizeContextTypes($defaults);
 
             $filter_set = CatalogFilterSet::query()->firstOrCreate(
                 [
                     'code' => (string) ($defaults['set_code'] ?? 'default_category'),
                 ],
                 [
-                    'context_type'                   => (string) ($defaults['context'] ?? 'category'),
+                    'context_type'                   => $selected_context_types[0] ?? 'category',
+                    'context_types'                  => $selected_context_types,
                     'is_enabled'                     => (bool) ($defaults['is_enabled'] ?? true),
                     'is_price_filter_enabled'        => (bool) ($defaults['is_price_filter_enabled'] ?? true),
                     'is_attribute_filtering_enabled' => (bool) ($defaults['is_attribute_filtering_enabled'] ?? true),
@@ -32,6 +34,12 @@ class CatalogFilterBootstrapService
                     'settings'                       => [],
                 ],
             );
+
+            if (empty($filter_set->context_types)) {
+                $filter_set->forceFill([
+                    'context_types' => [(string) $filter_set->getRawOriginal('context_type')],
+                ])->save();
+            }
 
             CatalogFilterIndexMeta::query()->firstOrCreate(
                 [
@@ -53,6 +61,7 @@ class CatalogFilterBootstrapService
                     'catalog_filter_set_id' => (int) $filter_set->id,
                     'code'                  => (string) $filter_set->code,
                     'context_type'          => (string) $filter_set->getRawOriginal('context_type'),
+                    'context_types'         => (array) $filter_set->context_types,
                 ],
             );
 
@@ -67,5 +76,27 @@ class CatalogFilterBootstrapService
 
             throw $throwable;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $defaults
+     * @return array<int, string>
+     */
+    private function normalizeContextTypes(array $defaults): array
+    {
+        $context_types = $defaults['contexts'] ?? [($defaults['context'] ?? 'category')];
+
+        if (! is_array($context_types)) {
+            $context_types = [$context_types];
+        }
+
+        $normalized_context_types = collect($context_types)
+            ->map(fn (mixed $context_type): string => (string) $context_type)
+            ->filter(fn (string $context_type): bool => filled($context_type))
+            ->unique()
+            ->values()
+            ->all();
+
+        return $normalized_context_types !== [] ? $normalized_context_types : ['category'];
     }
 }
