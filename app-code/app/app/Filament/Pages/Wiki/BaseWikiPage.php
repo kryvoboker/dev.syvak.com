@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Storage;
 use UnitEnum;
 
 abstract class BaseWikiPage extends Page
@@ -66,6 +67,16 @@ abstract class BaseWikiPage extends Page
         return (string) __(static::getWikiTranslationPath() . '.intro_description');
     }
 
+    public function getTableHeadings(): array
+    {
+        return [
+            'field'      => (string) __('admin/wiki.common.table.field'),
+            'purpose'    => (string) __('admin/wiki.common.table.purpose'),
+            'how_to_use' => (string) __('admin/wiki.common.table.how_to_use'),
+            'example'    => (string) __('admin/wiki.common.table.example'),
+        ];
+    }
+
     /**
      * @return array<int, string>
      */
@@ -105,6 +116,7 @@ abstract class BaseWikiPage extends Page
                 'title'                  => (string) ($section['title'] ?? ''),
                 'description'            => (string) ($section['description'] ?? ''),
                 'items'                  => is_array($section['items'] ?? null) ? $section['items'] : [],
+                'fields'                 => is_array($section['fields'] ?? null) ? $section['fields'] : [],
                 'screenshot_relative'    => $screenshot_relative_path,
                 'screenshot_url'         => $this->resolveScreenshotUrl($screenshot_relative_path),
                 'screenshot_description' => (string) ($section['screenshot_description'] ?? ''),
@@ -118,10 +130,10 @@ abstract class BaseWikiPage extends Page
             return null;
         }
 
-        if (! file_exists(public_path($screenshot_relative_path))) {
+        if (! Storage::disk('public')->exists($screenshot_relative_path)) {
             return null;
         }
 
-        return asset($screenshot_relative_path);
+        return Storage::disk('public')->url($screenshot_relative_path);
     }
 }

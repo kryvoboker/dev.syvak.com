@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\PageSettings\Category\Pages;
 
+use App\Filament\Pages\Wiki\CategoryPageSettingsWikiPage;
 use App\Filament\Resources\PageSettings\Category\CategoryPageSettingResource;
 use App\Models\ApplicationSettings\Language;
 use App\Models\PageSettings\PageSetting;
@@ -41,9 +42,6 @@ class EditCategoryPageSettings extends EditRecord
     }
 
     /**
-     * @param int|string|null $record
-     *
-     * @return void
      * @throws Throwable
      */
     public function mount(int|string|null $record = null): void
@@ -60,7 +58,7 @@ class EditCategoryPageSettings extends EditRecord
         return [
             Action::make('open_wiki')
                 ->label(__('admin/settings/category_page_settings.actions.open_wiki'))
-                ->url(fn (): string => CategoryPageSettingResource::getUrl('wiki'), shouldOpenInNewTab: true),
+                ->url(fn (): string => CategoryPageSettingsWikiPage::getUrl(), shouldOpenInNewTab: true),
 
             Action::make('sync_filters')
                 ->label(__('admin/settings/category_page_settings.actions.sync_filters'))
@@ -72,9 +70,9 @@ class EditCategoryPageSettings extends EditRecord
                         ->title(__('admin/default.success.title'))
                         ->body(
                             __('admin/settings/category_page_settings.notifications.filters_synced', [
-                                'created' => (int)$summary['created_count'],
-                                'updated' => (int)$summary['updated_count'],
-                                'removed' => (int)$summary['removed_count'],
+                                'created' => (int) $summary['created_count'],
+                                'updated' => (int) $summary['updated_count'],
+                                'removed' => (int) $summary['removed_count'],
                             ]),
                         )
                         ->success()
@@ -87,8 +85,7 @@ class EditCategoryPageSettings extends EditRecord
     }
 
     /**
-     * @param array<string, mixed> $data
-     *
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeFill(array $data): array
@@ -105,42 +102,41 @@ class EditCategoryPageSettings extends EditRecord
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         /** @var PageSetting $record */
         $record->update([
-            'is_sorting_enabled'   => (bool)Arr::get($data, 'is_sorting_enabled', true),
-            'is_filtering_enabled' => (bool)Arr::get($data, 'is_filtering_enabled', true),
+            'is_sorting_enabled'   => (bool) Arr::get($data, 'is_sorting_enabled', true),
+            'is_filtering_enabled' => (bool) Arr::get($data, 'is_filtering_enabled', true),
             'settings'             => $this->normalizeSettingsContract($record, $data),
         ]);
 
-        $this->syncTranslationsFromForm($record, (array)Arr::get($data, 'localized_content', []));
+        $this->syncTranslationsFromForm($record, (array) Arr::get($data, 'localized_content', []));
         $this->syncItemsFromForm(
             $record,
             PageSetting::ITEM_TYPE_SORTING,
-            (array)Arr::get($data, 'sorting_items', []),
+            (array) Arr::get($data, 'sorting_items', []),
         );
         $this->syncItemsFromForm(
             $record,
             PageSetting::ITEM_TYPE_FILTER,
-            (array)Arr::get($data, 'filter_items', []),
+            (array) Arr::get($data, 'filter_items', []),
         );
 
         return $record->fresh(['translations.language', 'items']) ?? $record;
     }
 
     /**
-     * @param array<string, mixed> $data
-     *
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     private function normalizeSettingsContract(PageSetting $record, array $data): array
     {
         $settings = $record->settings;
 
-        if (!is_array($settings)) {
+        if (! is_array($settings)) {
             $settings = [];
         }
 
@@ -156,8 +152,8 @@ class EditCategoryPageSettings extends EditRecord
         );
 
         Arr::set($settings, 'meta.contract_version', 1);
-        Arr::set($settings, 'ui.sorting.enabled', (bool)Arr::get($data, 'is_sorting_enabled', true));
-        Arr::set($settings, 'ui.filters.enabled', (bool)Arr::get($data, 'is_filtering_enabled', true));
+        Arr::set($settings, 'ui.sorting.enabled', (bool) Arr::get($data, 'is_sorting_enabled', true));
+        Arr::set($settings, 'ui.filters.enabled', (bool) Arr::get($data, 'is_filtering_enabled', true));
 
         return $settings;
     }
@@ -168,30 +164,30 @@ class EditCategoryPageSettings extends EditRecord
     private function mapLocalizedContentForForm(PageSetting $record): array
     {
         $translations_by_language = $record->translations
-            ->keyBy(fn(PageSettingTranslation $translation): string => (string)$translation->language?->code);
-        $localized_content        = [];
+            ->keyBy(fn (PageSettingTranslation $translation): string => (string) $translation->language?->code);
+        $localized_content = [];
 
         foreach (new Language()->getActiveLanguages() as $language) {
-            $language_code = (string)$language->code;
+            $language_code = (string) $language->code;
             /** @var PageSettingTranslation|null $translation */
             $translation = $translations_by_language->get($language_code);
             $content     = $translation?->content;
 
-            if (!is_array($content)) {
+            if (! is_array($content)) {
                 $content = [];
             }
 
             $localized_content[$language_code] = [
                 'sorting' => [
-                    'title'       => (string)Arr::get($content, 'sorting.title', ''),
-                    'description' => (string)Arr::get($content, 'sorting.description', ''),
+                    'title'       => (string) Arr::get($content, 'sorting.title', ''),
+                    'description' => (string) Arr::get($content, 'sorting.description', ''),
                 ],
                 'filters' => [
-                    'title'             => (string)Arr::get($content, 'filters.title', ''),
-                    'description'       => (string)Arr::get($content, 'filters.description', ''),
-                    'drawer_title'      => (string)Arr::get($content, 'filters.drawer_title', ''),
-                    'apply_button_text' => (string)Arr::get($content, 'filters.apply_button_text', ''),
-                    'clear_button_text' => (string)Arr::get($content, 'filters.clear_button_text', ''),
+                    'title'             => (string) Arr::get($content, 'filters.title', ''),
+                    'description'       => (string) Arr::get($content, 'filters.description', ''),
+                    'drawer_title'      => (string) Arr::get($content, 'filters.drawer_title', ''),
+                    'apply_button_text' => (string) Arr::get($content, 'filters.apply_button_text', ''),
+                    'clear_button_text' => (string) Arr::get($content, 'filters.clear_button_text', ''),
                 ],
             ];
         }
@@ -213,19 +209,19 @@ class EditCategoryPageSettings extends EditRecord
                 $config_payload = is_array($item->config) ? $item->config : [];
 
                 return [
-                    'code'        => (string)$item->code,
-                    'source_type' => (string)($item->source_type ?? ''),
+                    'code'        => (string) $item->code,
+                    'source_type' => (string) ($item->source_type ?? ''),
                     'source_id'   => $item->source_id,
-                    'is_enabled'  => (bool)$item->is_enabled,
-                    'sort_order'  => (int)$item->sort_order,
+                    'is_enabled'  => (bool) $item->is_enabled,
+                    'sort_order'  => (int) $item->sort_order,
                     'get'         => [
-                        'key'   => (string)Arr::get($get_payload, 'key', ''),
+                        'key'   => (string) Arr::get($get_payload, 'key', ''),
                         'value' => Arr::get($get_payload, 'value'),
-                        'extra' => $this->normalizeStringMap((array)Arr::get($get_payload, 'extra', [])),
+                        'extra' => $this->normalizeStringMap((array) Arr::get($get_payload, 'extra', [])),
                     ],
-                    'config'      => $this->normalizeItemConfigForForm(
+                    'config' => $this->normalizeItemConfigForForm(
                         $config_payload,
-                        $this->resolveLegacyOptionLabelsForItem($record, (string)$item->code),
+                        $this->resolveLegacyOptionLabelsForItem($record, (string) $item->code),
                     ),
                 ];
             })
@@ -233,31 +229,31 @@ class EditCategoryPageSettings extends EditRecord
     }
 
     /**
-     * @param array<string, mixed> $localized_content
+     * @param  array<string, mixed>  $localized_content
      */
     private function syncTranslationsFromForm(PageSetting $record, array $localized_content): void
     {
         foreach (new Language()->getActiveLanguages() as $language) {
-            $language_code    = (string)$language->code;
+            $language_code    = (string) $language->code;
             $language_content = Arr::get($localized_content, $language_code, []);
 
             PageSettingTranslation::query()->updateOrCreate(
                 [
-                    'page_setting_id' => (int)$record->id,
-                    'language_id'     => (int)$language->id,
+                    'page_setting_id' => (int) $record->id,
+                    'language_id'     => (int) $language->id,
                 ],
                 [
                     'content' => [
                         'sorting' => [
-                            'title'       => (string)Arr::get($language_content, 'sorting.title', ''),
-                            'description' => (string)Arr::get($language_content, 'sorting.description', ''),
+                            'title'       => (string) Arr::get($language_content, 'sorting.title', ''),
+                            'description' => (string) Arr::get($language_content, 'sorting.description', ''),
                         ],
                         'filters' => [
-                            'title'             => (string)Arr::get($language_content, 'filters.title', ''),
-                            'description'       => (string)Arr::get($language_content, 'filters.description', ''),
-                            'drawer_title'      => (string)Arr::get($language_content, 'filters.drawer_title', ''),
-                            'apply_button_text' => (string)Arr::get($language_content, 'filters.apply_button_text', ''),
-                            'clear_button_text' => (string)Arr::get($language_content, 'filters.clear_button_text', ''),
+                            'title'             => (string) Arr::get($language_content, 'filters.title', ''),
+                            'description'       => (string) Arr::get($language_content, 'filters.description', ''),
+                            'drawer_title'      => (string) Arr::get($language_content, 'filters.drawer_title', ''),
+                            'apply_button_text' => (string) Arr::get($language_content, 'filters.apply_button_text', ''),
+                            'clear_button_text' => (string) Arr::get($language_content, 'filters.clear_button_text', ''),
                         ],
                     ],
                 ],
@@ -266,43 +262,43 @@ class EditCategoryPageSettings extends EditRecord
     }
 
     /**
-     * @param array<int, array<string, mixed>> $rows
+     * @param  array<int, array<string, mixed>>  $rows
      */
     private function syncItemsFromForm(PageSetting $record, string $type, array $rows): void
     {
         $rows_collection = collect($rows)
-            ->filter(fn(array $row): bool => filled((string)Arr::get($row, 'code')))
+            ->filter(fn (array $row): bool => filled((string) Arr::get($row, 'code')))
             ->values();
 
         $codes = $rows_collection
             ->pluck('code')
-            ->map(fn(mixed $code): string => (string)$code)
+            ->map(fn (mixed $code): string => (string) $code)
             ->all();
 
         PageSettingItem::query()
-            ->where('page_setting_id', (int)$record->id)
+            ->where('page_setting_id', (int) $record->id)
             ->where('type', $type)
             ->whereNotIn('code', $codes)
             ->delete();
 
         foreach ($rows_collection as $row) {
             $item = PageSettingItem::query()->firstOrNew([
-                'page_setting_id' => (int)$record->id,
+                'page_setting_id' => (int) $record->id,
                 'type'            => $type,
-                'code'            => (string)Arr::get($row, 'code'),
+                'code'            => (string) Arr::get($row, 'code'),
             ]);
 
             $item->fill([
                 'source_type' => $this->resolveItemSourceType($item, $row),
                 'source_id'   => $this->resolveItemSourceId($item, $row),
-                'is_enabled'  => (bool)Arr::get($row, 'is_enabled', true),
-                'sort_order'  => (int)Arr::get($row, 'sort_order', 0),
+                'is_enabled'  => (bool) Arr::get($row, 'is_enabled', true),
+                'sort_order'  => (int) Arr::get($row, 'sort_order', 0),
                 'get'         => [
-                    'key'   => (string)Arr::get($row, 'get.key', ''),
+                    'key'   => (string) Arr::get($row, 'get.key', ''),
                     'value' => Arr::get($row, 'get.value'),
-                    'extra' => $this->normalizeStringMap((array)Arr::get($row, 'get.extra', [])),
+                    'extra' => $this->normalizeStringMap((array) Arr::get($row, 'get.extra', [])),
                 ],
-                'config'      => $this->normalizeItemConfigFromForm((array)Arr::get($row, 'config', [])),
+                'config' => $this->normalizeItemConfigFromForm((array) Arr::get($row, 'config', [])),
             ]);
 
             $item->save();
@@ -310,36 +306,35 @@ class EditCategoryPageSettings extends EditRecord
     }
 
     /**
-     * @param array<string, mixed> $row
+     * @param  array<string, mixed>  $row
      */
     private function resolveItemSourceType(PageSettingItem $item, array $row): ?string
     {
         $source_type = Arr::get($row, 'source_type');
 
         if (filled($source_type)) {
-            return (string)$source_type;
+            return (string) $source_type;
         }
 
         return $item->source_type;
     }
 
     /**
-     * @param array<string, mixed> $row
+     * @param  array<string, mixed>  $row
      */
     private function resolveItemSourceId(PageSettingItem $item, array $row): ?int
     {
         $source_id = Arr::get($row, 'source_id');
 
         if (is_numeric($source_id)) {
-            return (int)$source_id;
+            return (int) $source_id;
         }
 
         return $item->source_id;
     }
 
     /**
-     * @param array<string, mixed> $values
-     *
+     * @param  array<string, mixed>  $values
      * @return array<string, string>
      */
     private function normalizeStringMap(array $values): array
@@ -347,16 +342,15 @@ class EditCategoryPageSettings extends EditRecord
         return collect($values)
             ->mapWithKeys(function (mixed $value, mixed $key): array {
                 return [
-                    (string)$key => (string)$value,
+                    (string) $key => (string) $value,
                 ];
             })
             ->all();
     }
 
     /**
-     * @param array<string, mixed>  $config_payload
-     * @param array<string, string> $legacy_labels
-     *
+     * @param  array<string, mixed>  $config_payload
+     * @param  array<string, string>  $legacy_labels
      * @return array<string, mixed>
      */
     private function normalizeItemConfigForForm(array $config_payload, array $legacy_labels = []): array
@@ -366,7 +360,7 @@ class EditCategoryPageSettings extends EditRecord
             return is_scalar($config_value) || $config_value === null;
         });
 
-        $labels = $this->normalizeStringMap((array)Arr::get($config_payload, 'labels', []));
+        $labels = $this->normalizeStringMap((array) Arr::get($config_payload, 'labels', []));
 
         if ($labels === [] && $legacy_labels !== []) {
             $labels = $legacy_labels;
@@ -378,8 +372,7 @@ class EditCategoryPageSettings extends EditRecord
     }
 
     /**
-     * @param array<string, mixed> $config_payload
-     *
+     * @param  array<string, mixed>  $config_payload
      * @return array<string, mixed>
      */
     private function normalizeItemConfigFromForm(array $config_payload): array
@@ -402,7 +395,7 @@ class EditCategoryPageSettings extends EditRecord
             unset($normalized_config['mode']);
         }
 
-        $normalized_config['labels'] = $this->normalizeStringMap((array)Arr::get($config_payload, 'labels', []));
+        $normalized_config['labels'] = $this->normalizeStringMap((array) Arr::get($config_payload, 'labels', []));
 
         return $normalized_config;
     }
@@ -415,8 +408,8 @@ class EditCategoryPageSettings extends EditRecord
         $legacy_labels = [];
 
         foreach ($record->translations as $translation) {
-            $language_code = (string)$translation->language?->code;
-            $label         = (string)Arr::get((array)$translation->content, "option_labels.$item_code", '');
+            $language_code = (string) $translation->language?->code;
+            $label         = (string) Arr::get((array) $translation->content, "option_labels.$item_code", '');
 
             if (blank($language_code) || blank($label)) {
                 continue;

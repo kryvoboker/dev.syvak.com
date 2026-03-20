@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PageSettings\Category;
 
 use App\Filament\Navigation\AdminNavigationGroupEnum;
-use App\Filament\Resources\PageSettings\Category\Pages\CategoryPageSettingsWiki;
 use App\Filament\Resources\PageSettings\Category\Pages\EditCategoryPageSettings;
 use App\Filament\Resources\PageSettings\Category\Schemas\CategoryPageSettingsForm;
 use App\Models\PageSettings\PageSetting;
@@ -40,7 +39,6 @@ class CategoryPageSettingResource extends Resource
     {
         return [
             'index' => EditCategoryPageSettings::route('/'),
-            'wiki'  => CategoryPageSettingsWiki::route('/wiki'),
         ];
     }
 

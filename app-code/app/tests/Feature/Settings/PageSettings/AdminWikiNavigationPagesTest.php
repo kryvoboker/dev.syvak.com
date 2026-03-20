@@ -11,6 +11,7 @@ use App\Filament\Pages\Wiki\ApplicationSettingsWikiPage;
 use App\Filament\Pages\Wiki\CatalogAttributesWikiPage;
 use App\Filament\Pages\Wiki\CatalogCategoriesWikiPage;
 use App\Filament\Pages\Wiki\CatalogProductsWikiPage;
+use App\Filament\Pages\Wiki\CategoryPageSettingsWikiPage;
 use App\Filament\Pages\Wiki\InfoPagesWikiPage;
 use App\Filament\Pages\Wiki\ModulesWikiPage;
 use App\Filament\Pages\Wiki\UserGroupsWikiPage;
@@ -32,6 +33,7 @@ class AdminWikiNavigationPagesTest extends TestCase
             CatalogProductsWikiPage::class,
             CatalogCategoriesWikiPage::class,
             CatalogAttributesWikiPage::class,
+            CategoryPageSettingsWikiPage::class,
             InfoPagesWikiPage::class,
             UsersWikiPage::class,
             UserGroupsWikiPage::class,

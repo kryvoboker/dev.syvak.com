@@ -54,6 +54,32 @@
                         @endforeach
                     </ul>
                 @endif
+
+                @if(! empty($section['fields']))
+                    @php($table_headings = $this->getTableHeadings())
+                    <div class="mt-4 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead>
+                            <tr class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                <th class="px-3 py-2">{{ $table_headings['field'] }}</th>
+                                <th class="px-3 py-2">{{ $table_headings['purpose'] }}</th>
+                                <th class="px-3 py-2">{{ $table_headings['how_to_use'] }}</th>
+                                <th class="px-3 py-2">{{ $table_headings['example'] }}</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white text-gray-700">
+                            @foreach($section['fields'] as $field)
+                                <tr>
+                                    <td class="px-3 py-2 font-medium text-gray-900">{{ $field['label'] ?? '' }}</td>
+                                    <td class="px-3 py-2">{{ $field['purpose'] ?? '' }}</td>
+                                    <td class="px-3 py-2">{{ $field['how'] ?? '' }}</td>
+                                    <td class="px-3 py-2">{{ $field['example'] ?? '' }}</td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
             </section>
         @endforeach
     </div>
