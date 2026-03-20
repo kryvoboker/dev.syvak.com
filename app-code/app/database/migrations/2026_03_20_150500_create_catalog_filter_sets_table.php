@@ -18,6 +18,7 @@ return new class() extends Migration
 
             $table->string('code', 120)->nullable(false);
             $table->string('context_type', 40)->nullable(false);
+            $table->json('context_types')->nullable();
             $table->boolean('is_enabled')->default(true)->nullable(false);
             $table->boolean('is_price_filter_enabled')->default(true)->nullable(false);
             $table->boolean('is_attribute_filtering_enabled')->default(true)->nullable(false);
