@@ -17,7 +17,7 @@ return new class() extends Migration
             $table->id();
 
             $table->foreignId('catalog_filter_set_id')
-                ->constrained('catalog_filter_sets')
+                ->constrained(indexName: 'catalog_filter_product_index_cf_s_id_foreign')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -26,29 +26,29 @@ return new class() extends Migration
 
             $table->foreignId('category_id')
                 ->nullable()
-                ->constrained('categories')
+                ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->foreignId('product_id')
-                ->constrained('products')
+                ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->foreignId('catalog_filter_group_id')
-                ->constrained('catalog_filter_groups')
+                ->constrained(indexName: 'catalog_filter_product_index_c_f_g_id_foreign')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->foreignId('catalog_filter_value_id')
                 ->nullable()
-                ->constrained('catalog_filter_values')
+                ->constrained(indexName: 'catalog_filter_product_index_c_f_v_id_foreign')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->foreignId('attribute_id')
                 ->nullable()
-                ->constrained('attributes')
+                ->constrained()
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
