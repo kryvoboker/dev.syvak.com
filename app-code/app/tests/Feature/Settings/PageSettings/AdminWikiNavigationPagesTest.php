@@ -30,21 +30,22 @@ class AdminWikiNavigationPagesTest extends TestCase
     public function test_wiki_pages_are_in_wiki_navigation_group_and_have_stable_urls(): void
     {
         $wiki_pages = [
-            CatalogProductsWikiPage::class,
-            CatalogCategoriesWikiPage::class,
-            CatalogAttributesWikiPage::class,
-            CategoryPageSettingsWikiPage::class,
-            InfoPagesWikiPage::class,
-            UsersWikiPage::class,
-            UserGroupsWikiPage::class,
-            ModulesWikiPage::class,
-            ApplicationCurrenciesWikiPage::class,
-            ApplicationLanguagesWikiPage::class,
-            ApplicationSettingsWikiPage::class,
+            CatalogProductsWikiPage::class       => AdminNavigationGroupEnum::Catalog,
+            CatalogCategoriesWikiPage::class     => AdminNavigationGroupEnum::Catalog,
+            CatalogAttributesWikiPage::class     => AdminNavigationGroupEnum::Catalog,
+            CategoryPageSettingsWikiPage::class  => AdminNavigationGroupEnum::PageSettings,
+            InfoPagesWikiPage::class             => AdminNavigationGroupEnum::InfoPages,
+            UsersWikiPage::class                 => AdminNavigationGroupEnum::Users,
+            UserGroupsWikiPage::class            => AdminNavigationGroupEnum::Users,
+            ModulesWikiPage::class               => AdminNavigationGroupEnum::Modules,
+            ApplicationCurrenciesWikiPage::class => AdminNavigationGroupEnum::ApplicationSettings,
+            ApplicationLanguagesWikiPage::class  => AdminNavigationGroupEnum::ApplicationSettings,
+            ApplicationSettingsWikiPage::class   => AdminNavigationGroupEnum::ApplicationSettings,
         ];
 
-        foreach ($wiki_pages as $wiki_page_class) {
+        foreach ($wiki_pages as $wiki_page_class => $navigation_parent_group) {
             $this->assertSame(AdminNavigationGroupEnum::Wiki, $wiki_page_class::getNavigationGroup());
+            $this->assertSame((string) $navigation_parent_group->getLabel(), $wiki_page_class::getNavigationParentItem());
             $this->assertStringContainsString('/wiki/', $wiki_page_class::getUrl());
         }
     }

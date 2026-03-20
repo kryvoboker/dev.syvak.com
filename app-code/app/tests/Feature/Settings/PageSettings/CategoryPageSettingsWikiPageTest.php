@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Settings\PageSettings;
 
+use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Pages\Wiki\CategoryPageSettingsWikiPage;
 use App\Filament\Resources\PageSettings\Category\CategoryPageSettingResource;
 use App\Filament\Resources\PageSettings\Category\Pages\EditCategoryPageSettings;
@@ -41,6 +42,7 @@ class CategoryPageSettingsWikiPageTest extends TestCase
     public function test_standalone_wiki_page_is_discoverable_in_wiki_group(): void
     {
         $this->assertStringContainsString('/wiki/page-settings-categories', CategoryPageSettingsWikiPage::getUrl());
+        $this->assertSame((string) AdminNavigationGroupEnum::PageSettings->getLabel(), CategoryPageSettingsWikiPage::getNavigationParentItem());
     }
 
     public function test_shared_wiki_view_exists_and_contains_main_blocks(): void

@@ -24,6 +24,8 @@ abstract class BaseWikiPage extends Page
 
     abstract protected static function getWikiScreenshotDirectory(): string;
 
+    abstract protected static function getWikiParentNavigationGroup(): AdminNavigationGroupEnum;
+
     public function getTitle(): string
     {
         return (string) __(static::getWikiTranslationPath() . '.title');
@@ -48,6 +50,11 @@ abstract class BaseWikiPage extends Page
     public static function getNavigationLabel(): string
     {
         return (string) __(static::getWikiTranslationPath() . '.navigation_label');
+    }
+
+    public static function getNavigationParentItem(): ?string
+    {
+        return (string) static::getWikiParentNavigationGroup()->getLabel();
     }
 
     public function getBreadcrumbs(): array
