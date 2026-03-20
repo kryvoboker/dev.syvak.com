@@ -18,6 +18,14 @@ google-chrome \
   --disable-dev-shm-usage \
   https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=344-3934
 
+google-chrome \
+  --remote-debugging-address=127.0.0.1 \
+  --remote-debugging-port=9222 \
+  --user-data-dir=/tmp/chrome-profile \
+  --no-sandbox \
+  --disable-dev-shm-usage \
+  http://dev.syvak.com/en/alyo-admin
+
 
 For run Google Chrome only for mcp server:
 

@@ -23,7 +23,7 @@ class ModuleDefinitionResource extends Resource
 {
     protected static ?string $model = ModuleDefinition::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Squares2x2;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::SquaresPlus;
 
     protected static string|null|UnitEnum $navigationGroup = AdminNavigationGroupEnum::Modules;
 
