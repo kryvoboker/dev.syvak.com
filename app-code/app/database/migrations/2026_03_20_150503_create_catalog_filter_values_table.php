@@ -17,7 +17,7 @@ return new class() extends Migration
             $table->id();
 
             $table->foreignId('catalog_filter_group_id')
-                ->constrained('catalog_filter_groups')
+                ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

@@ -13,11 +13,11 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('catalog_filter_value_translations', function (Blueprint $table) {
+        Schema::create('catalog_filter_group_translations', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('catalog_filter_value_id')
-                ->constrained('catalog_filter_values')
+            $table->foreignId('catalog_filter_group_id')
+                ->constrained(indexName: 'catalog_filter_group_translations_catalog_f_g_id_foreign')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -32,8 +32,8 @@ return new class() extends Migration
             $table->timestamps();
 
             $table->unique(
-                ['catalog_filter_value_id', 'language_id'],
-                'catalog_filter_value_translations_unique_idx',
+                ['catalog_filter_group_id', 'language_id'],
+                'catalog_filter_group_translations_unique_idx',
             );
         });
     }
@@ -43,6 +43,6 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('catalog_filter_value_translations');
+        Schema::dropIfExists('catalog_filter_group_translations');
     }
 };
