@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Pages;
 
-use App\Actions\SearchProductAction;
+use App\Actions\SearchProductsAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Search\SearchProductIndexRequest;
 use App\Http\Requests\Search\SearchProductShowRequest;
@@ -16,7 +16,7 @@ class SearchProductController extends Controller
     /**
      * @throws Throwable
      */
-    public function index(SearchProductIndexRequest $request, SearchProductAction $search_product_action): ?JsonResponse
+    public function index(SearchProductIndexRequest $request, SearchProductsAction $search_product_action): ?JsonResponse
     {
         $search_products = $search_product_action->handle(
             $request->query('keyword'),

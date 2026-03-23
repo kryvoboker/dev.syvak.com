@@ -9,7 +9,7 @@ use App\Models\Catalogs\Products\Product;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Throwable;
 
-class SearchProductAction
+class SearchProductsAction
 {
     /**
      * @throws Throwable
