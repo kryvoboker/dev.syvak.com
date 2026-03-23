@@ -29,7 +29,7 @@
         <div class="flex flex-col gap-y-1 border-y border-y-opacity-light-gray-40% py-2">
             <form class="mob-search-form _needs-validation"
                   novalidate
-                  data-ajax-search-url="{{ localizedRoute('localized.catalog.live-search-product.index') }}"
+                  data-ajax-search-url="{{ localizedRoute('localized.catalog.live-search-product-ajax.index') }}"
                   action="{{ localizedRoute('localized.catalog.search-products.index') }}"
                   method="GET">
                 <div class="flex space-x-4">

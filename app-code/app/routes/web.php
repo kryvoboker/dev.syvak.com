@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Ajax\LiveSearchProductController;
+use App\Http\Controllers\Ajax\LiveSearchProductAjaxController;
 use App\Http\Controllers\Pages\CategoryController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\SearchProductsController;
@@ -23,6 +23,6 @@ Route::prefix('{locale}')
 
         Route::get('/product/{slug}', function (string $locale, string $slug) {})->name('product.show');
 
-        Route::get('/live-search', [LiveSearchProductController::class, 'index'])->name('live-search-product.index');
+        Route::get('/live-search', [LiveSearchProductAjaxController::class, 'index'])->name('live-search-product-ajax.index');
         Route::get('/search', [SearchProductsController::class, 'index'])->name('search-products.index');
     });
