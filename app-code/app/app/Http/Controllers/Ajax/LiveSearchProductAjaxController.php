@@ -11,7 +11,7 @@ use App\Http\Requests\Search\SearchProductsShowRequest;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
-class LiveSearchProductController extends Controller
+class LiveSearchProductAjaxController extends Controller
 {
     /**
      * @throws Throwable
