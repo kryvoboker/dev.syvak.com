@@ -18,8 +18,8 @@
         <div class="flex flex-col gap-y-1 border-y border-y-opacity-light-gray-40% py-2 md:px-8 md:py-20px bp1920px:py-11">
             <form class="pc-search-form _needs-validation"
                   novalidate
-                  data-ajax-search-url="{{ localizedRoute('localized.catalog.search.index') }}"
-                  action="{{ localizedRoute('localized.catalog.search.show') }}"
+                  data-ajax-search-url="{{ localizedRoute('localized.catalog.live-search-product.index') }}"
+                  action="{{ localizedRoute('localized.catalog.search-products.index') }}"
                   method="GET">
                 <div class="flex space-x-4">
                     <button class="pc-search-btn icon-[si--search-line] custom-icon my-auto size-6 shrink-0" type="submit"></button>
