@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\CatalogFilter;
+namespace App\Services\Catalogs\CatalogFilter;
 
 use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\ApplicationSettings\Language;
@@ -10,6 +10,7 @@ use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroupTranslation;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -17,6 +18,7 @@ class FilterGroupGeneratorService
 {
     /**
      * @return array<string, int>
+     * @throws Throwable
      */
     public function sync(CatalogFilterSet $filter_set): array
     {
@@ -24,28 +26,12 @@ class FilterGroupGeneratorService
             $created_count = 0;
             $updated_count = 0;
 
-            Log::channel('daily')->info('Catalog filter group sync policy applied.', [
-                'catalog_filter_set_id' => (int) $filter_set->id,
-                'preserved_fields'      => ['is_enabled', 'sort_order', 'get_key', 'config'],
-                'regenerated_fields'    => ['source_type', 'source_id', 'translations'],
-            ]);
-
             [$created_count, $updated_count] = $this->syncSystemGroups($filter_set, $created_count, $updated_count);
             [$created_count, $updated_count] = $this->syncAttributeGroups($filter_set, $created_count, $updated_count);
 
-            $total_groups = (int) CatalogFilterGroup::query()
-                ->where('catalog_filter_set_id', (int) $filter_set->id)
+            $total_groups = CatalogFilterGroup::query()
+                ->where('catalog_filter_set_id', (int)$filter_set->id)
                 ->count();
-
-            Log::channel('daily')->info(
-                'Catalog filter groups synchronized.',
-                [
-                    'catalog_filter_set_id' => (int) $filter_set->id,
-                    'created_count'         => $created_count,
-                    'updated_count'         => $updated_count,
-                    'total_groups'          => $total_groups,
-                ],
-            );
 
             return [
                 'created_count' => $created_count,
@@ -56,7 +42,7 @@ class FilterGroupGeneratorService
             Log::channel('stack')->error(
                 'Catalog filter groups synchronization failed.',
                 [
-                    'catalog_filter_set_id' => (int) $filter_set->id,
+                    'catalog_filter_set_id' => (int)$filter_set->id,
                     'exception'             => $throwable,
                 ],
             );
@@ -89,27 +75,27 @@ class FilterGroupGeneratorService
 
         foreach ($system_groups as $payload) {
             $group = CatalogFilterGroup::query()->firstOrNew([
-                'catalog_filter_set_id' => (int) $filter_set->id,
-                'code'                  => (string) $payload['code'],
+                'catalog_filter_set_id' => (int)$filter_set->id,
+                'code'                  => (string)$payload['code'],
             ]);
 
             $was_existing_group = $group->exists;
 
-            $group->source_type = (string) $payload['source_type'];
+            $group->source_type = (string)$payload['source_type'];
             $group->source_id   = null;
 
-            if (! $was_existing_group) {
+            if (!$was_existing_group) {
                 $group->is_enabled = true;
-                $group->sort_order = (int) $payload['sort_order'];
-                $group->get_key    = (string) $payload['get_key'];
+                $group->sort_order = (int)$payload['sort_order'];
+                $group->get_key    = (string)$payload['get_key'];
                 $group->setAttribute('config', []);
             }
 
-            if (blank((string) $group->get_key)) {
-                $group->get_key = (string) $payload['get_key'];
+            if (blank((string)$group->get_key)) {
+                $group->get_key = (string)$payload['get_key'];
             }
 
-            if (! is_array($group->config)) {
+            if (!is_array($group->config)) {
                 $group->setAttribute('config', []);
             }
 
@@ -132,6 +118,7 @@ class FilterGroupGeneratorService
      */
     private function syncAttributeGroups(CatalogFilterSet $filter_set, int $created_count, int $updated_count): array
     {
+        /** @var Collection<Attribute> $active_attributes */
         $active_attributes = Attribute::query()
             ->where('is_active', true)
             ->whereHas('productToAttribute.product', function ($query): void {
@@ -146,27 +133,27 @@ class FilterGroupGeneratorService
 
         foreach ($active_attributes as $attribute) {
             $group = CatalogFilterGroup::query()->firstOrNew([
-                'catalog_filter_set_id' => (int) $filter_set->id,
-                'code'                  => 'attribute_' . (int) $attribute->id,
+                'catalog_filter_set_id' => (int)$filter_set->id,
+                'code'                  => 'attribute_' . (int)$attribute->id,
             ]);
 
             $was_existing_group = $group->exists;
 
             $group->source_type = CatalogFilterGroupSourceTypeEnum::Attribute->value;
-            $group->source_id   = (int) $attribute->id;
+            $group->source_id   = (int)$attribute->id;
 
-            if (! $was_existing_group) {
+            if (!$was_existing_group) {
                 $group->is_enabled = true;
                 $group->sort_order = $sort_order;
-                $group->get_key    = 'filters[' . (int) $attribute->id . ']';
+                $group->get_key    = 'filters[' . (int)$attribute->id . ']';
                 $group->setAttribute('config', []);
             }
 
-            if (blank((string) $group->get_key)) {
-                $group->get_key = 'filters[' . (int) $attribute->id . ']';
+            if (blank((string)$group->get_key)) {
+                $group->get_key = 'filters[' . (int)$attribute->id . ']';
             }
 
-            if (! is_array($group->config)) {
+            if (!is_array($group->config)) {
                 $group->setAttribute('config', []);
             }
 
@@ -202,15 +189,15 @@ class FilterGroupGeneratorService
         $labels = $label_by_code[$group->code] ?? [];
 
         foreach (new Language()->getActiveLanguages() as $language) {
-            $language_code = (string) $language->code;
+            $language_code = (string)$language->code;
 
             CatalogFilterGroupTranslation::query()->updateOrCreate(
                 [
-                    'catalog_filter_group_id' => (int) $group->id,
-                    'language_id'             => (int) $language->id,
+                    'catalog_filter_group_id' => (int)$group->id,
+                    'language_id'             => (int)$language->id,
                 ],
                 [
-                    'label' => (string) ($labels[$language_code] ?? ucfirst($group->code)),
+                    'label' => (string)($labels[$language_code] ?? ucfirst($group->code)),
                 ],
             );
         }
@@ -219,20 +206,20 @@ class FilterGroupGeneratorService
     private function syncAttributeGroupTranslations(CatalogFilterGroup $group, Attribute $attribute): void
     {
         foreach (new Language()->getActiveLanguages() as $language) {
-            $attribute_name = (string) optional(
+            $attribute_name = (string)optional(
                 $attribute->attributeDescription
-                    ->firstWhere('language_id', (int) $language->id),
+                    ->firstWhere('language_id', (int)$language->id),
             )->name;
 
             CatalogFilterGroupTranslation::query()->updateOrCreate(
                 [
-                    'catalog_filter_group_id' => (int) $group->id,
-                    'language_id'             => (int) $language->id,
+                    'catalog_filter_group_id' => (int)$group->id,
+                    'language_id'             => (int)$language->id,
                 ],
                 [
                     'label' => filled($attribute_name)
                         ? $attribute_name
-                        : 'Attribute #' . (int) $attribute->id,
+                        : 'Attribute #' . (int)$attribute->id,
                 ],
             );
         }

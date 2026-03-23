@@ -6,7 +6,7 @@ namespace Tests\Feature\Catalogs\CatalogFilter;
 
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
-use App\Services\CatalogFilter\FilterGroupGeneratorService;
+use App\Services\Catalogs\CatalogFilter\FilterGroupGeneratorService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
