@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\CatalogFilter;
+namespace App\Services\Catalogs\CatalogFilter;
 
 use App\Enums\CatalogFilter\CatalogFilterDiscountOnlyPolicyEnum;
 use App\Enums\CatalogFilter\CatalogFilterPriceSourceModeEnum;
@@ -10,9 +10,9 @@ use App\Enums\CatalogFilter\CatalogFilterPriceSourceModeEnum;
 class PriceSourceResolverService
 {
     public function resolveEffectivePrice(
-        ?float $base_price,
-        ?float $discount_price,
-        CatalogFilterPriceSourceModeEnum $price_source_mode,
+        ?float                              $base_price,
+        ?float                              $discount_price,
+        CatalogFilterPriceSourceModeEnum    $price_source_mode,
         CatalogFilterDiscountOnlyPolicyEnum $discount_only_policy,
     ): ?float {
         return match ($price_source_mode) {
@@ -36,8 +36,8 @@ class PriceSourceResolverService
     }
 
     private function resolveDiscountOnlyModePrice(
-        ?float $base_price,
-        ?float $discount_price,
+        ?float                              $base_price,
+        ?float                              $discount_price,
         CatalogFilterDiscountOnlyPolicyEnum $discount_only_policy,
     ): ?float {
         if ($discount_price !== null) {

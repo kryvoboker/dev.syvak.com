@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\CatalogFilter;
+namespace App\Services\Catalogs\CatalogFilter;
 
 use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Enums\CatalogFilter\CatalogFilterValueTypeEnum;
@@ -12,6 +12,7 @@ use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValue;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValueTranslation;
 use App\Models\Catalogs\Products\ProductToAttribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -20,6 +21,7 @@ class FilterValueGeneratorService
 {
     /**
      * @return array<string, int>
+     * @throws Throwable
      */
     public function sync(CatalogFilterSet $filter_set): array
     {
@@ -28,8 +30,9 @@ class FilterValueGeneratorService
             $updated_count = 0;
             $removed_count = 0;
 
+            /** @var Collection<CatalogFilterGroup> $groups */
             $groups = CatalogFilterGroup::query()
-                ->where('catalog_filter_set_id', (int) $filter_set->id)
+                ->where('catalog_filter_set_id', (int)$filter_set->id)
                 ->where('is_enabled', true)
                 ->orderBy('sort_order')
                 ->get();
@@ -45,25 +48,14 @@ class FilterValueGeneratorService
                     ],
                 };
 
-                $created_count += (int) $summary['created_count'];
-                $updated_count += (int) $summary['updated_count'];
-                $removed_count += (int) $summary['removed_count'];
+                $created_count += $summary['created_count'];
+                $updated_count += $summary['updated_count'];
+                $removed_count += $summary['removed_count'];
             }
 
-            $total_values = (int) CatalogFilterValue::query()
+            $total_values = CatalogFilterValue::query()
                 ->whereIn('catalog_filter_group_id', $groups->pluck('id')->all())
                 ->count();
-
-            Log::channel('daily')->info(
-                'Catalog filter values synchronized.',
-                [
-                    'catalog_filter_set_id' => (int) $filter_set->id,
-                    'created_count'         => $created_count,
-                    'updated_count'         => $updated_count,
-                    'removed_count'         => $removed_count,
-                    'total_values'          => $total_values,
-                ],
-            );
 
             return [
                 'created_count' => $created_count,
@@ -75,7 +67,7 @@ class FilterValueGeneratorService
             Log::channel('stack')->error(
                 'Catalog filter values synchronization failed.',
                 [
-                    'catalog_filter_set_id' => (int) $filter_set->id,
+                    'catalog_filter_set_id' => (int)$filter_set->id,
                     'exception'             => $throwable,
                 ],
             );
@@ -90,7 +82,7 @@ class FilterValueGeneratorService
     private function syncStockValues(CatalogFilterGroup $group): array
     {
         $value = CatalogFilterValue::query()->firstOrNew([
-            'catalog_filter_group_id' => (int) $group->id,
+            'catalog_filter_group_id' => (int)$group->id,
             'code'                    => 'in_stock',
         ]);
 
@@ -109,15 +101,15 @@ class FilterValueGeneratorService
         $value->save();
 
         foreach (new Language()->getActiveLanguages() as $language) {
-            $label = (string) match ((string) $language->code) {
+            $label = match ((string)$language->code) {
                 'uk'    => 'В наявності',
                 default => 'In stock',
             };
 
             CatalogFilterValueTranslation::query()->updateOrCreate(
                 [
-                    'catalog_filter_value_id' => (int) $value->id,
-                    'language_id'             => (int) $language->id,
+                    'catalog_filter_value_id' => (int)$value->id,
+                    'language_id'             => (int)$language->id,
                 ],
                 [
                     'label' => $label,
@@ -137,7 +129,7 @@ class FilterValueGeneratorService
      */
     private function syncAttributeValues(CatalogFilterGroup $group): array
     {
-        $attribute_id = (int) $group->source_id;
+        $attribute_id = (int)$group->source_id;
 
         if ($attribute_id <= 0) {
             return [
@@ -157,8 +149,8 @@ class FilterValueGeneratorService
             ->distinct()
             ->orderBy('text')
             ->pluck('text')
-            ->filter(fn (mixed $value): bool => filled((string) $value))
-            ->map(fn (mixed $value): string => trim((string) $value))
+            ->filter(fn(mixed $value): bool => filled((string)$value))
+            ->map(fn(mixed $value): string => trim((string)$value))
             ->values();
 
         $active_codes  = [];
@@ -170,7 +162,7 @@ class FilterValueGeneratorService
             $active_codes[] = $value_code;
 
             $value = CatalogFilterValue::query()->firstOrNew([
-                'catalog_filter_group_id' => (int) $group->id,
+                'catalog_filter_group_id' => (int)$group->id,
                 'code'                    => $value_code,
             ]);
 
@@ -198,7 +190,7 @@ class FilterValueGeneratorService
         }
 
         $removed_count = CatalogFilterValue::query()
-            ->where('catalog_filter_group_id', (int) $group->id)
+            ->where('catalog_filter_group_id', (int)$group->id)
             ->whereNotIn('code', $active_codes)
             ->delete();
 
@@ -211,9 +203,10 @@ class FilterValueGeneratorService
 
     private function syncAttributeValueTranslations(
         CatalogFilterValue $value,
-        string $fallback_label,
-        int $attribute_id,
+        string             $fallback_label,
+        int                $attribute_id,
     ): void {
+        /** @var Collection<ProductToAttribute> $translations_by_language */
         $translations_by_language = ProductToAttribute::query()
             ->where('attribute_id', $attribute_id)
             ->where('text', $fallback_label)
@@ -221,17 +214,18 @@ class FilterValueGeneratorService
             ->select('language_id', 'text')
             ->distinct()
             ->get()
-            ->keyBy(fn (ProductToAttribute $attribute_text): int => (int) $attribute_text->language_id);
+            ->keyBy(fn(ProductToAttribute $attribute_text): int => (int)$attribute_text->language_id);
 
         foreach (new Language()->getActiveLanguages() as $language) {
-            $translated_label = (string) optional(
-                $translations_by_language->get((int) $language->id),
-            )->text;
+            /** @var ProductToAttribute|null $translation_by_language */
+            $translation_by_language = optional($translations_by_language->get((int)$language->id));
+
+            $translated_label = (string)$translation_by_language?->text;
 
             CatalogFilterValueTranslation::query()->updateOrCreate(
                 [
-                    'catalog_filter_value_id' => (int) $value->id,
-                    'language_id'             => (int) $language->id,
+                    'catalog_filter_value_id' => (int)$value->id,
+                    'language_id'             => (int)$language->id,
                 ],
                 [
                     'label' => filled($translated_label) ? $translated_label : $fallback_label,
