@@ -21,6 +21,11 @@ return [
         'all_results'    => 'All results',
         'self_excluding' => 'Self excluding',
     ],
+    'filter_modes' => [
+        'range'    => 'Range',
+        'boolean'  => 'Boolean',
+        'multiple' => 'Multiple',
+    ],
     'group_source_types' => [
         'attribute' => 'Attribute',
         'price'     => 'Price',

@@ -6,10 +6,10 @@ namespace App\Services\CatalogFilter;
 
 use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\ApplicationSettings\Language;
-use App\Models\CatalogFilter\CatalogFilterGroup;
-use App\Models\CatalogFilter\CatalogFilterGroupTranslation;
-use App\Models\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\Attributes\Attribute;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterGroupTranslation;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -23,6 +23,12 @@ class FilterGroupGeneratorService
         try {
             $created_count = 0;
             $updated_count = 0;
+
+            Log::channel('daily')->info('Catalog filter group sync policy applied.', [
+                'catalog_filter_set_id' => (int) $filter_set->id,
+                'preserved_fields'      => ['is_enabled', 'sort_order', 'get_key', 'config'],
+                'regenerated_fields'    => ['source_type', 'source_id', 'translations'],
+            ]);
 
             [$created_count, $updated_count] = $this->syncSystemGroups($filter_set, $created_count, $updated_count);
             [$created_count, $updated_count] = $this->syncAttributeGroups($filter_set, $created_count, $updated_count);
@@ -89,14 +95,24 @@ class FilterGroupGeneratorService
 
             $was_existing_group = $group->exists;
 
-            $group->fill([
-                'source_type' => (string) $payload['source_type'],
-                'source_id'   => null,
-                'is_enabled'  => true,
-                'sort_order'  => (int) $payload['sort_order'],
-                'get_key'     => (string) $payload['get_key'],
-                'config'      => [],
-            ]);
+            $group->source_type = (string) $payload['source_type'];
+            $group->source_id   = null;
+
+            if (! $was_existing_group) {
+                $group->is_enabled = true;
+                $group->sort_order = (int) $payload['sort_order'];
+                $group->get_key    = (string) $payload['get_key'];
+                $group->setAttribute('config', []);
+            }
+
+            if (blank((string) $group->get_key)) {
+                $group->get_key = (string) $payload['get_key'];
+            }
+
+            if (! is_array($group->config)) {
+                $group->setAttribute('config', []);
+            }
+
             $group->save();
 
             $this->syncSystemGroupTranslations($group);
@@ -136,14 +152,24 @@ class FilterGroupGeneratorService
 
             $was_existing_group = $group->exists;
 
-            $group->fill([
-                'source_type' => CatalogFilterGroupSourceTypeEnum::Attribute->value,
-                'source_id'   => (int) $attribute->id,
-                'is_enabled'  => true,
-                'sort_order'  => $sort_order,
-                'get_key'     => 'filters[' . (int) $attribute->id . ']',
-                'config'      => [],
-            ]);
+            $group->source_type = CatalogFilterGroupSourceTypeEnum::Attribute->value;
+            $group->source_id   = (int) $attribute->id;
+
+            if (! $was_existing_group) {
+                $group->is_enabled = true;
+                $group->sort_order = $sort_order;
+                $group->get_key    = 'filters[' . (int) $attribute->id . ']';
+                $group->setAttribute('config', []);
+            }
+
+            if (blank((string) $group->get_key)) {
+                $group->get_key = 'filters[' . (int) $attribute->id . ']';
+            }
+
+            if (! is_array($group->config)) {
+                $group->setAttribute('config', []);
+            }
+
             $group->save();
 
             $this->syncAttributeGroupTranslations($group, $attribute);

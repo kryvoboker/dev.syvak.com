@@ -36,6 +36,12 @@ return [
                     'how'     => 'Use a strategy that matches UX expectations for filter counters.',
                     'example' => 'self_excluding',
                 ],
+                [
+                    'label'   => 'Minimum stock quantity',
+                    'purpose' => 'Limits indexed/visible products to items with enough stock.',
+                    'how'     => 'Set N and only products with quantity >= N participate in filtering.',
+                    'example' => '5',
+                ],
             ],
         ],
         [
@@ -59,6 +65,48 @@ return [
                     'purpose' => 'Keeps index values stable and avoids currency drift.',
                     'how'     => 'Keep enabled to index in base currency and convert only on output.',
                     'example' => 'Enabled',
+                ],
+            ],
+        ],
+        [
+            'title'       => 'Filter options tab',
+            'description' => 'Point-by-point editor for each filter group. The tab is stored in Catalog Filter tables and does not depend on Page Settings.',
+            'fields'      => [
+                [
+                    'label'   => 'Filter options rows',
+                    'purpose' => 'Each row configures one group like price or one attribute.',
+                    'how'     => 'Change is_enabled, sort_order, GET key/value/extra, and mode for each row.',
+                    'example' => 'Set price row mode to range with custom GET extras.',
+                ],
+                [
+                    'label'   => 'GET key',
+                    'purpose' => 'Parameter name that will be used in URL.',
+                    'how'     => 'Edit only if you understand your URL contract; otherwise keep the default.',
+                    'example' => 'filters[21] or price',
+                ],
+                [
+                    'label'   => 'GET value',
+                    'purpose' => 'Parameter value for a filter row in URL.',
+                    'how'     => 'Can stay empty for rows where values are formed from selected options automatically.',
+                    'example' => 'in_stock',
+                ],
+                [
+                    'label'   => 'GET extra',
+                    'purpose' => 'Additional URL keys for advanced filter contracts.',
+                    'how'     => 'Use for range cases, e.g. from/to keys.',
+                    'example' => 'from_key=price_from, to_key=price_to',
+                ],
+                [
+                    'label'   => 'Localized option labels',
+                    'purpose' => 'Stores labels for each active language directly in Catalog Filter translations.',
+                    'how'     => 'Fill labels in each language tab for stable multilingual storefront output.',
+                    'example' => 'en: Age, uk: Вік',
+                ],
+                [
+                    'label'   => 'Sync compatibility policy',
+                    'purpose' => 'Explains what sync can regenerate and what remains user-managed.',
+                    'how'     => 'Sync keeps is_enabled, sort_order, get_key, and config; source metadata and labels are regenerated from source data.',
+                    'example' => 'After Sync Groups, manual mode and GET mapping are preserved.',
                 ],
             ],
         ],

@@ -7,7 +7,7 @@ namespace App\Filament\Resources\Catalogs\CatalogFilter;
 use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Resources\Catalogs\CatalogFilter\Pages\EditCatalogFilterSet;
 use App\Filament\Resources\Catalogs\CatalogFilter\Schemas\CatalogFilterSetForm;
-use App\Models\CatalogFilter\CatalogFilterSet;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

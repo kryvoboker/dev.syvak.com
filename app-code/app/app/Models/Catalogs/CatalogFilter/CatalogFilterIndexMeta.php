@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models\CatalogFilter;
+namespace App\Models\Catalogs\CatalogFilter;
 
 use App\Enums\CatalogFilter\CatalogFilterIndexRunModeEnum;
 use App\Enums\CatalogFilter\CatalogFilterIndexStatusEnum;

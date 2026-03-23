@@ -6,7 +6,10 @@ namespace App\Filament\Resources\Catalogs\CatalogFilter\Pages;
 
 use App\Filament\Pages\Wiki\CatalogFilterWikiPage;
 use App\Filament\Resources\Catalogs\CatalogFilter\CatalogFilterSetResource;
-use App\Models\CatalogFilter\CatalogFilterSet;
+use App\Models\ApplicationSettings\Language;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterGroupTranslation;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Services\CatalogFilter\CatalogFilterBootstrapService;
 use App\Services\CatalogFilter\FilterGroupGeneratorService;
 use App\Services\CatalogFilter\FilterValueGeneratorService;
@@ -14,6 +17,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class EditCatalogFilterSet extends EditRecord
@@ -63,7 +67,7 @@ class EditCatalogFilterSet extends EditRecord
                 ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.sync_groups'))
                 ->action(function (): void {
                     /** @var CatalogFilterSet $record */
-                    $record  = $this->getRecord();
+                    $record = $this->getRecord();
                     $summary = app(FilterGroupGeneratorService::class)->sync($record);
 
                     Notification::make()
@@ -72,7 +76,7 @@ class EditCatalogFilterSet extends EditRecord
                             __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.groups_synced', [
                                 'created' => (int) $summary['created_count'],
                                 'updated' => (int) $summary['updated_count'],
-                                'total'   => (int) $summary['total_groups'],
+                                'total' => (int) $summary['total_groups'],
                             ]),
                         )
                         ->success()
@@ -85,7 +89,7 @@ class EditCatalogFilterSet extends EditRecord
                 ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.sync_values'))
                 ->action(function (): void {
                     /** @var CatalogFilterSet $record */
-                    $record  = $this->getRecord();
+                    $record = $this->getRecord();
                     $summary = app(FilterValueGeneratorService::class)->sync($record);
 
                     Notification::make()
@@ -95,7 +99,7 @@ class EditCatalogFilterSet extends EditRecord
                                 'created' => (int) $summary['created_count'],
                                 'updated' => (int) $summary['updated_count'],
                                 'removed' => (int) $summary['removed_count'],
-                                'total'   => (int) $summary['total_values'],
+                                'total' => (int) $summary['total_values'],
                             ]),
                         )
                         ->success()
@@ -137,7 +141,7 @@ class EditCatalogFilterSet extends EditRecord
     {
         /** @var CatalogFilterSet $record */
         $record = $this->getRecord();
-        $record->loadMissing('indexMeta');
+        $record->loadMissing('indexMeta', 'groups.translations.language');
 
         $selected_context_types = is_array($record->context_types) && $record->context_types !== []
             ? $record->context_types
@@ -156,6 +160,61 @@ class EditCatalogFilterSet extends EditRecord
         Arr::set($data, 'index_meta.last_incremental_sync_at', $index_meta?->getRawOriginal('last_incremental_sync_at'));
         Arr::set($data, 'index_meta.rebuild_lock_key', $index_meta?->rebuild_lock_key);
         Arr::set($data, 'index_meta.rebuild_lock_acquired_at', $index_meta?->getRawOriginal('rebuild_lock_acquired_at'));
+
+        $filter_items = $record->groups
+            ->sortBy([
+                ['sort_order', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->reject(fn (CatalogFilterGroup $group): bool => (string) $group->code === 'stock')
+            ->map(function (CatalogFilterGroup $group): array {
+                $config_data = (array) ($group->config ?? []);
+                $get_data = (array) ($config_data['get'] ?? []);
+
+                $labels = $group->translations
+                    ->mapWithKeys(function (CatalogFilterGroupTranslation $translation): array {
+                        $language_code = (string) optional($translation->language)->code;
+
+                        if (blank($language_code)) {
+                            return [];
+                        }
+
+                        return [
+                            $language_code => (string) ($translation->label ?? ''),
+                        ];
+                    })
+                    ->all();
+
+                return [
+                    'code' => (string) $group->code,
+                    'source_type' => (string) $group->getRawOriginal('source_type'),
+                    'source_id' => $group->source_id,
+                    'is_enabled' => (bool) $group->is_enabled,
+                    'sort_order' => (int) $group->sort_order,
+                    'get' => [
+                        'key' => (string) ($group->get_key ?? ''),
+                        'value' => (string) ($get_data['value'] ?? ''),
+                        'extra' => is_array($get_data['extra'] ?? null) ? (array) $get_data['extra'] : [],
+                    ],
+                    'config' => [
+                        'mode' => (string) ($config_data['mode'] ?? $this->getDefaultFilterMode()),
+                        'min_price' => $config_data['min_price'] ?? null,
+                        'max_price' => $config_data['max_price'] ?? null,
+                        'step' => $config_data['step'] ?? null,
+                        'labels' => $labels,
+                    ],
+                ];
+            })
+            ->values()
+            ->all();
+
+        Arr::set($data, 'filter_items', $filter_items);
+
+        Log::channel('daily')->debug('Catalog filter options mapped for edit form.', [
+            'catalog_filter_set_id' => (int) $record->id,
+            'rows_count' => count($filter_items),
+            'excluded_codes' => ['stock'],
+        ]);
 
         return $data;
     }
@@ -180,14 +239,138 @@ class EditCatalogFilterSet extends EditRecord
         Arr::set($data, 'context_types', $selected_context_types);
         Arr::set($data, 'context_type', $selected_context_types[0]);
 
+        $filter_items = (array) Arr::pull($data, 'filter_items', []);
+        $this->syncFilterItems($filter_items);
+
         return $data;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $filter_items
+     */
+    private function syncFilterItems(array $filter_items): void
+    {
+        /** @var CatalogFilterSet $record */
+        $record = $this->getRecord();
+
+        $existing_groups_by_code = CatalogFilterGroup::query()
+            ->where('catalog_filter_set_id', (int) $record->id)
+            ->with('translations.language')
+            ->get()
+            ->keyBy('code');
+
+        /** @var array<string, Language> $languages_by_code */
+        $languages_by_code = [];
+
+        foreach (new Language()->getActiveLanguages() as $language) {
+            $languages_by_code[(string) $language->code] = $language;
+        }
+
+        $created_count = 0;
+        $updated_count = 0;
+        $skipped_count = 0;
+
+        foreach ($filter_items as $filter_item) {
+            $group_code = (string) Arr::get($filter_item, 'code', '');
+
+            if (blank($group_code)) {
+                continue;
+            }
+
+            // Stock filter is system-managed and intentionally not editable from this tab.
+            if ($group_code === 'stock') {
+                $skipped_count++;
+
+                continue;
+            }
+
+            /** @var CatalogFilterGroup|null $group */
+            $group = $existing_groups_by_code->get($group_code);
+
+            $is_new_group = ! $group instanceof CatalogFilterGroup;
+
+            if ($is_new_group) {
+                $group = new CatalogFilterGroup();
+                $group->catalog_filter_set_id = (int) $record->id;
+                $group->code = $group_code;
+            }
+
+            $config_data = (array) Arr::get($filter_item, 'config', []);
+            $get_data = [
+                'value' => (string) Arr::get($filter_item, 'get.value', ''),
+                'extra' => is_array(Arr::get($filter_item, 'get.extra', []))
+                    ? (array) Arr::get($filter_item, 'get.extra', [])
+                    : [],
+            ];
+
+            $next_config = array_merge(
+                (array) ($group->config ?? []),
+                [
+                    'mode' => (string) Arr::get($config_data, 'mode', $this->getDefaultFilterMode()),
+                    'get' => $get_data,
+                    'min_price' => $group_code === 'price' ? Arr::get($config_data, 'min_price') : null,
+                    'max_price' => $group_code === 'price' ? Arr::get($config_data, 'max_price') : null,
+                    'step' => $group_code === 'price' ? Arr::get($config_data, 'step') : null,
+                ],
+            );
+
+            $group->fill([
+                'source_type' => (string) Arr::get($filter_item, 'source_type', $group->getRawOriginal('source_type') ?? 'system'),
+                'source_id' => filled(Arr::get($filter_item, 'source_id'))
+                    ? (int) Arr::get($filter_item, 'source_id')
+                    : null,
+                'is_enabled' => (bool) Arr::get($filter_item, 'is_enabled', true),
+                'sort_order' => (int) Arr::get($filter_item, 'sort_order', 0),
+                'get_key' => (string) Arr::get($filter_item, 'get.key', ''),
+                'config' => $next_config,
+            ]);
+            $group->save();
+
+            $labels = (array) Arr::get($config_data, 'labels', []);
+
+            foreach ($languages_by_code as $language_code => $language) {
+                CatalogFilterGroupTranslation::query()->updateOrCreate(
+                    [
+                        'catalog_filter_group_id' => (int) $group->id,
+                        'language_id' => (int) $language->id,
+                    ],
+                    [
+                        'label' => (string) ($labels[$language_code] ?? ''),
+                        'description' => null,
+                    ],
+                );
+            }
+
+            if ($is_new_group) {
+                $created_count++;
+            } else {
+                $updated_count++;
+            }
+        }
+
+        Log::channel('daily')->info('Catalog filter options synchronized from admin form.', [
+            'catalog_filter_set_id' => (int) $record->id,
+            'created_count' => $created_count,
+            'updated_count' => $updated_count,
+            'rows_total' => count($filter_items),
+            'skipped_count' => $skipped_count,
+            'system_managed_codes' => ['stock'],
+        ]);
+    }
+
+    private function getDefaultFilterMode(): string
+    {
+        $filter_modes = (array) config('catalog-filter.filter_modes', []);
+        $default_mode = array_key_first($filter_modes);
+
+        return is_string($default_mode) && filled($default_mode) ? $default_mode : 'multiple';
     }
 
     private function refreshRecord(): void
     {
         /** @var CatalogFilterSet $record */
-        $record       = $this->getRecord();
-        $this->record = $record->fresh(['indexMeta']) ?? $record;
+        $record = $this->getRecord();
+        $this->record = $record->fresh(['indexMeta', 'groups.translations.language']) ?? $record;
 
         $this->fillForm();
     }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\CatalogFilter;
 
-use App\Models\CatalogFilter\CatalogFilterIndexMeta;
-use App\Models\CatalogFilter\CatalogFilterSet;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterIndexMeta;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
