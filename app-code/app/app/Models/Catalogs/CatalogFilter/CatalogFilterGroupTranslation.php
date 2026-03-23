@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Models\CatalogFilter;
+namespace App\Models\Catalogs\CatalogFilter;
 
 use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CatalogFilterValueTranslation extends Model
+class CatalogFilterGroupTranslation extends Model
 {
     protected $fillable = [
-        'catalog_filter_value_id',
+        'catalog_filter_group_id',
         'language_id',
         'label',
         'description',
@@ -23,17 +23,17 @@ class CatalogFilterValueTranslation extends Model
     protected function casts(): array
     {
         return [
-            'catalog_filter_value_id' => 'integer',
+            'catalog_filter_group_id' => 'integer',
             'language_id'             => 'integer',
         ];
     }
 
     /**
-     * @return BelongsTo<CatalogFilterValue, $this>
+     * @return BelongsTo<CatalogFilterGroup, $this>
      */
-    public function filterValue(): BelongsTo
+    public function filterGroup(): BelongsTo
     {
-        return $this->belongsTo(CatalogFilterValue::class, 'catalog_filter_value_id');
+        return $this->belongsTo(CatalogFilterGroup::class, 'catalog_filter_group_id');
     }
 
     /**
