@@ -6,17 +6,17 @@ namespace App\Http\Controllers\Ajax;
 
 use App\Actions\SearchProductsAction;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Search\LiveSearchProductsIndexRequest;
+use App\Http\Requests\Ajax\LiveSearchProductsAjaxIndexRequest;
 use App\Http\Requests\Search\SearchProductsShowRequest;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
-class LiveSearchProductAjaxController extends Controller
+class LiveSearchProductsAjaxController extends Controller
 {
     /**
      * @throws Throwable
      */
-    public function index(LiveSearchProductsIndexRequest $request, SearchProductsAction $search_product_action): ?JsonResponse
+    public function index(LiveSearchProductsAjaxIndexRequest $request, SearchProductsAction $search_product_action): ?JsonResponse
     {
         $search_products                   = $search_product_action->handle(
             $request->query('keyword'),

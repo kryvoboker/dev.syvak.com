@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Search;
+namespace App\Http\Requests\Ajax;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LiveSearchProductsIndexRequest extends FormRequest
+class LiveSearchProductsAjaxIndexRequest extends FormRequest
 {
     /**
      * @return array<string, array>
