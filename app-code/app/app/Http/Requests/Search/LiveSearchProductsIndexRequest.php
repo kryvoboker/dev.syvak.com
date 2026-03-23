@@ -6,7 +6,7 @@ namespace App\Http\Requests\Search;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SearchProductShowRequest extends FormRequest
+class LiveSearchProductsIndexRequest extends FormRequest
 {
     /**
      * @return array<string, array>
@@ -14,7 +14,7 @@ class SearchProductShowRequest extends FormRequest
     public function rules(): array
     {
         return [
-
+            'keyword' => ['required', 'string', 'min:3', 'max:255'],
         ];
     }
 
