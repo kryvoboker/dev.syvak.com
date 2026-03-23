@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Ajax\CatalogFilterAjaxController;
 use App\Http\Controllers\Ajax\LiveSearchProductsAjaxController;
 use App\Http\Controllers\Pages\CategoryController;
 use App\Http\Controllers\Pages\HomeController;
@@ -20,6 +21,7 @@ Route::prefix('{locale}')
         Route::get('/', [HomeController::class, 'index'])->name('home');
 
         Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
+        Route::get('/category/{slug}/filters', [CatalogFilterAjaxController::class, 'index'])->name('catalog-filter-ajax.index');
 
         Route::get('/product/{slug}', function (string $locale, string $slug) {})->name('product.show');
 
