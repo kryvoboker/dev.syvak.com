@@ -139,7 +139,9 @@ return [
     ],
     'page_settings' => [
         'category' => [
-            'filter_modes' => [
+            'products_per_page_limit'       => 20,
+            'ajax_products_loading_enabled' => true,
+            'filter_modes'                  => [
                 'range'    => 'Range',
                 'boolean'  => 'Boolean',
                 'multiple' => 'Multiple',

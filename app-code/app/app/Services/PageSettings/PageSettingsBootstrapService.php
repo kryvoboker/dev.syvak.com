@@ -17,28 +17,39 @@ class PageSettingsBootstrapService
     public function bootstrapCategoryPageSetting(): PageSetting
     {
         try {
+            $default_products_limit = (int) config('app.page_settings.category.products_per_page_limit', 20);
+            $default_ajax_enabled   = (bool) config('app.page_settings.category.ajax_products_loading_enabled', true);
+
             $page_setting = PageSetting::query()->firstOrCreate(
                 [
                     'page_type' => PageSetting::PAGE_TYPE_CATEGORY,
                 ],
                 [
                     'is_sorting_enabled'   => true,
-                    'is_filtering_enabled' => true,
-                    'settings'             => $this->buildSettingsContract(true, true),
+                    'is_filtering_enabled' => false,
+                    'settings'             => $this->buildSettingsContract(
+                        is_sorting_enabled: true,
+                        products_per_page_limit: $default_products_limit,
+                        is_ajax_products_loading_enabled: $default_ajax_enabled,
+                    ),
                 ],
             );
 
             $this->syncSettingsContract($page_setting);
             $this->syncDefaultSortingItems($page_setting);
             $this->syncMissingTranslations($page_setting);
+            $this->purgeLegacyFilterItems($page_setting);
+
+            $page_setting_settings = is_array($page_setting->settings) ? $page_setting->settings : [];
 
             Log::channel('daily')->info('Category page setting bootstrapped.', [
-                'page_setting_id'      => (int) $page_setting->id,
-                'page_type'            => (string) $page_setting->page_type,
-                'sorting_items_count'  => (int) $page_setting->sortingItems()->count(),
-                'translations_count'   => (int) $page_setting->translations()->count(),
-                'is_sorting_enabled'   => (bool) $page_setting->is_sorting_enabled,
-                'is_filtering_enabled' => (bool) $page_setting->is_filtering_enabled,
+                'page_setting_id'                  => (int) $page_setting->id,
+                'page_type'                        => (string) $page_setting->page_type,
+                'sorting_items_count'              => (int) $page_setting->sortingItems()->count(),
+                'translations_count'               => (int) $page_setting->translations()->count(),
+                'is_sorting_enabled'               => (bool) $page_setting->is_sorting_enabled,
+                'products_per_page_limit'          => (int) Arr::get($page_setting_settings, 'pagination.products_per_page_limit', $default_products_limit),
+                'ajax_products_loading_is_enabled' => (bool) Arr::get($page_setting_settings, 'pagination.ajax_products_loading_enabled', $default_ajax_enabled),
             ]);
 
             return $page_setting->fresh(['translations.language', 'items']) ?? $page_setting;
@@ -55,8 +66,11 @@ class PageSettingsBootstrapService
     /**
      * @return array<string, mixed>
      */
-    private function buildSettingsContract(bool $is_sorting_enabled, bool $is_filtering_enabled): array
-    {
+    private function buildSettingsContract(
+        bool $is_sorting_enabled,
+        int $products_per_page_limit,
+        bool $is_ajax_products_loading_enabled,
+    ): array {
         return [
             'meta' => [
                 'contract_version' => 1,
@@ -65,9 +79,10 @@ class PageSettingsBootstrapService
                 'sorting' => [
                     'enabled' => $is_sorting_enabled,
                 ],
-                'filters' => [
-                    'enabled' => $is_filtering_enabled,
-                ],
+            ],
+            'pagination' => [
+                'products_per_page_limit'       => max(1, $products_per_page_limit),
+                'ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
             ],
         ];
     }
@@ -80,17 +95,23 @@ class PageSettingsBootstrapService
             $settings = [];
         }
 
+        $default_products_limit = (int) config('app.page_settings.category.products_per_page_limit', 20);
+        $default_ajax_enabled   = (bool) config('app.page_settings.category.ajax_products_loading_enabled', true);
+
         $settings = array_replace_recursive(
             $this->buildSettingsContract(
-                (bool) $page_setting->is_sorting_enabled,
-                (bool) $page_setting->is_filtering_enabled,
+                is_sorting_enabled: (bool) $page_setting->is_sorting_enabled,
+                products_per_page_limit: (int) Arr::get($settings, 'pagination.products_per_page_limit', $default_products_limit),
+                is_ajax_products_loading_enabled: (bool) Arr::get($settings, 'pagination.ajax_products_loading_enabled', $default_ajax_enabled),
             ),
             $settings,
         );
 
         Arr::set($settings, 'ui.sorting.enabled', (bool) $page_setting->is_sorting_enabled);
-        Arr::set($settings, 'ui.filters.enabled', (bool) $page_setting->is_filtering_enabled);
+        Arr::set($settings, 'pagination.products_per_page_limit', max(1, (int) Arr::get($settings, 'pagination.products_per_page_limit', $default_products_limit)));
+        Arr::set($settings, 'pagination.ajax_products_loading_enabled', (bool) Arr::get($settings, 'pagination.ajax_products_loading_enabled', $default_ajax_enabled));
         Arr::set($settings, 'meta.contract_version', 1);
+        Arr::forget($settings, ['ui.filters']);
 
         $page_setting->forceFill([
             'settings' => $settings,
@@ -141,6 +162,14 @@ class PageSettingsBootstrapService
         }
     }
 
+    private function purgeLegacyFilterItems(PageSetting $page_setting): void
+    {
+        PageSettingItem::query()
+            ->where('page_setting_id', (int) $page_setting->id)
+            ->where('type', PageSetting::ITEM_TYPE_FILTER)
+            ->delete();
+    }
+
     /**
      * @return array<int, array{code: string, source_type: string, get: array<string, mixed>, config: array<string, mixed>}>
      */
@@ -189,13 +218,6 @@ class PageSettingsBootstrapService
             'sorting' => [
                 'title'       => '',
                 'description' => '',
-            ],
-            'filters' => [
-                'title'             => '',
-                'description'       => '',
-                'drawer_title'      => '',
-                'apply_button_text' => '',
-                'clear_button_text' => '',
             ],
         ];
     }

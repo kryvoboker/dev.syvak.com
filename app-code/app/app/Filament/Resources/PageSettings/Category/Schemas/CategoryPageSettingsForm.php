@@ -6,16 +6,13 @@ namespace App\Filament\Resources\PageSettings\Category\Schemas;
 
 use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
-use Illuminate\Validation\Rule;
 
 class CategoryPageSettingsForm
 {
@@ -36,22 +33,6 @@ class CategoryPageSettingsForm
                     Textarea::make("localized_content.$language_code.sorting.description")
                         ->label(__('admin/settings/category_page_settings.labels.sorting_description'))
                         ->rows(2),
-
-                    TextInput::make("localized_content.$language_code.filters.title")
-                        ->label(__('admin/settings/category_page_settings.labels.filters_title')),
-
-                    Textarea::make("localized_content.$language_code.filters.description")
-                        ->label(__('admin/settings/category_page_settings.labels.filters_description'))
-                        ->rows(2),
-
-                    TextInput::make("localized_content.$language_code.filters.drawer_title")
-                        ->label(__('admin/settings/category_page_settings.labels.filters_drawer_title')),
-
-                    TextInput::make("localized_content.$language_code.filters.apply_button_text")
-                        ->label(__('admin/settings/category_page_settings.labels.filters_apply_button_text')),
-
-                    TextInput::make("localized_content.$language_code.filters.clear_button_text")
-                        ->label(__('admin/settings/category_page_settings.labels.filters_clear_button_text')),
                 ])
                 ->columns(1);
         }
@@ -60,6 +41,21 @@ class CategoryPageSettingsForm
             ->components([
                 Tabs::make('CategoryPageSettingsTabs')
                     ->tabs([
+                        Tabs\Tab::make(__('admin/settings/category_page_settings.tabs.general'))
+                            ->schema([
+                                TextInput::make('products_per_page_limit')
+                                    ->label(__('admin/settings/category_page_settings.labels.products_per_page_limit'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required()
+                                    ->default((int) config('app.page_settings.category.products_per_page_limit', 20)),
+
+                                Toggle::make('is_ajax_products_loading_enabled')
+                                    ->label(__('admin/settings/category_page_settings.labels.is_ajax_products_loading_enabled'))
+                                    ->default((bool) config('app.page_settings.category.ajax_products_loading_enabled', true)),
+                            ])
+                            ->columns(1),
+
                         Tabs\Tab::make(__('admin/settings/category_page_settings.tabs.sorting'))
                             ->schema([
                                 Toggle::make('is_sorting_enabled')
@@ -116,105 +112,6 @@ class CategoryPageSettingsForm
                             ])
                             ->columns(1),
 
-                        Tabs\Tab::make(__('admin/settings/category_page_settings.tabs.filters'))
-                            ->schema([
-                                Toggle::make('is_filtering_enabled')
-                                    ->label(__('admin/settings/category_page_settings.labels.is_filtering_enabled'))
-                                    ->default(true),
-
-                                Repeater::make('filter_items')
-                                    ->label(__('admin/settings/category_page_settings.labels.filter_items'))
-                                    ->schema([
-                                        TextInput::make('code')
-                                            ->label(__('admin/settings/category_page_settings.labels.code'))
-                                            ->disabled()
-                                            ->dehydrated(),
-
-                                        TextInput::make('source_type')
-                                            ->label(__('admin/settings/category_page_settings.labels.source_type'))
-                                            ->disabled()
-                                            ->dehydrated(),
-
-                                        TextInput::make('source_id')
-                                            ->label(__('admin/settings/category_page_settings.labels.source_id'))
-                                            ->disabled()
-                                            ->dehydrated(),
-
-                                        Toggle::make('is_enabled')
-                                            ->label(__('admin/settings/category_page_settings.labels.is_enabled'))
-                                            ->default(true),
-
-                                        TextInput::make('sort_order')
-                                            ->label(__('admin/settings/category_page_settings.labels.sort_order'))
-                                            ->numeric()
-                                            ->required(),
-
-                                        TextInput::make('get.key')
-                                            ->label(__('admin/settings/category_page_settings.labels.get_key'))
-                                            ->required(),
-
-                                        TextInput::make('get.value')
-                                            ->label(__('admin/settings/category_page_settings.labels.get_value')),
-
-                                        KeyValue::make('get.extra')
-                                            ->label(__('admin/settings/category_page_settings.labels.get_extra'))
-                                            ->keyLabel(__('admin/settings/category_page_settings.labels.key'))
-                                            ->valueLabel(__('admin/settings/category_page_settings.labels.value')),
-
-                                        Select::make('config.mode')
-                                            ->label(__('admin/settings/category_page_settings.labels.filter_mode'))
-                                            ->options(self::getFilterModeOptions())
-                                            ->helperText(__('admin/settings/category_page_settings.labels.filter_mode_helper'))
-                                            ->hint(__('admin/settings/category_page_settings.labels.filter_mode_hint'))
-                                            ->searchable()
-                                            ->rules([
-                                                'required',
-                                                Rule::in(array_keys(self::getFilterModeOptions())),
-                                            ])
-                                            ->required(),
-
-                                        Placeholder::make('config.mode_description')
-                                            ->label(__('admin/settings/category_page_settings.labels.filter_mode_description'))
-                                            ->content(fn (callable $get): string => self::getFilterModeDescription((string) $get('config.mode')))
-                                            ->hidden(fn (callable $get): bool => blank((string) $get('config.mode')))
-                                            ->dehydrated(false),
-
-                                        TextInput::make('config.min_price')
-                                            ->numeric()
-                                            ->label(__('admin/settings/category_page_settings.labels.min_price'))
-                                            ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
-                                            ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
-
-                                        TextInput::make('config.max_price')
-                                            ->numeric()
-                                            ->label(__('admin/settings/category_page_settings.labels.max_price'))
-                                            ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
-                                            ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
-
-                                        TextInput::make('config.step')
-                                            ->numeric()
-                                            ->label(__('admin/settings/category_page_settings.labels.step'))
-                                            ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
-                                            ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
-
-                                        Section::make(__('admin/settings/category_page_settings.labels.option_labels'))
-                                            ->schema([
-                                                self::buildOptionLabelTabs(
-                                                    $active_languages,
-                                                    'filter_item_option_labels_tabs',
-                                                ),
-                                            ]),
-                                    ])
-                                    ->defaultItems(0)
-                                    ->addable(false)
-                                    ->deletable(false)
-                                    ->reorderable(false)
-                                    ->collapsible()
-                                    ->collapsed(false)
-                                    ->columns(),
-                            ])
-                            ->columns(1),
-
                         Tabs\Tab::make(__('admin/settings/category_page_settings.tabs.localized_content'))
                             ->schema([
                                 Tabs::make('CategoryPageSettingsLanguageTabs')
@@ -251,33 +148,5 @@ class CategoryPageSettingsForm
             ->tabs($tabs)
             ->activeTab(1)
             ->contained(false);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private static function getFilterModeOptions(): array
-    {
-        $filter_modes = (array) config('app.page_settings.category.filter_modes', []);
-
-        return collect($filter_modes)
-            ->keys()
-            ->mapWithKeys(function (mixed $mode_value): array {
-                $mode = (string) $mode_value;
-
-                return [
-                    $mode => (string) __("admin/settings/category_page_settings.filter_mode_options.$mode"),
-                ];
-            })
-            ->all();
-    }
-
-    private static function getFilterModeDescription(string $mode): string
-    {
-        if (! array_key_exists($mode, self::getFilterModeOptions())) {
-            return '';
-        }
-
-        return (string) __("admin/settings/category_page_settings.filter_mode_descriptions.$mode");
     }
 }
