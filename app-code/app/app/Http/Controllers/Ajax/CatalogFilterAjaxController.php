@@ -8,22 +8,30 @@ use App\Actions\FilterProductsAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ajax\CatalogFilterAjaxIndexRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
+use Throwable;
 
 class CatalogFilterAjaxController extends Controller
 {
+    /**
+     * @throws Throwable
+     */
     public function index(
         CatalogFilterAjaxIndexRequest $request,
-        FilterProductsAction          $filter_products_action,
-        string                        $slug,
+        FilterProductsAction $filter_products_action,
+        string $slug,
     ): JsonResponse {
         $response_data = $filter_products_action->handle(
             validated_data: $request->validated(),
-            category_slug : $slug,
-            locale        : app()->getLocale(),
+            category_slug: $slug,
+            locale: app()->getLocale(),
         );
 
+        $total_products = (int) Arr::get($response_data, 'pagination.total', 0);
+
         return response()->json([
-            'success' => true,
+            'success'        => true,
+            'total_products' => $total_products,
             ...$response_data,
         ]);
     }

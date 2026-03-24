@@ -20,6 +20,7 @@ use DateTimeInterface;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -76,6 +77,16 @@ class AppServiceProvider extends ServiceProvider
 
         require_once app_path('Supports/helpers.php');
 
+        /**
+         * Global locale parameter constraint prevents arbitrary values in
+         * locale-aware routes and stabilizes URL matching for storefront/admin routes.
+         */
+        $allowed_locales = array_values(array_filter((array) config('app.locales', [config('app.locale', 'en')])));
+
+        if ($allowed_locales !== []) {
+            Route::pattern('locale', implode('|', array_map('preg_quote', $allowed_locales)));
+        }
+
         // Register view namespaces for frontend (catalog) and admin
         // This allows usage like view('catalog::layouts.partials.header')
         $catalog_path = resource_path('views/catalog');
@@ -86,7 +97,7 @@ class AppServiceProvider extends ServiceProvider
 
         if (app()->isLocal() && app()->hasDebugModeEnabled() === true) {
             // Check SQL queries in the local environment for remote debugging
-            DB::listen(function (QueryExecuted $query) {
+            DB::listen(function (QueryExecuted $query): void {
                 $bindings = $query->bindings;
 
                 // Replace placeholders with quoted bindings for readable SQL.
