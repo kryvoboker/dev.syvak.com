@@ -8,6 +8,7 @@ use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Resources\Catalogs\Categories\Categories\Pages\CreateCategory;
 use App\Filament\Resources\Catalogs\Categories\Categories\Pages\EditCategory;
 use App\Filament\Resources\Catalogs\Categories\Categories\Pages\ListCategories;
+use App\Filament\Resources\Catalogs\Categories\Categories\RelationManagers\ProductsRelationManager;
 use App\Filament\Resources\Catalogs\Categories\Categories\Schemas\CategoryForm;
 use App\Filament\Resources\Catalogs\Categories\Categories\Tables\CategoriesTable;
 use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
@@ -42,7 +43,7 @@ class CategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductsRelationManager::class,
         ];
     }
 
