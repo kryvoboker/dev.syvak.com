@@ -201,7 +201,7 @@ class Product extends Model
                         ->orderBy('priority');
                 },
             ])
-            ->where('quantity', '>', (int) config('app.products.minimum_stock_quantity'))
+            ->where('quantity', '>=', (int) config('app.products.minimum_stock_quantity'))
             ->where(function (Builder $query) use ($keyword) {
                 $query->whereHas('productDescription', function ($query_2) use ($keyword) {
                     $query_2->whereLike('name', "%$keyword%");
