@@ -10,7 +10,7 @@
 
             @if(! empty($this->getPracticalExamples()))
                 <h3 class="mt-5 text-sm font-semibold text-gray-900">
-                    {{ __('admin/wiki.common.examples_title') }}
+                    {{ __('admin/wiki/wiki.common.examples_title') }}
                 </h3>
                 <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
                     @foreach($this->getPracticalExamples() as $example)
@@ -39,8 +39,8 @@
                             @endif
                         @else
                             <div class="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
-                                <p class="font-medium">{{ __('admin/wiki.common.screenshot_missing_title') }}</p>
-                                <p class="mt-1">{{ __('admin/wiki.common.screenshot_missing_description') }}</p>
+                                <p class="font-medium">{{ __('admin/wiki/wiki.common.screenshot_missing_title') }}</p>
+                                <p class="mt-1">{{ __('admin/wiki/wiki.common.screenshot_missing_description') }}</p>
                                 <p class="mt-1 font-mono text-xs text-amber-800">{{ $section['screenshot_relative'] }}</p>
                             </div>
                         @endif

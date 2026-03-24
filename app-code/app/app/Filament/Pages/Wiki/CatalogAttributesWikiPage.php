@@ -19,7 +19,7 @@ class CatalogAttributesWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.catalog_attributes';
+        return 'admin/wiki/wiki.pages.catalog_attributes';
     }
 
     protected static function getWikiScreenshotDirectory(): string

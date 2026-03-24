@@ -19,7 +19,7 @@ class CategoryPageSettingsWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.page_settings_category';
+        return 'admin/wiki/wiki.pages.page_settings_category';
     }
 
     protected static function getWikiScreenshotDirectory(): string

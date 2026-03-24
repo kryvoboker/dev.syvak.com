@@ -19,7 +19,7 @@ class UserGroupsWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.user_groups';
+        return 'admin/wiki/wiki.pages.user_groups';
     }
 
     protected static function getWikiScreenshotDirectory(): string

@@ -81,10 +81,11 @@ class AppServiceProvider extends ServiceProvider
          * Global locale parameter constraint prevents arbitrary values in
          * locale-aware routes and stabilizes URL matching for storefront/admin routes.
          */
-        $allowed_locales = array_values(array_filter((array) config('app.locales', [config('app.locale', 'en')])));
+        $allowed_locales = array_values(array_filter((array)config('app.locales', [config('app.locale', 'en')])));
+        $locale_key      = config('localization.locale_parameter', 'locale');
 
         if ($allowed_locales !== []) {
-            Route::pattern('locale', implode('|', array_map('preg_quote', $allowed_locales)));
+            Route::pattern($locale_key, implode('|', array_map('preg_quote', $allowed_locales)));
         }
 
         // Register view namespaces for frontend (catalog) and admin
@@ -94,6 +95,8 @@ class AppServiceProvider extends ServiceProvider
         if (File::isDirectory($catalog_path)) {
             View::addNamespace('catalog', $catalog_path);
         }
+
+        View::share(compact('locale_key'));
 
         if (app()->isLocal() && app()->hasDebugModeEnabled() === true) {
             // Check SQL queries in the local environment for remote debugging

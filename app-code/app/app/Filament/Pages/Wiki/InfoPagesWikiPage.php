@@ -19,7 +19,7 @@ class InfoPagesWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.info_pages';
+        return 'admin/wiki/wiki.pages.info_pages';
     }
 
     protected static function getWikiScreenshotDirectory(): string

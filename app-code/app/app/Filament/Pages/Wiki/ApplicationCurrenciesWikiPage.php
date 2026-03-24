@@ -19,7 +19,7 @@ class ApplicationCurrenciesWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.application_currencies';
+        return 'admin/wiki/wiki.pages.application_currencies';
     }
 
     protected static function getWikiScreenshotDirectory(): string

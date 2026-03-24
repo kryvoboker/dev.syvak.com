@@ -19,7 +19,7 @@ class ApplicationSettingsWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.application_settings';
+        return 'admin/wiki/wiki.pages.application_settings';
     }
 
     protected static function getWikiScreenshotDirectory(): string

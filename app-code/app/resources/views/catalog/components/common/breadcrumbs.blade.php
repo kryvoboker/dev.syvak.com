@@ -21,11 +21,13 @@
                             {{ $breadcrumb_data['title'] }}
                         </span>
                         @endif
-
-                        @if(!$is_last)
-                            <span class="breadcrumbs__sep" aria-hidden="true">/</span>
-                        @endif
                     </li>
+
+                    @if(!$is_last)
+                        <li class="breadcrumbs__sep inline-block" aria-hidden="true">
+                            /
+                        </li>
+                    @endif
                 @endforeach
             </ol>
         </nav>

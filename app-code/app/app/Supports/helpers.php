@@ -6,6 +6,7 @@ use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\Language;
 use App\Models\PageSettings\PageSetting;
 use App\Models\PageSettings\PageSettingItem;
+use App\Models\Slug;
 use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
@@ -19,22 +20,22 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-if (! function_exists('clear_telephone')) {
+if (!function_exists('clear_telephone')) {
     function clear_telephone(?string $telephone, bool $is_delete_first_nums = false): string
     {
-        if (! isset($telephone)) {
+        if (!isset($telephone)) {
             return '';
         }
 
         if ($is_delete_first_nums) {
-            return (string) (preg_replace(['/\D+/', '/^38/'], '', $telephone) ?: $telephone);
+            return (string)(preg_replace(['/\D+/', '/^38/'], '', $telephone) ?: $telephone);
         }
 
-        return (string) (preg_replace('/\D+/', '', $telephone) ?: $telephone);
+        return (string)(preg_replace('/\D+/', '', $telephone) ?: $telephone);
     }
 }
 
-if (! function_exists('parse_telephone')) {
+if (!function_exists('parse_telephone')) {
     function parse_telephone(string $telephone): string
     {
         $telephone = clear_telephone($telephone, true);
@@ -50,7 +51,7 @@ if (! function_exists('parse_telephone')) {
     }
 }
 
-if (! function_exists('trim_strs_in_arr')) {
+if (!function_exists('trim_strs_in_arr')) {
     function trim_strs_in_arr(array $arr): array
     {
         return array_map(function ($item) {
@@ -63,9 +64,9 @@ if (! function_exists('trim_strs_in_arr')) {
     }
 }
 
-if (! function_exists('convert_img_and_get_url')) {
+if (!function_exists('convert_img_and_get_url')) {
     /**
-     * @param  string  $bg_color  HEX or transparent color
+     * @param string $bg_color HEX or transparent color
      */
     function convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): string
     {
@@ -73,9 +74,9 @@ if (! function_exists('convert_img_and_get_url')) {
     }
 }
 
-if (! function_exists('multiple_convert_img_and_get_url')) {
+if (!function_exists('multiple_convert_img_and_get_url')) {
     /**
-     * @param  string  $bg_color  HEX or transparent color
+     * @param string $bg_color HEX or transparent color
      */
     function multiple_convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
     {
@@ -83,21 +84,21 @@ if (! function_exists('multiple_convert_img_and_get_url')) {
     }
 }
 
-if (! function_exists('get_app_settings')) {
+if (!function_exists('get_app_settings')) {
     function get_app_settings(): ?AppSettingsData
     {
         return app(AppSettingsService::class)->getSettings();
     }
 }
 
-if (! function_exists('breadcrumb')) {
+if (!function_exists('breadcrumb')) {
     function breadcrumb(string $title, ?string $url = null): array
     {
         return ['title' => $title, 'url' => $url];
     }
 }
 
-if (! function_exists('try_detect_page_type')) {
+if (!function_exists('try_detect_page_type')) {
     function try_detect_page_type(?Request $request = null): ?string
     {
         if ($request === null) {
@@ -112,32 +113,32 @@ if (! function_exists('try_detect_page_type')) {
 
         if (is_string($route_name) && filled($route_name)) {
             return match (true) {
-                Str::endsWith($route_name, '.home') => (string) config('page-type.home'),
+                Str::endsWith($route_name, '.home')          => (string)config('page-type.home'),
                 Str::endsWith($route_name, '.product'),
-                Str::endsWith($route_name, '.product.show') => (string) config('page-type.product'),
+                Str::endsWith($route_name, '.product.show')  => (string)config('page-type.product'),
                 Str::endsWith($route_name, '.category'),
-                Str::endsWith($route_name, '.category.show') => (string) config('page-type.category'),
+                Str::endsWith($route_name, '.category.show') => (string)config('page-type.category'),
                 default                                      => null,
             };
         }
 
         $segments = collect(explode('/', Str::trim($request->path(), '/')))
-            ->filter(fn (string $segment): bool => filled($segment))
+            ->filter(fn(string $segment): bool => filled($segment))
             ->values();
 
         if ($segments->count() === 1) {
-            return (string) config('page-type.home');
+            return (string)config('page-type.home');
         }
 
         return match ($segments->get(1)) {
-            'product'  => (string) config('page-type.product'),
-            'category' => (string) config('page-type.category'),
+            'product'  => (string)config('page-type.product'),
+            'category' => (string)config('page-type.category'),
             default    => null,
         };
     }
 }
 
-if (! function_exists('localizedRoute')) {
+if (!function_exists('localizedRoute')) {
     function localizedRoute(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
     {
         $locale_key = config('localization.locale_parameter');
@@ -152,14 +153,14 @@ if (! function_exists('localizedRoute')) {
     }
 }
 
-if (! function_exists('decode_html_entities')) {
+if (!function_exists('decode_html_entities')) {
     function decode_html_entities(?string $string): string
     {
-        return html_entity_decode((string) $string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return html_entity_decode((string)$string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 }
 
-if (! function_exists('escape_special_html')) {
+if (!function_exists('escape_special_html')) {
     function escape_special_html(?string $html_string): string
     {
         $prepared_html = Str::replaceMatches('/<script>.*?<\/script>/s', function ($match) {
@@ -174,7 +175,7 @@ if (! function_exists('escape_special_html')) {
     }
 }
 
-if (! function_exists('convert_price')) {
+if (!function_exists('convert_price')) {
     function convert_price(float $price, string $code_from, string $code_to): float
     {
         return app(ConvertPrice::class)->convert(
@@ -185,7 +186,7 @@ if (! function_exists('convert_price')) {
     }
 }
 
-if (! function_exists('format_price')) {
+if (!function_exists('format_price')) {
     function format_price(float|int $price, ?string $currency_code = null, float|int $exchange_rate = 0, bool $is_formatting = true): string|float
     {
         return app(ConvertPrice::class)->format(
@@ -197,7 +198,7 @@ if (! function_exists('format_price')) {
     }
 }
 
-if (! function_exists('replace_currency_symbol_to_code')) {
+if (!function_exists('replace_currency_symbol_to_code')) {
     function replace_currency_symbol_to_code(string $price_string, ?string $currency_symbol = null, ?string $currency_code = null): string
     {
         return app(ConvertPrice::class)->replaceCurrencySymbolToCode(
@@ -208,28 +209,28 @@ if (! function_exists('replace_currency_symbol_to_code')) {
     }
 }
 
-if (! function_exists('str_more_or_equal_length')) {
+if (!function_exists('str_more_or_equal_length')) {
     function str_more_or_equal_length(?string $string, ?int $length): bool
     {
         return $string !== null && $length !== null && Str::length(Str::trim($string)) >= $length;
     }
 }
 
-if (! function_exists('num_more_or_equal_num')) {
+if (!function_exists('num_more_or_equal_num')) {
     function num_more_or_equal_num(mixed $num, ?int $num_for_comparison): bool
     {
         return is_numeric($num) && $num_for_comparison !== null && $num >= $num_for_comparison;
     }
 }
 
-if (! function_exists('get_now_date')) {
+if (!function_exists('get_now_date')) {
     function get_now_date(?string $time_zone = null): Carbon|CarbonInterface
     {
         return now($time_zone ?: config('app.timezone'));
     }
 }
 
-if (! function_exists('resolve_modules_for_context')) {
+if (!function_exists('resolve_modules_for_context')) {
     /**
      * @throws BindingResolutionException
      * @throws CircularDependencyException
@@ -240,7 +241,7 @@ if (! function_exists('resolve_modules_for_context')) {
     }
 }
 
-if (! function_exists('sanitaze_url')) {
+if (!function_exists('sanitaze_url')) {
     function sanitaze_url(?string $url): string
     {
         if ($url === null) {
@@ -258,7 +259,7 @@ if (! function_exists('sanitaze_url')) {
     }
 }
 
-if (! function_exists('resolve_language_by_locale')) {
+if (!function_exists('resolve_language_by_locale')) {
     function resolve_language_by_locale(string $locale): ?Language
     {
         $language = new Language();
@@ -267,14 +268,14 @@ if (! function_exists('resolve_language_by_locale')) {
     }
 }
 
-if (! function_exists('get_page_settings')) {
+if (!function_exists('get_page_settings')) {
     function get_page_settings(PageSetting $page_setting): array
     {
         return is_array($page_setting->settings) ? $page_setting->settings : [];
     }
 }
 
-if (! function_exists('get_sorting_items')) {
+if (!function_exists('get_sorting_items')) {
     function get_sorting_items(PageSetting $page_setting): Illuminate\Database\Eloquent\Collection
     {
         return $page_setting
@@ -285,7 +286,7 @@ if (! function_exists('get_sorting_items')) {
     }
 }
 
-if (! function_exists('resolve_sort_code')) {
+if (!function_exists('resolve_sort_code')) {
     function resolve_sort_code(PageSetting $page_setting, string $sort_value): string
     {
         if ($sort_value === '') {
@@ -296,18 +297,87 @@ if (! function_exists('resolve_sort_code')) {
         $sorting_values_to_code = [];
 
         foreach ($sorting_items as $sorting_item) {
-            if (! $sorting_item instanceof PageSettingItem) {
+            if (!$sorting_item instanceof PageSettingItem) {
                 continue;
             }
 
             $item_get   = is_array($sorting_item->get) ? $sorting_item->get : [];
-            $item_value = (string) Arr::get($item_get, 'value', '');
+            $item_value = (string)Arr::get($item_get, 'value', '');
 
             if (filled($item_value)) {
-                $sorting_values_to_code[$item_value] = (string) $sorting_item->code;
+                $sorting_values_to_code[$item_value] = (string)$sorting_item->code;
             }
         }
 
         return $sorting_values_to_code[$sort_value] ?? 'default';
+    }
+}
+
+if (!function_exists('normalize_locale')) {
+    /**
+     * @param string|null $locale
+     *
+     * @return string
+     */
+    function normalize_locale(?string $locale): string
+    {
+        if ($locale === null || in_array($locale, config('app.locales'), true)) {
+            $locale = app()->getLocale();
+        }
+
+        return $locale;
+    }
+}
+
+if (!function_exists('get_slug_variants')) {
+    /**
+     * @param string|null $sluggable_type
+     * @param string|null $slug_value
+     *
+     * @return array
+     */
+    function get_slug_variants(?string $sluggable_type, ?string $slug_value = null): array
+    {
+        if ($sluggable_type === null) {
+            return [];
+        }
+
+        $language_ids = new Language()
+            ->getActiveLanguages()
+            ->pluck('id', 'code')
+            ->all();
+
+        $slug = new Slug()
+            ->where('slug', $slug_value)
+            ->first();
+
+        if (blank($slug?->sluggable_id)) {
+            return [];
+        }
+
+        $slugs_query = new Slug()
+            ->where('sluggable_type', $sluggable_type)
+            ->where('sluggable_id', $slug->sluggable_id)
+            ->whereIn('language_id', $language_ids);
+
+        if ($slug !== null) {
+            $slugs_query->whereNot('slug', $slug_value);
+        }
+
+        $slugs = $slugs_query->get();
+
+        $language_ids = array_flip($language_ids);
+
+        return $slugs
+            ->mapWithKeys(function (Slug $slug) use ($language_ids) {
+                $language_code = Arr::get($language_ids, $slug->language_id);
+
+                if ($language_code === null) {
+                    return [];
+                }
+
+                return [$language_code => $slug->slug];
+            })
+            ->all();
     }
 }

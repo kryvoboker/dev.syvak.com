@@ -19,7 +19,7 @@ class CatalogFilterWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki_catalog_filter';
+        return 'admin/wiki/wiki_catalog_filter';
     }
 
     protected static function getWikiScreenshotDirectory(): string

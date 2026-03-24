@@ -53,7 +53,7 @@ class CategoryPageSettingsWikiPageTest extends TestCase
 
         $view_content = File::get($view_path);
 
-        $this->assertStringContainsString('admin/wiki.common.examples_title', $view_content);
+        $this->assertStringContainsString('admin/wiki/wiki.common.examples_title', $view_content);
         $this->assertStringContainsString('getTableHeadings', $view_content);
         $this->assertStringContainsString('getWikiSections', $view_content);
     }

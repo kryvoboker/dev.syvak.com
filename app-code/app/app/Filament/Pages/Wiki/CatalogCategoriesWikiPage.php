@@ -19,7 +19,7 @@ class CatalogCategoriesWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.catalog_categories';
+        return 'admin/wiki/wiki.pages.catalog_categories';
     }
 
     protected static function getWikiScreenshotDirectory(): string

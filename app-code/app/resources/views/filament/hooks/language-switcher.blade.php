@@ -30,7 +30,7 @@
                 <x-filament::dropdown.list.item
                     :color="$current_locale === $language->code ? 'primary' : null"
                     icon="heroicon-m-chevron-right"
-                    :href="route($current_route, array_merge($route_params, ['locale' => $language->code]))"
+                    :href="route($current_route, array_merge($route_params, [$locale_key => $language->code]))"
                     tag="a"
                 >
                     {{ $language->name }}

@@ -204,7 +204,7 @@ class ListModuleDefinitions extends ListRecords
                     }
                 }),
             Action::make('open_wiki')
-                ->label(__('admin/wiki.actions.open_wiki'))
+                ->label(__('admin/wiki/wiki.actions.open_wiki'))
                 ->icon(Heroicon::BookOpen)
                 ->url(fn (): string => ModulesWikiPage::getUrl(), shouldOpenInNewTab: true),
         ];

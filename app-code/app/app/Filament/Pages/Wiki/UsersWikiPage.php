@@ -19,7 +19,7 @@ class UsersWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.users';
+        return 'admin/wiki/wiki.pages.users';
     }
 
     protected static function getWikiScreenshotDirectory(): string
