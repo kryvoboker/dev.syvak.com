@@ -19,7 +19,7 @@ class CatalogProductsWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.catalog_products';
+        return 'admin/wiki/wiki.pages.catalog_products';
     }
 
     protected static function getWikiScreenshotDirectory(): string

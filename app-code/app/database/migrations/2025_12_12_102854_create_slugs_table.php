@@ -32,6 +32,7 @@ return new class() extends Migration
             $table->unique(['sluggable_type', 'sluggable_id', 'language_id']);
             $table->unique(['language_id', 'slug']);
             $table->index(['slug', 'language_id']);
+            $table->index(['sluggable_type']);
         });
     }
 

@@ -19,7 +19,7 @@ class ModulesWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.modules';
+        return 'admin/wiki/wiki.pages.modules';
     }
 
     protected static function getWikiScreenshotDirectory(): string

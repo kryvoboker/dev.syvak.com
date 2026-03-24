@@ -10,16 +10,16 @@ use App\Enums\CatalogFilter\CatalogFilterPriceSourceModeEnum;
 class PriceSourceResolverService
 {
     public function resolveEffectivePrice(
-        ?float                              $base_price,
+        ?float                              $rrc_price,
         ?float                              $discount_price,
         CatalogFilterPriceSourceModeEnum    $price_source_mode,
         CatalogFilterDiscountOnlyPolicyEnum $discount_only_policy,
     ): ?float {
         return match ($price_source_mode) {
-            CatalogFilterPriceSourceModeEnum::BaseOnly     => $base_price,
-            CatalogFilterPriceSourceModeEnum::Both         => $this->resolveBothModePrice($base_price, $discount_price),
+            CatalogFilterPriceSourceModeEnum::RrcOnly      => $rrc_price,
+            CatalogFilterPriceSourceModeEnum::Both         => $this->resolveBothModePrice($rrc_price, $discount_price),
             CatalogFilterPriceSourceModeEnum::DiscountOnly => $this->resolveDiscountOnlyModePrice(
-                $base_price,
+                $rrc_price,
                 $discount_price,
                 $discount_only_policy,
             ),

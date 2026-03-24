@@ -48,7 +48,7 @@ class EditCatalogFilterSet extends EditRecord
     {
         return [
             Action::make('open_wiki')
-                ->label(__('admin/wiki.actions.open_wiki'))
+                ->label(__('admin/wiki/wiki.actions.open_wiki'))
                 ->url(fn (): string => CatalogFilterWikiPage::getUrl(), shouldOpenInNewTab: true),
 
             Action::make('refresh_index_status')

@@ -148,8 +148,8 @@ class CarouselModuleDataService
     {
         if (!is_array($translations)) {
             return [
-                'locale'      => null,
-                'translation' => null,
+                config('localization.locale_parameter') => null,
+                'translation'                           => null,
             ];
         }
 
@@ -157,22 +157,24 @@ class CarouselModuleDataService
 
         if (is_array($current_translation)) {
             return [
-                'locale'      => $current_locale,
-                'translation' => $current_translation,
+                config('localization.locale_parameter') => $current_locale,
+                'translation'                           => $current_translation,
             ];
         }
+
+        $locale_key = config('localization.locale_parameter');
 
         foreach ($translations as $locale => $translation) {
             if (is_array($translation)) {
                 return [
-                    'locale'      => is_string($locale) ? $locale : null,
+                    $locale_key   => is_string($locale) ? $locale : null,
                     'translation' => $translation,
                 ];
             }
         }
 
         return [
-            'locale'      => null,
+            $locale_key   => null,
             'translation' => null,
         ];
     }
@@ -182,10 +184,12 @@ class CarouselModuleDataService
      */
     private function resolveTranslationImagePath(mixed $translations, string $image_field, string $current_locale): array
     {
+        $locale_key = config('localization.locale_parameter');
+
         if (!is_array($translations)) {
             return [
-                'path'   => null,
-                'locale' => null,
+                'path'      => null,
+                $locale_key => null,
             ];
         }
 
@@ -196,8 +200,8 @@ class CarouselModuleDataService
 
         if (filled($current_path)) {
             return [
-                'path'   => $current_path,
-                'locale' => $current_locale,
+                'path'      => $current_path,
+                $locale_key => $current_locale,
             ];
         }
 
@@ -210,15 +214,15 @@ class CarouselModuleDataService
 
             if (filled($candidate_path)) {
                 return [
-                    'path'   => $candidate_path,
-                    'locale' => is_string($locale) ? $locale : null,
+                    'path'      => $candidate_path,
+                    $locale_key => is_string($locale) ? $locale : null,
                 ];
             }
         }
 
         return [
-            'path'   => null,
-            'locale' => null,
+            'path'      => null,
+            $locale_key => null,
         ];
     }
 

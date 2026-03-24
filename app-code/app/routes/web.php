@@ -20,8 +20,10 @@ Route::get('/alyo-admin/login', function (): RedirectResponse {
     return redirect('/' . app()->getLocale() . '/alyo-admin/login');
 });
 
-Route::prefix('{locale}')
-    ->whereIn('locale', (array) config('app.locales', [config('app.locale', 'en')]))
+$locale_key = config('localization.locale_parameter', 'locale');
+
+Route::prefix('{' . $locale_key . '}')
+    ->whereIn($locale_key, (array)config('app.locales', [config('app.locale', 'en')]))
     ->name('localized.catalog.')
     ->group(function (): void {
         Route::get('/', [HomeController::class, 'index'])->name('home');

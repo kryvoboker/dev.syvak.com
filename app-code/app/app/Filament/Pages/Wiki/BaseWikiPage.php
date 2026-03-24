@@ -77,10 +77,10 @@ abstract class BaseWikiPage extends Page
     public function getTableHeadings(): array
     {
         return [
-            'field'      => (string) __('admin/wiki.common.table.field'),
-            'purpose'    => (string) __('admin/wiki.common.table.purpose'),
-            'how_to_use' => (string) __('admin/wiki.common.table.how_to_use'),
-            'example'    => (string) __('admin/wiki.common.table.example'),
+            'field'      => (string) __('admin/wiki/wiki.common.table.field'),
+            'purpose'    => (string) __('admin/wiki/wiki.common.table.purpose'),
+            'how_to_use' => (string) __('admin/wiki/wiki.common.table.how_to_use'),
+            'example'    => (string) __('admin/wiki/wiki.common.table.example'),
         ];
     }
 

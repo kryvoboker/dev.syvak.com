@@ -35,7 +35,7 @@ class ListLanguages extends ListRecords
     {
         return [
             Action::make('open_wiki')
-                ->label(__('admin/wiki.actions.open_wiki'))
+                ->label(__('admin/wiki/wiki.actions.open_wiki'))
                 ->icon(Heroicon::BookOpen)
                 ->url(fn (): string => ApplicationLanguagesWikiPage::getUrl(), shouldOpenInNewTab: true),
             CreateAction::make(),

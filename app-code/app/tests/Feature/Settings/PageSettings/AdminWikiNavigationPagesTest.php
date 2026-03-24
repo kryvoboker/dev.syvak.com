@@ -84,10 +84,10 @@ class AdminWikiNavigationPagesTest extends TestCase
 
         $wiki_view_content = File::get($wiki_view_path);
 
-        $this->assertStringContainsString('admin/wiki.common.examples_title', $wiki_view_content);
+        $this->assertStringContainsString('admin/wiki/wiki.common.examples_title', $wiki_view_content);
         $this->assertStringContainsString('getWikiSections', $wiki_view_content);
 
-        $this->assertFileExists(lang_path('en/admin/wiki.php'));
-        $this->assertFileExists(lang_path('uk/admin/wiki.php'));
+        $this->assertFileExists(lang_path('en/admin/wiki/wiki.php'));
+        $this->assertFileExists(lang_path('uk/admin/wiki/wiki.php'));
     }
 }

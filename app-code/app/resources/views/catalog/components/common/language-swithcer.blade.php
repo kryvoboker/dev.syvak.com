@@ -1,7 +1,7 @@
 @php
     $current_route = request()->route()->getName();
     $route_params = request()->route()->parameters();
-    $locale = config('localization.locale_parameter');
+    $slug_variants = get_slug_variants($sluggable_type ?? null, $slug ?? null)
 @endphp
 
 <div {{ $attributes->merge(['class' => 'dropdown dropdown-lang-menu relative']) }}>
@@ -38,8 +38,15 @@
                 @else
                     <span class="material-symbols--square size-2 bg-transparent"></span>
 
+                    @php
+                        $route_params = array_merge($route_params, [
+                            'slug' => $slug_variants[$language->code] ?? $slug,
+                            $locale_key => $language->code,
+                        ]);
+                    @endphp
+
                     <a class="block w-full"
-                       href="{{ route($current_route, array_merge($route_params, [$locale => $language->code])) }}">
+                       href="{{ route($current_route, $route_params) }}">
                         {{ $language->name }}
                     </a>
                 @endif

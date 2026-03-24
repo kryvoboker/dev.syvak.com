@@ -19,7 +19,7 @@ class ApplicationLanguagesWikiPage extends BaseWikiPage
 
     protected static function getWikiTranslationPath(): string
     {
-        return 'admin/wiki.pages.application_languages';
+        return 'admin/wiki/wiki.pages.application_languages';
     }
 
     protected static function getWikiScreenshotDirectory(): string
