@@ -49,7 +49,7 @@ class CategoryPageSettingsServicesTest extends TestCase
 
         $this->assertSame(PageSetting::PAGE_TYPE_CATEGORY, $page_setting->page_type);
         $this->assertTrue($page_setting->is_sorting_enabled);
-        $this->assertTrue($page_setting->is_filtering_enabled);
+        $this->assertFalse($page_setting->is_filtering_enabled);
         $this->assertSame(1, data_get($page_setting->settings, 'meta.contract_version'));
 
         $this->assertDatabaseCount('page_setting_items', 5);

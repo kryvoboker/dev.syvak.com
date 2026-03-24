@@ -3,13 +3,19 @@
 declare(strict_types=1);
 
 use App\Data\AppSettingsData;
+use App\Models\ApplicationSettings\Language;
+use App\Models\PageSettings\PageSetting;
+use App\Models\PageSettings\PageSettingItem;
 use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -98,7 +104,7 @@ if (! function_exists('try_detect_page_type')) {
             $request = request();
         }
 
-        $route_name = $request?->route()?->getName();
+        $route_name = $request->route()?->getName();
 
         if ($route_name === null) {
             return null;
@@ -224,6 +230,10 @@ if (! function_exists('get_now_date')) {
 }
 
 if (! function_exists('resolve_modules_for_context')) {
+    /**
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
+     */
     function resolve_modules_for_context(?string $placement = null, ?string $context_key = null): Collection
     {
         return app(ModuleRuntimeResolverService::class)->resolve($placement, $context_key);
@@ -241,9 +251,63 @@ if (! function_exists('sanitaze_url')) {
 
         // Ensure the URL has a valid scheme (http or https)
         if (Str::startsWith($sanitized_url, ['http://', 'https://']) === false) {
-            $sanitized_url = (request()?->isSecure() ? 'https://' : 'http://') . $sanitized_url;
+            $sanitized_url = (request()->isSecure() ? 'https://' : 'http://') . $sanitized_url;
         }
 
         return $sanitized_url;
+    }
+}
+
+if (! function_exists('resolve_language_by_locale')) {
+    function resolve_language_by_locale(string $locale): ?Language
+    {
+        $language = new Language();
+
+        return $language->getLanguageByCode($locale) ?: $language->getDefaultLanguage();
+    }
+}
+
+if (! function_exists('get_page_settings')) {
+    function get_page_settings(PageSetting $page_setting): array
+    {
+        return is_array($page_setting->settings) ? $page_setting->settings : [];
+    }
+}
+
+if (! function_exists('get_sorting_items')) {
+    function get_sorting_items(PageSetting $page_setting): Illuminate\Database\Eloquent\Collection
+    {
+        return $page_setting
+            ->sortingItems()
+            ->where('is_enabled', true)
+            ->orderBy('sort_order')
+            ->get();
+    }
+}
+
+if (! function_exists('resolve_sort_code')) {
+    function resolve_sort_code(PageSetting $page_setting, string $sort_value): string
+    {
+        if ($sort_value === '') {
+            return 'default';
+        }
+
+        $sorting_items          = get_sorting_items($page_setting);
+        $sorting_values_to_code = [];
+
+        foreach ($sorting_items as $sorting_item) {
+            if (! $sorting_item instanceof PageSettingItem) {
+                continue;
+            }
+
+            $item_get   = is_array($sorting_item->get) ? $sorting_item->get : [];
+            $item_value = (string) Arr::get($item_get, 'value', '');
+
+            if (filled($item_value)) {
+                $sorting_values_to_code[$item_value] = (string) $sorting_item->code;
+            }
+        }
+
+        return $sorting_values_to_code[$sort_value] ?? 'default';
     }
 }
