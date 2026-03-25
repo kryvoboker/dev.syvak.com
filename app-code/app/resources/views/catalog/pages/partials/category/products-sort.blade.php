@@ -1,12 +1,14 @@
 <div class="dropdown category-sort-dropdown relative">
-    <button class="dropdown-toggle default-btn flex items-center gap-x-2 border border-opacity-light-gray-40% px-3 py-1.5 text-11px
-                                   uppercase tracking-0.04em duration-200 ease-in-out hover:border-white md:text-sm lg:text-base"
+    <button class="dropdown-toggle filter-sort-btns"
             type="button"
             aria-haspopup="menu"
             aria-expanded="false"
             aria-label="Sort products dropdown">
-        <span>СОРТУВАННЯ</span>
-        <span class="icon-[solar--alt-arrow-down-line-duotone] dropdown-open:rotate-180 size-19px text-white duration-100 ease-in-out"></span>
+        <span>
+            {{ __('catalog/default.buttons.sort') }}
+        </span>
+
+        <span class="icon-[fluent--filter-24-regular] custom-icon dropdown-open:rotate-180 duration-100 ease-in-out"></span>
     </button>
 
     <ul class="dropdown-menu dropdown-open:opacity-100 hidden min-w-52 border border-opacity-light-gray-40% bg-black p-3 md:p-4"
@@ -15,7 +17,7 @@
         <button class="close-category-sort-dropdown-btn mb-1 ms-auto block"
                 type="button"
                 aria-label="Close sort dropdown">
-            <span class="icon-[ic--baseline-close] size-5 text-white"></span>
+            <span class="icon-[ic--baseline-close] custom-icon"></span>
         </button>
 
         @foreach($category_page_settings['sort_options'] as $sort_option)

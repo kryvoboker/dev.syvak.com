@@ -18,6 +18,7 @@ use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Str;
 
 if (!function_exists('clear_telephone')) {
@@ -91,10 +92,28 @@ if (!function_exists('get_app_settings')) {
     }
 }
 
+if (!function_exists('sanitaze_str')) {
+    function sanitaze_str(?string $string): string
+    {
+        if ($string === null) {
+            return '';
+        }
+
+        return $string
+                |> decode_html_entities(...)
+                |> strip_tags(...)
+                |> (fn(string $str): string => Str::trim($str))
+                |> (fn(string $str): string => Str::replaceMatches('/\s+/', ' ', $str));
+    }
+}
+
 if (!function_exists('breadcrumb')) {
     function breadcrumb(string $title, ?string $url = null): array
     {
-        return ['title' => $title, 'url' => $url];
+        return [
+            'title' => sanitaze_str($title),
+            'url'   => sanitaze_url($url)
+        ];
     }
 }
 
@@ -276,7 +295,7 @@ if (!function_exists('get_page_settings')) {
 }
 
 if (!function_exists('get_sorting_items')) {
-    function get_sorting_items(PageSetting $page_setting): Illuminate\Database\Eloquent\Collection
+    function get_sorting_items(PageSetting $page_setting): EloquentCollection
     {
         return $page_setting
             ->sortingItems()
@@ -321,7 +340,7 @@ if (!function_exists('normalize_locale')) {
      */
     function normalize_locale(?string $locale): string
     {
-        if ($locale === null || in_array($locale, config('app.locales'), true)) {
+        if ($locale === null || in_array($locale, config('app.locales'), true) === false) {
             $locale = app()->getLocale();
         }
 
@@ -347,7 +366,9 @@ if (!function_exists('get_slug_variants')) {
             ->pluck('id', 'code')
             ->all();
 
-        $slug = new Slug()
+        $slug_instance = new Slug();
+
+        $slug = $slug_instance
             ->where('slug', $slug_value)
             ->first();
 
@@ -355,7 +376,7 @@ if (!function_exists('get_slug_variants')) {
             return [];
         }
 
-        $slugs_query = new Slug()
+        $slugs_query = $slug_instance
             ->where('sluggable_type', $sluggable_type)
             ->where('sluggable_id', $slug->sluggable_id)
             ->whereIn('language_id', $language_ids);
@@ -364,6 +385,7 @@ if (!function_exists('get_slug_variants')) {
             $slugs_query->whereNot('slug', $slug_value);
         }
 
+        /** @var EloquentCollection $slugs */
         $slugs = $slugs_query->get();
 
         $language_ids = array_flip($language_ids);
