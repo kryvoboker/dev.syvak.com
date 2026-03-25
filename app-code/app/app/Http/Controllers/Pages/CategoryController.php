@@ -18,6 +18,7 @@ use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\Products\ProductsLimitService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -48,12 +49,10 @@ class CategoryController extends Controller
             locale        : $locale,
         );
 
-        $is_ajax_products_loading_enabled = Arr::get(
-                $page_setting_settings,
-                'pagination.ajax_products_loading_enabled',
-                (bool)config('app.page_settings.category.ajax_products_loading_enabled', true),
-            ) === true
-            && $products_per_page_limit < (int)Arr::get($response_data, 'pagination.total', 0);
+        /** @var LengthAwarePaginator|null $paginator */
+        $paginator                        = Arr::get($response_data, 'paginator');
+        $is_ajax_products_loading_enabled = (bool)config('app.page_settings.category.ajax_products_loading_enabled', true) === true
+            && $products_per_page_limit < (int)$paginator?->total();
 
         $category_page_settings = [
             'sort_options'                     => $this->buildSortOptions($page_setting),

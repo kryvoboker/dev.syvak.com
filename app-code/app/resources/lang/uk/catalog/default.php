@@ -4,21 +4,27 @@ declare(strict_types=1);
 
 return [
     // Texts
-    'texts' => [
+    'texts'        => [
         'sku'                         => 'Артикул: :sku',
         'products_not_found'          => 'Товари не знайдено!',
         'category_title_fallback'     => 'Колекції',
         'category_products_not_found' => 'Товари для цієї категорії не знайдені',
         'category_products_in_stock'  => 'В наявності: :quantity',
+        'from'                        => 'від',
+        'to'                          => 'до',
+        'of'                          => 'з',
     ],
 
     // Links
-    'links' => [
-        'home' => 'Головна',
+    'links'        => [
+        'home'       => 'Головна',
+        'previous'   => 'Попередня',
+        'next'       => 'Наступна',
+        'go_to_page' => 'Перейти на сторінку :page',
     ],
 
     // Buttons
-    'buttons' => [
+    'buttons'      => [
         'catalog'   => 'Каталог',
         'show_more' => 'Показати ще',
         'filter'    => 'Фільтр',
@@ -26,7 +32,7 @@ return [
     ],
 
     // Sort labels
-    'sort' => [
+    'sort'         => [
         'default'     => 'За замовчуванням',
         'newest'      => 'Спочатку нові',
         'bestsellers' => 'Бестселери',
@@ -40,7 +46,7 @@ return [
     ],
 
     // Aria-Labels
-    'aria_labels' => [
+    'aria_labels'  => [
         'toggle_main_menu'       => 'Перемкнути головне меню',
         'toggle_catalog_menu'    => 'Перемкнути меню каталогу',
         'back_to_main_mob_menu'  => 'Повернутися до головного меню',
@@ -51,7 +57,7 @@ return [
     ],
 
     // Errors
-    'errors' => [
+    'errors'       => [
         'keyword_required' => 'Пошукове слово є обов\'язковим!',
         'keyword_string'   => 'Пошукове слово повинно бути рядком!',
         'keyword_min'      => 'Пошук повинен містити щонайменше 3 символи!',

@@ -19,6 +19,8 @@
             </div>
 
             @include('catalog.pages.partials.category.products-list')
+
+            {{ $paginator->links('pagination::tailwind') }}
         </div>
     </section>
 
