@@ -50,12 +50,4 @@
     </div>
 @endif
 
-@if($category_page_settings['is_ajax_products_loading_enabled'])
-    <div class="mt-5 flex justify-center md:mt-6 lg:mt-7">
-        <button class="default-btn uppercase tracking-0.04em text-light-gray duration-200 ease-in-out hover:text-white"
-                type="button">
-            {{ __('catalog/default.buttons.show_more') }}
-            <span class="icon-[solar--alt-arrow-down-line-duotone] size-4 md:size-5"></span>
-        </button>
-    </div>
-@endif
+@include('catalog.pages.partials.category.load-more-btn')

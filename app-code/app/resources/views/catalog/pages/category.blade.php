@@ -13,14 +13,14 @@
             </h1>
 
             <div class="grid grid-cols-2 items-center gap-x-4 md:gap-x-0 max-w-500px ms-auto">
-                @include('catalog.pages.partials.category.products-filter-btn')
+                @include('catalog.pages.partials.category.filter-btn')
 
-                @include('catalog.pages.partials.category.products-sort')
+                @include('catalog.pages.partials.category.sort')
             </div>
 
             @include('catalog.pages.partials.category.products-list')
         </div>
     </section>
 
-    @include('catalog.pages.partials.category.products-filter-content')
+    @include('catalog.pages.partials.category.filter-content')
 @endsection
