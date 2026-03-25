@@ -21,6 +21,8 @@ return [
     'buttons' => [
         'catalog'   => 'Catalog',
         'show_more' => 'Show more',
+        'filter'    => 'Filter',
+        'sort'      => 'Sorting',
     ],
 
     // Sort labels

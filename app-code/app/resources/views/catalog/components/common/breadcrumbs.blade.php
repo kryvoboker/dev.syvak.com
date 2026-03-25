@@ -3,27 +3,31 @@
 ])
 
 @if(!empty($breadcrumbs))
-    <div class="container">
-        <nav aria-label="Breadcrumb" {{ $attributes->merge(['class' => 'breadcrumbs']) }}>
-            <ol class="breadcrumbs__list flex items-center gap-x-2">
+    <div class="container border-b border-b-opacity-light-gray-40%">
+        <nav aria-label="Breadcrumb" {{ $attributes->merge(['class' => 'breadcrumbs flex items-center']) }}>
+            <ol class="breadcrumbs__list flex items-center gap-x-6 px-0 py-4">
                 @foreach($breadcrumbs as $index => $breadcrumb_data)
-                    @php
-                        $is_last = $index === count($breadcrumbs) - 1;
-                    @endphp
+                    @if($loop->first)
+                        <li class="breadcrumbs__item">
+                            <a class="" href="">
+                                <span class="icon-[formkit--arrowleft] custom-icon"></span>
+                            </a>
+                        </li>
+                    @endif
 
-                    <li class="breadcrumbs__item" @if($is_last) aria-current="page" @endif>
-                        @if(!$is_last && !empty($breadcrumb_data['url']))
-                            <a class="breadcrumbs__link" href="{{ $breadcrumb_data['url'] }}">
+                    <li class="breadcrumbs__item" @if($loop->last) aria-current="page" @endif>
+                        @if(!$loop->last && !empty($breadcrumb_data['url']))
+                            <a class="breadcrumbs__link text-light-gray" href="{{ $breadcrumb_data['url'] }}">
                                 {{ $breadcrumb_data['title'] }}
                             </a>
                         @else
-                            <span class="breadcrumbs__current">
-                            {{ $breadcrumb_data['title'] }}
-                        </span>
+                            <div class="breadcrumbs__current">
+                                {{ $breadcrumb_data['title'] }}
+                            </div>
                         @endif
                     </li>
 
-                    @if(!$is_last)
+                    @if(!$loop->last)
                         <li class="breadcrumbs__sep inline-block" aria-hidden="true">
                             /
                         </li>

@@ -2,7 +2,7 @@
 @include('catalog.pages.partials.search.mob-search')
 @include('catalog.pages.partials.search.pc-search')
 
-<header class="header sticky top-0 border-y border-y-opacity-light-gray-40% backdrop-blur-[6px] z-10">
+<header class="header sticky top-0 border-b border-b-opacity-light-gray-40% backdrop-blur-[6px] z-10">
     <nav>
         <div class="container">
             <div class="flex items-center justify-between gap-x-1">
