@@ -1,7 +1,7 @@
 @php
     $current_route = request()->route()->getName();
     $route_params = request()->route()->parameters();
-    $slug_variants = get_slug_variants($sluggable_type ?? null, $slug ?? null)
+    $slug_variants = get_slug_variants($sluggable_type ?? null, $slug ?? null);
 @endphp
 
 <div {{ $attributes->merge(['class' => 'dropdown dropdown-lang-menu relative']) }}>
@@ -39,10 +39,16 @@
                     <span class="material-symbols--square size-2 bg-transparent"></span>
 
                     @php
-                        $route_params = array_merge($route_params, [
-                            'slug' => $slug_variants[$language->code] ?? $slug,
-                            $locale_key => $language->code,
-                        ]);
+                        if (isset($slug)) {
+                            $route_params = array_merge($route_params, [
+                                'slug' => $slug_variants[$language->code] ?? $slug,
+                                $locale_key => $language->code,
+                            ]);
+                        } else {
+                            $route_params = array_merge($route_params, [
+                                $locale_key => $language->code,
+                            ]);
+                        }
                     @endphp
 
                     <a class="block w-full"
