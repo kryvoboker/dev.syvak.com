@@ -46,11 +46,11 @@ class SetCommonPreferences
 
         if ($currency !== null) {
             config([
-                'app.currency.default_currency_code'          => $currency->code,
-                'app.currency.default_currency_symbol'        => $currency->symbol_left ?: $currency->symbol_right,
-                'app.currency.default_currency_exchange_rate' => $currency->exchange_rate,
-                'app.currency.default_format_locale'          => $currency->format_locale,
-                'app.currency.default_decimal_places'         => $currency->decimal_places,
+                'app.currency.current_currency_code'          => $currency->code,
+                'app.currency.current_currency_symbol'        => $currency->symbol_left ?: $currency->symbol_right,
+                'app.currency.current_currency_exchange_rate' => $currency->exchange_rate,
+                'app.currency.current_format_locale'          => $currency->format_locale,
+                'app.currency.current_decimal_places'         => $currency->decimal_places,
                 'devices.current_device_type'                 => $device_type,
             ]);
 

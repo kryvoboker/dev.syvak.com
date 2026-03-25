@@ -112,7 +112,7 @@ class ProductsTable
                     ->getStateUsing(function (Product $record) {
                         $discount = new Product()->getLastActualAndLastModifiedDiscountFromModel($record);
 
-                        $currency      = config('app.currency.default_currency_code');
+                        $currency      = config('app.currency.current_currency_code');
                         $exchange_rate = (float) config('app.currency.default_exchange_rate');
 
                         $convert_price = app(ConvertPrice::class);
