@@ -604,7 +604,7 @@ readonly class ProductsCarouselModuleDataService
             'sku'   => escape_special_html((string) $product->sku),
             'price' => format_price(
                 (float) $product->price,
-                config('app.currency.default_currency_code'),
+                config('app.currency.current_currency_code'),
                 (float) config('app.currency.default_exchange_rate'),
             ),
             'image_data' => [

@@ -25,4 +25,8 @@
     </section>
 
     @include('catalog.pages.partials.category.filter-content')
+
+    @prepend('styles')
+        @vite(['./node_modules/nouislider/dist/nouislider.css'])
+    @endprepend
 @endsection

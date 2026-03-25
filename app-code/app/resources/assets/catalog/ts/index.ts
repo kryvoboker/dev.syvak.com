@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsDropdownCollection = window.$hsDropdownCollection || [];
-    window.$hsOverlayCollection = window.$hsOverlayCollection || [];
-    const pageType = window.app_params?.page_type ?? null;
+    window.$hsOverlayCollection  = window.$hsOverlayCollection || [];
+    const pageType               = window.app_params?.page_type ?? null;
 
     import('@ts-shared/lib/validateForm.ts')
         .then(module => module.handleValidateForms());
@@ -15,19 +15,19 @@ document.addEventListener('DOMContentLoaded', (): void => {
     import('@ts-features/search/mob-search.ts')
         .then(module => {
             module.handleMobSearch({
-                openSearchBtn:    '.open-mob-search-btn',
-                searchContainer:  '.mob-search-container',
-                searchInput:      '.mob-search-input',
-                searchResults:    '.mob-search-results',
-                searchForm:       '.mob-search-form',
+                openSearchBtn:   '.open-mob-search-btn',
+                searchContainer: '.mob-search-container',
+                searchInput:     '.mob-search-input',
+                searchResults:   '.mob-search-results',
+                searchForm:      '.mob-search-form',
             });
 
             module.handleMobSearch({
-                openSearchBtn:    '.open-pc-search-btn',
-                searchContainer:  '.pc-search-container',
-                searchInput:      '.pc-search-input',
-                searchResults:    '.pc-search-results',
-                searchForm:       '.pc-search-form',
+                openSearchBtn:   '.open-pc-search-btn',
+                searchContainer: '.pc-search-container',
+                searchInput:     '.pc-search-input',
+                searchResults:   '.pc-search-results',
+                searchForm:      '.pc-search-form',
             })
         });
 

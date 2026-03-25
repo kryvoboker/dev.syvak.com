@@ -24,8 +24,8 @@ class SearchProductResource extends JsonResource
         $search_product_sizes = $app_settings->image_sizes?->firstWhere('name', 'search_product') ?? [];
         $price                = format_price(
             $this->price,
-            config('app.currency.default_currency_code'),
-            (float) config('app.currency.default_exchange_rate'),
+            config('app.currency.current_currency_code'),
+            (float) config('app.currency.current_exchange_rate'),
         );
 
         return [
@@ -61,8 +61,8 @@ class SearchProductResource extends JsonResource
                 if ($product_discount !== null) {
                     $discounted_price = format_price(
                         $product_discount->price,
-                        config('app.currency.default_currency_code'),
-                        (float) config('app.currency.default_exchange_rate'),
+                        config('app.currency.current_currency_code'),
+                        (float) config('app.currency.current_exchange_rate'),
                     );
 
                     return [

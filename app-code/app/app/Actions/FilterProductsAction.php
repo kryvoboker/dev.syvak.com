@@ -472,14 +472,14 @@ readonly class FilterProductsAction
 
                 $formatted_effective_price = format_price(
                     $effective_price,
-                    config('app.currency.default_currency_code'),
-                    (float)config('app.currency.default_exchange_rate'),
+                    config('app.currency.current_currency_code'),
+                    (float)config('app.currency.current_exchange_rate'),
                 );
 
                 $formatted_rrc_price = format_price(
                     $rrc_price,
-                    config('app.currency.default_currency_code'),
-                    (float)config('app.currency.default_exchange_rate'),
+                    config('app.currency.current_currency_code'),
+                    (float)config('app.currency.current_exchange_rate'),
                 );
 
                 $product_slug = (string)optional($product->slugs->first())->slug;
@@ -512,8 +512,8 @@ readonly class FilterProductsAction
                         'discount_formatted' => $discount_price !== null
                             ? (string)format_price(
                                 $discount_price,
-                                config('app.currency.default_currency_code'),
-                                (float)config('app.currency.default_exchange_rate'),
+                                config('app.currency.current_currency_code'),
+                                (float)config('app.currency.current_exchange_rate'),
                             )
                             : null,
                     ],

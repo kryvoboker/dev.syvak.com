@@ -114,7 +114,7 @@ class ProductForm
                             ->numeric()
                             ->rules(['nullable', 'numeric', 'min:0'])
                             ->minValue(0)
-                            ->prefix(config('app.currency.default_currency_symbol'))
+                            ->prefix(config('app.currency.current_currency_symbol'))
                             ->default(0.0)
                             ->nullable(),
                     ])
@@ -394,7 +394,7 @@ class ProductForm
                                     ->numeric()
                                     ->rules(['nullable', 'numeric', 'min:0'])
                                     ->minValue(0)
-                                    ->prefix(config('app.currency.default_currency_symbol'))
+                                    ->prefix(config('app.currency.current_currency_symbol'))
                                     ->default(0.0)
                                     ->nullable(),
 

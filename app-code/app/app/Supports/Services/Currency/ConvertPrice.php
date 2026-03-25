@@ -114,7 +114,7 @@ final class ConvertPrice
 
         if (! isset($this->default_currency)) {
             $currency = new Currency()->getActiveCurrencyByCode(
-                config('app.currency.default_currency_code'),
+                config('app.currency.current_currency_code'),
             );
 
             if ($currency === null) {
