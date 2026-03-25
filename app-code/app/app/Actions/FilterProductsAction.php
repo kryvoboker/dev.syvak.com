@@ -106,14 +106,7 @@ readonly class FilterProductsAction
                 filter_set            : $filter_set,
                 minimum_stock_quantity: $minimum_stock_quantity,
             ),
-            'pagination'        => [
-                'current_page' => $products->currentPage(),
-                'last_page'    => $products->lastPage(),
-                'per_page'     => $products->perPage(),
-                'total'        => $products->total(),
-                'from'         => $products->firstItem(),
-                'to'           => $products->lastItem(),
-            ],
+            'paginator'         => $products,
             'applied_filters'   => [
                 'sort'       => $requested_sort_value,
                 'price_from' => Arr::get($validated_data, 'price_from'),
