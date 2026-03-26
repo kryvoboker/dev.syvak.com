@@ -76,7 +76,7 @@ return [
     ],
 
     'notifications' => [
-        'index_status_refreshed' => 'Статус індексації оновлено.',
+        'index_status_refreshed' => 'Індекс оновлено. Рядків: :rows_total, Версія: :index_version, Статус: :status.',
         'groups_synced'          => 'Групи синхронізовано. Створено: :created, Оновлено: :updated, Всього: :total.',
         'values_synced'          => 'Значення синхронізовано. Створено: :created, Оновлено: :updated, Видалено: :removed, Всього: :total.',
         'all_synced'             => 'Фільтр товарів синхронізовано. Груп: :groups_total, Значень: :values_total.',

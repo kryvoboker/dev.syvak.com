@@ -252,7 +252,7 @@ readonly class FilterProductsAction
 
         $query = Product::query()
             ->select('products.*')
-            ->selectRaw('active_product_discount.price as active_discount_price')
+            ->selectRaw(config('database.prefix') . 'active_product_discount.price as active_discount_price')
             ->with([
                 'slugs' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
@@ -730,7 +730,7 @@ readonly class FilterProductsAction
             ->distinct('product_id')
             ->count('product_id');
 
-        return max(0, (int) $total_products);
+        return max(0, $total_products);
     }
 
     /**
