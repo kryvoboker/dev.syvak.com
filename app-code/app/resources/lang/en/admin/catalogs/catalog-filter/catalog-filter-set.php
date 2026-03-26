@@ -76,7 +76,7 @@ return [
     ],
 
     'notifications' => [
-        'index_status_refreshed' => 'Index runtime status refreshed.',
+        'index_status_refreshed' => 'Index rebuild completed. Rows: :rows_total, Version: :index_version, Status: :status.',
         'groups_synced'          => 'Groups synchronized. Created: :created, Updated: :updated, Total: :total.',
         'values_synced'          => 'Values synchronized. Created: :created, Updated: :updated, Removed: :removed, Total: :total.',
         'all_synced'             => 'Catalog filter synchronized. Groups: :groups_total, Values: :values_total.',
