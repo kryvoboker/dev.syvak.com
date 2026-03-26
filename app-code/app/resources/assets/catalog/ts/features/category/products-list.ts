@@ -27,7 +27,7 @@ function handleNoUiSlider(): void {
         },
         format: wNumb({
             decimals: 0,
-            prefix: stepsSlider?.dataset.currencySign ?? '',
+            prefix: (stepsSlider?.dataset.currencySign ?? '') + ' ',
         })
     });
 
@@ -60,7 +60,7 @@ function handleNoUiSlider(): void {
             // 13 is enter,
             // 38 is key up,
             // 40 is key down.
-            switch (e.which) {
+            switch (e.keyCode) {
                 case 13:
                     NO_UI_SLIDER_API.setHandle(handle, this.value);
 
