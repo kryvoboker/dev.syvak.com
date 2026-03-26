@@ -1,4 +1,4 @@
-import { initCarousel }   from '@ts-features/carousel/lib/initCarousel.ts';
+import { initCarousel }   from '@ts-shared/carousel/initCarousel.ts';
 import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
 import { getAppParam }    from '@ts-shared/lib/getAppParam.ts';
 import { findArrayElems } from '@ts-shared/lib/helpers.ts';
