@@ -19,18 +19,20 @@ class CatalogFilterAjaxController extends Controller
      */
     public function index(
         CatalogFilterAjaxIndexRequest $request,
-        FilterProductsAction          $filter_products_action,
-        string                        $slug,
+        FilterProductsAction $filter_products_action,
+        string $slug,
     ): JsonResponse {
-        $response_data = $filter_products_action->handle(
-            validated_data: $request->validated(),
-            category_slug : $slug,
-            locale        : app()->getLocale(),
+        $response_data = $filter_products_action->handle([
+            'validated_data'      => $request->validated(),
+            'category_slug'       => $slug,
+            'is_get_filters_data' => false,
+        ],
+            locale: app()->getLocale(),
         );
 
         /** @var LengthAwarePaginator|null $paginator */
         $paginator      = Arr::get($response_data, 'paginator');
-        $total_products = (int)$paginator?->total();
+        $total_products = (int) $paginator?->total();
 
         return response()->json([
             'success'        => true,
