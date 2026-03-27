@@ -127,7 +127,6 @@ readonly class FilterProductsAction
                 'sort'       => $requested_sort_value,
                 'price_from' => Arr::get($validated_data, 'price_from'),
                 'price_to'   => Arr::get($validated_data, 'price_to'),
-                'stock'      => (array) Arr::get($validated_data, 'stock', []),
                 'attributes' => (array) Arr::get($validated_data, 'attributes', []),
             ],
             'active_sort_code'  => $resolved_sort_code,
@@ -695,14 +694,6 @@ readonly class FilterProductsAction
                 ->contains($value_code);
         }
 
-        if ($source_type === CatalogFilterGroupSourceTypeEnum::Stock->value) {
-            $selected_stock_codes = (array) Arr::get($validated_data, 'stock', []);
-
-            return collect($selected_stock_codes)
-                ->map(fn (mixed $code): string => (string) $code)
-                ->contains($value_code);
-        }
-
         return false;
     }
 
@@ -746,7 +737,6 @@ readonly class FilterProductsAction
                 'sort'       => (string) Arr::get($validated_data, 'sort', ''),
                 'price_from' => Arr::get($validated_data, 'price_from'),
                 'price_to'   => Arr::get($validated_data, 'price_to'),
-                'stock'      => (array) Arr::get($validated_data, 'stock', []),
                 'attributes' => (array) Arr::get($validated_data, 'attributes', []),
             ],
             'active_sort_code'  => $sort_code,

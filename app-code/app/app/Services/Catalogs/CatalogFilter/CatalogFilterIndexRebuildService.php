@@ -177,18 +177,6 @@ readonly class CatalogFilterIndexRebuildService
             return 0;
         }
 
-        $stock_group = $groups->first(
-            fn (CatalogFilterGroup $group): bool => (string) $group->getRawOriginal('source_type') === CatalogFilterGroupSourceTypeEnum::Stock->value,
-        );
-
-        $stock_value_id = null;
-
-        if ($stock_group instanceof CatalogFilterGroup) {
-            $stock_value_id = $stock_group->values
-                ->first(fn (CatalogFilterValue $value): bool => (string) $value->code === 'in_stock')
-                ?->id;
-        }
-
         /** @var Collection<int, CatalogFilterGroup> $attribute_groups */
         $attribute_groups = $groups->filter(
             fn (CatalogFilterGroup $group): bool => (string) $group->getRawOriginal('source_type') === CatalogFilterGroupSourceTypeEnum::Attribute->value,
@@ -212,8 +200,6 @@ readonly class CatalogFilterIndexRebuildService
             $filter_set,
             $index_version,
             $indexed_at,
-            $stock_group,
-            $stock_value_id,
             $value_lookup_by_attribute,
             $minimum_stock_quantity,
             $insert_chunk_size,
@@ -249,25 +235,6 @@ readonly class CatalogFilterIndexRebuildService
                 $is_in_stock    = $stock_quantity >= $minimum_stock_quantity;
 
                 foreach ($category_ids as $category_id) {
-                    if ($stock_group instanceof CatalogFilterGroup && $stock_value_id !== null) {
-                        $rows_to_insert[] = $this->buildIndexRowPayload(
-                            filter_set_id: (int) $filter_set->id,
-                            index_version: $index_version,
-                            category_id: $category_id,
-                            product_id: $product_id,
-                            group_id: (int) $stock_group->id,
-                            value_id: (int) $stock_value_id,
-                            attribute_id: null,
-                            base_price: $base_price,
-                            discount_price: $discount_price,
-                            effective_price: $effective_price,
-                            stock_quantity: $stock_quantity,
-                            is_in_stock: $is_in_stock,
-                            is_active_product: (bool) $product->is_active,
-                            indexed_at: $indexed_at,
-                        );
-                    }
-
                     foreach ($product->productToAttribute as $attribute_value) {
                         if (! $attribute_value instanceof ProductToAttribute) {
                             continue;
@@ -369,7 +336,7 @@ readonly class CatalogFilterIndexRebuildService
     {
         $app_settings               = get_app_settings();
         $current_datetime           = now(config('app.timezone'));
-        $discount_alias_with_prefix = (string) config('database.prefix') . 'active_product_discount';
+        $discount_alias_with_prefix = config('database.prefix') . 'active_product_discount';
 
         return Product::query()
             ->select('products.*')

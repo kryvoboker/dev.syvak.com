@@ -62,5 +62,6 @@ return [
         'keyword_string'   => 'Search keyword must be a string!',
         'keyword_min'      => 'Search must be at least 3 characters long!',
         'keyword_max'      => 'Search keyword may not be greater than 255 characters!',
+        'price_from'       => 'The "Price from" value must be less than "Price to"!',
     ],
 ];

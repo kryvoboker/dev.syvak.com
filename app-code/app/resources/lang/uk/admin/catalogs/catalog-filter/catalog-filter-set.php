@@ -53,6 +53,7 @@ return [
         'step'                            => 'Крок ціни',
         'option_labels'                   => 'Переклади назви опції',
         'option_label_value'              => 'Назва',
+        'price'                           => 'Ціна',
     ],
 
     'helpers' => [

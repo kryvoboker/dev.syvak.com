@@ -53,6 +53,7 @@ return [
         'step'                            => 'Price Step',
         'option_labels'                   => 'Option Labels',
         'option_label_value'              => 'Label',
+        'price'                           => 'Price',
     ],
 
     'helpers' => [
