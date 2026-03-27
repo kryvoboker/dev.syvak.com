@@ -72,7 +72,7 @@ return [
                             'label'   => 'GET key / value / extra',
                             'purpose' => 'Формує URL-контракт для бекенд-фільтрації.',
                             'how'     => 'Налаштовуй детерміновані ключі та значення для кожного елемента фільтра.',
-                            'example' => 'in_stock => key=stock, value=1, extra=toggle.',
+                            'example' => 'light => key=attribute, value=1, extra=toggle.',
                         ],
                         [
                             'label'   => 'Filter mode + price range config',

@@ -318,6 +318,10 @@ readonly class CatalogFilterIndexRebuildService
         return CatalogFilterGroup::query()
             ->where('catalog_filter_set_id', (int) $filter_set->id)
             ->where('is_enabled', true)
+            ->whereIn('source_type', [
+                CatalogFilterGroupSourceTypeEnum::Price->value,
+                CatalogFilterGroupSourceTypeEnum::Attribute->value,
+            ])
             ->with([
                 'values' => fn ($query) => $query
                     ->where('is_enabled', true)

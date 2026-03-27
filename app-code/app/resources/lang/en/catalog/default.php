@@ -13,6 +13,8 @@ return [
         'from'                        => 'from',
         'to'                          => 'to',
         'of'                          => 'of',
+        'filter'                      => 'Filter',
+        'filter_results'              => '%d products found',
     ],
 
     // Links
@@ -29,6 +31,8 @@ return [
         'show_more' => 'Show more',
         'filter'    => 'Filter',
         'sort'      => 'Sorting',
+        'apply'     => 'Apply',
+        'clear_all' => 'Clear all',
     ],
 
     // Sort labels

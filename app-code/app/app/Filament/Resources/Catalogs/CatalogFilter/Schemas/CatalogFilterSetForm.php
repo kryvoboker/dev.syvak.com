@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\CatalogFilter\Schemas;
 
+use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
@@ -21,7 +22,8 @@ class CatalogFilterSetForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $active_languages = new Language()->getActiveLanguages();
+        $active_languages        = new Language()->getActiveLanguages();
+        $price_filter_group_name = CatalogFilterGroupSourceTypeEnum::Price->value;
 
         return $schema
             ->components([
@@ -70,21 +72,33 @@ class CatalogFilterSetForm
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.price_source_mode'))
                                             ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
                                             ->options(self::getPriceSourceModeOptions())
-                                            ->rules(['required', Rule::in(array_keys(self::getPriceSourceModeOptions()))])
+                                            ->rules([
+                                                'required', self::getPriceSourceModeOptions()
+                                                    |> array_keys(...)
+                                                    |> Rule::in(...)
+                                            ])
                                             ->required(),
 
                                         Select::make('discount_only_policy')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.discount_only_policy'))
                                             ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
                                             ->options(self::getDiscountOnlyPolicyOptions())
-                                            ->rules(['required', Rule::in(array_keys(self::getDiscountOnlyPolicyOptions()))])
+                                            ->rules([
+                                                'required', self::getDiscountOnlyPolicyOptions()
+                                                    |> array_keys(...)
+                                                    |> Rule::in(...)
+                                            ])
                                             ->required(),
 
                                         Select::make('facet_strategy')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.facet_strategy'))
                                             ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
                                             ->options(self::getFacetStrategyOptions())
-                                            ->rules(['required', Rule::in(array_keys(self::getFacetStrategyOptions()))])
+                                            ->rules([
+                                                'required', self::getFacetStrategyOptions()
+                                                    |> array_keys(...)
+                                                    |> Rule::in(...)
+                                            ])
                                             ->required(),
                                     ])
                                     ->columns(),
@@ -134,43 +148,43 @@ class CatalogFilterSetForm
                                     ->schema([
                                         TextEntry::make('index_meta_active_index_version')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.active_index_version'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.active_index_version') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.active_index_version') ?? '—')),
 
                                         TextEntry::make('index_meta_building_index_version')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.building_index_version'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.building_index_version') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.building_index_version') ?? '—')),
 
                                         TextEntry::make('index_meta_last_status')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.last_status'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.last_status') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.last_status') ?? '—')),
 
                                         TextEntry::make('index_meta_last_run_mode')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.last_run_mode'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.last_run_mode') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.last_run_mode') ?? '—')),
 
                                         TextEntry::make('index_meta_last_progress_percent')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.last_progress_percent'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.last_progress_percent') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.last_progress_percent') ?? '—')),
 
                                         TextEntry::make('index_meta_index_rows_total')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.index_rows_total'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.index_rows_total') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.index_rows_total') ?? '—')),
 
                                         TextEntry::make('index_meta_last_full_rebuild_at')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.last_full_rebuild_at'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.last_full_rebuild_at') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.last_full_rebuild_at') ?? '—')),
 
                                         TextEntry::make('index_meta_last_incremental_sync_at')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.last_incremental_sync_at'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.last_incremental_sync_at') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.last_incremental_sync_at') ?? '—')),
 
                                         TextEntry::make('index_meta_rebuild_lock_key')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.rebuild_lock_key'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.rebuild_lock_key') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.rebuild_lock_key') ?? '—')),
 
                                         TextEntry::make('index_meta_rebuild_lock_acquired_at')
                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.rebuild_lock_acquired_at'))
-                                            ->state(fn (callable $get): string => (string) ($get('index_meta.rebuild_lock_acquired_at') ?? '—')),
+                                            ->state(fn(callable $get): string => (string)($get('index_meta.rebuild_lock_acquired_at') ?? '—')),
                                     ])
                                     ->columns(),
                             ]),
@@ -232,7 +246,7 @@ class CatalogFilterSetForm
                                                         Select::make('config.mode')
                                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.filter_mode'))
                                                             ->helperText(function (callable $get): string {
-                                                                $config_mode = (string) $get('config.mode');
+                                                                $config_mode = (string)$get('config.mode');
                                                                 $helper_text = __('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki');
 
                                                                 if (blank($config_mode)) {
@@ -246,7 +260,9 @@ class CatalogFilterSetForm
                                                             ->searchable()
                                                             ->rules([
                                                                 'required',
-                                                                Rule::in(array_keys(self::getFilterModeOptions())),
+                                                                self::getFilterModeOptions()
+                                                                    |> array_keys(...)
+                                                                    |> Rule::in(...),
                                                             ])
                                                             ->required(),
                                                     ]),
@@ -262,22 +278,22 @@ class CatalogFilterSetForm
                                                     ->numeric()
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.min_price'))
                                                     ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
-                                                    ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
-                                                    ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
+                                                    ->visible(fn(callable $get): bool => (string)$get('code') === $price_filter_group_name)
+                                                    ->dehydrated(fn(callable $get): bool => (string)$get('code') === $price_filter_group_name),
 
                                                 TextInput::make('config.max_price')
                                                     ->numeric()
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.max_price'))
                                                     ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
-                                                    ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
-                                                    ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
+                                                    ->visible(fn(callable $get): bool => (string)$get('code') === $price_filter_group_name)
+                                                    ->dehydrated(fn(callable $get): bool => (string)$get('code') === $price_filter_group_name),
 
                                                 TextInput::make('config.step')
                                                     ->numeric()
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.step'))
                                                     ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
-                                                    ->visible(fn (callable $get): bool => (string) $get('code') === 'price')
-                                                    ->dehydrated(fn (callable $get): bool => (string) $get('code') === 'price'),
+                                                    ->visible(fn(callable $get): bool => (string)$get('code') === $price_filter_group_name)
+                                                    ->dehydrated(fn(callable $get): bool => (string)$get('code') === $price_filter_group_name),
                                             ])
                                             ->defaultItems(0)
                                             ->addable(false)
@@ -302,7 +318,7 @@ class CatalogFilterSetForm
         $tabs = [];
 
         foreach ($active_languages as $language) {
-            $language_code = (string) $language->code;
+            $language_code = (string)$language->code;
 
             $tabs[] = Tabs\Tab::make($language->name)
                 ->badge($language_code)
@@ -324,7 +340,7 @@ class CatalogFilterSetForm
      */
     private static function getContextOptions(): array
     {
-        return (array) config('catalog-filter.contexts', []);
+        return (array)config('catalog-filter.contexts', []);
     }
 
     /**
@@ -332,7 +348,7 @@ class CatalogFilterSetForm
      */
     private static function getPriceSourceModeOptions(): array
     {
-        return (array) config('catalog-filter.price_source_modes', []);
+        return (array)config('catalog-filter.price_source_modes', []);
     }
 
     /**
@@ -340,7 +356,7 @@ class CatalogFilterSetForm
      */
     private static function getDiscountOnlyPolicyOptions(): array
     {
-        return (array) config('catalog-filter.discount_only_policies', []);
+        return (array)config('catalog-filter.discount_only_policies', []);
     }
 
     /**
@@ -348,7 +364,7 @@ class CatalogFilterSetForm
      */
     private static function getFacetStrategyOptions(): array
     {
-        return (array) config('catalog-filter.facet_strategies', []);
+        return (array)config('catalog-filter.facet_strategies', []);
     }
 
     /**
@@ -356,13 +372,13 @@ class CatalogFilterSetForm
      */
     private static function getFilterModeOptions(): array
     {
-        return collect((array) config('catalog-filter.filter_modes', []))
+        return collect((array)config('catalog-filter.filter_modes', []))
             ->keys()
             ->mapWithKeys(function (mixed $mode_value): array {
-                $mode = (string) $mode_value;
+                $mode = (string)$mode_value;
 
                 return [
-                    $mode => (string) __('admin/catalogs/catalog-filter/catalog-filter-set.filter_mode_options.' . $mode),
+                    $mode => (string)__('admin/catalogs/catalog-filter/catalog-filter-set.filter_mode_options.' . $mode),
                 ];
             })
             ->all();
@@ -370,10 +386,10 @@ class CatalogFilterSetForm
 
     private static function getFilterModeDescription(string $mode): string
     {
-        if (! array_key_exists($mode, self::getFilterModeOptions())) {
+        if (!array_key_exists($mode, self::getFilterModeOptions())) {
             return '';
         }
 
-        return (string) __('admin/catalogs/catalog-filter/catalog-filter-set.filter_mode_descriptions.' . $mode);
+        return (string)__('admin/catalogs/catalog-filter/catalog-filter-set.filter_mode_descriptions.' . $mode);
     }
 }

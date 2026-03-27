@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\PageSettings;
 
+use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\PageSettings\PageSetting;
@@ -16,6 +17,8 @@ use Throwable;
 class CategoryPageFilterSyncService
 {
     /**
+     * @throws Throwable
+     *
      * @return array<string, int>
      */
     public function sync(PageSetting $page_setting): array
@@ -129,12 +132,12 @@ class CategoryPageFilterSyncService
             ->max();
 
         return [
-            'code'        => 'price',
-            'source_type' => 'price',
+            'code'        => CatalogFilterGroupSourceTypeEnum::Price->value,
+            'source_type' => CatalogFilterGroupSourceTypeEnum::Price->value,
             'source_id'   => null,
             'is_enabled'  => true,
             'get'         => [
-                'key'   => 'price',
+                'key'   => CatalogFilterGroupSourceTypeEnum::Price->value,
                 'value' => null,
                 'extra' => [
                     'from_key' => 'price_from',
@@ -191,15 +194,16 @@ class CategoryPageFilterSyncService
             ->get();
 
         return $attributes->map(function (Attribute $attribute): array {
-            $attribute_name = (string) optional($attribute->attributeDescription->first())->name;
+            $attribute_discription = $attribute->attributeDescription->first();
+            $attribute_name        = (string) $attribute_discription?->name;
 
             return [
-                'code'        => 'attribute_' . (int) $attribute->id,
-                'source_type' => 'attribute',
+                'code'        => CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id,
+                'source_type' => CatalogFilterGroupSourceTypeEnum::Attribute->value,
                 'source_id'   => (int) $attribute->id,
                 'is_enabled'  => true,
                 'get'         => [
-                    'key'   => 'attributes[' . (int) $attribute->id . ']',
+                    'key'   => CatalogFilterGroupSourceTypeEnum::Attribute->value . 's[' . (int) $attribute->id . ']',
                     'value' => null,
                     'extra' => [
                         'mode' => 'multiple',

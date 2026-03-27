@@ -1,9 +1,10 @@
-import { $HIDDEN_CLASS_NAME } from "@ts-shared/lib/constants.ts";
+import { $HIDDEN_CLASS_NAME }                 from "@ts-shared/lib/constants.ts";
+import type { QueryValueType, URLParamsType } from "@ts-types/httpQueryBuild.ts";
 
 export const findElem             = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): T | HTMLElement | null => context ? context.querySelector(searchVal) : null;
-export const findElems            = <T extends HTMLElement>(searchVal: string, context: T | Document = document): NodeListOf<T> | NodeListOf<HTMLElement> | null => context.querySelectorAll(searchVal);
+export const findElems            = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): NodeListOf<T> | NodeListOf<HTMLElement> | null => context ? context.querySelectorAll(searchVal) : null;
 export const arrayFrom            = <T>(pseudoArray: ArrayLike<T> | null): T[] => pseudoArray ? Array.from(pseudoArray) : [];
-export const findArrayElems       = <T extends HTMLElement>(searchVal: string, context: T | Document = document): (T | HTMLElement)[] | [] => arrayFrom(findElems(searchVal, context));
+export const findArrayElems       = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): (T | HTMLElement)[] | [] => context ? arrayFrom(findElems(searchVal, context)) : [];
 export const isArray              = (value: any): value is any[] => Array.isArray(value);
 export const addClass             = <T extends HTMLElement>(element: T | null, selector: string | string[]): void | null => element ? (isArray(selector) ? element.classList.add(... selector) : element.classList.add(selector)) : null;
 export const removeClass          = <T extends HTMLElement>(element: T | null, selector: string | string[]): void | null => element ? (isArray(selector) ? element.classList.remove(... selector) : element.classList.remove(selector)) : null;
@@ -26,11 +27,77 @@ export const getRandomNums        = (): string => Math.random().toString(36).sub
 export const windowMatchMedia     = (query: string): boolean => matchMedia(`(${query.replace(/^\(+/, '').replace(/\)+$/, '')})`).matches;
 export const getClosestParentEl   = <T extends HTMLElement>(selector: string, childEl: T | null): T | null => childEl ? childEl.closest(selector) : null;
 export const isClosestClass       = <T extends HTMLElement>(selector: string, context: T | null): boolean => getClosestParentEl(selector, context) !== null;
+export const sprintF              = (str: string, ... args: (string | number)[]): string => {
+    let index: number = 0;
+
+    return str.replace(/%[sdif]/g, (match: string): string => {
+        if (index >= args.length) {
+            return match;
+        }
+
+        const arg: string | number = args[index];
+        index++;
+
+        switch (match) {
+            case '%s':
+                return String(arg);
+            case '%d':
+            case '%i':
+                return parseInt(String(arg), 10).toString();
+            case '%f':
+                return parseFloat(String(arg)).toString();
+            default:
+                return match;
+        }
+    });
+};
+
+export const valueToString = (value: string | number | boolean): string => {
+    if (typeof value === "boolean") {
+        value = value ? '1' : '0';
+    }
+
+    return value.toString();
+};
+
+export const httpBuildQueryString = (queries: URLParamsType): string => {
+    const params = new URLSearchParams();
+
+    for (const [queriesKey, queryValue] of Object.entries(queries)) {
+        const key: string                            = queriesKey.trim() + '[]';
+        let value: QueryValueType | QueryValueType[] = queryValue;
+
+        if (isArray(value)) {
+            value.forEach((item: QueryValueType): void => {
+                item = valueToString(item);
+
+                params.append(key, item.toString());
+            });
+
+            continue;
+        }
+
+        value = valueToString(value);
+
+        params.append(key, value.toString());
+    }
+
+    return params.toString();
+};
+
+// Usage:
+// sprintF('Hello %s, you have %d messages', 'Anna', 5)
+// → "Hello Anna, you have 5 messages"
+
 
 const isEmpty = <T extends Object>(value: string | number | null | undefined | any[] | T): boolean => {
     if (typeof value === 'number') {
         return isNaN(value) ? false : value === 0;
     } else if (isArray(value) || typeof value === 'string') {
+        if (typeof value === 'string') {
+            value = value.trim();
+        }
+
         return value.length === 0;
     } else if (value === null) {
         return true;
