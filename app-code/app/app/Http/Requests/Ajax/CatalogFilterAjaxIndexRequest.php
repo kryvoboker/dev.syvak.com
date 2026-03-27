@@ -99,13 +99,14 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
      */
     private function normalizeGroupInput(CatalogFilterGroup $group, array &$normalized_data): void
     {
-        $source_type   = (string) $group->getRawOriginal('source_type');
-        $group_get_key = (string) $group->get_key;
+        $source_type     = (string) $group->getRawOriginal('source_type');
+        $group_get_key   = (string) $group->get_key;
+        $group_config    = is_array($group->config) ? $group->config : [];
+        $group_get_value = trim((string) Arr::get($group_config, 'get.value', ''));
 
         if ($source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
-            $group_config = is_array($group->config) ? $group->config : [];
-            $from_key     = (string) Arr::get($group_config, 'get.extra.from_key', 'price_from');
-            $to_key       = (string) Arr::get($group_config, 'get.extra.to_key', 'price_to');
+            $from_key = (string) Arr::get($group_config, 'get.extra.from_key', 'price_from');
+            $to_key   = (string) Arr::get($group_config, 'get.extra.to_key', 'price_to');
 
             $normalized_data['price_from'] = $this->extractByGetKey($from_key) ?? $normalized_data['price_from'];
             $normalized_data['price_to']   = $this->extractByGetKey($to_key) ?? $normalized_data['price_to'];
@@ -115,6 +116,25 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
 
         $group_input_value  = $this->extractByGetKey($group_get_key);
         $group_input_values = $this->normalizeToStringArray($group_input_value);
+        $query_key_exists   = $this->hasQueryKey($group_get_key);
+
+        if (
+            $group_input_values !== []
+            && filled($group_get_value)
+            && count($group_input_values) === 1
+            && in_array(mb_strtolower($group_input_values[0]), ['1', 'true', 'on', 'yes'], true)
+        ) {
+            $group_input_values = [$group_get_value];
+        }
+
+        if (
+            $group_input_values === []
+            && $query_key_exists
+            && filled($group_get_value)
+        ) {
+            // If key is present without meaningful value, use configured fallback contract value.
+            $group_input_values = [$group_get_value];
+        }
 
         if ($group_input_values === []) {
             return;
@@ -140,6 +160,19 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
         }
 
         return $this->query($get_key);
+    }
+
+    private function hasQueryKey(string $get_key): bool
+    {
+        if (blank($get_key)) {
+            return false;
+        }
+
+        if (preg_match('/^(?<root>[a-zA-Z0-9_]+)\[(?<child>[a-zA-Z0-9_]+)]$/', $get_key, $matches) === 1) {
+            return Arr::has($this->query(), $matches['root'] . '.' . $matches['child']);
+        }
+
+        return Arr::has($this->query(), $get_key);
     }
 
     /**

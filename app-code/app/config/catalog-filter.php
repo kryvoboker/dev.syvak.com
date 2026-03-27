@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
+
 return [
     'contexts' => [
         'category' => 'Category',
@@ -29,7 +31,6 @@ return [
     'group_source_types' => [
         'attribute' => 'Attribute',
         'price'     => 'Price',
-        'stock'     => 'Stock',
         'system'    => 'System',
     ],
     'value_types' => [
@@ -70,18 +71,21 @@ return [
         'enabled'   => true,
         'sort_keys' => [
             'sort',
-            'stock',
             'price_from',
             'price_to',
         ],
         'whitelist_keys' => [
             'sort',
-            'stock',
             'price_from',
             'price_to',
             'filters',
             'page',
             'per_page',
         ],
+    ],
+    'filter_groups' => [
+        'attribute' => CatalogFilterGroupSourceTypeEnum::Attribute->value,
+        'price'     => CatalogFilterGroupSourceTypeEnum::Price->value,
+        'system'    => CatalogFilterGroupSourceTypeEnum::System->value,
     ],
 ];

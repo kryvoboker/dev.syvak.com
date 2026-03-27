@@ -13,6 +13,8 @@ return [
         'from'                        => 'від',
         'to'                          => 'до',
         'of'                          => 'з',
+        'filter'                      => 'Фільтр',
+        'filter_results'              => 'Знайдено %d товарів',
     ],
 
     // Links
@@ -29,6 +31,8 @@ return [
         'show_more' => 'Показати ще',
         'filter'    => 'Фільтр',
         'sort'      => 'Сортування',
+        'apply'     => 'Застосувати',
+        'clear_all' => 'Очистити все',
     ],
 
     // Sort labels

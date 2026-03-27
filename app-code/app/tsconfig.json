@@ -11,6 +11,9 @@
             "@ts-stores/*": [
                 "./resources/assets/catalog/ts/stores/*"
             ],
+            "@ts-types/*": [
+                "./resources/assets/catalog/ts/types/*"
+            ],
             "@products-carousel-ts/*": [
                 "./Modules/ProductsCarousel/resources/assets/ts/*"
             ],

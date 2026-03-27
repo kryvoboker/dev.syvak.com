@@ -58,7 +58,7 @@ return [
 
     'helpers' => [
         'see_wiki'        => 'See "Wiki" page.',
-        'get_value_usage' => 'Not used in SQL filtering. This is URL/GET contract metadata. See "Wiki".',
+        'get_value_usage' => 'Used in URL/GET contract as fallback flag value (e.g. attribute=1 -> light). Not a DB column. See "Wiki".',
     ],
 
     'sections' => [

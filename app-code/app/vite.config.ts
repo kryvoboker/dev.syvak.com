@@ -47,6 +47,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
         '@ts-shared':   path.resolve(__dirname, './resources/assets/catalog/ts/shared'),
         '@ts-features': path.resolve(__dirname, './resources/assets/catalog/ts/features'),
         '@ts-stores':   path.resolve(__dirname, './resources/assets/catalog/ts/stores'),
+        '@ts-types':   path.resolve(__dirname, './resources/assets/catalog/ts/types'),
     };
 
     const refreshGlobs: string[] = [

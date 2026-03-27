@@ -1,10 +1,10 @@
-<div class="overlay overlay-open:translate-x-0 drawer drawer-start category-filter-drawer bg-black     Hidden     open opened    p-4"
+<div class="overlay overlay-open:translate-x-0 drawer drawer-start category-filter-drawer justify-start bg-black     Hidden     open opened    p-4"
      id="category-filter-drawer"
      role="dialog"
      tabindex="-1">
     <div class="drawer-header items-center justify-between p-0">
         <div class="text-2xl uppercase">
-            Фільтр
+            {{ __('catalog/default.texts.filter') }}
         </div>
 
         <button type="button"
@@ -16,9 +16,10 @@
         </button>
     </div>
 
-    <div class="drawer-body p-0">
-        <div class="category-filter__total-results text-light-gray font-light text-lg tracking-0.04em mt-2 mb-4">
-            Знайдено 00 товарів
+    <div class="drawer-body grow-0 p-0 mb-2">
+        <div class="category-filter__total-results hidden text-light-gray font-light text-lg tracking-0.04em mt-2 mb-4"
+             id="category-filter-total-results"
+             data-template="{{ __('catalog/default.texts.filter_results') }}">
         </div>
 
         <div class="grid grid-cols-[minmax(10%,0.5fr)_auto_minmax(10%,0.5fr)] items-center justify-between gap-x-5 mb-3">
@@ -47,21 +48,26 @@
         <div class="category-filter__items-list">
             <div class="accordion divide-opacity-light-gray-40% divide-y">
                 @foreach($filters_data as $filter_data)
-                    @continue($filter_data['group_code'] == 'price')
+                    @continue($filter_data['group_code'] == config('catalog-filter.filter_groups.price'))
 
-                    <div class="accordion-item {{ $loop->first ? 'active' : '' }}"
-                         id="{{ $filter_data['group_id'] }}">
-                        <button class="accordion-toggle inline-flex items-center justify-between gap-x-4 text-start {{ $loop->first ? 'border-t border-t-opacity-light-gray-40%' : '' }} p-2"
+                    <div class="accordion-item"
+                         id="{{ $filter_data['group_id'] }}"
+                         data-filter-group-get-key="{{ $filter_data['get_key'] }}">
+                        <button class="accordion-toggle inline-flex items-center justify-between gap-x-4 text-start
+                                       {{ $loop->first ? 'border-t border-t-opacity-light-gray-40%' : '' }}
+                                       {{ $loop->last ? 'border-b border-b-opacity-light-gray-40%' : '' }}
+                                       p-2"
                                 aria-controls="{{ $filter_data['group_id'] }}-collapse"
-                                aria-expanded="{{ $loop->first ? 'true' : 'false' }}">
+                                aria-expanded="false">
                             <span>
                                 {{ $filter_data['group_name'] }}
                             </span>
 
-                            <span class="icon-[solar--alt-arrow-right-linear] accordion-item-active:-rotate-90 custom-icon shrink-0 transition-transform duration-300"></span>
+                            <span class="icon-[solar--alt-arrow-right-linear] accordion-item-active:-rotate-90 custom-icon shrink-0
+                                         transition-transform duration-300"></span>
                         </button>
 
-                        <div id="{{ $filter_data['group_id'] }}-collapse" class="accordion-content {{ $loop->first ? '' : 'hidden' }} w-full overflow-hidden transition-[height] duration-300"
+                        <div id="{{ $filter_data['group_id'] }}-collapse" class="accordion-content hidden w-full overflow-hidden transition-[height] duration-300"
                              aria-labelledby="{{ $filter_data['group_id'] }}"
                              role="region">
                             <div class="flex flex-col gap-2 ps-2 pb-3">
@@ -70,14 +76,12 @@
                                         <input type="checkbox"
                                                class="checkbox"
                                                id="category-filter-item-{{ $filter_item_data['id'] }}"
-                                               data-filter-group-id="{{ $filter_data['group_id'] }}"
-                                               data-filter-item-id="{{ $filter_item_data['id'] }}"
                                                data-filter-item-code="{{ $filter_item_data['code'] }}"
                                                @if($filter_item_data['is_checked'] === true) checked @endif
                                                @if ($filter_item_data['total_products'] <= 0) disabled @endif />
 
                                         <label class="label-text"
-                                               for="{{ $filter_item_data['id'] }}">
+                                               for="category-filter-item-{{ $filter_item_data['id'] }}">
                                             {{ $filter_item_data['name'] }}
                                         </label>
 
@@ -91,6 +95,24 @@
                     </div>
                 @endforeach
             </div>
+        </div>
+    </div>
+
+    <div class="drawer-footer p-0">
+        <div class="category-filter__controls flex items-center justify-between gap-x-2 w-full">
+            <button class="category-filter__clear-all-btn w-1/2 border border-light-gray bg-transparent hover:bg-white
+                           hover:text-black ease-in-out duration-200 p-2"
+                    id="category-filter-clear-all-btn"
+                    type="button">
+                {{ __('catalog/default.buttons.clear_all') }}
+            </button>
+
+            <button class="category-filter__apply-btn w-1/2 border border-light-gray text-black hover:text-white uppercase
+                           bg-white hover:bg-black ease-in-out duration-200 p-2"
+                    id="category-filter-apply-btn"
+                    type="button">
+                {{ __('catalog/default.buttons.apply') }}
+            </button>
         </div>
     </div>
 </div>

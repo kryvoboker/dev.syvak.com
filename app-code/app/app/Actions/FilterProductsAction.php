@@ -227,15 +227,17 @@ readonly class FilterProductsAction
 
         return $groups
             ->filter(function (CatalogFilterGroup $group) use ($filter_set): bool {
-                if ((string) $group->getRawOriginal('source_type') === CatalogFilterGroupSourceTypeEnum::Price->value) {
+                $source_type = (string) $group->getRawOriginal('source_type');
+
+                if ($source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
                     return (bool) $filter_set->is_price_filter_enabled;
                 }
 
-                if ((string) $group->getRawOriginal('source_type') === CatalogFilterGroupSourceTypeEnum::Attribute->value) {
+                if ($source_type === CatalogFilterGroupSourceTypeEnum::Attribute->value) {
                     return (bool) $filter_set->is_attribute_filtering_enabled;
                 }
 
-                return true;
+                return false;
             })
             ->values();
     }
@@ -373,7 +375,7 @@ readonly class FilterProductsAction
 
         /** @var CatalogFilterGroup|null $price_group */
         $price_group = $filter_groups
-            ->first(fn (CatalogFilterGroup $group): bool => (string) $group->code === 'price');
+            ->first(fn (CatalogFilterGroup $group): bool => (string) $group->code === CatalogFilterGroupSourceTypeEnum::Price->value);
 
         if (! $price_group instanceof CatalogFilterGroup) {
             return $query;
@@ -591,7 +593,11 @@ readonly class FilterProductsAction
                 'source_type' => $group_source_type,
                 'source_id'   => (int) $group->source_id,
                 'get_key'     => (string) $group->get_key,
-                'items'       => [],
+                'get_value'   => (string) Arr::get((array) ($group->config ?? []), 'get.value', ''),
+                'get_extra'   => is_array(Arr::get((array) ($group->config ?? []), 'get.extra'))
+                    ? (array) Arr::get((array) ($group->config ?? []), 'get.extra')
+                    : [],
+                'items' => [],
             ];
 
             if ($group_source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {

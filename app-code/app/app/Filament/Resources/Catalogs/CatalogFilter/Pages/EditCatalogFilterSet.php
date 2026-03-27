@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\CatalogFilter\Pages;
 
+use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Filament\Pages\Wiki\CatalogFilterWikiPage;
 use App\Filament\Resources\Catalogs\CatalogFilter\CatalogFilterSetResource;
 use App\Models\ApplicationSettings\Language;
@@ -270,18 +271,12 @@ class EditCatalogFilterSet extends EditRecord
             $languages_by_code[(string) $language->code] = $language;
         }
 
-        $created_count = 0;
-        $updated_count = 0;
+        $price_filter_group_name = CatalogFilterGroupSourceTypeEnum::Price->value;
 
         foreach ($filter_items as $filter_item) {
             $group_code = (string) Arr::get($filter_item, 'code', '');
 
             if (blank($group_code)) {
-                continue;
-            }
-
-            // Stock filter is system-managed and intentionally not editable from this tab.
-            if ($group_code === 'stock') {
                 continue;
             }
 
@@ -309,9 +304,9 @@ class EditCatalogFilterSet extends EditRecord
                 [
                     'mode'      => (string) Arr::get($config_data, 'mode', $this->getDefaultFilterMode()),
                     'get'       => $get_data,
-                    'min_price' => $group_code === 'price' ? Arr::get($config_data, 'min_price') : null,
-                    'max_price' => $group_code === 'price' ? Arr::get($config_data, 'max_price') : null,
-                    'step'      => $group_code === 'price' ? Arr::get($config_data, 'step') : null,
+                    'min_price' => $group_code === $price_filter_group_name ? Arr::get($config_data, 'min_price') : null,
+                    'max_price' => $group_code === $price_filter_group_name ? Arr::get($config_data, 'max_price') : null,
+                    'step'      => $group_code === $price_filter_group_name ? Arr::get($config_data, 'step') : null,
                 ],
             );
 
@@ -355,14 +350,7 @@ class EditCatalogFilterSet extends EditRecord
                     ],
                 );
             }
-
-            if ($is_new_group) {
-                $created_count++;
-            } else {
-                $updated_count++;
-            }
         }
-
     }
 
     private function getDefaultFilterMode(): string
@@ -375,8 +363,10 @@ class EditCatalogFilterSet extends EditRecord
 
     private function resolveDefaultGetKey(string $source_type, ?int $source_id, string $group_code): string
     {
-        if ($source_type === 'price') {
-            return 'price';
+        $price_filter_group_name = CatalogFilterGroupSourceTypeEnum::Price->value;
+
+        if ($source_type === $price_filter_group_name) {
+            return $price_filter_group_name;
         }
 
         if ($source_type === 'attribute' && $source_id !== null && $source_id > 0) {

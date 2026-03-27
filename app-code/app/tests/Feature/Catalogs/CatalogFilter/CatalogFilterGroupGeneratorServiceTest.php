@@ -39,6 +39,10 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
         ]);
     }
 
+    /**
+     * @throws \Throwable
+     * @throws \JsonException
+     */
     public function test_sync_preserves_user_managed_fields_for_existing_system_group(): void
     {
         $filter_set = CatalogFilterSet::query()->create([
@@ -65,8 +69,8 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
             'sort_order'            => 777,
             'get_key'               => 'custom_price_key',
             'config'                => json_encode([
-                'mode'      => 'range',
-                'get'       => [
+                'mode' => 'range',
+                'get'  => [
                     'value' => 'custom',
                     'extra' => ['from_key' => 'custom_from'],
                 ],
@@ -74,8 +78,8 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
                 'max_price' => 120,
                 'step'      => 3,
             ], JSON_THROW_ON_ERROR),
-            'created_at'            => now(),
-            'updated_at'            => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         app(FilterGroupGeneratorService::class)->sync($filter_set);

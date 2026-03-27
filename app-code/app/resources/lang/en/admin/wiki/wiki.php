@@ -68,7 +68,7 @@ return [
                             'label'   => 'GET key / value / extra',
                             'purpose' => 'Defines URL contract consumed by storefront filtering logic.',
                             'how'     => 'Configure deterministic keys and values per filter item.',
-                            'example' => 'in_stock => key=stock, value=1, extra=toggle.',
+                            'example' => 'light => key=attribute, value=1, extra=toggle.',
                         ],
                         [
                             'label'   => 'Filter mode + price range config',

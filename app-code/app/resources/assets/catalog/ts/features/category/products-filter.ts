@@ -1,9 +1,19 @@
-import { findArrayElems } from "@ts-shared/lib/helpers.ts";
-import { initAccordion }  from "@ts-shared/accordion/initAccordion.ts";
-import { findElem }       from "@ts-shared/lib/helpers.ts";
-import noUiSlider         from "nouislider";
-import type { API }       from "nouislider";
-import wNumb              from "wnumb";
+import {
+    debounce, fetchFunc, findArrayElems, findElem,
+    httpBuildQueryString, isEmpty, removeClass, sprintF
+} from "@ts-shared/lib/helpers.ts";
+import { initAccordion }      from "@ts-shared/accordion/initAccordion.ts";
+import type { API }           from "nouislider";
+import noUiSlider             from "nouislider";
+import wNumb                  from "wnumb";
+import { $HIDDEN_CLASS_NAME } from "@ts-shared/lib/constants.ts";
+import type { URLParamsType } from "@ts-types/httpQueryBuild.ts";
+
+const CATEGORY_FILTER_DRAWER = <HTMLElement | null>findElem('#category-filter-drawer');
+let FILTER_GROUPS_ELS: HTMLElement[] | [];
+let RESULTS_EL: HTMLElement | null;
+let CLEAR_ALL_BTN_EL: HTMLButtonElement | null;
+let APPLY_BTN_EL: HTMLButtonElement | null;
 
 function handleNoUiSlider(): void {
     const stepsSlider = <HTMLElement | null>findElem('#category-filter-steps-slider');
@@ -97,6 +107,74 @@ function handleNoUiSlider(): void {
     });
 }
 
+const fireSearchProductsEvent = (): void => {
+    const urlParams: URLParamsType = {};
+
+    for (const filterGroupEl of FILTER_GROUPS_ELS) {
+        const filterGroupKey: string = filterGroupEl.dataset.filterGroupGetKey ?? '';
+
+        const checkedInputsEls    = <HTMLInputElement[] | []>findArrayElems('[data-filter-item-code]:checked', filterGroupEl);
+        urlParams[filterGroupKey] = checkedInputsEls
+            .map((inputEl: HTMLInputElement): string => inputEl.dataset.filterItemCode ?? '')
+            .filter((code: string): boolean => code.trim() !== '');
+    }
+
+    const url: string = httpBuildQueryString(urlParams);
+
+    console.log('url: ', url);
+
+    // TODO: change hardcoded URL to dynamic one
+    // TODO: need dev prepare API response
+    fetchFunc('/en/category/t-shirts/filters?' + url, {}, 'GET')
+        .then(res => {
+            console.log('res: ', res);
+
+            if (res['success'] === true) {
+                const totalResults: number = res['total_products'];
+
+                if (RESULTS_EL !== null) {
+                    RESULTS_EL.textContent = sprintF(
+                        RESULTS_EL.dataset.template ?? '%d products found',
+                        totalResults
+                    );
+
+                    removeClass(RESULTS_EL, $HIDDEN_CLASS_NAME);
+                }
+            }
+        })
+        .catch(err => console.error('err: ', err));
+};
+
+function handleFilters(): void {
+    if (isEmpty(CATEGORY_FILTER_DRAWER)) {
+        return;
+    }
+
+    FILTER_GROUPS_ELS = <HTMLElement[] | []>findArrayElems('[data-filter-group-get-key]', CATEGORY_FILTER_DRAWER);
+    RESULTS_EL        = <HTMLElement | null>findElem('#category-filter-total-results', CATEGORY_FILTER_DRAWER);
+    CLEAR_ALL_BTN_EL  = <HTMLButtonElement | null>findElem('#category-filter-clear-all-btn', CATEGORY_FILTER_DRAWER);
+    APPLY_BTN_EL      = <HTMLButtonElement | null>findElem('#category-filter-apply-btn', CATEGORY_FILTER_DRAWER);
+
+    for (const filterGroupEl of FILTER_GROUPS_ELS) {
+        const filterInputsEls        = <HTMLInputElement[] | []>findArrayElems('[data-filter-item-code]', filterGroupEl);
+        const filterGroupKey: string = filterGroupEl.dataset.filterGroupGetKey ?? '';
+
+        if (isEmpty(filterGroupKey)) {
+            filterGroupEl.remove();
+
+            continue;
+        }
+
+        const fireSearchProductsEventDebounce = debounce(fireSearchProductsEvent, 1000);
+
+        filterInputsEls.forEach((filterInputEl: HTMLInputElement): void => {
+            filterInputEl.addEventListener('change', function (): void {
+                fireSearchProductsEventDebounce();
+            });
+        });
+    }
+}
+
 export const handleProductsFilter = (): void => {
     handleNoUiSlider();
 
@@ -105,4 +183,8 @@ export const handleProductsFilter = (): void => {
     filterAccordionsEls.forEach((accordionEl: HTMLElement): void => {
         initAccordion(accordionEl);
     });
+
+    // TODO: add event listener to clear all button
+    // TODO: add event listener to apply button
+    handleFilters();
 };
