@@ -28,8 +28,6 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
             'sort'           => ['nullable', 'string', 'max:120'],
             'price_from'     => ['nullable', 'numeric', 'min:0'],
             'price_to'       => ['nullable', 'numeric', 'min:0'],
-            'stock'          => ['sometimes', 'array'],
-            'stock.*'        => ['string', 'max:120'],
             'attributes'     => ['sometimes', 'array'],
             'attributes.*'   => ['array'],
             'attributes.*.*' => ['string', 'max:120'],
@@ -43,7 +41,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
             $price_to   = $this->input('price_to');
 
             if (is_numeric($price_from) && is_numeric($price_to) && (float) $price_from > (float) $price_to) {
-                $validator->errors()->add('price_from', 'The price_from value must be less than or equal to price_to.');
+                $validator->errors()->add('price_from', __('catalog/default.errors.price_from'));
             }
         });
     }
@@ -54,7 +52,6 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
             'sort'       => $this->query('sort'),
             'price_from' => $this->query('price_from'),
             'price_to'   => $this->query('price_to'),
-            'stock'      => [],
             'attributes' => [],
         ];
 
@@ -90,10 +87,6 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
             }
         }
 
-        if ($normalized_data['stock'] === []) {
-            unset($normalized_data['stock']);
-        }
-
         if ($normalized_data['attributes'] === []) {
             unset($normalized_data['attributes']);
         }
@@ -124,12 +117,6 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
         $group_input_values = $this->normalizeToStringArray($group_input_value);
 
         if ($group_input_values === []) {
-            return;
-        }
-
-        if ($source_type === CatalogFilterGroupSourceTypeEnum::Stock->value) {
-            $normalized_data['stock'] = $group_input_values;
-
             return;
         }
 

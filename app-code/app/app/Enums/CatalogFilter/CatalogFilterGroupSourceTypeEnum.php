@@ -8,6 +8,5 @@ enum CatalogFilterGroupSourceTypeEnum: string
 {
     case Attribute = 'attribute';
     case Price     = 'price';
-    case Stock     = 'stock';
     case System    = 'system';
 }

@@ -39,7 +39,6 @@ class FilterValueGeneratorService
 
             foreach ($groups as $group) {
                 $summary = match ($group->source_type) {
-                    CatalogFilterGroupSourceTypeEnum::Stock     => $this->syncStockValues($group),
                     CatalogFilterGroupSourceTypeEnum::Attribute => $this->syncAttributeValues($group),
                     default                                     => [
                         'created_count' => 0,
@@ -74,54 +73,6 @@ class FilterValueGeneratorService
 
             throw $throwable;
         }
-    }
-
-    /**
-     * @return array<string, int>
-     */
-    private function syncStockValues(CatalogFilterGroup $group): array
-    {
-        $value = CatalogFilterValue::query()->firstOrNew([
-            'catalog_filter_group_id' => (int)$group->id,
-            'code'                    => 'in_stock',
-        ]);
-
-        $was_existing_value = $value->exists;
-
-        $value->fill([
-            'value_type'   => CatalogFilterValueTypeEnum::Boolean->value,
-            'value_string' => 'in_stock',
-            'value_number' => null,
-            'range_from'   => null,
-            'range_to'     => null,
-            'is_enabled'   => true,
-            'sort_order'   => 10,
-            'meta'         => [],
-        ]);
-        $value->save();
-
-        foreach (new Language()->getActiveLanguages() as $language) {
-            $label = match ((string)$language->code) {
-                'uk'    => 'В наявності',
-                default => 'In stock',
-            };
-
-            CatalogFilterValueTranslation::query()->updateOrCreate(
-                [
-                    'catalog_filter_value_id' => (int)$value->id,
-                    'language_id'             => (int)$language->id,
-                ],
-                [
-                    'label' => $label,
-                ],
-            );
-        }
-
-        return [
-            'created_count' => $was_existing_value ? 0 : 1,
-            'updated_count' => $was_existing_value ? 1 : 0,
-            'removed_count' => 0,
-        ];
     }
 
     /**

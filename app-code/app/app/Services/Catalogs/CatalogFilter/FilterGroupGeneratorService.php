@@ -64,13 +64,6 @@ class FilterGroupGeneratorService
                 'sort_order'  => 10,
                 'get_key'     => 'price',
             ],
-            [
-                'code'        => 'stock',
-                'source_type' => CatalogFilterGroupSourceTypeEnum::Stock->value,
-                'source_id'   => null,
-                'sort_order'  => 20,
-                'get_key'     => 'stock',
-            ],
         ];
 
         foreach ($system_groups as $payload) {
@@ -175,21 +168,9 @@ class FilterGroupGeneratorService
 
     private function syncSystemGroupTranslations(CatalogFilterGroup $group): void
     {
-        $label_by_code = [
-            'price' => [
-                'en' => 'Price',
-                'uk' => 'Ціна',
-            ],
-            'stock' => [
-                'en' => 'Stock',
-                'uk' => 'Наявність',
-            ],
-        ];
-
-        $labels = $label_by_code[$group->code] ?? [];
-
         foreach (new Language()->getActiveLanguages() as $language) {
             $language_code = (string)$language->code;
+            $translate     = __('admin/catalogs/catalog-filter/catalog-filter-set.labels.price', locale: $language_code);
 
             CatalogFilterGroupTranslation::query()->updateOrCreate(
                 [
@@ -197,7 +178,7 @@ class FilterGroupGeneratorService
                     'language_id'             => (int)$language->id,
                 ],
                 [
-                    'label' => (string)($labels[$language_code] ?? ucfirst($group->code)),
+                    'label' => (string)($translate ?? ucfirst($group->code)),
                 ],
             );
         }
