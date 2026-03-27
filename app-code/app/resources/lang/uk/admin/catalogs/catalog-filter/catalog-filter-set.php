@@ -57,7 +57,8 @@ return [
     ],
 
     'helpers' => [
-        'see_wiki' => 'Дивись сторінку "Wiki".',
+        'see_wiki'        => 'Дивись сторінку "Wiki".',
+        'get_value_usage' => 'Не використовується в SQL-фільтрації. Це метадані для URL/GET-контракту. Дивись "Wiki".',
     ],
 
     'sections' => [

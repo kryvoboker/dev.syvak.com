@@ -57,7 +57,8 @@ return [
     ],
 
     'helpers' => [
-        'see_wiki' => 'See "Wiki" page.',
+        'see_wiki'        => 'See "Wiki" page.',
+        'get_value_usage' => 'Not used in SQL filtering. This is URL/GET contract metadata. See "Wiki".',
     ],
 
     'sections' => [

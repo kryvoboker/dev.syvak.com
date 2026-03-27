@@ -18,7 +18,6 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class EditCatalogFilterSet extends EditRecord
@@ -221,12 +220,6 @@ class EditCatalogFilterSet extends EditRecord
 
         Arr::set($data, 'filter_items', $filter_items);
 
-        Log::channel('daily')->debug('Catalog filter options mapped for edit form.', [
-            'catalog_filter_set_id' => (int) $record->id,
-            'rows_count'            => count($filter_items),
-            'excluded_codes'        => ['stock'],
-        ]);
-
         return $data;
     }
 
@@ -279,7 +272,6 @@ class EditCatalogFilterSet extends EditRecord
 
         $created_count = 0;
         $updated_count = 0;
-        $skipped_count = 0;
 
         foreach ($filter_items as $filter_item) {
             $group_code = (string) Arr::get($filter_item, 'code', '');
@@ -290,8 +282,6 @@ class EditCatalogFilterSet extends EditRecord
 
             // Stock filter is system-managed and intentionally not editable from this tab.
             if ($group_code === 'stock') {
-                $skipped_count++;
-
                 continue;
             }
 
@@ -325,6 +315,20 @@ class EditCatalogFilterSet extends EditRecord
                 ],
             );
 
+            $next_get_key = trim((string) Arr::get($filter_item, 'get.key', ''));
+
+            if (blank($next_get_key)) {
+                $next_get_key = filled((string) $group->get_key)
+                    ? (string) $group->get_key
+                    : $this->resolveDefaultGetKey(
+                        source_type: (string) Arr::get($filter_item, 'source_type', $group->getRawOriginal('source_type') ?? 'system'),
+                        source_id: filled(Arr::get($filter_item, 'source_id'))
+                            ? (int) Arr::get($filter_item, 'source_id')
+                            : null,
+                        group_code: $group_code,
+                    );
+            }
+
             $group->fill([
                 'source_type' => (string) Arr::get($filter_item, 'source_type', $group->getRawOriginal('source_type') ?? 'system'),
                 'source_id'   => filled(Arr::get($filter_item, 'source_id'))
@@ -332,7 +336,7 @@ class EditCatalogFilterSet extends EditRecord
                     : null,
                 'is_enabled' => (bool) Arr::get($filter_item, 'is_enabled', true),
                 'sort_order' => (int) Arr::get($filter_item, 'sort_order', 0),
-                'get_key'    => (string) Arr::get($filter_item, 'get.key', ''),
+                'get_key'    => $next_get_key,
                 'config'     => $next_config,
             ]);
             $group->save();
@@ -359,14 +363,6 @@ class EditCatalogFilterSet extends EditRecord
             }
         }
 
-        Log::channel('daily')->info('Catalog filter options synchronized from admin form.', [
-            'catalog_filter_set_id' => (int) $record->id,
-            'created_count'         => $created_count,
-            'updated_count'         => $updated_count,
-            'rows_total'            => count($filter_items),
-            'skipped_count'         => $skipped_count,
-            'system_managed_codes'  => ['stock'],
-        ]);
     }
 
     private function getDefaultFilterMode(): string
@@ -375,6 +371,23 @@ class EditCatalogFilterSet extends EditRecord
         $default_mode = array_key_first($filter_modes);
 
         return is_string($default_mode) && filled($default_mode) ? $default_mode : 'multiple';
+    }
+
+    private function resolveDefaultGetKey(string $source_type, ?int $source_id, string $group_code): string
+    {
+        if ($source_type === 'price') {
+            return 'price';
+        }
+
+        if ($source_type === 'attribute' && $source_id !== null && $source_id > 0) {
+            return 'filters[' . $source_id . ']';
+        }
+
+        if (filled($group_code)) {
+            return $group_code;
+        }
+
+        return 'filters';
     }
 
     private function refreshRecord(): void
