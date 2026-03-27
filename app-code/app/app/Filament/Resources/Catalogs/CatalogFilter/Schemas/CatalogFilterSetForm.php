@@ -224,14 +224,14 @@ class CatalogFilterSetForm
 
                                                 TextInput::make('get.value')
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.get_value'))
-                                                    ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki')),
+                                                    ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.get_value_usage')),
 
                                                 Grid::make()
                                                     ->columns(1)
                                                     ->schema([
                                                         Select::make('config.mode')
                                                             ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.filter_mode'))
-                                                            ->helperText(function(callable $get): string {
+                                                            ->helperText(function (callable $get): string {
                                                                 $config_mode = (string) $get('config.mode');
                                                                 $helper_text = __('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki');
 
