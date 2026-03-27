@@ -47,6 +47,8 @@
         <div class="category-filter__items-list">
             <div class="accordion divide-opacity-light-gray-40% divide-y">
                 @foreach($filters_data as $filter_data)
+                    @continue($filter_data['group_code'] == 'price')
+
                     <div class="accordion-item {{ $loop->first ? 'active' : '' }}"
                          id="{{ $filter_data['group_id'] }}">
                         <button class="accordion-toggle inline-flex items-center justify-between gap-x-4 text-start {{ $loop->first ? 'border-t border-t-opacity-light-gray-40%' : '' }} p-2"
@@ -66,8 +68,11 @@
                                 @foreach($filter_data['items'] as $filter_item_data)
                                     <div class="flex items-center gap-2">
                                         <input type="checkbox"
-                                               class="checkbox "
+                                               class="checkbox"
                                                id="category-filter-item-{{ $filter_item_data['id'] }}"
+                                               data-filter-group-id="{{ $filter_data['group_id'] }}"
+                                               data-filter-item-id="{{ $filter_item_data['id'] }}"
+                                               data-filter-item-code="{{ $filter_item_data['code'] }}"
                                                @if($filter_item_data['is_checked'] === true) checked @endif
                                                @if ($filter_item_data['total_products'] <= 0) disabled @endif />
 
