@@ -153,8 +153,22 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
 
         return collect($value)
             ->flatten(1)
-            ->map(fn (mixed $item): string => (string) $item)
-            ->filter(fn (string $item): bool => filled($item))
+            ->flatMap(function (mixed $item): array {
+                // Support both query styles:
+                // - ?weight[]=light&weight[]=medium
+                // - ?weight=light,medium
+                $string_item = trim((string) $item);
+
+                if (blank($string_item)) {
+                    return [];
+                }
+
+                return collect(explode(',', $string_item))
+                    ->map(fn (string $part): string => trim($part))
+                    ->filter(fn (string $part): bool => filled($part))
+                    ->values()
+                    ->all();
+            })
             ->unique()
             ->values()
             ->all();
