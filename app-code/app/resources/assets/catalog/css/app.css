@@ -334,6 +334,7 @@
         @apply text-dark-green;
     }
 
+    .category-filter__total-results._error,
     ._was-validated label:has(:valid) + ._success,
     ._was-validated label:has(:invalid) + ._error,
     ._was-validated .choices:has(:invalid) + ._error,

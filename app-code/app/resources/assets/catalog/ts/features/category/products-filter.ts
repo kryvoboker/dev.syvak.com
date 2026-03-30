@@ -1,32 +1,51 @@
 import {
-    debounce, fetchFunc, findArrayElems, findElem,
-    httpBuildQueryString, isEmpty, removeClass, sprintF
-} from "@ts-shared/lib/helpers.ts";
+    addClass, debounce, fetchFunc, findArrayElems, findElem,
+    httpBuildQueryString, isEmpty, redirect, removeClass, sprintF
+}                             from "@ts-shared/lib/helpers.ts";
 import { initAccordion }      from "@ts-shared/accordion/initAccordion.ts";
 import type { API }           from "nouislider";
 import noUiSlider             from "nouislider";
 import wNumb                  from "wnumb";
-import { $HIDDEN_CLASS_NAME } from "@ts-shared/lib/constants.ts";
+import {
+    $_ERROR_CLASS_NAME, $DEBOUNCE_DELAY, $FLEX_CLASS_NAME,
+    $HIDDEN_CLASS_NAME, $LOADER_CLASS_NAME
+}                             from "@ts-shared/lib/constants.ts";
 import type { URLParamsType } from "@ts-types/httpQueryBuild.ts";
+import { WindowAppParams }    from "@ts-types/global";
 
-const CATEGORY_FILTER_DRAWER = <HTMLElement | null>findElem('#category-filter-drawer');
+interface FireSearchProductsEventResponseType {
+    success: boolean;
+    total_products?: number;
+    message?: string;
+}
+
+const CHECKED_INPUTS_SELECTOR: string    = '[data-filter-item-code]:checked';
+const CATEGORY_FILTER_DRAWER             = <HTMLElement | null>findElem('#category-filter-drawer');
+const WINDOW_APP_PARAMS: WindowAppParams = window.app_params ?? {};
+let COUNT_UPDATE_NO_UI_SLIDER: number    = 0;
+let INPUT_PRICE_FROM: HTMLInputElement | null;
+let INPUT_PRICE_TO: HTMLInputElement | null;
 let FILTER_GROUPS_ELS: HTMLElement[] | [];
 let RESULTS_EL: HTMLElement | null;
+let CATEGORY_FILTER_CONTROLS_EL: HTMLElement | null;
 let CLEAR_ALL_BTN_EL: HTMLButtonElement | null;
 let APPLY_BTN_EL: HTMLButtonElement | null;
+let LOADER_EL: HTMLElement | null;
+
+const normalizePrice = (price: string): number => {
+    return parseInt(price.replace(/\D/g, ''));
+};
 
 function handleNoUiSlider(): void {
-    const stepsSlider = <HTMLElement | null>findElem('#category-filter-steps-slider');
-    const inputFrom   = <HTMLInputElement | null>findElem('#category-filter-steps-input-from');
-    const inputTo     = <HTMLInputElement | null>findElem('#category-filter-steps-input-to');
+    const stepsSlider = <HTMLElement | null>findElem('#category-filter-steps-slider', CATEGORY_FILTER_DRAWER);
 
-    if (stepsSlider === null || inputFrom === null || inputTo === null) {
+    if (stepsSlider === null || INPUT_PRICE_FROM === null || INPUT_PRICE_TO === null) {
         return;
     }
 
-    const inputs: HTMLInputElement[] = [inputTo, inputFrom];
-    const startMin: number           = +(inputFrom?.dataset.startMin ?? 0);
-    const startMax: number           = +(inputTo?.dataset.startMax ?? 0);
+    const inputs: HTMLInputElement[] = [INPUT_PRICE_TO, INPUT_PRICE_FROM];
+    const startMin: number           = +(INPUT_PRICE_FROM?.dataset.startMin ?? 0);
+    const startMax: number           = +(INPUT_PRICE_TO?.dataset.startMax ?? 0);
 
     const NO_UI_SLIDER_API: API = noUiSlider.create(stepsSlider, {
         start:  [startMin, startMax],
@@ -42,14 +61,24 @@ function handleNoUiSlider(): void {
     });
 
     NO_UI_SLIDER_API.on('update', function (values: (string | number)[], handle: number): void {
+        const value: string = values[handle] as string;
+
         if (handle) {
-            inputFrom.value = values[handle] as string;
+            // @ts-ignore
+            INPUT_PRICE_FROM.value = value;
         } else {
-            inputTo.value = values[handle] as string;
+            // @ts-ignore
+            INPUT_PRICE_TO.value = value;
+        }
+
+        if (COUNT_UPDATE_NO_UI_SLIDER <= 2) {
+            COUNT_UPDATE_NO_UI_SLIDER++;
+        } else {
+            fireSearchProductsEventDebounce();
         }
     });
 
-    inputs.forEach(function (input: HTMLInputElement, handle: number) {
+    inputs.forEach(function (input: HTMLInputElement, handle: number): void {
         input.addEventListener('change', function () {
             NO_UI_SLIDER_API.setHandle(handle, this.value);
         });
@@ -107,54 +136,105 @@ function handleNoUiSlider(): void {
     });
 }
 
-const fireSearchProductsEvent = (): void => {
+const toggleElement = <T extends HTMLElement>(element: T | null, isShow: boolean): void => {
+    if (isShow) {
+        removeClass(element, $HIDDEN_CLASS_NAME);
+        addClass(element, $FLEX_CLASS_NAME);
+    } else {
+        removeClass(element, $FLEX_CLASS_NAME);
+        addClass(element, $HIDDEN_CLASS_NAME);
+    }
+};
+
+const processCollectUrlParams = (): URLParamsType => {
     const urlParams: URLParamsType = {};
 
     for (const filterGroupEl of FILTER_GROUPS_ELS) {
         const filterGroupKey: string = filterGroupEl.dataset.filterGroupGetKey ?? '';
 
-        const checkedInputsEls    = <HTMLInputElement[] | []>findArrayElems('[data-filter-item-code]:checked', filterGroupEl);
+        const checkedInputsEls = <HTMLInputElement[] | []>findArrayElems(CHECKED_INPUTS_SELECTOR, filterGroupEl);
+
+        if (isEmpty(checkedInputsEls)) {
+            continue;
+        }
+
         urlParams[filterGroupKey] = checkedInputsEls
             .map((inputEl: HTMLInputElement): string => inputEl.dataset.filterItemCode ?? '')
             .filter((code: string): boolean => code.trim() !== '');
     }
 
-    const url: string = httpBuildQueryString(urlParams);
+    const priceFrom: number = normalizePrice(INPUT_PRICE_TO?.value ?? '');
+    const priceTo: number   = normalizePrice(INPUT_PRICE_FROM?.value ?? '');
+
+    if (!isNaN(priceFrom) && !isNaN(priceTo)) {
+        urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.from_key ?? 'price_from'] = priceFrom;
+        urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.to_key ?? 'price_to']     = priceTo;
+    }
+
+    return urlParams;
+};
+
+const fireSearchProductsEvent = (): void => {
+    const urlParams: URLParamsType = processCollectUrlParams();
+
+    if (isEmpty(urlParams)) {
+        toggleElement(CATEGORY_FILTER_CONTROLS_EL, false);
+        toggleElement(RESULTS_EL, false);
+
+        return;
+    }
+
+    const url: string = httpBuildQueryString(urlParams, true);
 
     console.log('url: ', url);
 
-    // TODO: change hardcoded URL to dynamic one
-    // TODO: need dev prepare API response
-    fetchFunc('/en/category/t-shirts/filters?' + url, {}, 'GET')
-        .then(res => {
-            console.log('res: ', res);
+    toggleElement(LOADER_EL, true);
 
-            if (res['success'] === true) {
-                const totalResults: number = res['total_products'];
+    fetchFunc(WINDOW_APP_PARAMS?.catalog_filter_ajax_url + '?' + url, {}, 'GET')
+        .then((json: FireSearchProductsEventResponseType): void => {
+            console.log('res: ', json);
 
-                if (RESULTS_EL !== null) {
+            if (json.success && json.total_products !== undefined) {
+                const totalResults: number = json.total_products;
+
+                if (RESULTS_EL) {
                     RESULTS_EL.textContent = sprintF(
                         RESULTS_EL.dataset.template ?? '%d products found',
                         totalResults
                     );
 
-                    removeClass(RESULTS_EL, $HIDDEN_CLASS_NAME);
+                    if (json.total_products > 0) {
+                        APPLY_BTN_EL?.addEventListener('click', (): void => {
+                            redirect(url);
+                        });
+
+                        toggleElement(APPLY_BTN_EL, true);
+                    } else {
+                        toggleElement(APPLY_BTN_EL, false);
+                    }
+
+                    toggleElement(RESULTS_EL, true);
+                }
+
+                toggleElement(CATEGORY_FILTER_CONTROLS_EL, true);
+            } else if (json.message) {
+                console.error('Error: ', json.message);
+
+                if (RESULTS_EL) {
+                    RESULTS_EL.textContent = json.message;
+
+                    addClass(RESULTS_EL, $_ERROR_CLASS_NAME);
+                    toggleElement(RESULTS_EL, true);
                 }
             }
         })
-        .catch(err => console.error('err: ', err));
+        .catch(err => console.error('err: ', err))
+        .finally((): void => toggleElement(LOADER_EL, false));
 };
 
+const fireSearchProductsEventDebounce = debounce(fireSearchProductsEvent, $DEBOUNCE_DELAY);
+
 function handleFilters(): void {
-    if (isEmpty(CATEGORY_FILTER_DRAWER)) {
-        return;
-    }
-
-    FILTER_GROUPS_ELS = <HTMLElement[] | []>findArrayElems('[data-filter-group-get-key]', CATEGORY_FILTER_DRAWER);
-    RESULTS_EL        = <HTMLElement | null>findElem('#category-filter-total-results', CATEGORY_FILTER_DRAWER);
-    CLEAR_ALL_BTN_EL  = <HTMLButtonElement | null>findElem('#category-filter-clear-all-btn', CATEGORY_FILTER_DRAWER);
-    APPLY_BTN_EL      = <HTMLButtonElement | null>findElem('#category-filter-apply-btn', CATEGORY_FILTER_DRAWER);
-
     for (const filterGroupEl of FILTER_GROUPS_ELS) {
         const filterInputsEls        = <HTMLInputElement[] | []>findArrayElems('[data-filter-item-code]', filterGroupEl);
         const filterGroupKey: string = filterGroupEl.dataset.filterGroupGetKey ?? '';
@@ -165,8 +245,6 @@ function handleFilters(): void {
             continue;
         }
 
-        const fireSearchProductsEventDebounce = debounce(fireSearchProductsEvent, 1000);
-
         filterInputsEls.forEach((filterInputEl: HTMLInputElement): void => {
             filterInputEl.addEventListener('change', function (): void {
                 fireSearchProductsEventDebounce();
@@ -175,7 +253,33 @@ function handleFilters(): void {
     }
 }
 
+const handleClearAllChoosenFilters = (): void => {
+    CLEAR_ALL_BTN_EL?.addEventListener('click', (): void => {
+        const checkedInputsEls = <HTMLInputElement[] | []>findArrayElems(CHECKED_INPUTS_SELECTOR, CATEGORY_FILTER_DRAWER);
+
+        checkedInputsEls.forEach((input: HTMLInputElement): void => {
+            input.checked = false;
+        });
+
+        toggleElement(CATEGORY_FILTER_CONTROLS_EL, false);
+        toggleElement(RESULTS_EL, false);
+    });
+};
+
 export const handleProductsFilter = (): void => {
+    if (isEmpty(CATEGORY_FILTER_DRAWER)) {
+        return;
+    }
+
+    INPUT_PRICE_FROM            = <HTMLInputElement | null>findElem('#category-filter-steps-input-from');
+    INPUT_PRICE_TO              = <HTMLInputElement | null>findElem('#category-filter-steps-input-to');
+    FILTER_GROUPS_ELS           = <HTMLElement[] | []>findArrayElems('[data-filter-group-get-key]', CATEGORY_FILTER_DRAWER);
+    RESULTS_EL                  = <HTMLElement | null>findElem('#category-filter-total-results', CATEGORY_FILTER_DRAWER);
+    CLEAR_ALL_BTN_EL            = <HTMLButtonElement | null>findElem('#category-filter-clear-all-btn', CATEGORY_FILTER_DRAWER);
+    APPLY_BTN_EL                = <HTMLButtonElement | null>findElem('#category-filter-apply-btn', CATEGORY_FILTER_DRAWER);
+    CATEGORY_FILTER_CONTROLS_EL = <HTMLElement | null>findElem('#category-filter-controls', CATEGORY_FILTER_DRAWER);
+    LOADER_EL                   = <HTMLElement | null>findElem('.' + $LOADER_CLASS_NAME, CATEGORY_FILTER_DRAWER);
+
     handleNoUiSlider();
 
     const filterAccordionsEls = <HTMLElement[] | []>findArrayElems('.accordion-item');
@@ -184,7 +288,6 @@ export const handleProductsFilter = (): void => {
         initAccordion(accordionEl);
     });
 
-    // TODO: add event listener to clear all button
-    // TODO: add event listener to apply button
     handleFilters();
+    handleClearAllChoosenFilters();
 };

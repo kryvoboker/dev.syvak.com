@@ -52,7 +52,11 @@ export const sprintF              = (str: string, ... args: (string | number)[])
     });
 };
 
-export const valueToString = (value: string | number | boolean): string => {
+export const valueToString = (value: string | number | boolean | undefined | null): string => {
+    if (value === undefined || value === null) {
+        return '';
+    }
+
     if (typeof value === "boolean") {
         value = value ? '1' : '0';
     }
@@ -60,35 +64,69 @@ export const valueToString = (value: string | number | boolean): string => {
     return value.toString();
 };
 
-export const httpBuildQueryString = (queries: URLParamsType): string => {
-    const params = new URLSearchParams();
+export const normalizeAndEncodeUriComponent = (uriComponent: boolean | string | null | undefined): string => {
+    uriComponent = valueToString(uriComponent);
+
+    if (isEmpty(uriComponent)) {
+        return '';
+    }
+
+    return encodeURIComponent(
+        decodeURIComponent(<string>uriComponent).trim()
+    );
+};
+
+export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams: boolean = false): string => {
+    const queryParamsMap: Map<string, string> = new Map();
+    const queryParamsArray: string[]          = [];
 
     for (const [queriesKey, queryValue] of Object.entries(queries)) {
-        const key: string                            = queriesKey.trim() + '[]';
+        if (isEmpty(queryValue) && queryValue !== 0) {
+            continue;
+        }
+
+        const key: string                            = queriesKey.trim();
         let value: QueryValueType | QueryValueType[] = queryValue;
 
         if (isArray(value)) {
-            value.forEach((item: QueryValueType): void => {
-                item = valueToString(item);
+            let values: string[] = [];
 
-                params.append(key, item.toString());
+            value.forEach((item: QueryValueType): void => {
+                values.push(valueToString(item));
             });
+
+            queryParamsMap.set(key, values.join(','));
 
             continue;
         }
 
-        value = valueToString(value);
-
-        params.append(key, value.toString());
+        queryParamsMap.set(key, valueToString(value));
     }
 
-    return params.toString();
+    if (isWidthSearchParams) {
+        const searchParams: string = window.location.search;
+
+        if (!isEmpty(searchParams)) {
+            const searchParamsSplit: string[] = searchParams.slice(1).split('&');
+            const searchParamsLength: number  = searchParamsSplit.length;
+
+            for (let index = 0; index < searchParamsLength; index++) {
+                const searchParamsValues: string[] = searchParamsSplit[index].split('=');
+
+                queryParamsMap.set(
+                    searchParamsValues[0],
+                    searchParamsValues[1]
+                );
+            }
+        }
+    }
+
+    for (const [key, values] of queryParamsMap.entries()) {
+        queryParamsArray.push(`${normalizeAndEncodeUriComponent(key)}=${normalizeAndEncodeUriComponent(values)}`);
+    }
+
+    return queryParamsArray.join('&');
 };
-
-// Usage:
-// sprintF('Hello %s, you have %d messages', 'Anna', 5)
-// → "Hello Anna, you have 5 messages"
-
 
 const isEmpty = <T extends Object>(value: string | number | null | undefined | any[] | T): boolean => {
     if (typeof value === 'number') {
@@ -104,7 +142,7 @@ const isEmpty = <T extends Object>(value: string | number | null | undefined | a
     } else if (value === undefined) {
         return false;
     } else {
-        return Object.keys(value).length === 0;
+        return !(value instanceof HTMLElement) && Object.keys(value).length === 0;
     }
 };
 
@@ -290,7 +328,7 @@ const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, me
     const response: Response = await fetch(url, options);
 
     if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.statusText}`);
+        console.error(`Network response was not ok: ${response.statusText}`);
     }
 
     return await response.json();

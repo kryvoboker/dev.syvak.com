@@ -31,9 +31,12 @@
 @endphp
 
 <script>
-    window.app_params = @json([
-        'page_type' => $page_type,
-    ]);
+    window.app_params = {
+        ...(window.app_params ?? {}),
+        ...@json([
+            'page_type' => $page_type,
+        ])
+    };
 </script>
 
 <div class="wrapper">

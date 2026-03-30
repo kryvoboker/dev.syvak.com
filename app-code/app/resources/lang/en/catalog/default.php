@@ -62,10 +62,11 @@ return [
 
     // Errors
     'errors'       => [
-        'keyword_required' => 'Search keyword is required!',
-        'keyword_string'   => 'Search keyword must be a string!',
-        'keyword_min'      => 'Search must be at least 3 characters long!',
-        'keyword_max'      => 'Search keyword may not be greater than 255 characters!',
-        'price_from'       => 'The "Price from" value must be less than "Price to"!',
+        'keyword_required'   => 'Search keyword is required!',
+        'keyword_string'     => 'Search keyword must be a string!',
+        'keyword_min'        => 'Search must be at least 3 characters long!',
+        'keyword_max'        => 'Search keyword may not be greater than 255 characters!',
+        'price_from'         => 'The "Price from" value must be less than "Price to"!',
+        'filtering_products' => 'An error occurred while filtering products. Please try again later.',
     ],
 ];

@@ -30,6 +30,12 @@ export const $FLEX_CLASS_NAME = 'flex';
 
 /**
  * @global
+ * @var {string} $_ERROR_CLASS_NAME
+ */
+export const $_ERROR_CLASS_NAME = '_error';
+
+/**
+ * @global
  * @var {string} $_WAS_VALIDATED_CLASS_NAME
  */
 export const $_WAS_VALIDATED_CLASS_NAME: string = '_was-validated';
