@@ -15,12 +15,17 @@ use Throwable;
 class CatalogFilterAjaxController extends Controller
 {
     /**
+     * @param CatalogFilterAjaxIndexRequest $request
+     * @param FilterProductsAction          $filter_products_action
+     * @param string                        $slug
+     *
+     * @return JsonResponse
      * @throws Throwable
      */
     public function index(
         CatalogFilterAjaxIndexRequest $request,
-        FilterProductsAction $filter_products_action,
-        string $slug,
+        FilterProductsAction          $filter_products_action,
+        string                        $slug,
     ): JsonResponse {
         $response_data = $filter_products_action->handle([
             'validated_data'      => $request->validated(),
@@ -30,14 +35,23 @@ class CatalogFilterAjaxController extends Controller
             locale: app()->getLocale(),
         );
 
-        /** @var LengthAwarePaginator|null $paginator */
-        $paginator      = Arr::get($response_data, 'paginator');
-        $total_products = (int) $paginator?->total();
+        try {
+            /** @var LengthAwarePaginator|null $paginator */
+            $paginator      = Arr::get($response_data, 'paginator');
+            $total_products = (int)$paginator?->total();
 
-        return response()->json([
-            'success'        => true,
-            'total_products' => $total_products,
-            ...$response_data,
-        ]);
+            return response()->json([
+                'success'        => true,
+                'total_products' => $total_products,
+                'products'       => Arr::get($response_data, 'products', []),
+            ]);
+        } catch (Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('catalog/default.errors.filtering_products'),
+            ]);
+        }
     }
 }

@@ -20,7 +20,7 @@
 
             @include('catalog.pages.partials.category.products-list')
 
-            {{ $paginator->links('pagination::tailwind') }}
+            {{ $paginator?->links('pagination::tailwind') }}
         </div>
     </section>
 
@@ -29,4 +29,13 @@
     @prepend('styles')
         @vite(['./node_modules/nouislider/dist/nouislider.css'])
     @endprepend
+
+    <script>
+        window.app_params = {
+            ...(window.app_params ?? {}),
+            ...@json([
+                'catalog_filter_ajax_url' => $category_page_settings['catalog_filter_ajax_url'],
+            ])
+        };
+    </script>
 @endsection

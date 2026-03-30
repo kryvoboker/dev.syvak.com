@@ -1,7 +1,11 @@
-<div class="overlay overlay-open:translate-x-0 drawer drawer-start category-filter-drawer justify-start bg-black     Hidden     open opened    p-4"
+<div class="overlay overlay-open:translate-x-0 drawer drawer-start category-filter-drawer justify-start bg-black space-y-2     Hidden     open opened    p-4"
      id="category-filter-drawer"
      role="dialog"
      tabindex="-1">
+    <div class="loader fixed top-0 left-0 hidden items-center justify-center size-full bg-black/90 z-10">
+        <span class="loading loading-spinner loading-xl"></span>
+    </div>
+
     <div class="drawer-header items-center justify-between p-0">
         <div class="text-2xl uppercase">
             {{ __('catalog/default.texts.filter') }}
@@ -16,13 +20,24 @@
         </button>
     </div>
 
-    <div class="drawer-body grow-0 p-0 mb-2">
-        <div class="category-filter__total-results hidden text-light-gray font-light text-lg tracking-0.04em mt-2 mb-4"
+    <div class="drawer-body grow-0 space-y-4 p-0">
+        <div class="category-filter__total-results hidden text-light-gray font-light text-lg tracking-0.04em mt-2"
              id="category-filter-total-results"
              data-template="{{ __('catalog/default.texts.filter_results') }}">
         </div>
 
-        <div class="grid grid-cols-[minmax(10%,0.5fr)_auto_minmax(10%,0.5fr)] items-center justify-between gap-x-5 mb-3">
+        @if(isset($is_show_clear_filters_link) && $is_show_clear_filters_link === true)
+            <div class="category-filter__choosen-filters-list flex gap-2 text-sm mt-0.5">
+                <a class="category-filter__clear-all-link border border-light-gray rounded-2xl bg-transparent hover:bg-white
+                          hover:text-black ease-in-out duration-200 p-1"
+                   href="{{ $category_page_settings['clear_filters_url'] ?? '#' }}"
+                   id="category-filter-clear-all-link">
+                    {{ __('catalog/default.buttons.clear_all') }}
+                </a>
+            </div>
+        @endif
+
+        <div class="grid grid-cols-[minmax(10%,0.5fr)_auto_minmax(10%,0.5fr)] items-center justify-between gap-x-5">
             <input class="text-light-gray! border border-opacity-light-gray-40% px-4 py-2"
                    type="text"
                    id="category-filter-steps-input-to"
@@ -40,7 +55,7 @@
                    data-start-min="0">
         </div>
 
-        <div class="category-filter__price w-full max-w-[97%] mx-auto mb-4"
+        <div class="category-filter__price w-full max-w-[97%] mx-auto"
              id="category-filter-steps-slider"
              data-currency-sign="{{ config('app.currency.current_currency_symbol') }}">
         </div>
@@ -48,6 +63,19 @@
         <div class="category-filter__items-list">
             <div class="accordion divide-opacity-light-gray-40% divide-y">
                 @foreach($filters_data as $filter_data)
+                    @if($filter_data['group_code'] == config('catalog-filter.filter_groups.price'))
+                        <script>
+                            window.app_params = {
+                                ...(window.app_params ?? {}),
+                                ...@json([
+                                    'catalog_filter_price_data' => [
+                                        'get_extra' => $filter_data['get_extra'],
+                                    ],
+                                ])
+                            };
+                        </script>
+                    @endif
+
                     @continue($filter_data['group_code'] == config('catalog-filter.filter_groups.price'))
 
                     <div class="accordion-item"
@@ -99,7 +127,8 @@
     </div>
 
     <div class="drawer-footer p-0">
-        <div class="category-filter__controls flex items-center justify-between gap-x-2 w-full">
+        <div class="category-filter__controls hidden items-center justify-between gap-x-2 w-full"
+             id="category-filter-controls">
             <button class="category-filter__clear-all-btn w-1/2 border border-light-gray bg-transparent hover:bg-white
                            hover:text-black ease-in-out duration-200 p-2"
                     id="category-filter-clear-all-btn"
