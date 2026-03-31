@@ -34,6 +34,13 @@ class ProductToAttributeSeeder extends Seeder
         11 => 'length',
         12 => 'print_type',
     ];
+    private array $attributes_values_indexes        = [
+        0 => 0,
+        1 => 1,
+        2 => 2,
+        3 => 3
+    ];
+    private array $product_to_attribute_value_index = [];
 
     public function run(): void
     {
@@ -85,9 +92,9 @@ class ProductToAttributeSeeder extends Seeder
                 $now_timestamp   = now(config('app.timezone'));
                 $rows_for_upsert = [];
 
-                foreach ($products_chunk as $product_index => $product) {
-                    foreach ($active_attributes as $attribute_index => $attribute) {
-                        foreach ($active_languages as $language_index => $language) {
+                foreach ($products_chunk as $product) {
+                    foreach ($active_attributes as $attribute) {
+                        foreach ($active_languages as $language) {
                             $rows_for_upsert[] = [
                                 'product_id'   => (int)$product->id,
                                 'attribute_id' => (int)$attribute->id,
@@ -96,10 +103,7 @@ class ProductToAttributeSeeder extends Seeder
                                     attribute_value_pools: $attribute_value_pools,
                                     attribute_id         : (int)$attribute->id,
                                     language_id          : (int)$language->id,
-                                    product_id           : (int)$product->id,
-                                    product_index        : $product_index,
-                                    attribute_index      : $attribute_index,
-                                    language_index       : $language_index,
+                                    product_id           : (int)$product->id
                                 ),
                                 'created_at'   => $now_timestamp,
                                 'updated_at'   => $now_timestamp,
@@ -214,22 +218,17 @@ class ProductToAttributeSeeder extends Seeder
         int   $attribute_id,
         int   $language_id,
         int   $product_id,
-        int   $product_index,
-        int   $attribute_index,
-        int   $language_index,
     ): string {
         $values_pool = $attribute_value_pools[$attribute_id][$language_id] ?? ['Standard'];
-        $pool_size   = count($values_pool);
 
-        $seed_index = self::STABLE_SEED
-            + $product_id
-            + ($product_index * 3)
-            + ($attribute_id * 7)
-            + ($attribute_index * 11)
-            + ($language_id * 13)
-            + ($language_index * 17);
+        $value_index = $this->product_to_attribute_value_index[$product_id] ?? null;
 
-        $value_index = $seed_index % $pool_size;
+        if ($value_index === null) {
+            shuffle($this->attributes_values_indexes);
+
+            $value_index                                         = array_rand($this->attributes_values_indexes);
+            $this->product_to_attribute_value_index[$product_id] = $value_index;
+        }
 
         return $values_pool[$value_index] ?? $values_pool[0];
     }
