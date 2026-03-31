@@ -287,6 +287,11 @@
         }
     }
 
+    .category-filter__clear-all-btn,
+    .category-filter__apply-btn {
+        @apply w-1/2 items-center justify-center text-center border border-light-gray ease-in-out duration-200 p-2;
+    }
+
     .footer-contacts,
     .footer-menu,
     .footer-info {

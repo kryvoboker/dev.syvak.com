@@ -115,6 +115,12 @@ readonly class FilterProductsAction
             ->paginate($this->resolveCategoryProductsPerPage())
             ->withQueryString();
 
+        $available_keys_for_show_clear_btn = config('catalog-filter.available_keys_for_show_clear_btn', []);
+        $is_show_clear_filters_link        = array_any(
+            array_keys($validated_data),
+            fn(mixed $value): bool => in_array($value, $available_keys_for_show_clear_btn, true)
+        );
+
         return [
             'products'                   => $this->mapProductsForResponse(
                 products              : $products,
@@ -141,7 +147,7 @@ readonly class FilterProductsAction
                     validated_data        : $validated_data,
                 )
                 : [],
-            'is_show_clear_filters_link' => !empty(array_filter($validated_data)),
+            'is_show_clear_filters_link' => $is_show_clear_filters_link,
         ];
     }
 
@@ -251,10 +257,11 @@ readonly class FilterProductsAction
     ): Builder {
         $app_settings     = get_app_settings();
         $current_datetime = now(config('app.timezone'));
+        $bd_prefix        = config('database.prefix');
 
         $query = Product::query()
             ->select('products.*')
-            ->selectRaw(config('database.prefix') . 'active_product_discount.price as active_discount_price')
+            ->selectRaw($bd_prefix . 'active_product_discount.price as active_discount_price')
             ->with([
                 'slugs'              => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
@@ -281,7 +288,7 @@ readonly class FilterProductsAction
             && $this->resolvePriceSourceMode($filter_set) === CatalogFilterPriceSourceModeEnum::DiscountOnly
             && $this->resolveDiscountOnlyPolicy($filter_set) === CatalogFilterDiscountOnlyPolicyEnum::ExcludeWithoutDiscount
         ) {
-            $query->whereNotNull('active_product_discount.price');
+            $query->whereNotNull($bd_prefix . 'active_product_discount.price');
         }
 
         return $query;
@@ -431,20 +438,21 @@ readonly class FilterProductsAction
     {
         $price_source_mode    = $this->resolvePriceSourceMode($filter_set);
         $discount_only_policy = $this->resolveDiscountOnlyPolicy($filter_set);
+        $db_prefix            = config('database.prefix');
 
         if ($price_source_mode === CatalogFilterPriceSourceModeEnum::RrcOnly) {
-            return 'products.price';
+            return $db_prefix . 'products.price';
         }
 
         if ($price_source_mode === CatalogFilterPriceSourceModeEnum::Both) {
-            return 'COALESCE(active_product_discount.price, products.price)';
+            return "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}products.price)";
         }
 
         if ($discount_only_policy === CatalogFilterDiscountOnlyPolicyEnum::FallbackToBase) {
-            return 'COALESCE(active_product_discount.price, products.price)';
+            return "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}products.price)";
         }
 
-        return 'active_product_discount.price';
+        return $db_prefix . 'active_product_discount.price';
     }
 
     private function resolvePriceSourceMode(?CatalogFilterSet $filter_set): CatalogFilterPriceSourceModeEnum

@@ -10,6 +10,13 @@ export interface WindowAppParams {
         get_extra?: {
             from_key: string;
             to_key: string;
+        },
+        range?: {
+            min: number;
+            max: number;
+            step: number;
+            selected_from: number | null;
+            selected_to: number | null;
         }
     }
 
