@@ -30,7 +30,7 @@ class CategoryController extends Controller
      * @param CatalogFilterAjaxIndexRequest $request
      * @param FilterProductsAction          $filter_products_action
      * @param string                        $locale
-     * @param string                        $slug
+     * @param string|null                   $slug
      *
      * @return View|Factory
      * @throws Throwable
@@ -39,7 +39,7 @@ class CategoryController extends Controller
         CatalogFilterAjaxIndexRequest $request,
         FilterProductsAction          $filter_products_action,
         string                        $locale,
-        string                        $slug,
+        ?string                       $slug,
     ): View|Factory {
         $locale                  = normalize_locale($locale);
         $header_data             = app(HeaderService::class)();
@@ -72,8 +72,8 @@ class CategoryController extends Controller
             'sort_options'                     => $this->buildSortOptions($page_setting),
             'is_ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
             'products_per_page_limit'          => $products_per_page_limit,
-            'clear_filters_url'       => localizedRoute('localized.catalog.category.show', ['slug' => $slug]),
-            'catalog_filter_ajax_url' => localizedRoute('localized.catalog.catalog-filter-ajax.index', ['slug' => $slug]),
+            'clear_filters_url'                => localizedRoute('localized.catalog.category.show', ['slug' => $slug]),
+            'catalog_filter_ajax_url'          => localizedRoute('localized.catalog.catalog-filter-ajax.index', ['slug' => $slug]),
         ];
 
         \Illuminate\Support\Facades\View::share([
@@ -82,16 +82,16 @@ class CategoryController extends Controller
         ]);
 
         $data = [
-            'header_data'             => $header_data,
-            'footer_data'             => app(FooterService::class)([
+            'header_data'            => $header_data,
+            'footer_data'            => app(FooterService::class)([
                 // Footer uses category links too; pass already loaded categories from header.
                 'categories' => $header_data['categories'],
             ]),
-            'page_type'               => $page_type,
-            'category_page_settings'  => $category_page_settings,
-            'category_slug'           => $slug,
-            'category_title'          => $category_context['title'],
-            'breadcrumbs'             => $category_context['breadcrumbs'],
+            'page_type'              => $page_type,
+            'category_page_settings' => $category_page_settings,
+            'category_slug'          => $slug,
+            'category_title'         => $category_context['title'],
+            'breadcrumbs'            => $category_context['breadcrumbs'],
             ...$response_data,
         ];
 

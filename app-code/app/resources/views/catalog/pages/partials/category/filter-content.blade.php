@@ -40,8 +40,7 @@
         <div class="grid grid-cols-[minmax(10%,0.5fr)_auto_minmax(10%,0.5fr)] items-center justify-between gap-x-5">
             <input class="text-light-gray! border border-opacity-light-gray-40% px-4 py-2"
                    type="text"
-                   id="category-filter-steps-input-to"
-                   data-start-max="3000">
+                   id="category-filter-steps-input-to">
 
             <span>
                 <svg width="19" height="1" viewBox="0 0 19 1" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -51,8 +50,7 @@
 
             <input class="text-light-gray! border border-opacity-light-gray-40% px-4 py-2"
                    type="text"
-                   id="category-filter-steps-input-from"
-                   data-start-min="0">
+                   id="category-filter-steps-input-from">
         </div>
 
         <div class="category-filter__price w-full max-w-[97%] mx-auto"
@@ -70,7 +68,8 @@
                                 ...@json([
                                     'catalog_filter_price_data' => [
                                         'get_extra' => $filter_data['get_extra'],
-                                    ],
+                                        'range' => $filter_data['range'],
+                                    ]
                                 ])
                             };
                         </script>
@@ -129,15 +128,13 @@
     <div class="drawer-footer p-0">
         <div class="category-filter__controls hidden items-center justify-between gap-x-2 w-full"
              id="category-filter-controls">
-            <button class="category-filter__clear-all-btn w-1/2 border border-light-gray bg-transparent hover:bg-white
-                           hover:text-black ease-in-out duration-200 p-2"
+            <button class="category-filter__clear-all-btn hover:text-black bg-transparent hover:bg-white"
                     id="category-filter-clear-all-btn"
                     type="button">
                 {{ __('catalog/default.buttons.clear_all') }}
             </button>
 
-            <button class="category-filter__apply-btn w-1/2 border border-light-gray text-black hover:text-white uppercase
-                           bg-white hover:bg-black ease-in-out duration-200 p-2"
+            <button class="category-filter__apply-btn text-black hover:text-white uppercase bg-white hover:bg-black"
                     id="category-filter-apply-btn"
                     type="button">
                 {{ __('catalog/default.buttons.apply') }}

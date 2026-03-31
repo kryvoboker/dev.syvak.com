@@ -14,6 +14,9 @@ use Throwable;
 
 class PageSettingsBootstrapService
 {
+    /**
+     * @throws Throwable
+     */
     public function bootstrapCategoryPageSetting(): PageSetting
     {
         try {
@@ -39,18 +42,6 @@ class PageSettingsBootstrapService
             $this->syncDefaultSortingItems($page_setting);
             $this->syncMissingTranslations($page_setting);
             $this->purgeLegacyFilterItems($page_setting);
-
-            $page_setting_settings = is_array($page_setting->settings) ? $page_setting->settings : [];
-
-            Log::channel('daily')->info('Category page setting bootstrapped.', [
-                'page_setting_id'                  => (int) $page_setting->id,
-                'page_type'                        => (string) $page_setting->page_type,
-                'sorting_items_count'              => (int) $page_setting->sortingItems()->count(),
-                'translations_count'               => (int) $page_setting->translations()->count(),
-                'is_sorting_enabled'               => (bool) $page_setting->is_sorting_enabled,
-                'products_per_page_limit'          => (int) Arr::get($page_setting_settings, 'pagination.products_per_page_limit', $default_products_limit),
-                'ajax_products_loading_is_enabled' => (bool) Arr::get($page_setting_settings, 'pagination.ajax_products_loading_enabled', $default_ajax_enabled),
-            ]);
 
             return $page_setting->fresh(['translations.language', 'items']) ?? $page_setting;
         } catch (Throwable $throwable) {

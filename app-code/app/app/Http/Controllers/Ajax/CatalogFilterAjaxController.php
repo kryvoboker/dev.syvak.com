@@ -17,7 +17,8 @@ class CatalogFilterAjaxController extends Controller
     /**
      * @param CatalogFilterAjaxIndexRequest $request
      * @param FilterProductsAction          $filter_products_action
-     * @param string                        $slug
+     * @param string                        $locale
+     * @param string|null                   $slug
      *
      * @return JsonResponse
      * @throws Throwable
@@ -25,17 +26,20 @@ class CatalogFilterAjaxController extends Controller
     public function index(
         CatalogFilterAjaxIndexRequest $request,
         FilterProductsAction          $filter_products_action,
-        string                        $slug,
+        string                        $locale,
+        ?string                       $slug
     ): JsonResponse {
-        $response_data = $filter_products_action->handle([
-            'validated_data'      => $request->validated(),
-            'category_slug'       => $slug,
-            'is_get_filters_data' => false,
-        ],
-            locale: app()->getLocale(),
-        );
+        $locale = normalize_locale($locale);
 
         try {
+            $response_data = $filter_products_action->handle([
+                'validated_data'      => $request->validated(),
+                'category_slug'       => $slug,
+                'is_get_filters_data' => false,
+            ],
+                locale: $locale,
+            );
+
             /** @var LengthAwarePaginator|null $paginator */
             $paginator      = Arr::get($response_data, 'paginator');
             $total_products = (int)$paginator?->total();
@@ -43,7 +47,6 @@ class CatalogFilterAjaxController extends Controller
             return response()->json([
                 'success'        => true,
                 'total_products' => $total_products,
-                'products'       => Arr::get($response_data, 'products', []),
             ]);
         } catch (Throwable $e) {
             report($e);

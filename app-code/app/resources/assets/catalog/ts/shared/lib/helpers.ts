@@ -113,6 +113,10 @@ export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams
             for (let index = 0; index < searchParamsLength; index++) {
                 const searchParamsValues: string[] = searchParamsSplit[index].split('=');
 
+                if (queryParamsMap.has(searchParamsValues[0]) || typeof searchParamsValues[1] === 'undefined' || isEmpty(searchParamsValues[1])) {
+                    continue;
+                }
+
                 queryParamsMap.set(
                     searchParamsValues[0],
                     searchParamsValues[1]

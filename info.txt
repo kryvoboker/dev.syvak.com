@@ -31,3 +31,5 @@ For run Google Chrome only for mcp server:
 
 Xvfb :99 -screen 0 1920x1080x24 &
 export DISPLAY=:99
+
+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

@@ -43,13 +43,16 @@ function handleNoUiSlider(): void {
         return;
     }
 
+    const filterRangeData = WINDOW_APP_PARAMS?.catalog_filter_price_data?.range;
+
     const inputs: HTMLInputElement[] = [INPUT_PRICE_TO, INPUT_PRICE_FROM];
-    const startMin: number           = +(INPUT_PRICE_FROM?.dataset.startMin ?? 0);
-    const startMax: number           = +(INPUT_PRICE_TO?.dataset.startMax ?? 0);
+    const startMin: number           = +(filterRangeData?.selected_from ?? filterRangeData?.min ?? 0);
+    const startMax: number           = +(filterRangeData?.selected_to ?? filterRangeData?.max ?? 0);
+    const step: number               = +(filterRangeData?.step ?? 1);
 
     const NO_UI_SLIDER_API: API = noUiSlider.create(stepsSlider, {
         start:  [startMin, startMax],
-        step:   1,
+        step:   step,
         range:  {
             'min': [startMin],
             'max': [startMax]
@@ -184,13 +187,13 @@ const fireSearchProductsEvent = (): void => {
         return;
     }
 
-    const url: string = httpBuildQueryString(urlParams, true);
+    const urlQueries: string = httpBuildQueryString(urlParams, true);
 
-    console.log('url: ', url);
+    console.log('url: ', urlQueries);
 
     toggleElement(LOADER_EL, true);
 
-    fetchFunc(WINDOW_APP_PARAMS?.catalog_filter_ajax_url + '?' + url, {}, 'GET')
+    fetchFunc(WINDOW_APP_PARAMS?.catalog_filter_ajax_url + '?' + urlQueries, {}, 'GET')
         .then((json: FireSearchProductsEventResponseType): void => {
             console.log('res: ', json);
 
@@ -205,7 +208,7 @@ const fireSearchProductsEvent = (): void => {
 
                     if (json.total_products > 0) {
                         APPLY_BTN_EL?.addEventListener('click', (): void => {
-                            redirect(url);
+                            redirect(location.origin + location.pathname + '?' + urlQueries);
                         });
 
                         toggleElement(APPLY_BTN_EL, true);
