@@ -26,16 +26,9 @@
 
     @include('catalog.pages.partials.category.filter-content')
 
-    @prepend('styles')
-        @vite(['./node_modules/nouislider/dist/nouislider.css'])
-    @endprepend
-
-    <script>
-        window.app_params = {
-            ...(window.app_params ?? {}),
-            ...@json([
-                'catalog_filter_ajax_url' => $category_page_settings['catalog_filter_ajax_url'],
-            ])
-        };
-    </script>
+    @if(isset($is_filter_enabled) && $is_filter_enabled === true)
+        @prepend('styles')
+            @vite(['./node_modules/nouislider/dist/nouislider.css'])
+        @endprepend
+    @endif
 @endsection
