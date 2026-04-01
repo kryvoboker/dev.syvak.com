@@ -20,8 +20,10 @@ class PageSettingsBootstrapService
     public function bootstrapCategoryPageSetting(): PageSetting
     {
         try {
-            $default_products_limit = (int) config('app.page_settings.category.products_per_page_limit', 20);
-            $default_ajax_enabled   = (bool) config('app.page_settings.category.ajax_products_loading_enabled', true);
+            $default_products_limit       = (int) config('app.page_settings.category.products_per_page_limit', 20);
+            $default_ajax_enabled         = (bool) config('app.page_settings.category.ajax_products_loading_enabled', true);
+            $default_product_image_width  = (int) config('app.page_settings.category.product_image_width', 420);
+            $default_product_image_height = (int) config('app.page_settings.category.product_image_height', 420);
 
             $page_setting = PageSetting::query()->firstOrCreate(
                 [
@@ -34,6 +36,8 @@ class PageSettingsBootstrapService
                         is_sorting_enabled: true,
                         products_per_page_limit: $default_products_limit,
                         is_ajax_products_loading_enabled: $default_ajax_enabled,
+                        product_image_width: $default_product_image_width,
+                        product_image_height: $default_product_image_height,
                     ),
                 ],
             );
@@ -61,6 +65,8 @@ class PageSettingsBootstrapService
         bool $is_sorting_enabled,
         int $products_per_page_limit,
         bool $is_ajax_products_loading_enabled,
+        int $product_image_width,
+        int $product_image_height,
     ): array {
         return [
             'meta' => [
@@ -75,6 +81,12 @@ class PageSettingsBootstrapService
                 'products_per_page_limit'       => max(1, $products_per_page_limit),
                 'ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
             ],
+            'images' => [
+                'products' => [
+                    'width'  => max(1, $product_image_width),
+                    'height' => max(1, $product_image_height),
+                ],
+            ],
         ];
     }
 
@@ -86,14 +98,18 @@ class PageSettingsBootstrapService
             $settings = [];
         }
 
-        $default_products_limit = (int) config('app.page_settings.category.products_per_page_limit', 20);
-        $default_ajax_enabled   = (bool) config('app.page_settings.category.ajax_products_loading_enabled', true);
+        $default_products_limit       = (int) config('app.page_settings.category.products_per_page_limit', 20);
+        $default_ajax_enabled         = (bool) config('app.page_settings.category.ajax_products_loading_enabled', true);
+        $default_product_image_width  = (int) config('app.page_settings.category.product_image_width', 420);
+        $default_product_image_height = (int) config('app.page_settings.category.product_image_height', 420);
 
         $settings = array_replace_recursive(
             $this->buildSettingsContract(
                 is_sorting_enabled: (bool) $page_setting->is_sorting_enabled,
                 products_per_page_limit: (int) Arr::get($settings, 'pagination.products_per_page_limit', $default_products_limit),
                 is_ajax_products_loading_enabled: (bool) Arr::get($settings, 'pagination.ajax_products_loading_enabled', $default_ajax_enabled),
+                product_image_width: (int) Arr::get($settings, 'images.products.width', $default_product_image_width),
+                product_image_height: (int) Arr::get($settings, 'images.products.height', $default_product_image_height),
             ),
             $settings,
         );
@@ -101,6 +117,8 @@ class PageSettingsBootstrapService
         Arr::set($settings, 'ui.sorting.enabled', (bool) $page_setting->is_sorting_enabled);
         Arr::set($settings, 'pagination.products_per_page_limit', max(1, (int) Arr::get($settings, 'pagination.products_per_page_limit', $default_products_limit)));
         Arr::set($settings, 'pagination.ajax_products_loading_enabled', (bool) Arr::get($settings, 'pagination.ajax_products_loading_enabled', $default_ajax_enabled));
+        Arr::set($settings, 'images.products.width', max(1, (int) Arr::get($settings, 'images.products.width', $default_product_image_width)));
+        Arr::set($settings, 'images.products.height', max(1, (int) Arr::get($settings, 'images.products.height', $default_product_image_height)));
         Arr::set($settings, 'meta.contract_version', 1);
         Arr::forget($settings, ['ui.filters']);
 

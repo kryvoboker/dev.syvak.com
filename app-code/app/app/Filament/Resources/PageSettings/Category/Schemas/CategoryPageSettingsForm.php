@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PageSettings\Category\Schemas;
 
 use App\Models\ApplicationSettings\Language;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -53,6 +52,20 @@ class CategoryPageSettingsForm
                                 Toggle::make('is_ajax_products_loading_enabled')
                                     ->label(__('admin/settings/category_page_settings.labels.is_ajax_products_loading_enabled'))
                                     ->default((bool) config('app.page_settings.category.ajax_products_loading_enabled', true)),
+
+                                TextInput::make('product_image_width')
+                                    ->label(__('admin/settings/category_page_settings.labels.product_image_width'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required()
+                                    ->default((int) config('app.page_settings.category.product_image_width', 420)),
+
+                                TextInput::make('product_image_height')
+                                    ->label(__('admin/settings/category_page_settings.labels.product_image_height'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required()
+                                    ->default((int) config('app.page_settings.category.product_image_height', 420)),
                             ])
                             ->columns(1),
 
@@ -81,18 +94,12 @@ class CategoryPageSettingsForm
 
                                         TextInput::make('get.key')
                                             ->label(__('admin/settings/category_page_settings.labels.get_key'))
+                                            ->readOnly()
                                             ->required(),
 
                                         TextInput::make('get.value')
-                                            ->label(__('admin/settings/category_page_settings.labels.get_value')),
-
-                                        KeyValue::make('get.extra')
-                                            ->label(__('admin/settings/category_page_settings.labels.get_extra'))
-                                            ->keyLabel(__('admin/settings/category_page_settings.labels.key'))
-                                            ->valueLabel(__('admin/settings/category_page_settings.labels.value')),
-
-                                        TextInput::make('config.selection')
-                                            ->label(__('admin/settings/category_page_settings.labels.selection_mode')),
+                                            ->label(__('admin/settings/category_page_settings.labels.get_value'))
+                                            ->readOnly(),
 
                                         Section::make(__('admin/settings/category_page_settings.labels.option_labels'))
                                             ->schema([

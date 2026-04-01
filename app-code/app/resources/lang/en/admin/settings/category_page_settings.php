@@ -14,6 +14,8 @@ return [
     'labels' => [
         'products_per_page_limit'          => 'Products per page limit',
         'is_ajax_products_loading_enabled' => 'Enable AJAX products loading',
+        'product_image_width'              => 'Product image width',
+        'product_image_height'             => 'Product image height',
         'model'                            => 'Category page settings',
         'plural_model'                     => 'Category page settings',
         'is_sorting_enabled'               => 'Enable product sorting',
@@ -23,8 +25,6 @@ return [
         'sort_order'                       => 'Sort order',
         'get_key'                          => 'GET key',
         'get_value'                        => 'GET value',
-        'get_extra'                        => 'Extra GET params',
-        'selection_mode'                   => 'Selection mode',
         'key'                              => 'Key',
         'value'                            => 'Value',
         'sorting_title'                    => 'Sorting block title',
