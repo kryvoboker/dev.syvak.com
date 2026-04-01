@@ -29,30 +29,30 @@ readonly class FilterProductsAction
 {
     public function __construct(
         private PageSettingsBootstrapService $page_settings_bootstrap_service,
-        private PriceSourceResolverService $price_source_resolver_service,
+        private PriceSourceResolverService   $price_source_resolver_service,
     ) {}
 
     /**
-     * @param  array<string, mixed>  $params
-     *
-     * @throws Throwable
+     * @param array<string, mixed> $params
      *
      * @return array<string, mixed>
+     * @throws Throwable
+     *
      */
     public function handle(array $params, ?string $locale = null): array
     {
         $validated_data      = Arr::get($params, 'validated_data', []);
-        $category_slug       = (string) Arr::get($params, 'category_slug', '');
-        $is_get_filters_data = (bool) Arr::get($params, 'is_get_filters_data', false);
+        $category_slug       = (string)Arr::get($params, 'category_slug', '');
+        $is_get_filters_data = (bool)Arr::get($params, 'is_get_filters_data', false);
 
-        if (! is_array($validated_data)) {
+        if (!is_array($validated_data)) {
             $validated_data = [];
         }
 
         $locale   = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
 
-        if (! $language instanceof Language || blank($category_slug)) {
+        if (!$language instanceof Language || blank($category_slug)) {
             return $this->buildEmptyResponse(
                 validated_data     : $validated_data,
                 sort_code          : 'default',
@@ -60,9 +60,9 @@ readonly class FilterProductsAction
             );
         }
 
-        $category = Category::findBySlug($category_slug, (int) $language->id);
+        $category = Category::findBySlug($category_slug, (int)$language->id);
 
-        if (! $category instanceof Category) {
+        if (!$category instanceof Category) {
             return $this->buildEmptyResponse(
                 validated_data     : $validated_data,
                 sort_code          : 'default',
@@ -78,14 +78,14 @@ readonly class FilterProductsAction
             ? $this->resolveEnabledFilterGroups($filter_set)
             : collect();
 
-        $requested_sort_value       = (string) Arr::get($validated_data, 'sort', '');
+        $requested_sort_value       = (string)Arr::get($validated_data, 'sort', '');
         $resolved_sort_code         = $this->resolveSortCodeFromRequestedValue($requested_sort_value);
         $effective_price_expression = $this->resolveEffectivePriceSqlExpression($filter_set);
 
         $products_query = $this->buildBaseProductsQuery(
             filter_set            : $filter_set,
-            category_id           : (int) $category->id,
-            language_id           : (int) $language->id,
+            category_id           : (int)$category->id,
+            language_id           : (int)$language->id,
             minimum_stock_quantity: $minimum_stock_quantity,
         );
 
@@ -119,31 +119,31 @@ readonly class FilterProductsAction
         $available_keys_for_show_clear_btn = config('catalog-filter.available_keys_for_show_clear_btn', []);
         $is_show_clear_filters_link        = array_any(
             array_keys($validated_data),
-            fn (mixed $value): bool => in_array($value, $available_keys_for_show_clear_btn, true),
+            fn(mixed $value): bool => in_array($value, $available_keys_for_show_clear_btn, true),
         );
 
         return [
-            'products' => $this->mapProductsForResponse(
+            'products'                   => $this->mapProductsForResponse(
                 products              : $products,
-                language_id           : (int) $language->id,
+                language_id           : (int)$language->id,
                 filter_set            : $filter_set,
                 minimum_stock_quantity: $minimum_stock_quantity,
             ),
-            'paginator'       => $products,
-            'applied_filters' => [
+            'paginator'                  => $products,
+            'applied_filters'            => [
                 'sort'       => $requested_sort_value,
                 'price_from' => Arr::get($validated_data, 'price_from'),
                 'price_to'   => Arr::get($validated_data, 'price_to'),
-                'attributes' => (array) Arr::get($validated_data, 'attributes', []),
+                'attributes' => (array)Arr::get($validated_data, 'attributes', []),
             ],
-            'active_sort_code'  => $resolved_sort_code,
-            'is_filter_enabled' => $is_filter_mechanism_enabled,
-            'filters_data'      => $is_get_filters_data
+            'active_sort_code'           => $resolved_sort_code,
+            'is_filter_enabled'          => $is_filter_mechanism_enabled,
+            'filters_data'               => $is_get_filters_data
                 ? $this->buildFiltersData(
                     filter_set            : $filter_set,
                     filter_groups         : $filter_groups,
-                    language_id           : (int) $language->id,
-                    category_id           : (int) $category->id,
+                    language_id           : (int)$language->id,
+                    category_id           : (int)$category->id,
                     minimum_stock_quantity: $minimum_stock_quantity,
                     validated_data        : $validated_data,
                 )
@@ -156,7 +156,7 @@ readonly class FilterProductsAction
      * This method uses the same filter contract as `handle()` but returns only
      * matched products count for selected category/filter params.
      *
-     * @param  array<string, mixed>  $validated_data
+     * @param array<string, mixed> $validated_data
      *
      * @throws Throwable
      */
@@ -171,7 +171,7 @@ readonly class FilterProductsAction
         /** @var LengthAwarePaginator|null $paginator */
         $paginator = Arr::get($response_data, 'paginator');
 
-        return (int) $paginator?->total();
+        return (int)$paginator?->total();
     }
 
     /**
@@ -198,7 +198,7 @@ readonly class FilterProductsAction
             ->orderBy('id')
             ->first();
 
-        if (! $filter_set instanceof CatalogFilterSet) {
+        if (!$filter_set instanceof CatalogFilterSet) {
             return null;
         }
 
@@ -235,14 +235,14 @@ readonly class FilterProductsAction
 
         return $groups
             ->filter(function (CatalogFilterGroup $group) use ($filter_set): bool {
-                $source_type = (string) $group->getRawOriginal('source_type');
+                $source_type = (string)$group->getRawOriginal('source_type');
 
                 if ($source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
-                    return (bool) $filter_set->is_price_filter_enabled;
+                    return (bool)$filter_set->is_price_filter_enabled;
                 }
 
                 if ($source_type === CatalogFilterGroupSourceTypeEnum::Attribute->value) {
-                    return (bool) $filter_set->is_attribute_filtering_enabled;
+                    return (bool)$filter_set->is_attribute_filtering_enabled;
                 }
 
                 return false;
@@ -252,9 +252,9 @@ readonly class FilterProductsAction
 
     private function buildBaseProductsQuery(
         ?CatalogFilterSet $filter_set,
-        int $category_id,
-        int $language_id,
-        int $minimum_stock_quantity,
+        int               $category_id,
+        int               $language_id,
+        int               $minimum_stock_quantity,
     ): Builder {
         $app_settings     = get_app_settings();
         $current_datetime = now(config('app.timezone'));
@@ -264,7 +264,7 @@ readonly class FilterProductsAction
             ->select('products.*')
             ->selectRaw($bd_prefix . 'active_product_discount.price as active_discount_price')
             ->with([
-                'slugs' => function ($query) use ($language_id): void {
+                'slugs'              => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
                 'productDescription' => function ($query) use ($language_id): void {
@@ -274,7 +274,7 @@ readonly class FilterProductsAction
             ->leftJoin('product_discounts as active_product_discount', function (JoinClause $join) use ($app_settings, $current_datetime): void {
                 $join
                     ->on('active_product_discount.product_id', '=', 'products.id')
-                    ->where('active_product_discount.user_group_id', '=', (int) $app_settings->user_group_id)
+                    ->where('active_product_discount.user_group_id', '=', (int)$app_settings->user_group_id)
                     ->where('active_product_discount.date_start', '<=', $current_datetime)
                     ->where('active_product_discount.date_end', '>=', $current_datetime);
             })
@@ -296,30 +296,30 @@ readonly class FilterProductsAction
     }
 
     /**
-     * @param  array<string, mixed>  $validated_data
+     * @param array<string, mixed> $validated_data
      */
     private function applyAttributeFilters(
-        Builder $query,
+        Builder          $query,
         CatalogFilterSet $filter_set,
-        Collection $filter_groups,
-        array $validated_data,
+        Collection       $filter_groups,
+        array            $validated_data,
     ): Builder {
-        if (! $filter_set->is_attribute_filtering_enabled) {
+        if (!$filter_set->is_attribute_filtering_enabled) {
             return $query;
         }
 
         $attribute_filters = Arr::get($validated_data, 'attributes', []);
 
-        if (! is_array($attribute_filters) || $attribute_filters === []) {
+        if (!is_array($attribute_filters) || $attribute_filters === []) {
             return $query;
         }
 
         $attribute_groups_by_id = $filter_groups
-            ->where(fn (CatalogFilterGroup $group): bool => (string) $group->getRawOriginal('source_type') === CatalogFilterGroupSourceTypeEnum::Attribute->value)
-            ->keyBy(fn (CatalogFilterGroup $group): int => (int) $group->source_id);
+            ->where(fn(CatalogFilterGroup $group): bool => (string)$group->getRawOriginal('source_type') === CatalogFilterGroupSourceTypeEnum::Attribute->value)
+            ->keyBy(fn(CatalogFilterGroup $group): int => (int)$group->source_id);
 
         foreach ($attribute_filters as $attribute_id => $selected_codes) {
-            $attribute_id = (int) $attribute_id;
+            $attribute_id = (int)$attribute_id;
 
             if ($attribute_id <= 0) {
                 continue;
@@ -328,13 +328,13 @@ readonly class FilterProductsAction
             /** @var CatalogFilterGroup|null $attribute_group */
             $attribute_group = $attribute_groups_by_id->get($attribute_id);
 
-            if (! $attribute_group instanceof CatalogFilterGroup) {
+            if (!$attribute_group instanceof CatalogFilterGroup) {
                 continue;
             }
 
             $selected_codes = collect(is_array($selected_codes) ? $selected_codes : [$selected_codes])
-                ->map(fn (mixed $code): string => (string) $code)
-                ->filter(fn (string $code): bool => filled($code))
+                ->map(fn(mixed $code): string => (string)$code)
+                ->filter(fn(string $code): bool => filled($code))
                 ->unique()
                 ->values();
 
@@ -343,12 +343,12 @@ readonly class FilterProductsAction
             }
 
             $attribute_values = CatalogFilterValue::query()
-                ->where('catalog_filter_group_id', (int) $attribute_group->id)
+                ->where('catalog_filter_group_id', (int)$attribute_group->id)
                 ->where('is_enabled', true)
                 ->whereIn('code', $selected_codes->all())
                 ->pluck('value_string')
-                ->map(fn (mixed $value): string => (string) $value)
-                ->filter(fn (string $value): bool => filled($value))
+                ->map(fn(mixed $value): string => (string)$value)
+                ->filter(fn(string $value): bool => filled($value))
                 ->unique()
                 ->values();
 
@@ -369,24 +369,24 @@ readonly class FilterProductsAction
     }
 
     /**
-     * @param  array<string, mixed>  $validated_data
+     * @param array<string, mixed> $validated_data
      */
     private function applyPriceRangeFilter(
-        Builder $query,
+        Builder          $query,
         CatalogFilterSet $filter_set,
-        Collection $filter_groups,
-        array $validated_data,
-        string $effective_price_expression,
+        Collection       $filter_groups,
+        array            $validated_data,
+        string           $effective_price_expression,
     ): Builder {
-        if (! $filter_set->is_price_filter_enabled) {
+        if (!$filter_set->is_price_filter_enabled) {
             return $query;
         }
 
         /** @var CatalogFilterGroup|null $price_group */
         $price_group = $filter_groups
-            ->first(fn (CatalogFilterGroup $group): bool => (string) $group->code === CatalogFilterGroupSourceTypeEnum::Price->value);
+            ->first(fn(CatalogFilterGroup $group): bool => (string)$group->code === CatalogFilterGroupSourceTypeEnum::Price->value);
 
-        if (! $price_group instanceof CatalogFilterGroup) {
+        if (!$price_group instanceof CatalogFilterGroup) {
             return $query;
         }
 
@@ -394,11 +394,11 @@ readonly class FilterProductsAction
         $price_to   = Arr::get($validated_data, 'price_to');
 
         if (is_numeric($price_from)) {
-            $query->whereRaw($effective_price_expression . ' >= ?', [(float) $price_from]);
+            $query->whereRaw($effective_price_expression . ' >= ?', [(float)$price_from]);
         }
 
         if (is_numeric($price_to)) {
-            $query->whereRaw($effective_price_expression . ' <= ?', [(float) $price_to]);
+            $query->whereRaw($effective_price_expression . ' <= ?', [(float)$price_to]);
         }
 
         return $query;
@@ -411,15 +411,15 @@ readonly class FilterProductsAction
                 ->orderByDesc('products.viewed')
                 ->orderByDesc('products.id'),
 
-            'price_asc' => $query
+            'price_asc'   => $query
                 ->orderByRaw($effective_price_expression . ' ASC')
                 ->orderByDesc('products.id'),
 
-            'price_desc' => $query
+            'price_desc'  => $query
                 ->orderByRaw($effective_price_expression . ' DESC')
                 ->orderByDesc('products.id'),
 
-            default => $query
+            default       => $query
                 ->orderByDesc('products.date_added')
                 ->orderByDesc('products.id'),
         };
@@ -458,7 +458,7 @@ readonly class FilterProductsAction
 
     private function resolvePriceSourceMode(?CatalogFilterSet $filter_set): CatalogFilterPriceSourceModeEnum
     {
-        if (! $filter_set instanceof CatalogFilterSet) {
+        if (!$filter_set instanceof CatalogFilterSet) {
             return CatalogFilterPriceSourceModeEnum::Both;
         }
 
@@ -468,13 +468,13 @@ readonly class FilterProductsAction
             return $price_source_mode;
         }
 
-        return CatalogFilterPriceSourceModeEnum::tryFrom((string) $price_source_mode)
+        return CatalogFilterPriceSourceModeEnum::tryFrom((string)$price_source_mode)
             ?? CatalogFilterPriceSourceModeEnum::Both;
     }
 
     private function resolveDiscountOnlyPolicy(?CatalogFilterSet $filter_set): CatalogFilterDiscountOnlyPolicyEnum
     {
-        if (! $filter_set instanceof CatalogFilterSet) {
+        if (!$filter_set instanceof CatalogFilterSet) {
             return CatalogFilterDiscountOnlyPolicyEnum::FallbackToBase;
         }
 
@@ -484,7 +484,7 @@ readonly class FilterProductsAction
             return $discount_only_policy;
         }
 
-        return CatalogFilterDiscountOnlyPolicyEnum::tryFrom((string) $discount_only_policy)
+        return CatalogFilterDiscountOnlyPolicyEnum::tryFrom((string)$discount_only_policy)
             ?? CatalogFilterDiscountOnlyPolicyEnum::ExcludeWithoutDiscount;
     }
 
@@ -493,9 +493,9 @@ readonly class FilterProductsAction
      */
     private function mapProductsForResponse(
         LengthAwarePaginator $products,
-        int $language_id,
-        ?CatalogFilterSet $filter_set,
-        int $minimum_stock_quantity,
+        int                  $language_id,
+        ?CatalogFilterSet    $filter_set,
+        int                  $minimum_stock_quantity,
     ): array {
         $app_settings        = get_app_settings();
         $catalog_image_sizes = $app_settings->image_sizes?->firstWhere('name', 'search_product') ?? [];
@@ -503,9 +503,9 @@ readonly class FilterProductsAction
 
         return collect($products->items())
             ->map(function (Product $product) use ($language_id, $filter_set, $catalog_image_sizes, $minimum_stock_quantity, $locale_key): array {
-                $rrc_price      = (float) $product->price;
+                $rrc_price      = (float)$product->price;
                 $discount_price = is_numeric($product->getAttribute('active_discount_price'))
-                    ? (float) $product->getAttribute('active_discount_price')
+                    ? (float)$product->getAttribute('active_discount_price')
                     : null;
 
                 $effective_price = $this->price_source_resolver_service->resolveEffectivePrice(
@@ -520,74 +520,75 @@ readonly class FilterProductsAction
                 $formatted_effective_price = format_price(
                     $effective_price,
                     config('app.currency.current_currency_code'),
-                    (float) config('app.currency.current_exchange_rate'),
+                    (float)config('app.currency.current_exchange_rate'),
                 );
 
                 $formatted_rrc_price = format_price(
                     $rrc_price,
                     config('app.currency.current_currency_code'),
-                    (float) config('app.currency.current_exchange_rate'),
+                    (float)config('app.currency.current_exchange_rate'),
                 );
 
-                $product_slug = (string) optional($product->slugs->first())->slug;
+                $product_slug = (string)optional($product->slugs->first())->slug;
                 $product_url  = filled($product_slug)
                     ? localizedRoute('localized.catalog.product.show', ['slug' => $product_slug])
                     : '';
 
                 return [
-                    'id'          => (int) $product->id,
-                    'name'        => (string) optional($product->productDescription->first())->name,
-                    'sku'         => (string) $product->sku,
-                    'quantity'    => (int) $product->quantity,
-                    'is_in_stock' => (int) $product->quantity >= $minimum_stock_quantity,
+                    'id'          => (int)$product->id,
+                    'name'        => (string)optional($product->productDescription->first())->name,
+                    'sku'         => (string)$product->sku,
+                    'quantity'    => (int)$product->quantity,
+                    'is_in_stock' => (int)$product->quantity >= $minimum_stock_quantity,
                     'url'         => $product_url,
                     'image_data'  => [
-                        'urls' => multiple_convert_img_and_get_url(
+                        'urls'   => multiple_convert_img_and_get_url(
                             $product->image,
-                            (int) ($catalog_image_sizes['width'] ?? 420),
-                            (int) ($catalog_image_sizes['height'] ?? 420),
+                            (int)($catalog_image_sizes['width'] ?? 420),
+                            (int)($catalog_image_sizes['height'] ?? 420),
                         ),
-                        'width'  => (int) ($catalog_image_sizes['width'] ?? 420),
-                        'height' => (int) ($catalog_image_sizes['height'] ?? 420),
+                        'width'  => (int)($catalog_image_sizes['width'] ?? 420),
+                        'height' => (int)($catalog_image_sizes['height'] ?? 420),
                     ],
-                    'price' => [
+                    'price'       => [
                         'value'              => $effective_price,
-                        'formatted'          => (string) $formatted_effective_price,
+                        'formatted'          => (string)$formatted_effective_price,
                         'rrc_value'          => $rrc_price,
-                        'rrc_formatted'      => (string) $formatted_rrc_price,
+                        'rrc_formatted'      => (string)$formatted_rrc_price,
                         'discount_value'     => $discount_price,
                         'discount_formatted' => $discount_price !== null
-                            ? (string) format_price(
+                            ? (string)format_price(
                                 $discount_price,
                                 config('app.currency.current_currency_code'),
-                                (float) config('app.currency.current_exchange_rate'),
+                                (float)config('app.currency.current_exchange_rate'),
                             )
                             : null,
                     ],
-                    $locale_key => $language_id,
+                    $locale_key   => $language_id,
                 ];
             })
             ->all();
     }
 
     /**
-     * @param  Collection<int, CatalogFilterGroup>  $filter_groups
-     * @param  array<string, mixed>  $validated_data
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param array<string, mixed>                $validated_data
+     *
      * @return array<string, array<string, mixed>>
      */
     private function buildFiltersData(
         ?CatalogFilterSet $filter_set,
-        Collection $filter_groups,
-        int $language_id,
-        int $category_id,
-        int $minimum_stock_quantity,
-        array $validated_data,
+        Collection        $filter_groups,
+        int               $language_id,
+        int               $category_id,
+        int               $minimum_stock_quantity,
+        array             $validated_data,
     ): array {
-        if (! $filter_set instanceof CatalogFilterSet || $filter_groups->isEmpty()) {
+        if (!$filter_set instanceof CatalogFilterSet || $filter_groups->isEmpty()) {
             return [];
         }
 
-        $active_index_version = (int) optional($filter_set->indexMeta)->active_index_version;
+        $active_index_version = (int)optional($filter_set->indexMeta)->active_index_version;
         $dynamic_price_max    = $this->resolveDynamicPriceRangeMax(
             filter_set            : $filter_set,
             filter_groups         : $filter_groups,
@@ -601,34 +602,52 @@ readonly class FilterProductsAction
         $filters_data = [];
 
         foreach ($filter_groups as $group) {
-            $group_key         = (string) $group->id;
-            $group_source_type = (string) $group->getRawOriginal('source_type');
+            $group_key         = (string)$group->id;
+            $group_source_type = (string)$group->getRawOriginal('source_type');
 
             $group_payload = [
                 'group_id'    => $group_key,
-                'group_code'  => (string) $group->code,
+                'group_code'  => (string)$group->code,
                 'group_name'  => $this->resolveGroupLabel($group, $language_id),
                 'source_type' => $group_source_type,
-                'source_id'   => (int) $group->source_id,
-                'get_key'     => (string) $group->get_key,
-                'get_value'   => (string) Arr::get((array) ($group->config ?? []), 'get.value', ''),
-                'get_extra'   => is_array(Arr::get((array) ($group->config ?? []), 'get.extra'))
-                    ? (array) Arr::get((array) ($group->config ?? []), 'get.extra')
+                'source_id'   => (int)$group->source_id,
+                'get_key'     => (string)$group->get_key,
+                'get_value'   => (string)Arr::get((array)($group->config ?? []), 'get.value', ''),
+                'get_extra'   => is_array(Arr::get((array)($group->config ?? []), 'get.extra'))
+                    ? (array)Arr::get((array)($group->config ?? []), 'get.extra')
                     : [],
-                'items' => [],
+                'items'       => [],
             ];
 
             if ($group_source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
-                $group_config = is_array($group->config) ? $group->config : [];
+                $group_config   = is_array($group->config) ? $group->config : [];
+                $selected_from  = Arr::get($validated_data, 'price_from');
+                $selected_to    = Arr::get($validated_data, 'price_to');
+                $price_from_key = trim((string)Arr::get($group_config, 'get.extra.from_key', 'price_from'));
+                $price_to_key   = trim((string)Arr::get($group_config, 'get.extra.to_key', 'price_to'));
+
+                if (blank($price_from_key)) {
+                    $price_from_key = 'price_from';
+                }
+
+                if (blank($price_to_key)) {
+                    $price_to_key = 'price_to';
+                }
 
                 $group_payload['range'] = [
-                    'min' => Arr::get($group_config, 'min_price'),
-                    'max' => is_numeric($dynamic_price_max)
-                        ? (float) $dynamic_price_max
+                    'min'           => Arr::get($group_config, 'min_price'),
+                    'max'           => is_numeric($dynamic_price_max)
+                        ? (float)$dynamic_price_max
                         : Arr::get($group_config, 'max_price'),
                     'step'          => Arr::get($group_config, 'step'),
-                    'selected_from' => Arr::get($validated_data, 'price_from'),
-                    'selected_to'   => Arr::get($validated_data, 'price_to'),
+                    'selected_from' => $selected_from,
+                    'selected_to'   => $selected_to,
+                    'cancel_link'   => $this->buildCancelLinkForPriceRange(
+                        price_from_get_key: $price_from_key,
+                        price_to_get_key  : $price_to_key,
+                        selected_from     : $selected_from,
+                        selected_to       : $selected_to,
+                    ),
                 ];
 
                 $filters_data[$group_key] = $group_payload;
@@ -640,7 +659,7 @@ readonly class FilterProductsAction
             $group_values = $group->values;
 
             foreach ($group_values as $value) {
-                $value_key  = (string) $value->id;
+                $value_key  = (string)$value->id;
                 $is_checked = $this->resolveValueCheckedState(
                     group         : $group,
                     value         : $value,
@@ -648,20 +667,20 @@ readonly class FilterProductsAction
                 );
 
                 $group_payload['items'][$value_key] = [
-                    'id'             => (int) $value->id,
-                    'code'           => (string) $value->code,
+                    'id'             => (int)$value->id,
+                    'code'           => (string)$value->code,
                     'name'           => $this->resolveValueLabel($value, $language_id),
                     'total_products' => $this->resolveValueProductsTotal(
-                        filter_set_id         : (int) $filter_set->id,
+                        filter_set_id         : (int)$filter_set->id,
                         active_index_version  : $active_index_version,
                         category_id           : $category_id,
-                        group_id              : (int) $group->id,
-                        value_id              : (int) $value->id,
+                        group_id              : (int)$group->id,
+                        value_id              : (int)$value->id,
                         minimum_stock_quantity: $minimum_stock_quantity,
-                        fallback_count        : (int) $value->products_count_cached,
+                        fallback_count        : (int)$value->products_count_cached,
                     ),
-                    'is_checked'  => $is_checked,
-                    'cancel_link' => $is_checked
+                    'is_checked'     => $is_checked,
+                    'cancel_link'    => $is_checked
                         ? $this->buildCancelLinkForCheckedValue($group, $value)
                         : null,
                 ];
@@ -681,11 +700,11 @@ readonly class FilterProductsAction
      */
     private function resolveDynamicPriceRangeMax(
         CatalogFilterSet $filter_set,
-        Collection $filter_groups,
-        int $category_id,
-        int $language_id,
-        int $minimum_stock_quantity,
-        array $validated_data,
+        Collection       $filter_groups,
+        int              $category_id,
+        int              $language_id,
+        int              $minimum_stock_quantity,
+        array            $validated_data,
     ): ?float {
         $query = $this->buildBaseProductsQuery(
             filter_set            : $filter_set,
@@ -709,19 +728,19 @@ readonly class FilterProductsAction
             ->selectRaw('MAX(' . $effective_price_expression . ') as max_effective_price')
             ->value('max_effective_price');
 
-        return is_numeric($max_price) ? (float) $max_price : null;
+        return is_numeric($max_price) ? (float)$max_price : null;
     }
 
     private function buildCancelLinkForCheckedValue(CatalogFilterGroup $group, CatalogFilterValue $value): ?string
     {
-        $get_key = trim((string) $group->get_key);
+        $get_key = trim((string)$group->get_key);
 
-        if (blank($get_key) || ! app()->bound('request')) {
+        if (blank($get_key) || !app()->bound('request')) {
             return null;
         }
 
         $request          = request();
-        $query_parameters = (array) $request->query();
+        $query_parameters = (array)$request->query();
         $query_value      = $this->extractQueryValueByGetKey($query_parameters, $get_key);
 
         if ($query_value === null) {
@@ -729,7 +748,7 @@ readonly class FilterProductsAction
         }
 
         $remaining_values = collect($this->normalizeFilterQueryValues($query_value))
-            ->reject(fn (string $candidate_value): bool => $candidate_value === (string) $value->code)
+            ->reject(fn(string $candidate_value): bool => $candidate_value === (string)$value->code)
             ->values()
             ->all();
 
@@ -754,6 +773,28 @@ readonly class FilterProductsAction
             : $request->url();
     }
 
+    private function buildCancelLinkForPriceRange(
+        string $price_from_get_key,
+        string $price_to_get_key,
+        mixed  $selected_from,
+        mixed  $selected_to,
+    ): ?string {
+        if (($selected_from === null && $selected_to === null) || !app()->bound('request')) {
+            return null;
+        }
+
+        $request               = request();
+        $next_query_parameters = (array)$request->query()
+                |> (fn($x) => $this->replaceQueryValueByGetKey(query_parameters: $x, get_key: $price_from_get_key, next_value: null))
+                |> (fn($x) => $this->replaceQueryValueByGetKey(query_parameters: $x, get_key: $price_to_get_key, next_value: null));
+
+        $next_query_string = Arr::query($next_query_parameters);
+
+        return filled($next_query_string)
+            ? $request->url() . '?' . $next_query_string
+            : $request->url();
+    }
+
     private function extractQueryValueByGetKey(array $query_parameters, string $get_key): mixed
     {
         if (Str::contains($get_key, '[') && Str::endsWith($get_key, ']')) {
@@ -766,7 +807,8 @@ readonly class FilterProductsAction
     }
 
     /**
-     * @param  array<string, mixed>  $query_parameters
+     * @param array<string, mixed> $query_parameters
+     *
      * @return array<string, mixed>
      */
     private function replaceQueryValueByGetKey(array $query_parameters, string $get_key, mixed $next_value): array
@@ -806,22 +848,22 @@ readonly class FilterProductsAction
      */
     private function normalizeFilterQueryValues(mixed $raw_value): array
     {
-        if (! is_array($raw_value)) {
+        if (!is_array($raw_value)) {
             $raw_value = [$raw_value];
         }
 
         return collect($raw_value)
             ->flatten(1)
             ->flatMap(function (mixed $item): array {
-                $string_value = trim((string) $item);
+                $string_value = trim((string)$item);
 
                 if (blank($string_value)) {
                     return [];
                 }
 
                 return collect(explode(',', $string_value))
-                    ->map(fn (string $part): string => trim($part))
-                    ->filter(fn (string $part): bool => filled($part))
+                    ->map(fn(string $part): string => trim($part))
+                    ->filter(fn(string $part): bool => filled($part))
                     ->values()
                     ->all();
             })
@@ -836,13 +878,13 @@ readonly class FilterProductsAction
             ->firstWhere('language_id', $language_id)
             ?? $group->translations->first();
 
-        $label = (string) ($translation ? $translation->label : '');
+        $label = (string)($translation ? $translation->label : '');
 
         if (filled($label)) {
             return $label;
         }
 
-        return (string) $group->code;
+        return (string)$group->code;
     }
 
     private function resolveValueLabel(CatalogFilterValue $value, int $language_id): string
@@ -851,33 +893,33 @@ readonly class FilterProductsAction
             ->firstWhere('language_id', $language_id)
             ?? $value->translations->first();
 
-        $label = (string) ($translation ? $translation->label : '');
+        $label = (string)($translation ? $translation->label : '');
 
         if (filled($label)) {
             return $label;
         }
 
-        if (filled((string) $value->value_string)) {
-            return (string) $value->value_string;
+        if (filled((string)$value->value_string)) {
+            return (string)$value->value_string;
         }
 
-        return (string) $value->code;
+        return (string)$value->code;
     }
 
     /**
-     * @param  array<string, mixed>  $validated_data
+     * @param array<string, mixed> $validated_data
      */
     private function resolveValueCheckedState(CatalogFilterGroup $group, CatalogFilterValue $value, array $validated_data): bool
     {
-        $source_type = (string) $group->getRawOriginal('source_type');
-        $value_code  = (string) $value->code;
+        $source_type = (string)$group->getRawOriginal('source_type');
+        $value_code  = (string)$value->code;
 
         if ($source_type === CatalogFilterGroupSourceTypeEnum::Attribute->value) {
-            $attribute_id   = (int) $group->source_id;
-            $selected_codes = (array) Arr::get($validated_data, 'attributes.' . $attribute_id, []);
+            $attribute_id   = (int)$group->source_id;
+            $selected_codes = (array)Arr::get($validated_data, 'attributes.' . $attribute_id, []);
 
             return collect($selected_codes)
-                ->map(fn (mixed $code): string => (string) $code)
+                ->map(fn(mixed $code): string => (string)$code)
                 ->contains($value_code);
         }
 
@@ -912,19 +954,20 @@ readonly class FilterProductsAction
     }
 
     /**
-     * @param  array<string, mixed>  $validated_data
+     * @param array<string, mixed> $validated_data
+     *
      * @return array<string, mixed>
      */
     private function buildEmptyResponse(array $validated_data, string $sort_code, bool $is_get_filters_data): array
     {
         return [
-            'products'        => [],
-            'paginator'       => null,
-            'applied_filters' => [
-                'sort'       => (string) Arr::get($validated_data, 'sort', ''),
+            'products'          => [],
+            'paginator'         => null,
+            'applied_filters'   => [
+                'sort'       => (string)Arr::get($validated_data, 'sort', ''),
                 'price_from' => Arr::get($validated_data, 'price_from'),
                 'price_to'   => Arr::get($validated_data, 'price_to'),
-                'attributes' => (array) Arr::get($validated_data, 'attributes', []),
+                'attributes' => (array)Arr::get($validated_data, 'attributes', []),
             ],
             'active_sort_code'  => $sort_code,
             'is_filter_enabled' => false,
@@ -935,9 +978,9 @@ readonly class FilterProductsAction
     private function resolveMinimumStockQuantity(?CatalogFilterSet $filter_set): int
     {
         if ($filter_set instanceof CatalogFilterSet && $filter_set->is_enabled) {
-            return max(0, (int) $filter_set->min_stock_quantity);
+            return max(0, (int)$filter_set->min_stock_quantity);
         }
 
-        return max(0, (int) config('app.products.minimum_stock_quantity', 1));
+        return max(0, (int)config('app.products.minimum_stock_quantity', 1));
     }
 }
