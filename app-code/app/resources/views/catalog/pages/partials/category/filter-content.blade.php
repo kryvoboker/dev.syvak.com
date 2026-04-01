@@ -2,6 +2,15 @@
     $filter_price_group_code = config('catalog-filter.filter_groups.price');
 @endphp
 
+<script>
+    window.app_params = {
+        ...(window.app_params ?? {}),
+        ...@json([
+                'catalog_filter_ajax_url' => $category_page_settings['catalog_filter_ajax_url'],
+            ])
+    };
+</script>
+
 <div class="overlay overlay-open:translate-x-0 drawer drawer-start category-filter-drawer justify-start bg-black space-y-2 hidden p-4"
      id="category-filter-drawer"
      role="dialog"
