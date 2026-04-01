@@ -1,4 +1,8 @@
-<div class="overlay overlay-open:translate-x-0 drawer drawer-start category-filter-drawer justify-start bg-black space-y-2     Hidden     open opened    p-4"
+@php
+    $filter_price_group_code = config('catalog-filter.filter_groups.price');
+@endphp
+
+<div class="overlay overlay-open:translate-x-0 drawer drawer-start category-filter-drawer justify-start bg-black space-y-2 hidden p-4"
      id="category-filter-drawer"
      role="dialog"
      tabindex="-1">
@@ -27,13 +31,52 @@
         </div>
 
         @if(isset($is_show_clear_filters_link) && $is_show_clear_filters_link === true)
-            <div class="category-filter__choosen-filters-list flex gap-2 text-sm mt-0.5">
-                <a class="category-filter__clear-all-link border border-light-gray rounded-2xl bg-transparent hover:bg-white
-                          hover:text-black ease-in-out duration-200 p-1"
+            <div class="category-filter__choosen-filters-list flex flex-wrap gap-2 text-sm mt-0.5">
+                <a class="category-filter__clear-all-link"
                    href="{{ $category_page_settings['clear_filters_url'] ?? '#' }}"
                    id="category-filter-clear-all-link">
                     {{ __('catalog/default.buttons.clear_all') }}
                 </a>
+
+                @foreach($filters_data as $filter_data)
+                    @if($filter_data['group_code'] == $filter_price_group_code && isset($filter_data['range']['selected_from']) && isset($filter_data['range']['selected_to']))
+                        <a class="category-filter__remove-choosen-filter-link"
+                           href="{{ $filter_data['range']['cancel_link'] ?? '#' }}"
+                           id="category-filter-remove-choosen-filter-link">
+                            @isset($filter_data['group_name'])
+                                <span>
+                                    {{ $filter_data['group_name'] }}: {{ $filter_data['range']['selected_from'] }} - {{ $filter_data['range']['selected_to'] }}
+                                </span>
+                            @else
+                                <span>
+                                    {{ $filter_data['range']['selected_from'] }} - {{ $filter_data['range']['selected_to'] }}
+                                </span>
+                            @endisset
+
+                            <span class="icon-[proicons--cancel] custom-icon"></span>
+                        </a>
+                    @endif
+
+                    @foreach($filter_data['items'] as $filter_item_data)
+                        @if($filter_item_data['is_checked'] === true)
+                            <a class="category-filter__remove-choosen-filter-link"
+                               href="{{ $filter_item_data['cancel_link'] }}"
+                               id="category-filter-remove-choosen-filter-link">
+                                @isset($filter_data['group_name'])
+                                    <span>
+                                        {{ $filter_data['group_name'] }}: {{ $filter_item_data['name'] }}
+                                    </span>
+                                @else
+                                    <span>
+                                        {{ $filter_item_data['name'] }}
+                                    </span>
+                                @endisset
+
+                                <span class="icon-[proicons--cancel] custom-icon"></span>
+                            </a>
+                        @endif
+                    @endforeach
+                @endforeach
             </div>
         @endif
 
@@ -61,7 +104,7 @@
         <div class="category-filter__items-list">
             <div class="accordion divide-opacity-light-gray-40% divide-y">
                 @foreach($filters_data as $filter_data)
-                    @if($filter_data['group_code'] == config('catalog-filter.filter_groups.price'))
+                    @if($filter_data['group_code'] == $filter_price_group_code)
                         <script>
                             window.app_params = {
                                 ...(window.app_params ?? {}),
@@ -75,7 +118,7 @@
                         </script>
                     @endif
 
-                    @continue($filter_data['group_code'] == config('catalog-filter.filter_groups.price'))
+                    @continue($filter_data['group_code'] == $filter_price_group_code)
 
                     <div class="accordion-item"
                          id="{{ $filter_data['group_id'] }}"
@@ -112,7 +155,7 @@
                                             {{ $filter_item_data['name'] }}
                                         </label>
 
-                                        <span class="badge badge-outline {{ $filter_item_data['total_products'] > 0 ? '' : 'badge-error' }} ms-auto">
+                                        <span class="badge badge-outline {{ $filter_item_data['total_products'] > 0 ? '' : 'badge-error' }} px-1.5 ms-auto">
                                             {{ $filter_item_data['total_products'] }}
                                         </span>
                                     </div>
