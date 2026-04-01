@@ -7,6 +7,7 @@ return [
 
     'tabs' => [
         'general'           => 'General settings',
+        'for_admin'         => 'For admin',
         'sorting'           => 'Products sorting',
         'localized_content' => 'Localized content',
     ],
@@ -16,6 +17,13 @@ return [
         'is_ajax_products_loading_enabled' => 'Enable AJAX products loading',
         'product_image_width'              => 'Product image width',
         'product_image_height'             => 'Product image height',
+        'category_upload_max_size_mb'      => 'Category image upload max size (MB)',
+        'category_image_upload_directory'  => 'Category image upload directory',
+        'category_no_image_path'           => 'Category fallback no-image',
+        'category_preview_list_width'      => 'Category preview width in list (admin)',
+        'category_preview_list_height'     => 'Category preview height in list (admin)',
+        'category_preview_page_width'      => 'Category preview width in page (admin)',
+        'category_preview_page_height'     => 'Category preview height in page (admin)',
         'model'                            => 'Category page settings',
         'plural_model'                     => 'Category page settings',
         'is_sorting_enabled'               => 'Enable product sorting',
@@ -35,5 +43,9 @@ return [
 
     'actions' => [
         'open_wiki' => 'Open settings wiki',
+    ],
+
+    'helpers' => [
+        'category_image_upload_directory' => 'Use placeholders {year} and {month} (for example: images/categories/{year}/{month}).',
     ],
 ];

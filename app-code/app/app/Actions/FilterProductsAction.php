@@ -118,7 +118,9 @@ readonly class FilterProductsAction
 
         $available_keys_for_show_clear_btn = config('catalog-filter.available_keys_for_show_clear_btn', []);
         $is_show_clear_filters_link        = array_any(
-            array_keys($validated_data),
+            $validated_data
+                |> array_filter(...)
+                |> array_keys(...),
             fn(mixed $value): bool => in_array($value, $available_keys_for_show_clear_btn, true),
         );
 
@@ -497,8 +499,7 @@ readonly class FilterProductsAction
         ?CatalogFilterSet    $filter_set,
         int                  $minimum_stock_quantity,
     ): array {
-        $app_settings        = get_app_settings();
-        $catalog_image_sizes = $app_settings->image_sizes?->firstWhere('name', 'search_product') ?? [];
+        $catalog_image_sizes = $this->page_settings_bootstrap_service->getCategoryProductImageSize();
         $locale_key          = config('localization.locale_parameter');
 
         return collect($products->items())
@@ -784,9 +785,17 @@ readonly class FilterProductsAction
         }
 
         $request               = request();
-        $next_query_parameters = (array)$request->query()
-                |> (fn($x) => $this->replaceQueryValueByGetKey(query_parameters: $x, get_key: $price_from_get_key, next_value: null))
-                |> (fn($x) => $this->replaceQueryValueByGetKey(query_parameters: $x, get_key: $price_to_get_key, next_value: null));
+        $next_query_parameters = (array)$request->query();
+        $next_query_parameters = $this->replaceQueryValueByGetKey(
+            query_parameters: $next_query_parameters,
+            get_key         : $price_from_get_key,
+            next_value      : null,
+        );
+        $next_query_parameters = $this->replaceQueryValueByGetKey(
+            query_parameters: $next_query_parameters,
+            get_key         : $price_to_get_key,
+            next_value      : null,
+        );
 
         $next_query_string = Arr::query($next_query_parameters);
 
@@ -981,6 +990,6 @@ readonly class FilterProductsAction
             return max(0, (int)$filter_set->min_stock_quantity);
         }
 
-        return max(0, (int)config('app.products.minimum_stock_quantity', 1));
+        return max(0, $this->page_settings_bootstrap_service->getProductMinimumStockQuantity());
     }
 }

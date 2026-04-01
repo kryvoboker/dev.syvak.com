@@ -19,7 +19,6 @@ return new class() extends Migration
                 ->cascadeOnDelete();
 
             $table->string('name', 255)->nullable(false);
-            $table->string('slug', 255)->unique()->nullable(false);
             $table->string('placement', 255)->nullable();
             $table->string('context_key', 255)->nullable();
             $table->boolean('is_enabled')->default(true)->nullable(false);

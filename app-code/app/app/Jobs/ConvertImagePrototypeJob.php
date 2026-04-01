@@ -106,9 +106,25 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
         $manager    = new ImageManager(new Driver());
         $img        = $manager->read($prototype_abs);
         $target_abs = Storage::path($target_abs);
+        $webp_quality = max(
+            1,
+            (int) data_get(
+                get_app_settings(),
+                'system_settings.images.webp_quality',
+                (int) config('app.images.webp_quality', 80),
+            ),
+        );
+        $avif_quality = max(
+            1,
+            (int) data_get(
+                get_app_settings(),
+                'system_settings.images.avif_quality',
+                (int) config('app.images.avif_quality', 50),
+            ),
+        );
 
         if ($format === 'webp') {
-            $img->toWebp(quality: (int) config('app.images.webp_quality'))->save($target_abs);
+            $img->toWebp(quality: $webp_quality)->save($target_abs);
 
             return;
         }
@@ -116,7 +132,7 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
         // AVIF: support depends on driver/build (GD/Imagick + libavif)
         // If not supported - exit without error
         try {
-            $img->toAvif(quality: (int) config('app.images.avif_quality'))->save($target_abs);
+            $img->toAvif(quality: $avif_quality)->save($target_abs);
         } catch (Throwable $e) {
             Log::channel('stack')->warning('AVIF conversion not supported on this server.', [
                 'error' => $e->getMessage(),

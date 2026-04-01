@@ -69,6 +69,52 @@ class CategoryPageSettingsForm
                             ])
                             ->columns(1),
 
+                        Tabs\Tab::make(__('admin/settings/category_page_settings.tabs.for_admin'))
+                            ->schema([
+                                TextInput::make('category_upload_max_size_mb')
+                                    ->label(__('admin/settings/category_page_settings.labels.category_upload_max_size_mb'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+
+                                TextInput::make('category_image_upload_directory')
+                                    ->label(__('admin/settings/category_page_settings.labels.category_image_upload_directory'))
+                                    ->helperText(__('admin/settings/category_page_settings.helpers.category_image_upload_directory'))
+                                    ->placeholder('images/categories/{year}/{month}')
+                                    ->rules(['required', 'string', 'max:255'])
+                                    ->required(),
+
+                                TextInput::make('category_no_image_path')
+                                    ->label(__('admin/settings/category_page_settings.labels.category_no_image_path'))
+                                    ->rules(['required', 'string', 'max:255'])
+                                    ->required(),
+
+                                TextInput::make('category_preview_list_width')
+                                    ->label(__('admin/settings/category_page_settings.labels.category_preview_list_width'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+
+                                TextInput::make('category_preview_list_height')
+                                    ->label(__('admin/settings/category_page_settings.labels.category_preview_list_height'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+
+                                TextInput::make('category_preview_page_width')
+                                    ->label(__('admin/settings/category_page_settings.labels.category_preview_page_width'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+
+                                TextInput::make('category_preview_page_height')
+                                    ->label(__('admin/settings/category_page_settings.labels.category_preview_page_height'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+                            ])
+                            ->columns(1),
+
                         Tabs\Tab::make(__('admin/settings/category_page_settings.tabs.sorting'))
                             ->schema([
                                 Toggle::make('is_sorting_enabled')

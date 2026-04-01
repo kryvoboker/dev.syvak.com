@@ -25,7 +25,14 @@ final readonly class ImageUrlBuilderService
      */
     public function multipleUrl(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
     {
-        $total_sizes_for_generate = (int) config('app.images.total_sizes_for_generate');
+        $total_sizes_for_generate = max(
+            1,
+            (int) data_get(
+                get_app_settings(),
+                'system_settings.images.total_sizes_for_generate',
+                (int) config('app.images.total_sizes_for_generate', 4),
+            ),
+        );
         $path                     = (string) $path;
         $height ??= $width;
 
@@ -60,8 +67,8 @@ final readonly class ImageUrlBuilderService
 
         if (
             Storage::fileExists($path) === false ||
-            $width > (int) config('app.images.max_image_width_for_convert') ||
-            $height > (int) config('app.images.max_image_height_for_convert')
+            $width > (int) data_get(get_app_settings(), 'system_settings.images.max_image_width_for_convert', (int) config('app.images.max_image_width_for_convert', 2500)) ||
+            $height > (int) data_get(get_app_settings(), 'system_settings.images.max_image_height_for_convert', (int) config('app.images.max_image_height_for_convert', 2500))
         ) {
             return $this->assetVersioned($path);
         }
@@ -158,7 +165,11 @@ final readonly class ImageUrlBuilderService
     private function checkSourceImage(string &$path): void
     {
         if (Storage::fileExists($path) === false) {
-            $path = config('app.images.default_no_image');
+            $path = (string) data_get(
+                get_app_settings(),
+                'system_settings.images.default_no_image',
+                (string) config('app.images.default_no_image', 'images/no-image.png'),
+            );
         }
     }
 
@@ -270,7 +281,7 @@ final readonly class ImageUrlBuilderService
                 $image_obj->pad($w, $h, $bg_color);
             }
 
-            $image_obj->save($dst, (int) config('app.images.prototype_quality'));
+            $image_obj->save($dst, (int) data_get(get_app_settings(), 'system_settings.images.prototype_quality', (int) config('app.images.prototype_quality', 100)));
 
             return;
         }
@@ -278,6 +289,6 @@ final readonly class ImageUrlBuilderService
         // Non-square: use cover to fill the dimensions
         $image_obj
             ->cover($w, $h)
-            ->save($dst, (int) config('app.images.prototype_quality'));
+            ->save($dst, (int) data_get(get_app_settings(), 'system_settings.images.prototype_quality', (int) config('app.images.prototype_quality', 100)));
     }
 }

@@ -141,10 +141,47 @@ return [
         'category' => [
             'products_per_page_limit'       => 20,
             'ajax_products_loading_enabled' => true,
+            'product_image_width'           => 420,
+            'product_image_height'          => 420,
             'filter_modes'                  => [
                 'range'    => 'Range',
                 'boolean'  => 'Boolean',
                 'multiple' => 'Multiple',
+            ],
+        ],
+        'product' => [
+            'minimum_stock_quantity' => (int) env('PRODUCT_MINIMUM_STOCK_QUANTITY', 1),
+            'ean_max_length'         => (int) env('PRODUCT_EAN_MAX_LENGTH', 13),
+            'image_width'            => (int) env('PRODUCT_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_WIDTH', 500),
+            'image_height'           => (int) env('PRODUCT_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_HEIGHT', 500),
+            'for_customer'           => [
+                'minimum_stock_quantity' => (int) env('PRODUCT_MINIMUM_STOCK_QUANTITY', 1),
+                'image_width'            => (int) env('PRODUCT_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_WIDTH', 500),
+                'image_height'           => (int) env('PRODUCT_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_HEIGHT', 500),
+            ],
+            'for_admin' => [
+                'ean_max_length'         => (int) env('PRODUCT_EAN_MAX_LENGTH', 13),
+                'upload_max_size_kb'     => (int) env('MAX_UPLOAD_PRODUCT_IMAGE_SIZE_KB', 5120),
+                'image_upload_directory' => env('PRODUCTS_IMAGES_PATH', 'images/products') . '/' . date('Y/m'),
+                'no_image'               => env('DEFAULT_PRODUCT_NO_IMAGE_PATH', 'images/no-image.png'),
+                'preview_in_list_width'  => (int) env('PRODUCT_IMAGE_PREVIEW_IN_LIST_IN_ADMIN_WIDTH', 100),
+                'preview_in_list_height' => (int) env('PRODUCT_IMAGE_PREVIEW_IN_LIST_IN_ADMIN_HEIGHT', 100),
+                'preview_in_page_width'  => (int) env('PRODUCT_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_WIDTH', 500),
+                'preview_in_page_height' => (int) env('PRODUCT_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_HEIGHT', 500),
+            ],
+        ],
+        'search' => [
+            'products_per_page_limit' => (int) env('SEARCH_PRODUCTS_PER_PAGE', 15),
+            'images'                  => [
+                'search_product' => [
+                    'width'  => 219,
+                    'height' => 219,
+                ],
+                'search_not_found' => [
+                    'path'   => env('DEFAULT_IMAGE_SEARCH_NOT_FOUND_PATH', 'images/search/not-found.jpg'),
+                    'width'  => 600,
+                    'height' => 600,
+                ],
             ],
         ],
     ],

@@ -11,6 +11,10 @@ class PageSetting extends Model
 {
     public const string PAGE_TYPE_CATEGORY = 'category';
 
+    public const string PAGE_TYPE_PRODUCT = 'product';
+
+    public const string PAGE_TYPE_SEARCH = 'search';
+
     public const string ITEM_TYPE_SORTING = 'sorting';
 
     public const string ITEM_TYPE_FILTER = 'filter';

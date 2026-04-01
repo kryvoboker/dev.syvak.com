@@ -23,6 +23,9 @@ class AppSetting extends Model
         'iframe_map',
         'timezone',
         'image_sizes',
+        'system_settings',
+        'user_settings',
+        'ai_settings',
     ];
 
     /**
@@ -41,6 +44,9 @@ class AppSetting extends Model
             'work_time'         => 'array',
             'contact_addresses' => 'array',
             'image_sizes'       => 'array',
+            'system_settings'   => 'array',
+            'user_settings'     => 'array',
+            'ai_settings'       => 'array',
         ];
     }
 
@@ -80,6 +86,27 @@ class AppSetting extends Model
     }
 
     public function contactAddresses(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
+    }
+
+    public function aiSettings(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
+    }
+
+    public function systemSettings(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+        );
+    }
+
+    public function userSettings(): Attribute
     {
         return Attribute::make(
             set: fn ($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
