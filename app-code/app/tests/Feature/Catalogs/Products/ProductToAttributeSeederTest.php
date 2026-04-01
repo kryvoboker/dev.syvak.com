@@ -145,7 +145,7 @@ class ProductToAttributeSeederTest extends TestCase
 
         DB::table('attributes')->insert([
             [
-                'id'         => 6,
+                'id'         => 7,
                 'sort_order' => 1,
                 'is_active'  => true,
                 'created_at' => $now_timestamp,
@@ -162,14 +162,14 @@ class ProductToAttributeSeederTest extends TestCase
 
         DB::table('attribute_descriptions')->insert([
             [
-                'attribute_id' => 6,
+                'attribute_id' => 7,
                 'language_id'  => (int) $languages_by_code['uk'],
                 'name'         => 'Розмір',
                 'created_at'   => $now_timestamp,
                 'updated_at'   => $now_timestamp,
             ],
             [
-                'attribute_id' => 6,
+                'attribute_id' => 7,
                 'language_id'  => (int) $languages_by_code['en'],
                 'name'         => 'Size',
                 'created_at'   => $now_timestamp,
@@ -217,7 +217,7 @@ class ProductToAttributeSeederTest extends TestCase
             'products_count'    => 8,
             'attributes_count'  => 2,
             'languages_count'   => 2,
-            'size_attribute_id' => 6,
+            'size_attribute_id' => 7,
             'uk_language_id'    => (int) $languages_by_code['uk'],
         ];
     }
