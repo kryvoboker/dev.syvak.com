@@ -36,11 +36,25 @@ class SetCommonPreferences
             $device_type = config('devices.types.desktop');
         }
 
+        $max_viewport_width = max(
+            1,
+            (int) data_get(
+                $app_settings_service->getSettings(),
+                'system_settings.frontend.max_viewport_width',
+                (int) config('app.frontend.max_viewport_width', 1920),
+            ),
+        );
+        $default_no_image_path = (string) data_get(
+            $app_settings_service->getSettings(),
+            'system_settings.images.default_no_image',
+            (string) config('app.images.default_no_image', 'images/no-image.png'),
+        );
+
         View::share([
             'app_settings'        => $app_settings_service->getSettings(),
-            'no_image_url'        => asset('storage/' . config('app.images.default_no_image')),
+            'no_image_url'        => asset('storage/' . $default_no_image_path),
             'current_locale'      => app()->getLocale(),
-            'max_viewport_width'  => (int)config('app.frontend.max_viewport_width'),
+            'max_viewport_width'  => $max_viewport_width,
             'current_device_type' => $device_type,
         ]);
 

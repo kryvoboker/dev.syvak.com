@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     // Menu items
-    'menu'         => [
+    'menu' => [
         'item_catalog'              => 'Каталог',
         'info_pages'                => 'Інформаційні сторінки',
         'item_users'                => 'Користувачі',
@@ -15,7 +15,7 @@ return [
     ],
 
     // Texts
-    'texts'        => [
+    'texts' => [
         'language'  => 'Мова',
         'facebook'  => 'Facebook',
         'twitter'   => 'Twitter',
@@ -26,7 +26,7 @@ return [
     ],
 
     // Columns
-    'columns'      => [
+    'columns' => [
         'title'             => 'Заголовок',
         'name'              => 'Ім\'я',
         'lastname'          => 'Прізвище',
@@ -56,7 +56,7 @@ return [
     ],
 
     // Labels
-    'labels'       => [
+    'labels' => [
         'model'                 => 'Модель',
         'sku'                   => 'Артикул',
         'ean'                   => 'EAN',
@@ -114,7 +114,7 @@ return [
     ],
 
     // Buttons
-    'buttons'      => [
+    'buttons' => [
         'save'   => 'Зберегти',
         'create' => 'Створити',
         'edit'   => 'Редагувати',
@@ -124,14 +124,15 @@ return [
     ],
 
     // Helpers
-    'helpers'      => [
-        'categories'      => 'Виберіть категорії',
-        'parent_category' => 'Виберіть батьківську категорію, під якою ця категорія буде вкладена. Залиште порожнім, щоб зробити її категорією верхнього рівня.',
-        'svg_icon'        => 'Ви можете вставити сюди код SVG іконки. З міркувань безпеки переконайтеся, що код SVG не містить тегів <code>&lt;script&gt;</code>.',
+    'helpers' => [
+        'categories'         => 'Виберіть категорії',
+        'parent_category'    => 'Виберіть батьківську категорію, під якою ця категорія буде вкладена. Залиште порожнім, щоб зробити її категорією верхнього рівня.',
+        'svg_icon'           => 'Ви можете вставити сюди код SVG іконки. З міркувань безпеки переконайтеся, що код SVG не містить тегів <code>&lt;script&gt;</code>.',
+        'max_upload_size_mb' => 'Максимальний розмір файлу: :size МБ.',
     ],
 
     // Tabs
-    'tabs'         => [
+    'tabs' => [
         'general'      => 'Загальні',
         'translations' => 'Переклади',
         'categories'   => 'Категорії',
@@ -143,7 +144,7 @@ return [
     ],
 
     // Sections
-    'sections'     => [
+    'sections' => [
         'basic_info'        => 'Основна інформація',
         'stock'             => 'Наявність',
         'pricing'           => 'Ціни',
@@ -160,7 +161,7 @@ return [
     ],
 
     // Filters
-    'filters'      => [
+    'filters' => [
         'active'                  => 'Активні',
         'default'                 => 'За замовчуванням',
         'default_only'            => 'Тільки за замовчуванням',
@@ -209,12 +210,12 @@ return [
     ],
 
     // Success
-    'success'      => [
+    'success' => [
         'title' => 'Успіх',
     ],
 
     // Errors
-    'errors'       => [
+    'errors' => [
         'title'                           => 'Помилка',
         'no_language'                     => 'Не встановлено мову за замовчуванням. Будь ласка, налаштуйте мови в налаштуваннях!',
         'validation_duplicate_categories' => 'Обрані категорії містять дублікати. Будь ласка, видаліть дублікати і спробуйте ще раз.',

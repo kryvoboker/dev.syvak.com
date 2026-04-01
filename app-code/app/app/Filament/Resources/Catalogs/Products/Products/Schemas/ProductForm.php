@@ -7,11 +7,12 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
+use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryPath;
-use App\Models\ApplicationSettings\Language;
 use App\Models\Users\UserGroup;
+use App\Services\PageSettings\PageSettingsBootstrapService;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -59,9 +60,16 @@ class ProductForm
     /**
      * Create general information tab
      */
-    protected static function createGeneralTabs(): Tabs\Tab
+    protected static function createGeneralTabs(): Tab
     {
-        return Tabs\Tab::make(__('admin/default.tabs.general'))
+        $admin_image_settings       = self::resolveProductAdminImageSettings();
+        $product_upload_max_size_kb = (int) data_get($admin_image_settings, 'upload.max_size_kb', (int) config('app.images.product.upload.max_size_kb'));
+        $product_upload_max_size_mb = self::resolveMegabytesFromKilobytes($product_upload_max_size_kb);
+        $image_upload_directory      = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.product.image_path')));
+        $preview_in_page_width      = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.width', (int) config('app.images.product.preview_in_page_in_admin.width')));
+        $preview_in_page_height     = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.height', (int) config('app.images.product.preview_in_page_in_admin.height')));
+
+        return Tab::make(__('admin/default.tabs.general'))
             ->schema([
                 Section::make(__('admin/default.sections.basic_info'))
                     ->schema([
@@ -82,7 +90,7 @@ class ProductForm
                             ->label(__('admin/default.labels.ean'))
                             ->numeric()
                             ->minValue(0)
-                            ->rules(['required', 'numeric', 'max_digits:' . (int) config('app.products.ean_max_length')])
+                            ->rules(['required', 'numeric', 'max_digits:' . self::resolveEanMaxLength()])
                             ->required(),
                     ])
                     ->columns(3),
@@ -124,14 +132,15 @@ class ProductForm
                     ->schema([
                         FileUpload::make('image')
                             ->label(__('admin/default.labels.image'))
+                            ->helperText(__('admin/default.helpers.max_upload_size_mb', ['size' => $product_upload_max_size_mb]))
                             ->image()
-                            ->directory(config('app.images.product.image_path'))
-                            ->maxSize((int) config('app.images.product.upload.max_size_kb'))
-                            ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . (int) config('app.images.product.upload.max_size_kb')])
+                            ->directory($image_upload_directory)
+                            ->maxSize($product_upload_max_size_kb)
+                            ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . $product_upload_max_size_kb])
                             ->preserveFilenames()
                             ->imageEditor()
-                            ->imageEditorViewportWidth((int) config('app.images.product.preview_in_page_in_admin.width'))
-                            ->imageEditorViewportHeight((int) config('app.images.product.preview_in_page_in_admin.height'))
+                            ->imageEditorViewportWidth($preview_in_page_width)
+                            ->imageEditorViewportHeight($preview_in_page_height)
                             ->imageEditorAspectRatioOptions([
                                 '1:1'  => '1:1',
                                 '4:3'  => '4:3',
@@ -175,21 +184,40 @@ class ProductForm
             ]);
     }
 
+    private static function resolveEanMaxLength(): int
+    {
+        static $ean_max_length_cache = null;
+
+        if (is_int($ean_max_length_cache)) {
+            return $ean_max_length_cache;
+        }
+
+        $ean_max_length_cache = (int) config('app.products.ean_max_length', 13);
+
+        try {
+            $ean_max_length_cache = app(PageSettingsBootstrapService::class)->getProductEanMaxLength();
+        } catch (Throwable) {
+            // Keep config fallback when page settings are not available.
+        }
+
+        return max(1, $ean_max_length_cache);
+    }
+
     /**
      * Create categories tab
      *
      * @param  Collection<Language>  $active_languages
      */
-    protected static function createCategoriesTabs(Collection $active_languages): Tabs\Tab
+    protected static function createCategoriesTabs(Collection $active_languages): Tab
     {
         $current_language_id = self::tryGetCurrentLanguageIdFromActiveLangs($active_languages);
 
         if ($current_language_id === null) {
-            return Tabs\Tab::make(__('admin/default.tabs.categories'))
+            return Tab::make(__('admin/default.tabs.categories'))
                 ->schema([]);
         }
 
-        return Tabs\Tab::make(__('admin/default.tabs.categories'))
+        return Tab::make(__('admin/default.tabs.categories'))
             ->schema([
                 Section::make(__('admin/default.sections.categories'))
                     ->schema([
@@ -298,9 +326,16 @@ class ProductForm
     /**
      * Create images tab
      */
-    protected static function createImagesTabs(): Tabs\Tab
+    protected static function createImagesTabs(): Tab
     {
-        return Tabs\Tab::make(__('admin/default.tabs.images'))
+        $admin_image_settings       = self::resolveProductAdminImageSettings();
+        $product_upload_max_size_kb = (int) data_get($admin_image_settings, 'upload.max_size_kb', (int) config('app.images.product.upload.max_size_kb'));
+        $product_upload_max_size_mb = self::resolveMegabytesFromKilobytes($product_upload_max_size_kb);
+        $image_upload_directory      = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.product.image_path')));
+        $preview_in_page_width      = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.width', (int) config('app.images.product.preview_in_page_in_admin.width')));
+        $preview_in_page_height     = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.height', (int) config('app.images.product.preview_in_page_in_admin.height')));
+
+        return Tab::make(__('admin/default.tabs.images'))
             ->schema([
                 Section::make(__('admin/default.sections.additional_images'))
                     ->schema([
@@ -309,14 +344,15 @@ class ProductForm
                             ->schema([
                                 FileUpload::make('image')
                                     ->label(__('admin/default.labels.image'))
+                                    ->helperText(__('admin/default.helpers.max_upload_size_mb', ['size' => $product_upload_max_size_mb]))
                                     ->image()
-                                    ->directory(config('app.images.product.image_path'))
-                                    ->maxSize((int) config('app.images.product.upload.max_size_kb'))
-                                    ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . (int) config('app.images.product.upload.max_size_kb')])
+                                    ->directory($image_upload_directory)
+                                    ->maxSize($product_upload_max_size_kb)
+                                    ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . $product_upload_max_size_kb])
                                     ->preserveFilenames()
                                     ->imageEditor()
-                                    ->imageEditorViewportWidth((int) config('app.images.product.preview_in_page_in_admin.width'))
-                                    ->imageEditorViewportHeight((int) config('app.images.product.preview_in_page_in_admin.height'))
+                                    ->imageEditorViewportWidth($preview_in_page_width)
+                                    ->imageEditorViewportHeight($preview_in_page_height)
                                     ->imageEditorAspectRatioOptions([
                                         '1:1'  => '1:1',
                                         '4:3'  => '4:3',
@@ -343,12 +379,65 @@ class ProductForm
             ]);
     }
 
-    /**
-     * @return Tab
-     */
-    protected static function createDiscountsTabs(): Tabs\Tab
+    private static function resolveMegabytesFromKilobytes(int $kilobytes): string
     {
-        return Tabs\Tab::make(__('admin/default.tabs.discounts'))
+        return number_format(max(1, $kilobytes) / 1024, 2, '.', '');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function resolveProductAdminImageSettings(): array
+    {
+        static $settings_cache = null;
+
+        if (is_array($settings_cache)) {
+            return $settings_cache;
+        }
+
+        $settings_cache = [
+            'upload' => [
+                'max_size_kb' => (int) config('app.images.product.upload.max_size_kb', 5120),
+                'directory'   => (string) config('app.images.product.image_path', 'images/products/' . date('Y/m')),
+            ],
+            'images' => [
+                'preview_in_page' => [
+                    'width'  => (int) config('app.images.product.preview_in_page_in_admin.width', 500),
+                    'height' => (int) config('app.images.product.preview_in_page_in_admin.height', 500),
+                ],
+            ],
+        ];
+
+        try {
+            $service_settings = app(PageSettingsBootstrapService::class)->getProductSettings();
+
+            if (is_array($service_settings)) {
+                $settings_cache = array_replace_recursive(
+                    $settings_cache,
+                    [
+                        'upload' => [
+                            'max_size_kb' => (int) data_get($service_settings, 'admin.upload.max_size_kb', (int) config('app.images.product.upload.max_size_kb', 5120)),
+                            'directory'   => (string) data_get($service_settings, 'admin.upload.directory', (string) config('app.images.product.image_path', 'images/products/' . date('Y/m'))),
+                        ],
+                        'images' => [
+                            'preview_in_page' => [
+                                'width'  => (int) data_get($service_settings, 'admin.images.preview_in_page.width', (int) config('app.images.product.preview_in_page_in_admin.width', 500)),
+                                'height' => (int) data_get($service_settings, 'admin.images.preview_in_page.height', (int) config('app.images.product.preview_in_page_in_admin.height', 500)),
+                            ],
+                        ],
+                    ],
+                );
+            }
+        } catch (Throwable) {
+            // Keep config fallback when page settings are not available.
+        }
+
+        return $settings_cache;
+    }
+
+    protected static function createDiscountsTabs(): Tab
+    {
+        return Tab::make(__('admin/default.tabs.discounts'))
             ->schema([
                 Section::make(__('admin/default.sections.discounts'))
                     ->schema([
@@ -426,16 +515,16 @@ class ProductForm
      *
      * @param  Collection<Language>  $active_languages
      */
-    protected static function createAttributesTabs(Collection $active_languages): Tabs\Tab
+    protected static function createAttributesTabs(Collection $active_languages): Tab
     {
         $current_language_id = self::tryGetCurrentLanguageIdFromActiveLangs($active_languages);
 
         if ($current_language_id === null) {
-            return Tabs\Tab::make(__('admin/default.tabs.attributes'))
+            return Tab::make(__('admin/default.tabs.attributes'))
                 ->schema([]);
         }
 
-        return Tabs\Tab::make(__('admin/default.tabs.attributes'))
+        return Tab::make(__('admin/default.tabs.attributes'))
             ->schema([
                 Section::make(__('admin/default.sections.attributes'))
                     ->schema([

@@ -23,6 +23,9 @@ class AppSettingsData extends Data
         public ?string $iframe_map,
         public ?string $timezone,
         public ?Collection $image_sizes,
+        public ?Collection $system_settings,
+        public ?Collection $user_settings,
+        public ?Collection $ai_settings,
         public ?int $language_id,
         public ?int $user_group_id,
     ) {}
@@ -46,6 +49,9 @@ class AppSettingsData extends Data
             iframe_map       : $data['iframe_map'] ?? null,
             timezone         : $data['timezone'] ?? null,
             image_sizes      : isset($data['image_sizes']) ? collect($data['image_sizes']) : null,
+            system_settings  : isset($data['system_settings']) ? collect($data['system_settings']) : null,
+            user_settings    : isset($data['user_settings']) ? collect($data['user_settings']) : null,
+            ai_settings      : isset($data['ai_settings']) ? collect($data['ai_settings']) : null,
             language_id      : $data['language_id'] ?? null,
             user_group_id    : $data['user_group_id'] ?? null,
         );

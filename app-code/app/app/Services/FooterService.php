@@ -17,6 +17,11 @@ class FooterService
         $logo_sizes   = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
         $logo_width   = (int) ($logo_sizes['width'] ?? config('app.images.logo_width'));
         $logo_height  = (int) ($logo_sizes['height'] ?? config('app.images.logo_height'));
+        $logo_path    = (string) data_get(
+            $app_settings,
+            'system_settings.images.path_to_logo',
+            (string) config('app.images.path_to_logo', 'images/logo.png'),
+        );
 
         /** @var Collection<Category>|\Illuminate\Support\Collection<Category> $categories */
         $categories = $params['categories'] ?? new Category()->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
@@ -26,7 +31,7 @@ class FooterService
         return [
             'logo_data' => [
                 'urls' => multiple_convert_img_and_get_url(
-                    config('app.images.path_to_logo'),
+                    $logo_path,
                     $logo_width,
                     $logo_height,
                     is_square: false,

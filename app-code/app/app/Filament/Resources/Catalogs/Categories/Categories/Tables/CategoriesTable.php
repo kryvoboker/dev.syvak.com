@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Catalogs\Categories\Categories\Tables;
 
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Categories\Category;
+use App\Services\PageSettings\PageSettingsBootstrapService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -18,6 +19,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class CategoriesTable
 {
@@ -26,6 +28,29 @@ class CategoriesTable
     public static function configure(Table $table): Table
     {
         $current_language_id = self::getCurrentLanguageId();
+        $admin_image_settings = [
+            'images' => [
+                'no_image' => [
+                    'path' => (string) config('app.images.category.no_image', 'images/no-image.png'),
+                ],
+                'preview_in_list' => [
+                    'width'  => (int) config('app.images.category.preview_in_list_in_admin.width', 100),
+                    'height' => (int) config('app.images.category.preview_in_list_in_admin.height', 100),
+                ],
+            ],
+        ];
+
+        try {
+            $admin_image_settings = array_replace_recursive(
+                $admin_image_settings,
+                app(PageSettingsBootstrapService::class)->getCategoryAdminImageSettings(),
+            );
+        } catch (Throwable) {
+            // Keep config fallback when page settings are not available.
+        }
+
+        $preview_list_width = max(1, (int) data_get($admin_image_settings, 'images.preview_in_list.width', 100));
+        $no_image_path      = (string) data_get($admin_image_settings, 'images.no_image.path', 'images/no-image.png');
 
         return $table
             ->modifyQueryUsing(function (Builder $query) {
@@ -56,14 +81,14 @@ class CategoriesTable
                             $description = $record->categoryDescription->first();
                         }
 
-                        return $description?->name ?? '-';
+                        return (string) data_get($description, 'name', '-');
                     }),
 
                 ImageColumn::make('icon')
                     ->label(__('admin/default.columns.image'))
-                    ->imageSize((int) config('app.images.category.preview_in_list_in_admin.width'))
+                    ->imageSize($preview_list_width)
                     ->checkFileExistence()
-                    ->defaultImageUrl(config('app.images.category.no_image'))
+                    ->defaultImageUrl(Storage::url($no_image_path))
                     ->extraImgAttributes([
                         'decoding' => 'async',
                         'loading'  => 'lazy',

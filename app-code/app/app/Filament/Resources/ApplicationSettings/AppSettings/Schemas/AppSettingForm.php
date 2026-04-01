@@ -6,6 +6,7 @@ namespace App\Filament\Resources\ApplicationSettings\AppSettings\Schemas;
 
 use App\Filament\Resources\Trait\LanguageTrait;
 use Carbon\Carbon;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -37,10 +38,67 @@ class AppSettingForm
                             ])
                             ->columns(1),
 
-                        // Contact Information Tab with language tabs inside
                         Tabs\Tab::make(__('admin/settings/app_settings.tabs.contacts'))
                             ->schema([
                                 self::createLanguageTabs($active_languages, 'contacts'),
+                            ])
+                            ->columns(1),
+
+                        Tabs\Tab::make(__('admin/settings/app_settings.tabs.user'))
+                            ->schema([
+                                TextInput::make('user_settings.upload.max_size_mb')
+                                    ->label(__('admin/settings/app_settings.labels.user_upload_max_size_mb'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.user_upload_max_size_mb'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+
+                                TextInput::make('user_settings.image_path')
+                                    ->label(__('admin/settings/app_settings.labels.user_image_path'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.user_image_path'))
+                                    ->placeholder('images/avatars/{year}/{month}')
+                                    ->rules(['required', 'string', 'max:255'])
+                                    ->required(),
+
+                                FileUpload::make('user_settings.no_image')
+                                    ->label(__('admin/settings/app_settings.labels.user_no_image'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.user_no_image'))
+                                    ->image()
+                                    ->directory('images')
+                                    ->visibility('public')
+                                    ->imageEditor()
+                                    ->required(),
+
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('user_settings.preview_in_list_in_admin.width')
+                                            ->label(__('admin/settings/app_settings.labels.user_preview_list_width'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.user_preview_list_width'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(),
+
+                                        TextInput::make('user_settings.preview_in_list_in_admin.height')
+                                            ->label(__('admin/settings/app_settings.labels.user_preview_list_height'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.user_preview_list_height'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(),
+
+                                        TextInput::make('user_settings.preview_in_page_in_admin.width')
+                                            ->label(__('admin/settings/app_settings.labels.user_preview_page_width'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.user_preview_page_width'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(),
+
+                                        TextInput::make('user_settings.preview_in_page_in_admin.height')
+                                            ->label(__('admin/settings/app_settings.labels.user_preview_page_height'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.user_preview_page_height'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(),
+                                    ]),
                             ])
                             ->columns(1),
 
@@ -86,6 +144,76 @@ class AppSettingForm
                                     ->default(config('app.timezone'))
                                     ->required(),
 
+                                TextInput::make('system_settings.max_viewport_width')
+                                    ->label(__('admin/settings/app_settings.labels.max_viewport_width'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.max_viewport_width'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required(),
+
+                                TextInput::make('system_settings.images.path_to_logo')
+                                    ->label(__('admin/settings/app_settings.labels.path_to_logo'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.path_to_logo'))
+                                    ->rules(['required', 'string', 'max:255'])
+                                    ->required(),
+
+                                TextInput::make('system_settings.images.default_no_image')
+                                    ->label(__('admin/settings/app_settings.labels.default_no_image'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.default_no_image'))
+                                    ->rules(['required', 'string', 'max:255'])
+                                    ->required(),
+
+                                Grid::make(3)
+                                    ->schema([
+                                        TextInput::make('system_settings.images.prototype_quality')
+                                            ->label(__('admin/settings/app_settings.labels.prototype_quality'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.prototype_quality'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->maxValue(100)
+                                            ->required(),
+
+                                        TextInput::make('system_settings.images.webp_quality')
+                                            ->label(__('admin/settings/app_settings.labels.webp_quality'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.webp_quality'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->maxValue(100)
+                                            ->required(),
+
+                                        TextInput::make('system_settings.images.avif_quality')
+                                            ->label(__('admin/settings/app_settings.labels.avif_quality'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.avif_quality'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->maxValue(100)
+                                            ->required(),
+                                    ]),
+
+                                Grid::make(3)
+                                    ->schema([
+                                        TextInput::make('system_settings.images.total_sizes_for_generate')
+                                            ->label(__('admin/settings/app_settings.labels.total_sizes_for_generate'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.total_sizes_for_generate'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(),
+
+                                        TextInput::make('system_settings.images.max_image_width_for_convert')
+                                            ->label(__('admin/settings/app_settings.labels.max_image_width_for_convert'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.max_image_width_for_convert'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(),
+
+                                        TextInput::make('system_settings.images.max_image_height_for_convert')
+                                            ->label(__('admin/settings/app_settings.labels.max_image_height_for_convert'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.max_image_height_for_convert'))
+                                            ->numeric()
+                                            ->minValue(1)
+                                            ->required(),
+                                    ]),
+
                                 Repeater::make('image_sizes')
                                     ->label(__('admin/settings/app_settings.labels.image_sizes'))
                                     ->helperText(__('admin/settings/app_settings.helpers.image_sizes'))
@@ -113,6 +241,77 @@ class AppSettingForm
                                             ->required(),
                                     ])
                                     ->columns(3),
+                            ])
+                            ->columns(1),
+
+                        // AI Settings Tab
+                        Tabs\Tab::make(__('admin/settings/app_settings.tabs.ai'))
+                            ->schema([
+                                TextInput::make('ai_settings.api_model')
+                                    ->label(__('admin/settings/app_settings.labels.ai_api_model'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.ai_api_model'))
+                                    ->rules(['required', 'string', 'max:255'])
+                                    ->maxLength(255)
+                                    ->required(),
+
+                                TextInput::make('ai_settings.api_temperature')
+                                    ->label(__('admin/settings/app_settings.labels.ai_api_temperature'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.ai_api_temperature'))
+                                    ->numeric()
+                                    ->rules(['required', 'numeric', 'min:0', 'max:2'])
+                                    ->minValue(0)
+                                    ->maxValue(2)
+                                    ->required(),
+
+                                TextInput::make('ai_settings.api_max_tokens')
+                                    ->label(__('admin/settings/app_settings.labels.ai_api_max_tokens'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.ai_api_max_tokens'))
+                                    ->numeric()
+                                    ->rules(['required', 'numeric', 'min:1'])
+                                    ->minValue(1)
+                                    ->required(),
+
+                                Textarea::make('ai_settings.system_prompt')
+                                    ->label(__('admin/settings/app_settings.labels.ai_system_prompt'))
+                                    ->helperText(__('admin/settings/app_settings.helpers.ai_system_prompt'))
+                                    ->rows(4)
+                                    ->rules(['required', 'string'])
+                                    ->required(),
+
+                                Grid::make()
+                                    ->schema([
+                                        TextInput::make('ai_settings.api_wait_time_seconds')
+                                            ->label(__('admin/settings/app_settings.labels.ai_api_wait_time_seconds'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.ai_api_wait_time_seconds'))
+                                            ->numeric()
+                                            ->rules(['required', 'numeric', 'min:0'])
+                                            ->minValue(0)
+                                            ->required(),
+
+                                        TextInput::make('ai_settings.api_max_calls')
+                                            ->label(__('admin/settings/app_settings.labels.ai_api_max_calls'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.ai_api_max_calls'))
+                                            ->numeric()
+                                            ->rules(['required', 'numeric', 'min:1'])
+                                            ->minValue(1)
+                                            ->required(),
+
+                                        TextInput::make('ai_settings.api_max_retries')
+                                            ->label(__('admin/settings/app_settings.labels.ai_api_max_retries'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.ai_api_max_retries'))
+                                            ->numeric()
+                                            ->rules(['required', 'numeric', 'min:0'])
+                                            ->minValue(0)
+                                            ->required(),
+
+                                        TextInput::make('ai_settings.api_max_retry_wait_time_seconds')
+                                            ->label(__('admin/settings/app_settings.labels.ai_api_max_retry_wait_time_seconds'))
+                                            ->helperText(__('admin/settings/app_settings.helpers.ai_api_max_retry_wait_time_seconds'))
+                                            ->numeric()
+                                            ->rules(['required', 'numeric', 'min:0'])
+                                            ->minValue(0)
+                                            ->required(),
+                                    ]),
                             ])
                             ->columns(1),
                     ])
@@ -158,7 +357,7 @@ class AppSettingForm
                 TextInput::make("meta_titles.$lang_code")
                     ->label(__('admin/settings/app_settings.labels.meta_titles'))
                     ->helperText(__('admin/settings/app_settings.helpers.meta_titles'))
-                    ->rules(['nullable', 'string', 'max:255'])
+                    ->rules(['nullable', 'max:255'])
                     ->maxLength(255)
                     ->nullable(),
 
@@ -166,14 +365,14 @@ class AppSettingForm
                     ->label(__('admin/settings/app_settings.labels.meta_descriptions'))
                     ->helperText(__('admin/settings/app_settings.helpers.meta_descriptions'))
                     ->rows(3)
-                    ->rules(['nullable', 'string', 'max:255'])
+                    ->rules(['nullable', 'max:255'])
                     ->maxLength(255)
                     ->nullable(),
 
                 TextInput::make("meta_keywords.$lang_code")
                     ->label(__('admin/settings/app_settings.labels.meta_keywords'))
                     ->helperText(__('admin/settings/app_settings.helpers.meta_keywords'))
-                    ->rules(['nullable', 'string', 'max:255'])
+                    ->rules(['nullable', 'max:255'])
                     ->maxLength(255)
                     ->nullable(),
             ],

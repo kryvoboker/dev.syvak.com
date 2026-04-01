@@ -15,6 +15,11 @@ class HeaderService
         $category     = new Category();
         $app_settings = get_app_settings();
         $logo_sizes   = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
+        $logo_path    = (string) data_get(
+            $app_settings,
+            'system_settings.images.path_to_logo',
+            (string) config('app.images.path_to_logo', 'images/logo.png'),
+        );
         $categories   = $category->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
             $app_settings->language_id,
         )
@@ -42,7 +47,7 @@ class HeaderService
         return [
             'logo_data' => [
                 'urls' => multiple_convert_img_and_get_url(
-                    config('app.images.path_to_logo'),
+                    $logo_path,
                     $logo_width,
                     $logo_height,
                     is_square: false,

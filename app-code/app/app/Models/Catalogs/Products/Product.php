@@ -7,6 +7,7 @@ namespace App\Models\Catalogs\Products;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Trait\HasSlugsTrait;
 use App\Models\Trait\SlugTrait;
+use App\Services\PageSettings\PageSettingsBootstrapService;
 use Database\Factories\Catalogs\Products\ProductFactory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Throwable;
 
 class Product extends Model
 {
@@ -181,7 +183,14 @@ class Product extends Model
 
     public function search(string $keyword, int $per_page): LengthAwarePaginator
     {
-        $app_settings = get_app_settings();
+        $app_settings           = get_app_settings();
+        $minimum_stock_quantity = (int) config('app.products.minimum_stock_quantity', 1);
+
+        try {
+            $minimum_stock_quantity = app(PageSettingsBootstrapService::class)->getProductMinimumStockQuantity();
+        } catch (Throwable) {
+            // Keep config fallback when page settings are not available.
+        }
 
         return self::query()
             ->with([
@@ -201,7 +210,7 @@ class Product extends Model
                         ->orderBy('priority');
                 },
             ])
-            ->where('quantity', '>=', (int) config('app.products.minimum_stock_quantity'))
+            ->where('quantity', '>=', max(0, $minimum_stock_quantity))
             ->where(function (Builder $query) use ($keyword) {
                 $query->whereHas('productDescription', function ($query_2) use ($keyword) {
                     $query_2->whereLike('name', "%$keyword%");

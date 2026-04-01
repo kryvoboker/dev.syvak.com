@@ -14,12 +14,17 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Storage;
 
 class UsersTable
 {
     public static function configure(Table $table): Table
     {
+        $user_image_settings     = self::resolveUserImageSettings();
+        $user_preview_list_width = max(1, (int) data_get($user_image_settings, 'preview_in_list_in_admin.width', (int) config('app.images.user.preview_in_list_in_admin.width')));
+        $user_no_image_path      = (string) data_get($user_image_settings, 'no_image', (string) config('app.images.user.no_image'));
+
         return $table
             ->columns([
                 TextColumn::make('name')
@@ -52,10 +57,10 @@ class UsersTable
 
                 ImageColumn::make('avatar')
                     ->label(__('admin/default.columns.avatar'))
-                    ->imageSize((int) config('app.images.user.preview_in_list_in_admin.width'))
+                    ->imageSize($user_preview_list_width)
                     ->circular()
                     ->checkFileExistence()
-                    ->defaultImageUrl(Storage::url(config('app.images.user.no_image')))
+                    ->defaultImageUrl(Storage::url($user_no_image_path))
                     ->extraImgAttributes([
                         'decoding' => 'async',
                         'loading'  => 'lazy',
@@ -108,5 +113,24 @@ class UsersTable
                         }),
                 ]),
             ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function resolveUserImageSettings(): array
+    {
+        $app_settings = get_app_settings();
+        $settings     = data_get($app_settings, 'user_settings');
+
+        if ($settings instanceof SupportCollection) {
+            return $settings->toArray();
+        }
+
+        if (is_array($settings)) {
+            return $settings;
+        }
+
+        return [];
     }
 }

@@ -31,6 +31,9 @@ return new class() extends Migration
 
             $table->text('timezone')->default(config('app.timezone'))->nullable(false);
             $table->json('image_sizes')->nullable();
+            $table->json('user_settings')->nullable();
+            $table->json('ai_settings')->nullable();
+            $table->json('system_settings')->nullable();
 
             $table->timestamps();
         });

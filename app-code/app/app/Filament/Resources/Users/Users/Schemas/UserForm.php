@@ -12,8 +12,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\File;
 
 class UserForm
 {
@@ -21,7 +21,13 @@ class UserForm
     {
         $user_group = new UserGroup();
         /** @var User|null $record */
-        $record = $schema->getRecord();
+        $record                   = $schema->getRecord();
+        $user_image_settings      = self::resolveUserImageSettings();
+        $user_upload_max_size_kb  = max(1, (int) data_get($user_image_settings, 'upload.max_size_kb', (int) config('app.images.user.upload.max_size_kb')));
+        $user_upload_max_size_mb  = self::resolveMegabytesFromKilobytes($user_upload_max_size_kb);
+        $user_image_path          = resolve_upload_path_placeholders((string) data_get($user_image_settings, 'image_path', (string) config('app.images.user.image_path', 'images/avatars/' . date('Y/m'))));
+        $user_preview_page_width  = max(1, (int) data_get($user_image_settings, 'preview_in_page_in_admin.width', (int) config('app.images.user.preview_in_page_in_admin.width')));
+        $user_preview_page_height = max(1, (int) data_get($user_image_settings, 'preview_in_page_in_admin.height', (int) config('app.images.user.preview_in_page_in_admin.height')));
 
         return $schema
             ->components([
@@ -59,9 +65,10 @@ class UserForm
 
                 FileUpload::make('avatar')
                     ->label(__('admin/default.labels.avatar'))
+                    ->helperText(__('admin/default.helpers.max_upload_size_mb', ['size' => $user_upload_max_size_mb]))
                     ->image()
-                    ->directory(config('app.images.user.image_path'))
-                    ->maxSize((int)config('app.images.user.upload.max_size_kb'))
+                    ->directory($user_image_path)
+                    ->maxSize($user_upload_max_size_kb)
                     ->imagePreviewHeight('250')
                     ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png'])
                     ->mimeTypeMap([
@@ -71,12 +78,12 @@ class UserForm
                     ])
                     ->rules([
                         'nullable',
-                        Rule::file()::types(['image/jpeg', 'image/jpg', 'image/png'])->max((int) config('app.images.user.upload.max_size_kb')),
+                        Rule::file()::types(['image/jpeg', 'image/jpg', 'image/png'])->max($user_upload_max_size_kb),
                     ])
                     ->storeFileNamesIn('avatar_file_name')
                     ->imageEditor()
-                    ->imageEditorViewportWidth((int)config('app.images.user.preview_in_page_in_admin.width'))
-                    ->imageEditorViewportHeight((int)config('app.images.user.preview_in_page_in_admin.height'))
+                    ->imageEditorViewportWidth($user_preview_page_width)
+                    ->imageEditorViewportHeight($user_preview_page_height)
                     ->imageEditorAspectRatioOptions([
                         '1:1'  => '1:1',
                         '4:3'  => '4:3',
@@ -120,5 +127,29 @@ class UserForm
                     ->live()
                     ->rules([Rule::exists('user_groups', 'id')]),
             ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function resolveUserImageSettings(): array
+    {
+        $app_settings = get_app_settings();
+        $settings     = data_get($app_settings, 'user_settings');
+
+        if ($settings instanceof Collection) {
+            return $settings->toArray();
+        }
+
+        if (is_array($settings)) {
+            return $settings;
+        }
+
+        return [];
+    }
+
+    private static function resolveMegabytesFromKilobytes(int $kilobytes): string
+    {
+        return number_format(max(1, $kilobytes) / 1024, 2, '.', '');
     }
 }

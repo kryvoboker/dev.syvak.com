@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\Catalogs\Products\Product;
+use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Throwable;
 
 /**
  * @mixin Product
@@ -20,9 +22,22 @@ class SearchProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $app_settings         = get_app_settings();
-        $search_product_sizes = $app_settings->image_sizes?->firstWhere('name', 'search_product') ?? [];
-        $price                = format_price(
+        static $search_product_sizes_cache = null;
+
+        if (! is_array($search_product_sizes_cache)) {
+            $search_product_sizes_cache = [
+                'width'  => (int) config('app.page_settings.search.images.search_product.width', 219),
+                'height' => (int) config('app.page_settings.search.images.search_product.height', 219),
+            ];
+
+            try {
+                $search_product_sizes_cache = app(PageSettingsBootstrapService::class)->getSearchProductImageSize();
+            } catch (Throwable) {
+                // Keep config fallback when page settings are not available.
+            }
+        }
+
+        $price = format_price(
             $this->price,
             config('app.currency.current_currency_code'),
             (float) config('app.currency.current_exchange_rate'),
@@ -35,11 +50,11 @@ class SearchProductResource extends JsonResource
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
                     $this->image,
-                    (int) $search_product_sizes['width'],
-                    (int) $search_product_sizes['height'],
+                    (int) $search_product_sizes_cache['width'],
+                    (int) $search_product_sizes_cache['height'],
                 ),
-                'width'  => (int) $search_product_sizes['width'],
-                'height' => (int) $search_product_sizes['height'],
+                'width'  => (int) $search_product_sizes_cache['width'],
+                'height' => (int) $search_product_sizes_cache['height'],
             ],
             'link' => $this->whenLoaded('slugs', function () {
                 $slug = $this->slugs->first()?->slug;

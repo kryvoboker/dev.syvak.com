@@ -6,4 +6,5 @@ return [
     'home'     => 'home',
     'product'  => 'product',
     'category' => 'category',
+    'search'   => 'search',
 ];

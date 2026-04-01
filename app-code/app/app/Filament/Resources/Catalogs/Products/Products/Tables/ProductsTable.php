@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Tables;
 
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Products\Product;
+use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\Currency\ConvertPrice;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -20,6 +21,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class ProductsTable
 {
@@ -28,6 +30,19 @@ class ProductsTable
     public static function configure(Table $table): Table
     {
         $current_language_id = self::getCurrentLanguageId();
+        $preview_size        = [
+            'width'  => (int) config('app.images.product.preview_in_list_in_admin.width', 100),
+            'height' => (int) config('app.images.product.preview_in_list_in_admin.height', 100),
+        ];
+        $fallback_no_image = (string) config('app.images.product.no_image', 'images/no-image.png');
+
+        try {
+            $service           = app(PageSettingsBootstrapService::class);
+            $preview_size      = $service->getProductPreviewInListSize();
+            $fallback_no_image = $service->getProductNoImagePath();
+        } catch (Throwable) {
+            // Keep config fallback when page settings are not available.
+        }
 
         return $table
             ->modifyQueryUsing(function (Builder $query) {
@@ -59,7 +74,7 @@ class ProductsTable
                             $description = $record->productDescription->first();
                         }
 
-                        return $description?->name ?? '-';
+                        return (string) data_get($description, 'name', '-');
                     }),
 
                 TextColumn::make('model')
@@ -94,9 +109,9 @@ class ProductsTable
 
                 ImageColumn::make('image')
                     ->label(__('admin/default.columns.image'))
-                    ->imageSize((int) config('app.images.product.preview_in_list_in_admin.width'))
+                    ->imageSize(max(1, (int) $preview_size['width']))
                     ->checkFileExistence()
-                    ->defaultImageUrl(Storage::url(config('app.images.product.no_image')))
+                    ->defaultImageUrl(Storage::url($fallback_no_image))
                     ->extraImgAttributes([
                         'decoding' => 'async',
                         'loading'  => 'lazy',

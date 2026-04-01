@@ -99,6 +99,60 @@ class EditCategoryPageSettings extends EditRecord
                 (int) config('app.page_settings.category.product_image_height', 420),
             ),
         );
+        $data['category_upload_max_size_mb'] = max(
+            1,
+            (int) ceil(
+                (
+                    (int) Arr::get(
+                        $record_settings,
+                        'admin.upload.max_size_kb',
+                        (int) config('app.images.category.upload.max_size_kb', 5120),
+                    )
+                ) / 1024,
+            ),
+        );
+        $data['category_image_upload_directory'] = (string) Arr::get(
+            $record_settings,
+            'admin.upload.directory',
+            normalize_upload_path_template((string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))),
+        );
+        $data['category_no_image_path'] = (string) Arr::get(
+            $record_settings,
+            'admin.images.no_image.path',
+            (string) config('app.images.category.no_image', 'images/no-image.png'),
+        );
+        $data['category_preview_list_width'] = max(
+            1,
+            (int) Arr::get(
+                $record_settings,
+                'admin.images.preview_in_list.width',
+                (int) config('app.images.category.preview_in_list_in_admin.width', 100),
+            ),
+        );
+        $data['category_preview_list_height'] = max(
+            1,
+            (int) Arr::get(
+                $record_settings,
+                'admin.images.preview_in_list.height',
+                (int) config('app.images.category.preview_in_list_in_admin.height', 100),
+            ),
+        );
+        $data['category_preview_page_width'] = max(
+            1,
+            (int) Arr::get(
+                $record_settings,
+                'admin.images.preview_in_page.width',
+                (int) config('app.images.category.preview_in_page_in_admin.width', 500),
+            ),
+        );
+        $data['category_preview_page_height'] = max(
+            1,
+            (int) Arr::get(
+                $record_settings,
+                'admin.images.preview_in_page.height',
+                (int) config('app.images.category.preview_in_page_in_admin.height', 500),
+            ),
+        );
 
         return $data;
     }
@@ -157,6 +211,25 @@ class EditCategoryPageSettings extends EditRecord
                         'height' => (int) config('app.page_settings.category.product_image_height', 420),
                     ],
                 ],
+                'admin' => [
+                    'upload' => [
+                        'max_size_kb' => (int) config('app.images.category.upload.max_size_kb', 5120),
+                        'directory'   => normalize_upload_path_template((string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))),
+                    ],
+                    'images' => [
+                        'no_image' => [
+                            'path' => (string) config('app.images.category.no_image', 'images/no-image.png'),
+                        ],
+                        'preview_in_list' => [
+                            'width'  => (int) config('app.images.category.preview_in_list_in_admin.width', 100),
+                            'height' => (int) config('app.images.category.preview_in_list_in_admin.height', 100),
+                        ],
+                        'preview_in_page' => [
+                            'width'  => (int) config('app.images.category.preview_in_page_in_admin.width', 500),
+                            'height' => (int) config('app.images.category.preview_in_page_in_admin.height', 500),
+                        ],
+                    ],
+                ],
             ],
             $settings,
         );
@@ -167,6 +240,17 @@ class EditCategoryPageSettings extends EditRecord
         Arr::set($settings, 'pagination.ajax_products_loading_enabled', (bool) Arr::get($data, 'is_ajax_products_loading_enabled', true));
         Arr::set($settings, 'images.products.width', max(1, (int) Arr::get($data, 'product_image_width', 420)));
         Arr::set($settings, 'images.products.height', max(1, (int) Arr::get($data, 'product_image_height', 420)));
+        Arr::set($settings, 'admin.upload.max_size_kb', max(1, (int) Arr::get($data, 'category_upload_max_size_mb', 5) * 1024));
+        Arr::set(
+            $settings,
+            'admin.upload.directory',
+            normalize_upload_path_template((string) Arr::get($data, 'category_image_upload_directory', 'images/categories/{year}/{month}')),
+        );
+        Arr::set($settings, 'admin.images.no_image.path', (string) Arr::get($data, 'category_no_image_path', 'images/no-image.png'));
+        Arr::set($settings, 'admin.images.preview_in_list.width', max(1, (int) Arr::get($data, 'category_preview_list_width', 100)));
+        Arr::set($settings, 'admin.images.preview_in_list.height', max(1, (int) Arr::get($data, 'category_preview_list_height', 100)));
+        Arr::set($settings, 'admin.images.preview_in_page.width', max(1, (int) Arr::get($data, 'category_preview_page_width', 500)));
+        Arr::set($settings, 'admin.images.preview_in_page.height', max(1, (int) Arr::get($data, 'category_preview_page_height', 500)));
         Arr::forget($settings, ['ui.filters']);
 
         return $settings;
