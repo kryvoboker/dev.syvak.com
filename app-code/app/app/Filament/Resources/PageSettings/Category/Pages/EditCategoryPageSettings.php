@@ -83,6 +83,22 @@ class EditCategoryPageSettings extends EditRecord
             'pagination.ajax_products_loading_enabled',
             (bool) config('app.page_settings.category.ajax_products_loading_enabled', true),
         );
+        $data['product_image_width'] = max(
+            1,
+            (int) Arr::get(
+                $record_settings,
+                'images.products.width',
+                (int) config('app.page_settings.category.product_image_width', 420),
+            ),
+        );
+        $data['product_image_height'] = max(
+            1,
+            (int) Arr::get(
+                $record_settings,
+                'images.products.height',
+                (int) config('app.page_settings.category.product_image_height', 420),
+            ),
+        );
 
         return $data;
     }
@@ -135,6 +151,12 @@ class EditCategoryPageSettings extends EditRecord
                     'products_per_page_limit'       => (int) config('app.page_settings.category.products_per_page_limit', 20),
                     'ajax_products_loading_enabled' => (bool) config('app.page_settings.category.ajax_products_loading_enabled', true),
                 ],
+                'images' => [
+                    'products' => [
+                        'width'  => (int) config('app.page_settings.category.product_image_width', 420),
+                        'height' => (int) config('app.page_settings.category.product_image_height', 420),
+                    ],
+                ],
             ],
             $settings,
         );
@@ -143,6 +165,8 @@ class EditCategoryPageSettings extends EditRecord
         Arr::set($settings, 'ui.sorting.enabled', (bool) Arr::get($data, 'is_sorting_enabled', true));
         Arr::set($settings, 'pagination.products_per_page_limit', max(1, (int) Arr::get($data, 'products_per_page_limit', 20)));
         Arr::set($settings, 'pagination.ajax_products_loading_enabled', (bool) Arr::get($data, 'is_ajax_products_loading_enabled', true));
+        Arr::set($settings, 'images.products.width', max(1, (int) Arr::get($data, 'product_image_width', 420)));
+        Arr::set($settings, 'images.products.height', max(1, (int) Arr::get($data, 'product_image_height', 420)));
         Arr::forget($settings, ['ui.filters']);
 
         return $settings;
@@ -265,7 +289,10 @@ class EditCategoryPageSettings extends EditRecord
                 'get'        => [
                     'key'   => (string) Arr::get($row, 'get.key', ''),
                     'value' => Arr::get($row, 'get.value'),
-                    'extra' => $this->normalizeStringMap((array) Arr::get($row, 'get.extra', [])),
+                    'extra' => $this->resolvePersistedGetExtra(
+                        form_row: $row,
+                        item: $item,
+                    ),
                 ],
                 'config' => $this->normalizeItemConfigFromForm((array) Arr::get($row, 'config', [])),
             ]);
@@ -325,5 +352,24 @@ class EditCategoryPageSettings extends EditRecord
         $normalized_config['labels'] = $this->normalizeStringMap((array) Arr::get($config_payload, 'labels', []));
 
         return $normalized_config;
+    }
+
+    /**
+     * Keep legacy `get.extra` payload stable when the field is no longer editable in admin.
+     *
+     * @param  array<string, mixed>  $form_row
+     * @return array<string, string>
+     */
+    private function resolvePersistedGetExtra(array $form_row, PageSettingItem $item): array
+    {
+        $form_extra = Arr::get($form_row, 'get.extra');
+
+        if (is_array($form_extra)) {
+            return $this->normalizeStringMap($form_extra);
+        }
+
+        $item_get = is_array($item->get) ? $item->get : [];
+
+        return $this->normalizeStringMap((array) Arr::get($item_get, 'extra', []));
     }
 }

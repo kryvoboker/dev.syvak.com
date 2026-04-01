@@ -14,6 +14,8 @@ return [
     'labels' => [
         'products_per_page_limit'          => 'Ліміт товарів на сторінці',
         'is_ajax_products_loading_enabled' => 'Увімкнути AJAX підгрузку товарів',
+        'product_image_width'              => 'Ширина зображення товару',
+        'product_image_height'             => 'Висота зображення товару',
         'model'                            => 'Налаштування сторінки категорій',
         'plural_model'                     => 'Налаштування сторінки категорій',
         'is_sorting_enabled'               => 'Увімкнути сортування товарів',
@@ -23,8 +25,6 @@ return [
         'sort_order'                       => 'Порядок сортування',
         'get_key'                          => 'GET ключ',
         'get_value'                        => 'GET значення',
-        'get_extra'                        => 'Додаткові GET параметри',
-        'selection_mode'                   => 'Режим вибору',
         'key'                              => 'Ключ',
         'value'                            => 'Значення',
         'sorting_title'                    => 'Заголовок блоку сортування',
