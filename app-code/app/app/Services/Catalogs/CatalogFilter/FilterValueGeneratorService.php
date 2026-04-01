@@ -330,7 +330,11 @@ class FilterValueGeneratorService
 
     private function buildValueCode(string $value_label): string
     {
-        $slug = Str::slug($value_label, '_');
+        /**
+         * Filter option codes are used in URL query parameters, so we keep
+         * hyphen-separated slugs for SEO/readability and stable search engine parsing.
+         */
+        $slug = Str::slug($value_label, '-');
 
         if (filled($slug)) {
             return $slug;
