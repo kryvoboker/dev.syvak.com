@@ -6,7 +6,5 @@
     "editors": [
         "codex"
     ],
-    "guidelines": [
-        "filament/filament"
-    ]
+    "guidelines": true
 }

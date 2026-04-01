@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Modules;
 
 use App\Models\Modules\ModuleDefinition;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -47,24 +49,18 @@ class StorefrontModulePlacementResolverService
             return $this->resolved_placements_cache[$cache_key];
         }
 
-        /** @var Collection<int, ModuleDefinition> $definitions */
-        $definitions = resolve_modules_for_context($placement);
+        try {
+            /** @var Collection<int, ModuleDefinition> $definitions */
+            $definitions = resolve_modules_for_context($placement);
+        } catch (BindingResolutionException|CircularDependencyException $e) {
+            report($e);
+        }
 
         $resolved_items = $definitions
-            ->map(fn (ModuleDefinition $definition): array => $this->resolveDefinitionEntries($definition, $placement, $page_type))
+            ->map(fn(ModuleDefinition $definition): array => $this->resolveDefinitionEntries($definition, $placement, $page_type))
             ->collapse()
             ->values()
             ->all();
-
-        Log::channel('daily')->info('Storefront modules resolved for placement.', [
-            'placement'              => $placement,
-            'page_type'              => $page_type,
-            'resolved_items_count'   => count($resolved_items),
-            'resolved_modules_count' => collect($resolved_items)
-                ->pluck('module_definition_id')
-                ->unique()
-                ->count(),
-        ]);
 
         $this->resolved_placements_cache[$cache_key] = $resolved_items;
 
@@ -94,7 +90,7 @@ class StorefrontModulePlacementResolverService
             return [];
         }
 
-        $view = Str::trim((string) Arr::get($module_config, 'runtime.storefront.view', ''));
+        $view = Str::trim((string)Arr::get($module_config, 'runtime.storefront.view', ''));
 
         if (blank($view) || View::exists($view) === false) {
             Log::channel('stack')->warning('Storefront module view is missing or invalid.', [
@@ -122,13 +118,13 @@ class StorefrontModulePlacementResolverService
         /** @var array<int, array<string, mixed>> $module_items */
         $module_items = $data_service->resolveForPlacement($placement, $page_type);
 
-        $view_data_key = Str::trim((string) Arr::get($module_config, 'runtime.storefront.view_data_key', 'module_data'));
+        $view_data_key = Str::trim((string)Arr::get($module_config, 'runtime.storefront.view_data_key', 'module_data'));
 
         return collect($module_items)
             ->map(function (array $item) use ($definition, $view, $view_data_key, $page_type): array {
                 return [
-                    'module_definition_id' => (int) $definition->id,
-                    'module_name'          => (string) $definition->nwidart_name,
+                    'module_definition_id' => (int)$definition->id,
+                    'module_name'          => (string)$definition->nwidart_name,
                     'view'                 => $view,
                     'view_data'            => [
                         $view_data_key => $item,
@@ -141,13 +137,13 @@ class StorefrontModulePlacementResolverService
     }
 
     /**
-     * @param  array<string, mixed>  $module_config
+     * @param array<string, mixed> $module_config
      */
     private function resolveDataServiceClass(ModuleDefinition $definition, array $module_config): ?string
     {
         $service_relative_class = Arr::get($module_config, 'runtime.storefront.data_service');
 
-        if (! is_string($service_relative_class) || blank($service_relative_class)) {
+        if (!is_string($service_relative_class) || blank($service_relative_class)) {
             $service_relative_class = sprintf('Services\\%sModuleDataService', $definition->nwidart_name);
         }
 
@@ -159,7 +155,7 @@ class StorefrontModulePlacementResolverService
      */
     private function loadModuleConfig(ModuleDefinition $definition): array
     {
-        $module_path = Str::trim((string) $definition->module_path);
+        $module_path = Str::trim((string)$definition->module_path);
 
         if ($module_path === '') {
             return [];
