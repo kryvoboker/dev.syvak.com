@@ -46,6 +46,7 @@ return [
     ],
 
     'helpers' => [
+        'category_no_image_path'          => 'Image used when category has no own image.',
         'category_image_upload_directory' => 'Use placeholders {year} and {month} (for example: images/categories/{year}/{month}).',
     ],
 ];

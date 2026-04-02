@@ -46,6 +46,7 @@ return [
     ],
 
     'helpers' => [
+        'category_no_image_path'          => 'Зображення, яке використовується, якщо у категорії немає власного.',
         'category_image_upload_directory' => 'Використовуйте плейсхолдери {year} і {month} (наприклад: images/categories/{year}/{month}).',
     ],
 ];
