@@ -6,7 +6,7 @@
     window.app_params = {
         ...(window.app_params ?? {}),
         ...@json([
-                'catalog_filter_ajax_url' => $category_page_settings['catalog_filter_ajax_url'],
+                'catalog_filter_ajax_url' => $catalog_filter_ajax_url,
             ])
     };
 </script>
@@ -42,7 +42,7 @@
         @if(isset($is_show_clear_filters_link) && $is_show_clear_filters_link === true)
             <div class="category-filter__choosen-filters-list flex flex-wrap gap-2 text-sm mt-0.5">
                 <a class="category-filter__clear-all-link"
-                   href="{{ $category_page_settings['clear_filters_url'] ?? '#' }}"
+                   href="{{ $clear_filters_url ?? '#' }}"
                    id="category-filter-clear-all-link">
                     {{ __('catalog/default.buttons.clear_all') }}
                 </a>
