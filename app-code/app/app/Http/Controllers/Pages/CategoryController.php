@@ -90,6 +90,7 @@ class CategoryController extends Controller
             'products_per_page_limit'          => $products_per_page_limit,
             'clear_filters_url'                => localizedRoute('localized.catalog.category.show', ['slug' => $slug]),
             'catalog_filter_ajax_url'          => localizedRoute('localized.catalog.catalog-filter-ajax.index', ['slug' => $slug]),
+            'load_more_products_ajax_url'      => localizedRoute('localized.catalog.load-more-products-ajax.index', ['slug' => $slug]),
             'category_slug'                    => $slug,
             'category_title'                   => $category_context['title'],
             'breadcrumbs'                      => $category_context['breadcrumbs'],
