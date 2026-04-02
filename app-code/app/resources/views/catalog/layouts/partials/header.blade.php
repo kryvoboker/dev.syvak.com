@@ -14,7 +14,7 @@
                     <span class="icon-[qlementine-icons--menu-burger-16] custom-icon"></span>
                 </button>
 
-                @if(isset($page_type) && $page_type == config('page-type.home'))
+                @if(isset($page_type) && $page_type == config('page-settings.page_type.home'))
                     <div>
                         <x-catalog::common.img
                             class="object-contain"
