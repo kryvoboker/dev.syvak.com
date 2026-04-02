@@ -349,7 +349,7 @@ class EditCategoryPageSettings extends EditRecord
      * @param  array<string, mixed>  $config_payload
      * @return array<string, mixed>
      */
-    private function normalizeItemConfigFromForm(array $config_payload): array
+    private function normalizeItemConfigFromForm(array $config_payload, array $persisted_config = []): array
     {
         $normalized_config = [];
 
@@ -363,7 +363,14 @@ class EditCategoryPageSettings extends EditRecord
             }
         }
 
-        $normalized_config['labels'] = $this->normalizeStringMap((array) Arr::get($config_payload, 'labels', []));
+        $persisted_labels = $this->normalizeStringMap((array)Arr::get($persisted_config, 'labels', []));
+        $submitted_labels = $this->normalizeStringMap((array)Arr::get($config_payload, 'labels', []));
+
+        /**
+         * Keep labels from DB for locales that are absent in the current admin form
+         * and override only locales explicitly submitted by user.
+         */
+        $normalized_config['labels'] = array_replace($persisted_labels, $submitted_labels);
 
         return $normalized_config;
     }
@@ -438,6 +445,8 @@ class EditCategoryPageSettings extends EditRecord
                     fallback: (string) Arr::get($persisted_get, 'value', ''),
                 );
 
+                $persisted_config = is_array(Arr::get($persisted_row, 'config')) ? Arr::get($persisted_row, 'config') : [];
+
                 return [
                     'code'        => $code,
                     'is_enabled'  => (bool) Arr::get($row, 'is_enabled', true),
@@ -452,7 +461,10 @@ class EditCategoryPageSettings extends EditRecord
                             persisted_row: $persisted_row,
                         ),
                     ],
-                    'config' => $this->normalizeItemConfigFromForm((array) Arr::get($row, 'config', [])),
+                    'config' => $this->normalizeItemConfigFromForm(
+                        config_payload : (array)Arr::get($row, 'config', []),
+                        persisted_config: $persisted_config,
+                    ),
                 ];
             })
             ->filter(fn (mixed $row): bool => is_array($row))
