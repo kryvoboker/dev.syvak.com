@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Ajax\CatalogFilterAjaxController;
 use App\Http\Controllers\Ajax\LiveSearchProductsAjaxController;
+use App\Http\Controllers\Ajax\LoadMoreProductsByAjaxController;
 use App\Http\Controllers\Pages\CategoryController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\SearchProductsController;
@@ -30,6 +31,7 @@ Route::prefix('{' . $locale_key . '}')
 
         Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
         Route::get('/category/{slug}/filters', [CatalogFilterAjaxController::class, 'index'])->name('catalog-filter-ajax.index');
+        Route::get('/category/{slug}/load-more', [LoadMoreProductsByAjaxController::class, 'index'])->name('load-more-products-ajax.index');
 
         Route::get('/product/{slug}', function (string $locale, string $slug): void {})->name('product.show');
 
