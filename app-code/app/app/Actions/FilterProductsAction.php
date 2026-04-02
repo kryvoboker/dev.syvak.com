@@ -76,7 +76,7 @@ readonly class FilterProductsAction
             ? $this->resolveEnabledFilterGroups($filter_set)
             : collect();
 
-        $requested_sort_value       = (string)Arr::get($validated_data, 'sort', '');
+        $requested_sort_value       = $this->normalizeRequestedSortValue(Arr::get($validated_data, 'sort', ''));
         $resolved_sort_code         = $this->resolveSortCodeFromRequestedValue($requested_sort_value);
         $effective_price_expression = $this->resolveEffectivePriceSqlExpression($filter_set);
 
@@ -137,6 +137,7 @@ readonly class FilterProductsAction
                 'attributes' => (array)Arr::get($validated_data, 'attributes', []),
             ],
             'active_sort_code'           => $resolved_sort_code,
+            'selected_sort_value'        => $requested_sort_value,
             'is_filter_enabled'          => $is_filter_mechanism_enabled,
             'filters_data'               => $is_get_filters_data
                 ? $this->buildFiltersData(
@@ -406,6 +407,10 @@ readonly class FilterProductsAction
 
     private function applySorting(Builder $query, string $resolved_sort_code, string $effective_price_expression): void
     {
+        /**
+         * Sorting uses canonical sort codes from page settings.
+         * Unknown values are normalized before this point and resolved to `default`.
+         */
         match ($resolved_sort_code) {
             'bestsellers' => $query
                 ->orderByDesc('products.viewed')
@@ -417,6 +422,10 @@ readonly class FilterProductsAction
 
             'price-desc'  => $query
                 ->orderByRaw($effective_price_expression . ' DESC')
+                ->orderByDesc('products.id'),
+
+            'newest'      => $query
+                ->orderByDesc('products.date_added')
                 ->orderByDesc('products.id'),
 
             default       => $query
@@ -960,16 +969,19 @@ readonly class FilterProductsAction
      */
     private function buildEmptyResponse(array $validated_data, string $sort_code): array
     {
+        $requested_sort_value = $this->normalizeRequestedSortValue(Arr::get($validated_data, 'sort', ''));
+
         return [
             'products'          => [],
             'paginator'         => null,
             'applied_filters'   => [
-                'sort'       => (string)Arr::get($validated_data, 'sort', ''),
+                'sort'       => $requested_sort_value,
                 'price_from' => Arr::get($validated_data, 'price_from'),
                 'price_to'   => Arr::get($validated_data, 'price_to'),
                 'attributes' => (array)Arr::get($validated_data, 'attributes', []),
             ],
             'active_sort_code'  => $sort_code,
+            'selected_sort_value' => $requested_sort_value,
             'is_filter_enabled' => false,
             'filters_data'      => [],
         ];
@@ -988,5 +1000,10 @@ readonly class FilterProductsAction
         }
 
         return max(0, $this->page_settings_bootstrap_service->getProductMinimumStockQuantity());
+    }
+
+    private function normalizeRequestedSortValue(mixed $sort_value): string
+    {
+        return Str::lower(trim((string) $sort_value));
     }
 }
