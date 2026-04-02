@@ -40,8 +40,8 @@ return [
         'default'     => 'Default',
         'newest'      => 'Newest first',
         'bestsellers' => 'Bestsellers',
-        'price_asc'   => 'Lowest price first',
-        'price_desc'  => 'Highest price first',
+        'price-asc'   => 'Lowest price first',
+        'price-desc'  => 'Highest price first',
     ],
 
     // Placeholders

@@ -162,7 +162,7 @@ class EditProductPageSettings extends EditRecord
 
         $settings = array_replace_recursive(
             [
-                'meta'     => ['contract_version' => 1],
+                'meta'     => ['contract_version' => 2],
                 'customer' => [
                     'stock' => [
                         'minimum_stock_quantity' => (int) config('app.page_settings.product.for_customer.minimum_stock_quantity', (int) config('app.page_settings.product.minimum_stock_quantity', 1)),
@@ -200,7 +200,7 @@ class EditProductPageSettings extends EditRecord
             $settings,
         );
 
-        Arr::set($settings, 'meta.contract_version', 1);
+        Arr::set($settings, 'meta.contract_version', 2);
         Arr::set($settings, 'customer.stock.minimum_stock_quantity', max(0, (int) Arr::get($data, 'minimum_stock_quantity', 1)));
         Arr::set($settings, 'customer.images.product.width', max(1, (int) Arr::get($data, 'product_image_width', 500)));
         Arr::set($settings, 'customer.images.product.height', max(1, (int) Arr::get($data, 'product_image_height', 500)));

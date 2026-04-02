@@ -85,7 +85,7 @@ class EditSearchPageSettings extends EditRecord
 
         $settings = array_replace_recursive(
             [
-                'meta'       => ['contract_version' => 1],
+                'meta'       => ['contract_version' => 2],
                 'pagination' => [
                     'products_per_page_limit' => (int) config('app.page_settings.search.products_per_page_limit', 15),
                 ],
@@ -104,7 +104,7 @@ class EditSearchPageSettings extends EditRecord
             $settings,
         );
 
-        Arr::set($settings, 'meta.contract_version', 1);
+        Arr::set($settings, 'meta.contract_version', 2);
         Arr::set($settings, 'pagination.products_per_page_limit', max(1, (int) Arr::get($data, 'products_per_page_limit', 15)));
         Arr::set($settings, 'images.search_product.width', max(1, (int) Arr::get($data, 'search_product_image_width', 219)));
         Arr::set($settings, 'images.search_product.height', max(1, (int) Arr::get($data, 'search_product_image_height', 219)));

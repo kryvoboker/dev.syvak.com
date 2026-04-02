@@ -7,6 +7,7 @@ namespace App\Filament\Resources\PageSettings\Category\Schemas;
 use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -23,15 +24,15 @@ class CategoryPageSettingsForm
         $language_tabs    = [];
 
         foreach ($active_languages as $language) {
-            $language_code = (string)$language->code;
+            $language_id = (string) $language->id;
 
             $language_tabs[] = Tabs\Tab::make($language->name)
-                ->badge($language_code)
+                ->badge((string) $language->code)
                 ->schema([
-                    TextInput::make("localized_content.$language_code.sorting.title")
+                    TextInput::make("localized_content.$language_id.sorting.title")
                         ->label(__('admin/settings/category_page_settings.labels.sorting_title')),
 
-                    Textarea::make("localized_content.$language_code.sorting.description")
+                    Textarea::make("localized_content.$language_id.sorting.description")
                         ->label(__('admin/settings/category_page_settings.labels.sorting_description'))
                         ->rows(2),
                 ])
@@ -51,11 +52,11 @@ class CategoryPageSettingsForm
                                             ->numeric()
                                             ->minValue(1)
                                             ->required()
-                                            ->default((int)config('app.page_settings.category.products_per_page_limit', 20)),
+                                            ->default((int) config('app.page_settings.category.products_per_page_limit', 20)),
 
                                         Toggle::make('is_ajax_products_loading_enabled')
                                             ->label(__('admin/settings/category_page_settings.labels.is_ajax_products_loading_enabled'))
-                                            ->default((bool)config('app.page_settings.category.ajax_products_loading_enabled', true)),
+                                            ->default((bool) config('app.page_settings.category.ajax_products_loading_enabled', true)),
                                     ]),
 
                                 Section::make()
@@ -65,7 +66,7 @@ class CategoryPageSettingsForm
                                             ->numeric()
                                             ->minValue(1)
                                             ->required()
-                                            ->default((int)config('app.page_settings.category.product_image_width', 420))
+                                            ->default((int) config('app.page_settings.category.product_image_width', 420))
                                             ->columns(1),
 
                                         TextInput::make('product_image_height')
@@ -73,7 +74,7 @@ class CategoryPageSettingsForm
                                             ->numeric()
                                             ->minValue(1)
                                             ->required()
-                                            ->default((int)config('app.page_settings.category.product_image_height', 420))
+                                            ->default((int) config('app.page_settings.category.product_image_height', 420))
                                             ->columns(1),
                                     ])
                                     ->columns(),
@@ -163,19 +164,32 @@ class CategoryPageSettingsForm
 
                                         Section::make()
                                             ->schema([
-                                                TextInput::make('code')
+                                                Select::make('code')
                                                     ->label(__('admin/settings/category_page_settings.labels.code'))
-                                                    ->disabled()
-                                                    ->dehydrated(),
+                                                    ->options(self::resolveSortCodeOptions())
+                                                    ->in(self::resolveSortCodeAllowedValues())
+                                                    ->disabled(fn (mixed $state): bool => self::shouldLockFixedField($state, self::resolveSortCodeAllowedValues()))
+                                                    ->dehydrated()
+                                                    ->required()
+                                                    ->native(false),
 
-                                                TextInput::make('get.key')
+                                                Select::make('get.key')
                                                     ->label(__('admin/settings/category_page_settings.labels.get_key'))
-                                                    ->disabled()
-                                                    ->required(),
+                                                    ->options(self::resolveSortGetKeyOptions())
+                                                    ->in(self::resolveSortGetKeyAllowedValues())
+                                                    ->disabled(fn (mixed $state): bool => self::shouldLockFixedField($state, self::resolveSortGetKeyAllowedValues()))
+                                                    ->dehydrated()
+                                                    ->required()
+                                                    ->native(false),
 
-                                                TextInput::make('get.value')
+                                                Select::make('get.value')
                                                     ->label(__('admin/settings/category_page_settings.labels.get_value'))
-                                                    ->disabled(),
+                                                    ->options(self::resolveSortGetValueOptions())
+                                                    ->in(self::resolveSortGetValueAllowedValues())
+                                                    ->disabled(fn (mixed $state): bool => self::shouldLockFixedField($state, self::resolveSortGetValueAllowedValues()))
+                                                    ->dehydrated()
+                                                    ->required()
+                                                    ->native(false),
                                             ])
                                             ->columns(3),
 
@@ -221,12 +235,12 @@ class CategoryPageSettingsForm
         $tabs = [];
 
         foreach ($active_languages as $language) {
-            $language_code = (string)$language->code;
+            $language_id = (string) $language->id;
 
             $tabs[] = Tabs\Tab::make($language->name)
-                ->badge($language_code)
+                ->badge((string) $language->code)
                 ->schema([
-                    TextInput::make("config.labels.$language_code")
+                    TextInput::make("config.labels.$language_id")
                         ->label(__('admin/settings/category_page_settings.labels.option_label_value')),
                 ]);
         }
@@ -235,5 +249,111 @@ class CategoryPageSettingsForm
             ->tabs($tabs)
             ->activeTab(1)
             ->contained(false);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function resolveSortCodeOptions(): array
+    {
+        return self::resolveSelectOptionsFromConfig('page-settings.sort_codes');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function resolveSortGetKeyOptions(): array
+    {
+        return self::resolveSelectOptionsFromConfig('page-settings.sort_get_keys');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function resolveSortGetValueOptions(): array
+    {
+        return self::resolveSelectOptionsFromConfig('page-settings.sort_get_values');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function resolveSortCodeAllowedValues(): array
+    {
+        return self::resolveAllowedValuesFromConfig('page-settings.sort_codes');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function resolveSortGetKeyAllowedValues(): array
+    {
+        return self::resolveAllowedValuesFromConfig('page-settings.sort_get_keys');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function resolveSortGetValueAllowedValues(): array
+    {
+        return self::resolveAllowedValuesFromConfig('page-settings.sort_get_values');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function resolveSelectOptionsFromConfig(string $config_key): array
+    {
+        return collect((array) config($config_key, []))
+            ->mapWithKeys(function (mixed $value, mixed $key): array {
+                $label = (string) (is_string($key) ? $key : $value);
+
+                return [
+                    (string) $value => $label,
+                ];
+            })
+            ->filter(fn (mixed $label, mixed $value): bool => filled((string) $value) && filled((string) $label))
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function resolveAllowedValuesFromConfig(string $config_key): array
+    {
+        return collect((array) config($config_key, []))
+            ->flatMap(function (mixed $value, mixed $key): array {
+                $normalized = [];
+
+                if (is_string($key) && filled($key)) {
+                    $normalized[] = $key;
+                }
+
+                $string_value = (string) $value;
+
+                if (filled($string_value)) {
+                    $normalized[] = $string_value;
+                }
+
+                return $normalized;
+            })
+            ->filter(fn (mixed $value): bool => filled((string) $value))
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Fixed contract fields must stay locked, but we keep them editable when value is unexpectedly empty.
+     *
+     * @param  array<int, string>  $allowed_values
+     */
+    private static function shouldLockFixedField(mixed $state, array $allowed_values): bool
+    {
+        if (! is_string($state) || blank($state)) {
+            return false;
+        }
+
+        return in_array($state, $allowed_values, true);
     }
 }

@@ -8,6 +8,7 @@ use App\Models\PageSettings\PageSetting;
 use App\Services\PageSettings\CategoryPageFilterSyncService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -48,28 +49,18 @@ class CategoryPageSettingsServicesTest extends TestCase
         $page_setting = $service->bootstrapCategoryPageSetting();
 
         $this->assertSame(PageSetting::PAGE_TYPE_CATEGORY, $page_setting->page_type);
-        $this->assertTrue($page_setting->is_sorting_enabled);
-        $this->assertFalse($page_setting->is_filtering_enabled);
-        $this->assertSame(1, data_get($page_setting->settings, 'meta.contract_version'));
+        $this->assertSame(2, (int) data_get($page_setting->settings, 'meta.contract_version'));
+        $this->assertTrue((bool) data_get($page_setting->settings, 'ui.sorting.enabled'));
+        $this->assertFalse((bool) data_get($page_setting->settings, 'ui.filtering.enabled'));
 
-        $this->assertDatabaseCount('page_setting_items', 5);
-        $this->assertDatabaseHas('page_setting_items', [
-            'page_setting_id' => $page_setting->id,
-            'type'            => PageSetting::ITEM_TYPE_SORTING,
-            'code'            => 'newest',
-        ]);
-        $this->assertDatabaseCount('page_setting_translations', 2);
+        $sorting_items = (array) data_get($page_setting->settings, 'items.sorting', []);
+        $this->assertCount(5, $sorting_items);
+        $this->assertTrue(collect($sorting_items)->contains(fn (array $item): bool => (string) Arr::get($item, 'code') === 'newest'));
 
-        $translation_content = DB::table('page_setting_translations')
-            ->where('page_setting_id', $page_setting->id)
-            ->where('language_id', 1)
-            ->value('content');
-
-        $this->assertIsString($translation_content);
-
-        $decoded_translation_content = json_decode($translation_content, true, 512, JSON_THROW_ON_ERROR);
-
-        $this->assertArrayNotHasKey('option_labels', $decoded_translation_content);
+        $localized = (array) data_get($page_setting->settings, 'localized', []);
+        $this->assertArrayHasKey('1', $localized);
+        $this->assertArrayHasKey('2', $localized);
+        $this->assertArrayNotHasKey('option_labels', (array) Arr::get($localized, '1', []));
     }
 
     public function test_filter_sync_is_idempotent_and_generates_expected_get_contracts(): void
@@ -167,44 +158,25 @@ class CategoryPageSettingsServicesTest extends TestCase
         $this->assertGreaterThan(0, $first_summary['created_count']);
         $this->assertSame(0, $second_summary['created_count']);
 
-        $this->assertDatabaseHas('page_setting_items', [
-            'page_setting_id' => $page_setting->id,
-            'type'            => PageSetting::ITEM_TYPE_FILTER,
-            'code'            => 'price',
-        ]);
-        $this->assertDatabaseHas('page_setting_items', [
-            'page_setting_id' => $page_setting->id,
-            'type'            => PageSetting::ITEM_TYPE_FILTER,
-            'code'            => 'stock',
-        ]);
-        $this->assertDatabaseMissing('page_setting_items', [
-            'page_setting_id' => $page_setting->id,
-            'type'            => PageSetting::ITEM_TYPE_FILTER,
-            'code'            => 'category_11',
-        ]);
-        $this->assertDatabaseHas('page_setting_items', [
-            'page_setting_id' => $page_setting->id,
-            'type'            => PageSetting::ITEM_TYPE_FILTER,
-            'code'            => 'attribute_21',
-        ]);
+        $page_setting->refresh();
 
-        $price_item = DB::table('page_setting_items')
-            ->where('page_setting_id', $page_setting->id)
-            ->where('type', PageSetting::ITEM_TYPE_FILTER)
-            ->where('code', 'price')
-            ->first();
+        $filter_items = collect((array) data_get($page_setting->settings, 'items.filters', []));
 
-        $this->assertNotNull($price_item);
+        $this->assertTrue($filter_items->contains(fn (array $item): bool => (string) Arr::get($item, 'code') === 'price'));
+        $this->assertTrue($filter_items->contains(fn (array $item): bool => (string) Arr::get($item, 'code') === 'stock'));
+        $this->assertFalse($filter_items->contains(fn (array $item): bool => (string) Arr::get($item, 'code') === 'category_11'));
+        $this->assertTrue($filter_items->contains(fn (array $item): bool => (string) Arr::get($item, 'code') === 'attribute_21'));
 
-        $price_item_get    = json_decode((string) $price_item->get, true, 512, JSON_THROW_ON_ERROR);
-        $price_item_config = json_decode((string) $price_item->config, true, 512, JSON_THROW_ON_ERROR);
+        $price_item = $filter_items
+            ->first(fn (array $item): bool => (string) Arr::get($item, 'code') === 'price');
 
-        $this->assertSame('price', $price_item_get['key']);
-        $this->assertSame('price_from', $price_item_get['extra']['from_key']);
-        $this->assertSame('price_to', $price_item_get['extra']['to_key']);
-        $this->assertSame(80.0, (float) $price_item_config['min_price']);
+        $this->assertIsArray($price_item);
+        $this->assertSame('price', (string) Arr::get($price_item, 'get.key'));
+        $this->assertSame('price_from', (string) Arr::get($price_item, 'get.extra.from_key'));
+        $this->assertSame('price_to', (string) Arr::get($price_item, 'get.extra.to_key'));
+        $this->assertSame(80.0, (float) Arr::get($price_item, 'config.min_price'));
         $this->assertContains(
-            (string) $price_item_config['mode'],
+            (string) Arr::get($price_item, 'config.mode'),
             array_keys((array) config('app.page_settings.category.filter_modes', [])),
         );
     }
@@ -226,34 +198,8 @@ class CategoryPageSettingsServicesTest extends TestCase
         Schema::create('page_settings', function (Blueprint $table): void {
             $table->id();
             $table->string('page_type', 100)->unique();
-            $table->boolean('is_sorting_enabled')->default(true);
-            $table->boolean('is_filtering_enabled')->default(true);
             $table->json('settings')->nullable();
             $table->timestamps();
-        });
-
-        Schema::create('page_setting_translations', function (Blueprint $table): void {
-            $table->id();
-            $table->unsignedBigInteger('page_setting_id');
-            $table->unsignedBigInteger('language_id');
-            $table->json('content')->nullable();
-            $table->timestamps();
-            $table->unique(['page_setting_id', 'language_id']);
-        });
-
-        Schema::create('page_setting_items', function (Blueprint $table): void {
-            $table->id();
-            $table->unsignedBigInteger('page_setting_id');
-            $table->string('type', 20);
-            $table->string('code', 120);
-            $table->string('source_type', 40)->nullable();
-            $table->unsignedBigInteger('source_id')->nullable();
-            $table->boolean('is_enabled')->default(true);
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->json('get');
-            $table->json('config')->nullable();
-            $table->timestamps();
-            $table->unique(['page_setting_id', 'type', 'code']);
         });
     }
 
