@@ -19,7 +19,7 @@ Schedule::call(function (): void {
         return;
     }
 
-    $max_files     = 50;
+    $max_files     = 20;
     $debugbar_path = config('debugbar.storage.path');
     $files         = glob($debugbar_path . '/*.json');
 
