@@ -55,8 +55,7 @@ readonly class FilterProductsAction
         if (!$language instanceof Language || blank($category_slug)) {
             return $this->buildEmptyResponse(
                 validated_data     : $validated_data,
-                sort_code          : 'default',
-                is_get_filters_data: $is_get_filters_data,
+                sort_code          : 'default'
             );
         }
 
@@ -65,8 +64,7 @@ readonly class FilterProductsAction
         if (!$category instanceof Category) {
             return $this->buildEmptyResponse(
                 validated_data     : $validated_data,
-                sort_code          : 'default',
-                is_get_filters_data: $is_get_filters_data,
+                sort_code          : 'default'
             );
         }
 
@@ -413,11 +411,11 @@ readonly class FilterProductsAction
                 ->orderByDesc('products.viewed')
                 ->orderByDesc('products.id'),
 
-            'price_asc'   => $query
+            'price-asc'   => $query
                 ->orderByRaw($effective_price_expression . ' ASC')
                 ->orderByDesc('products.id'),
 
-            'price_desc'  => $query
+            'price-desc'  => $query
                 ->orderByRaw($effective_price_expression . ' DESC')
                 ->orderByDesc('products.id'),
 
@@ -492,6 +490,7 @@ readonly class FilterProductsAction
 
     /**
      * @return array<int, array<string, mixed>>
+     * @throws Throwable
      */
     private function mapProductsForResponse(
         LengthAwarePaginator $products,
@@ -785,17 +784,9 @@ readonly class FilterProductsAction
         }
 
         $request               = request();
-        $next_query_parameters = (array)$request->query();
-        $next_query_parameters = $this->replaceQueryValueByGetKey(
-            query_parameters: $next_query_parameters,
-            get_key         : $price_from_get_key,
-            next_value      : null,
-        );
-        $next_query_parameters = $this->replaceQueryValueByGetKey(
-            query_parameters: $next_query_parameters,
-            get_key         : $price_to_get_key,
-            next_value      : null,
-        );
+        $next_query_parameters = (array)$request->query()
+                |> (fn($x) => $this->replaceQueryValueByGetKey(query_parameters: $x, get_key: $price_from_get_key, next_value: null))
+                |> (fn($x) => $this->replaceQueryValueByGetKey(query_parameters: $x, get_key: $price_to_get_key, next_value: null));
 
         $next_query_string = Arr::query($next_query_parameters);
 
@@ -967,7 +958,7 @@ readonly class FilterProductsAction
      *
      * @return array<string, mixed>
      */
-    private function buildEmptyResponse(array $validated_data, string $sort_code, bool $is_get_filters_data): array
+    private function buildEmptyResponse(array $validated_data, string $sort_code): array
     {
         return [
             'products'          => [],
@@ -980,10 +971,16 @@ readonly class FilterProductsAction
             ],
             'active_sort_code'  => $sort_code,
             'is_filter_enabled' => false,
-            'filters_data'      => $is_get_filters_data ? [] : [],
+            'filters_data'      => [],
         ];
     }
 
+    /**
+     * @param CatalogFilterSet|null $filter_set
+     *
+     * @return int
+     * @throws Throwable
+     */
     private function resolveMinimumStockQuantity(?CatalogFilterSet $filter_set): int
     {
         if ($filter_set instanceof CatalogFilterSet && $filter_set->is_enabled) {

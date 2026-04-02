@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\Language;
 use App\Models\PageSettings\PageSetting;
-use App\Models\PageSettings\PageSettingItem;
 use App\Models\Slug;
 use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Supports\Services\AppSettingsService;
@@ -15,7 +14,6 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -132,13 +130,13 @@ if (! function_exists('try_detect_page_type')) {
 
         if (is_string($route_name) && filled($route_name)) {
             return match (true) {
-                Str::endsWith($route_name, '.home') => (string) config('page-type.home'),
+                Str::endsWith($route_name, '.home') => (string) config('page-settings.page_type.home'),
                 Str::endsWith($route_name, '.product'),
-                Str::endsWith($route_name, '.product.show') => (string) config('page-type.product'),
+                Str::endsWith($route_name, '.product.show') => (string) config('page-settings.page_type.product'),
                 Str::endsWith($route_name, '.category'),
-                Str::endsWith($route_name, '.category.show') => (string) config('page-type.category'),
+                Str::endsWith($route_name, '.category.show') => (string) config('page-settings.page_type.category'),
                 Str::endsWith($route_name, '.search'),
-                Str::endsWith($route_name, '.search-products.index') => (string) config('page-type.search'),
+                Str::endsWith($route_name, '.search-products.index') => (string) config('page-settings.page_type.search'),
                 default                                              => null,
             };
         }
@@ -148,13 +146,13 @@ if (! function_exists('try_detect_page_type')) {
             ->values();
 
         if ($segments->count() === 1) {
-            return (string) config('page-type.home');
+            return (string) config('page-settings.page_type.home');
         }
 
         return match ($segments->get(1)) {
-            'product'  => (string) config('page-type.product'),
-            'category' => (string) config('page-type.category'),
-            'search'   => (string) config('page-type.search'),
+            'product'  => (string) config('page-settings.page_type.product'),
+            'category' => (string) config('page-settings.page_type.category'),
+            'search'   => (string) config('page-settings.page_type.search'),
             default    => null,
         };
     }
@@ -321,13 +319,15 @@ if (! function_exists('get_page_settings')) {
 }
 
 if (! function_exists('get_sorting_items')) {
-    function get_sorting_items(PageSetting $page_setting): EloquentCollection
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    function get_sorting_items(PageSetting $page_setting): Collection
     {
-        return $page_setting
-            ->sortingItems()
-            ->where('is_enabled', true)
-            ->orderBy('sort_order')
-            ->get();
+        return collect($page_setting->getSortingItemsFromSettings())
+            ->filter(fn (array $sorting_item): bool => (bool) Arr::get($sorting_item, 'is_enabled', true))
+            ->sortBy('sort_order')
+            ->values();
     }
 }
 
@@ -342,15 +342,11 @@ if (! function_exists('resolve_sort_code')) {
         $sorting_values_to_code = [];
 
         foreach ($sorting_items as $sorting_item) {
-            if (! $sorting_item instanceof PageSettingItem) {
-                continue;
-            }
-
-            $item_get   = is_array($sorting_item->get) ? $sorting_item->get : [];
+            $item_get   = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
             $item_value = (string) Arr::get($item_get, 'value', '');
 
             if (filled($item_value)) {
-                $sorting_values_to_code[$item_value] = (string) $sorting_item->code;
+                $sorting_values_to_code[$item_value] = (string) Arr::get($sorting_item, 'code', '');
             }
         }
 
@@ -398,17 +394,13 @@ if (! function_exists('get_slug_variants')) {
 
         $slugs_query->whereNot('slug', $slug_value);
 
-        /** @var EloquentCollection $slugs */
+        /** @var Collection<int, Slug> $slugs */
         $slugs = $slugs_query->get();
 
         $language_ids = array_flip($language_ids);
 
         return $slugs
-            ->mapWithKeys(function ($slug) use ($language_ids) {
-                if (! $slug instanceof Slug) {
-                    return [];
-                }
-
+            ->mapWithKeys(function (Slug $slug) use ($language_ids) {
                 $language_code = Arr::get($language_ids, $slug->language_id);
 
                 if ($language_code === null) {

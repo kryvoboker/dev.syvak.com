@@ -8,7 +8,6 @@ use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\PageSettings\PageSetting;
-use App\Models\PageSettings\PageSettingItem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,21 +26,7 @@ class CategoryPageFilterSyncService
             $default_language_id  = $this->resolveDefaultLanguageId();
             $filter_item_payloads = $this->buildFilterItemPayloads($default_language_id);
 
-            $summary = $this->syncFilterItems($page_setting, $filter_item_payloads);
-
-            Log::channel('daily')->info(
-                'Category page filters synchronized.',
-                [
-                    'page_setting_id'       => (int) $page_setting->id,
-                    'default_language_id'   => $default_language_id,
-                    'created_count'         => $summary['created_count'],
-                    'updated_count'         => $summary['updated_count'],
-                    'removed_count'         => $summary['removed_count'],
-                    'source_payloads_count' => count($filter_item_payloads),
-                ],
-            );
-
-            return $summary;
+            return $this->syncFilterItems($page_setting, $filter_item_payloads);
         } catch (Throwable $throwable) {
             Log::channel('stack')->error(
                 'Category page filters synchronization failed.',
@@ -223,52 +208,63 @@ class CategoryPageFilterSyncService
      */
     private function syncFilterItems(PageSetting $page_setting, array $payloads): array
     {
+        $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
+
+        $existing_filter_items = collect((array) Arr::get($settings, 'items.filters', []))
+            ->filter(fn (mixed $item): bool => is_array($item) && filled((string) Arr::get($item, 'code')))
+            ->keyBy(fn (array $item): string => (string) Arr::get($item, 'code'));
+
         $created_count = 0;
         $updated_count = 0;
-
-        $payload_codes = collect($payloads)
-            ->pluck('code')
-            ->filter(fn (mixed $code): bool => is_string($code) && filled($code))
-            ->values()
-            ->all();
-
-        $removed_count = PageSettingItem::query()
-            ->where('page_setting_id', (int) $page_setting->id)
-            ->where('type', PageSetting::ITEM_TYPE_FILTER)
-            ->whereNotIn('code', $payload_codes)
-            ->delete();
+        $next_items    = [];
 
         foreach ($payloads as $payload) {
-            $item = PageSettingItem::query()->firstOrNew([
-                'page_setting_id' => (int) $page_setting->id,
-                'type'            => PageSetting::ITEM_TYPE_FILTER,
-                'code'            => (string) $payload['code'],
-            ]);
+            $code = (string) Arr::get($payload, 'code', '');
 
-            $was_existing_item = $item->exists;
-
-            $item->fill([
-                'source_type' => Arr::get($payload, 'source_type'),
-                'source_id'   => Arr::get($payload, 'source_id'),
-                'get'         => Arr::get($payload, 'get', []),
-                'config'      => Arr::get($payload, 'config', []),
-            ]);
-
-            if (! $was_existing_item) {
-                $item->fill([
-                    'is_enabled' => (bool) Arr::get($payload, 'is_enabled', true),
-                    'sort_order' => (int) Arr::get($payload, 'sort_order', 0),
-                ]);
+            if ($code === '') {
+                continue;
             }
 
-            $item->save();
+            $existing_item = $existing_filter_items->get($code);
+            $is_existing   = is_array($existing_item);
 
-            if ($was_existing_item) {
+            $next_items[] = [
+                'code'        => $code,
+                'source_type' => Arr::get($payload, 'source_type'),
+                'source_id'   => Arr::get($payload, 'source_id'),
+                'is_enabled'  => (bool) Arr::get($existing_item, 'is_enabled', Arr::get($payload, 'is_enabled', true)),
+                'sort_order'  => (int) Arr::get($payload, 'sort_order', Arr::get($existing_item, 'sort_order', 0)),
+                'get'         => [
+                    'key'   => (string) Arr::get($payload, 'get.key', ''),
+                    'value' => Arr::get($payload, 'get.value'),
+                    'extra' => is_array(Arr::get($payload, 'get.extra')) ? Arr::get($payload, 'get.extra') : [],
+                ],
+                'config' => is_array(Arr::get($payload, 'config')) ? Arr::get($payload, 'config') : [],
+            ];
+
+            if ($is_existing) {
                 $updated_count++;
             } else {
                 $created_count++;
             }
         }
+
+        $removed_count = max(0, $existing_filter_items->count() - count($next_items));
+
+        Arr::set(
+            $settings,
+            'items.filters',
+            collect($next_items)
+                ->sortBy('sort_order')
+                ->values()
+                ->all(),
+        );
+
+        Arr::set($settings, 'meta.contract_version', max(2, (int) Arr::get($settings, 'meta.contract_version', 1)));
+
+        $page_setting->forceFill([
+            'settings' => $settings,
+        ])->save();
 
         return [
             'created_count' => $created_count,

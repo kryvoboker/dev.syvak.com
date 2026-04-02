@@ -7,8 +7,6 @@ namespace App\Services\PageSettings;
 use App\Models\ApplicationSettings\AppSetting;
 use App\Models\ApplicationSettings\Language;
 use App\Models\PageSettings\PageSetting;
-use App\Models\PageSettings\PageSettingItem;
-use App\Models\PageSettings\PageSettingTranslation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -341,10 +339,9 @@ class PageSettingsBootstrapService
                     'page_type' => PageSetting::PAGE_TYPE_CATEGORY,
                 ],
                 [
-                    'is_sorting_enabled'   => true,
-                    'is_filtering_enabled' => false,
-                    'settings'             => $this->buildCategorySettingsContract(
+                    'settings' => $this->buildCategorySettingsContract(
                         is_sorting_enabled              : true,
+                        is_filtering_enabled            : false,
                         products_per_page_limit         : $defaults['products_per_page_limit'],
                         is_ajax_products_loading_enabled: $defaults['ajax_products_loading_enabled'],
                         product_image_width             : $defaults['product_image_width'],
@@ -363,9 +360,9 @@ class PageSettingsBootstrapService
             $this->syncCategorySettingsContract($page_setting, $defaults);
             $this->syncDefaultSortingItems($page_setting);
             $this->syncMissingTranslations($page_setting);
-            $this->purgeLegacyFilterItems($page_setting);
+            $this->syncFilterItemsNode($page_setting);
 
-            return $page_setting->fresh(['translations.language', 'items']) ?? $page_setting;
+            return $page_setting->fresh() ?? $page_setting;
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('Category page setting bootstrap failed.', [
                 'page_type' => PageSetting::PAGE_TYPE_CATEGORY,
@@ -389,15 +386,13 @@ class PageSettingsBootstrapService
                     'page_type' => PageSetting::PAGE_TYPE_PRODUCT,
                 ],
                 [
-                    'is_sorting_enabled'   => false,
-                    'is_filtering_enabled' => false,
-                    'settings'             => $this->buildProductSettingsContract($defaults),
+                    'settings' => $this->buildProductSettingsContract($defaults),
                 ],
             );
 
             $this->syncProductSettingsContract($page_setting, $defaults);
 
-            return $page_setting->fresh(['translations.language', 'items']) ?? $page_setting;
+            return $page_setting->fresh() ?? $page_setting;
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('Product page setting bootstrap failed.', [
                 'page_type' => PageSetting::PAGE_TYPE_PRODUCT,
@@ -421,15 +416,13 @@ class PageSettingsBootstrapService
                     'page_type' => PageSetting::PAGE_TYPE_SEARCH,
                 ],
                 [
-                    'is_sorting_enabled'   => false,
-                    'is_filtering_enabled' => false,
-                    'settings'             => $this->buildSearchSettingsContract($defaults),
+                    'settings' => $this->buildSearchSettingsContract($defaults),
                 ],
             );
 
             $this->syncSearchSettingsContract($page_setting, $defaults);
 
-            return $page_setting->fresh(['translations.language', 'items']) ?? $page_setting;
+            return $page_setting->fresh() ?? $page_setting;
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('Search page setting bootstrap failed.', [
                 'page_type' => PageSetting::PAGE_TYPE_SEARCH,
@@ -581,6 +574,7 @@ class PageSettingsBootstrapService
      */
     private function buildCategorySettingsContract(
         bool $is_sorting_enabled,
+        bool $is_filtering_enabled,
         int $products_per_page_limit,
         bool $is_ajax_products_loading_enabled,
         int $product_image_width,
@@ -595,11 +589,14 @@ class PageSettingsBootstrapService
     ): array {
         return [
             'meta' => [
-                'contract_version' => 1,
+                'contract_version' => 2,
             ],
             'ui' => [
                 'sorting' => [
                     'enabled' => $is_sorting_enabled,
+                ],
+                'filtering' => [
+                    'enabled' => $is_filtering_enabled,
                 ],
             ],
             'pagination' => [
@@ -631,6 +628,11 @@ class PageSettingsBootstrapService
                     ],
                 ],
             ],
+            'items' => [
+                'sorting' => [],
+                'filters' => [],
+            ],
+            'localized' => [],
         ];
     }
 
@@ -644,7 +646,8 @@ class PageSettingsBootstrapService
 
         $settings = array_replace_recursive(
             $this->buildCategorySettingsContract(
-                is_sorting_enabled              : (bool) $page_setting->is_sorting_enabled,
+                is_sorting_enabled              : (bool) Arr::get($settings, 'ui.sorting.enabled', true),
+                is_filtering_enabled            : (bool) Arr::get($settings, 'ui.filtering.enabled', false),
                 products_per_page_limit         : (int) Arr::get($settings, 'pagination.products_per_page_limit', $defaults['products_per_page_limit']),
                 is_ajax_products_loading_enabled: (bool) Arr::get($settings, 'pagination.ajax_products_loading_enabled', $defaults['ajax_products_loading_enabled']),
                 product_image_width             : (int) Arr::get($settings, 'images.products.width', $defaults['product_image_width']),
@@ -660,7 +663,9 @@ class PageSettingsBootstrapService
             $settings,
         );
 
-        Arr::set($settings, 'ui.sorting.enabled', (bool) $page_setting->is_sorting_enabled);
+        Arr::set($settings, 'meta.contract_version', 2);
+        Arr::set($settings, 'ui.sorting.enabled', (bool) Arr::get($settings, 'ui.sorting.enabled', true));
+        Arr::set($settings, 'ui.filtering.enabled', (bool) Arr::get($settings, 'ui.filtering.enabled', false));
         Arr::set($settings, 'pagination.products_per_page_limit', max(1, (int) Arr::get($settings, 'pagination.products_per_page_limit', $defaults['products_per_page_limit'])));
         Arr::set($settings, 'pagination.ajax_products_loading_enabled', (bool) Arr::get($settings, 'pagination.ajax_products_loading_enabled', $defaults['ajax_products_loading_enabled']));
         Arr::set($settings, 'images.products.width', max(1, (int) Arr::get($settings, 'images.products.width', $defaults['product_image_width'])));
@@ -672,8 +677,8 @@ class PageSettingsBootstrapService
         Arr::set($settings, 'admin.images.preview_in_list.height', max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.height', $defaults['category_preview_list_height'])));
         Arr::set($settings, 'admin.images.preview_in_page.width', max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.width', $defaults['category_preview_page_width'])));
         Arr::set($settings, 'admin.images.preview_in_page.height', max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.height', $defaults['category_preview_page_height'])));
-        Arr::set($settings, 'meta.contract_version', 1);
-        Arr::forget($settings, ['ui.filters']);
+        Arr::set($settings, 'items.sorting', $this->normalizeSettingsItems((array) Arr::get($settings, 'items.sorting', [])));
+        Arr::set($settings, 'items.filters', $this->normalizeSettingsItems((array) Arr::get($settings, 'items.filters', [])));
 
         $page_setting->forceFill([
             'settings' => $settings,
@@ -700,7 +705,7 @@ class PageSettingsBootstrapService
     {
         return [
             'meta' => [
-                'contract_version' => 1,
+                'contract_version' => 2,
             ],
             'customer' => [
                 'stock' => [
@@ -789,7 +794,7 @@ class PageSettingsBootstrapService
         Arr::set($settings, 'admin.images.preview_in_list.height', max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.height', $defaults['admin_preview_in_list_height'])));
         Arr::set($settings, 'admin.images.preview_in_page.width', max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.width', $defaults['admin_preview_in_page_width'])));
         Arr::set($settings, 'admin.images.preview_in_page.height', max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.height', $defaults['admin_preview_in_page_height'])));
-        Arr::set($settings, 'meta.contract_version', 1);
+        Arr::set($settings, 'meta.contract_version', 2);
         Arr::forget($settings, ['stock', 'validation']);
 
         $page_setting->forceFill([
@@ -805,7 +810,15 @@ class PageSettingsBootstrapService
     {
         return [
             'meta' => [
-                'contract_version' => 1,
+                'contract_version' => 2,
+            ],
+            'ui' => [
+                'sorting' => [
+                    'enabled' => false,
+                ],
+                'filtering' => [
+                    'enabled' => false,
+                ],
             ],
             'pagination' => [
                 'products_per_page_limit' => $defaults['products_per_page_limit'],
@@ -853,7 +866,9 @@ class PageSettingsBootstrapService
         Arr::set($settings, 'images.search_not_found.path', (string) Arr::get($settings, 'images.search_not_found.path', $defaults['search_not_found_path']));
         Arr::set($settings, 'images.search_not_found.width', max(1, (int) Arr::get($settings, 'images.search_not_found.width', $defaults['search_not_found_width'])));
         Arr::set($settings, 'images.search_not_found.height', max(1, (int) Arr::get($settings, 'images.search_not_found.height', $defaults['search_not_found_height'])));
-        Arr::set($settings, 'meta.contract_version', 1);
+        Arr::set($settings, 'meta.contract_version', 2);
+        Arr::set($settings, 'ui.sorting.enabled', (bool) Arr::get($settings, 'ui.sorting.enabled', false));
+        Arr::set($settings, 'ui.filtering.enabled', (bool) Arr::get($settings, 'ui.filtering.enabled', false));
 
         $page_setting->forceFill([
             'settings' => $settings,
@@ -862,54 +877,78 @@ class PageSettingsBootstrapService
 
     private function syncDefaultSortingItems(PageSetting $page_setting): void
     {
+        $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
+
+        $existing_items = collect((array) Arr::get($settings, 'items.sorting', []))
+            ->filter(fn (mixed $item): bool => is_array($item) && filled((string) Arr::get($item, 'code')))
+            ->mapWithKeys(fn (array $item): array => [(string) Arr::get($item, 'code') => $item]);
+
+        $sorting_items = [];
+
         foreach ($this->getDefaultSortingItemPayloads() as $index => $item_payload) {
-            $item = PageSettingItem::query()->firstOrNew([
-                'page_setting_id' => (int) $page_setting->id,
-                'type'            => PageSetting::ITEM_TYPE_SORTING,
-                'code'            => $item_payload['code'],
-            ]);
+            $code          = (string) $item_payload['code'];
+            $existing_item = $existing_items->get($code, []);
 
-            $item->fill([
-                'source_type' => $item_payload['source_type'],
-                'source_id'   => null,
-                'get'         => $item_payload['get'],
-                'config'      => $item_payload['config'],
-            ]);
-
-            if (! $item->exists) {
-                $item->fill([
-                    'is_enabled' => true,
-                    'sort_order' => ($index + 1) * 10,
-                ]);
-            }
-
-            $item->save();
+            $sorting_items[] = [
+                'code'        => $code,
+                'source_type' => (string) Arr::get($existing_item, 'source_type', $item_payload['source_type']),
+                'source_id'   => Arr::get($existing_item, 'source_id'),
+                'is_enabled'  => (bool) Arr::get($existing_item, 'is_enabled', true),
+                'sort_order'  => (int) Arr::get($existing_item, 'sort_order', ($index + 1) * 10),
+                'get'         => array_replace_recursive((array) $item_payload['get'], (array) Arr::get($existing_item, 'get', [])),
+                'config'      => array_replace_recursive((array) $item_payload['config'], (array) Arr::get($existing_item, 'config', [])),
+            ];
         }
+
+        Arr::set($settings, 'items.sorting', $sorting_items);
+
+        $page_setting->forceFill([
+            'settings' => $settings,
+        ])->save();
     }
 
     private function syncMissingTranslations(PageSetting $page_setting): void
     {
+        $settings       = is_array($page_setting->settings) ? $page_setting->settings : [];
+        $localized_data = Arr::get($settings, 'localized', []);
+
+        if (! is_array($localized_data)) {
+            $localized_data = [];
+        }
+
         $active_languages = new Language()->getActiveLanguages();
 
         foreach ($active_languages as $language) {
-            PageSettingTranslation::query()->firstOrCreate(
-                [
-                    'page_setting_id' => (int) $page_setting->id,
-                    'language_id'     => (int) $language->id,
-                ],
-                [
-                    'content' => $this->buildDefaultTranslationContent(),
-                ],
+            $language_id = (string) $language->id;
+
+            if (! isset($localized_data[$language_id]) || ! is_array($localized_data[$language_id])) {
+                $localized_data[$language_id] = $this->buildDefaultTranslationContent();
+
+                continue;
+            }
+
+            $localized_data[$language_id] = array_replace_recursive(
+                $this->buildDefaultTranslationContent(),
+                $localized_data[$language_id],
             );
         }
+
+        Arr::set($settings, 'localized', $localized_data);
+
+        $page_setting->forceFill([
+            'settings' => $settings,
+        ])->save();
     }
 
-    private function purgeLegacyFilterItems(PageSetting $page_setting): void
+    private function syncFilterItemsNode(PageSetting $page_setting): void
     {
-        PageSettingItem::query()
-            ->where('page_setting_id', (int) $page_setting->id)
-            ->where('type', PageSetting::ITEM_TYPE_FILTER)
-            ->delete();
+        $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
+
+        Arr::set($settings, 'items.filters', $this->normalizeSettingsItems((array) Arr::get($settings, 'items.filters', [])));
+
+        $page_setting->forceFill([
+            'settings' => $settings,
+        ])->save();
     }
 
     /**
@@ -937,15 +976,15 @@ class PageSettingsBootstrapService
                 'config'      => ['selection' => 'single'],
             ],
             [
-                'code'        => 'price_asc',
+                'code'        => 'price-asc',
                 'source_type' => 'static',
-                'get'         => ['key' => 'sort', 'value' => 'price_asc', 'extra' => []],
+                'get'         => ['key' => 'sort', 'value' => 'price-asc', 'extra' => []],
                 'config'      => ['selection' => 'single'],
             ],
             [
-                'code'        => 'price_desc',
+                'code'        => 'price-desc',
                 'source_type' => 'static',
-                'get'         => ['key' => 'sort', 'value' => 'price_desc', 'extra' => []],
+                'get'         => ['key' => 'sort', 'value' => 'price-desc', 'extra' => []],
                 'config'      => ['selection' => 'single'],
             ],
         ];
@@ -962,5 +1001,35 @@ class PageSettingsBootstrapService
                 'description' => '',
             ],
         ];
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $items
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeSettingsItems(array $items): array
+    {
+        return collect($items)
+            ->filter(fn (mixed $item): bool => is_array($item) && filled((string) Arr::get($item, 'code')))
+            ->map(function (array $item): array {
+                $item_get = Arr::get($item, 'get', []);
+
+                return [
+                    'code'        => (string) Arr::get($item, 'code', ''),
+                    'is_enabled'  => (bool) Arr::get($item, 'is_enabled', true),
+                    'sort_order'  => max(0, (int) Arr::get($item, 'sort_order', 0)),
+                    'source_type' => Arr::get($item, 'source_type'),
+                    'source_id'   => Arr::get($item, 'source_id'),
+                    'get'         => [
+                        'key'   => (string) Arr::get($item_get, 'key', ''),
+                        'value' => Arr::get($item_get, 'value'),
+                        'extra' => is_array(Arr::get($item_get, 'extra')) ? Arr::get($item_get, 'extra') : [],
+                    ],
+                    'config' => is_array(Arr::get($item, 'config')) ? Arr::get($item, 'config') : [],
+                ];
+            })
+            ->sortBy('sort_order')
+            ->values()
+            ->all();
     }
 }

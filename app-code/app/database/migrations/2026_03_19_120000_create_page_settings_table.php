@@ -17,8 +17,6 @@ return new class() extends Migration
             $table->id();
 
             $table->string('page_type', 100)->unique()->nullable(false);
-            $table->boolean('is_sorting_enabled')->default(true)->nullable(false);
-            $table->boolean('is_filtering_enabled')->default(true)->nullable(false);
             $table->json('settings')->nullable();
 
             $table->timestamps();

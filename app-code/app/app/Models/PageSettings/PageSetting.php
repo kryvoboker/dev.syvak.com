@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\PageSettings;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Arr;
 
 class PageSetting extends Model
 {
@@ -15,14 +15,8 @@ class PageSetting extends Model
 
     public const string PAGE_TYPE_SEARCH = 'search';
 
-    public const string ITEM_TYPE_SORTING = 'sorting';
-
-    public const string ITEM_TYPE_FILTER = 'filter';
-
     protected $fillable = [
         'page_type',
-        'is_sorting_enabled',
-        'is_filtering_enabled',
         'settings',
     ];
 
@@ -32,41 +26,45 @@ class PageSetting extends Model
     protected function casts(): array
     {
         return [
-            'is_sorting_enabled'   => 'boolean',
-            'is_filtering_enabled' => 'boolean',
-            'settings'             => 'array',
+            'settings' => 'array',
         ];
     }
 
     /**
-     * @return HasMany<PageSettingTranslation, $this>
+     * @return array<int, array<string, mixed>>
      */
-    public function translations(): HasMany
+    public function getSortingItemsFromSettings(): array
     {
-        return $this->hasMany(PageSettingTranslation::class);
+        $settings       = is_array($this->settings) ? $this->settings : [];
+        $settings_items = Arr::get($settings, 'items.sorting', []);
+
+        if (! is_array($settings_items)) {
+            return [];
+        }
+
+        return collect($settings_items)
+            ->filter(fn (mixed $item): bool => is_array($item))
+            ->map(fn (array $item): array => $item)
+            ->values()
+            ->all();
     }
 
     /**
-     * @return HasMany<PageSettingItem, $this>
+     * @return array<int, array<string, mixed>>
      */
-    public function items(): HasMany
+    public function getFilterItemsFromSettings(): array
     {
-        return $this->hasMany(PageSettingItem::class);
-    }
+        $settings       = is_array($this->settings) ? $this->settings : [];
+        $settings_items = Arr::get($settings, 'items.filters', []);
 
-    /**
-     * @return HasMany<PageSettingItem, $this>
-     */
-    public function sortingItems(): HasMany
-    {
-        return $this->items()->where('type', self::ITEM_TYPE_SORTING);
-    }
+        if (! is_array($settings_items)) {
+            return [];
+        }
 
-    /**
-     * @return HasMany<PageSettingItem, $this>
-     */
-    public function filterItems(): HasMany
-    {
-        return $this->items()->where('type', self::ITEM_TYPE_FILTER);
+        return collect($settings_items)
+            ->filter(fn (mixed $item): bool => is_array($item))
+            ->map(fn (array $item): array => $item)
+            ->values()
+            ->all();
     }
 }

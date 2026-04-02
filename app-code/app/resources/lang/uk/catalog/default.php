@@ -40,8 +40,8 @@ return [
         'default'     => 'За замовчуванням',
         'newest'      => 'Спочатку нові',
         'bestsellers' => 'Бестселери',
-        'price_asc'   => 'Спочатку дешеві',
-        'price_desc'  => 'Спочатку дорогі',
+        'price-asc'   => 'Спочатку дешеві',
+        'price-desc'  => 'Спочатку дорогі',
     ],
 
     // Placeholders
