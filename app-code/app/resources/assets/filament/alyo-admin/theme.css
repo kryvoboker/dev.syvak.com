@@ -17,4 +17,8 @@
             @apply sm:justify-end
         }
     }
+
+    .fi-sidebar-nav-groups {
+        @apply gap-y-1;
+    }
 }

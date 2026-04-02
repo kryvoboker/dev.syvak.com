@@ -6,6 +6,7 @@ namespace App\Filament\Resources\PageSettings\Search\Schemas;
 
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
@@ -40,7 +41,7 @@ class SearchPageSettingsForm
                                             ->minValue(1)
                                             ->required(),
                                     ])
-                                    ->columns(1),
+                                    ->columns(),
 
                                 Section::make(__('admin/settings/search_page_settings.sections.search_not_found_image'))
                                     ->schema([
@@ -50,25 +51,33 @@ class SearchPageSettingsForm
                                             ->directory('images/search')
                                             ->visibility('public')
                                             ->imageEditor()
-                                            ->required(),
+                                            ->required()
+                                            ->columnStart(1)
+                                            ->columns(1),
 
-                                        TextInput::make('search_not_found_image_width')
-                                            ->label(__('admin/settings/search_page_settings.labels.search_not_found_image_width'))
-                                            ->numeric()
-                                            ->minValue(1)
-                                            ->required(),
+                                        Grid::make()
+                                            ->schema([
+                                                TextInput::make('search_not_found_image_width')
+                                                    ->label(__('admin/settings/search_page_settings.labels.search_not_found_image_width'))
+                                                    ->numeric()
+                                                    ->minValue(1)
+                                                    ->required(),
 
-                                        TextInput::make('search_not_found_image_height')
-                                            ->label(__('admin/settings/search_page_settings.labels.search_not_found_image_height'))
-                                            ->numeric()
-                                            ->minValue(1)
-                                            ->required(),
+                                                TextInput::make('search_not_found_image_height')
+                                                    ->label(__('admin/settings/search_page_settings.labels.search_not_found_image_height'))
+                                                    ->numeric()
+                                                    ->minValue(1)
+                                                    ->required(),
+                                            ])
+                                            ->columnStart(2)
+                                            ->columns(1),
                                     ])
-                                    ->columns(1),
+                                    ->columns(),
                             ])
                             ->columns(1),
                     ])
                     ->activeTab(1)
+                    ->contained(false)
                     ->persistTabInQueryString()
                     ->columnSpanFull(),
             ]);
