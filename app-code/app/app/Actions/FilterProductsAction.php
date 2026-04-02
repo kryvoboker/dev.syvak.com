@@ -424,10 +424,6 @@ readonly class FilterProductsAction
                 ->orderByRaw($effective_price_expression . ' DESC')
                 ->orderByDesc('products.id'),
 
-            'newest'      => $query
-                ->orderByDesc('products.date_added')
-                ->orderByDesc('products.id'),
-
             default       => $query
                 ->orderByDesc('products.date_added')
                 ->orderByDesc('products.id'),
