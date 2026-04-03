@@ -18,6 +18,31 @@ export const getSessionStorage    = (key: string, defaultValue: any = null): str
 export const removeSessionStorage = (key: string): void => sessionStorage.removeItem(key);
 export const isContainsClass      = <T extends HTMLElement>(element: T | null, className: string): boolean => element ? element.classList.contains(className) : false;
 export const redirect             = (url: string): string => location.href = url;
+export const goBack              = (fallbackUrl: string = '/'): void => {
+    if (history.length > 1) {
+        history.back();
+
+        return;
+    }
+
+    const referrer: string = document.referrer?.trim() ?? '';
+
+    if (!isEmpty(referrer)) {
+        try {
+            const referrerUrl: URL = new URL(referrer);
+
+            if (referrerUrl.origin === location.origin && referrerUrl.href !== location.href) {
+                redirect(referrerUrl.href);
+
+                return;
+            }
+        } catch {
+            // Ignore malformed referrer and use fallback.
+        }
+    }
+
+    redirect(fallbackUrl);
+};
 export const removeElement        = <T extends HTMLElement>(selector: string, context: T | Document = document): void => findElem(selector, context)?.remove();
 export const getSpinnerHtml       = (selector: string = ''): string => `<div class="spinner-border ${selector}" role="status"></div>`;
 export const blockBody            = (isBlock: boolean = true): string => document.body.style.overflow = isBlock ? $HIDDEN_CLASS_NAME : '';
