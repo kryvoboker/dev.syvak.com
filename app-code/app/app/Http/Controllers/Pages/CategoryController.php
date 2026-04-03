@@ -40,9 +40,9 @@ class CategoryController extends Controller
         $header_data             = app(HeaderService::class)();
         $page_type               = try_detect_page_type($request);
         $page_setting            = app(PageSettingsBootstrapService::class)->bootstrapCategoryPageSetting();
-        $page_setting_settings   = get_page_settings($page_setting);
+        $page_settings_arr       = get_page_settings($page_setting);
         $category_context        = $this->resolveCategoryContext($slug, $locale);
-        $products_per_page_limit = ProductsLimitService::getProductsCategoryLimit($page_setting_settings);
+        $products_per_page_limit = ProductsLimitService::getProductsCategoryLimit($page_settings_arr);
         $requested_sort_value    = $this->normalizeSortValue((string)Arr::get($request->validated(), 'sort', ''));
         $fallback_active_sort    = resolve_sort_code($page_setting, $requested_sort_value);
 
@@ -51,6 +51,7 @@ class CategoryController extends Controller
                 'validated_data'      => $request->validated(),
                 'category_slug'       => $slug,
                 'is_get_filters_data' => true,
+                'page_path'           => localizedRoute('localized.catalog.category.show', ['slug' => $slug], absolute: false),
             ],
                 locale: $locale,
             );
@@ -68,8 +69,10 @@ class CategoryController extends Controller
 
         /** @var LengthAwarePaginator|null $paginator */
         $paginator                        = Arr::get($response_data, 'paginator');
-        $is_ajax_products_loading_enabled = (bool)config('app.page_settings.category.ajax_products_loading_enabled', true) === true
-            && $products_per_page_limit < (int)$paginator?->total();
+        $current_page                     = $paginator instanceof LengthAwarePaginator ? (int)$paginator->currentPage() : null;
+        $is_has_more_pages                = $paginator instanceof LengthAwarePaginator ? $paginator->hasMorePages() : false;
+        $is_ajax_products_loading_enabled = (bool)Arr::get($page_settings_arr, 'pagination.ajax_products_loading_enabled') === true
+            && $products_per_page_limit < (int)($paginator instanceof LengthAwarePaginator ? $paginator->total() : 0);
 
         \Illuminate\Support\Facades\View::share([
             'sluggable_type' => Category::class,
@@ -86,7 +89,9 @@ class CategoryController extends Controller
             'sort_options'                     => $this->buildSortOptions($page_setting, $language_id),
             'active_sort_code'                 => (string)Arr::get($response_data, 'active_sort_code', $fallback_active_sort),
             'selected_sort_value'              => (string)Arr::get($response_data, 'selected_sort_value', $requested_sort_value),
+            'is_has_more_pages'                => $is_has_more_pages,
             'is_ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
+            'next_page'                        => $current_page !== null ? ($current_page + 1) : null,
             'products_per_page_limit'          => $products_per_page_limit,
             'clear_filters_url'                => localizedRoute('localized.catalog.category.show', ['slug' => $slug]),
             'catalog_filter_ajax_url'          => localizedRoute('localized.catalog.catalog-filter-ajax.index', ['slug' => $slug]),
@@ -115,9 +120,9 @@ class CategoryController extends Controller
 
         return $sorting_items
             ->map(function (array $sorting_item) use ($request_url, $request_query, $sorting_keys, $language_id): array {
-                $item_get = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
-                $sort_key = trim((string)Arr::get($item_get, 'key', config('page-settings.sort_get_keys.sort', 'sort')));
-                $sort_key = $sort_key !== '' ? $sort_key : (string)config('page-settings.sort_get_keys.sort', 'sort');
+                $item_get   = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
+                $sort_key   = trim((string)Arr::get($item_get, 'key', config('page-settings.sort_get_keys.sort', 'sort')));
+                $sort_key   = $sort_key !== '' ? $sort_key : (string)config('page-settings.sort_get_keys.sort', 'sort');
                 $sort_value = (string)Arr::get($item_get, 'value', (string)Arr::get($sorting_item, 'code', ''));
 
                 return [
@@ -245,10 +250,10 @@ class CategoryController extends Controller
      */
     private function buildSortOptionUrl(
         string $request_url,
-        array $request_query,
+        array  $request_query,
         string $sort_key,
         string $sort_value,
-        array $sorting_keys,
+        array  $sorting_keys,
     ): string {
         if (blank($request_url) || blank($sort_key) || blank($sort_value)) {
             return '';
