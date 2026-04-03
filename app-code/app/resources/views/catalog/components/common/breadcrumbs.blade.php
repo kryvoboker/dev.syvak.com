@@ -9,9 +9,9 @@
                 @foreach($breadcrumbs as $index => $breadcrumb_data)
                     @if($loop->first)
                         <li class="breadcrumbs__item">
-                            <a class="" href="">
+                            <button class="go-to-previous-page__btn" type="button">
                                 <span class="icon-[formkit--arrowleft] custom-icon"></span>
-                            </a>
+                            </button>
                         </li>
                     @endif
 

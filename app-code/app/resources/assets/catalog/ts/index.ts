@@ -5,6 +5,15 @@ document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsOverlayCollection   = window.$hsOverlayCollection || [];
     const pageType: string | null = window.app_params?.page_type ?? null;
 
+    import('@ts-shared/lib/helpers.ts')
+        .then(module => {
+            const goToPreviousPageBtnEl = <HTMLButtonElement | null>module.findElem('.go-to-previous-page__btn');
+
+            goToPreviousPageBtnEl?.addEventListener('click', (): void => {
+                module.goBack(location.origin);
+            });
+        });
+
     import('@ts-shared/lib/validateForm.ts')
         .then(module => module.handleValidateForms());
 
