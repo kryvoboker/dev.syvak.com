@@ -2,7 +2,31 @@
  * @global
  * @var {number} $DEBOUNCE_DELAY
  */
-export const $DEBOUNCE_DELAY: number = 700;
+export const $DEBOUNCE_DELAY: number = 1000;
+
+/**
+ * @global
+ * @var {string} $HOME_PAGE_TYPE
+ */
+export const $HOME_PAGE_TYPE: string = 'home';
+
+/**
+ * @global
+ * @var {string} $PRODUCT_PAGE_TYPE
+ */
+export const $PRODUCT_PAGE_TYPE: string = 'product';
+
+/**
+ * @global
+ * @var {string} $CATEGORY_PAGE_TYPE
+ */
+export const $CATEGORY_PAGE_TYPE: string = 'category';
+
+/**
+ * @global
+ * @var {string} $SEARCH_PAGE_TYPE
+ */
+export const $SEARCH_PAGE_TYPE: string = 'search';
 
 /**
  * @global
@@ -15,6 +39,12 @@ export const $PAGE_TYPE_KEY: string = 'page_type';
  * @var {string} $HIDDEN_CLASS_NAME
  */
 export const $HIDDEN_CLASS_NAME = 'hidden';
+
+/**
+ * @global
+ * @var {string} $ANIMATION_SPIN_CLASS_NAME
+ */
+export const $ANIMATION_SPIN_CLASS_NAME: string = 'animate-spin';
 
 /**
  * @global

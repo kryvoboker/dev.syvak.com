@@ -5,7 +5,7 @@
         :breadcrumbs="$breadcrumbs"
     />
 
-    <section class="category-section section"
+    <section class="category section" id="category"
              aria-label="{{ __('catalog/default.aria_labels.category_products_list') }}">
         <div class="container">
             <h1 class="section-title">
@@ -18,17 +18,18 @@
                 @include('catalog.pages.partials.category.sort')
             </div>
 
-            @include('catalog.pages.partials.category.products-list')
-
-            {{ $paginator?->links('pagination::tailwind') }}
+            @include('catalog.pages.partials.category.category-content-container')
         </div>
     </section>
 
     @include('catalog.pages.partials.category.filter-content')
 
-    @if(isset($is_filter_enabled) && $is_filter_enabled === true)
-        @prepend('styles')
-            @vite(['./node_modules/nouislider/dist/nouislider.css'])
-        @endprepend
-    @endif
+    <script>
+        window.app_params = {
+            ...(window.app_params ?? {}),
+            ...@json([
+                'load_more_products_ajax_url' => $load_more_products_ajax_url,
+            ])
+        };
+    </script>
 @endsection

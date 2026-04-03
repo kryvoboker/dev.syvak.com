@@ -2,6 +2,12 @@
     $filter_price_group_code = config('catalog-filter.filter_groups.price');
 @endphp
 
+@if(isset($is_filter_enabled) && $is_filter_enabled === true)
+    @prepend('styles')
+        @vite(['./node_modules/nouislider/dist/nouislider.css'])
+    @endprepend
+@endif
+
 <script>
     window.app_params = {
         ...(window.app_params ?? {}),
@@ -15,9 +21,7 @@
      id="category-filter-drawer"
      role="dialog"
      tabindex="-1">
-    <div class="loader fixed top-0 left-0 hidden items-center justify-center size-full bg-black/90 z-10">
-        <span class="loading loading-spinner loading-xl"></span>
-    </div>
+    <x-catalog::common.loader class="filter-loader" />
 
     <div class="drawer-header items-center justify-between p-0">
         <div class="text-2xl uppercase">

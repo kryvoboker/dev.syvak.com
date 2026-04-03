@@ -1,17 +1,16 @@
 import {
     addClass, debounce, fetchFunc, findArrayElems, findElem,
-    httpBuildQueryString, isEmpty, redirect, removeClass, sprintF
-}                             from "@ts-shared/lib/helpers.ts";
-import { initAccordion }      from "@ts-shared/accordion/initAccordion.ts";
-import type { API }           from "nouislider";
-import noUiSlider             from "nouislider";
-import wNumb                  from "wnumb";
+    httpBuildQueryString, isEmpty, redirect, sprintF, toggleElement
+}                               from "@ts-shared/lib/helpers.ts";
+import { initAccordion }        from "@ts-shared/accordion/initAccordion.ts";
+import type { API }             from "nouislider";
+import noUiSlider               from "nouislider";
+import wNumb                    from "wnumb";
 import {
-    $_ERROR_CLASS_NAME, $DEBOUNCE_DELAY, $FLEX_CLASS_NAME,
-    $HIDDEN_CLASS_NAME, $LOADER_CLASS_NAME
-}                             from "@ts-shared/lib/constants.ts";
-import type { URLParamsType } from "@ts-types/httpQueryBuild.ts";
-import { WindowAppParams }    from "@ts-types/global";
+    $_ERROR_CLASS_NAME, $DEBOUNCE_DELAY, $LOADER_CLASS_NAME
+}                               from "@ts-shared/lib/constants.ts";
+import type { URLParamsType }   from "@ts-types/httpQueryBuild.ts";
+import type { WindowAppParams } from "@ts-types/global";
 
 interface FireSearchProductsEventResponseType {
     success: boolean;
@@ -139,16 +138,6 @@ function handleNoUiSlider(): void {
     });
 }
 
-const toggleElement = <T extends HTMLElement>(element: T | null, isShow: boolean): void => {
-    if (isShow) {
-        removeClass(element, $HIDDEN_CLASS_NAME);
-        addClass(element, $FLEX_CLASS_NAME);
-    } else {
-        removeClass(element, $FLEX_CLASS_NAME);
-        addClass(element, $HIDDEN_CLASS_NAME);
-    }
-};
-
 const processCollectUrlParams = (): URLParamsType => {
     const urlParams: URLParamsType = {};
 
@@ -189,14 +178,10 @@ const fireSearchProductsEvent = (): void => {
 
     const urlQueries: string = httpBuildQueryString(urlParams, true);
 
-    console.log('url: ', urlQueries);
-
     toggleElement(LOADER_EL, true);
 
     fetchFunc(WINDOW_APP_PARAMS?.catalog_filter_ajax_url + '?' + urlQueries, {}, 'GET')
         .then((json: FireSearchProductsEventResponseType): void => {
-            console.log('res: ', json);
-
             if (json.success && json.total_products !== undefined) {
                 const totalResults: number = json.total_products;
 
