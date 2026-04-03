@@ -44,6 +44,7 @@ readonly class FilterProductsAction
         $validated_data      = Arr::get($params, 'validated_data', []);
         $category_slug       = (string)Arr::get($params, 'category_slug', '');
         $is_get_filters_data = (bool)Arr::get($params, 'is_get_filters_data', false);
+        $page_path           = (string)Arr::get($params, 'page_path', '');
 
         if (!is_array($validated_data)) {
             $validated_data = [];
@@ -54,8 +55,8 @@ readonly class FilterProductsAction
 
         if (!$language instanceof Language || blank($category_slug)) {
             return $this->buildEmptyResponse(
-                validated_data     : $validated_data,
-                sort_code          : 'default'
+                validated_data: $validated_data,
+                sort_code     : 'default'
             );
         }
 
@@ -63,13 +64,12 @@ readonly class FilterProductsAction
 
         if (!$category instanceof Category) {
             return $this->buildEmptyResponse(
-                validated_data     : $validated_data,
-                sort_code          : 'default'
+                validated_data: $validated_data,
+                sort_code     : 'default'
             );
         }
 
-        $filter_set = $this->resolveActiveCategoryFilterSet();
-
+        $filter_set                  = $this->resolveActiveCategoryFilterSet();
         $is_filter_mechanism_enabled = $filter_set instanceof CatalogFilterSet && $filter_set->is_enabled;
         $minimum_stock_quantity      = $this->resolveMinimumStockQuantity($filter_set);
         $filter_groups               = $is_filter_mechanism_enabled
@@ -113,6 +113,7 @@ readonly class FilterProductsAction
         $products = $products_query
             ->paginate($this->resolveCategoryProductsPerPage())
             ->withQueryString();
+        $products->setPath($this->resolvePaginatorPath($page_path));
 
         $available_keys_for_show_clear_btn = config('catalog-filter.available_keys_for_show_clear_btn', []);
         $is_show_clear_filters_link        = array_any(
@@ -968,18 +969,18 @@ readonly class FilterProductsAction
         $requested_sort_value = $this->normalizeRequestedSortValue(Arr::get($validated_data, 'sort', ''));
 
         return [
-            'products'          => [],
-            'paginator'         => null,
-            'applied_filters'   => [
+            'products'            => [],
+            'paginator'           => null,
+            'applied_filters'     => [
                 'sort'       => $requested_sort_value,
                 'price_from' => Arr::get($validated_data, 'price_from'),
                 'price_to'   => Arr::get($validated_data, 'price_to'),
                 'attributes' => (array)Arr::get($validated_data, 'attributes', []),
             ],
-            'active_sort_code'  => $sort_code,
+            'active_sort_code'    => $sort_code,
             'selected_sort_value' => $requested_sort_value,
-            'is_filter_enabled' => false,
-            'filters_data'      => [],
+            'is_filter_enabled'   => false,
+            'filters_data'        => [],
         ];
     }
 
@@ -1000,6 +1001,19 @@ readonly class FilterProductsAction
 
     private function normalizeRequestedSortValue(mixed $sort_value): string
     {
-        return Str::lower(trim((string) $sort_value));
+        return Str::lower(trim((string)$sort_value));
+    }
+
+    private function resolvePaginatorPath(string $page_path): string
+    {
+        if (filled($page_path)) {
+            return $page_path;
+        }
+
+        if (app()->bound('request')) {
+            return request()->url();
+        }
+
+        return '/';
     }
 }

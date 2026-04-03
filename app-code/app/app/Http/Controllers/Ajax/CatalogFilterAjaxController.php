@@ -36,6 +36,7 @@ class CatalogFilterAjaxController extends Controller
                 'validated_data'      => $request->validated(),
                 'category_slug'       => $slug,
                 'is_get_filters_data' => false,
+                'page_path'           => localizedRoute('localized.catalog.category.show', ['slug' => $slug], absolute: false),
             ],
                 locale: $locale,
             );
