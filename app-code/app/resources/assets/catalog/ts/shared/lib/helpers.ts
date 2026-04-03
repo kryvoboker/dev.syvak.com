@@ -1,5 +1,5 @@
-import { $HIDDEN_CLASS_NAME }                 from "@ts-shared/lib/constants.ts";
-import type { QueryValueType, URLParamsType } from "@ts-types/httpQueryBuild.ts";
+import { $FLEX_CLASS_NAME, $HIDDEN_CLASS_NAME } from "@ts-shared/lib/constants.ts";
+import type { QueryValueType, URLParamsType }   from "@ts-types/httpQueryBuild.ts";
 
 export const findElem             = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): T | HTMLElement | null => context ? context.querySelector(searchVal) : null;
 export const findElems            = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): NodeListOf<T> | NodeListOf<HTMLElement> | null => context ? context.querySelectorAll(searchVal) : null;
@@ -27,6 +27,7 @@ export const getRandomNums        = (): string => Math.random().toString(36).sub
 export const windowMatchMedia     = (query: string): boolean => matchMedia(`(${query.replace(/^\(+/, '').replace(/\)+$/, '')})`).matches;
 export const getClosestParentEl   = <T extends HTMLElement>(selector: string, childEl: T | null): T | null => childEl ? childEl.closest(selector) : null;
 export const isClosestClass       = <T extends HTMLElement>(selector: string, context: T | null): boolean => getClosestParentEl(selector, context) !== null;
+export const setHistoryState       = (url: string, title: string = '', stateObj: any = {}): void => history.pushState(stateObj, title, url);
 export const sprintF              = (str: string, ... args: (string | number)[]): string => {
     let index: number = 0;
 
@@ -85,8 +86,8 @@ export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams
             continue;
         }
 
-        const key: string                            = queriesKey.trim();
-        let value: QueryValueType | QueryValueType[] = queryValue;
+        const key: string                              = queriesKey.trim();
+        const value: QueryValueType | QueryValueType[] = queryValue;
 
         if (isArray(value)) {
             let values: string[] = [];
@@ -104,7 +105,7 @@ export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams
     }
 
     if (isWidthSearchParams) {
-        const searchParams: string = window.location.search;
+        const searchParams: string = location.search;
 
         if (!isEmpty(searchParams)) {
             const searchParamsSplit: string[] = searchParams.slice(1).split('&');
@@ -141,10 +142,8 @@ const isEmpty = <T extends Object>(value: string | number | null | undefined | a
         }
 
         return value.length === 0;
-    } else if (value === null) {
+    } else if (value === null || value === undefined) {
         return true;
-    } else if (value === undefined) {
-        return false;
     } else {
         return !(value instanceof HTMLElement) && Object.keys(value).length === 0;
     }
@@ -350,15 +349,13 @@ const scrollToAnchor = (selector: string): void => {
     })
 };
 
-const toggleLoader = (classNameLoader: string, isShowLoader: boolean): void => {
-    const loaderContainer = <HTMLElement | null>findElem(classNameLoader);
-
-    if (isShowLoader) {
-        removeClass(loaderContainer, 'invisible');
-        addClass(document.body, 'overflow-hidden');
+export const toggleElement = <T extends HTMLElement>(element: T | null, isShow: boolean): void => {
+    if (isShow) {
+        removeClass(element, $HIDDEN_CLASS_NAME);
+        addClass(element, $FLEX_CLASS_NAME);
     } else {
-        addClass(loaderContainer, 'invisible');
-        removeClass(document.body, 'overflow-hidden');
+        removeClass(element, $FLEX_CLASS_NAME);
+        addClass(element, $HIDDEN_CLASS_NAME);
     }
 };
 
@@ -408,13 +405,13 @@ const normalizeNumber = (value: string | number): number => {
     return value;
 };
 
-const togglePage = (loaderClassName: string, isBlockingPage: boolean): void => {
+export const togglePage = <T extends HTMLElement>(loaderClassName: T | null, isBlockingPage: boolean): void => {
     blockBody(isBlockingPage);
-    toggleLoader(loaderClassName, isBlockingPage);
+    toggleElement(loaderClassName, isBlockingPage);
 };
 
 export {
     throttle, scrollToTop, debounce, fetchFunc, scrollToAnchor,
-    toggleLoader, isEmpty, scrollToBottom, stripUnit, toRem,
-    getBaseDocumentFontSize, normalizeNumber, togglePage
+    isEmpty, scrollToBottom, stripUnit, toRem,
+    getBaseDocumentFontSize, normalizeNumber
 };

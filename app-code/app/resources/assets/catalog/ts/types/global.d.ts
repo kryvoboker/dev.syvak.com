@@ -19,6 +19,9 @@ export interface WindowAppParams {
             selected_to: number | null;
         }
     }
+    is_has_more_pages?: boolean;
+    load_more_products_ajax_url?: string;
+    next_page?: number | null;
 
     [key: string]: unknown;
 }

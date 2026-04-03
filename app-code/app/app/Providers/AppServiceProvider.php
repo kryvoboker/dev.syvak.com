@@ -13,6 +13,7 @@ use App\Services\Modules\ModuleInstanceService;
 use App\Services\Modules\ModuleProviderRegistrarService;
 use App\Services\Modules\ModuleProviderResolverService;
 use App\Services\Modules\ModuleRuntimeResolverService;
+use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
@@ -56,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleRuntimeResolverService::class);
         $this->app->singleton(ModuleProviderResolverService::class);
         $this->app->singleton(ModuleProviderRegistrarService::class);
+        $this->app->singleton(PageSettingsBootstrapService::class);
     }
 
     /**

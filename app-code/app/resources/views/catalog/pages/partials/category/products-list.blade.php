@@ -49,5 +49,3 @@
         {{ __('catalog/default.texts.category_products_not_found') }}
     </div>
 @endif
-
-@include('catalog.pages.partials.category.load-more-btn')

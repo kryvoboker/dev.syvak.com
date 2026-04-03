@@ -46,6 +46,12 @@ class CategoryController extends Controller
         $requested_sort_value    = $this->normalizeSortValue((string)Arr::get($request->validated(), 'sort', ''));
         $fallback_active_sort    = resolve_sort_code($page_setting, $requested_sort_value);
 
+        if ($page_type == config('page-settings.page_type.category')) {
+            $page_path = 'localized.catalog.category.show';
+        } else {
+            $page_path = 'localized.catalog.search-products.index';
+        }
+
         try {
             $response_data = $filter_products_action->handle([
                 'validated_data'      => $request->validated(),

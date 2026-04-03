@@ -51,10 +51,10 @@ readonly class LoadMoreProductsByAjaxAction
 
         /** @var LengthAwarePaginator|null $paginator */
         $paginator                        = Arr::get($response_data, 'paginator');
-        $current_page                     = $paginator instanceof LengthAwarePaginator ? (int)$paginator->currentPage() : null;
-        $is_has_more_pages                = $paginator instanceof LengthAwarePaginator ? $paginator->hasMorePages() : false;
+        $current_page                     = $paginator instanceof LengthAwarePaginator ? $paginator->currentPage() : null;
+        $is_has_more_pages                = $paginator instanceof LengthAwarePaginator && $paginator->hasMorePages();
         $is_ajax_products_loading_enabled = (bool)Arr::get($page_settings_arr, 'pagination.ajax_products_loading_enabled') === true
-            && $products_per_page_limit < (int)($paginator instanceof LengthAwarePaginator ? $paginator->total() : 0);
+            && $products_per_page_limit < ($paginator instanceof LengthAwarePaginator ? $paginator->total() : 0);
 
         return [
             'success'                          => true,

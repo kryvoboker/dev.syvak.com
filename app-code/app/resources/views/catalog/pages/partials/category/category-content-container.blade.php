@@ -1,0 +1,17 @@
+<div class="category__content-container">
+    @include('catalog.pages.partials.category.products-list')
+
+    @include('catalog.pages.partials.category.load-more-btn')
+
+    {{ $paginator?->links('pagination::tailwind') }}
+</div>
+
+<script>
+    window.app_params = {
+        ...(window.app_params ?? {}),
+        ...@json([
+                'next_page' => $paginator?->currentPage() !== null ? $paginator?->currentPage() + 1 : null,
+                'is_has_more_pages' => $is_has_more_pages ?? null,
+            ])
+    };
+</script>
