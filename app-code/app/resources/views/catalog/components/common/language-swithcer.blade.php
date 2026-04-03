@@ -17,7 +17,7 @@
         </div>
     </button>
 
-    <ul class="dropdown-menu dropdown-open:opacity-100 hidden max-w-36 w-full text-light-gray bg-black border border-opacity-light-gray-40% rounded-none p-4"
+    <ul class="dropdown-menu dropdown-open:opacity-100 hidden max-w-36 w-full bg-black border border-opacity-light-gray-40% rounded-none p-4"
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="dropdown-lang-menu-btn">
@@ -26,18 +26,18 @@
         </button>
 
         @foreach ($languages as $language)
-            <li class="flex items-center gap-x-2 border-b border-b-opacity-light-gray-40% dark-btn p-3">
+            <li class="flex items-center gap-x-2 w-full border-b border-b-opacity-light-gray-40% dark-btn">
                 @if ($language->code == $current_locale)
-                    <span class="icon-[material-symbols--square] size-2 text-white"></span>
+                    <span class="flex items-center gap-x-2">
+                        <span class="icon-[material-symbols--square] shrink-0 size-2 text-white"></span>
 
-                    <span
-                        class="block w-full text-white"
-                        aria-current="true">
-                        {{ $language->name }}
+                        <span
+                            class="block w-full text-white p-3"
+                            aria-current="true">
+                            {{ $language->name }}
+                        </span>
                     </span>
                 @else
-                    <span class="material-symbols--square size-2 bg-transparent"></span>
-
                     @php
                         if (isset($slug)) {
                             $route_params = array_merge($route_params, [
@@ -51,10 +51,14 @@
                         }
                     @endphp
 
-                    <a class="block w-full"
-                       href="{{ route($current_route, $route_params) }}">
-                        {{ $language->name }}
-                    </a>
+                    <span class="flex items-center gap-x-2 w-full">
+                        <span class="material-symbols--square shrink-0 size-2 bg-transparent"></span>
+
+                        <a class="block w-full p-3"
+                           href="{{ route($current_route, $route_params) }}">
+                            {{ $language->name }}
+                        </a>
+                    </span>
                 @endif
             </li>
         @endforeach
