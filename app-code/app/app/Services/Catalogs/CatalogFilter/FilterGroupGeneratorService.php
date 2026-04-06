@@ -115,8 +115,8 @@ class FilterGroupGeneratorService
         /** @var Collection<Attribute> $active_attributes */
         $active_attributes = Attribute::query()
             ->where('is_active', true)
-            ->whereHas('productToAttribute.product', function ($query): void {
-                $query->where('is_active', true);
+            ->whereHas('productToAttribute.variant.product', function ($query): void {
+                $query->where('products.is_active', true);
             })
             ->with('attributeDescription')
             ->orderBy('sort_order')

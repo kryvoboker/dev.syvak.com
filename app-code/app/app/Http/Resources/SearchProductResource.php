@@ -37,8 +37,13 @@ class SearchProductResource extends JsonResource
             }
         }
 
+        $variant          = $this->defaultVariant;
+        $price_source     = $variant->price ?? $this->price;
+        $image_source     = $variant->image ?? $this->image;
+        $variant_discount = $variant?->discounts?->first();
+
         $price = format_price(
-            $this->price,
+            $price_source,
             config('app.currency.current_currency_code'),
             (float) config('app.currency.current_exchange_rate'),
         );
@@ -49,7 +54,7 @@ class SearchProductResource extends JsonResource
             'price'      => replace_currency_symbol_to_code($price),
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
-                    $this->image,
+                    $image_source,
                     (int) $search_product_sizes_cache['width'],
                     (int) $search_product_sizes_cache['height'],
                 ),
@@ -70,21 +75,19 @@ class SearchProductResource extends JsonResource
                     'description' => escape_special_html($product_description?->description),
                 ];
             }),
-            'discount' => $this->whenLoaded('productDiscount', function () {
-                $product_discount = $this->productDiscount->first();
-
-                if ($product_discount !== null) {
+            'discount' => $this->whenLoaded('defaultVariant', function () use ($variant_discount) {
+                if ($variant_discount !== null) {
                     $discounted_price = format_price(
-                        $product_discount->price,
+                        $variant_discount->price,
                         config('app.currency.current_currency_code'),
                         (float) config('app.currency.current_exchange_rate'),
                     );
 
                     return [
-                        'id'               => $product_discount->id,
+                        'id'               => $variant_discount->id,
                         'discounted_price' => replace_currency_symbol_to_code($discounted_price),
-                        'start_date'       => $product_discount->date_start,
-                        'end_date'         => $product_discount->date_end,
+                        'start_date'       => $variant_discount->date_start,
+                        'end_date'         => $variant_discount->date_end,
                     ];
                 }
 

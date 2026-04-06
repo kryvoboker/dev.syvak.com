@@ -83,18 +83,21 @@ class CategoryPageFilterSyncService
     {
         $now = now(config('app.timezone'));
 
-        $base_price_stats = DB::table('products')
-            ->where('is_active', true)
-            ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+        $base_price_stats = DB::table('product_variants')
+            ->join('products', 'products.id', '=', 'product_variants.product_id')
+            ->where('products.is_active', true)
+            ->where('product_variants.is_active', true)
+            ->selectRaw('MIN(product_variants.price) as min_price, MAX(product_variants.price) as max_price')
             ->first();
 
-        $discount_price_stats = DB::table('product_discounts')
+        $discount_price_stats = DB::table('product_variant_discounts')
             ->where('date_start', '<=', $now)
             ->where('date_end', '>=', $now)
             ->whereExists(function ($query): void {
                 $query->selectRaw('1')
-                    ->from('products')
-                    ->whereColumn('products.id', 'product_discounts.product_id')
+                    ->from('product_variants')
+                    ->join('products', 'products.id', '=', 'product_variants.product_id')
+                    ->whereColumn('product_variants.id', 'product_variant_discounts.product_variant_id')
                     ->where('products.is_active', true);
             })
             ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
@@ -166,8 +169,8 @@ class CategoryPageFilterSyncService
     {
         $attributes = Attribute::query()
             ->where('is_active', true)
-            ->whereHas('productToAttribute.product', function ($query): void {
-                $query->where('is_active', true);
+            ->whereHas('productVariantAttributeValues.variant.product', function ($query): void {
+                $query->where('products.is_active', true);
             })
             ->with([
                 'attributeDescription' => function ($query) use ($language_id): void {

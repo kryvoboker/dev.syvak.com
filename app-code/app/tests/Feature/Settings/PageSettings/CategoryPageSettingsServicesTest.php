@@ -129,25 +129,38 @@ class CategoryPageSettingsServicesTest extends TestCase
             'updated_at'  => now(),
         ]);
 
-        DB::table('product_to_attributes')->insert([
-            'product_id'   => 31,
-            'attribute_id' => 21,
-            'language_id'  => 1,
-            'text'         => 'Red',
-            'created_at'   => now(),
-            'updated_at'   => now(),
+        DB::table('product_variants')->insert([
+            'id'             => 41,
+            'product_id'     => 31,
+            'is_default'     => true,
+            'is_active'      => true,
+            'quantity'       => 15,
+            'minimum'        => 1,
+            'price'          => 100,
+            'date_available' => now(),
+            'created_at'     => now(),
+            'updated_at'     => now(),
         ]);
 
-        DB::table('product_discounts')->insert([
-            'product_id'    => 31,
-            'user_group_id' => null,
-            'quantity'      => null,
-            'priority'      => 1,
-            'price'         => 80,
-            'date_start'    => now()->subDay(),
-            'date_end'      => now()->addDay(),
-            'created_at'    => now(),
-            'updated_at'    => now(),
+        DB::table('product_variant_attribute_values')->insert([
+            'product_variant_id' => 41,
+            'attribute_id'       => 21,
+            'language_id'        => 1,
+            'value_string'       => 'Red',
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
+
+        DB::table('product_variant_discounts')->insert([
+            'product_variant_id' => 41,
+            'user_group_id'      => null,
+            'quantity'           => null,
+            'priority'           => 1,
+            'price'              => 80,
+            'date_start'         => now()->subDay(),
+            'date_end'           => now()->addDay(),
+            'created_at'         => now(),
+            'updated_at'         => now(),
         ]);
 
         $sync_service = app(CategoryPageFilterSyncService::class);
@@ -254,14 +267,14 @@ class CategoryPageSettingsServicesTest extends TestCase
             $table->unique(['attribute_id', 'language_id']);
         });
 
-        Schema::create('product_to_attributes', function (Blueprint $table): void {
+        Schema::create('product_variant_attribute_values', function (Blueprint $table): void {
             $table->id();
-            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('product_variant_id');
             $table->unsignedBigInteger('attribute_id')->nullable();
             $table->unsignedBigInteger('language_id')->nullable();
-            $table->string('text', 3000)->nullable();
+            $table->string('value_string', 3000)->nullable();
             $table->timestamps();
-            $table->unique(['product_id', 'attribute_id', 'language_id']);
+            $table->unique(['product_variant_id', 'attribute_id', 'language_id']);
         });
     }
 
@@ -283,9 +296,22 @@ class CategoryPageSettingsServicesTest extends TestCase
             $table->timestamps();
         });
 
-        Schema::create('product_discounts', function (Blueprint $table): void {
+        Schema::create('product_variants', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('product_id');
+            $table->boolean('is_default')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('quantity')->default(0);
+            $table->unsignedInteger('minimum')->default(1);
+            $table->string('image')->nullable();
+            $table->decimal('price', 15, 4)->default(0);
+            $table->dateTime('date_available')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('product_variant_discounts', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('product_variant_id');
             $table->unsignedBigInteger('user_group_id')->nullable();
             $table->unsignedInteger('quantity')->nullable();
             $table->unsignedInteger('priority')->default(1);

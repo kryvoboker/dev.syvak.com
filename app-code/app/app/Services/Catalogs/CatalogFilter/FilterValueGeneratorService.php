@@ -11,7 +11,7 @@ use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValue;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValueTranslation;
-use App\Models\Catalogs\Products\ProductToAttribute;
+use App\Models\Catalogs\Products\ProductVariantAttributeValue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -178,15 +178,19 @@ class FilterValueGeneratorService
      */
     private function resolveAttributeValueOptions(int $attribute_id): array
     {
-        /** @var array<int, ProductToAttribute> $attribute_rows */
-        $attribute_rows = ProductToAttribute::query()
+        /** @var array<int, ProductVariantAttributeValue> $attribute_rows */
+        $attribute_rows = ProductVariantAttributeValue::query()
             ->where('attribute_id', $attribute_id)
-            ->whereNotNull('text')
-            ->whereHas('product', function ($query): void {
-                $query->where('is_active', true);
+            ->whereNotNull('value_string')
+            ->whereHas('variant', function ($query): void {
+                $query
+                    ->where('is_active', true)
+                    ->whereHas('product', function ($product_query): void {
+                        $product_query->where('is_active', true);
+                    });
             })
-            ->select('product_id', 'language_id', 'text')
-            ->orderBy('product_id')
+            ->select('product_variant_id', 'language_id', 'value_string')
+            ->orderBy('product_variant_id')
             ->orderBy('language_id')
             ->get()
             ->all();
@@ -198,12 +202,12 @@ class FilterValueGeneratorService
         $preferred_language_ids = $this->resolvePreferredLanguageIds();
         $options_by_key         = [];
 
-        foreach (collect($attribute_rows)->groupBy('product_id') as $product_rows) {
+        foreach (collect($attribute_rows)->groupBy('product_variant_id') as $product_rows) {
             $labels_by_language = [];
 
             foreach ($product_rows as $product_row) {
                 $language_id = (int) $product_row->language_id;
-                $label       = trim((string) $product_row->text);
+                $label       = trim((string) $product_row->value_string);
 
                 if ($language_id <= 0 || blank($label)) {
                     continue;

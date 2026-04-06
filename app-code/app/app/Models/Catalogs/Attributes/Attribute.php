@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Catalogs\Attributes;
 
 use App\Models\Catalogs\Products\ProductAttributeTextHash;
-use App\Models\Catalogs\Products\ProductToAttribute;
+use App\Models\Catalogs\Products\ProductVariantAttributeValue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,17 +45,26 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<ProductToAttribute, $this>
+     * Compatibility relation for legacy naming in services.
+     *
+     * @return HasMany<ProductVariantAttributeValue, $this>
      */
     public function productToAttribute(): HasMany
     {
-        return $this->hasMany(ProductToAttribute::class);
+        return $this->hasMany(ProductVariantAttributeValue::class, 'attribute_id');
+    }
+
+    /**
+     * @return HasMany<ProductVariantAttributeValue, $this>
+     */
+    public function productVariantAttributeValues(): HasMany
+    {
+        return $this->hasMany(ProductVariantAttributeValue::class, 'attribute_id');
     }
 
     protected static function booted(): void
     {
-        // Delete related translations when attribute is deleted
-        static::deleting(function (Attribute $attribute) {
+        static::deleting(function (Attribute $attribute): void {
             $attribute->attributeDescription()->delete();
         });
     }
@@ -65,7 +74,7 @@ class Attribute extends Model
         return self::query()
             ->where('is_active', true)
             ->with([
-                'attributeDescription' => function ($query) use ($language_id) {
+                'attributeDescription' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -75,7 +84,7 @@ class Attribute extends Model
     public function getActiveAttributeWithDescriptionByAttributeIdAndLanguageId(int $attribute_id, int $language_id): ?self
     {
         return self::with([
-            'attributeDescription' => function ($query) use ($language_id) {
+            'attributeDescription' => function ($query) use ($language_id): void {
                 $query->where('language_id', $language_id);
             },
         ])

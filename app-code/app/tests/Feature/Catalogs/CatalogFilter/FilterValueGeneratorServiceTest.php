@@ -74,9 +74,14 @@ class FilterValueGeneratorServiceTest extends TestCase
             ['id' => 102, 'model' => 'P-102', 'sku' => 'SKU-102', 'ean' => 102, 'quantity' => 10, 'minimum' => 1, 'price' => 100, 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        DB::table('product_to_attributes')->insert([
-            ['product_id' => 101, 'attribute_id' => 7, 'language_id' => 1, 'text' => '100 г', 'created_at' => now(), 'updated_at' => now()],
-            ['product_id' => 102, 'attribute_id' => 7, 'language_id' => 1, 'text' => '50 см', 'created_at' => now(), 'updated_at' => now()],
+        DB::table('product_variants')->insert([
+            ['id' => 201, 'product_id' => 101, 'is_default' => true, 'is_active' => true, 'quantity' => 10, 'minimum' => 1, 'price' => 100, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 202, 'product_id' => 102, 'is_default' => true, 'is_active' => true, 'quantity' => 10, 'minimum' => 1, 'price' => 100, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        DB::table('product_variant_attribute_values')->insert([
+            ['product_variant_id' => 201, 'attribute_id' => 7, 'language_id' => 1, 'value_string' => '100 г', 'created_at' => now(), 'updated_at' => now()],
+            ['product_variant_id' => 202, 'attribute_id' => 7, 'language_id' => 1, 'value_string' => '50 см', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         app(FilterValueGeneratorService::class)->sync($filter_set);
@@ -187,14 +192,25 @@ class FilterValueGeneratorServiceTest extends TestCase
             $table->timestamps();
         });
 
-        Schema::create('product_to_attributes', function (Blueprint $table): void {
+        Schema::create('product_variants', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('product_id');
+            $table->boolean('is_default')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->integer('quantity')->default(0);
+            $table->integer('minimum')->default(1);
+            $table->decimal('price', 15, 4)->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('product_variant_attribute_values', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('product_variant_id');
             $table->unsignedBigInteger('attribute_id')->nullable();
             $table->unsignedBigInteger('language_id')->nullable();
-            $table->string('text', 3000)->nullable();
+            $table->string('value_string', 3000)->nullable();
             $table->timestamps();
-            $table->unique(['product_id', 'attribute_id', 'language_id']);
+            $table->unique(['product_variant_id', 'attribute_id', 'language_id']);
         });
     }
 }

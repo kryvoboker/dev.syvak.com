@@ -9,14 +9,11 @@ use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Services\Catalogs\Products\ProductCategorySyncService;
 use Exception;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use LogicException;
-use Throwable;
 
 class CreateProduct extends CreateRecord
 {
@@ -26,12 +23,6 @@ class CreateProduct extends CreateRecord
 
     protected array $descriptions = [];
 
-    protected array $images = [];
-
-    protected array $discounts = [];
-
-    protected array $product_attributes = [];
-
     protected array $category_ids = [];
 
     protected array $slugs = [];
@@ -39,119 +30,44 @@ class CreateProduct extends CreateRecord
     public ?Model $record = null;
 
     /**
-     * Mutate form data before creating record
-     *
-     *
      * @throws Halt
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Store related data temporarily
-        $this->descriptions       = trim_strs_in_arr($data['descriptions'] ?? []);
-        $this->images             = $data['images'] ?? [];
-        $this->discounts          = $data['discounts'] ?? [];
-        $this->product_attributes = trim_strs_in_arr($data['attributes'] ?? []);
-        $this->category_ids       = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
-        $this->slugs              = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->category_ids = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
+        $this->slugs        = trim_strs_in_arr($data['slugs'] ?? []);
 
-        // Validate unique attribute-language pairs
-        $this->validateAttributeLanguagePairs($this->product_attributes);
-
-        // Remove from main data
-        unset(
-            $data['descriptions'], $data['images'], $data['discounts'],
-            $data['attributes'], $data['categories'], $data['slugs'],
-        );
+        unset($data['descriptions'], $data['categories'], $data['slugs']);
 
         return $data;
     }
 
     /**
-     * Validate that attribute-language pairs are unique
-     *
-     *
-     * @throws Halt
-     */
-    protected function validateAttributeLanguagePairs(array $attributes): void
-    {
-        $pairs = [];
-
-        foreach ($attributes as $attribute) {
-            if (empty($attribute['attribute_id']) || empty($attribute['language_id'])) {
-                continue;
-            }
-
-            $pair = $attribute['attribute_id'] . '_' . $attribute['language_id'];
-
-            if (in_array($pair, $pairs)) {
-                Notification::make()
-                    ->title(__('admin/default.errors.title'))
-                    ->body(__('admin/catalogs/products/products.errors.duplicate_attribute_language'))
-                    ->danger()
-                    ->send();
-
-                // Stop further processing
-                $this->halt();
-            }
-
-            $pairs[] = $pair;
-        }
-    }
-
-    /**
-     * Handle record creation with transaction
-     *
-     *
      * @throws Halt
      */
     protected function handleRecordCreation(array $data): Model
     {
-        try {
-            $record = DB::transaction(function () use ($data) {
-                // Create main record
-                $this->record = static::getModel()::create($data);
+        $record = DB::transaction(function () use ($data) {
+            $this->record = static::getModel()::create($data);
 
-                // Create descriptions
-                $this->createDescriptions();
+            $this->createDescriptions();
 
-                // Create images
-                $this->createImages();
+            if ($this->updateOrCreateSlugs() === false) {
+                throw new Exception('Failed to create slugs');
+            }
 
-                // Create discounts
-                $this->createDiscounts();
+            return $this->record;
+        });
 
-                // Create attributes
-                $this->createAttributes();
+        app(ProductCategorySyncService::class)->syncWithRetry(
+            $this->getProductRecord(),
+            $this->category_ids,
+        );
 
-                // Process slugs
-                if ($this->updateOrCreateSlugs() === false) {
-                    throw new Exception('Failed to create slugs');
-                }
-
-                return $this->record;
-            });
-
-            app(ProductCategorySyncService::class)->syncWithRetry(
-                $this->getProductRecord(),
-                $this->category_ids,
-            );
-
-            return $record;
-        } catch (Throwable $e) {
-            Log::channel('stack')->error('Failed to create Product: ' . $e->getMessage(), [
-                'data'      => $data,
-                'exception' => $e,
-            ]);
-
-            $this->halt();
-
-            throw $e;
-        }
+        return $record;
     }
 
-    /**
-     * Create descriptions for the record
-     */
     protected function createDescriptions(): void
     {
         $descriptions_data = [];
@@ -174,85 +90,11 @@ class CreateProduct extends CreateRecord
         }
     }
 
-    /**
-     * Create images for the record
-     */
-    protected function createImages(): void
-    {
-        $images_data = [];
-
-        foreach ($this->images as $image) {
-            if (! empty($image['image'])) {
-                $images_data[] = [
-                    'image'      => $image['image'],
-                    'sort_order' => $image['sort_order'] ?? 0,
-                ];
-            }
-        }
-
-        if (! empty($images_data)) {
-            $this->getProductRecord()->productImage()->createMany($images_data);
-        }
-    }
-
-    /**
-     * Create discounts for the record
-     */
-    protected function createDiscounts(): void
-    {
-        $discounts_data = [];
-
-        foreach ($this->discounts as $discount) {
-            if (! empty($discount['price'])) {
-                $discounts_data[] = [
-                    'customer_group_id' => $discount['customer_group_id'],
-                    'quantity'          => $discount['quantity'],
-                    'priority'          => $discount['priority'],
-                    'price'             => $discount['price'],
-                    'date_start'        => $discount['date_start'],
-                    'date_end'          => $discount['date_end'],
-                ];
-            }
-        }
-
-        if (! empty($discounts_data)) {
-            $this->getProductRecord()->productDiscount()->createMany($discounts_data);
-        }
-    }
-
-    /**
-     * Create attributes for the record
-     */
-    protected function createAttributes(): void
-    {
-        $attributes_data = [];
-
-        foreach ($this->product_attributes as $attribute) {
-            if (! empty($attribute['attribute_id']) && ! empty($attribute['text'])) {
-                $attributes_data[] = [
-                    'attribute_id' => $attribute['attribute_id'],
-                    'language_id'  => $attribute['language_id'],
-                    'text'         => $attribute['text'],
-                ];
-            }
-        }
-
-        if (! empty($attributes_data)) {
-            $this->getProductRecord()->productToAttribute()->createMany($attributes_data);
-        }
-    }
-
-    /**
-     * Get page title
-     */
     public function getTitle(): string
     {
         return __('admin/catalogs/products/products.navigation_label');
     }
 
-    /**
-     * Get page heading
-     */
     public function getHeading(): ?string
     {
         return __('admin/catalogs/products/products.navigation_label');
