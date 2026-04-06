@@ -87,7 +87,9 @@ class AppServiceProvider extends ServiceProvider
         $locale_key      = config('localization.locale_parameter', 'locale');
 
         if ($allowed_locales !== []) {
-            Route::pattern($locale_key, implode('|', array_map('preg_quote', $allowed_locales)));
+            array_map('preg_quote', $allowed_locales)
+                |> (fn($x) => implode('|', $x))
+                |> (fn($x) => Route::pattern($locale_key, $x));
         }
 
         // Register view namespaces for frontend (catalog) and admin

@@ -1,6 +1,8 @@
 import { $FLEX_CLASS_NAME, $HIDDEN_CLASS_NAME } from "@ts-shared/lib/constants.ts";
 import type { QueryValueType, URLParamsType }   from "@ts-types/httpQueryBuild.ts";
 
+type FetchFuncOptions = Record<string | number, string | number>;
+
 export const findElem             = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): T | HTMLElement | null => context ? context.querySelector(searchVal) : null;
 export const findElems            = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): NodeListOf<T> | NodeListOf<HTMLElement> | null => context ? context.querySelectorAll(searchVal) : null;
 export const arrayFrom            = <T>(pseudoArray: ArrayLike<T> | null): T[] => pseudoArray ? Array.from(pseudoArray) : [];
@@ -158,7 +160,7 @@ export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams
     return queryParamsArray.join('&');
 };
 
-const isEmpty = <T extends Object>(value: string | number | null | undefined | any[] | T): boolean => {
+export const isEmpty = <T extends Object>(value: string | number | null | undefined | any[] | T): boolean => {
     if (typeof value === 'number') {
         return isNaN(value) ? false : value === 0;
     } else if (isArray(value) || typeof value === 'string') {
@@ -174,7 +176,7 @@ const isEmpty = <T extends Object>(value: string | number | null | undefined | a
     }
 };
 
-const throttle = (func: Function, delay: number): Function => {
+export const throttle = (func: Function, delay: number): Function => {
     let isThrottled: boolean = false,
         savedArgs: IArguments | null,
         savedThis: Function | null;
@@ -203,7 +205,7 @@ const throttle = (func: Function, delay: number): Function => {
     return wrapper;
 };
 
-const scrollToTop = (anchor: string = ''): void => {
+export const scrollToTop = (anchor: string = ''): void => {
     const behavior = 'smooth';
 
     if (anchor) {
@@ -218,7 +220,7 @@ const scrollToTop = (anchor: string = ''): void => {
     }
 };
 
-const scrollToBottom = (selector: string = ''): void => {
+export const scrollToBottom = (selector: string = ''): void => {
     const behavior: ScrollBehavior = 'smooth';
 
     if (selector) {
@@ -238,7 +240,7 @@ const scrollToBottom = (selector: string = ''): void => {
     }
 };
 
-const debounce = <F extends (... args: any[]) => any>(func: F, delay: number): (this: ThisParameterType<F>, ... args: Parameters<F>) => void => {
+export const debounce = <F extends (... args: any[]) => any>(func: F, delay: number): (this: ThisParameterType<F>, ... args: Parameters<F>) => void => {
     let timeout: ReturnType<typeof setTimeout>;
 
     return function (this: ThisParameterType<F>, ... args: Parameters<F>): void {
@@ -316,9 +318,7 @@ const getCachedSupportedFormats = async (): Promise<string[]> => {
     return cachedFormats;
 };
 
-type FetchFuncOptions = Record<string | number, string | number>;
-
-const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, method: string = 'POST'): Promise<any> => {
+export const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, method: string = 'POST'): Promise<any> => {
     type TypeHeaders = {
         "X-Requested-With": string;
         contentType?: string;
@@ -362,7 +362,7 @@ const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, me
     return await response.json();
 };
 
-const scrollToAnchor = (selector: string): void => {
+export const scrollToAnchor = (selector: string): void => {
     findArrayElems(selector).forEach((link: HTMLElement): void => {
         link.addEventListener('click', function (e: Event): void {
             e.preventDefault();
@@ -384,7 +384,7 @@ export const toggleElement = <T extends HTMLElement>(element: T | null, isShow: 
     }
 };
 
-const stripUnit = (value: number | string): number => {
+export const stripUnit = (value: number | string): number => {
     // Ensure the value is a string, then remove any non-digit characters except the decimal point
     const numericValue: number = parseFloat(value as string);
 
@@ -396,7 +396,7 @@ const stripUnit = (value: number | string): number => {
     return numericValue;
 };
 
-const getBaseDocumentFontSize = (): number => {
+export const getBaseDocumentFontSize = (): number => {
     const doc: HTMLElement = document.documentElement;
     const computedStyle    = window.getComputedStyle(doc);
 
@@ -404,7 +404,7 @@ const getBaseDocumentFontSize = (): number => {
 };
 
 // Function to convert pixels to rems
-const toRem = (pxValue: number | string, baseUnitSize: null | number | string = null, sizeUnit: string = 'rem'): string => {
+export const toRem = (pxValue: number | string, baseUnitSize: null | number | string = null, sizeUnit: string = 'rem'): string => {
     if (!baseUnitSize) {
         baseUnitSize = getBaseDocumentFontSize();
     }
@@ -416,15 +416,18 @@ const toRem = (pxValue: number | string, baseUnitSize: null | number | string = 
     return `${numericPxValue / numericBaseUnitSize}${sizeUnit}`;
 };
 
-const normalizeNumber = (value: string | number): number => {
+export const normalizeNumber = (value: string | number): number => {
     if (typeof value == 'string') {
-        value = parseFloat(value);
-    } else {
-        value = Math.abs(value);
-    }
+        value = value
+            .replace(/[^\d.,]+/g, '')
+            .replace(/,+/g, '.')
+            .replace(/\.{2,}/g, '.');
 
-    if (!value || value < 1) {
-        value = 0;
+        if (value.includes('.')) {
+            value = parseFloat(value);
+        } else {
+            value = parseInt(value, 10);
+        }
     }
 
     return value;
@@ -433,10 +436,4 @@ const normalizeNumber = (value: string | number): number => {
 export const togglePage = <T extends HTMLElement>(loaderClassName: T | null, isBlockingPage: boolean): void => {
     blockBody(isBlockingPage);
     toggleElement(loaderClassName, isBlockingPage);
-};
-
-export {
-    throttle, scrollToTop, debounce, fetchFunc, scrollToAnchor,
-    isEmpty, scrollToBottom, stripUnit, toRem,
-    getBaseDocumentFontSize, normalizeNumber
 };
