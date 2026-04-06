@@ -127,6 +127,7 @@ class EditCatalogFilterSet extends EditRecord
 
                     $group_summary = app(FilterGroupGeneratorService::class)->sync($record);
                     $value_summary = app(FilterValueGeneratorService::class)->sync($record);
+                    $index_summary = app(CatalogFilterIndexRebuildService::class)->rebuild($record);
 
                     Notification::make()
                         ->title(__('admin/default.success.title'))
@@ -134,6 +135,10 @@ class EditCatalogFilterSet extends EditRecord
                             __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.all_synced', [
                                 'groups_total' => (int) $group_summary['total_groups'],
                                 'values_total' => (int) $value_summary['total_values'],
+                            ]) . ' ' . __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_status_refreshed', [
+                                'rows_total'    => (int) ($index_summary['rows_total'] ?? 0),
+                                'index_version' => (int) ($index_summary['index_version'] ?? 0),
+                                'status'        => (string) ($index_summary['status'] ?? 'ok'),
                             ]),
                         )
                         ->success()
