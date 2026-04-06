@@ -1,5 +1,3 @@
 import HSAccordion from "flyonui/src/js/plugins/accordion"
 
-export function initAccordion(accordionEl: HTMLElement): HSAccordion {
-    return new HSAccordion(accordionEl);
-}
+export const initAccordion = (accordionEl: HTMLElement): HSAccordion => new HSAccordion(accordionEl);
