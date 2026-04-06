@@ -260,14 +260,15 @@ readonly class FilterProductsAction
     ): Builder {
         $app_settings     = get_app_settings();
         $current_datetime = now(config('app.timezone'));
+        $db_prefix        = config('database.prefix');
         $query            = Product::query()
             ->select('products.*')
-            ->selectRaw('default_product_variant.id as default_variant_id_selected')
-            ->selectRaw('default_product_variant.quantity as default_variant_quantity')
-            ->selectRaw('default_product_variant.minimum as default_variant_minimum')
-            ->selectRaw('default_product_variant.price as default_variant_price')
-            ->selectRaw('default_product_variant.image as default_variant_image')
-            ->selectRaw('active_product_discount.price as active_discount_price')
+            ->selectRaw($db_prefix . 'default_product_variant.id as default_variant_id_selected')
+            ->selectRaw($db_prefix . 'default_product_variant.quantity as default_variant_quantity')
+            ->selectRaw($db_prefix . 'default_product_variant.minimum as default_variant_minimum')
+            ->selectRaw($db_prefix . 'default_product_variant.price as default_variant_price')
+            ->selectRaw($db_prefix . 'default_product_variant.image as default_variant_image')
+            ->selectRaw($db_prefix . 'active_product_discount.price as active_discount_price')
             ->with([
                 'slugs' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
@@ -466,20 +467,21 @@ readonly class FilterProductsAction
     {
         $price_source_mode    = $this->resolvePriceSourceMode($filter_set);
         $discount_only_policy = $this->resolveDiscountOnlyPolicy($filter_set);
+        $db_prefix            = config('database.prefix');
 
         if ($price_source_mode === CatalogFilterPriceSourceModeEnum::RrcOnly) {
-            return 'default_product_variant.price';
+            return $db_prefix . 'default_product_variant.price';
         }
 
         if ($price_source_mode === CatalogFilterPriceSourceModeEnum::Both) {
-            return 'COALESCE(active_product_discount.price, default_product_variant.price)';
+            return "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)";
         }
 
         if ($discount_only_policy === CatalogFilterDiscountOnlyPolicyEnum::FallbackToBase) {
-            return 'COALESCE(active_product_discount.price, default_product_variant.price)';
+            return "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)";
         }
 
-        return 'active_product_discount.price';
+        return $db_prefix . 'active_product_discount.price';
     }
 
     private function resolvePriceSourceMode(?CatalogFilterSet $filter_set): CatalogFilterPriceSourceModeEnum
