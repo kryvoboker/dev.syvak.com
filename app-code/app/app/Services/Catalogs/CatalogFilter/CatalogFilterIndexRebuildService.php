@@ -328,7 +328,8 @@ readonly class CatalogFilterIndexRebuildService
                 'values' => fn ($query) => $query
                     ->where('is_enabled', true)
                     ->orderBy('sort_order')
-                    ->orderBy('id'),
+                    ->orderBy('id')
+                    ->with('translations'),
             ])
             ->orderBy('sort_order')
             ->orderBy('id')
@@ -387,16 +388,32 @@ readonly class CatalogFilterIndexRebuildService
             }
 
             foreach ($group->values as $value) {
-                $normalized_value = $this->normalizeAttributeValue((string) $value->value_string);
+                /**
+                 * Keep value lookup locale-agnostic: index build reads variant
+                 * attribute labels in different languages, so we index both
+                 * canonical filter value and all translated labels.
+                 */
+                $value_candidates = collect([(string) $value->value_string])
+                    ->merge(
+                        $value->translations
+                            ->pluck('label')
+                            ->map(fn (mixed $label): string => (string) $label),
+                    )
+                    ->map(fn (string $label): string => $this->normalizeAttributeValue($label))
+                    ->filter(fn (string $label): bool => filled($label))
+                    ->unique()
+                    ->values();
 
-                if (blank($normalized_value)) {
-                    continue;
+                foreach ($value_candidates as $candidate) {
+                    if (isset($lookup[$attribute_id][$candidate])) {
+                        continue;
+                    }
+
+                    $lookup[$attribute_id][$candidate] = [
+                        'group_id' => (int) $group->id,
+                        'value_id' => (int) $value->id,
+                    ];
                 }
-
-                $lookup[$attribute_id][$normalized_value] = [
-                    'group_id' => (int) $group->id,
-                    'value_id' => (int) $value->id,
-                ];
             }
         }
 
