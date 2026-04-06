@@ -93,7 +93,6 @@ readonly class FilterProductsAction
                 filter_set    : $filter_set,
                 filter_groups : $filter_groups,
                 validated_data: $validated_data,
-                language_id   : (int) $language->id,
             );
 
             $products_query = $this->applyPriceRangeFilter(
@@ -325,7 +324,6 @@ readonly class FilterProductsAction
         CatalogFilterSet $filter_set,
         Collection $filter_groups,
         array $validated_data,
-        int $language_id,
     ): Builder {
         if (! $filter_set->is_attribute_filtering_enabled) {
             return $query;
@@ -365,12 +363,23 @@ readonly class FilterProductsAction
                 continue;
             }
 
-            $attribute_values = CatalogFilterValue::query()
-                ->where('catalog_filter_group_id', (int) $attribute_group->id)
-                ->where('is_enabled', true)
-                ->whereIn('code', $selected_codes->all())
-                ->pluck('value_string')
-                ->map(fn (mixed $value): string => (string) $value)
+            /**
+             * Filter codes are stable URL values, while variant attributes are localized.
+             * Build candidate value set from canonical filter value + all translations
+             * to avoid locale mismatch that causes false-zero results.
+             */
+            $attribute_values = $attribute_group->values
+                ->filter(fn (CatalogFilterValue $value): bool => $selected_codes->contains((string) $value->code))
+                ->flatMap(function (CatalogFilterValue $value): array {
+                    $value_candidates   = [(string) $value->value_string];
+                    $translation_labels = $value->translations
+                        ->pluck('label')
+                        ->map(fn (mixed $label): string => (string) $label)
+                        ->all();
+
+                    return [...$value_candidates, ...$translation_labels];
+                })
+                ->map(fn (mixed $value): string => $this->normalizeAttributeValue((string) $value))
                 ->filter(fn (string $value): bool => filled($value))
                 ->unique()
                 ->values();
@@ -381,10 +390,9 @@ readonly class FilterProductsAction
                 return $query;
             }
 
-            $query->whereHas('defaultVariant.attributeValues', function ($attribute_query) use ($attribute_id, $attribute_values, $language_id): void {
+            $query->whereHas('defaultVariant.attributeValues', function ($attribute_query) use ($attribute_id, $attribute_values): void {
                 $attribute_query
                     ->where('attribute_id', $attribute_id)
-                    ->where('language_id', $language_id)
                     ->whereIn('value_string', $attribute_values->all());
             });
         }
@@ -760,7 +768,6 @@ readonly class FilterProductsAction
             filter_set    : $filter_set,
             filter_groups : $filter_groups,
             validated_data: $validated_data,
-            language_id   : $language_id,
         );
 
         $effective_price_expression = $this->resolveEffectivePriceSqlExpression($filter_set);
@@ -920,6 +927,11 @@ readonly class FilterProductsAction
             ->unique()
             ->values()
             ->all();
+    }
+
+    private function normalizeAttributeValue(string $value): string
+    {
+        return trim($value);
     }
 
     private function resolveGroupLabel(CatalogFilterGroup $group, int $language_id): string
