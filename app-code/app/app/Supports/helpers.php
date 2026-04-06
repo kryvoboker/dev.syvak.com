@@ -357,7 +357,9 @@ if (! function_exists('resolve_sort_code')) {
 if (! function_exists('normalize_locale')) {
     function normalize_locale(?string $locale): string
     {
-        if ($locale === null || in_array($locale, config('app.locales'), true) === false) {
+        $languages = new Language()->getActiveLanguages();
+
+        if ($locale === null || $languages->containsStrict(fn (Language $language) => $language->code === $locale) === false) {
             $locale = app()->getLocale();
         }
 

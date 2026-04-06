@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\ApplicationSettings\Language;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,15 +17,18 @@ class SetDefaultLocalePrefix
     /**
      * Handle an incoming request.
      *
-     * @param Closure(Request): (Response) $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
-        $path_info           = Str::ltrim($request->getPathInfo(), '/');
-        $is_livewire_request = Str::startsWith($path_info, ['livewire-', 'livewire/']);
-        $locale_key          = config('localization.locale_parameter');
+        $allowed_locales = new Language()
+            ->getActiveLanguages()
+            ->pluck('code')
+            ->toArray() ?: array_values(array_filter((array) config('app.locales', [config('app.locale', 'en')])));
 
-        $allowed_locales           = array_values(array_filter((array)config('app.locales', [config('app.locale', 'en')])));
+        $path_info                 = Str::ltrim($request->getPathInfo(), '/');
+        $is_livewire_request       = Str::startsWith($path_info, ['livewire-', 'livewire/']);
+        $locale_key                = config('localization.locale_parameter');
         $fallback_locale           = $this->resolveFallbackLocale($allowed_locales);
         $session_locale            = session($locale_key);
         $normalized_session_locale = in_array($session_locale, $allowed_locales, true)
@@ -46,7 +50,7 @@ class SetDefaultLocalePrefix
         $has_locale_parameter   = in_array($locale_key, $route?->parameterNames() ?? [], true);
         $has_valid_route_locale = in_array($route_locale, $allowed_locales, true);
 
-        if ($has_locale_parameter && !$has_valid_route_locale && filled($route_name)) {
+        if ($has_locale_parameter && ! $has_valid_route_locale && filled($route_name)) {
             $route_parameters = array_merge($route->parameters(), [
                 $locale_key => $normalized_session_locale,
             ]);
@@ -69,11 +73,11 @@ class SetDefaultLocalePrefix
     }
 
     /**
-     * @param array<int, string> $allowed_locales
+     * @param  array<int, string>  $allowed_locales
      */
     private function resolveFallbackLocale(array $allowed_locales): string
     {
-        $configured_locale = (string)config('app.locale', 'en');
+        $configured_locale = (string) config('app.locale', 'en');
 
         if (in_array($configured_locale, $allowed_locales, true)) {
             return $configured_locale;

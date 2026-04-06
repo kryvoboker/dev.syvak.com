@@ -8,6 +8,7 @@ use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\CreateProduct;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\EditProduct;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\ListProducts;
+use App\Filament\Resources\Catalogs\Products\Products\RelationManagers\VariantsRelationManager;
 use App\Filament\Resources\Catalogs\Products\Products\Schemas\ProductForm;
 use App\Filament\Resources\Catalogs\Products\Products\Tables\ProductsTable;
 use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
@@ -42,7 +43,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            'variants' => VariantsRelationManager::class,
         ];
     }
 

@@ -158,13 +158,25 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        DB::table('product_to_attributes')->insert([
-            'product_id'   => 31,
-            'attribute_id' => 21,
-            'language_id'  => 1,
-            'text'         => '7+',
-            'created_at'   => now(),
-            'updated_at'   => now(),
+        DB::table('product_variants')->insert([
+            'id'         => 41,
+            'product_id' => 31,
+            'is_default' => true,
+            'is_active'  => true,
+            'quantity'   => 10,
+            'minimum'    => 1,
+            'price'      => 100,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('product_variant_attribute_values')->insert([
+            'product_variant_id' => 41,
+            'attribute_id'       => 21,
+            'language_id'        => 1,
+            'value_string'       => '7+',
+            'created_at'         => now(),
+            'updated_at'         => now(),
         ]);
 
         app(FilterGroupGeneratorService::class)->sync($filter_set);
@@ -276,14 +288,25 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
             $table->timestamps();
         });
 
-        Schema::create('product_to_attributes', function (Blueprint $table): void {
+        Schema::create('product_variants', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('product_id');
+            $table->boolean('is_default')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->integer('quantity')->default(0);
+            $table->integer('minimum')->default(1);
+            $table->decimal('price', 15, 4)->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('product_variant_attribute_values', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('product_variant_id');
             $table->unsignedBigInteger('attribute_id')->nullable();
             $table->unsignedBigInteger('language_id')->nullable();
-            $table->string('text', 3000)->nullable();
+            $table->string('value_string', 3000)->nullable();
             $table->timestamps();
-            $table->unique(['product_id', 'attribute_id', 'language_id']);
+            $table->unique(['product_variant_id', 'attribute_id', 'language_id']);
         });
     }
 }

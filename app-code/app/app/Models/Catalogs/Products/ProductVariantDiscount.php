@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models\Catalogs\Products;
+
+use App\Models\Users\UserGroup;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class ProductVariantDiscount extends Model
+{
+    protected $fillable = [
+        'product_variant_id',
+        'user_group_id',
+        'quantity',
+        'priority',
+        'price',
+        'date_start',
+        'date_end',
+    ];
+
+    /**
+     * @return string[]
+     */
+    protected function casts(): array
+    {
+        return [
+            'product_variant_id' => 'integer',
+            'user_group_id'      => 'integer',
+            'quantity'           => 'integer',
+            'priority'           => 'integer',
+            'price'              => 'float',
+            'date_start'         => 'datetime',
+            'date_end'           => 'datetime',
+        ];
+    }
+
+    /**
+     * @return BelongsTo<ProductVariant, $this>
+     */
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    /**
+     * @return BelongsTo<UserGroup, $this>
+     */
+    public function userGroup(): BelongsTo
+    {
+        return $this->belongsTo(UserGroup::class);
+    }
+}

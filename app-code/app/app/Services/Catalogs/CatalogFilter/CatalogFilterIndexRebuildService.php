@@ -16,7 +16,7 @@ use App\Models\Catalogs\CatalogFilter\CatalogFilterProductIndex;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValue;
 use App\Models\Catalogs\Products\Product;
-use App\Models\Catalogs\Products\ProductToAttribute;
+use App\Models\Catalogs\Products\ProductVariantAttributeValue;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -220,7 +220,9 @@ readonly class CatalogFilterIndexRebuildService
                     continue;
                 }
 
-                $base_price     = is_numeric($product->price) ? (float) $product->price : null;
+                $base_price = is_numeric($product->getAttribute('default_variant_price'))
+                    ? (float) $product->getAttribute('default_variant_price')
+                    : null;
                 $discount_price = is_numeric($product->getAttribute('active_discount_price'))
                     ? (float) $product->getAttribute('active_discount_price')
                     : null;
@@ -231,12 +233,12 @@ readonly class CatalogFilterIndexRebuildService
                     discount_only_policy: $this->resolveDiscountOnlyPolicy($filter_set),
                 );
 
-                $stock_quantity = (int) $product->quantity;
+                $stock_quantity = (int) ($product->getAttribute('default_variant_quantity') ?? 0);
                 $is_in_stock    = $stock_quantity >= $minimum_stock_quantity;
 
                 foreach ($category_ids as $category_id) {
-                    foreach ($product->productToAttribute as $attribute_value) {
-                        if (! $attribute_value instanceof ProductToAttribute) {
+                    foreach (collect(optional($product->defaultVariant)->attributeValues) as $attribute_value) {
+                        if (! $attribute_value instanceof ProductVariantAttributeValue) {
                             continue;
                         }
 
@@ -246,7 +248,7 @@ readonly class CatalogFilterIndexRebuildService
                             continue;
                         }
 
-                        $normalized_value = $this->normalizeAttributeValue((string) $attribute_value->text);
+                        $normalized_value = $this->normalizeAttributeValue((string) $attribute_value->value_string);
 
                         if (blank($normalized_value)) {
                             continue;
@@ -338,25 +340,32 @@ readonly class CatalogFilterIndexRebuildService
      */
     private function buildProductsBaseQuery(): Builder
     {
-        $app_settings               = get_app_settings();
-        $current_datetime           = now(config('app.timezone'));
-        $discount_alias_with_prefix = config('database.prefix') . 'active_product_discount';
+        $app_settings     = get_app_settings();
+        $current_datetime = now(config('app.timezone'));
 
         return Product::query()
             ->select('products.*')
-            ->selectRaw($discount_alias_with_prefix . '.price as active_discount_price')
-            ->leftJoin('product_discounts as active_product_discount', function (JoinClause $join) use ($app_settings, $current_datetime): void {
+            ->selectRaw('default_product_variant.price as default_variant_price')
+            ->selectRaw('default_product_variant.quantity as default_variant_quantity')
+            ->selectRaw('active_product_discount.price as active_discount_price')
+            ->leftJoin('product_variants as default_product_variant', function (JoinClause $join): void {
                 $join
-                    ->on('active_product_discount.product_id', '=', 'products.id')
+                    ->on('default_product_variant.product_id', '=', 'products.id')
+                    ->where('default_product_variant.is_default', true);
+            })
+            ->leftJoin('product_variant_discounts as active_product_discount', function (JoinClause $join) use ($app_settings, $current_datetime): void {
+                $join
+                    ->on('active_product_discount.product_variant_id', '=', 'default_product_variant.id')
                     ->where('active_product_discount.user_group_id', '=', (int) $app_settings->user_group_id)
                     ->where('active_product_discount.date_start', '<=', $current_datetime)
                     ->where('active_product_discount.date_end', '>=', $current_datetime);
             })
             ->where('products.is_active', true)
+            ->where('default_product_variant.is_active', true)
             ->with([
                 'categories:id',
-                'productToAttribute' => fn ($query) => $query
-                    ->select('id', 'product_id', 'attribute_id', 'text'),
+                'defaultVariant.attributeValues' => fn ($query) => $query
+                    ->select('id', 'product_variant_id', 'attribute_id', 'value_string'),
             ])
             ->orderBy('products.id');
     }

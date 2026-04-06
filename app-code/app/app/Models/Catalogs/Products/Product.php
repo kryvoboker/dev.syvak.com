@@ -13,8 +13,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Throwable;
 
@@ -26,6 +28,7 @@ class Product extends Model
     use HasSlugsTrait, SlugTrait;
 
     protected $fillable = [
+        'default_variant_id',
         'model',
         'sku',
         'ean',
@@ -45,13 +48,14 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'quantity'       => 'integer',
-            'minimum'        => 'integer',
-            'price'          => 'float',
-            'viewed'         => 'integer',
-            'date_available' => 'datetime',
-            'date_added'     => 'datetime',
-            'is_active'      => 'boolean',
+            'default_variant_id' => 'integer',
+            'quantity'           => 'integer',
+            'minimum'            => 'integer',
+            'price'              => 'float',
+            'viewed'             => 'integer',
+            'date_available'     => 'datetime',
+            'date_added'         => 'datetime',
+            'is_active'          => 'boolean',
         ];
     }
 
@@ -109,46 +113,81 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductDiscount, $this>
+     * Compatibility relation for legacy code paths.
+     *
+     * @return HasManyThrough<ProductVariantDiscount, ProductVariant, $this>
      */
-    public function productDiscount(): HasMany
+    public function productDiscount(): HasManyThrough
     {
-        return $this->hasMany(ProductDiscount::class);
+        return $this->hasManyThrough(
+            ProductVariantDiscount::class,
+            ProductVariant::class,
+            'product_id',
+            'product_variant_id',
+            'id',
+            'id',
+        );
     }
 
     /**
-     * @return HasMany<ProductImage, $this>
+     * Compatibility relation for legacy code paths.
+     *
+     * @return HasManyThrough<ProductVariantImage, ProductVariant, $this>
      */
-    public function productImage(): HasMany
+    public function productImage(): HasManyThrough
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->hasManyThrough(
+            ProductVariantImage::class,
+            ProductVariant::class,
+            'product_id',
+            'product_variant_id',
+            'id',
+            'id',
+        );
     }
 
     /**
-     * @return HasMany<ProductToAttribute, $this>
+     * Compatibility relation for legacy code paths.
+     *
+     * @return HasManyThrough<ProductVariantAttributeValue, ProductVariant, $this>
      */
-    public function productToAttribute(): HasMany
+    public function productToAttribute(): HasManyThrough
     {
-        return $this->hasMany(ProductToAttribute::class);
+        return $this->hasManyThrough(
+            ProductVariantAttributeValue::class,
+            ProductVariant::class,
+            'product_id',
+            'product_variant_id',
+            'id',
+            'id',
+        );
     }
 
     /**
-     * Get categories associated with the product
-     *
-     * ```
-     * // Get all products in the category
-     * $category = Category::find(1);
-     * $products = $category->products;
-     *
-     * // Get all categories for a product
-     * $product = Product::find(1);
-     * $categories = $product->categories;
-     *
-     * // With eager loading
-     * $category = Category::with('products')->find(1);
-     * $product = Product::with('categories')->find(1);
-     * ```
+     * @return BelongsTo<ProductVariant, $this>
      */
+    public function defaultVariant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'default_variant_id');
+    }
+
+    /**
+     * @return HasMany<ProductVariant, $this>
+     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    /**
+     * @return HasMany<ProductVariant, $this>
+     */
+    public function activeVariants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)
+            ->where('is_active', true);
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -166,19 +205,16 @@ class Product extends Model
             ->first();
     }
 
-    public function getLastActualAndLastModifiedDiscountFromModel(self $product): ?ProductDiscount
+    public function getLastActualAndLastModifiedDiscountFromModel(self $product): ?ProductVariantDiscount
     {
-        $current_date_time = now(config('app.timezone'));
+        $app_settings = get_app_settings();
+        $variant      = $product->defaultVariant;
 
-        /** @var ProductDiscount $discount */
-        $discount = $product
-            ->productDiscount()
-            ->where('date_start', '<=', $current_date_time)
-            ->where('date_end', '>=', $current_date_time)
-            ->orderByDesc('updated_at')
-            ->first();
+        if (! $variant instanceof ProductVariant) {
+            return null;
+        }
 
-        return $discount;
+        return $variant->getLastActualAndLastModifiedDiscountForUserGroup((int) $app_settings->user_group_id);
     }
 
     public function search(string $keyword, int $per_page): LengthAwarePaginator
@@ -194,13 +230,13 @@ class Product extends Model
 
         return self::query()
             ->with([
-                'slugs' => function ($query) use ($app_settings) {
+                'slugs' => function ($query) use ($app_settings): void {
                     $query->where('language_id', $app_settings->language_id);
                 },
-                'productDescription' => function ($query) use ($app_settings) {
+                'productDescription' => function ($query) use ($app_settings): void {
                     $query->where('language_id', $app_settings->language_id);
                 },
-                'productDiscount' => function ($query) use ($app_settings) {
+                'defaultVariant.discounts' => function ($query) use ($app_settings): void {
                     $current_date_time = now(config('app.timezone'));
 
                     $query
@@ -210,9 +246,14 @@ class Product extends Model
                         ->orderBy('priority');
                 },
             ])
-            ->where('quantity', '>=', max(0, $minimum_stock_quantity))
-            ->where(function (Builder $query) use ($keyword) {
-                $query->whereHas('productDescription', function ($query_2) use ($keyword) {
+            ->where('is_active', true)
+            ->whereHas('defaultVariant', function (Builder $query) use ($minimum_stock_quantity): void {
+                $query
+                    ->where('is_active', true)
+                    ->where('quantity', '>=', max(0, $minimum_stock_quantity));
+            })
+            ->where(function (Builder $query) use ($keyword): void {
+                $query->whereHas('productDescription', function (Builder $query_2) use ($keyword): void {
                     $query_2->whereLike('name', "%$keyword%");
                 })
                     ->orWhereLike('sku', "%$keyword%");

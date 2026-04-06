@@ -31,6 +31,7 @@ class ProductsRelationManager extends RelationManager
             ->modifyQueryUsing(function (Builder $query): Builder {
                 return $query->with([
                     'productDescription',
+                    'defaultVariant',
                     'slugs',
                 ]);
             })
@@ -73,7 +74,10 @@ class ProductsRelationManager extends RelationManager
 
                 TextColumn::make('quantity')
                     ->label(__('admin/default.columns.quantity'))
-                    ->sortable(),
+                    ->sortable()
+                    ->getStateUsing(function (Product $record): int {
+                        return (int) ($record->defaultVariant->quantity ?? 0);
+                    }),
 
                 IconColumn::make('is_active')
                     ->label(__('admin/default.labels.is_active'))

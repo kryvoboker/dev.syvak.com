@@ -16,6 +16,7 @@ use App\Services\PageSettings\PageSettingsBootstrapService;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -45,9 +46,7 @@ class ProductForm
                         self::createTranslationsFormTabs($active_languages),
                         self::createMetaTextsFormTabs($active_languages),
                         self::createCategoriesTabs($active_languages),
-                        self::createImagesTabs(),
-                        self::createDiscountsTabs(),
-                        self::createAttributesTabs($active_languages),
+                        self::createVariantsManagementTab(),
                         self::createSlugsFormTabs($active_languages),
                     ])
                     ->activeTab(1)
@@ -65,7 +64,7 @@ class ProductForm
         $admin_image_settings       = self::resolveProductAdminImageSettings();
         $product_upload_max_size_kb = (int) data_get($admin_image_settings, 'upload.max_size_kb', (int) config('app.images.product.upload.max_size_kb'));
         $product_upload_max_size_mb = self::resolveMegabytesFromKilobytes($product_upload_max_size_kb);
-        $image_upload_directory      = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.product.image_path')));
+        $image_upload_directory     = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.product.image_path')));
         $preview_in_page_width      = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.width', (int) config('app.images.product.preview_in_page_in_admin.width')));
         $preview_in_page_height     = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.height', (int) config('app.images.product.preview_in_page_in_admin.height')));
 
@@ -331,7 +330,7 @@ class ProductForm
         $admin_image_settings       = self::resolveProductAdminImageSettings();
         $product_upload_max_size_kb = (int) data_get($admin_image_settings, 'upload.max_size_kb', (int) config('app.images.product.upload.max_size_kb'));
         $product_upload_max_size_mb = self::resolveMegabytesFromKilobytes($product_upload_max_size_kb);
-        $image_upload_directory      = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.product.image_path')));
+        $image_upload_directory     = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.product.image_path')));
         $preview_in_page_width      = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.width', (int) config('app.images.product.preview_in_page_in_admin.width')));
         $preview_in_page_height     = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.height', (int) config('app.images.product.preview_in_page_in_admin.height')));
 
@@ -617,6 +616,19 @@ class ProductForm
                             }),
                     ])
                     ->columnSpanFull(),
+            ]);
+    }
+
+    protected static function createVariantsManagementTab(): Tab
+    {
+        return Tab::make(__('admin/default.tabs.attributes'))
+            ->schema([
+                Section::make(__('admin/default.tabs.attributes'))
+                    ->schema([
+                        Placeholder::make('variants_hint')
+                            ->hiddenLabel()
+                            ->content('Manage images, discounts, attributes and variant-specific texts in the "Variants" relation manager below the form.'),
+                    ]),
             ]);
     }
 }

@@ -49,9 +49,7 @@ class ProductsTable
                 // Eager load descriptions to avoid N+1 problem
                 return $query->with([
                     'productDescription',
-                    'productDiscount',
-                    'productImage',
-                    'productToAttribute',
+                    'defaultVariant.discounts',
                     'categories',
                     'slugs',
                 ]);
@@ -99,12 +97,18 @@ class ProductsTable
                 TextColumn::make('quantity')
                     ->label(__('admin/default.columns.quantity'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->getStateUsing(function (Product $record): int {
+                        return (int) ($record->defaultVariant->quantity ?? 0);
+                    }),
 
                 TextColumn::make('minimum')
                     ->label(__('admin/default.columns.minimum'))
                     ->numeric()
                     ->sortable()
+                    ->getStateUsing(function (Product $record): int {
+                        return (int) ($record->defaultVariant->minimum ?? 1);
+                    })
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 ImageColumn::make('image')
@@ -116,7 +120,10 @@ class ProductsTable
                         'decoding' => 'async',
                         'loading'  => 'lazy',
                         'style'    => 'object-fit: contain;',
-                    ]),
+                    ])
+                    ->getStateUsing(function (Product $record): ?string {
+                        return $record->defaultVariant->image;
+                    }),
 
                 TextColumn::make('price')
                     ->label(__('admin/default.columns.price'))
@@ -125,7 +132,8 @@ class ProductsTable
                     ->sortable()
                     ->limit(50)
                     ->getStateUsing(function (Product $record) {
-                        $discount = new Product()->getLastActualAndLastModifiedDiscountFromModel($record);
+                        $discount   = new Product()->getLastActualAndLastModifiedDiscountFromModel($record);
+                        $base_price = (float) ($record->defaultVariant->price ?? $record->price);
 
                         $currency      = config('app.currency.current_currency_code');
                         $exchange_rate = (float) config('app.currency.default_exchange_rate');
@@ -133,10 +141,10 @@ class ProductsTable
                         $convert_price = app(ConvertPrice::class);
 
                         if ($discount === null || $discount->price <= 0) {
-                            return $convert_price->format($record->price, $currency, $exchange_rate);
+                            return $convert_price->format($base_price, $currency, $exchange_rate);
                         }
 
-                        $old_price = $convert_price->format($record->price, $currency, $exchange_rate);
+                        $old_price = $convert_price->format($base_price, $currency, $exchange_rate);
                         $new_price = $convert_price->format($discount->price, $currency, $exchange_rate);
 
                         return '<span style="font-size: 1rem; text-decoration: line-through; color: rgb(156,163,175);"><del>' . $old_price . '</del></span><br>' .

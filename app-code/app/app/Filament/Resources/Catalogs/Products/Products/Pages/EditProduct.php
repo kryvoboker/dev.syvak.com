@@ -8,21 +8,15 @@ use App\Filament\Resources\Catalogs\Products\Products\ProductResource;
 use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductDescription;
-use App\Models\Catalogs\Products\ProductDiscount;
-use App\Models\Catalogs\Products\ProductImage;
-use App\Models\Catalogs\Products\ProductToAttribute;
 use App\Services\Catalogs\Products\ProductCategorySyncService;
 use Exception;
 use Filament\Actions\DeleteAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
 use LogicException;
-use Throwable;
 
 class EditProduct extends EditRecord
 {
@@ -31,12 +25,6 @@ class EditProduct extends EditRecord
     protected static string $resource = ProductResource::class;
 
     protected array $descriptions = [];
-
-    protected array $images = [];
-
-    protected array $discounts = [];
-
-    protected array $product_attributes = [];
 
     protected array $category_ids = [];
 
@@ -52,14 +40,10 @@ class EditProduct extends EditRecord
         ];
     }
 
-    /**
-     * Mutate form data before filling form
-     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $record = $this->getProductRecord();
 
-        // Load descriptions
         $descriptions = $record->productDescription()
             ->get()
             ->keyBy('language_id')
@@ -74,49 +58,7 @@ class EditProduct extends EditRecord
             ->toArray();
 
         $data['descriptions'] = $descriptions;
-
-        // Load images
-        $images = $record->productImage()
-            ->orderBy('sort_order')
-            ->get()
-            ->map(fn (ProductImage $img) => [
-                'id'         => $img->id,
-                'image'      => $img->image,
-                'sort_order' => $img->sort_order,
-            ])
-            ->toArray();
-
-        $data['images'] = $images;
-
-        // Load discounts
-        $discounts = $record->productDiscount()
-            ->get()
-            ->map(fn (ProductDiscount $disc) => [
-                'id'            => $disc->id,
-                'user_group_id' => $disc->user_group_id,
-                'quantity'      => $disc->quantity,
-                'priority'      => $disc->priority,
-                'price'         => $disc->price,
-                'date_start'    => $disc->date_start,
-                'date_end'      => $disc->date_end,
-            ])
-            ->toArray();
-
-        $data['discounts'] = $discounts;
-
-        // Load attributes
-        $attributes = $record->productToAttribute()
-            ->get()
-            ->map(fn (ProductToAttribute $attr) => [
-                'id'           => $attr->id,
-                'attribute_id' => $attr->attribute_id,
-                'language_id'  => $attr->language_id,
-                'text'         => $attr->text,
-            ])
-            ->toArray();
-
-        $data['attributes'] = $attributes;
-        $data['categories'] = $record->categories()
+        $data['categories']   = $record->categories()
             ->pluck('categories.id')
             ->map(fn (mixed $category_id): int => (int) $category_id)
             ->all();
@@ -127,68 +69,20 @@ class EditProduct extends EditRecord
     }
 
     /**
-     * Mutate form data before saving
-     *
-     *
      * @throws Halt
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        // Store related data temporarily
-        $this->descriptions       = trim_strs_in_arr($data['descriptions'] ?? []);
-        $this->images             = $data['images'] ?? [];
-        $this->discounts          = $data['discounts'] ?? [];
-        $this->product_attributes = trim_strs_in_arr($data['attributes'] ?? []);
-        $this->category_ids       = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
-        $this->slugs              = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->category_ids = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
+        $this->slugs        = trim_strs_in_arr($data['slugs'] ?? []);
 
-        // Validate unique attribute-language pairs
-        $this->validateAttributeLanguagePairs($this->product_attributes);
-
-        // Remove from main data
-        unset(
-            $data['descriptions'], $data['images'], $data['discounts'],
-            $data['attributes'], $data['categories'], $data['slugs'],
-        );
+        unset($data['descriptions'], $data['categories'], $data['slugs']);
 
         return $data;
     }
 
     /**
-     * Validate that attribute-language pairs are unique
-     *
-     *
-     * @throws Halt
-     */
-    protected function validateAttributeLanguagePairs(array $attributes): void
-    {
-        $pairs = [];
-
-        foreach ($attributes as $attribute) {
-            if (empty($attribute['attribute_id']) || empty($attribute['language_id'])) {
-                continue;
-            }
-
-            $pair = $attribute['attribute_id'] . '_' . $attribute['language_id'];
-
-            if (in_array($pair, $pairs)) {
-                Notification::make()
-                    ->title(__('admin/default.errors.title'))
-                    ->body(__('admin/catalogs/products/products.errors.duplicate_attribute_language'))
-                    ->danger()
-                    ->send();
-
-                $this->halt();
-            }
-
-            $pairs[] = $pair;
-        }
-    }
-
-    /**
-     * Handle record update with transaction
-     *
-     *
      * @throws Halt
      */
     protected function handleRecordUpdate(Model|Product $record, array $data): Model
@@ -197,51 +91,24 @@ class EditProduct extends EditRecord
             throw new LogicException('Product record has invalid type.');
         }
 
-        try {
-            DB::transaction(function () use ($record, $data): void {
-                // Update main record
-                $record->update($data);
+        DB::transaction(function () use ($record, $data): void {
+            $record->update($data);
 
-                // Update descriptions
-                $this->updateDescriptions();
+            $this->updateDescriptions();
 
-                // Update images
-                $this->updateImages();
+            if ($this->updateOrCreateSlugs() === false) {
+                throw new Exception('Failed to update slugs');
+            }
+        });
 
-                // Update discounts
-                $this->updateDiscounts();
+        app(ProductCategorySyncService::class)->syncWithRetry(
+            $record,
+            $this->category_ids,
+        );
 
-                // Update attributes
-                $this->updateAttributes();
-
-                // Process slugs
-                if ($this->updateOrCreateSlugs() === false) {
-                    throw new Exception('Failed to update slugs');
-                }
-            });
-
-            app(ProductCategorySyncService::class)->syncWithRetry(
-                $record,
-                $this->category_ids,
-            );
-
-            return $record;
-        } catch (Throwable $e) {
-            Log::channel('stack')->error('Failed to update Product: ' . $e->getMessage(), [
-                'record_id' => $record->id,
-                'data'      => $data,
-                'exception' => $e,
-            ]);
-
-            $this->halt();
-
-            throw $e;
-        }
+        return $record;
     }
 
-    /**
-     * Update descriptions for the record
-     */
     protected function updateDescriptions(): void
     {
         foreach ($this->descriptions as $language_id => $description) {
@@ -259,7 +126,6 @@ class EditProduct extends EditRecord
             }
         }
 
-        // Remove empty descriptions
         $filled_language_ids = collect($this->descriptions)
             ->filter(fn ($desc) => ! empty($desc['name']))
             ->keys()
@@ -273,91 +139,11 @@ class EditProduct extends EditRecord
         }
     }
 
-    /**
-     * Update images for the record
-     */
-    protected function updateImages(): void
-    {
-        $this->getProductRecord()->productImage()->delete();
-
-        $images_data = [];
-
-        foreach ($this->images as $image) {
-            if (! empty($image['image'])) {
-                $images_data[] = [
-                    'image'      => $image['image'],
-                    'sort_order' => $image['sort_order'] ?? 0,
-                ];
-            }
-        }
-
-        if (! empty($images_data)) {
-            $this->getProductRecord()->productImage()->createMany($images_data);
-        }
-    }
-
-    /**
-     * Update discounts for the record
-     */
-    protected function updateDiscounts(): void
-    {
-        $this->getProductRecord()->productDiscount()->delete();
-
-        $discounts_data = [];
-
-        foreach ($this->discounts as $discount) {
-            if (! empty($discount['price'])) {
-                $discounts_data[] = [
-                    'user_group_id' => $discount['user_group_id'],
-                    'quantity'      => $discount['quantity'],
-                    'priority'      => $discount['priority'],
-                    'price'         => $discount['price'],
-                    'date_start'    => $discount['date_start'],
-                    'date_end'      => $discount['date_end'],
-                ];
-            }
-        }
-
-        if (! empty($discounts_data)) {
-            $this->getProductRecord()->productDiscount()->createMany($discounts_data);
-        }
-    }
-
-    /**
-     * Update attributes for the record
-     */
-    protected function updateAttributes(): void
-    {
-        $this->getProductRecord()->productToAttribute()->delete();
-
-        $attributes_data = [];
-
-        foreach ($this->product_attributes as $attribute) {
-            if (! empty($attribute['attribute_id']) && ! empty($attribute['text'])) {
-                $attributes_data[] = [
-                    'attribute_id' => $attribute['attribute_id'],
-                    'language_id'  => $attribute['language_id'],
-                    'text'         => $attribute['text'],
-                ];
-            }
-        }
-
-        if (! empty($attributes_data)) {
-            $this->getProductRecord()->productToAttribute()->createMany($attributes_data);
-        }
-    }
-
-    /**
-     * Get page title
-     */
     public function getTitle(): string
     {
         return __('admin/catalogs/products/products.navigation_label');
     }
 
-    /**
-     * Get page heading
-     */
     public function getHeading(): ?string
     {
         return __('admin/catalogs/products/products.navigation_label');
