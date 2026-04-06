@@ -1,7 +1,6 @@
 import { defineConfig, UserConfig }          from 'vite';
 import { fileURLToPath }                     from 'node:url';
-import { dirname }                           from 'node:path';
-import path                                  from 'node:path';
+import path, { dirname }                     from 'node:path';
 import tailwindcss                           from '@tailwindcss/vite';
 import laravel                               from 'laravel-vite-plugin';
 import {
@@ -47,7 +46,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
         '@ts-shared':   path.resolve(__dirname, './resources/assets/catalog/ts/shared'),
         '@ts-features': path.resolve(__dirname, './resources/assets/catalog/ts/features'),
         '@ts-stores':   path.resolve(__dirname, './resources/assets/catalog/ts/stores'),
-        '@ts-types':   path.resolve(__dirname, './resources/assets/catalog/ts/types'),
+        '@ts-types':    path.resolve(__dirname, './resources/assets/catalog/ts/types'),
     };
 
     const refreshGlobs: string[] = [

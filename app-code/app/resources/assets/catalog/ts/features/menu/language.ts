@@ -1,4 +1,4 @@
-import { initDropdown } from "@ts-features/common/dropdown.ts";
+import { initDropdown } from "@ts-shared/dropdown/initDropdown.ts";
 
 export const handleLanguageMenu = (): void => {
     initDropdown({

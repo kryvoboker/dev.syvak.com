@@ -1,5 +1,5 @@
-import { initDrawer }   from "@ts-features/common/drawer.ts";
-import { initDropdown } from "@ts-features/common/dropdown.ts";
+import { initDrawer } from "@ts-shared/drawer/initDrawer.ts";
+import { initDropdown } from "@ts-shared/dropdown/initDropdown.ts";
 
 /**
  * Category products-list interactions.
