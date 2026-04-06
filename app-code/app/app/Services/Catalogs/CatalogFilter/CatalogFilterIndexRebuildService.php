@@ -342,12 +342,13 @@ readonly class CatalogFilterIndexRebuildService
     {
         $app_settings     = get_app_settings();
         $current_datetime = now(config('app.timezone'));
+        $db_prefix        = config('database.prefix');
 
         return Product::query()
             ->select('products.*')
-            ->selectRaw('default_product_variant.price as default_variant_price')
-            ->selectRaw('default_product_variant.quantity as default_variant_quantity')
-            ->selectRaw('active_product_discount.price as active_discount_price')
+            ->selectRaw($db_prefix . 'default_product_variant.price as default_variant_price')
+            ->selectRaw($db_prefix . 'default_product_variant.quantity as default_variant_quantity')
+            ->selectRaw($db_prefix . 'active_product_discount.price as active_discount_price')
             ->leftJoin('product_variants as default_product_variant', function (JoinClause $join): void {
                 $join
                     ->on('default_product_variant.product_id', '=', 'products.id')
