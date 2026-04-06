@@ -1,18 +1,18 @@
-import { initCarousel }          from '@ts-shared/carousel/initCarousel.ts';
-import { $PAGE_TYPE_KEY }        from '@ts-shared/lib/constants.ts';
-import { getAppParam }           from '@ts-shared/lib/getAppParam.ts';
-import { findArrayElems, toRem } from '@ts-shared/lib/helpers.ts';
+import { initCarousel }                              from '@ts-shared/carousel/initCarousel.ts';
+import { $PAGE_TYPE_KEY }                            from '@ts-shared/lib/constants.ts';
+import { getAppParam }                               from '@ts-shared/lib/getAppParam.ts';
+import { arrayFrom, findArrayElems, isEmpty, toRem } from '@ts-shared/lib/helpers.ts';
 
 function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
-    const pageType = getAppParam<string>($PAGE_TYPE_KEY);
+    const pageType: string | null = getAppParam<string>($PAGE_TYPE_KEY);
 
-    if (typeof pageType !== 'string' || pageType.trim().length === 0) {
+    if (typeof pageType !== 'string' || isEmpty(pageType)) {
         return true;
     }
 
-    const allowedPageTypesRaw = carouselElement.dataset.pageTypes;
+    const allowedPageTypesRaw: string | undefined = carouselElement.dataset.pageTypes;
 
-    if (typeof allowedPageTypesRaw !== 'string' || allowedPageTypesRaw.trim().length === 0) {
+    if (typeof allowedPageTypesRaw !== 'string' || isEmpty(allowedPageTypesRaw)) {
         return true;
     }
 
@@ -24,7 +24,7 @@ function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
         }
 
         return allowedPageTypes
-            .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+            .filter((value: unknown): value is string => typeof value === 'string' && !isEmpty(value))
             .includes(pageType);
     } catch {
         return true;
@@ -39,7 +39,7 @@ function setCardsHeight(): void {
         const slidersEls = <HTMLElement[] | []>findArrayElems('.products-carousel-slide', carouselBodyEl);
 
         slidersEls.forEach((sliderElChildrenEl: HTMLElement): void => {
-            const children = <HTMLElement[] | []>Array.from(sliderElChildrenEl.children);
+            const children = <HTMLElement[] | []>arrayFrom(sliderElChildrenEl.children);
 
             const sliderElChildrenElsHeight: number = children.reduce((acc2: number, sliderElChildEl: HTMLElement): number => {
                 return acc2 + sliderElChildEl.offsetHeight;
@@ -61,7 +61,7 @@ function setCardsHeight(): void {
 export function handleProductsCarousel(): void {
     const carouselElements = <HTMLElement[] | []>findArrayElems('[data-products-carousel]');
 
-    if (carouselElements.length === 0) {
+    if (isEmpty(carouselElements)) {
         return;
     }
 

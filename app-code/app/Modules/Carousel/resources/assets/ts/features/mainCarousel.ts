@@ -1,19 +1,19 @@
-import { initCarousel }   from '@ts-shared/carousel/initCarousel.ts';
-import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
-import { getAppParam }    from '@ts-shared/lib/getAppParam.ts';
-import { findArrayElems } from '@ts-shared/lib/helpers.ts';
+import { initCarousel }            from '@ts-shared/carousel/initCarousel.ts';
+import { $PAGE_TYPE_KEY }          from '@ts-shared/lib/constants.ts';
+import { getAppParam }             from '@ts-shared/lib/getAppParam.ts';
+import { findArrayElems, isEmpty } from '@ts-shared/lib/helpers.ts';
 
 function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
-    const pageType = getAppParam<string>($PAGE_TYPE_KEY);
+    const pageType: string | null = getAppParam<string>($PAGE_TYPE_KEY);
 
     // TODO: Replace this fallback with strict module/page_type matching once runtime page context policy is finalized.
-    if (typeof pageType !== 'string' || pageType.trim().length === 0) {
+    if (typeof pageType !== 'string' || isEmpty(pageType)) {
         return true;
     }
 
-    const allowedPageTypesRaw = carouselElement.dataset.pageTypes;
+    const allowedPageTypesRaw: string | undefined = carouselElement.dataset.pageTypes;
 
-    if (typeof allowedPageTypesRaw !== 'string' || allowedPageTypesRaw.trim().length === 0) {
+    if (typeof allowedPageTypesRaw !== 'string' || isEmpty(allowedPageTypesRaw)) {
         return true;
     }
 
@@ -25,7 +25,7 @@ function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
         }
 
         return allowedPageTypes
-            .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+            .filter((value: unknown): value is string => typeof value === 'string' && !isEmpty(value))
             .includes(pageType);
     } catch {
         return true;
@@ -33,21 +33,21 @@ function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
 }
 
 function hasEnoughSlidesForCarousel(carouselElement: HTMLElement): boolean {
-    const slidesCountFromData = Number.parseInt(carouselElement.dataset.slidesCount ?? '', 10);
+    const slidesCountFromData: number = Number.parseInt(carouselElement.dataset.slidesCount ?? '', 10);
 
     if (!Number.isNaN(slidesCountFromData)) {
         return slidesCountFromData > 1;
     }
 
-    const slidesCount = carouselElement.querySelectorAll('.carousel-slide').length;
+    const slidesCount: number = findArrayElems('.carousel-slide', carouselElement).length;
 
     return slidesCount > 1;
 }
 
 export function handleMainCarousel(): void {
-    const carouselElements = findArrayElems('[data-main-carousel]');
+    const carouselElements = <HTMLElement[] | []>findArrayElems('[data-main-carousel]');
 
-    if (carouselElements.length === 0) {
+    if (isEmpty(carouselElements)) {
         return;
     }
 
