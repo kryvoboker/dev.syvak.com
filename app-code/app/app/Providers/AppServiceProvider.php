@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\ApplicationSettings\Language;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\Modules\ModuleCacheService;
@@ -45,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
             ]);
         }
 
+        $this->app->singleton(Language::class);
         $this->app->singleton(HeaderService::class);
         $this->app->singleton(FooterService::class);
         $this->app->singleton(ImageUrlBuilderService::class);
@@ -83,7 +85,7 @@ class AppServiceProvider extends ServiceProvider
          * Global locale parameter constraint prevents arbitrary values in
          * locale-aware routes and stabilizes URL matching for storefront/admin routes.
          */
-        $allowed_locales = array_values(array_filter((array)config('app.locales', [config('app.locale', 'en')])));
+        $allowed_locales = get_allowed_locales();
         $locale_key      = config('localization.locale_parameter', 'locale');
 
         if ($allowed_locales !== []) {
