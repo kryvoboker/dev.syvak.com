@@ -414,3 +414,12 @@ if (! function_exists('get_slug_variants')) {
             ->all();
     }
 }
+
+if (! function_exists('get_allowed_locales')) {
+    function get_allowed_locales(): array
+    {
+        $languages = new Language()->getActiveLanguages();
+
+        return $languages->pluck('code')->toArray() ?: array_values(array_filter((array) config('app.locales', [config('app.locale', 'en')])));
+    }
+}

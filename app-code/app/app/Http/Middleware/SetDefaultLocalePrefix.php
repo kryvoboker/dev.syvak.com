@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Models\ApplicationSettings\Language;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,11 +20,7 @@ class SetDefaultLocalePrefix
      */
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
-        $allowed_locales = new Language()
-            ->getActiveLanguages()
-            ->pluck('code')
-            ->toArray() ?: array_values(array_filter((array) config('app.locales', [config('app.locale', 'en')])));
-
+        $allowed_locales           = get_allowed_locales();
         $path_info                 = Str::ltrim($request->getPathInfo(), '/');
         $is_livewire_request       = Str::startsWith($path_info, ['livewire-', 'livewire/']);
         $locale_key                = config('localization.locale_parameter');
