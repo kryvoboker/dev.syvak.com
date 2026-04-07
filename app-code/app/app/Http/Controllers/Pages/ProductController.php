@@ -6,19 +6,22 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\Controller;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Catalogs\Products\ProductVariantAttributeValue;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ProductController extends Controller
 {
-    public function show(string $locale, string $slug, ?string $variant_slug = null): View
+    public function show(Request $request, string $locale, string $slug, ?string $variant_slug = null): View
     {
         $locale   = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
@@ -33,19 +36,7 @@ class ProductController extends Controller
             throw new NotFoundHttpException();
         }
 
-        $variant = null;
-
-        if (filled($variant_slug)) {
-            $variant = ProductVariant::findBySlug((string) $variant_slug, (int) $language->id);
-
-            if ($variant instanceof ProductVariant && (int) $variant->product_id !== (int) $product->id) {
-                throw new NotFoundHttpException();
-            }
-        }
-
-        if (! $variant instanceof ProductVariant) {
-            $variant = $product->defaultVariant;
-        }
+        $variant = $this->resolveRequestedVariant($request, $product, (int) $language->id, $variant_slug);
 
         $header_data = app(HeaderService::class)();
         $page_type   = try_detect_page_type();
@@ -64,17 +55,231 @@ class ProductController extends Controller
         ]);
     }
 
+    private function resolveRequestedVariant(
+        Request $request,
+        Product $product,
+        int $language_id,
+        ?string $variant_slug,
+    ): ?ProductVariant {
+        if (filled((string) $variant_slug)) {
+            $variant_from_slug = ProductVariant::findBySlug((string) $variant_slug, $language_id);
+
+            if ($variant_from_slug instanceof ProductVariant && (int) $variant_from_slug->product_id !== (int) $product->id) {
+                throw new NotFoundHttpException();
+            }
+
+            if ($variant_from_slug instanceof ProductVariant) {
+                return $variant_from_slug;
+            }
+        }
+
+        $variant_from_attributes = $this->resolveVariantByAttributeQuery($request, $product, $language_id);
+
+        if ($variant_from_attributes instanceof ProductVariant) {
+            return $variant_from_attributes;
+        }
+
+        return $product->defaultVariant;
+    }
+
+    private function resolveVariantByAttributeQuery(Request $request, Product $product, int $language_id): ?ProductVariant
+    {
+        $attribute_filters = $this->extractAttributeFiltersFromQuery($request->query());
+
+        if ($attribute_filters === []) {
+            return null;
+        }
+
+        $variant_query = ProductVariant::query()
+            ->where('product_id', (int) $product->id);
+
+        foreach ($attribute_filters as $attribute_id => $attribute_values) {
+            $variant_query->whereHas('attributeValues', function (Builder $query) use ($attribute_id, $attribute_values, $language_id): void {
+                $query->where('attribute_id', $attribute_id)
+                    ->where('language_id', $language_id)
+                    ->whereIn('value_string', $attribute_values);
+            });
+        }
+
+        return $variant_query
+            ->orderByDesc('is_default')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
+    }
+
+    /**
+     * @param  array<string, mixed>  $query_params
+     * @return array<int, array<int, string>>
+     */
+    private function extractAttributeFiltersFromQuery(array $query_params): array
+    {
+        return collect($query_params)
+            ->mapWithKeys(function (mixed $raw_value, string $query_key): array {
+                if (! preg_match('/^attribute_(\d+)$/', $query_key, $matches)) {
+                    return [];
+                }
+
+                $attribute_id = (int) $matches[1];
+                $values       = collect(is_array($raw_value) ? $raw_value : explode(',', (string) $raw_value))
+                    ->map(fn (mixed $value): string => trim((string) $value))
+                    ->filter(fn (string $value): bool => filled($value))
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                if ($values === []) {
+                    return [];
+                }
+
+                return [$attribute_id => $values];
+            })
+            ->all();
+    }
+
     /**
      * @return array<int, array{title: string, url: string}>
      */
     private function resolveBreadcrumbs(Product $product, ?ProductVariant $variant, int $language_id): array
     {
         $product_title = $this->resolveProductTitle($product, $variant, $language_id);
-
-        return [
+        $breadcrumbs   = [
             breadcrumb(__('catalog/default.links.home'), localizedRoute('catalog.home')),
-            breadcrumb($product_title),
         ];
+
+        foreach ($this->resolveProductCategoryBreadcrumbs($product, $language_id) as $category_breadcrumb) {
+            $breadcrumbs[] = $category_breadcrumb;
+        }
+
+        $breadcrumbs[] = breadcrumb($product_title);
+
+        return $breadcrumbs;
+    }
+
+    /**
+     * @return array<int, array{title: string, url: string}>
+     */
+    private function resolveProductCategoryBreadcrumbs(Product $product, int $language_id): array
+    {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, Category> $product_categories */
+        $product_categories = $product->categories()
+            ->with([
+                'categoryPaths' => fn ($query) => $query->orderBy('level'),
+            ])
+            ->get();
+
+        if ($product_categories->isEmpty()) {
+            return [];
+        }
+
+        /** @var Category $target_category */
+        $target_category = $product_categories->first();
+
+        /**
+         * If product has an explicitly selected default category,
+         * use that category as the source of breadcrumb chain.
+         */
+        if (is_numeric($product->default_category_id)) {
+            $default_category = $product_categories
+                ->firstWhere('id', (int) $product->default_category_id);
+
+            if ($default_category instanceof Category) {
+                $target_category = $default_category;
+            }
+        }
+
+        foreach ($product_categories as $current_category) {
+            /** @var Category $current_category */
+            if ((int) $current_category->id === (int) $target_category->id) {
+                continue;
+            }
+
+            if ((int) $target_category->id === (int) $product->default_category_id) {
+                // Keep explicit category priority over automatic selection rules.
+                break;
+            }
+
+            $selected_depth = $target_category->categoryPaths->count();
+            $current_depth  = $current_category->categoryPaths->count();
+
+            if ($current_depth > $selected_depth) {
+                $target_category = $current_category;
+
+                continue;
+            }
+
+            if ($current_depth < $selected_depth) {
+                continue;
+            }
+
+            if ((int) $current_category->sort_order < (int) $target_category->sort_order) {
+                $target_category = $current_category;
+
+                continue;
+            }
+
+            if ((int) $current_category->sort_order > (int) $target_category->sort_order) {
+                continue;
+            }
+
+            if ((int) $current_category->id < (int) $target_category->id) {
+                $target_category = $current_category;
+            }
+        }
+
+        $path_ids = $target_category->categoryPaths
+            ->sortBy('level')
+            ->pluck('path_id')
+            ->map(fn (mixed $path_id): int => (int) $path_id)
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($path_ids === []) {
+            return [];
+        }
+
+        /** @var Collection<int, Category> $categories_by_id */
+        $categories_by_id = Category::query()
+            ->with([
+                'categoryDescription' => function ($query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'slugs' => function ($query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+            ])
+            ->whereIn('id', $path_ids)
+            ->get()
+            ->keyBy('id');
+
+        return collect($path_ids)
+            ->map(function (int $path_id) use ($categories_by_id): ?array {
+                /** @var Category|null $category */
+                $category = $categories_by_id->get($path_id);
+
+                if (! $category instanceof Category) {
+                    return null;
+                }
+
+                $category_title = trim((string) optional($category->categoryDescription->first())->name);
+                $category_slug  = trim((string) optional($category->slugs->first())->slug);
+
+                if (blank($category_title)) {
+                    return null;
+                }
+
+                if (filled($category_slug)) {
+                    return breadcrumb($category_title, localizedRoute('localized.catalog.category.show', [
+                        'slug' => $category_slug,
+                    ]));
+                }
+
+                return breadcrumb($category_title);
+            })
+            ->filter(fn (?array $breadcrumb): bool => $breadcrumb !== null)
+            ->values()
+            ->all();
     }
 
     /**
