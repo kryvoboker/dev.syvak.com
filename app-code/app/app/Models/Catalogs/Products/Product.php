@@ -29,6 +29,7 @@ class Product extends Model
 
     protected $fillable = [
         'default_variant_id',
+        'default_category_id',
         'model',
         'sku',
         'ean',
@@ -48,14 +49,15 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'default_variant_id' => 'integer',
-            'quantity'           => 'integer',
-            'minimum'            => 'integer',
-            'price'              => 'float',
-            'viewed'             => 'integer',
-            'date_available'     => 'datetime',
-            'date_added'         => 'datetime',
-            'is_active'          => 'boolean',
+            'default_variant_id'  => 'integer',
+            'default_category_id' => 'integer',
+            'quantity'            => 'integer',
+            'minimum'             => 'integer',
+            'price'               => 'float',
+            'viewed'              => 'integer',
+            'date_available'      => 'datetime',
+            'date_added'          => 'datetime',
+            'is_active'           => 'boolean',
         ];
     }
 
@@ -169,6 +171,14 @@ class Product extends Model
     public function defaultVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'default_variant_id');
+    }
+
+    /**
+     * @return BelongsTo<Category, $this>
+     */
+    public function defaultCategory(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'default_category_id');
     }
 
     /**
