@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     // Texts
-    'texts'        => [
+    'texts' => [
         'sku'                         => 'SKU: :sku',
         'products_not_found'          => 'Products not found!',
         'category_title_fallback'     => 'Collections',
@@ -18,7 +18,7 @@ return [
     ],
 
     // Links
-    'links'        => [
+    'links' => [
         'home'       => 'Home',
         'previous'   => 'Previous',
         'next'       => 'Next',
@@ -26,7 +26,7 @@ return [
     ],
 
     // Buttons
-    'buttons'      => [
+    'buttons' => [
         'catalog'   => 'Catalog',
         'show_more' => 'Show more',
         'filter'    => 'Filter',
@@ -36,7 +36,7 @@ return [
     ],
 
     // Sort labels
-    'sort'         => [
+    'sort' => [
         'default'     => 'Default',
         'newest'      => 'Newest first',
         'bestsellers' => 'Bestsellers',
@@ -50,7 +50,7 @@ return [
     ],
 
     // Aria-Labels
-    'aria_labels'  => [
+    'aria_labels' => [
         'toggle_main_menu'       => 'Toggle main menu',
         'toggle_catalog_menu'    => 'Toggle catalog menu',
         'back_to_main_mob_menu'  => 'Back to main menu',
@@ -61,12 +61,33 @@ return [
     ],
 
     // Errors
-    'errors'       => [
+    'errors' => [
         'keyword_required'   => 'Search keyword is required!',
         'keyword_string'     => 'Search keyword must be a string!',
         'keyword_min'        => 'Search must be at least 3 characters long!',
         'keyword_max'        => 'Search keyword may not be greater than 255 characters!',
         'price_from'         => 'The "Price from" value must be less than "Price to"!',
         'filtering_products' => 'An error occurred while filtering products. Please try again later.',
+    ],
+
+    // Product page
+    'product' => [
+        'option_groups' => [
+            'color'              => 'Color',
+            'length'             => 'Length, cm',
+            'size'               => 'Size',
+            'attribute_fallback' => 'Attribute',
+        ],
+        'details' => [
+            'composition' => 'Composition:',
+            'care'        => 'Care:',
+        ],
+        'labels' => [
+            'size_help'     => 'Check your size',
+            'buy_one_click' => 'Buy in one click',
+            'add_to_cart'   => 'Add to cart',
+            'notify'        => 'Notify when available',
+            'telegram'      => 'Telegram',
+        ],
     ],
 ];

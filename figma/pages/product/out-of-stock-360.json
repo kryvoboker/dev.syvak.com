@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "screen_width": 360,
+    "state": "out-of-stock",
+    "block": "product-hero",
+    "source_links": [
+      "https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=356-13201&t=BU6LZLkUXXMhvvc7-4",
+      "https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=966-10657&t=BU6LZLkUXXMhvvc7-4",
+      "https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=356-13244&t=BU6LZLkUXXMhvvc7-4"
+    ]
+  },
+  "html_structure": {
+    "tag": "section",
+    "name": "product-hero-mobile",
+    "children": [
+      { "tag": "header", "name": "mobile-topbar" },
+      { "tag": "nav", "name": "breadcrumbs-compact" },
+      {
+        "tag": "div",
+        "name": "product-gallery-main",
+        "children": [
+          { "tag": "button", "name": "gallery-prev" },
+          { "tag": "img", "name": "gallery-image" },
+          { "tag": "button", "name": "gallery-next" }
+        ]
+      },
+      {
+        "tag": "div",
+        "name": "product-summary-mobile",
+        "children": [
+          { "tag": "h1", "name": "product-title" },
+          { "tag": "p", "name": "product-sku" },
+          { "tag": "p", "name": "product-price" }
+        ]
+      },
+      {
+        "tag": "div",
+        "name": "notify-actions",
+        "children": [
+          { "tag": "p", "name": "notify-label" },
+          { "tag": "button", "name": "notify-telegram" }
+        ]
+      },
+      { "tag": "form", "name": "product-options" },
+      { "tag": "a", "name": "size-help-link" },
+      {
+        "tag": "div",
+        "name": "product-details-mobile",
+        "children": [
+          { "tag": "section", "name": "product-composition" },
+          { "tag": "section", "name": "product-care" }
+        ]
+      }
+    ]
+  }
+}
