@@ -416,10 +416,24 @@ if (! function_exists('get_slug_variants')) {
 }
 
 if (! function_exists('get_allowed_locales')) {
-    function get_allowed_locales(): array
+    /**
+     * @param bool $is_get_new_instance
+     *
+     * @return array
+     */
+    function get_allowed_locales(bool $is_get_new_instance = false): array
     {
-        $languages = new Language()->getActiveLanguages();
+        if ($is_get_new_instance === true) {
+            $languages = new Language();
+        } else {
+            $languages = app(Language::class);
+        }
 
-        return $languages->pluck('code')->toArray() ?: array_values(array_filter((array) config('app.locales', [config('app.locale', 'en')])));
+        return $languages
+            ?->getActiveLanguages()
+            ->pluck('code')
+            ->toArray() ?: config('app.allowed_locales', [])
+                |> array_filter(...)
+                |> array_values(...);
     }
 }
