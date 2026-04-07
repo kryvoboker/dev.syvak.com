@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     // Texts
-    'texts'        => [
+    'texts' => [
         'sku'                         => 'Артикул: :sku',
         'products_not_found'          => 'Товари не знайдено!',
         'category_title_fallback'     => 'Колекції',
@@ -18,7 +18,7 @@ return [
     ],
 
     // Links
-    'links'        => [
+    'links' => [
         'home'       => 'Головна',
         'previous'   => 'Попередня',
         'next'       => 'Наступна',
@@ -26,7 +26,7 @@ return [
     ],
 
     // Buttons
-    'buttons'      => [
+    'buttons' => [
         'catalog'   => 'Каталог',
         'show_more' => 'Показати ще',
         'filter'    => 'Фільтр',
@@ -36,7 +36,7 @@ return [
     ],
 
     // Sort labels
-    'sort'         => [
+    'sort' => [
         'default'     => 'За замовчуванням',
         'newest'      => 'Спочатку нові',
         'bestsellers' => 'Бестселери',
@@ -50,7 +50,7 @@ return [
     ],
 
     // Aria-Labels
-    'aria_labels'  => [
+    'aria_labels' => [
         'toggle_main_menu'       => 'Перемкнути головне меню',
         'toggle_catalog_menu'    => 'Перемкнути меню каталогу',
         'back_to_main_mob_menu'  => 'Повернутися до головного меню',
@@ -61,12 +61,33 @@ return [
     ],
 
     // Errors
-    'errors'       => [
+    'errors' => [
         'keyword_required'   => 'Пошукове слово є обов\'язковим!',
         'keyword_string'     => 'Пошукове слово повинно бути рядком!',
         'keyword_min'        => 'Пошук повинен містити щонайменше 3 символи!',
         'keyword_max'        => 'Пошукове слово не може бути довшим за 255 символів!',
         'price_from'         => 'Значення "Ціна від" повинно бути меншим за значення "Ціна до"!',
         'filtering_products' => 'Під час фільтрації товарів сталася помилка. Будь ласка, спробуйте ще раз.',
+    ],
+
+    // Product page
+    'product' => [
+        'option_groups' => [
+            'color'              => 'Колір',
+            'length'             => 'Довжина, см',
+            'size'               => 'Розмір',
+            'attribute_fallback' => 'Характеристика',
+        ],
+        'details' => [
+            'composition' => 'Склад:',
+            'care'        => 'Догляд:',
+        ],
+        'labels' => [
+            'size_help'     => 'Перевір свій розмір',
+            'buy_one_click' => 'Купити в 1 клік',
+            'add_to_cart'   => 'Додати в кошик',
+            'notify'        => 'Повідомити про наявність',
+            'telegram'      => 'Telegram',
+        ],
     ],
 ];
