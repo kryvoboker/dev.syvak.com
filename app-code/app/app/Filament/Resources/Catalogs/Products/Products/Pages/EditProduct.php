@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Products\Products\Pages;
 
 use App\Filament\Resources\Catalogs\Products\Products\ProductResource;
+use App\Filament\Resources\Catalogs\Products\Products\ProductVariantResource;
 use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductDescription;
 use App\Services\Catalogs\Products\ProductCategorySyncService;
 use Exception;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
@@ -36,6 +39,12 @@ class EditProduct extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('manage_variants')
+                ->label(__('admin/catalogs/products/products.actions.manage_variants'))
+                ->icon(Heroicon::RectangleStack)
+                ->url(fn (): string => ProductVariantResource::getUrl('index', [
+                    'product' => (int) data_get($this->getProductRecord(), 'id'),
+                ])),
             DeleteAction::make(),
         ];
     }
