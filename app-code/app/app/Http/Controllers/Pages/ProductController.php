@@ -12,15 +12,21 @@ use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Catalogs\Products\ProductVariantAttributeValue;
 use App\Services\FooterService;
 use App\Services\HeaderService;
+use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class ProductController extends Controller
 {
+    /**
+     * @throws Throwable
+     */
     public function show(Request $request, string $locale, string $slug, ?string $variant_slug = null): View
     {
         $locale   = normalize_locale($locale);
@@ -36,6 +42,9 @@ class ProductController extends Controller
             throw new NotFoundHttpException();
         }
 
+        $page_setting      = app(PageSettingsBootstrapService::class)->bootstrapProductPageSetting();
+        $page_settings_arr = get_page_settings($page_setting);
+
         $variant = $this->resolveRequestedVariant($request, $product, (int) $language->id, $variant_slug);
 
         $header_data = app(HeaderService::class)();
@@ -49,7 +58,7 @@ class ProductController extends Controller
             ]),
             'page_type'         => $page_type,
             'breadcrumbs'       => $this->resolveBreadcrumbs($product, $variant, (int) $language->id),
-            'product_view_data' => $this->buildProductViewData($product, $variant, (int) $language->id),
+            'product_view_data' => $this->buildProductViewData($product, $variant, (int) $language->id, $page_settings_arr),
             'product'           => $product,
             'variant'           => $variant,
         ]);
@@ -283,10 +292,17 @@ class ProductController extends Controller
     }
 
     /**
+     * Build a stable product payload for Blade and JS consumers.
+     *
+     * @param  array<string, mixed>  $page_settings_arr
      * @return array<string, mixed>
      */
-    private function buildProductViewData(Product $product, ?ProductVariant $variant, int $language_id): array
-    {
+    private function buildProductViewData(
+        Product $product,
+        ?ProductVariant $variant,
+        int $language_id,
+        array $page_settings_arr,
+    ): array {
         $product_title   = $this->resolveProductTitle($product, $variant, $language_id);
         $product_sku     = (string) $product->sku;
         $product_price   = $this->resolveProductPrice($product, $variant);
@@ -296,22 +312,38 @@ class ProductController extends Controller
             (float) config('app.currency.current_exchange_rate'),
         );
 
-        $is_in_stock      = $this->resolveInStockState($variant);
-        $gallery_images   = $this->resolveGalleryImages($product, $variant);
-        $main_image_path  = (string) ($gallery_images->first() ?? '');
+        $image_size          = $this->resolveProductCustomerImageSize($page_settings_arr);
+        $minimum_stock_qty   = $this->resolveProductMinimumStockQuantity($page_settings_arr);
+        $is_in_stock         = $this->resolveInStockState($variant, $minimum_stock_qty);
+        $gallery_images      = $this->resolveGalleryImages($product, $variant);
+        $main_image_path     = (string) ($gallery_images->first() ?? '');
+        $main_image_data     = $this->buildImageData($main_image_path, $image_size);
+        $gallery_images_data = $gallery_images
+            ->map(fn (string $image_path): array => $this->buildImageData($image_path, $image_size))
+            ->values()
+            ->all();
         $option_groups    = $this->resolveOptionGroups($variant, $language_id);
         $details_sections = $this->resolveDetailsSections();
 
         return [
-            'title'            => $product_title,
-            'sku'              => $product_sku,
-            'price_formatted'  => $formatted_price,
-            'is_in_stock'      => $is_in_stock,
-            'main_image_path'  => $main_image_path,
-            'gallery_images'   => $gallery_images,
-            'option_groups'    => $option_groups,
-            'details_sections' => $details_sections,
-            'labels'           => $this->resolveUiLabels(),
+            'title' => $product_title,
+            'sku'   => $product_sku,
+            'price' => [
+                'value'         => $product_price,
+                'formatted'     => (string) $formatted_price,
+                'currency_code' => (string) config('app.currency.current_currency_code'),
+                'exchange_rate' => (float) config('app.currency.current_exchange_rate'),
+            ],
+            'price_formatted'        => $formatted_price,
+            'is_in_stock'            => $is_in_stock,
+            'minimum_stock_quantity' => $minimum_stock_qty,
+            'main_image'             => $main_image_data,
+            'gallery_images_data'    => $gallery_images_data,
+            'main_image_path'        => $main_image_path,
+            'gallery_images'         => $gallery_images,
+            'option_groups'          => $option_groups,
+            'details_sections'       => $details_sections,
+            'labels'                 => $this->resolveUiLabels(),
         ];
     }
 
@@ -322,7 +354,7 @@ class ProductController extends Controller
             ->value('name');
 
         if (filled((string) $variant_title)) {
-            return trim((string) $variant_title);
+            return Str::trim((string) $variant_title);
         }
 
         $product_title = $product->productDescription()
@@ -330,10 +362,10 @@ class ProductController extends Controller
             ->value('name');
 
         if (filled((string) $product_title)) {
-            return trim((string) $product_title);
+            return Str::trim((string) $product_title);
         }
 
-        return trim((string) $product->model);
+        return Str::trim((string) $product->model);
     }
 
     private function resolveProductPrice(Product $product, ?ProductVariant $variant): float
@@ -345,15 +377,20 @@ class ProductController extends Controller
         return is_numeric($product->price) ? (float) $product->price : 0.0;
     }
 
-    private function resolveInStockState(?ProductVariant $variant): bool
+    private function resolveInStockState(?ProductVariant $variant, int $minimum_stock_quantity): bool
     {
         if (! $variant instanceof ProductVariant) {
             return false;
         }
 
-        $minimum_quantity = max(0, (int) $variant->minimum);
+        // Variant minimum is an item-level constraint; page setting minimum is a storefront policy.
+        // We enforce the stricter one to keep stock behavior deterministic for customer pages.
+        $minimum_quantity = max(
+            0,
+            max((int) $variant->minimum, $minimum_stock_quantity),
+        );
 
-        return (bool) $variant->is_active && (int) $variant->quantity >= $minimum_quantity;
+        return $variant->is_active && (int) $variant->quantity >= $minimum_quantity;
     }
 
     /**
@@ -377,7 +414,7 @@ class ProductController extends Controller
         }
 
         $variant_image  = $variant instanceof ProductVariant ? $variant->image : null;
-        $fallback_image = trim((string) ($variant_image ?? $product->image ?? ''));
+        $fallback_image = Str::trim((string) ($variant_image ?? $product->image ?? ''));
 
         return filled($fallback_image)
             ? collect([$fallback_image])
@@ -390,7 +427,78 @@ class ProductController extends Controller
             $image = Arr::get($image, 'image', Arr::first($image));
         }
 
-        return trim((string) $image);
+        return Str::trim((string) $image);
+    }
+
+    /**
+     * @param  array<string, mixed>  $page_settings_arr
+     * @return array{width:int,height:int}
+     */
+    private function resolveProductCustomerImageSize(array $page_settings_arr): array
+    {
+        return [
+            'width' => max(
+                1,
+                (int) Arr::get(
+                    $page_settings_arr,
+                    'customer.images.product.width',
+                    (int) Arr::get(
+                        $page_settings_arr,
+                        'images.product.width',
+                        (int) config('app.page_settings.product.for_customer.image_width', (int) config('app.page_settings.product.image_width', 500)),
+                    ),
+                ),
+            ),
+            'height' => max(
+                1,
+                (int) Arr::get(
+                    $page_settings_arr,
+                    'customer.images.product.height',
+                    (int) Arr::get(
+                        $page_settings_arr,
+                        'images.product.height',
+                        (int) config('app.page_settings.product.for_customer.image_height', (int) config('app.page_settings.product.image_height', 500)),
+                    ),
+                ),
+            ),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $page_settings_arr
+     */
+    private function resolveProductMinimumStockQuantity(array $page_settings_arr): int
+    {
+        return max(
+            0,
+            (int) Arr::get(
+                $page_settings_arr,
+                'customer.stock.minimum_stock_quantity',
+                (int) Arr::get(
+                    $page_settings_arr,
+                    'stock.minimum_stock_quantity',
+                    (int) config('app.page_settings.product.for_customer.minimum_stock_quantity', (int) config('app.page_settings.product.minimum_stock_quantity', 1)),
+                ),
+            ),
+        );
+    }
+
+    /**
+     * @param  array{width:int,height:int}  $image_size
+     * @return array{path:string,urls:array<string, string>,width:int,height:int}
+     */
+    private function buildImageData(string $image_path, array $image_size): array
+    {
+        $normalized_path = Str::trim($image_path);
+
+        return [
+            'path' => $normalized_path,
+            'urls' => filled($normalized_path)
+                ? multiple_convert_img_and_get_url($normalized_path, (int) $image_size['width'], (int) $image_size['height'])
+                : [],
+            'width'  => (int) $image_size['width'],
+            'height' => (int) $image_size['height'],
+        ];
     }
 
     /**
