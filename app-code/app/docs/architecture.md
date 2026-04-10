@@ -1,0 +1,41 @@
+[← Getting Started](getting-started.md) · [Back to README](../README.md) · [Configuration →](configuration.md)
+
+# Architecture
+
+## Pattern
+
+The project follows a **Modular Monolith** architecture.
+
+## Main Modules
+
+- `app/Models/Catalogs/*` — catalog domain (products, categories, filters, attributes)
+- `app/Models/ApplicationSettings/*` — app-level settings/localization entities
+- `app/Models/Users/*` — users and permissions
+- `app/Models/Infos/*` — info/content entities
+
+## Application Layers
+
+- `app/Http/*` — HTTP entrypoints and request contracts
+- `app/Actions/*` — use-case orchestration
+- `app/Services/*` and `app/Supports/*` — domain and shared services
+- `app/Filament/*` — admin delivery layer
+- `resources/views/*` — presentation only
+
+## Dependency Rules
+
+- Controllers/Filament pages call Actions/Services.
+- Actions/Services work with Models and framework adapters.
+- Business logic stays outside Blade templates.
+- Cross-domain access should go through explicit service/action boundaries.
+
+## Key Entry Points
+
+- `routes/web.php` — storefront + AJAX routes
+- `bootstrap/app.php` — app bootstrap, middleware, exception flow
+- `/ARCHITECTURE.md` — AI workflow architecture rules
+
+## See Also
+
+- [Catalog Storefront](catalog-storefront.md) — runtime storefront flows.
+- [Admin Panel](admin-panel.md) — Filament resource structure.
+- [Configuration](configuration.md) — runtime/env contracts.

@@ -1,0 +1,42 @@
+[← Configuration](configuration.md) · [Back to README](../README.md) · [Admin Panel →](admin-panel.md)
+
+# Catalog Storefront
+
+## Main Routes
+
+```php
+GET /{locale}/
+GET /{locale}/category/{slug}
+GET /{locale}/category/{slug}/filters
+GET /{locale}/category/{slug}/load-more
+GET /{locale}/product/{slug}
+GET /{locale}/product/{slug}/{variant_slug}
+GET /{locale}/search
+GET /{locale}/live-search
+```
+
+## Category Flow
+
+- `CategoryController` prepares category page data.
+- Filter/sort options are normalized from GET parameters.
+- Product list may be extended via AJAX load-more endpoint.
+
+## Product Flow
+
+- Product is resolved by product slug + language.
+- Variant can be resolved by:
+  - `variant_slug`, or
+  - GET attribute params (for variant selection behavior).
+- Breadcrumbs can include category chain before product title.
+
+## Filtering and Sorting
+
+- Catalog filters use normalized GET contract.
+- Sorting options are configured from page settings and validated server-side.
+- Filter index table is used to optimize product filtering.
+
+## See Also
+
+- [Admin Panel](admin-panel.md) — where filters/sort/page settings are managed.
+- [Architecture](architecture.md) — separation of storefront vs domain logic.
+- [Testing](testing.md) — how to validate storefront changes.
