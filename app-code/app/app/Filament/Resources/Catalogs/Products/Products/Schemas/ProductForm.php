@@ -627,7 +627,7 @@ class ProductForm
                     ->schema([
                         Placeholder::make('variants_hint')
                             ->hiddenLabel()
-                            ->content('Manage images, discounts, attributes and variant-specific texts in the "Variants" relation manager below the form.'),
+                            ->content('Manage product variants on the dedicated "Variants" page from product actions.'),
                     ]),
             ]);
     }
