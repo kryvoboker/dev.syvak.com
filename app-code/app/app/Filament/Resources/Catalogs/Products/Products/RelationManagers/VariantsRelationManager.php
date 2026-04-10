@@ -42,7 +42,7 @@ class VariantsRelationManager extends RelationManager
             ])
             ->recordActions([
                 Action::make('edit')
-                    ->label(__('admin/default.actions.edit'))
+                    ->label(__('admin/default.buttons.edit'))
                     ->icon('heroicon-o-pencil-square')
                     ->url(fn ($record): string => ProductVariantResource::getUrl('edit', [
                         'record'  => $record,
