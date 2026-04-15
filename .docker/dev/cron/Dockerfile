@@ -71,9 +71,9 @@ RUN deluser ${USERNAME} 2>/dev/null || true \
   && adduser -D -u ${UID} -G ${USERNAME} -s /bin/sh ${USERNAME}
 
 # Create crontab directory with proper permissions
-RUN mkdir -p /etc/crontabs/ /var/log/cron/ ${COMPOSER_CACHE_DIR}/ \
-  && chown ${UID}:${GID} /etc/crontabs/ /var/log/cron/ ${COMPOSER_CACHE_DIR}/ \
-  && chmod -R 755 /var/log/cron/ ${COMPOSER_CACHE_DIR}/
+RUN mkdir -p /etc/crontabs/ /var/log/ ${COMPOSER_CACHE_DIR}/ \
+  && chown ${UID}:${GID} /etc/crontabs/ /var/log/ ${COMPOSER_CACHE_DIR}/ \
+  && chmod -R 755 /var/log/ ${COMPOSER_CACHE_DIR}/
 
 # Copy entrypoint script
 COPY --chown=${UID}:${GID} .docker/dev/cron/entrypoint.sh /usr/local/bin/entrypoint.sh
