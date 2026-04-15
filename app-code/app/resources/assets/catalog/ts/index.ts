@@ -45,15 +45,15 @@ document.addEventListener('DOMContentLoaded', (): void => {
     if (pageType === $CATEGORY_PAGE_TYPE) {
         window.$hsAccordionCollection = window.$hsAccordionCollection || [];
 
-        import('@ts-features/products/productsList.ts')
+        import('@ts-features/common/products/productsList.ts')
             .then(module => module.handleCategoryProductsList());
 
-        import('@ts-features/products/productsFilter.ts')
+        import('@ts-features/common/products/productsFilter.ts')
             .then(module => module.handleProductsFilter());
     }
 
     if (pageType === $CATEGORY_PAGE_TYPE || pageType === $SEARCH_PAGE_TYPE) {
-        import('@ts-features/products/loadMoreProducts.ts')
+        import('@ts-features/common/products/loadMoreProducts.ts')
             .then(module => module.handleLoadMoreProducts());
     }
 });
