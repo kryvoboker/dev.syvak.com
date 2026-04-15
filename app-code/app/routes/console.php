@@ -38,3 +38,5 @@ Schedule::call(function (): void {
 })
     ->hourly()
     ->environments(['local']);
+
+Schedule::command('telescope:prune --hours=48')->daily();

@@ -328,12 +328,6 @@ class ProductController extends Controller
         return [
             'title' => $product_title,
             'sku'   => $product_sku,
-            'price' => [
-                'value'         => $product_price,
-                'formatted'     => (string) $formatted_price,
-                'currency_code' => (string) config('app.currency.current_currency_code'),
-                'exchange_rate' => (float) config('app.currency.current_exchange_rate'),
-            ],
             'price_formatted'        => $formatted_price,
             'is_in_stock'            => $is_in_stock,
             'minimum_stock_quantity' => $minimum_stock_qty,
@@ -385,10 +379,7 @@ class ProductController extends Controller
 
         // Variant minimum is an item-level constraint; page setting minimum is a storefront policy.
         // We enforce the stricter one to keep stock behavior deterministic for customer pages.
-        $minimum_quantity = max(
-            0,
-            max((int) $variant->minimum, $minimum_stock_quantity),
-        );
+        $minimum_quantity = max(0, (int)$variant->minimum, $minimum_stock_quantity);
 
         return $variant->is_active && (int) $variant->quantity >= $minimum_quantity;
     }
