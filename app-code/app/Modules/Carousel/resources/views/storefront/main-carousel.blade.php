@@ -26,10 +26,11 @@
                  data-main-carousel
              data-slides-count="{{ $slides_count }}"
              data-page-types='@json($page_types)'
-             data-carousel='{ "isAutoHeight": true, "loadingClasses": "opacity-0, opacity-100", "isDraggable": true, "isInfiniteLoop": true, "isAutoPlay": false }'
+             data-carousel='{ "isAutoHeight": true, "loadingClasses": "opacity-0, opacity-100", "isDraggable": true, "isInfiniteLoop": true, "isAutoPlay": true }'
             @endif>
             <div class="carousel main-carousel-track rounded-none">
-                <div class="main-carousel-body carousel-body">
+                <div class="main-carousel-body carousel-body
+                            {{ $is_interactive_carousel ? ' carousel-dragging:transition-none carousel-dragging:cursor-grabbing cursor-grab' : '' }}">
                     @foreach($carousel_module_data['slides'] as $slide)
                         @php
                             $has_image_link = filled($slide['image_url']);
