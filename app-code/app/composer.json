@@ -41,6 +41,7 @@
         "laravel/pail": "^1.2",
         "laravel/pint": "^1.29",
         "laravel/sail": "^1.55",
+        "laravel/telescope": "^5.20",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.9",
         "phpunit/phpunit": "^12.5"
@@ -106,7 +107,9 @@
             "merge-dev": true
         },
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "laravel/telescope"
+            ]
         }
     },
     "config": {
