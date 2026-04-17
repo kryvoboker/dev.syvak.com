@@ -19,4 +19,8 @@ require PublicConstants::ROOT_DIR . '/vendor/autoload.php';
 /** @var Application $app */
 $app = require PublicConstants::ROOT_DIR . '/bootstrap/app.php';
 
-$app->handleRequest(Request::capture());
+try {
+	$app->handleRequest(Request::capture());
+} catch (Exception $e) {
+	exit($e->getCode());
+}

@@ -28,7 +28,7 @@
             <a class="dark-btn flex items-center justify-between gap-x-2 font-cormorant-garamond
                       font-bold text-lg leading-none tracking-normal uppercase border-b
                       border-b-opacity-light-gray-40% py-4"
-               href="{{ localizedRoute('localized.catalog.category.show', ['slug' => $category_data['slug']]) }}">
+               href="{{ localized_route('localized.catalog.category.show', ['slug' => $category_data['slug']]) }}">
                 <span>
                     {{ $category_data['descriptions']['name'] }}
                 </span>

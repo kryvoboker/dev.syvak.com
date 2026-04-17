@@ -1,10 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Providers\AppServiceProvider;
+use App\Providers\Filament\AlyoAdminPanelProvider;
+use App\Providers\ModuleProvidersServiceProvider;
+use App\Providers\OpenAiServiceProvider;
+use App\Providers\TelescopeServiceProvider;
+use Fruitcake\LaravelDebugbar\ServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\Filament\AlyoAdminPanelProvider::class,
-    App\Providers\ModuleProvidersServiceProvider::class,
-    App\Providers\OpenAiServiceProvider::class,
-    App\Providers\TelescopeServiceProvider::class,
-    Barryvdh\Debugbar\ServiceProvider::class,
+    AppServiceProvider::class,
+    AlyoAdminPanelProvider::class,
+    ModuleProvidersServiceProvider::class,
+    OpenAiServiceProvider::class,
+    TelescopeServiceProvider::class,
+    ServiceProvider::class,
 ];

@@ -60,6 +60,12 @@ export const $FLEX_CLASS_NAME = 'flex';
 
 /**
  * @global
+ * @var {string} $ACTIVE_CLASS_NAME
+ */
+export const $ACTIVE_CLASS_NAME = 'active';
+
+/**
+ * @global
  * @var {string} $_ERROR_CLASS_NAME
  */
 export const $_ERROR_CLASS_NAME = '_error';

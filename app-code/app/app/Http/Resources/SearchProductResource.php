@@ -64,7 +64,7 @@ class SearchProductResource extends JsonResource
             'link' => $this->whenLoaded('slugs', function () {
                 $slug = $this->slugs->first()?->slug;
 
-                return $slug ? localizedRoute('localized.catalog.product.show', compact('slug')) : '';
+                return $slug ? localized_route('localized.catalog.product.show', compact('slug')) : '';
             }),
             'descriptions' => $this->whenLoaded('productDescription', function () {
                 $product_description = $this->productDescription->first();

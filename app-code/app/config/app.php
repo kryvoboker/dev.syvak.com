@@ -130,6 +130,12 @@ return [
         'store'  => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'allowed_admin_emails' => (string) env('ALLOWED_ADMIN_EMAILS', '')
+            |> (fn ($value) => explode(',', $value))
+            |> (fn ($values) => array_map(static fn (string $value): string => trim($value), $values))
+            |> array_filter(...)
+            |> array_values(...),
+
     'denied_delete_emails'      => [
         'fast.kamaz@gmail.com',
     ],

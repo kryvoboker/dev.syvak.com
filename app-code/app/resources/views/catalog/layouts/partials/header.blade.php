@@ -17,27 +17,27 @@
                 @if(isset($page_type) && $page_type == config('page-settings.page_type.home'))
                     <div>
                         <x-catalog::common.img
-                            class="object-contain"
-                            :urls_data="$header_data['logo_data']['urls']"
-                            :size="$header_data['logo_data']['width']"
-                            sizes="(max-width: {{ $max_viewport_width }}px) {{ $header_data['logo_data']['width'] * 2 }}px,
+                                class="object-contain"
+                                :urls_data="$header_data['logo_data']['urls']"
+                                :size="$header_data['logo_data']['width']"
+                                sizes="(max-width: {{ $max_viewport_width }}px) {{ $header_data['logo_data']['width'] * 2 }}px,
                                {{ $header_data['logo_data']['width'] * 2 }}px"
-                            width="{{ $header_data['logo_data']['width'] }}"
-                            height="{{ $header_data['logo_data']['height'] }}"
-                            alt="SYVAK"
+                                width="{{ $header_data['logo_data']['width'] }}"
+                                height="{{ $header_data['logo_data']['height'] }}"
+                                alt="SYVAK"
                         />
                     </div>
                 @else
-                    <a href="{{ localizedRoute('catalog.home') }}">
+                    <a href="{{ localized_route('catalog.home') }}">
                         <x-catalog::common.img
-                            class="object-contain"
-                            :urls_data="$header_data['logo_data']['urls']"
-                            :size="$header_data['logo_data']['width']"
-                            sizes="(max-width: {{ $max_viewport_width }}px) {{ $header_data['logo_data']['width'] * 2 }}px,
+                                class="object-contain"
+                                :urls_data="$header_data['logo_data']['urls']"
+                                :size="$header_data['logo_data']['width']"
+                                sizes="(max-width: {{ $max_viewport_width }}px) {{ $header_data['logo_data']['width'] * 2 }}px,
                                {{ $header_data['logo_data']['width'] * 2 }}px"
-                            width="{{ $header_data['logo_data']['width'] }}"
-                            height="{{ $header_data['logo_data']['height'] }}"
-                            alt="SYVAK"
+                                width="{{ $header_data['logo_data']['width'] }}"
+                                height="{{ $header_data['logo_data']['height'] }}"
+                                alt="SYVAK"
                         />
                     </a>
                 @endif
@@ -51,11 +51,11 @@
                         {{ __('catalog/default.buttons.catalog') }}
                     </button>
 
-                    <a href="{{ localizedRoute('localized.catalog.category.show', ['slug' => $header_data['hoodie_category']['slug']]) }}">
+                    <a href="{{ localized_route('localized.catalog.category.show', ['slug' => $header_data['hoodie_category']['slug']]) }}">
                         {{ $header_data['hoodie_category']['descriptions']['name'] }}
                     </a>
 
-                    <a href="{{ localizedRoute('localized.catalog.category.show', ['slug' => $header_data['exclusive_gifts_category']['slug']]) }}">
+                    <a href="{{ localized_route('localized.catalog.category.show', ['slug' => $header_data['exclusive_gifts_category']['slug']]) }}">
                         {{ $header_data['exclusive_gifts_category']['descriptions']['name'] }}
                     </a>
                 </div>
