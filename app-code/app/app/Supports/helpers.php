@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\PageSettings\PageSetting;
 use App\Models\Slug;
 use App\Services\Modules\ModuleRuntimeResolverService;
@@ -14,6 +15,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -132,6 +134,7 @@ if (! function_exists('try_detect_page_type')) {
             return match (true) {
                 Str::endsWith($route_name, '.home') => (string) config('page-settings.page_type.home'),
                 Str::endsWith($route_name, '.product'),
+                Str::endsWith($route_name, '.product.variant.show'),
                 Str::endsWith($route_name, '.product.show') => (string) config('page-settings.page_type.product'),
                 Str::endsWith($route_name, '.category'),
                 Str::endsWith($route_name, '.category.show') => (string) config('page-settings.page_type.category'),
@@ -158,8 +161,8 @@ if (! function_exists('try_detect_page_type')) {
     }
 }
 
-if (! function_exists('localizedRoute')) {
-    function localizedRoute(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
+if (! function_exists('localized_route')) {
+    function localized_route(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
     {
         $locale_key = config('localization.locale_parameter');
 
@@ -170,6 +173,124 @@ if (! function_exists('localizedRoute')) {
         return route($route, array_merge([
             $locale_key => app()->getLocale(),
         ], $parameters), $absolute);
+    }
+}
+
+if (! function_exists('prepare_product_attrs')) {
+    /**
+     * @param  array<int|string, mixed>  $attribute_filters
+     * @return array<int, array<int, int>>
+     */
+    function prepare_product_attrs(array $attribute_filters): array
+    {
+        return collect($attribute_filters)
+            ->mapWithKeys(function (mixed $raw_value, int|string $raw_key): array {
+                $attribute_id = null;
+
+                if (is_int($raw_key) || ctype_digit($raw_key)) {
+                    $attribute_id = (int) $raw_key;
+                } else {
+                    $matched_key = Str::match('/^attribute_(\d+)$/', $raw_key);
+
+                    if (filled($matched_key)) {
+                        $attribute_id = (int) $matched_key;
+                    }
+                }
+
+                if (! is_int($attribute_id) || $attribute_id <= 0) {
+                    return [];
+                }
+
+                $prepared_values = collect(is_array($raw_value) ? $raw_value : explode(',', (string) $raw_value))
+                    ->map(function (mixed $value): int {
+                        if (is_int($value) || ctype_digit((string) $value)) {
+                            return (int) $value;
+                        }
+
+                        $matched_value_id = Str::match('/^attribute_value_(\d+)$/i', Str::trim((string) $value));
+
+                        if (filled($matched_value_id)) {
+                            return (int) $matched_value_id;
+                        }
+
+                        return 0;
+                    })
+                    ->filter(fn (int $value_id): bool => $value_id > 0)
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                if ($prepared_values === []) {
+                    return [];
+                }
+
+                return [$attribute_id => $prepared_values];
+            })
+            ->all();
+    }
+}
+
+if (! function_exists('localized_product_variant_route')) {
+    /**
+     * @param  array<int|string, int|string|array<int, int|string>>  $attribute_filters
+     */
+    function localized_product_variant_route(
+        string $product_slug,
+        int $product_id,
+        array $attribute_filters = [],
+        bool $absolute = true,
+    ): string {
+        $normalized_filters = prepare_product_attrs($attribute_filters);
+
+        $language     = resolve_language_by_locale(app()->getLocale());
+        $language_id  = (int) ($language?->id ?? 0);
+        $variant_slug = '';
+
+        if ($language_id > 0) {
+            $variant_query = ProductVariant::query()
+                ->where('product_id', $product_id);
+
+            if ($normalized_filters !== []) {
+                foreach ($normalized_filters as $attribute_id => $attribute_value_ids) {
+                    $variant_query->whereHas('attributeValues', function (Builder $query) use ($attribute_id, $attribute_value_ids): void {
+                        $query->where('attribute_id', $attribute_id)
+                            ->whereIn('id', $attribute_value_ids);
+                    });
+                }
+            }
+
+            $variant = $variant_query
+                ->with([
+                    'slugs' => function ($query) use ($language_id): void {
+                        $query->where('language_id', $language_id);
+                    },
+                ])
+                ->orderByDesc('is_default')
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->first();
+
+            $variant_slug = Str::trim((string) $variant?->slugs->first()?->slug);
+        }
+
+        if (filled($variant_slug)) {
+            return localized_route('localized.catalog.product.variant.show', [
+                'slug'         => $product_slug,
+                'variant_slug' => $variant_slug,
+            ], $absolute);
+        }
+
+        $query_parameters = collect($normalized_filters)
+            ->mapWithKeys(fn (array $value_ids, int $attribute_id): array => [
+                'attribute_' . $attribute_id => collect($value_ids)
+                    ->map(fn (int $value_id): string => (string) $value_id)
+                    ->implode(','),
+            ])
+            ->all();
+
+        return localized_route('localized.catalog.product.show', array_merge([
+            'slug' => $product_slug,
+        ], $query_parameters), $absolute);
     }
 }
 
@@ -303,9 +424,13 @@ if (! function_exists('resolve_upload_path_placeholders')) {
 }
 
 if (! function_exists('resolve_language_by_locale')) {
-    function resolve_language_by_locale(string $locale): ?Language
+    function resolve_language_by_locale(string $locale, bool $is_get_new_instance = false): ?Language
     {
-        $language = new Language();
+        if ($is_get_new_instance === true) {
+            $language = new Language();
+        } else {
+            $language = app(Language::class);
+        }
 
         return $language->getLanguageByCode($locale) ?: $language->getDefaultLanguage();
     }
@@ -355,9 +480,15 @@ if (! function_exists('resolve_sort_code')) {
 }
 
 if (! function_exists('normalize_locale')) {
-    function normalize_locale(?string $locale): string
+    function normalize_locale(?string $locale, bool $is_get_new_instance = false): string
     {
-        $languages = new Language()->getActiveLanguages();
+        if ($is_get_new_instance === true) {
+            $language = new Language();
+        } else {
+            $language = app(Language::class);
+        }
+
+        $languages = $language->getActiveLanguages();
 
         if ($locale === null || $languages->containsStrict(fn (Language $language) => $language->code === $locale) === false) {
             $locale = app()->getLocale();
@@ -416,23 +547,46 @@ if (! function_exists('get_slug_variants')) {
 }
 
 if (! function_exists('get_allowed_locales')) {
+    function get_allowed_locales(bool $is_get_new_instance = false): array
+    {
+        try {
+            if ($is_get_new_instance === true) {
+                $language = new Language();
+            } else {
+                $language = app(Language::class);
+            }
+
+            $allowed_locales = $language
+                ?->getActiveLanguages()
+                ->pluck('code')
+                ->toArray();
+        } catch (Throwable) {
+            $allowed_locales = [];
+        }
+
+        if (is_array($allowed_locales) && $allowed_locales !== []) {
+            return $allowed_locales;
+        }
+
+        return array_values(array_filter(config('app.allowed_locales', [])));
+    }
+}
+
+if (!function_exists('string_to_array')) {
     /**
-     * @param bool $is_get_new_instance
+     * @param string|null $strings
+     * @param string      $separator
      *
      * @return array
      */
-    function get_allowed_locales(bool $is_get_new_instance = false): array
+    function string_to_array(?string $strings, string $separator = ','): array
     {
-        if ($is_get_new_instance === true) {
-            $languages = new Language();
-        } else {
-            $languages = app(Language::class);
+        if ($strings === null || Str::trim($strings) === '') {
+            return [];
         }
 
-        return $languages
-            ?->getActiveLanguages()
-            ->pluck('code')
-            ->toArray() ?: config('app.allowed_locales', [])
+        return explode($separator, $strings)
+                |> (fn($array) => array_map(static fn(string $val): string => Str::trim($val), $array))
                 |> array_filter(...)
                 |> array_values(...);
     }

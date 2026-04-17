@@ -15,19 +15,13 @@ use Throwable;
 class CatalogFilterAjaxController extends Controller
 {
     /**
-     * @param CatalogFilterAjaxIndexRequest $request
-     * @param FilterProductsAction          $filter_products_action
-     * @param string                        $locale
-     * @param string|null                   $slug
-     *
-     * @return JsonResponse
      * @throws Throwable
      */
     public function index(
         CatalogFilterAjaxIndexRequest $request,
-        FilterProductsAction          $filter_products_action,
-        string                        $locale,
-        ?string                       $slug
+        FilterProductsAction $filter_products_action,
+        string $locale,
+        ?string $slug,
     ): JsonResponse {
         $locale = normalize_locale($locale);
 
@@ -36,14 +30,14 @@ class CatalogFilterAjaxController extends Controller
                 'validated_data'      => $request->validated(),
                 'category_slug'       => $slug,
                 'is_get_filters_data' => false,
-                'page_path'           => localizedRoute('localized.catalog.category.show', ['slug' => $slug], absolute: false),
+                'page_path'           => localized_route('localized.catalog.category.show', ['slug' => $slug], absolute: false),
             ],
                 locale: $locale,
             );
 
             /** @var LengthAwarePaginator|null $paginator */
             $paginator      = Arr::get($response_data, 'paginator');
-            $total_products = (int)$paginator?->total();
+            $total_products = (int) $paginator?->total();
 
             return response()->json([
                 'success'        => true,

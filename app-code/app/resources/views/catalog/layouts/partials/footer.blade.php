@@ -95,7 +95,7 @@
             <a class="hidden md:inline-block md:font-extrabold md:uppercase md:leading-none md:tracking-[28%] md:text-150px md:-mb-5
                       lg:text-[180px] lg:tracking-[35%] lg:ms-16 xl:text-[230px] xl:ms-20 2xl:text-82px 2xl:tracking-[25%]
                       2xl:m-0"
-               href="{{ localizedRoute('catalog.home') }}"
+               href="{{ localized_route('catalog.home') }}"
                aria-label="{{ $footer_data['brand_large_text'] }}">
                 {{ $footer_data['brand_large_text'] }}
             </a>

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\ProductsCarousel\Services;
 
+use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
-use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Arr;
@@ -618,7 +618,7 @@ readonly class ProductsCarouselModuleDataService
                 'height' => $product_image_height,
             ],
             'url' => filled($slug)
-                ? localizedRoute('localized.catalog.product.show', ['slug' => $slug])
+                ? localized_route('localized.catalog.product.show', ['slug' => $slug])
                 : null,
         ];
     }

@@ -52,10 +52,10 @@ class FooterService
     private function getSubscriptionData(): array
     {
         return [
-            'title'          => '/ ПІДПИСКА НА НОВИНКИ /',
-            'button_text'    => 'TELEGRAM',
-            'button_url'     => '#',
-            'support_text'   => 'ТВОЯ ПІДТРИМКА — ЦЕ СИЛА ДЛЯ МИТЦЯ. ПРИЄДНУЙСЯ ДО ТИХ, ХТО НОСИТЬ ЗІ ЗМІСТОМ.',
+            'title'        => '/ ПІДПИСКА НА НОВИНКИ /',
+            'button_text'  => 'TELEGRAM',
+            'button_url'   => '#',
+            'support_text' => 'ТВОЯ ПІДТРИМКА — ЦЕ СИЛА ДЛЯ МИТЦЯ. ПРИЄДНУЙСЯ ДО ТИХ, ХТО НОСИТЬ ЗІ ЗМІСТОМ.',
         ];
     }
 
@@ -90,7 +90,7 @@ class FooterService
 
                 return [
                     'label' => Str::upper($label),
-                    'url'   => localizedRoute('localized.catalog.category.show', [
+                    'url'   => localized_route('localized.catalog.category.show', [
                         'slug' => $slug,
                     ]),
                 ];

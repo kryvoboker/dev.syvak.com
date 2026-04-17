@@ -25,19 +25,19 @@
             </div>
 
             <div class="flex flex-col gap-y-1 uppercase">
-                @isset($product_data['discount'])
+                @if(!empty($product_data['discount']) && isset($product_data['discount']['discounted_price']))
                     <div class="text-[.8em] text-light-red">
                         <del>{{ $product_data['price'] }}</del>
                     </div>
 
                     <div>
-                        {{ $product_data['discount'] }}
+                        {{ $product_data['discount']['discounted_price'] }}
                     </div>
                 @else
                     <div>
                         {{ $product_data['price'] }}
                     </div>
-                @endisset
+                @endif
             </div>
         </div>
     </a>

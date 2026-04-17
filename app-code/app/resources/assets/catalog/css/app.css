@@ -275,7 +275,7 @@
         backdrop-blur-xs hover:text-black carousel-disabled:opacity-50;
     }
 
-    .carousel-pagination {
+    .carousel-pagination:not(.product-carousel__pagination) {
         @apply flex items-center justify-center gap-x-2 h-2.5;
 
         & > * {
@@ -289,7 +289,7 @@
 
     .category-filter__clear-all-btn,
     .category-filter__apply-btn {
-        @apply w-1/2 items-center justify-center text-center border border-light-gray ease-in-out duration-200 p-2;
+        @apply w-1/2;
     }
 
     .category-filter__choosen-filters-list .custom-icon {
@@ -307,6 +307,18 @@
 
     .category-filter__clear-all-link {
         @apply border-light-red;
+    }
+
+    .product-carousel__pagination .carousel-pagination-item {
+        @apply border border-transparent transition-colors;
+
+        &.active {
+            @apply border-white;
+        }
+    }
+
+    h1.product-name {
+        @apply text-26px md:text-32px 2xl:text-64px leading-0.9em tracking-0.028em;
     }
 
     .footer-contacts,
@@ -370,6 +382,24 @@
         @apply default-btn flex items-center justify-between gap-x-4 w-full text-sm lg:text-base xl:text-lg
         uppercase tracking-0.04em md:border md:border-opacity-light-gray-40% md:hover:border-white md:duration-200 md:ease-in-out
         px-0 pt-0 pb-2 md:px-5 md:py-18px;
+    }
+
+    .black-btn,
+    .white-btn {
+        @apply items-center justify-center text-center border border-light-gray ease-in-out duration-200 p-2;
+    }
+
+    .black-btn:not(.category-filter__clear-all-btn),
+    .white-btn:not(.category-filter__apply-btn) {
+        @apply flex;
+    }
+
+    .black-btn {
+        @apply hover:text-black bg-transparent hover:bg-white;
+    }
+
+    .white-btn {
+        @apply text-black hover:text-white uppercase bg-white hover:bg-black;
     }
 
     .icon-park--setting-config {

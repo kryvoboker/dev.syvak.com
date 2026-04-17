@@ -575,13 +575,13 @@ readonly class FilterProductsAction
                 $fallback_description = $product->productDescription->first();
 
                 if (filled($product_slug) && filled($variant_slug)) {
-                    $product_url = localizedRoute('localized.catalog.product.variant.show', [
+                    $product_url = localized_route('localized.catalog.product.variant.show', [
                         'slug'         => $product_slug,
                         'variant_slug' => $variant_slug,
                     ]);
                 } else {
                     $product_url = filled($product_slug)
-                        ? localizedRoute('localized.catalog.product.show', ['slug' => $product_slug])
+                        ? localized_route('localized.catalog.product.show', ['slug' => $product_slug])
                         : '';
                 }
 

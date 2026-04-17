@@ -44,13 +44,11 @@ class ProductController extends Controller
 
         $page_setting      = app(PageSettingsBootstrapService::class)->bootstrapProductPageSetting();
         $page_settings_arr = get_page_settings($page_setting);
+        $variant           = $this->resolveRequestedVariant($request, $product, (int) $language->id, $variant_slug);
+        $header_data       = app(HeaderService::class)();
+        $page_type         = try_detect_page_type();
 
-        $variant = $this->resolveRequestedVariant($request, $product, (int) $language->id, $variant_slug);
-
-        $header_data = app(HeaderService::class)();
-        $page_type   = try_detect_page_type();
-
-        return view('catalog.pages.product', [
+        $data = [
             'header_data' => $header_data,
             'footer_data' => app(FooterService::class)([
                 // Footer uses category links too; pass already loaded categories from header.
@@ -61,7 +59,9 @@ class ProductController extends Controller
             'product_view_data' => $this->buildProductViewData($product, $variant, (int) $language->id, $page_settings_arr),
             'product'           => $product,
             'variant'           => $variant,
-        ]);
+        ];
+
+        return view('catalog.pages.product', $data);
     }
 
     private function resolveRequestedVariant(
@@ -93,7 +93,7 @@ class ProductController extends Controller
 
     private function resolveVariantByAttributeQuery(Request $request, Product $product, int $language_id): ?ProductVariant
     {
-        $attribute_filters = $this->extractAttributeFiltersFromQuery($request->query());
+        $attribute_filters = prepare_product_attrs($request->query());
 
         if ($attribute_filters === []) {
             return null;
@@ -102,11 +102,11 @@ class ProductController extends Controller
         $variant_query = ProductVariant::query()
             ->where('product_id', (int) $product->id);
 
-        foreach ($attribute_filters as $attribute_id => $attribute_values) {
-            $variant_query->whereHas('attributeValues', function (Builder $query) use ($attribute_id, $attribute_values, $language_id): void {
+        foreach ($attribute_filters as $attribute_id => $attribute_value_ids) {
+            $variant_query->whereHas('attributeValues', function (Builder $query) use ($attribute_id, $attribute_value_ids, $language_id): void {
                 $query->where('attribute_id', $attribute_id)
                     ->where('language_id', $language_id)
-                    ->whereIn('value_string', $attribute_values);
+                    ->whereIn('id', $attribute_value_ids);
             });
         }
 
@@ -118,42 +118,13 @@ class ProductController extends Controller
     }
 
     /**
-     * @param  array<string, mixed>  $query_params
-     * @return array<int, array<int, string>>
-     */
-    private function extractAttributeFiltersFromQuery(array $query_params): array
-    {
-        return collect($query_params)
-            ->mapWithKeys(function (mixed $raw_value, string $query_key): array {
-                if (! preg_match('/^attribute_(\d+)$/', $query_key, $matches)) {
-                    return [];
-                }
-
-                $attribute_id = (int) $matches[1];
-                $values       = collect(is_array($raw_value) ? $raw_value : explode(',', (string) $raw_value))
-                    ->map(fn (mixed $value): string => trim((string) $value))
-                    ->filter(fn (string $value): bool => filled($value))
-                    ->unique()
-                    ->values()
-                    ->all();
-
-                if ($values === []) {
-                    return [];
-                }
-
-                return [$attribute_id => $values];
-            })
-            ->all();
-    }
-
-    /**
      * @return array<int, array{title: string, url: string}>
      */
     private function resolveBreadcrumbs(Product $product, ?ProductVariant $variant, int $language_id): array
     {
         $product_title = $this->resolveProductTitle($product, $variant, $language_id);
         $breadcrumbs   = [
-            breadcrumb(__('catalog/default.links.home'), localizedRoute('catalog.home')),
+            breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
         ];
 
         foreach ($this->resolveProductCategoryBreadcrumbs($product, $language_id) as $category_breadcrumb) {
@@ -279,7 +250,7 @@ class ProductController extends Controller
                 }
 
                 if (filled($category_slug)) {
-                    return breadcrumb($category_title, localizedRoute('localized.catalog.category.show', [
+                    return breadcrumb($category_title, localized_route('localized.catalog.category.show', [
                         'slug' => $category_slug,
                     ]));
                 }
@@ -318,16 +289,21 @@ class ProductController extends Controller
         $gallery_images      = $this->resolveGalleryImages($product, $variant);
         $main_image_path     = (string) ($gallery_images->first() ?? '');
         $main_image_data     = $this->buildImageData($main_image_path, $image_size);
-        $gallery_images_data = $gallery_images
-            ->map(fn (string $image_path): array => $this->buildImageData($image_path, $image_size))
-            ->values()
-            ->all();
-        $option_groups    = $this->resolveOptionGroups($variant, $language_id);
-        $details_sections = $this->resolveDetailsSections();
+        $option_groups       = $this->resolveOptionGroups($product, $variant, $language_id);
+        $details_sections    = $this->resolveDetailsSections();
+        $gallery_images_data = [];
+
+        // Galler images contains main image as first item, so only build gallery data if there's more than one image to avoid redundant processing
+        if ($gallery_images->count() > 1) {
+            $gallery_images_data = $gallery_images
+                ->map(fn (string $image_path): array => $this->buildImageData($image_path, $image_size))
+                ->values()
+                ->all();
+        }
 
         return [
-            'title' => $product_title,
-            'sku'   => $product_sku,
+            'title'                  => $product_title,
+            'sku'                    => $product_sku,
             'price_formatted'        => $formatted_price,
             'is_in_stock'            => $is_in_stock,
             'minimum_stock_quantity' => $minimum_stock_qty,
@@ -337,7 +313,6 @@ class ProductController extends Controller
             'gallery_images'         => $gallery_images,
             'option_groups'          => $option_groups,
             'details_sections'       => $details_sections,
-            'labels'                 => $this->resolveUiLabels(),
         ];
     }
 
@@ -379,7 +354,7 @@ class ProductController extends Controller
 
         // Variant minimum is an item-level constraint; page setting minimum is a storefront policy.
         // We enforce the stricter one to keep stock behavior deterministic for customer pages.
-        $minimum_quantity = max(0, (int)$variant->minimum, $minimum_stock_quantity);
+        $minimum_quantity = max(0, (int) $variant->minimum, $minimum_stock_quantity);
 
         return $variant->is_active && (int) $variant->quantity >= $minimum_quantity;
     }
@@ -493,17 +468,23 @@ class ProductController extends Controller
     }
 
     /**
-     * @return array<int, array{key: string, label: string, values: array<int, string>}>
+     * @return array<int, array{
+     *     key: string,
+     *     name: string,
+     *     values: array<int, string>,
+     *     value_links: array<int, array{value_id: int, value: string, url: string, is_selected: bool}>
+     * }>
      */
-    private function resolveOptionGroups(?ProductVariant $variant, int $language_id): array
+    private function resolveOptionGroups(Product $product, ?ProductVariant $variant, int $language_id): array
     {
-        $fallback_groups = $this->resolveFallbackOptionGroups();
-
         if (! $variant instanceof ProductVariant) {
-            return $fallback_groups;
+            return [];
         }
 
+        $product_slug = Str::trim((string) $product->getSlugByLanguageId($language_id));
+
         $attribute_rows = $variant->attributeValues()
+            ->where('language_id', $language_id)
             ->with([
                 'attribute.attributeDescription' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
@@ -513,50 +494,69 @@ class ProductController extends Controller
             ->get();
 
         if ($attribute_rows->isEmpty()) {
-            return $fallback_groups;
+            return [];
         }
 
+        $selected_attribute_value_ids = $attribute_rows
+            ->mapWithKeys(fn (ProductVariantAttributeValue $attribute_value): array => [
+                (int) $attribute_value->attribute_id => (int) $attribute_value->id,
+            ])
+            ->filter(fn (int $value_id): bool => $value_id > 0)
+            ->all();
+
         /** @var Collection<int, ProductVariantAttributeValue> $attribute_rows */
-        $groups = $attribute_rows
+        return $attribute_rows
             ->groupBy(fn (ProductVariantAttributeValue $attribute_value): int => (int) $attribute_value->attribute_id)
-            ->map(function (Collection $group_rows): array {
+            ->map(function (Collection $group_rows) use ($selected_attribute_value_ids, $product_slug, $variant): array {
                 /** @var ProductVariantAttributeValue|null $first_row */
-                $first_row = $group_rows->first();
+                $first_row    = $group_rows->first();
+                $attribute_id = (int) $first_row?->attribute_id;
 
-                $label = trim((string) optional(optional($first_row)->attribute?->attributeDescription->first())->name);
+                $name = Str::trim((string) $first_row?->attribute?->attributeDescription->first()?->name);
 
-                if (blank($label)) {
-                    $label = __('catalog/default.product.option_groups.attribute_fallback');
+                if (blank($name)) {
+                    $name = __('catalog/default.product.option_groups.attribute_fallback');
                 }
 
+                $group_values = $group_rows
+                    ->map(fn (ProductVariantAttributeValue $row): array => [
+                        'value_id' => (int) $row->id,
+                        'value'    => Str::trim((string) $row->value_string),
+                    ])
+                    ->filter(fn (array $value_data): bool => filled($value_data['value']) && (int) $value_data['value_id'] > 0)
+                    ->unique()
+                    ->values();
+
+                $selected_value_id = $selected_attribute_value_ids[$attribute_id] ?? 0;
+
                 return [
-                    'key'    => 'attribute_' . (int) optional($first_row)->attribute_id,
-                    'label'  => $label,
-                    'values' => $group_rows
-                        ->map(fn (ProductVariantAttributeValue $row): string => trim((string) $row->value_string))
-                        ->filter(fn (string $value): bool => filled($value))
-                        ->unique()
-                        ->values()
+                    'key'         => 'attribute_' . (int) $first_row?->attribute_id,
+                    'name'        => $name,
+                    'values'      => $group_values->pluck('value')->all(),
+                    'value_links' => $group_values
+                        ->map(function (array $value_data) use ($selected_attribute_value_ids, $attribute_id, $product_slug, $variant, $selected_value_id): array {
+                            $target_attributes                 = $selected_attribute_value_ids;
+                            $target_attributes[$attribute_id] = (int) $value_data['value_id'];
+
+                            return [
+                                'value_id' => (int) $value_data['value_id'],
+                                'value'    => (string) $value_data['value'],
+                                'url'      => filled($product_slug)
+                                    ? localized_product_variant_route(
+                                        product_slug      : $product_slug,
+                                        product_id        : (int) $variant->product_id,
+                                        attribute_filters : $target_attributes,
+                                    )
+                                    : '',
+                                'is_selected' => $selected_value_id === (int) $value_data['value_id'],
+                            ];
+                        })
                         ->all(),
                 ];
             })
-            ->filter(fn (array $group): bool => $group['values'] !== [])
+            ->filter(fn (array $group): bool => $group['value_links'] !== [])
             ->values()
             ->all();
-
-        return $groups !== [] ? $groups : $fallback_groups;
-    }
-
-    /**
-     * @return array<int, array{key: string, label: string, values: array<int, string>}>
-     */
-    private function resolveFallbackOptionGroups(): array
-    {
-        return [
-            ['key' => 'color', 'label' => __('catalog/default.product.option_groups.color'), 'values' => []],
-            ['key' => 'length', 'label' => __('catalog/default.product.option_groups.length'), 'values' => []],
-            ['key' => 'size', 'label' => __('catalog/default.product.option_groups.size'), 'values' => []],
-        ];
     }
 
     /**
@@ -567,20 +567,6 @@ class ProductController extends Controller
         return [
             ['key' => 'composition', 'label' => __('catalog/default.product.details.composition'), 'items' => []],
             ['key' => 'care', 'label' => __('catalog/default.product.details.care'), 'items' => []],
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function resolveUiLabels(): array
-    {
-        return [
-            'size_help'     => __('catalog/default.product.labels.size_help'),
-            'buy_one_click' => __('catalog/default.product.labels.buy_one_click'),
-            'add_to_cart'   => __('catalog/default.product.labels.add_to_cart'),
-            'notify'        => __('catalog/default.product.labels.notify'),
-            'telegram'      => __('catalog/default.product.labels.telegram'),
         ];
     }
 }
