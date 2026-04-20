@@ -6,14 +6,12 @@ use App\Providers\AppServiceProvider;
 use App\Providers\Filament\AlyoAdminPanelProvider;
 use App\Providers\ModuleProvidersServiceProvider;
 use App\Providers\OpenAiServiceProvider;
-use App\Providers\TelescopeServiceProvider;
-use Fruitcake\LaravelDebugbar\ServiceProvider;
+use Fruitcake\LaravelDebugbar\ServiceProvider as DebugbarServiceProvider;
 
 return [
     AppServiceProvider::class,
     AlyoAdminPanelProvider::class,
     ModuleProvidersServiceProvider::class,
     OpenAiServiceProvider::class,
-    TelescopeServiceProvider::class,
-    ServiceProvider::class,
+    DebugbarServiceProvider::class,
 ];

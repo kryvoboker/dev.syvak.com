@@ -99,9 +99,10 @@ if (! function_exists('sanitaze_str')) {
             return '';
         }
 
-        $sanitized_value = decode_html_entities($string);
-        $sanitized_value = strip_tags($sanitized_value);
-        $sanitized_value = Str::trim($sanitized_value);
+        $sanitized_value = $string
+                |> decode_html_entities(...)
+                |> strip_tags(...)
+                |> Str::trim(...);
 
         return (string) Str::replaceMatches('/\s+/', ' ', $sanitized_value);
     }
@@ -568,25 +569,7 @@ if (! function_exists('get_allowed_locales')) {
             return $allowed_locales;
         }
 
-        return array_values(array_filter(config('app.allowed_locales', [])));
-    }
-}
-
-if (!function_exists('string_to_array')) {
-    /**
-     * @param string|null $strings
-     * @param string      $separator
-     *
-     * @return array
-     */
-    function string_to_array(?string $strings, string $separator = ','): array
-    {
-        if ($strings === null || Str::trim($strings) === '') {
-            return [];
-        }
-
-        return explode($separator, $strings)
-                |> (fn($array) => array_map(static fn(string $val): string => Str::trim($val), $array))
+        return config('app.allowed_locales', [])
                 |> array_filter(...)
                 |> array_values(...);
     }

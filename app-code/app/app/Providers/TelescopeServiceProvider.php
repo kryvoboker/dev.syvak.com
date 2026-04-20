@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\Users\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
@@ -34,6 +35,35 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     }
 
     /**
+     * @return void
+     */
+    public function boot(): void
+    {
+        parent::boot();
+
+        Telescope::auth(function (Request $request) {
+            $login = config('telescope.auth_credentials.login');
+            $pass  = config('telescope.auth_credentials.password');
+            $user  = $request->user();
+
+            if (
+                !($user instanceof User) ||
+                $request->getUser() !== $login ||
+                $request->getPassword() !== $pass
+            ) {
+                header('WWW-Authenticate: Basic realm="Telescope"');
+                header('HTTP/1.0 401 Unauthorized');
+
+                echo 'Authentication required.';
+
+                exit();
+            }
+
+            return true;
+        });
+    }
+
+    /**
      * Prevent sensitive request details from being logged by Telescope.
      */
     protected function hideSensitiveRequestDetails(): void
@@ -59,7 +89,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewTelescope', function (User $user) {
-            return in_array($user->email, config('app.allowed_admin_emails'), true);
+            return in_array($user->email, config('telescope.allowed_emails'), true);
         });
     }
 }

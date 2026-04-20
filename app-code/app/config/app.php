@@ -84,9 +84,7 @@ return [
     */
 
     'locale'          => env('APP_LOCALE', 'en'),
-    'allowed_locales' => env('APP_ALLOWED_LOCALES', 'en')
-            |> (fn($x) => explode(',', $x))
-            |> array_filter(...),
+    'allowed_locales' => string_to_array(env('APP_ALLOWED_LOCALES', 'en')),
     'default_locale'  => env('APP_DEFAULT_LOCALE', 'en'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
     'faker_locale'    => env('APP_FAKER_LOCALE', 'en_US'),
@@ -106,11 +104,7 @@ return [
 
     'key' => env('APP_KEY'),
 
-    'previous_keys' => [
-        ...array_filter(
-            explode(',', (string)env('APP_PREVIOUS_KEYS', '')),
-        ),
-    ],
+    'previous_keys' => string_to_array((string)env('APP_PREVIOUS_KEYS', '')),
 
     /*
     |--------------------------------------------------------------------------
@@ -130,11 +124,7 @@ return [
         'store'  => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'allowed_admin_emails' => (string) env('ALLOWED_ADMIN_EMAILS', '')
-            |> (fn ($value) => explode(',', $value))
-            |> (fn ($values) => array_map(static fn (string $value): string => trim($value), $values))
-            |> array_filter(...)
-            |> array_values(...),
+    'admin_emails_for_access' => string_to_array(env('ADMIN_EMAILS_FOR_ACCESS', '')),
 
     'denied_delete_emails'      => [
         'fast.kamaz@gmail.com',
@@ -191,7 +181,7 @@ return [
             ],
         ],
     ],
-    'socials_list'              => explode(',', env('SOCIALS_LIST')),
+    'socials_list'              => string_to_array(env('SOCIALS_LIST')),
     'regex_validate_conditions' => [
         'email'       => '/^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/',
         'telephone'   => '/(^((\+?\d{2,}\s?)|(.*))\(?\d{3,}\)?\s?\d{3,}-?\d{2,}-?\d{2,}$)/',
