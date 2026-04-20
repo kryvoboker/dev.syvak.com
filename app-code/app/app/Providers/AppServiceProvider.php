@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Services\FooterService;
 use App\Services\HeaderService;
@@ -19,6 +20,8 @@ use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
 use DateTimeInterface;
+use Detection\Exception\MobileDetectException;
+use Detection\MobileDetect;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -69,6 +72,8 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
+     *
+     * @throws MobileDetectException
      */
     public function boot(): void
     {
@@ -99,6 +104,52 @@ class AppServiceProvider extends ServiceProvider
                 |> (fn($x) => Route::pattern($locale_key, $x));
         }
 
+        $currency             = new Currency()->getDefaultActiveCurrency();
+        $app_settings_service = app(AppSettingsService::class);
+        $app_settings_service->setSettings();
+        $detect = new MobileDetect();
+
+        if ($detect->isMobile()) {
+            $device_type = $detect->isTablet() ? config('devices.types.tablet') : config('devices.types.mobile');
+        } else {
+            $device_type = config('devices.types.desktop');
+        }
+
+        $max_viewport_width    = max(
+            1,
+            (int)data_get(
+                $app_settings_service->getSettings(),
+                'system_settings.frontend.max_viewport_width',
+                (int)config('app.frontend.max_viewport_width', 1920),
+            ),
+        );
+        $default_no_image_path = (string)data_get(
+            $app_settings_service->getSettings(),
+            'system_settings.images.default_no_image',
+            (string)config('app.images.default_no_image', 'images/no-image.png'),
+        );
+
+        if ($currency !== null) {
+            config([
+                'app.currency.current_currency_code'          => $currency->code,
+                'app.currency.current_currency_symbol'        => $currency->symbol_left ?: $currency->symbol_right,
+                'app.currency.current_currency_exchange_rate' => $currency->exchange_rate,
+                'app.currency.current_format_locale'          => $currency->format_locale,
+                'app.currency.current_decimal_places'         => $currency->decimal_places,
+                'devices.current_device_type'                 => $device_type,
+            ]);
+
+            app(ConvertPrice::class)->setDefaultCurrency($currency);
+        }
+
+        $app_settings_timezone = $app_settings_service->getSettings()?->timezone;
+
+        if (filled($app_settings_timezone) && in_array($app_settings_timezone, timezone_identifiers_list(), true)) {
+            config(['app.timezone' => $app_settings_timezone]);
+
+            date_default_timezone_set($app_settings_timezone);
+        }
+
         // Register view namespaces for frontend (catalog) and admin
         // This allows usage like view('catalog::layouts.partials.header')
         $catalog_path = resource_path('views/catalog');
@@ -107,7 +158,14 @@ class AppServiceProvider extends ServiceProvider
             View::addNamespace('catalog', $catalog_path);
         }
 
-        View::share(compact('locale_key'));
+        View::share([
+            'app_settings'        => $app_settings_service->getSettings(),
+            'no_image_url'        => asset('storage/' . $default_no_image_path),
+            'current_locale'      => app()->getLocale(),
+            'max_viewport_width'  => $max_viewport_width,
+            'current_device_type' => $device_type,
+            'locale_key'          => $locale_key,
+        ]);
 
         if (app()->isLocal() && app()->hasDebugModeEnabled() === true) {
             // Check SQL queries in the local environment for remote debugging

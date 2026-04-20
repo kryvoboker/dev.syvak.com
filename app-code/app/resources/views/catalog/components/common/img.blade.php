@@ -55,7 +55,7 @@
 
             $candidate_width = $normalized_size * (int) $candidate['density'];
 
-            return "{$candidate_url} {$candidate_width}w";
+            return "$candidate_url {$candidate_width}w";
         })
         ->filter()
         ->implode(', ');

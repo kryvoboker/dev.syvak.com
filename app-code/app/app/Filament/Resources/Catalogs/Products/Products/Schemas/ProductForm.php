@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
+use App\Filament\Resources\Catalogs\Products\Products\Schemas\Components\SizeGuideTabSchema;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
@@ -43,10 +44,12 @@ class ProductForm
                 Tabs::make('ProductTabs')
                     ->tabs([
                         self::createGeneralTabs(),
+                        SizeGuideTabSchema::make($active_languages),
                         self::createTranslationsFormTabs($active_languages),
                         self::createMetaTextsFormTabs($active_languages),
                         self::createCategoriesTabs($active_languages),
                         self::createVariantsManagementTab(),
+                        self::createImagesTabs(),
                         self::createSlugsFormTabs($active_languages),
                     ])
                     ->activeTab(1)
@@ -133,9 +136,9 @@ class ProductForm
                             ->label(__('admin/default.labels.image'))
                             ->helperText(__('admin/default.helpers.max_upload_size_mb', ['size' => $product_upload_max_size_mb]))
                             ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png'])
                             ->directory($image_upload_directory)
                             ->maxSize($product_upload_max_size_kb)
-                            ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . $product_upload_max_size_kb])
                             ->preserveFilenames()
                             ->imageEditor()
                             ->imageEditorViewportWidth($preview_in_page_width)
@@ -164,13 +167,13 @@ class ProductForm
                                 DateTimePicker::make('date_available')
                                     ->label(__('admin/default.labels.date_available'))
                                     ->rules(['required', 'date'])
-                                    ->default(now(config('app.timezone')))
+                                    ->default(get_now_date())
                                     ->required(),
 
                                 DateTimePicker::make('date_added')
                                     ->label(__('admin/default.labels.date_added'))
                                     ->rules(['required', 'date'])
-                                    ->default(now(config('app.timezone')))
+                                    ->default(get_now_date())
                                     ->required(),
                             ]),
 
@@ -345,9 +348,9 @@ class ProductForm
                                     ->label(__('admin/default.labels.image'))
                                     ->helperText(__('admin/default.helpers.max_upload_size_mb', ['size' => $product_upload_max_size_mb]))
                                     ->image()
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png'])
                                     ->directory($image_upload_directory)
                                     ->maxSize($product_upload_max_size_kb)
-                                    ->rules(['nullable', Rule::file()::types(['image/jpeg', 'image/png']), 'max:' . $product_upload_max_size_kb])
                                     ->preserveFilenames()
                                     ->imageEditor()
                                     ->imageEditorViewportWidth($preview_in_page_width)

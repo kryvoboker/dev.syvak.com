@@ -113,7 +113,7 @@ if (! function_exists('breadcrumb')) {
     {
         return [
             'title' => sanitaze_str($title),
-            'url'   => sanitaze_url($url),
+            'url'   => $url,
         ];
     }
 }

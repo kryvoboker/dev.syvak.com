@@ -26,6 +26,7 @@ return new class() extends Migration
             $table->string('image', 3000)->nullable();
             $table->dateTime('date_available')->nullable();
             $table->smallInteger('sort_order')->default(0);
+            $table->json('size_guide_data')->nullable();
 
             $table->timestamps();
 

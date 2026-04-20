@@ -33,7 +33,7 @@ final readonly class ImageUrlBuilderService
                 (int) config('app.images.total_sizes_for_generate', 4),
             ),
         );
-        $path                     = (string) $path;
+        $path = (string) $path;
         $height ??= $width;
 
         $this->checkSourceImage($path);
@@ -187,7 +187,7 @@ final readonly class ImageUrlBuilderService
     private function assetVersioned(string $public_relative): string
     {
         $v   = (string) config('app.images.image_version');
-        $url = sanitaze_url(asset("storage/$public_relative"));
+        $url = asset("storage/$public_relative");
 
         // Add version to query string
         $sep = Str::contains($url, '?') ? '&' : '?';

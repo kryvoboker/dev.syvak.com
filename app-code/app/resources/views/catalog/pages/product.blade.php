@@ -1,5 +1,11 @@
 @extends('catalog.layouts.main')
 
+@use(Illuminate\Support\Str;)
+
+@push('styles')
+    @vite(['./node_modules/@fancyapps/ui/dist/fancybox/fancybox.css'])
+@endpush
+
 @php
     $aa = [
             'size_help'     => __('catalog/default.product.labels.size_help'),
@@ -8,6 +14,8 @@
             'notify'        => __('catalog/default.product.labels.notify'),
             'telegram'      => __('catalog/default.product.labels.telegram'),
         ];
+
+    $product_title = Str::trim(strip_tags($product_view_data['title']));
 @endphp
 
 @section('content')
@@ -16,6 +24,84 @@
     <section class="product" id="product">
         <div class="container">
             <div class="product-content grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                <div class="product-carousel relative w-full {{ !empty($product_view_data['gallery_images_data']) ? 'product-carousel--init' : '' }}"
+                     id="vertical-thumbnails"
+                     @if(!empty($product_view_data['gallery_images_data']))
+                         data-carousel='{ "loadingClasses": "opacity-0", "isDraggable": true, "isInfiniteLoop":true }'
+                    @endif
+                >
+                    <div class="carousel flex space-x-2 rounded-none">
+                        <div class="relative grow overflow-hidden">
+                            <div class="carousel-body {{ !empty($product_view_data['gallery_images_data']) ? 'carousel-dragging:transition-none carousel-dragging:cursor-grabbing cursor-grab opacity-0' : '' }}">
+                                @forelse($product_view_data['gallery_images_data'] as $gallery_image_data)
+                                    <div class="carousel-slide">
+                                        <a class="flex size-full justify-center"
+                                           href="{{ $gallery_image_data['urls']['original_thumb'] }}"
+                                           data-fancybox="gallery">
+                                            <x-catalog::common.img
+                                                class="size-full object-contain {{ $loop->first ? 'active' : '' }}"
+                                                :urls_data="$gallery_image_data['urls']"
+                                                :size="$gallery_image_data['width']"
+                                                :max-density="3"
+                                                sizes="100vw"
+                                                width="{{ $gallery_image_data['width'] }}"
+                                                height="{{ $gallery_image_data['height'] }}"
+                                                alt="{{ $product_title }}"
+                                            />
+                                        </a>
+                                    </div>
+                                @empty
+                                    <a class="flex size-full justify-center"
+                                       href="{{ $product_view_data['main_image']['urls']['original_thumb'] }}"
+                                       data-fancybox="gallery">
+                                        <x-catalog::common.img
+                                            class="size-full object-contain"
+                                            :urls_data="$product_view_data['main_image']['urls']"
+                                            :size="$product_view_data['main_image']['width']"
+                                            :max-density="3"
+                                            sizes="100vw"
+                                            width="{{ $product_view_data['main_image']['width'] }}"
+                                            height="{{ $product_view_data['main_image']['height'] }}"
+                                            alt="{{ $product_title }}"
+                                        />
+                                    </a>
+                                @endforelse
+                            </div>
+
+                            @if(!empty($product_view_data['gallery_images_data']))
+                                <button class="carousel-prev start-5 max-sm:start-3 carousel-nav"
+                                        type="button"
+                                        aria-label="Previous product">
+                                    <span class="icon-[mynaui--arrow-left] size-6"></span>
+                                </button>
+
+                                <button class="carousel-next end-5 max-sm:end-3 carousel-nav"
+                                        type="button"
+                                        aria-label="Next product">
+                                    <span class="icon-[mynaui--arrow-right] size-6"></span>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                @if(!empty($product_view_data['gallery_images_data']))
+                    <div class="product-carousel__pagination carousel-pagination hidden md:flex justify-between gap-x-4 size-full max-h-28 overflow-hidden">
+                        @foreach($product_view_data['gallery_images_data'] as $gallery_image_data)
+                            <x-catalog::common.img
+                                class="carousel-pagination-item grow object-contain {{ $loop->first ? 'active' : '' }}"
+                                :urls_data="$gallery_image_data['urls']"
+                                :size="$gallery_image_data['width']"
+                                :max-density="3"
+                                sizes="100vw"
+                                width="{{ $gallery_image_data['width'] }}"
+                                height="{{ $gallery_image_data['height'] }}"
+                                alt="{{ $product_title }}"
+                            />
+                        @endforeach
+                    </div>
+                @endif
+
                 <h1 class="product-name">
                     {{ $product_view_data['title'] }}
                 </h1>
@@ -47,98 +133,25 @@
                                     {{ $option_group['name'] }}:
                                 </div>
 
-                                <div class="flex">
+                                <div class="flex items-center gap-3">
                                     @foreach($option_group['value_links'] as $value_data)
-                                        <a class="{{ $value_data['is_selected'] === true ? 'selected' : '' }}"
-                                           href="{{ $value_data['url'] }}">
-                                            {{ $value_data['value'] }}
-                                        </a>
+                                        @if(isset($value_data['is_selected']) && $value_data['is_selected'] === true)
+                                            <div class="">
+                                                {{ $value_data['value'] }}
+                                            </div>
+                                        @else
+                                            <a class="border border-opacity-light-gray-40% px-2 py-1"
+                                               href="{{ $value_data['url'] }}">
+                                                {{ $value_data['value'] }}
+                                            </a>
+                                        @endif
                                     @endforeach
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 @endif
-
-
-                <div class="product-carousel relative w-full" id="vertical-thumbnails" data-carousel='{ "loadingClasses": "opacity-0", "isDraggable": true, "isInfiniteLoop":true }'>
-                    <div class="carousel flex space-x-2 rounded-none">
-                        <div class="relative grow overflow-hidden">
-                            <div class="carousel-body h-80 carousel-dragging:transition-none carousel-dragging:cursor-grabbing cursor-grab opacity-0">
-                                <!-- Slide 1 -->
-                                <div class="carousel-slide">
-                                    <div class="flex size-full justify-center">
-                                        <img src="https://cdn.flyonui.com/fy-assets/components/carousel/image-21.png" class="size-full object-cover" alt="mountain"/>
-                                    </div>
-                                </div>
-                                <!-- Slide 2 -->
-                                <div class="carousel-slide">
-                                    <div class="flex size-full justify-center">
-                                        <img src="https://cdn.flyonui.com/fy-assets/components/carousel/image-14.png" class="size-full object-cover" alt="sand"/>
-                                    </div>
-                                </div>
-                                <!-- Slide 3 -->
-                                <div class="carousel-slide">
-                                    <div class="flex size-full justify-center">
-                                        <img
-                                            src="https://cdn.flyonui.com/fy-assets/components/carousel/image-7.png"
-                                            class="size-full object-cover"
-                                            alt="cloud"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Previous Slide -->
-                            <button type="button" class="carousel-prev start-5 max-sm:start-3 carousel-disabled:opacity-50 size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow-base-300/20 shadow-sm">
-                                <span class="icon-[tabler--chevron-left] size-5 cursor-pointer"></span>
-                                <span class="sr-only">Previous</span>
-                            </button>
-                            <!-- Next Slide -->
-                            <button type="button" class="carousel-next end-5 max-sm:end-3 carousel-disabled:opacity-50 size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow-base-300/20 shadow-sm">
-                                <span class="icon-[tabler--chevron-right] size-5"></span>
-                                <span class="sr-only">Next</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex-none ms-2">
-                    <div class="product-carousel__pagination carousel-pagination h-full max-sm:w-8 w-[200px] flex justify-between flex-col gap-y-2 overflow-hidden">
-                        <img src="https://cdn.flyonui.com/fy-assets/components/carousel/image-21.png" class="carousel-pagination-item grow object-cover active" alt="mountain"/>
-                        <img src="https://cdn.flyonui.com/fy-assets/components/carousel/image-14.png" class="carousel-pagination-item grow object-cover" alt="sand"/>
-                        <img src="https://cdn.flyonui.com/fy-assets/components/carousel/image-7.png" class="carousel-pagination-item grow object-cover" alt="cloud"/>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
 @endsection
-
-
-{{--<div data-block="top">
-                    <x-catalog::common.img
-                        class="object-cover"
-                        :urls_data="$product_view_data['main_image']['urls']"
-                        :size="$product_view_data['main_image']['width']"
-                        :max-density="3"
-                        sizes="100vw"
-                        width="{{ $product_view_data['main_image']['width'] }}"
-                        height="{{ $product_view_data['main_image']['height'] }}"
-                        alt="{{ strip_tags($product_view_data['title']) }}"
-                    />
-
-                    <div data-block="gallery-thumbnails">
-                        @foreach($product_view_data['gallery_images_data'] as $gallery_image_data)
-                            <x-catalog::common.img
-                                class="object-cover"
-                                :urls_data="$gallery_image_data['urls']"
-                                :size="$gallery_image_data['width']"
-                                :max-density="3"
-                                sizes="100vw"
-                                width="{{ $gallery_image_data['width'] }}"
-                                height="{{ $gallery_image_data['height'] }}"
-                                alt="{{ strip_tags($product_view_data['title']) }}"
-                            />
-                        @endforeach
-                    </div>
-                </div>--}}

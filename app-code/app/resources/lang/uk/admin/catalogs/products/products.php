@@ -8,14 +8,33 @@ return [
 
     // Labels
     'labels' => [
-        'model'                => 'Товар',
-        'plural_model'         => 'Товари',
-        'variant_model'        => 'Варіація товару',
-        'variant_plural_model' => 'Варіації товару',
-        'add_discount'         => 'Додати знижку',
-        'add_attribute'        => 'Додати атрибут',
-        'delete_discount'      => 'Видалити знижку',
-        'delete_attribute'     => 'Видалити атрибут',
+        'model'                             => 'Товар',
+        'plural_model'                      => 'Товари',
+        'variant_model'                     => 'Варіація товару',
+        'variant_plural_model'              => 'Варіації товару',
+        'add_discount'                      => 'Додати знижку',
+        'add_attribute'                     => 'Додати атрибут',
+        'delete_discount'                   => 'Видалити знижку',
+        'delete_attribute'                  => 'Видалити атрибут',
+        'size_guide_title'                  => 'Назва блоку / popup',
+        'size_guide_short_description'      => 'Короткий опис',
+        'size_guide_table'                  => 'Таблиця розмірів',
+        'size_guide_table_helper'           => 'Встав таблицю у форматі TSV (tab) або CSV (; або ,). Кожен новий рядок — новий рядок таблиці.',
+        'size_guide_table_preview'          => 'Попередній перегляд таблиці',
+        'size_guide_table_preview_empty'    => 'Почни вводити TSV/CSV, і тут зʼявиться попередній перегляд.',
+        'size_guide_image'                  => 'Зображення',
+        'size_guide_full_description_title' => 'Назва блоку з повним описом',
+        'size_guide_full_description'       => 'Повний опис',
+    ],
+
+    // Sections
+    'sections' => [
+        'size_guide' => 'Довідник розмірів',
+    ],
+
+    // Tabs
+    'tabs' => [
+        'size_guide' => 'Довідник розмірів',
     ],
 
     // Pages
@@ -35,6 +54,11 @@ return [
 
     // Errors
     'errors' => [
-        'duplicate_attribute_language' => 'Комбінація атрибуту та мови повинна бути унікальною!',
+        'duplicate_attribute_language'             => 'Комбінація атрибуту та мови повинна бути унікальною!',
+        'validation_size_guide_table_required'     => 'Таблиця розмірів обовʼязкова, якщо вказано зображення або розпочато заповнення таблиці.',
+        'duplicate_variant_slug_language'          => 'Для варіанта товару мова slug не може дублюватися.',
+        'duplicate_variant_slug_value'             => 'Такий SEO slug для цієї мови вже використовується іншим варіантом товару.',
+        'duplicate_product_or_variant_slug_value'  => 'Такий SEO slug уже використовується іншим товаром або варіантом товару.',
+        'duplicate_variant_attributes_combination' => 'Варіант із таким самим набором атрибутів і значень уже існує для цього товару.',
     ],
 ];
