@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Http\Middleware\Modules\RegisterModuleProvidersAfterSession;
 use App\Http\Middleware\SetDefaultLocalePrefix;
-use App\Http\Middleware\User\SetCommonPreferences;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -41,7 +40,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             SetDefaultLocalePrefix::class,
-            SetCommonPreferences::class,
             RegisterModuleProvidersAfterSession::class,
         ]);
     })

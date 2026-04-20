@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
+use App\Filament\Resources\Catalogs\Products\Products\Schemas\Components\SizeGuideTabSchema;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Users\UserGroup;
+use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -90,6 +92,8 @@ class ProductVariantForm
                                     ->columns(1)
                                     ->columnSpanFull(),
                             ]),
+
+                        SizeGuideTabSchema::make($active_languages),
 
                         Tab::make(__('admin/default.tabs.images'))
                             ->schema([
@@ -180,7 +184,23 @@ class ProductVariantForm
                                                     ->maxLength(500),
                                             ])
                                             ->columns(2)
-                                            ->defaultItems(0),
+                                            ->defaultItems(0)
+                                            ->rule(function (): Closure {
+                                                return function (string $attribute, mixed $value, Closure $fail): void {
+                                                    if (! is_array($value) || $value === []) {
+                                                        return;
+                                                    }
+
+                                                    $language_ids = collect($value)
+                                                        ->filter(fn (mixed $row): bool => is_array($row))
+                                                        ->map(fn (array $row): int => (int) ($row['language_id'] ?? 0))
+                                                        ->filter(fn (int $language_id): bool => $language_id > 0);
+
+                                                    if ($language_ids->count() !== $language_ids->unique()->count()) {
+                                                        $fail(__('admin/catalogs/products/products.errors.duplicate_variant_slug_language'));
+                                                    }
+                                                };
+                                            }),
                                     ])
                                     ->columnSpanFull(),
                             ]),

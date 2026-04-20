@@ -291,6 +291,7 @@ class ProductController extends Controller
         $main_image_data     = $this->buildImageData($main_image_path, $image_size);
         $option_groups       = $this->resolveOptionGroups($product, $variant, $language_id);
         $details_sections    = $this->resolveDetailsSections();
+        $size_guide_data     = $this->resolveSizeGuideData($product, $variant, $language_id);
         $gallery_images_data = [];
 
         // Galler images contains main image as first item, so only build gallery data if there's more than one image to avoid redundant processing
@@ -313,7 +314,190 @@ class ProductController extends Controller
             'gallery_images'         => $gallery_images,
             'option_groups'          => $option_groups,
             'details_sections'       => $details_sections,
+            'size_guide'             => $size_guide_data,
         ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function resolveSizeGuideData(Product $product, ?ProductVariant $variant, int $language_id): ?array
+    {
+        /** @var array<string, mixed>|null $variant_size_guide_data */
+        $variant_size_guide_data = is_array($variant?->size_guide_data) ? $variant->size_guide_data : null;
+
+        $variant_translation = $this->resolveSizeGuideTranslationByLanguage(
+            size_guide_data: $variant_size_guide_data,
+            language_id    : $language_id,
+        );
+
+        if ($this->hasSizeGuideContent($variant_translation)) {
+            return $this->normalizeSizeGuideTranslationPayload($variant_translation);
+        }
+
+        /** @var array<string, mixed>|null $product_size_guide_data */
+        $product_size_guide_data = is_array($product->size_guide_data) ? $product->size_guide_data : null;
+
+        $product_translation = $this->resolveSizeGuideTranslationByLanguage(
+            size_guide_data: $product_size_guide_data,
+            language_id    : $language_id,
+        );
+
+        if (! $this->hasSizeGuideContent($product_translation)) {
+            return null;
+        }
+
+        return $this->normalizeSizeGuideTranslationPayload($product_translation);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $size_guide_data
+     * @return array<string, mixed>|null
+     */
+    private function resolveSizeGuideTranslationByLanguage(?array $size_guide_data, int $language_id): ?array
+    {
+        if (! is_array($size_guide_data)) {
+            return null;
+        }
+
+        /** @var mixed $translations */
+        $translations = Arr::get($size_guide_data, 'translations');
+
+        if (! is_array($translations)) {
+            return null;
+        }
+
+        $language_data = Arr::get($translations, (string) $language_id);
+
+        return is_array($language_data) ? $language_data : null;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $translation_data
+     */
+    private function hasSizeGuideContent(?array $translation_data): bool
+    {
+        if (! is_array($translation_data)) {
+            return false;
+        }
+
+        $text_fields = [
+            trim((string) Arr::get($translation_data, 'title', '')),
+            trim((string) Arr::get($translation_data, 'short_description', '')),
+            trim((string) Arr::get($translation_data, 'full_description_title', '')),
+            trim((string) Arr::get($translation_data, 'full_description', '')),
+        ];
+
+        if (collect($text_fields)->contains(fn (string $value): bool => $value !== '')) {
+            return true;
+        }
+
+        $table_rows = Arr::get($translation_data, 'table_rows');
+
+        if ($this->hasSizeGuideTableValues($table_rows)) {
+            return true;
+        }
+
+        return trim((string) Arr::get($translation_data, 'image', '')) !== '';
+    }
+
+    private function hasSizeGuideTableValues(mixed $table_rows): bool
+    {
+        return $this->normalizeSizeGuideTableRows($table_rows) !== [];
+    }
+
+    /**
+     * @param  array<string, mixed>  $translation_data
+     * @return array<string, mixed>
+     */
+    private function normalizeSizeGuideTranslationPayload(array $translation_data): array
+    {
+        $image_path = trim((string) Arr::get($translation_data, 'image', ''));
+        $image_size = [
+            'width'  => max(1, (int) Arr::get($translation_data, 'image_width', 1)),
+            'height' => max(1, (int) Arr::get($translation_data, 'image_height', 1)),
+        ];
+
+        return [
+            'title'                  => trim((string) Arr::get($translation_data, 'title', '')),
+            'short_description'      => trim((string) Arr::get($translation_data, 'short_description', '')),
+            'table_rows'             => $this->normalizeSizeGuideTableRows(Arr::get($translation_data, 'table_rows')),
+            'image'                  => $this->buildImageData($image_path, $image_size),
+            'full_description_title' => trim((string) Arr::get($translation_data, 'full_description_title', '')),
+            'full_description'       => trim((string) Arr::get($translation_data, 'full_description', '')),
+        ];
+    }
+
+    /**
+     * @return array<int, array<int, string>>
+     */
+    private function normalizeSizeGuideTableRows(mixed $table_rows): array
+    {
+        if (is_string($table_rows)) {
+            return $this->parseSizeGuideTableRowsFromString($table_rows);
+        }
+
+        if (! is_array($table_rows)) {
+            return [];
+        }
+
+        return collect($table_rows)
+            ->map(function (mixed $row): array {
+                $cells = Arr::get($row, 'cells', []);
+
+                if (! is_array($cells)) {
+                    return [];
+                }
+
+                return collect($cells)
+                    ->map(fn (mixed $cell): string => trim((string) Arr::get($cell, 'value', '')))
+                    ->filter(fn (string $value): bool => $value !== '')
+                    ->values()
+                    ->all();
+            })
+            ->filter(fn (array $cells): bool => $cells !== [])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, array<int, string>>
+     */
+    private function parseSizeGuideTableRowsFromString(string $table_raw): array
+    {
+        $table_raw = trim($table_raw);
+
+        if ($table_raw === '') {
+            return [];
+        }
+
+        $rows = preg_split('/\R/u', $table_raw) ?: [];
+
+        return collect($rows)
+            ->map(function (string $row): array {
+                $trimmed_row = trim($row);
+
+                if ($trimmed_row === '') {
+                    return [];
+                }
+
+                if (str_contains($trimmed_row, "\t")) {
+                    $cells = explode("\t", $trimmed_row);
+                } elseif (str_contains($trimmed_row, ';')) {
+                    $cells = str_getcsv($trimmed_row, ';');
+                } else {
+                    $cells = str_getcsv($trimmed_row, ',');
+                }
+
+                return collect($cells)
+                    ->map(fn (string $cell): string => trim($cell))
+                    ->filter(fn (string $cell): bool => $cell !== '')
+                    ->values()
+                    ->all();
+            })
+            ->filter(fn (array $cells): bool => $cells !== [])
+            ->values()
+            ->all();
     }
 
     private function resolveProductTitle(Product $product, ?ProductVariant $variant, int $language_id): string
@@ -364,11 +548,15 @@ class ProductController extends Controller
      */
     private function resolveGalleryImages(Product $product, ?ProductVariant $variant): Collection
     {
-        $variant_images = $variant instanceof ProductVariant
-            ? $variant->images()
+        if ($variant instanceof ProductVariant) {
+            $variant_image  = $variant->image;
+            $variant_images = $variant->images()
                 ->orderBy('sort_order')
-                ->pluck('image')
-            : collect();
+                ->pluck('image');
+        } else {
+            $variant_image  = null;
+            $variant_images = collect();
+        }
 
         $variant_images = collect($variant_images)
             ->map(fn (mixed $image): string => $this->normalizeImagePath($image))
@@ -376,10 +564,13 @@ class ProductController extends Controller
             ->values();
 
         if ($variant_images->isNotEmpty()) {
+            if ($variant_image !== null) {
+                $variant_images->prepend($variant_image);
+            }
+
             return $variant_images;
         }
 
-        $variant_image  = $variant instanceof ProductVariant ? $variant->image : null;
         $fallback_image = Str::trim((string) ($variant_image ?? $product->image ?? ''));
 
         return filled($fallback_image)
@@ -535,7 +726,7 @@ class ProductController extends Controller
                     'values'      => $group_values->pluck('value')->all(),
                     'value_links' => $group_values
                         ->map(function (array $value_data) use ($selected_attribute_value_ids, $attribute_id, $product_slug, $variant, $selected_value_id): array {
-                            $target_attributes                 = $selected_attribute_value_ids;
+                            $target_attributes                = $selected_attribute_value_ids;
                             $target_attributes[$attribute_id] = (int) $value_data['value_id'];
 
                             return [
@@ -543,9 +734,9 @@ class ProductController extends Controller
                                 'value'    => (string) $value_data['value'],
                                 'url'      => filled($product_slug)
                                     ? localized_product_variant_route(
-                                        product_slug      : $product_slug,
-                                        product_id        : (int) $variant->product_id,
-                                        attribute_filters : $target_attributes,
+                                        product_slug     : $product_slug,
+                                        product_id       : (int) $variant->product_id,
+                                        attribute_filters: $target_attributes,
                                     )
                                     : '',
                                 'is_selected' => $selected_value_id === (int) $value_data['value_id'],

@@ -4,7 +4,7 @@ import HSCarousel                                                               
 import { $ACTIVE_CLASS_NAME }                                                        from "@ts-shared/lib/constants.ts";
 
 export const handleProductCarousel = (): void => {
-    const carouselEl = <HTMLElement | null>findElem('.product-carousel');
+    const carouselEl = <HTMLElement | null>findElem('.product-carousel--init');
 
     if (isEmpty(carouselEl)) {
         return;

@@ -41,6 +41,7 @@ class Product extends Model
         'is_active',
         'date_available',
         'date_added',
+        'size_guide_data',
     ];
 
     /**
@@ -58,6 +59,7 @@ class Product extends Model
             'date_available'      => 'datetime',
             'date_added'          => 'datetime',
             'is_active'           => 'boolean',
+            'size_guide_data'     => 'array',
         ];
     }
 

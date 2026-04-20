@@ -24,7 +24,7 @@ return new class() extends Migration
                 ->cascadeOnDelete();
 
             $table->string('slug', 500)
-                ->index()
+                ->unique()
                 ->comment('SEO friendly URL');
 
             $table->timestamps();

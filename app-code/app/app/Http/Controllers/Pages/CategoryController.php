@@ -263,7 +263,7 @@ class CategoryController extends Controller
 
         $query_string = Arr::query($next_query);
 
-        return sanitaze_url(filled($query_string) ? $request_url . '?' . $query_string : $request_url);
+        return filled($query_string) ? $request_url . '?' . $query_string : $request_url;
     }
 
     private function forgetByGetKey(array &$query_parameters, string $get_key): void

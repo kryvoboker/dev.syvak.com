@@ -13,7 +13,6 @@ use App\Filament\Pages\Wiki\ModulesWikiPage;
 use App\Filament\Pages\Wiki\UsersWikiPage;
 use App\Http\Middleware\LogFilamentErrors;
 use App\Http\Middleware\SetDefaultLocalePrefix;
-use App\Http\Middleware\User\SetCommonPreferences;
 use App\Models\ApplicationSettings\Language;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -129,7 +128,6 @@ class AlyoAdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SetDefaultLocalePrefix::class,
-                SetCommonPreferences::class,
                 LogFilamentErrors::class,
             ])
             ->authMiddleware([

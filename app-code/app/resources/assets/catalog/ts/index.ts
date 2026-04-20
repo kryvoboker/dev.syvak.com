@@ -53,6 +53,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
     } else if (pageType === $PRODUCT_PAGE_TYPE) {
         import('@ts-features/pages/product/productCarousel.ts')
             .then(module => module.handleProductCarousel());
+
+        import('@ts-features/pages/product/productImageGallery.ts')
+            .then(module => module.handleProductImageGallery());
     }
 
     if (pageType === $CATEGORY_PAGE_TYPE || pageType === $SEARCH_PAGE_TYPE) {
