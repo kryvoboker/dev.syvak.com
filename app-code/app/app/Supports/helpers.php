@@ -569,8 +569,6 @@ if (! function_exists('get_allowed_locales')) {
             return $allowed_locales;
         }
 
-        return config('app.allowed_locales', [])
-                |> array_filter(...)
-                |> array_values(...);
+        return string_to_array(config('app.allowed_locales', []));
     }
 }
