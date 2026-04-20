@@ -486,7 +486,7 @@ class ProductController extends Controller
                 } elseif (str_contains($trimmed_row, ';')) {
                     $cells = str_getcsv($trimmed_row, ';');
                 } else {
-                    $cells = str_getcsv($trimmed_row, ',');
+                    $cells = str_getcsv($trimmed_row);
                 }
 
                 return collect($cells)
@@ -674,79 +674,310 @@ class ProductController extends Controller
 
         $product_slug = Str::trim((string) $product->getSlugByLanguageId($language_id));
 
-        $attribute_rows = $variant->attributeValues()
-            ->where('language_id', $language_id)
+        /** @var Collection<int, ProductVariant> $variants */
+        $variants = ProductVariant::query()
+            ->where('product_id', (int) $product->id)
             ->with([
-                'attribute.attributeDescription' => function ($query) use ($language_id): void {
+                'attributeValues' => function ($query) use ($language_id): void {
+                    $query->where('language_id', $language_id)
+                        ->orderBy('attribute_id');
+                },
+                'attributeValues.attribute.attributeDescription' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
-            ->orderBy('attribute_id')
+            ->orderByDesc('is_default')
+            ->orderBy('sort_order')
+            ->orderBy('id')
             ->get();
 
-        if ($attribute_rows->isEmpty()) {
+        if ($variants->isEmpty()) {
             return [];
         }
 
-        $selected_attribute_value_ids = $attribute_rows
-            ->mapWithKeys(fn (ProductVariantAttributeValue $attribute_value): array => [
-                (int) $attribute_value->attribute_id => (int) $attribute_value->id,
-            ])
-            ->filter(fn (int $value_id): bool => $value_id > 0)
-            ->all();
+        $variant_data = $this->buildVariantOptionData($variants);
 
-        /** @var Collection<int, ProductVariantAttributeValue> $attribute_rows */
-        return $attribute_rows
-            ->groupBy(fn (ProductVariantAttributeValue $attribute_value): int => (int) $attribute_value->attribute_id)
-            ->map(function (Collection $group_rows) use ($selected_attribute_value_ids, $product_slug, $variant): array {
-                /** @var ProductVariantAttributeValue|null $first_row */
-                $first_row    = $group_rows->first();
-                $attribute_id = (int) $first_row?->attribute_id;
+        if ($variant_data === []) {
+            return [];
+        }
 
-                $name = Str::trim((string) $first_row?->attribute?->attributeDescription->first()?->name);
+        $attribute_name_map = $variants
+            ->flatMap(fn (ProductVariant $item): Collection => $item->attributeValues)
+            ->mapWithKeys(function (ProductVariantAttributeValue $attribute_value): array {
+                $attribute_id = (int) $attribute_value->attribute_id;
+                $name = Str::trim((string) $attribute_value->attribute?->attributeDescription->first()?->name);
 
-                if (blank($name)) {
-                    $name = __('catalog/default.product.option_groups.attribute_fallback');
+                if ($attribute_id < 1 || $name === '') {
+                    return [];
                 }
 
-                $group_values = $group_rows
-                    ->map(fn (ProductVariantAttributeValue $row): array => [
-                        'value_id' => (int) $row->id,
-                        'value'    => Str::trim((string) $row->value_string),
-                    ])
-                    ->filter(fn (array $value_data): bool => filled($value_data['value']) && (int) $value_data['value_id'] > 0)
-                    ->unique()
-                    ->values();
+                return [$attribute_id => $name];
+            })
+            ->all();
 
-                $selected_value_id = $selected_attribute_value_ids[$attribute_id] ?? 0;
+        $selected_variant_data = collect($variant_data)
+            ->first(fn (array $item): bool => (int) $item['variant_id'] === (int) $variant->id);
+
+        if (! is_array($selected_variant_data)) {
+            $selected_variant_data = collect($variant_data)->first();
+        }
+
+        if (! is_array($selected_variant_data)) {
+            return [];
+        }
+
+        /** @var array<int, array{value_id:int,value:string,value_normalized:string}> $selected_attributes */
+        $selected_attributes = $selected_variant_data['attributes'];
+        $variant_id_order    = collect($variant_data)
+            ->pluck('variant_id')
+            ->map(fn (mixed $variant_id): int => (int) $variant_id)
+            ->values()
+            ->all();
+        $group_data_map = $this->buildGroupValuesData($variant_data, $attribute_name_map);
+
+        return collect($group_data_map)
+            ->sortKeys()
+            ->map(function (array $group_data, int $attribute_id) use (
+                $selected_attributes,
+                $variant_data,
+                $variant_id_order,
+                $product_slug,
+                $product
+            ): array {
+                $selected_value_normalized = (string) data_get($selected_attributes, "$attribute_id.value_normalized", '');
+                $attribute_name            = (string) $group_data['name'];
+                $values_data               = collect((array) $group_data['values'])
+                    ->sortKeys()
+                    ->all();
 
                 return [
-                    'key'         => 'attribute_' . (int) $first_row?->attribute_id,
-                    'name'        => $name,
-                    'values'      => $group_values->pluck('value')->all(),
-                    'value_links' => $group_values
-                        ->map(function (array $value_data) use ($selected_attribute_value_ids, $attribute_id, $product_slug, $variant, $selected_value_id): array {
-                            $target_attributes                = $selected_attribute_value_ids;
-                            $target_attributes[$attribute_id] = (int) $value_data['value_id'];
+                    'key'         => 'attribute_' . $attribute_id,
+                    'name'        => filled($attribute_name) ? $attribute_name : __('catalog/default.product.option_groups.attribute_fallback'),
+                    'values'      => collect($values_data)
+                        ->pluck('value')
+                        ->filter(fn (mixed $value): bool => filled((string) $value))
+                        ->values()
+                        ->all(),
+                    'value_links' => collect($values_data)
+                        ->map(function (array $value_data, string $value_normalized) use (
+                            $attribute_id,
+                            $selected_value_normalized,
+                            $selected_attributes,
+                            $variant_data,
+                            $variant_id_order,
+                            $product_slug,
+                            $product
+                        ): array {
+                            $target_variant_data = $this->resolveTargetVariantDataForOption(
+                                variant_data             : $variant_data,
+                                attribute_id             : $attribute_id,
+                                candidate_value_normalized: $value_normalized,
+                                selected_attributes      : $selected_attributes,
+                                variant_id_order         : $variant_id_order,
+                            );
+
+                            $target_filters = $this->buildAttributeFiltersFromVariantData($target_variant_data);
 
                             return [
                                 'value_id' => (int) $value_data['value_id'],
                                 'value'    => (string) $value_data['value'],
-                                'url'      => filled($product_slug)
+                                'url'      => filled($product_slug) && $target_filters !== []
                                     ? localized_product_variant_route(
                                         product_slug     : $product_slug,
-                                        product_id       : (int) $variant->product_id,
-                                        attribute_filters: $target_attributes,
+                                        product_id       : (int) $product->id,
+                                        attribute_filters: $target_filters,
                                     )
                                     : '',
-                                'is_selected' => $selected_value_id === (int) $value_data['value_id'],
+                                'is_selected' => $selected_value_normalized !== '' && $selected_value_normalized === $value_normalized,
                             ];
                         })
+                        ->filter(fn (array $link): bool => filled((string) $link['value']))
+                        ->values()
                         ->all(),
                 ];
             })
             ->filter(fn (array $group): bool => $group['value_links'] !== [])
             ->values()
+            ->all();
+    }
+
+    /**
+     * @param  Collection<int, ProductVariant>  $variants
+     * @return array<int, array{
+     *     variant_id:int,
+     *     attributes:array<int, array{value_id:int,value:string,value_normalized:string}>
+     * }>
+     */
+    private function buildVariantOptionData(Collection $variants): array
+    {
+        return $variants
+            ->map(function (ProductVariant $item): array {
+                $attributes = $item->attributeValues
+                    ->mapWithKeys(function (ProductVariantAttributeValue $attribute_value): array {
+                        $attribute_id      = (int) $attribute_value->attribute_id;
+                        $value             = Str::trim((string) $attribute_value->value_string);
+                        $value_normalized  = Str::of($value)->lower()->toString();
+                        $attribute_value_id = (int) $attribute_value->id;
+
+                        if ($attribute_id < 1 || $attribute_value_id < 1 || $value_normalized === '') {
+                            return [];
+                        }
+
+                        return [
+                            $attribute_id => [
+                                'value_id'         => $attribute_value_id,
+                                'value'            => $value,
+                                'value_normalized' => $value_normalized,
+                            ],
+                        ];
+                    })
+                    ->all();
+
+                return [
+                    'variant_id'  => (int) $item->id,
+                    'attributes' => $attributes,
+                ];
+            })
+            ->filter(fn (array $item): bool => $item['attributes'] !== [])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  array<int, array{variant_id:int,attributes:array<int, array{value_id:int,value:string,value_normalized:string}>}>  $variant_data
+     * @param  array<int, string>  $attribute_name_map
+     * @return array<int, array{name:string,values:array<string, array{value_id:int,value:string}>}>
+     */
+    private function buildGroupValuesData(array $variant_data, array $attribute_name_map): array
+    {
+        $groups = [];
+
+        foreach ($variant_data as $item) {
+            foreach ($item['attributes'] as $attribute_id => $attribute_data) {
+                $attribute_name = Str::trim((string) ($attribute_name_map[$attribute_id] ?? ''));
+
+                if (! isset($groups[$attribute_id])) {
+                    $groups[$attribute_id] = [
+                        'name'   => $attribute_name,
+                        'values' => [],
+                    ];
+                }
+
+                if (blank((string) $groups[$attribute_id]['name']) && filled($attribute_name)) {
+                    $groups[$attribute_id]['name'] = $attribute_name;
+                }
+
+                $value_key = (string) $attribute_data['value_normalized'];
+
+                if ($value_key === '' || isset($groups[$attribute_id]['values'][$value_key])) {
+                    continue;
+                }
+
+                $groups[$attribute_id]['values'][$value_key] = [
+                    'value_id' => (int) $attribute_data['value_id'],
+                    'value'    => (string) $attribute_data['value'],
+                ];
+            }
+        }
+
+        return $groups;
+    }
+
+    /**
+     * @param  array<int, array{variant_id:int,attributes:array<int, array{value_id:int,value:string,value_normalized:string}>}>  $variant_data
+     * @param  array<int, array{value_id:int,value:string,value_normalized:string}>  $selected_attributes
+     * @param  array<int, int>  $variant_id_order
+     * @return array{variant_id:int,attributes:array<int, array{value_id:int,value:string,value_normalized:string}>}|null
+     */
+    private function resolveTargetVariantDataForOption(
+        array $variant_data,
+        int $attribute_id,
+        string $candidate_value_normalized,
+        array $selected_attributes,
+        array $variant_id_order,
+    ): ?array {
+        $candidates = collect($variant_data)
+            ->filter(function (array $item) use ($attribute_id, $candidate_value_normalized): bool {
+                $candidate_value = (string) data_get($item, "attributes.$attribute_id.value_normalized", '');
+
+                return $candidate_value !== '' && $candidate_value === $candidate_value_normalized;
+            })
+            ->values();
+
+        if ($candidates->isEmpty()) {
+            return null;
+        }
+
+        /** @var Collection<int, array{
+         *     variant_id:int,
+         *     attributes:array<int, array{value_id:int,value:string,value_normalized:string}>,
+         *     score:int,
+         *     order:int
+         * }> $scored */
+        $scored = $candidates
+            ->map(function (array $item) use ($selected_attributes, $attribute_id, $variant_id_order): array {
+                $score = collect($selected_attributes)
+                    ->reject(fn (array $_, int $selected_attribute_id): bool => $selected_attribute_id === $attribute_id)
+                    ->reduce(function (int $carry, array $selected_data, int $selected_attribute_id) use ($item): int {
+                        $selected_value = (string) $selected_data['value_normalized'];
+                        $candidate_value = (string) data_get($item, "attributes.$selected_attribute_id.value_normalized", '');
+
+                        if ($selected_value !== '' && $candidate_value !== '' && $selected_value === $candidate_value) {
+                            return $carry + 1;
+                        }
+
+                        return $carry;
+                    }, 0);
+
+                $order = array_search((int) $item['variant_id'], $variant_id_order, true);
+
+                return [
+                    'variant_id'  => (int) $item['variant_id'],
+                    'attributes' => (array) $item['attributes'],
+                    'score'      => $score,
+                    'order'      => $order === false ? PHP_INT_MAX : (int) $order,
+                ];
+            })
+            ->sortBy([
+                ['score', 'desc'],
+                ['order', 'asc'],
+            ])
+            ->values();
+
+        $best = $scored->first();
+
+        if (! is_array($best)) {
+            return null;
+        }
+
+        return [
+            'variant_id'  => (int) $best['variant_id'],
+            'attributes' => (array) $best['attributes'],
+        ];
+    }
+
+    /**
+     * @param  array{variant_id:int,attributes:array<int, array{value_id:int,value:string,value_normalized:string}>}|null  $variant_data
+     * @return array<int, array<int, int>>
+     */
+    private function buildAttributeFiltersFromVariantData(?array $variant_data): array
+    {
+        if (! is_array($variant_data)) {
+            return [];
+        }
+
+        return collect((array) $variant_data['attributes'])
+            ->mapWithKeys(function (array $attribute_data, int $attribute_id): array {
+                $value_id = (int) $attribute_data['value_id'];
+
+                if ($attribute_id < 1 || $value_id < 1) {
+                    return [];
+                }
+
+                return [
+                    $attribute_id => [$value_id],
+                ];
+            })
             ->all();
     }
 

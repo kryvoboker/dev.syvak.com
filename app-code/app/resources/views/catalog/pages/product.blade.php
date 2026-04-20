@@ -136,7 +136,7 @@
                                 <div class="flex items-center gap-3">
                                     @foreach($option_group['value_links'] as $value_data)
                                         @if(isset($value_data['is_selected']) && $value_data['is_selected'] === true)
-                                            <div class="">
+                                            <div class="selected text-black bg-white border border-opacity-light-gray-40% px-2 py-1">
                                                 {{ $value_data['value'] }}
                                             </div>
                                         @else
