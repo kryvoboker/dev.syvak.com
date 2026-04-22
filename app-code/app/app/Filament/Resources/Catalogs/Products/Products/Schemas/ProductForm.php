@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
+use App\Filament\Resources\Catalogs\Products\Products\Schemas\Components\CompositionAndCareTabSchema;
 use App\Filament\Resources\Catalogs\Products\Products\Schemas\Components\SizeGuideTabSchema;
 use App\Filament\Resources\Trait\Forms\MetaTextFormTrait;
 use App\Filament\Resources\Trait\Forms\SlugFormTrait;
@@ -45,6 +46,7 @@ class ProductForm
                     ->tabs([
                         self::createGeneralTabs(),
                         SizeGuideTabSchema::make($active_languages),
+                        CompositionAndCareTabSchema::make($active_languages),
                         self::createTranslationsFormTabs($active_languages),
                         self::createMetaTextsFormTabs($active_languages),
                         self::createCategoriesTabs($active_languages),

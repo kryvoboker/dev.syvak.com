@@ -19,22 +19,32 @@ return [
         'size_guide_title'                  => 'Назва блоку / popup',
         'size_guide_short_description'      => 'Короткий опис',
         'size_guide_table'                  => 'Таблиця розмірів',
-        'size_guide_table_helper'           => 'Встав таблицю у форматі TSV (tab) або CSV (; або ,). Кожен новий рядок — новий рядок таблиці.',
+        'size_guide_table_helper'           => 'Встав таблицю у форматі TSV (tab) або CSV (використовуйте роздільник - ;). Кожен новий рядок — новий рядок таблиці.',
         'size_guide_table_preview'          => 'Попередній перегляд таблиці',
         'size_guide_table_preview_empty'    => 'Почни вводити TSV/CSV, і тут зʼявиться попередній перегляд.',
         'size_guide_image'                  => 'Зображення',
         'size_guide_full_description_title' => 'Назва блоку з повним описом',
         'size_guide_full_description'       => 'Повний опис',
+        'composition_title'                 => 'Назва блоку "Склад"',
+        'composition_items'                 => 'Пункти списку "Склад"',
+        'composition_item_value'            => 'Пункт складу',
+        'care_title'                        => 'Назва блоку "Догляд"',
+        'care_items'                        => 'Пункти списку "Догляд"',
+        'care_item_value'                   => 'Пункт догляду',
     ],
 
     // Sections
     'sections' => [
-        'size_guide' => 'Довідник розмірів',
+        'size_guide'           => 'Довідник розмірів',
+        'composition_and_care' => 'Склад і догляд',
+        'composition_block'    => 'Блок "Склад"',
+        'care_block'           => 'Блок "Догляд"',
     ],
 
     // Tabs
     'tabs' => [
-        'size_guide' => 'Довідник розмірів',
+        'size_guide'           => 'Довідник розмірів',
+        'composition_and_care' => 'Склад і догляд',
     ],
 
     // Pages

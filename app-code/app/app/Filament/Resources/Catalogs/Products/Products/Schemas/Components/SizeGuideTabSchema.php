@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas\Components;
 
 use App\Models\ApplicationSettings\Language;
+use App\Supports\Services\Products\ProductSizeGuide;
 use Closure;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -84,16 +85,16 @@ class SizeGuideTabSchema
                                         return;
                                     }
 
-                                    if (self::parseSizeGuideTableRows((string) $value) === []) {
+                                    if (ProductSizeGuide::parseSizeGuideTableRowsFromString((string) $value) === []) {
                                         $fail(__('admin/catalogs/products/products.errors.validation_size_guide_table_required'));
                                     }
                                 };
                             })
                             ->dehydrateStateUsing(fn (mixed $state): string => Str::trim((string) $state)),
 
-                        Placeholder::make("{$language_path}.table_preview")
+                        TextEntry::make("$language_path.table_preview")
                             ->label(__('admin/catalogs/products/products.labels.size_guide_table_preview'))
-                            ->content(function (Get $get) use ($table_path): HtmlString {
+                            ->state(function (Get $get) use ($table_path): HtmlString {
                                 return self::renderTablePreview((string) $get($table_path));
                             })
                             ->columnSpanFull(),
@@ -154,49 +155,9 @@ class SizeGuideTabSchema
         return number_format(max(1, $kilobytes) / 1024, 2, '.', '');
     }
 
-    /**
-     * @return array<int, array<int, string>>
-     */
-    private static function parseSizeGuideTableRows(string $table_raw): array
-    {
-        $table_raw = Str::trim($table_raw);
-
-        if ($table_raw === '') {
-            return [];
-        }
-
-        $rows = preg_split('/\R/u', $table_raw) ?: [];
-
-        return collect($rows)
-            ->map(function (string $row): array {
-                $trimmed_row = Str::trim($row);
-
-                if ($trimmed_row === '') {
-                    return [];
-                }
-
-                if (str_contains($trimmed_row, "\t")) {
-                    $cells = explode("\t", $trimmed_row);
-                } elseif (str_contains($trimmed_row, ';')) {
-                    $cells = str_getcsv($trimmed_row, ';');
-                } else {
-                    $cells = str_getcsv($trimmed_row);
-                }
-
-                return collect($cells)
-                    ->map(fn (string $cell): string => Str::trim($cell))
-                    ->filter(fn (string $cell): bool => $cell !== '')
-                    ->values()
-                    ->all();
-            })
-            ->filter(fn (array $cells): bool => $cells !== [])
-            ->values()
-            ->all();
-    }
-
     private static function renderTablePreview(string $table_raw): HtmlString
     {
-        $rows = self::parseSizeGuideTableRows($table_raw);
+        $rows = ProductSizeGuide::parseSizeGuideTableRowsFromString($table_raw);
 
         if ($rows === []) {
             return new HtmlString('<p class="text-sm text-gray-500">' . e(__('admin/catalogs/products/products.labels.size_guide_table_preview_empty')) . '</p>');

@@ -314,6 +314,7 @@
 
         &::before {
             content: "";
+
             background:
                 radial-gradient(
                     circle at center,
@@ -327,10 +328,6 @@
         }
     }
 
-    .product-main-grid {
-        @apply bg-black;
-    }
-
     .product .product-carousel .carousel-slide,
     .product .product-carousel .carousel-body > a {
         @apply h-108.5 md:h-165 lg:h-180 2xl:h-190;
@@ -339,10 +336,6 @@
     .product .product-carousel .carousel-slide > a,
     .product .product-carousel .carousel-body > a {
         @apply h-full;
-    }
-
-    .product .product-carousel__pagination .carousel-pagination-item {
-        @apply h-21 md:h-28;
     }
 
     .product-carousel__pagination .carousel-pagination-item {

@@ -19,22 +19,32 @@ return [
         'size_guide_title'                  => 'Block / popup title',
         'size_guide_short_description'      => 'Short description',
         'size_guide_table'                  => 'Size table',
-        'size_guide_table_helper'           => 'Paste a table in TSV (tab) or CSV (; or ,) format. Each new line becomes a table row.',
+        'size_guide_table_helper'           => 'Paste a table in TSV (tab) or CSV (use separator - ;) format. Each new line becomes a table row.',
         'size_guide_table_preview'          => 'Table preview',
         'size_guide_table_preview_empty'    => 'Start entering TSV/CSV and the preview will appear here.',
         'size_guide_image'                  => 'Image',
         'size_guide_full_description_title' => 'Full description block title',
         'size_guide_full_description'       => 'Full description',
+        'composition_title'                 => 'Composition block title',
+        'composition_items'                 => 'Composition list items',
+        'composition_item_value'            => 'Composition item',
+        'care_title'                        => 'Care block title',
+        'care_items'                        => 'Care list items',
+        'care_item_value'                   => 'Care item',
     ],
 
     // Sections
     'sections' => [
-        'size_guide' => 'Size guide',
+        'size_guide'           => 'Size guide',
+        'composition_and_care' => 'Composition and care',
+        'composition_block'    => 'Composition block',
+        'care_block'           => 'Care block',
     ],
 
     // Tabs
     'tabs' => [
-        'size_guide' => 'Size guide',
+        'size_guide'           => 'Size guide',
+        'composition_and_care' => 'Composition and care',
     ],
 
     // Pages

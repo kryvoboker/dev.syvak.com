@@ -17,16 +17,7 @@
             <section class="footer-subscribe flex flex-col gap-4" aria-label="{{ $subscription_data['title'] }}">
                 <div class="footer-title">{{ $subscription_data['title'] }}</div>
 
-                <a class="footer-subscribe-btn dark-btn inline-flex items-center justify-between gap-3 border border-opacity-light-gray-40%
-                          bg-white px-4 py-2 text-black md:px-4 md:py-3"
-                   href="{{ $subscription_data['button_url'] }}"
-                   aria-label="{{ $subscription_data['button_text'] }}">
-                    <span>{{ $subscription_data['button_text'] }}</span>
-
-                    <span class="footer-subscribe-btn-arrow inline-flex size-12 items-center justify-center border border-black text-32px leading-none">
-                        <span class="icon-[quill--arrow-up] rotate-45"></span>
-                    </span>
-                </a>
+                <x-catalog::common.telegram-link :telegram_data="$subscription_data" />
 
                 <p class="footer-support-text max-w-496px font-light text-white uppercase opacity-70 tracking-0.04em">
                     {{ $subscription_data['support_text'] }}

@@ -13,6 +13,8 @@ use App\Models\Catalogs\Products\ProductVariantAttributeValue;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
+use App\Services\Trait\SocialServiceTrait;
+use App\Supports\Services\Products\ProductSizeGuide;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -24,6 +26,8 @@ use Throwable;
 
 class ProductController extends Controller
 {
+    use SocialServiceTrait;
+
     /**
      * @throws Throwable
      */
@@ -47,6 +51,10 @@ class ProductController extends Controller
         $variant           = $this->resolveRequestedVariant($request, $product, (int)$language->id, $variant_slug);
         $header_data       = app(HeaderService::class)();
         $page_type         = try_detect_page_type();
+        $app_settings      = get_app_settings();
+        $telegram_row      = collect($app_settings?->socials[$locale] ?? [])
+            ->first(fn(mixed $social_item): bool => (string)data_get($social_item, 'social_type') === 'telegram');
+        $telegram_link     = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
         $data = [
             'header_data'       => $header_data,
@@ -59,6 +67,10 @@ class ProductController extends Controller
             'product_view_data' => $this->buildProductViewData($product, $variant, (int)$language->id, $page_settings_arr),
             'product'           => $product,
             'variant'           => $variant,
+            'telegram_data'     => [
+                'url'  => $telegram_link,
+                'text' => __('catalog/default.product.labels.telegram'),
+            ]
         ];
 
         return view('catalog.pages.product', $data);
@@ -242,8 +254,8 @@ class ProductController extends Controller
                     return null;
                 }
 
-                $category_title = trim((string)optional($category->categoryDescription->first())->name);
-                $category_slug  = trim((string)optional($category->slugs->first())->slug);
+                $category_title = Str::trim((string)optional($category->categoryDescription->first())->name);
+                $category_slug  = Str::trim((string)optional($category->slugs->first())->slug);
 
                 if (blank($category_title)) {
                     return null;
@@ -291,7 +303,7 @@ class ProductController extends Controller
         $main_image_path     = (string)($gallery_images->first() ?? '');
         $main_image_data     = $this->buildImageData($main_image_path, $image_size);
         $option_groups       = $this->resolveOptionGroups($product, $variant, $language_id);
-        $details_sections    = $this->resolveDetailsSections();
+        $details_sections    = $this->resolveDetailsSections($product, $variant, $language_id);
         $size_guide_data     = $this->resolveSizeGuideData($product, $variant, $language_id);
         $gallery_images_data = [];
 
@@ -315,6 +327,9 @@ class ProductController extends Controller
             'gallery_images'         => $gallery_images,
             'option_groups'          => $option_groups,
             'details_sections'       => $details_sections,
+            'composition_and_care'   => [
+                'sections' => $details_sections,
+            ],
             'size_guide'             => $size_guide_data,
         ];
     }
@@ -384,10 +399,10 @@ class ProductController extends Controller
         }
 
         $text_fields = [
-            trim((string)Arr::get($translation_data, 'title', '')),
-            trim((string)Arr::get($translation_data, 'short_description', '')),
-            trim((string)Arr::get($translation_data, 'full_description_title', '')),
-            trim((string)Arr::get($translation_data, 'full_description', '')),
+            Str::trim((string)Arr::get($translation_data, 'title', '')),
+            Str::trim((string)Arr::get($translation_data, 'short_description', '')),
+            Str::trim((string)Arr::get($translation_data, 'full_description_title', '')),
+            Str::trim((string)Arr::get($translation_data, 'full_description', '')),
         ];
 
         if (collect($text_fields)->contains(fn(string $value): bool => $value !== '')) {
@@ -400,7 +415,7 @@ class ProductController extends Controller
             return true;
         }
 
-        return trim((string)Arr::get($translation_data, 'image', '')) !== '';
+        return Str::trim((string)Arr::get($translation_data, 'image', '')) !== '';
     }
 
     private function hasSizeGuideTableValues(mixed $table_rows): bool
@@ -415,19 +430,20 @@ class ProductController extends Controller
      */
     private function normalizeSizeGuideTranslationPayload(array $translation_data): array
     {
-        $image_path = trim((string)Arr::get($translation_data, 'image', ''));
+        $image_path = Str::trim((string)Arr::get($translation_data, 'image', ''));
         $image_size = [
             'width'  => max(1, (int)Arr::get($translation_data, 'image_width', 1)),
             'height' => max(1, (int)Arr::get($translation_data, 'image_height', 1)),
         ];
 
+        // In HTML the short_description is not decoded!
         return [
-            'title'                  => trim((string)Arr::get($translation_data, 'title', '')),
-            'short_description'      => trim((string)Arr::get($translation_data, 'short_description', '')),
+            'title'                  => Str::trim((string)Arr::get($translation_data, 'title', '')),
+            'short_description'      => Str::trim((string)Arr::get($translation_data, 'short_description', '')) |> escape_special_html(...),
             'table_rows'             => $this->normalizeSizeGuideTableRows(Arr::get($translation_data, 'table_rows')),
             'image'                  => $this->buildImageData($image_path, $image_size),
-            'full_description_title' => trim((string)Arr::get($translation_data, 'full_description_title', '')),
-            'full_description'       => trim((string)Arr::get($translation_data, 'full_description', '')),
+            'full_description_title' => Str::trim((string)Arr::get($translation_data, 'full_description_title', '')),
+            'full_description'       => Str::trim((string)Arr::get($translation_data, 'full_description', '')),
         ];
     }
 
@@ -437,7 +453,7 @@ class ProductController extends Controller
     private function normalizeSizeGuideTableRows(mixed $table_rows): array
     {
         if (is_string($table_rows)) {
-            return $this->parseSizeGuideTableRowsFromString($table_rows);
+            return ProductSizeGuide::parseSizeGuideTableRowsFromString($table_rows);
         }
 
         if (!is_array($table_rows)) {
@@ -453,48 +469,8 @@ class ProductController extends Controller
                 }
 
                 return collect($cells)
-                    ->map(fn(mixed $cell): string => trim((string)Arr::get($cell, 'value', '')))
+                    ->map(fn(mixed $cell): string => Str::trim((string)Arr::get($cell, 'value', '')))
                     ->filter(fn(string $value): bool => $value !== '')
-                    ->values()
-                    ->all();
-            })
-            ->filter(fn(array $cells): bool => $cells !== [])
-            ->values()
-            ->all();
-    }
-
-    /**
-     * @return array<int, array<int, string>>
-     */
-    private function parseSizeGuideTableRowsFromString(string $table_raw): array
-    {
-        $table_raw = trim($table_raw);
-
-        if ($table_raw === '') {
-            return [];
-        }
-
-        $rows = preg_split('/\R/u', $table_raw) ?: [];
-
-        return collect($rows)
-            ->map(function (string $row): array {
-                $trimmed_row = trim($row);
-
-                if ($trimmed_row === '') {
-                    return [];
-                }
-
-                if (str_contains($trimmed_row, "\t")) {
-                    $cells = explode("\t", $trimmed_row);
-                } else if (str_contains($trimmed_row, ';')) {
-                    $cells = str_getcsv($trimmed_row, ';');
-                } else {
-                    $cells = str_getcsv($trimmed_row);
-                }
-
-                return collect($cells)
-                    ->map(fn(string $cell): string => trim($cell))
-                    ->filter(fn(string $cell): bool => $cell !== '')
                     ->values()
                     ->all();
             })
@@ -994,11 +970,119 @@ class ProductController extends Controller
     /**
      * @return array<int, array{key: string, label: string, items: array<int, string>}>
      */
-    private function resolveDetailsSections(): array
+    private function resolveDetailsSections(Product $product, ?ProductVariant $variant, int $language_id): array
     {
-        return [
-            ['key' => 'composition', 'label' => __('catalog/default.product.details.composition'), 'items' => []],
-            ['key' => 'care', 'label' => __('catalog/default.product.details.care'), 'items' => []],
+        /** @var array<string, mixed>|null $variant_details_data */
+        $variant_details_data = is_array($variant?->composition_and_care_data)
+            ? $variant->composition_and_care_data
+            : null;
+
+        /** @var array<string, mixed>|null $product_details_data */
+        $product_details_data = is_array($product->composition_and_care_data)
+            ? $product->composition_and_care_data
+            : null;
+
+        $variant_translation = $this->resolveDetailsTranslationByLanguage($variant_details_data, $language_id);
+        $product_translation = $this->resolveDetailsTranslationByLanguage($product_details_data, $language_id);
+        $section_defaults    = [
+            'composition' => __('catalog/default.product.details.composition'),
+            'care'        => __('catalog/default.product.details.care'),
         ];
+
+        return collect($section_defaults)
+            ->map(function (string $default_label, string $section_key) use ($variant_translation, $product_translation): array {
+                $variant_section = $this->normalizeDetailsSection(
+                    section_data : Arr::get($variant_translation, $section_key),
+                    default_label: $default_label,
+                );
+
+                $product_section = $this->normalizeDetailsSection(
+                    section_data : Arr::get($product_translation, $section_key),
+                    default_label: $default_label,
+                );
+
+                $resolved_section = $this->hasDetailsItems($variant_section)
+                    ? $variant_section
+                    : $product_section;
+
+                return [
+                    'key'   => $section_key,
+                    'label' => (string)$resolved_section['label'],
+                    'items' => (array)$resolved_section['items'],
+                ];
+            })
+            ->filter(fn(array $section): bool => $section['items'] !== [])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param array<string, mixed>|null $details_data
+     *
+     * @return array<string, mixed>|null
+     */
+    private function resolveDetailsTranslationByLanguage(?array $details_data, int $language_id): ?array
+    {
+        if (!is_array($details_data)) {
+            return null;
+        }
+
+        /** @var mixed $translations */
+        $translations = Arr::get($details_data, 'translations');
+
+        if (!is_array($translations)) {
+            return null;
+        }
+
+        $language_data = Arr::get($translations, (string)$language_id);
+
+        return is_array($language_data) ? $language_data : null;
+    }
+
+    /**
+     * @return array{label: string, items: array<int, string>}
+     */
+    private function normalizeDetailsSection(mixed $section_data, string $default_label): array
+    {
+        if (!is_array($section_data)) {
+            return [
+                'label' => $default_label,
+                'items' => [],
+            ];
+        }
+
+        $label = Str::trim((string)Arr::get($section_data, 'title', ''));
+
+        if ($label === '') {
+            $label = $default_label;
+        }
+
+        /** @var mixed $items_raw */
+        $items_raw = Arr::get($section_data, 'items', []);
+
+        $items = collect(is_array($items_raw) ? $items_raw : [])
+            ->map(function (mixed $item): string {
+                if (is_array($item)) {
+                    return Str::trim((string)Arr::get($item, 'value', ''));
+                }
+
+                return Str::trim((string)$item);
+            })
+            ->filter(fn(string $value): bool => $value !== '')
+            ->values()
+            ->all();
+
+        return [
+            'label' => $label,
+            'items' => $items,
+        ];
+    }
+
+    /**
+     * @param array{label: string, items: array<int, string>} $section
+     */
+    private function hasDetailsItems(array $section): bool
+    {
+        return $section['items'] !== [];
     }
 }
