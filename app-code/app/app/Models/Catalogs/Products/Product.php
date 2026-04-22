@@ -42,6 +42,7 @@ class Product extends Model
         'date_available',
         'date_added',
         'size_guide_data',
+        'composition_and_care_data',
     ];
 
     /**
@@ -50,16 +51,17 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'default_variant_id'  => 'integer',
-            'default_category_id' => 'integer',
-            'quantity'            => 'integer',
-            'minimum'             => 'integer',
-            'price'               => 'float',
-            'viewed'              => 'integer',
-            'date_available'      => 'datetime',
-            'date_added'          => 'datetime',
-            'is_active'           => 'boolean',
-            'size_guide_data'     => 'array',
+            'default_variant_id'        => 'integer',
+            'default_category_id'       => 'integer',
+            'quantity'                  => 'integer',
+            'minimum'                   => 'integer',
+            'price'                     => 'float',
+            'viewed'                    => 'integer',
+            'date_available'            => 'datetime',
+            'date_added'                => 'datetime',
+            'is_active'                 => 'boolean',
+            'size_guide_data'           => 'array',
+            'composition_and_care_data' => 'array',
         ];
     }
 

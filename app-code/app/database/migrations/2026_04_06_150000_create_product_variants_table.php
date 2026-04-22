@@ -27,6 +27,7 @@ return new class() extends Migration
             $table->dateTime('date_available')->nullable();
             $table->smallInteger('sort_order')->default(0);
             $table->json('size_guide_data')->nullable();
+            $table->json('composition_and_care_data')->nullable();
 
             $table->timestamps();
 

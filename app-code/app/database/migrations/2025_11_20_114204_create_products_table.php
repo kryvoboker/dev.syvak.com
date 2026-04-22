@@ -40,6 +40,7 @@ return new class() extends Migration
             $table->dateTime('date_available')->nullable()->useCurrent();
             $table->dateTime('date_added')->nullable()->useCurrent();
             $table->json('size_guide_data')->nullable();
+            $table->json('composition_and_care_data')->nullable();
 
             $table->timestamps();
         });

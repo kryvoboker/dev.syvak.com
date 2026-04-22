@@ -21,22 +21,22 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-if (! function_exists('clear_telephone')) {
+if (!function_exists('clear_telephone')) {
     function clear_telephone(?string $telephone, bool $is_delete_first_nums = false): string
     {
-        if (! isset($telephone)) {
+        if (!isset($telephone)) {
             return '';
         }
 
         if ($is_delete_first_nums) {
-            return (string) (preg_replace(['/\D+/', '/^38/'], '', $telephone) ?: $telephone);
+            return (string)(preg_replace(['/\D+/', '/^38/'], '', $telephone) ?: $telephone);
         }
 
-        return (string) (preg_replace('/\D+/', '', $telephone) ?: $telephone);
+        return (string)(preg_replace('/\D+/', '', $telephone) ?: $telephone);
     }
 }
 
-if (! function_exists('parse_telephone')) {
+if (!function_exists('parse_telephone')) {
     function parse_telephone(string $telephone): string
     {
         $telephone = clear_telephone($telephone, true);
@@ -52,7 +52,7 @@ if (! function_exists('parse_telephone')) {
     }
 }
 
-if (! function_exists('trim_strs_in_arr')) {
+if (!function_exists('trim_strs_in_arr')) {
     function trim_strs_in_arr(array $arr): array
     {
         return array_map(function ($item) {
@@ -65,9 +65,9 @@ if (! function_exists('trim_strs_in_arr')) {
     }
 }
 
-if (! function_exists('convert_img_and_get_url')) {
+if (!function_exists('convert_img_and_get_url')) {
     /**
-     * @param  string  $bg_color  HEX or transparent color
+     * @param string $bg_color HEX or transparent color
      */
     function convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): string
     {
@@ -75,9 +75,9 @@ if (! function_exists('convert_img_and_get_url')) {
     }
 }
 
-if (! function_exists('multiple_convert_img_and_get_url')) {
+if (!function_exists('multiple_convert_img_and_get_url')) {
     /**
-     * @param  string  $bg_color  HEX or transparent color
+     * @param string $bg_color HEX or transparent color
      */
     function multiple_convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
     {
@@ -85,14 +85,14 @@ if (! function_exists('multiple_convert_img_and_get_url')) {
     }
 }
 
-if (! function_exists('get_app_settings')) {
+if (!function_exists('get_app_settings')) {
     function get_app_settings(): ?AppSettingsData
     {
         return app(AppSettingsService::class)->getSettings();
     }
 }
 
-if (! function_exists('sanitaze_str')) {
+if (!function_exists('sanitaze_str')) {
     function sanitaze_str(?string $string): string
     {
         if ($string === null) {
@@ -104,11 +104,11 @@ if (! function_exists('sanitaze_str')) {
                 |> strip_tags(...)
                 |> Str::trim(...);
 
-        return (string) Str::replaceMatches('/\s+/', ' ', $sanitized_value);
+        return (string)Str::replaceMatches('/\s+/', ' ', $sanitized_value);
     }
 }
 
-if (! function_exists('breadcrumb')) {
+if (!function_exists('breadcrumb')) {
     function breadcrumb(string $title, ?string $url = null): array
     {
         return [
@@ -118,7 +118,7 @@ if (! function_exists('breadcrumb')) {
     }
 }
 
-if (! function_exists('try_detect_page_type')) {
+if (!function_exists('try_detect_page_type')) {
     function try_detect_page_type(?Request $request = null): ?string
     {
         if ($request === null) {
@@ -133,36 +133,36 @@ if (! function_exists('try_detect_page_type')) {
 
         if (is_string($route_name) && filled($route_name)) {
             return match (true) {
-                Str::endsWith($route_name, '.home') => (string) config('page-settings.page_type.home'),
+                Str::endsWith($route_name, '.home')                  => (string)config('page-settings.page_type.home'),
                 Str::endsWith($route_name, '.product'),
                 Str::endsWith($route_name, '.product.variant.show'),
-                Str::endsWith($route_name, '.product.show') => (string) config('page-settings.page_type.product'),
+                Str::endsWith($route_name, '.product.show')          => (string)config('page-settings.page_type.product'),
                 Str::endsWith($route_name, '.category'),
-                Str::endsWith($route_name, '.category.show') => (string) config('page-settings.page_type.category'),
+                Str::endsWith($route_name, '.category.show')         => (string)config('page-settings.page_type.category'),
                 Str::endsWith($route_name, '.search'),
-                Str::endsWith($route_name, '.search-products.index') => (string) config('page-settings.page_type.search'),
+                Str::endsWith($route_name, '.search-products.index') => (string)config('page-settings.page_type.search'),
                 default                                              => null,
             };
         }
 
         $segments = collect(explode('/', Str::trim($request->path(), '/')))
-            ->filter(fn (string $segment): bool => filled($segment))
+            ->filter(fn(string $segment): bool => filled($segment))
             ->values();
 
         if ($segments->count() === 1) {
-            return (string) config('page-settings.page_type.home');
+            return (string)config('page-settings.page_type.home');
         }
 
         return match ($segments->get(1)) {
-            'product'  => (string) config('page-settings.page_type.product'),
-            'category' => (string) config('page-settings.page_type.category'),
-            'search'   => (string) config('page-settings.page_type.search'),
+            'product'  => (string)config('page-settings.page_type.product'),
+            'category' => (string)config('page-settings.page_type.category'),
+            'search'   => (string)config('page-settings.page_type.search'),
             default    => null,
         };
     }
 }
 
-if (! function_exists('localized_route')) {
+if (!function_exists('localized_route')) {
     function localized_route(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
     {
         $locale_key = config('localization.locale_parameter');
@@ -177,9 +177,10 @@ if (! function_exists('localized_route')) {
     }
 }
 
-if (! function_exists('prepare_product_attrs')) {
+if (!function_exists('prepare_product_attrs')) {
     /**
-     * @param  array<int|string, mixed>  $attribute_filters
+     * @param array<int|string, mixed> $attribute_filters
+     *
      * @return array<int, array<int, int>>
      */
     function prepare_product_attrs(array $attribute_filters): array
@@ -189,34 +190,34 @@ if (! function_exists('prepare_product_attrs')) {
                 $attribute_id = null;
 
                 if (is_int($raw_key) || ctype_digit($raw_key)) {
-                    $attribute_id = (int) $raw_key;
+                    $attribute_id = (int)$raw_key;
                 } else {
                     $matched_key = Str::match('/^attribute_(\d+)$/', $raw_key);
 
                     if (filled($matched_key)) {
-                        $attribute_id = (int) $matched_key;
+                        $attribute_id = (int)$matched_key;
                     }
                 }
 
-                if (! is_int($attribute_id) || $attribute_id <= 0) {
+                if (!is_int($attribute_id) || $attribute_id <= 0) {
                     return [];
                 }
 
-                $prepared_values = collect(is_array($raw_value) ? $raw_value : explode(',', (string) $raw_value))
+                $prepared_values = collect(is_array($raw_value) ? $raw_value : explode(',', (string)$raw_value))
                     ->map(function (mixed $value): int {
-                        if (is_int($value) || ctype_digit((string) $value)) {
-                            return (int) $value;
+                        if (is_int($value) || ctype_digit((string)$value)) {
+                            return (int)$value;
                         }
 
-                        $matched_value_id = Str::match('/^attribute_value_(\d+)$/i', Str::trim((string) $value));
+                        $matched_value_id = Str::match('/^attribute_value_(\d+)$/i', Str::trim((string)$value));
 
                         if (filled($matched_value_id)) {
-                            return (int) $matched_value_id;
+                            return (int)$matched_value_id;
                         }
 
                         return 0;
                     })
-                    ->filter(fn (int $value_id): bool => $value_id > 0)
+                    ->filter(fn(int $value_id): bool => $value_id > 0)
                     ->unique()
                     ->values()
                     ->all();
@@ -231,20 +232,20 @@ if (! function_exists('prepare_product_attrs')) {
     }
 }
 
-if (! function_exists('localized_product_variant_route')) {
+if (!function_exists('localized_product_variant_route')) {
     /**
-     * @param  array<int|string, int|string|array<int, int|string>>  $attribute_filters
+     * @param array<int|string, int|string|array<int, int|string>> $attribute_filters
      */
     function localized_product_variant_route(
         string $product_slug,
-        int $product_id,
-        array $attribute_filters = [],
-        bool $absolute = true,
+        int    $product_id,
+        array  $attribute_filters = [],
+        bool   $absolute = true,
     ): string {
         $normalized_filters = prepare_product_attrs($attribute_filters);
 
         $language     = resolve_language_by_locale(app()->getLocale());
-        $language_id  = (int) ($language?->id ?? 0);
+        $language_id  = (int)($language?->id ?? 0);
         $variant_slug = '';
 
         if ($language_id > 0) {
@@ -271,7 +272,7 @@ if (! function_exists('localized_product_variant_route')) {
                 ->orderBy('id')
                 ->first();
 
-            $variant_slug = Str::trim((string) $variant?->slugs->first()?->slug);
+            $variant_slug = Str::trim((string)$variant?->slugs->first()?->slug);
         }
 
         if (filled($variant_slug)) {
@@ -282,9 +283,9 @@ if (! function_exists('localized_product_variant_route')) {
         }
 
         $query_parameters = collect($normalized_filters)
-            ->mapWithKeys(fn (array $value_ids, int $attribute_id): array => [
+            ->mapWithKeys(fn(array $value_ids, int $attribute_id): array => [
                 'attribute_' . $attribute_id => collect($value_ids)
-                    ->map(fn (int $value_id): string => (string) $value_id)
+                    ->map(fn(int $value_id): string => (string)$value_id)
                     ->implode(','),
             ])
             ->all();
@@ -295,14 +296,14 @@ if (! function_exists('localized_product_variant_route')) {
     }
 }
 
-if (! function_exists('decode_html_entities')) {
+if (!function_exists('decode_html_entities')) {
     function decode_html_entities(?string $string): string
     {
-        return html_entity_decode((string) $string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return html_entity_decode((string)$string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 }
 
-if (! function_exists('escape_special_html')) {
+if (!function_exists('escape_special_html')) {
     function escape_special_html(?string $html_string): string
     {
         $prepared_html = Str::replaceMatches('/<script>.*?<\/script>/s', function ($match) {
@@ -317,7 +318,7 @@ if (! function_exists('escape_special_html')) {
     }
 }
 
-if (! function_exists('convert_price')) {
+if (!function_exists('convert_price')) {
     function convert_price(float $price, string $code_from, string $code_to): float
     {
         return app(ConvertPrice::class)->convert(
@@ -328,7 +329,7 @@ if (! function_exists('convert_price')) {
     }
 }
 
-if (! function_exists('format_price')) {
+if (!function_exists('format_price')) {
     function format_price(float|int $price, ?string $currency_code = null, float|int $exchange_rate = 0, bool $is_formatting = true): string|float
     {
         return app(ConvertPrice::class)->format(
@@ -340,7 +341,7 @@ if (! function_exists('format_price')) {
     }
 }
 
-if (! function_exists('replace_currency_symbol_to_code')) {
+if (!function_exists('replace_currency_symbol_to_code')) {
     function replace_currency_symbol_to_code(string $price_string, ?string $currency_symbol = null, ?string $currency_code = null): string
     {
         return app(ConvertPrice::class)->replaceCurrencySymbolToCode(
@@ -351,28 +352,28 @@ if (! function_exists('replace_currency_symbol_to_code')) {
     }
 }
 
-if (! function_exists('str_more_or_equal_length')) {
+if (!function_exists('str_more_or_equal_length')) {
     function str_more_or_equal_length(?string $string, ?int $length): bool
     {
         return $string !== null && $length !== null && Str::length(Str::trim($string)) >= $length;
     }
 }
 
-if (! function_exists('num_more_or_equal_num')) {
+if (!function_exists('num_more_or_equal_num')) {
     function num_more_or_equal_num(mixed $num, ?int $num_for_comparison): bool
     {
         return is_numeric($num) && $num_for_comparison !== null && $num >= $num_for_comparison;
     }
 }
 
-if (! function_exists('get_now_date')) {
+if (!function_exists('get_now_date')) {
     function get_now_date(?string $time_zone = null): Carbon|CarbonInterface
     {
         return now($time_zone ?: config('app.timezone'));
     }
 }
 
-if (! function_exists('resolve_modules_for_context')) {
+if (!function_exists('resolve_modules_for_context')) {
     /**
      * @throws BindingResolutionException
      * @throws CircularDependencyException
@@ -383,7 +384,7 @@ if (! function_exists('resolve_modules_for_context')) {
     }
 }
 
-if (! function_exists('sanitaze_url')) {
+if (!function_exists('sanitaze_url')) {
     function sanitaze_url(?string $url): string
     {
         if ($url === null) {
@@ -401,19 +402,19 @@ if (! function_exists('sanitaze_url')) {
     }
 }
 
-if (! function_exists('normalize_upload_path_template')) {
+if (!function_exists('normalize_upload_path_template')) {
     function normalize_upload_path_template(?string $path): string
     {
-        $normalized_path = (string) $path;
+        $normalized_path = (string)$path;
 
-        return (string) preg_replace('/\/\d{4}\/\d{2}$/', '/{year}/{month}', $normalized_path);
+        return (string)preg_replace('/\/\d{4}\/\d{2}$/', '/{year}/{month}', $normalized_path);
     }
 }
 
-if (! function_exists('resolve_upload_path_placeholders')) {
+if (!function_exists('resolve_upload_path_placeholders')) {
     function resolve_upload_path_placeholders(?string $path): string
     {
-        $normalized_path = (string) $path;
+        $normalized_path = (string)$path;
         $now_date        = get_now_date();
 
         return Str::replace(
@@ -424,7 +425,7 @@ if (! function_exists('resolve_upload_path_placeholders')) {
     }
 }
 
-if (! function_exists('resolve_language_by_locale')) {
+if (!function_exists('resolve_language_by_locale')) {
     function resolve_language_by_locale(string $locale, bool $is_get_new_instance = false): ?Language
     {
         if ($is_get_new_instance === true) {
@@ -437,27 +438,27 @@ if (! function_exists('resolve_language_by_locale')) {
     }
 }
 
-if (! function_exists('get_page_settings')) {
+if (!function_exists('get_page_settings')) {
     function get_page_settings(PageSetting $page_setting): array
     {
         return is_array($page_setting->settings) ? $page_setting->settings : [];
     }
 }
 
-if (! function_exists('get_sorting_items')) {
+if (!function_exists('get_sorting_items')) {
     /**
      * @return Collection<int, array<string, mixed>>
      */
     function get_sorting_items(PageSetting $page_setting): Collection
     {
         return collect($page_setting->getSortingItemsFromSettings())
-            ->filter(fn (array $sorting_item): bool => (bool) Arr::get($sorting_item, 'is_enabled', true))
+            ->filter(fn(array $sorting_item): bool => (bool)Arr::get($sorting_item, 'is_enabled', true))
             ->sortBy('sort_order')
             ->values();
     }
 }
 
-if (! function_exists('resolve_sort_code')) {
+if (!function_exists('resolve_sort_code')) {
     function resolve_sort_code(PageSetting $page_setting, string $sort_value): string
     {
         if ($sort_value === '') {
@@ -469,10 +470,10 @@ if (! function_exists('resolve_sort_code')) {
 
         foreach ($sorting_items as $sorting_item) {
             $item_get   = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
-            $item_value = (string) Arr::get($item_get, 'value', '');
+            $item_value = (string)Arr::get($item_get, 'value', '');
 
             if (filled($item_value)) {
-                $sorting_values_to_code[$item_value] = (string) Arr::get($sorting_item, 'code', '');
+                $sorting_values_to_code[$item_value] = (string)Arr::get($sorting_item, 'code', '');
             }
         }
 
@@ -480,7 +481,7 @@ if (! function_exists('resolve_sort_code')) {
     }
 }
 
-if (! function_exists('normalize_locale')) {
+if (!function_exists('normalize_locale')) {
     function normalize_locale(?string $locale, bool $is_get_new_instance = false): string
     {
         if ($is_get_new_instance === true) {
@@ -491,7 +492,7 @@ if (! function_exists('normalize_locale')) {
 
         $languages = $language->getActiveLanguages();
 
-        if ($locale === null || $languages->containsStrict(fn (Language $language) => $language->code === $locale) === false) {
+        if ($locale === null || $languages->containsStrict(fn(Language $language) => $language->code === $locale) === false) {
             $locale = app()->getLocale();
         }
 
@@ -499,7 +500,7 @@ if (! function_exists('normalize_locale')) {
     }
 }
 
-if (! function_exists('get_slug_variants')) {
+if (!function_exists('get_slug_variants')) {
     function get_slug_variants(?string $sluggable_type, ?string $slug_value = null): array
     {
         if ($sluggable_type === null) {
@@ -547,7 +548,7 @@ if (! function_exists('get_slug_variants')) {
     }
 }
 
-if (! function_exists('get_allowed_locales')) {
+if (!function_exists('get_allowed_locales')) {
     function get_allowed_locales(bool $is_get_new_instance = false): array
     {
         try {

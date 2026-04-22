@@ -14,8 +14,8 @@ use Exception;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use LogicException;
 
@@ -139,16 +139,17 @@ class CreateProduct extends CreateRecord
         }
 
         $default_variant = ProductVariant::query()->create([
-            'product_id'      => (int) $product->id,
-            'is_default'      => true,
-            'is_active'       => (bool) $product->is_active,
-            'quantity'        => (int) $product->quantity,
-            'minimum'         => max(1, (int) $product->minimum),
-            'price'           => (float) $product->price,
-            'image'           => $product->image,
-            'date_available'  => $product->date_available,
-            'sort_order'      => 0,
-            'size_guide_data' => null,
+            'product_id'                => (int) $product->id,
+            'is_default'                => true,
+            'is_active'                 => (bool) $product->is_active,
+            'quantity'                  => (int) $product->quantity,
+            'minimum'                   => max(1, (int) $product->minimum),
+            'price'                     => (float) $product->price,
+            'image'                     => $product->image,
+            'date_available'            => $product->date_available,
+            'sort_order'                => 0,
+            'size_guide_data'           => null,
+            'composition_and_care_data' => null,
         ]);
 
         $product->default_variant_id = (int) $default_variant->id;
