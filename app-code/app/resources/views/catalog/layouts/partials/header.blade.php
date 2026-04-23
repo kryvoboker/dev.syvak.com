@@ -61,7 +61,12 @@
                 </div>
 
                 <div class="flex items-center justify-between gap-x-7">
-                    <x-catalog::common.language-swithcer class="hidden md:inline-flex" :languages="$header_data['languages']"/>
+                    <x-catalog::common.language-swithcer class="hidden md:inline-flex"
+                                                         :languages="$header_data['languages']"
+                                                         :sluggable_type="$header_data['sluggable_type']"
+                                                         :slug="$header_data['slug']"
+                                                         :variant_slug="$header_data['variant_slug']"
+                                                         :attribute_filters="$header_data['attribute_filters']" />
 
                     <button class="hidden md:block open-pc-search-btn"
                             type="button"

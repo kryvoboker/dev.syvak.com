@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\View as LaravelView;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -99,9 +100,9 @@ class AppServiceProvider extends ServiceProvider
         $locale_key      = config('localization.locale_parameter', 'locale');
 
         if ($allowed_locales !== []) {
-            array_map('preg_quote', $allowed_locales)
-                |> (fn($x) => implode('|', $x))
-                |> (fn($x) => Route::pattern($locale_key, $x));
+            $allowed_locales_pattern = implode('|', array_map('preg_quote', $allowed_locales));
+
+            Route::pattern($locale_key, $allowed_locales_pattern);
         }
 
         $currency             = new Currency()->getDefaultActiveCurrency();
@@ -115,18 +116,18 @@ class AppServiceProvider extends ServiceProvider
             $device_type = config('devices.types.desktop');
         }
 
-        $max_viewport_width    = max(
+        $max_viewport_width = max(
             1,
-            (int)data_get(
+            (int) data_get(
                 $app_settings_service->getSettings(),
                 'system_settings.frontend.max_viewport_width',
-                (int)config('app.frontend.max_viewport_width', 1920),
+                (int) config('app.frontend.max_viewport_width', 1920),
             ),
         );
-        $default_no_image_path = (string)data_get(
+        $default_no_image_path = (string) data_get(
             $app_settings_service->getSettings(),
             'system_settings.images.default_no_image',
-            (string)config('app.images.default_no_image', 'images/no-image.png'),
+            (string) config('app.images.default_no_image', 'images/no-image.png'),
         );
 
         if ($currency !== null) {
@@ -161,11 +162,20 @@ class AppServiceProvider extends ServiceProvider
         View::share([
             'app_settings'        => $app_settings_service->getSettings(),
             'no_image_url'        => asset('storage/' . $default_no_image_path),
-            'current_locale'      => app()->getLocale(),
             'max_viewport_width'  => $max_viewport_width,
             'current_device_type' => $device_type,
             'locale_key'          => $locale_key,
         ]);
+
+        /**
+         * NOTE:
+         * Locale is finalized by SetDefaultLocalePrefix middleware.
+         * We must inject current locale at render time, otherwise early
+         * boot-time share can keep default locale (e.g. "en") for all views.
+         */
+        View::composer('*', function (LaravelView $view): void {
+            $view->with('current_locale', app()->getLocale());
+        });
 
         if (app()->isLocal() && app()->hasDebugModeEnabled() === true) {
             // Check SQL queries in the local environment for remote debugging

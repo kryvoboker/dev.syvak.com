@@ -11,7 +11,12 @@
         </button>
 
         <div class="flex md:hidden items-center justify-between gap-x-2 border-y border-y-opacity-light-gray-40% py-18px">
-            <x-catalog::common.language-swithcer class="inline-flex" :languages="$header_data['languages']"/>
+            <x-catalog::common.language-swithcer class="inline-flex"
+                                                 :languages="$header_data['languages']"
+                                                 :sluggable_type="$header_data['sluggable_type']"
+                                                 :slug="$header_data['slug']"
+                                                 :variant_slug="$header_data['variant_slug']"
+                                                 :attribute_filters="$header_data['attribute_filters']" />
 
             <button class="open-mob-search-btn btn btn-text btn-circle"
                     type="button"

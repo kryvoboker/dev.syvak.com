@@ -1,7 +1,21 @@
+@props([
+    'languages' => [],
+    'sluggable_type' => null,
+    'slug' => null,
+    'variant_slug' => null,
+    'attribute_filters' => [],
+    'current_locale' => app()->getLocale(),
+])
+
 @php
     $current_route = request()->route()->getName();
     $route_params = request()->route()->parameters();
-    $slug_variants = get_slug_variants($sluggable_type ?? null, $slug ?? null);
+    $slug_variants = get_slug_variants(
+        $sluggable_type ?? null,
+        $slug ?? null,
+        $variant_slug ?? null,
+        is_array($attribute_filters) ? $attribute_filters : [],
+    );
 @endphp
 
 <div {{ $attributes->merge(['class' => 'dropdown dropdown-lang-menu relative']) }}>
@@ -39,14 +53,21 @@
                     </span>
                 @else
                     @php
-                        if (isset($slug)) {
-                            $route_params = array_merge($route_params, [
-                                'slug' => $slug_variants[$language->code] ?? $slug,
-                                $locale_key => $language->code,
-                            ]);
-                        } else {
-                            $route_params = array_merge($route_params, [
-                                $locale_key => $language->code,
+                        $next_route_params = array_merge($route_params, [
+                            $locale_key => $language->code,
+                        ]);
+                        $next_route_name = $current_route;
+                        $localized_slug_data = $slug_variants[$language->code] ?? null;
+
+                        if (is_array($localized_slug_data)) {
+                            $next_route_params = array_merge($next_route_params, $localized_slug_data);
+
+                            if (filled((string) ($localized_slug_data['variant_slug'] ?? ''))) {
+                                $next_route_name = 'localized.catalog.product.variant.show';
+                            }
+                        } elseif (is_string($localized_slug_data) && isset($slug)) {
+                            $next_route_params = array_merge($next_route_params, [
+                                'slug' => $localized_slug_data,
                             ]);
                         }
                     @endphp
@@ -55,7 +76,7 @@
                         <span class="material-symbols--square shrink-0 size-2 bg-transparent"></span>
 
                         <a class="block w-full p-3"
-                           href="{{ route($current_route, $route_params) }}">
+                           href="{{ route($next_route_name, $next_route_params) }}">
                             {{ $language->name }}
                         </a>
                     </span>
