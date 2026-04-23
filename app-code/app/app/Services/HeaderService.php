@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Catalogs\Categories\Category;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Catalogs\Categories\Category;
 use Illuminate\Database\Eloquent\Collection;
 
 class HeaderService
@@ -20,7 +20,7 @@ class HeaderService
             'system_settings.images.path_to_logo',
             (string) config('app.images.path_to_logo', 'images/logo.png'),
         );
-        $categories   = $category->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
+        $categories = $category->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
             $app_settings->language_id,
         )
             ->map(function ($category_item): array {
@@ -62,6 +62,10 @@ class HeaderService
             'languages'                => $languages,
             'menu_data'                => $this->processCreateMainMenu($categories, $languages),
             'socials'                  => $socials,
+            'sluggable_type'           => $params['sluggable_type'] ?? null,
+            'slug'                     => $params['slug'] ?? null,
+            'variant_slug'             => $params['variant_slug'] ?? null,
+            'attribute_filters'        => is_array($params['attribute_filters'] ?? null) ? $params['attribute_filters'] : [],
         ];
     }
 

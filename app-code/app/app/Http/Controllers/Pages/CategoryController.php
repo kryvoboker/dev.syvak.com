@@ -34,10 +34,13 @@ class CategoryController extends Controller
         string $locale,
         ?string $slug,
     ): View|Factory {
-        $locale                  = normalize_locale($locale);
-        $language                = resolve_language_by_locale($locale);
-        $language_id             = $language instanceof Language ? (int) $language->id : null;
-        $header_data             = app(HeaderService::class)();
+        $locale      = normalize_locale($locale);
+        $language    = resolve_language_by_locale($locale);
+        $language_id = $language instanceof Language ? (int) $language->id : null;
+        $header_data = app(HeaderService::class)([
+            'sluggable_type' => Category::class,
+            'slug'           => $slug,
+        ]);
         $page_type               = try_detect_page_type($request);
         $page_setting            = app(PageSettingsBootstrapService::class)->bootstrapCategoryPageSetting();
         $page_settings_arr       = get_page_settings($page_setting);
@@ -73,11 +76,6 @@ class CategoryController extends Controller
         $is_has_more_pages                = (bool) $paginator?->hasMorePages();
         $is_ajax_products_loading_enabled = (bool) Arr::get($page_settings_arr, 'pagination.ajax_products_loading_enabled') === true
             && $products_per_page_limit < (int) $paginator?->total();
-
-        \Illuminate\Support\Facades\View::share([
-            'sluggable_type' => Category::class,
-            'slug'           => $slug,
-        ]);
 
         $data = [
             'header_data' => $header_data,
