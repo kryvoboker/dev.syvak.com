@@ -56,6 +56,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
         import('@ts-features/pages/product/productImageGallery.ts')
             .then(module => module.handleProductImageGallery());
+
+        import('@ts-features/pages/product/productSizeGuideModal.ts')
+            .then(module => module.handleProductSizeGuideModal());
     }
 
     if (pageType === $CATEGORY_PAGE_TYPE || pageType === $SEARCH_PAGE_TYPE) {

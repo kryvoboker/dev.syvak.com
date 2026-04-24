@@ -1,5 +1,6 @@
 figma design link - https://www.figma.com/design/gcUrHK4jui7vuBwqrM8gTH/--S-Y-V-A-K--?node-id=344-3934&p=f&t=uAcYZrt8DprZDAyg-0
 copy figma design link - https://www.figma.com/design/m17Qcmu7S8RROW0Q2G9T1C/--S-Y-V-A-K----Copy-?node-id=344-3934
+copy figma design link with dev mode - https://www.figma.com/design/plNxQHmr5AdMhnElTtx1Ie/--S-Y-V-A-K----Copy-for-Developer-?node-id=344-3934&p=f&m=dev
 
 For run Google Chrome in WSL 2:
 

@@ -139,18 +139,10 @@
                                 </div>
                             </div>
                         @endforeach
-
-                        @if(!empty($product_view_data['size_guide']))
-                            <button class="inline-flex items-center justify-end gap-x-2 text-sm md:text-lg"
-                                    type="button">
-                                <span class="icon-[mdi--tag-outline]"></span>
-                                {{ __('catalog/default.product.labels.size_help') }}
-                            </button>
-                        @endif
                     </div>
                 @endif
 
-                <button class="2xl:col-start-3 2xl:col-end-4 2xl:row-start-18 2xl:row-end-19 flex items-center gap-x-2 ms-auto">
+                <button class="product-size-guide__open-btn 2xl:col-start-3 2xl:col-end-4 2xl:row-start-18 2xl:row-end-19 flex items-center gap-x-2 ms-auto">
                     @if(filled($product_view_data['size_guide']))
                         <span class="custom-icon icon-[mingcute--tag-2-line]"></span>
 
@@ -196,104 +188,14 @@
                     </div>
                 @endif
             </div>
+
+            @if(filled($product_view_data['description']))
+                <div class="mt-4 md:mt-6 lg:mt-12">
+                    {!! $product_view_data['description'] !!}
+                </div>
+            @endif
         </div>
     </section>
 
-    @if(filled($product_view_data['size_guide']))
-        <button type="button"
-                class="btn btn-primary"
-                aria-haspopup="dialog"
-                aria-expanded="false"
-                aria-controls="fullscreen-modal"
-                data-overlay="#fullscreen-modal">Fullscreen modal
-        </button>
-
-        <div id="fullscreen-modal" class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 open opened p-1" role="dialog" tabindex="-1">
-            <div class="modal-dialog max-w-full">
-                <div class="modal-content h-full max-h-none justify-between">
-                    <div class="modal-header">
-                        <h3 class="modal-title">
-                            {{ $product_view_data['size_guide']['title'] }}
-                        </h3>
-
-                        <button type="button" class="btn btn-text btn-circle btn-sm"
-                                aria-label="Close"
-                                data-overlay="#fullscreen-modal">
-                            <span class="custom-icon icon-[tabler--x]"></span>
-                        </button>
-                    </div>
-
-                    <div class="modal-body grow p-0">
-                        <div class="flex flex-col items-center justify-center gap-y-4 md:gap-x-5">
-                            <div>
-                                {!! $product_view_data['size_guide']['short_description'] !!}
-                            </div>
-
-                            <div class="flex flex-col gap-y-2">
-                                <div class="w-full overflow-x-auto">
-                                    <table class="table">
-                                        <thead>
-                                        <tr>
-                                            @foreach($product_view_data['size_guide']['table_rows'] as $table_cols)
-                                                @continue($loop->first === false)
-
-                                                @foreach($table_cols as $table_col)
-                                                    <th class="{{ filled($table_col) ? 'border border-opacity-light-gray-40%' : '' }}">
-                                                        {{ $table_col }}
-                                                    </th>
-                                                @endforeach
-                                            @endforeach
-                                        </tr>
-                                        </thead>
-
-                                        <tbody>
-                                        @foreach($product_view_data['size_guide']['table_rows'] as $table_cols)
-                                            @continue($loop->first === true)
-
-                                            <tr>
-                                                @foreach($table_cols as $table_col)
-                                                    <td class="border border-opacity-light-gray-40%">
-                                                        {{ $table_col }}
-                                                    </td>
-                                                @endforeach
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div>
-                                    <x-catalog::common.img
-                                        class="size-full grow object-contain"
-                                        :urls_data="$product_view_data['size_guide']['image']['urls']"
-                                        :size="$product_view_data['size_guide']['image']['width']"
-                                        :max-density="3"
-                                        sizes="100vw"
-                                        width="{{ $product_view_data['size_guide']['image']['width'] }}"
-                                        height="{{ $product_view_data['size_guide']['image']['height'] }}"
-                                        alt="{{ strip_tags($product_view_data['size_guide']['title']) }}"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="mb-2">
-                                    {{ $product_view_data['size_guide']['full_description_title'] }}
-                                </div>
-
-                                <div>
-                                    {{ $product_view_data['size_guide']['full_description'] }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-soft btn-secondary" data-overlay="#fullscreen-modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    @include('catalog.pages.partials.product.product-size-guide-modal')
 @endsection
