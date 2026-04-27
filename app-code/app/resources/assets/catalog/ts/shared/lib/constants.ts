@@ -30,6 +30,12 @@ export const $SEARCH_PAGE_TYPE: string = 'search';
 
 /**
  * @global
+ * @var {string} $CART_PAGE_TYPE
+ */
+export const $CART_PAGE_TYPE: string = 'cart';
+
+/**
+ * @global
  * @var {string} $PAGE_TYPE_KEY
  */
 export const $PAGE_TYPE_KEY: string = 'page_type';

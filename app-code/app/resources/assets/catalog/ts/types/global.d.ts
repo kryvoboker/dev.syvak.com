@@ -22,6 +22,13 @@ export interface WindowAppParams {
     is_has_more_pages?: boolean;
     load_more_products_ajax_url?: string;
     next_page?: number | null;
+    cart_mode?: string;
+    cart_modal_ajax_url?: string;
+    cart_store_url?: string;
+    cart_update_url_pattern?: string;
+    cart_delete_url_pattern?: string;
+    order_validate_url?: string;
+    order_store_url?: string;
 
     [key: string]: unknown;
 }
