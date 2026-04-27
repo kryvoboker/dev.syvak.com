@@ -481,6 +481,10 @@ if (! function_exists('resolve_sort_code')) {
 if (! function_exists('normalize_locale')) {
     function normalize_locale(?string $locale, bool $is_get_new_instance = false): string
     {
+        if ($locale === null) {
+            return app()->getLocale();
+        }
+
         if ($is_get_new_instance === true) {
             $language = new Language();
         } else {
@@ -489,7 +493,7 @@ if (! function_exists('normalize_locale')) {
 
         $languages = $language->getActiveLanguages();
 
-        if ($locale === null || $languages->contains(function (mixed $language) use ($locale): bool {
+        if ($languages->contains(function (mixed $language) use ($locale): bool {
             return $language instanceof Language && $language->code === $locale;
         }) === false) {
             $locale = app()->getLocale();

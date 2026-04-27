@@ -76,8 +76,8 @@
                         <span class="icon-[si--search-line] custom-icon"></span>
                     </button>
 
-                    <button class="open-cart-modal-btn" type="button">
-                        <span class="icon-[material-symbols-light--shopping-bag-outline] custom-icon"></span>
+                    <button class="open-cart-modal-btn" id="open-cart-modal-btn" type="button">
+                        <span class="custom-icon icon-[material-symbols-light--shopping-bag-outline]"></span>
                     </button>
                 </div>
             </div>

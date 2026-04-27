@@ -17,7 +17,7 @@
             <section class="footer-subscribe flex flex-col gap-4" aria-label="{{ $subscription_data['title'] }}">
                 <div class="footer-title">{{ $subscription_data['title'] }}</div>
 
-                <x-catalog::common.telegram-link :telegram_data="$subscription_data" />
+                <x-catalog::common.telegram-link :telegram_data="$subscription_data"/>
 
                 <p class="footer-support-text max-w-496px font-light text-white uppercase opacity-70 tracking-0.04em">
                     {{ $subscription_data['support_text'] }}
@@ -103,3 +103,6 @@
         </div>
     </div>
 </footer>
+
+<x-catalog::cart.modal/>
+<x-catalog::cart.fast-order-modal/>
