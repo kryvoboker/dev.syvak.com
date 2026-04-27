@@ -90,4 +90,36 @@ return [
             'telegram'      => 'Telegram',
         ],
     ],
+
+    'cart' => [
+        'labels' => [
+            'cart'       => 'Кошик',
+            'fast_order' => 'Швидке замовлення',
+            'empty'      => 'Ваш кошик порожній',
+            'quantity'   => 'К-сть',
+            'total'      => 'Сума',
+            'first_name' => 'Імʼя',
+            'last_name'  => 'Прізвище',
+            'phone'      => 'Телефон',
+        ],
+        'buttons' => [
+            'continue_shopping' => 'Продовжити покупки',
+            'checkout'          => 'Оформити замовлення',
+            'submit_fast_order' => 'Оформити швидке замовлення',
+            'show_more_items'   => 'Показати інші товари (:count)',
+            'hide_more_items'   => 'Приховати інші товари',
+        ],
+        'totals' => [
+            'items_subtotal' => 'Сума товарів',
+            'grand_total'    => 'Разом до сплати',
+        ],
+        'messages' => [
+            'variant_not_found' => 'Варіант товару не знайдено.',
+            'item_added'        => 'Товар додано до кошика.',
+            'item_updated'      => 'Позицію в кошику оновлено.',
+            'item_removed'      => 'Позицію видалено з кошика.',
+            'cart_is_empty'     => 'Кошик порожній.',
+            'payment_failed'    => 'Оплата неуспішна. Спробуйте ще раз.',
+        ],
+    ],
 ];

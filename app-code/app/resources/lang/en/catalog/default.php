@@ -90,4 +90,36 @@ return [
             'telegram'      => 'Telegram',
         ],
     ],
+
+    'cart' => [
+        'labels' => [
+            'cart'       => 'Cart',
+            'fast_order' => 'Fast order',
+            'empty'      => 'Your cart is empty',
+            'quantity'   => 'Qty',
+            'total'      => 'Total',
+            'first_name' => 'First name',
+            'last_name'  => 'Last name',
+            'phone'      => 'Phone',
+        ],
+        'buttons' => [
+            'continue_shopping' => 'Continue shopping',
+            'checkout'          => 'Checkout',
+            'submit_fast_order' => 'Submit fast order',
+            'show_more_items'   => 'Show other items (:count)',
+            'hide_more_items'   => 'Hide other items',
+        ],
+        'totals' => [
+            'items_subtotal' => 'Items subtotal',
+            'grand_total'    => 'Grand total',
+        ],
+        'messages' => [
+            'variant_not_found' => 'Product variant was not found.',
+            'item_added'        => 'Product was added to cart.',
+            'item_updated'      => 'Cart item was updated.',
+            'item_removed'      => 'Cart item was removed.',
+            'cart_is_empty'     => 'Cart is empty.',
+            'payment_failed'    => 'Payment failed. Please try again.',
+        ],
+    ],
 ];

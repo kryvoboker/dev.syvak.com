@@ -1,8 +1,9 @@
-import { $CATEGORY_PAGE_TYPE, $PRODUCT_PAGE_TYPE, $SEARCH_PAGE_TYPE } from "@ts-shared/lib/constants.ts";
+import { $CART_PAGE_TYPE, $CATEGORY_PAGE_TYPE, $PRODUCT_PAGE_TYPE, $SEARCH_PAGE_TYPE } from "@ts-shared/lib/constants.ts";
 
 document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsDropdownCollection  = window.$hsDropdownCollection || [];
     window.$hsOverlayCollection   = window.$hsOverlayCollection || [];
+    window.$hsAccordionCollection = window.$hsAccordionCollection || [];
     const pageType: string | null = window.app_params?.page_type ?? null;
 
     import('@ts-shared/lib/helpers.ts')
@@ -16,6 +17,12 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
     import('@ts-shared/lib/validateForm.ts')
         .then(module => module.handleValidateForms());
+
+    import('@ts-features/cart/cartModal.ts')
+        .then(module => module.handleCartModal());
+
+    import('@ts-features/cart/fastOrderModal.ts')
+        .then(module => module.handleFastOrderModal());
 
     import('@ts-features/menu/language.ts')
         .then(module => module.handleLanguageMenu());
@@ -43,8 +50,6 @@ document.addEventListener('DOMContentLoaded', (): void => {
         });
 
     if (pageType === $CATEGORY_PAGE_TYPE) {
-        window.$hsAccordionCollection = window.$hsAccordionCollection || [];
-
         import('@ts-features/common/products/productsList.ts')
             .then(module => module.handleCategoryProductsList());
 
@@ -64,5 +69,10 @@ document.addEventListener('DOMContentLoaded', (): void => {
     if (pageType === $CATEGORY_PAGE_TYPE || pageType === $SEARCH_PAGE_TYPE) {
         import('@ts-features/common/products/loadMoreProducts.ts')
             .then(module => module.handleLoadMoreProducts());
+    }
+
+    if (pageType === $CART_PAGE_TYPE) {
+        import('@ts-features/cart/cartPage.ts')
+            .then(module => module.handleCartPage());
     }
 });

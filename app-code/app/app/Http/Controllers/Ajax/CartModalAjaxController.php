@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Ajax;
 
 use App\Http\Controllers\Controller;
+use App\Services\Cart\CartService;
 use App\Services\Trait\CartTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Throwable;
 
 class CartModalAjaxController extends Controller
@@ -23,12 +25,21 @@ class CartModalAjaxController extends Controller
      */
     public function index(Request $request, ?string $locale): JsonResponse
     {
-        $locale = normalize_locale($locale);
-
-        $data = [];
+        $locale    = normalize_locale($locale);
+        $cart_mode = Str::lower((string) $request->query('cart_mode', 'regular'));
+        $cart_mode = in_array($cart_mode, ['regular', 'fast_order'], true) ? $cart_mode : 'regular';
+        $cart_data = app(CartService::class)->getSnapshot($locale, $cart_mode);
 
         return response()->json([
-            'html' => view('catalog.partials.cart.modal-items', $data)->render(),
+            'success'  => true,
+            'mode'     => $cart_mode,
+            'cart'     => $cart_data,
+            'rendered' => [
+                'modal_items_html' => view('catalog.partials.cart.modal-items', [
+                    'cart_data' => $cart_data,
+                    'cart_mode' => $cart_mode,
+                ])->render(),
+            ],
         ]);
     }
 }

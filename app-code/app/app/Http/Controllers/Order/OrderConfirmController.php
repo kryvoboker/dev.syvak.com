@@ -7,46 +7,42 @@ namespace App\Http\Controllers\Order;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Order\OrderConfirmStoreRequest;
 use App\Http\Requests\Order\OrderConfirmValidateRequest;
+use App\Services\Order\OrderCreationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 
 class OrderConfirmController extends Controller
 {
-    /**
-     * @param OrderConfirmStoreRequest $request
-     * @param string|null              $locale
-     *
-     * @return RedirectResponse
-     */
-	public function store(OrderConfirmStoreRequest $request, ?string $locale): RedirectResponse
-	{
-        $locale = normalize_locale($locale);
+    public function store(
+        OrderConfirmStoreRequest $request,
+        OrderCreationService $order_creation_service,
+        ?string $locale,
+    ): RedirectResponse|JsonResponse {
+        $locale      = normalize_locale($locale);
+        $result_data = $order_creation_service->createOrder($request->validated(), $locale);
 
-        $is_success_create_order = true; // TODO: need replace it by real code
-
-        if ($is_success_create_order === true) {
-            redirect(localized_route('localized.catalog.thank-you.index'), [
-                'locale' => $locale,
-            ]);
+        if ($request->expectsJson()) {
+            return response()->json($result_data);
         }
 
-        return  redirect(localized_route('localized.catalog.failure-order.index'), [
-            'locale' => $locale,
-        ]);
-	}
+        $redirect_url = (string) Arr::get(
+            $result_data,
+            'redirect_url',
+            localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
+        );
 
-    /**
-     * @param OrderConfirmValidateRequest $request
-     * @param string|null                 $locale
-     *
-     * @return JsonResponse
-     */
-    public function validate(OrderConfirmValidateRequest $request, ?string $locale): JsonResponse
-    {
-        $locale = normalize_locale($locale);
+        return redirect($redirect_url);
+    }
 
-        $data = [];
+    public function validate(
+        OrderConfirmValidateRequest $request,
+        OrderCreationService $order_creation_service,
+        ?string $locale,
+    ): JsonResponse {
+        $locale      = normalize_locale($locale);
+        $result_data = $order_creation_service->validateOrderData($request->validated(), $locale);
 
-        return response()->json($data);
+        return response()->json($result_data);
     }
 }
