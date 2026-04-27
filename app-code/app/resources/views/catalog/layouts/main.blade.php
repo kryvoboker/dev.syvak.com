@@ -33,8 +33,15 @@
 <script>
     window.app_params = {
         ...(window.app_params ?? {}),
-        ...@json([
+        ...@js([
             'page_type' => $page_type,
+            'cart_mode' => 'regular',
+            'cart_modal_ajax_url' => localized_route('localized.catalog.cart-modal-ajax.index'),
+            'cart_store_url' => localized_route('localized.catalog.cart.store'),
+            'cart_update_url_pattern' => localized_route('localized.catalog.cart.update', ['cart_id' => '__variant_id__']),
+            'cart_delete_url_pattern' => localized_route('localized.catalog.cart.delete', ['cart_id' => '__variant_id__']),
+            'order_validate_url' => localized_route('localized.catalog.order-confirm.validate'),
+            'order_store_url' => localized_route('localized.catalog.order-confirm.store')
         ])
     };
 </script>
