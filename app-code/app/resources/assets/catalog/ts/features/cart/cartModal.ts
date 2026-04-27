@@ -1,0 +1,173 @@
+import type { CartMode }                from "@ts-features/cart/cartTypes.ts";
+import {
+    addCartItem, loadCartSnapshot, removeCartItem,
+    toggleCartLoader, updateCartItemQuantity
+}                                       from "@ts-features/cart/cartCrud.ts";
+import { getCartMode, setCartMode }     from "@ts-features/cart/cartModeStorage.ts";
+import { initAccordion }                from "@ts-shared/accordion/initAccordion.ts";
+import { initDrawer }                   from "@ts-shared/drawer/initDrawer.ts";
+import { findElem, getClosestParentEl } from "@ts-shared/lib/helpers.ts";
+import { Cart }                         from "@ts-features/cart/constants.ts";
+import $FAST_ORDER = Cart.$FAST_ORDER;
+import $REGULAR = Cart.$REGULAR;
+
+const openSelectedCartDrawer = async (mode: CartMode): Promise<void> => {
+    const selector = mode === $FAST_ORDER ? '.open-cart-modal-fast-order-trigger' : '.open-cart-modal-regular-trigger';
+    const trigger  = <HTMLButtonElement | null>findElem(selector);
+
+    if (!trigger) {
+        return;
+    }
+
+    trigger.click();
+
+    toggleCartLoader(true);
+
+    await loadCartSnapshot(mode)
+        .finally((): void => toggleCartLoader(false));
+
+    const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
+
+    if (accordionElement) {
+        initAccordion(accordionElement);
+    }
+};
+
+const bindAddToCartButtons = (): void => {
+    if (document.body.dataset.cartAddBound === '1') {
+        return;
+    }
+
+    document.body.dataset.cartAddBound = '1';
+
+    document.addEventListener('click', async (event: Event): Promise<void> => {
+        const target          = event.target as HTMLElement;
+        const regularButton   = <HTMLElement | null>getClosestParentEl('[data-add-to-cart]', target);
+        const fastOrderButton = <HTMLElement | null>getClosestParentEl('[data-fast-order]', target);
+
+        if (regularButton === null && fastOrderButton === null) {
+            return;
+        }
+
+        const isFastOrder: boolean             = fastOrderButton !== null;
+        const sourceButton: HTMLElement | null = isFastOrder ? fastOrderButton : regularButton;
+
+        if (!sourceButton) {
+            return;
+        }
+
+        const rawVariantId: string | undefined = isFastOrder
+            ? fastOrderButton?.dataset?.fastOrder
+            : regularButton?.dataset?.addToCart;
+        const variantId: number                = Number(rawVariantId ?? 0);
+
+        if (!Number.isInteger(variantId) || variantId <= 0) {
+            return;
+        }
+
+        const mode: CartMode = isFastOrder ? $FAST_ORDER : $REGULAR;
+
+        setCartMode(mode);
+        toggleCartLoader(true);
+
+        await addCartItem(variantId, mode)
+            .finally((): void => toggleCartLoader(false));
+
+        await openSelectedCartDrawer(mode);
+    });
+};
+
+const bindMutationHandlers = (): void => {
+    if (document.body.dataset.cartMutationBound === '1') {
+        return;
+    }
+
+    document.body.dataset.cartMutationBound = '1';
+
+    document.addEventListener('change', async (event: Event): Promise<void> => {
+        const target        = event.target as HTMLElement;
+        const quantityInput = <HTMLInputElement | null>getClosestParentEl('[data-cart-item-quantity]', target);
+
+        if (!quantityInput) {
+            return;
+        }
+
+        const mode: CartMode    = getCartMode();
+        const variantId: number = Number(quantityInput.dataset.variantId ?? 0);
+        const quantity: number  = Number(quantityInput.value ?? 1);
+
+        if (!Number.isInteger(variantId) || variantId <= 0) {
+            return;
+        }
+
+        toggleCartLoader(true);
+
+        await updateCartItemQuantity(variantId, Math.max(1, quantity), mode)
+            .finally((): void => toggleCartLoader(false));
+
+        const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
+
+        if (accordionElement) {
+            initAccordion(accordionElement);
+        }
+    });
+
+    document.addEventListener('click', async (event: Event): Promise<void> => {
+        const target       = event.target as HTMLElement;
+        const removeButton = <HTMLElement | null>getClosestParentEl('[data-remove-cart-item]', target);
+
+        if (!removeButton) {
+            return;
+        }
+
+        const mode: CartMode    = getCartMode();
+        const variantId: number = Number(removeButton.dataset.variantId ?? 0);
+
+        if (!Number.isInteger(variantId) || variantId <= 0) {
+            return;
+        }
+
+        toggleCartLoader(true);
+
+        await removeCartItem(variantId, mode)
+            .finally((): void => toggleCartLoader(false));
+
+        const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
+
+        if (accordionElement) {
+            initAccordion(accordionElement);
+        }
+    });
+};
+
+const bindOpenCartButton = (): void => {
+    const openButton = <HTMLButtonElement | null>findElem('#open-cart-modal-btn');
+
+    if (!openButton || openButton.dataset.cartOpenBound === '1') {
+        return;
+    }
+
+    openButton.dataset.cartOpenBound = '1';
+
+    openButton.addEventListener('click', async (): Promise<void> => {
+        const mode: CartMode = getCartMode();
+
+        await openSelectedCartDrawer(mode);
+    });
+};
+
+export const handleCartModal = (): void => {
+    initDrawer({
+        drawerSelector:  '#cart-modal',
+        triggerSelector: '.open-cart-modal-regular-trigger',
+    });
+
+    initDrawer({
+        drawerSelector:  '#fast-order-cart-modal',
+        triggerSelector: '.open-cart-modal-fast-order-trigger',
+    });
+
+    bindOpenCartButton();
+    bindAddToCartButtons();
+    bindMutationHandlers();
+};
