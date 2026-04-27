@@ -28,7 +28,7 @@
         <div id="{{ $carousel_dom_id }}"
              class="products-carousel-root --prevent-on-load-init relative"
              data-products-carousel
-             data-page-types='@json($products_carousel_module_data['page_types'])'
+             data-page-types='@js($products_carousel_module_data['page_types'])'
              data-current-page-type="{{ $current_page_type }}"
              data-carousel='{"loadingClasses":"opacity-0, opacity-100 transition-opacity easy duration-200","isAutoHeight":true,"isInfiniteLoop":true, "isDraggable": true, "slidesQty":{"xs":1,"sm":1,"md":2,"lg":3,"2xl":5}, "isAutoPlay": true}'>
             <div class="carousel products-carousel-track rounded-none overflow-hidden border border-light-black bg-black">

@@ -11,7 +11,7 @@
 <script>
     window.app_params = {
         ...(window.app_params ?? {}),
-        ...@json([
+        ...@js([
                 'catalog_filter_ajax_url' => $catalog_filter_ajax_url,
             ])
     };
@@ -121,7 +121,7 @@
                         <script>
                             window.app_params = {
                                 ...(window.app_params ?? {}),
-                                ...@json([
+                                ...@js([
                                     'catalog_filter_price_data' => [
                                         'get_extra' => $filter_data['get_extra'],
                                         'range' => $filter_data['range'],

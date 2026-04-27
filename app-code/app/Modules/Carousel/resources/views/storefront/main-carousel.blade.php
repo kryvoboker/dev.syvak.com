@@ -25,7 +25,7 @@
              @if($is_interactive_carousel)
                  data-main-carousel
              data-slides-count="{{ $slides_count }}"
-             data-page-types='@json($page_types)'
+             data-page-types='@js($page_types)'
              data-carousel='{ "isAutoHeight": true, "loadingClasses": "opacity-0, opacity-100", "isDraggable": true, "isInfiniteLoop": true, "isAutoPlay": true }'
             @endif>
             <div class="carousel main-carousel-track rounded-none">
