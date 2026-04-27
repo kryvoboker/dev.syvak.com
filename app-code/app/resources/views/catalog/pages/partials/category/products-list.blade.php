@@ -36,6 +36,7 @@
 
                         <button class="add-to-cart"
                                 type="button"
+                                data-add-to-cart="{{ (int)($product['variant_id'] ?? 0) }}"
                                 aria-label="{{ __('catalog/default.aria_labels.add_product_to_cart') }}">
                             <span class="icon-[solar--cart-5-linear] custom-icon"></span>
                         </button>
