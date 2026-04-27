@@ -9,7 +9,7 @@
 <script>
     window.app_params = {
         ...(window.app_params ?? {}),
-        ...@json([
+        ...@js([
                 'next_page' => $paginator?->currentPage() !== null ? $paginator?->currentPage() + 1 : null,
                 'is_has_more_pages' => $is_has_more_pages ?? null,
             ])

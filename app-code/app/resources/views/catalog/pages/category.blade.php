@@ -27,7 +27,7 @@
     <script>
         window.app_params = {
             ...(window.app_params ?? {}),
-            ...@json([
+            ...@js([
                 'load_more_products_ajax_url' => $load_more_products_ajax_url,
             ])
         };
