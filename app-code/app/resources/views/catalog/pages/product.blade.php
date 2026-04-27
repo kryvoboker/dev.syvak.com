@@ -154,11 +154,15 @@
 
                 <div class="2xl:col-start-3 2xl:col-end-4 2xl:row-start-19 2xl:row-end-21 flex flex-col gap-y-2 mt-2 md:mt-4">
                     @if(isset($product_view_data['is_in_stock']) && $product_view_data['is_in_stock'] === true)
-                        <button class="white-btn default-btn w-full" type="button">
+                                <button class="white-btn default-btn w-full"
+                                        type="button"
+                                        data-fast-order="{{ (int) ($variant?->id ?? $product?->default_variant_id ?? 0) }}">
                             {{ __('catalog/default.product.labels.buy_one_click') }}
                         </button>
 
-                        <button class="black-btn default-btn w-full" type="button">
+                        <button class="black-btn default-btn w-full"
+                                type="button"
+                                data-add-to-cart="{{ (int) ($variant?->id ?? $product?->default_variant_id ?? 0) }}">
                             {{ __('catalog/default.product.labels.add_to_cart') }}
                         </button>
                     @else
