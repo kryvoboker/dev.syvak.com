@@ -349,7 +349,7 @@
         @apply text-26px md:text-32px 2xl:text-64px leading-0.9em tracking-0.028em;
     }
 
-    .product-size-guide__modal .modal-content {
+    .modal-shadow {
         box-shadow: 0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset,
         -0.0625rem -0.25rem 1.5625rem 0 rgba(255, 255, 255, 0.40) inset,
         0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset;
