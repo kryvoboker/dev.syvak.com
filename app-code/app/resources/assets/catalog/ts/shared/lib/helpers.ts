@@ -168,6 +168,10 @@ export const isEmpty = <T extends Object>(value: string | number | null | undefi
             value = value.trim();
         }
 
+        if (value === '0') {
+            return true;
+        }
+
         return value.length === 0;
     } else if (value === null || value === undefined) {
         return true;

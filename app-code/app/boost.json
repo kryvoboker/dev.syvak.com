@@ -3,6 +3,7 @@
         "codex",
         "copilot"
     ],
+    "cloud": false,
     "editors": [
         "codex"
     ],
