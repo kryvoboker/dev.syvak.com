@@ -13,10 +13,10 @@ const resolveUrl = (key: keyof WindowAppParams): string => {
     return typeof value === 'string' ? value : '';
 };
 
-const resolveMutationUrlByPattern = (patternKey: keyof WindowAppParams, variantId: number): string => {
+const resolveMutationUrlByPattern = (patternKey: keyof WindowAppParams, cartId: number): string => {
     const pattern: string = resolveUrl(patternKey);
 
-    return pattern.replace('__variant_id__', `${variantId}`);
+    return pattern.replace('__cart_id__', `${cartId}`);
 };
 
 const appendCommonPayload = (formData: FormData, mode: CartMode): void => {
@@ -84,8 +84,8 @@ export const addCartItem = async (variantId: number, mode: CartMode): Promise<Ca
     return response;
 };
 
-export const updateCartItemQuantity = async (variantId: number, quantity: number, mode: CartMode): Promise<CartMutationResponse> => {
-    const updateUrl: string = resolveMutationUrlByPattern('cart_update_url_pattern', variantId);
+export const updateCartItemQuantity = async (cartId: number, quantity: number, mode: CartMode): Promise<CartMutationResponse> => {
+    const updateUrl: string = resolveMutationUrlByPattern('cart_update_url_pattern', cartId);
 
     if (isEmpty(updateUrl)) {
         return { success: false };
@@ -93,7 +93,7 @@ export const updateCartItemQuantity = async (variantId: number, quantity: number
 
     const formData = new FormData();
 
-    formData.append('product_variant_id', `${variantId}`);
+    formData.append('cart_id', `${cartId}`);
     formData.append('quantity', `${quantity}`);
     appendCommonPayload(formData, mode);
 
@@ -104,8 +104,8 @@ export const updateCartItemQuantity = async (variantId: number, quantity: number
     return response;
 };
 
-export const removeCartItem = async (variantId: number, mode: CartMode): Promise<CartMutationResponse> => {
-    const deleteUrl: string = resolveMutationUrlByPattern('cart_delete_url_pattern', variantId);
+export const removeCartItem = async (cartId: number, mode: CartMode): Promise<CartMutationResponse> => {
+    const deleteUrl: string = resolveMutationUrlByPattern('cart_delete_url_pattern', cartId);
 
     if (isEmpty(deleteUrl)) {
         return { success: false };
@@ -113,7 +113,7 @@ export const removeCartItem = async (variantId: number, mode: CartMode): Promise
 
     const formData = new FormData();
 
-    formData.append('product_variant_id', `${variantId}`);
+    formData.append('cart_id', `${cartId}`);
     appendCommonPayload(formData, mode);
 
     const response = <CartMutationResponse>await fetchFunc(deleteUrl, formData, 'DELETE');

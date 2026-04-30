@@ -5,6 +5,7 @@
 
 <div class="flex items-start gap-2 md:gap-4 border-b border-b-opacity-light-gray-40% pb-3 cart-item-row"
      data-cart-item-row
+     data-cart-id="{{ $cart_item['cart_id'] }}"
      data-variant-id="{{ $cart_item['variant_id'] }}">
     <span class="mt-1 inline-block size-4 border border-light-gray/80 shrink-0"></span>
 
@@ -63,9 +64,9 @@
                 </button>
 
                 <input class="w-10 border-0 bg-transparent p-0 text-center text-sm md:text-base"
-                       id="cart-item-qty-{{ $cart_item['variant_id'] }}"
+                       id="cart-item-qty-{{ $cart_item['cart_id'] }}"
                        data-cart-item-quantity
-                       data-variant-id="{{ $cart_item['variant_id'] }}"
+                       data-cart-id="{{ $cart_item['cart_id'] }}"
                        type="number"
                        min="{{ $cart_item['minimum_quantity'] }}"
                        max="{{ max($cart_item['minimum_quantity'], $cart_item['available_quantity']) }}"
@@ -81,7 +82,7 @@
 
             <button class="btn btn-text p-0"
                     data-remove-cart-item
-                    data-variant-id="{{ $cart_item['variant_id'] }}"
+                    data-cart-id="{{ $cart_item['cart_id'] }}"
                     type="button"
                     aria-label="{{ __('catalog/default.cart.messages.item_removed') }}">
                 <span class="icon-[iconamoon--trash-light] custom-icon size-6 md:size-6"></span>

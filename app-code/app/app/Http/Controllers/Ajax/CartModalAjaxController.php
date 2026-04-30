@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Ajax;
 
+use App\Enums\CartModeEnum;
+use App\Enums\CartRequestKeyEnum;
 use App\Http\Controllers\Controller;
 use App\Services\Cart\CartService;
 use App\Services\Trait\CartTrait;
@@ -17,17 +19,15 @@ class CartModalAjaxController extends Controller
     use CartTrait;
 
     /**
-     * @param Request     $request
-     * @param string|null $locale
-     *
-     * @return JsonResponse
      * @throws Throwable
      */
     public function index(Request $request, ?string $locale): JsonResponse
     {
         $locale    = normalize_locale($locale);
-        $cart_mode = Str::lower((string) $request->query('cart_mode', 'regular'));
-        $cart_mode = in_array($cart_mode, ['regular', 'fast_order'], true) ? $cart_mode : 'regular';
+        $cart_mode = Str::lower((string) $request->query(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
+        $cart_mode = in_array($cart_mode, array_column(CartModeEnum::cases(), 'value'), true)
+            ? $cart_mode
+            : CartModeEnum::Regular->value;
         $cart_data = app(CartService::class)->getSnapshot($locale, $cart_mode);
 
         return response()->json([
@@ -36,8 +36,8 @@ class CartModalAjaxController extends Controller
             'cart'     => $cart_data,
             'rendered' => [
                 'modal_items_html' => view('catalog.partials.cart.modal-items', [
-                    'cart_data' => $cart_data,
-                    'cart_mode' => $cart_mode,
+                    'cart_data'                         => $cart_data,
+                    CartRequestKeyEnum::CartMode->value => $cart_mode,
                 ])->render(),
             ],
         ]);
