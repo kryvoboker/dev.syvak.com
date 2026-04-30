@@ -6,8 +6,8 @@
 
 @import "flyonui/variants.css";
 
-@plugin "flyonui";
-@plugin "flyonui/theme" {
+@plugin "../../../../node_modules/flyonui/index.js";
+@plugin "../../../../node_modules/flyonui/theme/index.js" {
     name: "black";
     default: true;
     color-scheme: black;
