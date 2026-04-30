@@ -23,12 +23,12 @@ Schedule::call(function (): void {
     $debugbar_path = config('debugbar.storage.path');
     $files         = glob($debugbar_path . '/*.json');
 
-    if (!$files || count($files) <= $max_files) {
+    if (! $files || count($files) <= $max_files) {
         return;
     }
 
     // Sort by modification time (oldest first)
-    usort($files, fn(string $a, string $b): int => filemtime($a) - filemtime($b));
+    usort($files, fn (string $a, string $b): int => filemtime($a) - filemtime($b));
 
     $files_to_delete = array_slice($files, 0, count($files) - $max_files);
 
@@ -40,3 +40,4 @@ Schedule::call(function (): void {
     ->environments(['local']);
 
 Schedule::command('telescope:prune --hours=48')->daily();
+Schedule::command('cart:cleanup-expired-items')->daily();

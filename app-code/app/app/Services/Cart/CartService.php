@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Cart;
 
+use App\Enums\CartModeEnum;
 use App\Models\Catalogs\Products\ProductVariant;
 
 readonly class CartService
@@ -16,18 +17,24 @@ readonly class CartService
     /**
      * @return array<string, mixed>
      */
-    public function getSnapshot(string $locale, string $mode = 'regular'): array
+    public function getSnapshot(string $locale, string $mode = CartModeEnum::Regular->value): array
     {
-        $session_items = $this->cart_session_service->getItems();
+        $cart_items = $this->cart_session_service->getItems($mode);
 
-        return $this->cart_view_data_builder_service->build($session_items, $locale, $mode);
+        return $this->cart_view_data_builder_service->build($cart_items, $locale, $mode);
     }
 
     /**
+     * @param  array<int|string, mixed>  $chosen_attributes
      * @return array<string, mixed>
      */
-    public function addItem(int $product_variant_id, int $quantity, string $locale, string $mode = 'regular'): array
-    {
+    public function addItem(
+        int $product_variant_id,
+        int $quantity,
+        string $locale,
+        string $mode = CartModeEnum::Regular->value,
+        array $chosen_attributes = [],
+    ): array {
         if (! $this->isVariantAvailableForCart($product_variant_id)) {
             return [
                 'success' => false,
@@ -36,7 +43,7 @@ readonly class CartService
             ];
         }
 
-        $this->cart_session_service->addItem($product_variant_id, $quantity);
+        $this->cart_session_service->addItem($product_variant_id, $quantity, $mode, $chosen_attributes);
 
         return [
             'success' => true,
@@ -48,42 +55,38 @@ readonly class CartService
     /**
      * @return array<string, mixed>
      */
-    public function updateItem(int $product_variant_id, int $quantity, string $locale, string $mode = 'regular'): array
+    public function updateItem(int $cart_id, int $quantity, string $locale, string $mode = CartModeEnum::Regular->value): array
     {
-        if (! $this->isVariantAvailableForCart($product_variant_id)) {
-            return [
-                'success' => false,
-                'message' => __('catalog/default.cart.messages.variant_not_found'),
-                'cart'    => $this->getSnapshot($locale, $mode),
-            ];
-        }
-
-        $this->cart_session_service->updateItem($product_variant_id, $quantity);
+        $is_updated = $this->cart_session_service->updateItem($cart_id, $quantity, $mode);
 
         return [
-            'success' => true,
-            'message' => __('catalog/default.cart.messages.item_updated'),
-            'cart'    => $this->getSnapshot($locale, $mode),
+            'success' => $is_updated,
+            'message' => $is_updated
+                ? __('catalog/default.cart.messages.item_updated')
+                : __('catalog/default.cart.messages.variant_not_found'),
+            'cart' => $this->getSnapshot($locale, $mode),
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function removeItem(int $product_variant_id, string $locale, string $mode = 'regular'): array
+    public function removeItem(int $cart_id, string $locale, string $mode = CartModeEnum::Regular->value): array
     {
-        $this->cart_session_service->removeItem($product_variant_id);
+        $is_removed = $this->cart_session_service->removeItem($cart_id, $mode);
 
         return [
-            'success' => true,
-            'message' => __('catalog/default.cart.messages.item_removed'),
-            'cart'    => $this->getSnapshot($locale, $mode),
+            'success' => $is_removed,
+            'message' => $is_removed
+                ? __('catalog/default.cart.messages.item_removed')
+                : __('catalog/default.cart.messages.variant_not_found'),
+            'cart' => $this->getSnapshot($locale, $mode),
         ];
     }
 
-    public function clearCart(): void
+    public function clearCart(?string $mode = null): void
     {
-        $this->cart_session_service->clearCart();
+        $this->cart_session_service->clearCart($mode);
     }
 
     private function isVariantAvailableForCart(int $product_variant_id): bool

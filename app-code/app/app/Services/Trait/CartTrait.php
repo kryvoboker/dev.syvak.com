@@ -4,22 +4,19 @@ declare(strict_types=1);
 
 namespace App\Services\Trait;
 
+use App\Enums\CartModeEnum;
+use App\Enums\CartRequestKeyEnum;
 use App\Http\Requests\Pages\CartDeleteRequest;
 use App\Http\Requests\Pages\CartStoreRequest;
 use App\Http\Requests\Pages\CartUpdateRequest;
 use App\Services\Cart\CartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Throwable;
 
 trait CartTrait
 {
     /**
-     * @param CartStoreRequest $request
-     * @param string|null      $locale
-     *
-     * @return JsonResponse
      * @throws Throwable
      */
     public function store(CartStoreRequest $request, ?string $locale): JsonResponse
@@ -32,16 +29,13 @@ trait CartTrait
             quantity          : (int) Arr::get($request->validated(), 'quantity', 1),
             locale            : $locale,
             mode              : $mode,
+            chosen_attributes : (array) Arr::get($request->validated(), 'chosen_attributes', []),
         );
 
         return $this->buildMutationResponse($result_data, $mode);
     }
 
     /**
-     * @param CartUpdateRequest $request
-     * @param string|null       $locale
-     *
-     * @return JsonResponse
      * @throws Throwable
      */
     public function update(CartUpdateRequest $request, ?string $locale): JsonResponse
@@ -50,20 +44,16 @@ trait CartTrait
         $mode   = $this->resolveCartMode($request->validated());
 
         $result_data = app(CartService::class)->updateItem(
-            product_variant_id: (int) Arr::get($request->validated(), 'product_variant_id', 0),
-            quantity          : (int) Arr::get($request->validated(), 'quantity', 1),
-            locale            : $locale,
-            mode              : $mode,
+            cart_id : (int) Arr::get($request->validated(), 'cart_id', 0),
+            quantity: (int) Arr::get($request->validated(), 'quantity', 1),
+            locale  : $locale,
+            mode    : $mode,
         );
 
         return $this->buildMutationResponse($result_data, $mode);
     }
 
     /**
-     * @param CartDeleteRequest $request
-     * @param string|null       $locale
-     *
-     * @return JsonResponse
      * @throws Throwable
      */
     public function delete(CartDeleteRequest $request, ?string $locale): JsonResponse
@@ -72,16 +62,16 @@ trait CartTrait
         $mode   = $this->resolveCartMode($request->validated());
 
         $result_data = app(CartService::class)->removeItem(
-            product_variant_id: (int) Arr::get($request->validated(), 'product_variant_id', 0),
-            locale            : $locale,
-            mode              : $mode,
+            cart_id: (int) Arr::get($request->validated(), 'cart_id', 0),
+            locale : $locale,
+            mode   : $mode,
         );
 
         return $this->buildMutationResponse($result_data, $mode);
     }
 
     /**
-     * @param array<string, mixed> $result_data
+     * @param  array<string, mixed>  $result_data
      *
      * @throws Throwable
      */
@@ -96,8 +86,8 @@ trait CartTrait
             'cart'     => $cart_data,
             'rendered' => [
                 'modal_items_html' => view('catalog.partials.cart.modal-items', [
-                    'cart_data' => $cart_data,
-                    'cart_mode' => $mode,
+                    'cart_data'                         => $cart_data,
+                    CartRequestKeyEnum::CartMode->value => $mode,
                 ])->render(),
                 'cart_page_html' => view('catalog.partials.cart.page-content', [
                     'cart_data' => $cart_data,
@@ -111,8 +101,10 @@ trait CartTrait
      */
     private function resolveCartMode(array $validated_data): string
     {
-        $mode = Str::lower((string) Arr::get($validated_data, 'cart_mode', 'regular'));
+        $mode = (string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
 
-        return in_array($mode, ['regular', 'fast_order'], true) ? $mode : 'regular';
+        return in_array($mode, array_column(CartModeEnum::cases(), 'value'), true)
+            ? $mode
+            : CartModeEnum::Regular->value;
     }
 }

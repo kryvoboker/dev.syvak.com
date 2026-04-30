@@ -92,17 +92,17 @@ const bindMutationHandlers = (): void => {
             return;
         }
 
-        const mode: CartMode    = getCartMode();
-        const variantId: number = Number(quantityInput.dataset.variantId ?? 0);
-        const quantity: number  = Number(quantityInput.value ?? 1);
+        const mode: CartMode = getCartMode();
+        const cartId: number = Number(quantityInput.dataset.cartId ?? 0);
+        const quantity: number = Number(quantityInput.value ?? 1);
 
-        if (!Number.isInteger(variantId) || variantId <= 0) {
+        if (!Number.isInteger(cartId) || cartId <= 0) {
             return;
         }
 
         toggleCartLoader(true);
 
-        await updateCartItemQuantity(variantId, Math.max(1, quantity), mode)
+        await updateCartItemQuantity(cartId, Math.max(1, quantity), mode)
             .finally((): void => toggleCartLoader(false));
 
         const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
@@ -120,16 +120,16 @@ const bindMutationHandlers = (): void => {
             return;
         }
 
-        const mode: CartMode    = getCartMode();
-        const variantId: number = Number(removeButton.dataset.variantId ?? 0);
+        const mode: CartMode = getCartMode();
+        const cartId: number = Number(removeButton.dataset.cartId ?? 0);
 
-        if (!Number.isInteger(variantId) || variantId <= 0) {
+        if (!Number.isInteger(cartId) || cartId <= 0) {
             return;
         }
 
         toggleCartLoader(true);
 
-        await removeCartItem(variantId, mode)
+        await removeCartItem(cartId, mode)
             .finally((): void => toggleCartLoader(false));
 
         const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');

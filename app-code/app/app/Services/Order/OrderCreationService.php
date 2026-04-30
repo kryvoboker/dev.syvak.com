@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Order;
 
+use App\Enums\CartModeEnum;
+use App\Enums\CartRequestKeyEnum;
 use App\Services\Cart\CartService;
 use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use App\Services\Order\Payment\WayForPayPaymentModule;
@@ -24,7 +26,7 @@ readonly class OrderCreationService
      */
     public function validateOrderData(array $validated_data, string $locale): array
     {
-        $cart_mode = (string) Arr::get($validated_data, 'cart_mode', 'regular');
+        $cart_mode = (string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
         $cart_data = $this->cart_service->getSnapshot($locale, $cart_mode);
 
         if ((bool) Arr::get($cart_data, 'is_empty', true) === true) {
@@ -82,7 +84,7 @@ readonly class OrderCreationService
         $is_success = (bool) Arr::get($payment_result, 'is_success', false);
 
         if ($is_success === true) {
-            $this->cart_service->clearCart();
+            $this->cart_service->clearCart((string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
 
             return [
                 'success'      => true,

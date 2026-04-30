@@ -16,6 +16,7 @@ export interface CartTotals {
 }
 
 export interface CartItem {
+    cart_id: number;
     variant_id: number;
     product_id: number;
     name: string;

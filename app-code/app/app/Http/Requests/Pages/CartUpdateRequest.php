@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Pages;
 
+use App\Enums\CartModeEnum;
+use App\Enums\CartRequestKeyEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CartUpdateRequest extends FormRequest
 {
@@ -16,15 +19,15 @@ class CartUpdateRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
     public function rules(): array
     {
         return [
-            'product_variant_id' => ['required', 'integer', 'min:1'],
-            'quantity'           => ['required', 'integer', 'min:1', 'max:999'],
-            'cart_mode'          => ['nullable', 'string', 'in:regular,fast_order'],
-            'is_call_from_modal' => ['nullable', 'boolean'],
+            'cart_id'                                  => ['required', 'integer', 'min:1'],
+            'quantity'                                 => ['required', 'integer', 'min:1', 'max:999'],
+            CartRequestKeyEnum::CartMode->value        => ['nullable', 'string', Rule::in(array_column(CartModeEnum::cases(), 'value'))],
+            CartRequestKeyEnum::IsCallFromModal->value => ['nullable', 'boolean'],
         ];
     }
 
@@ -32,14 +35,15 @@ class CartUpdateRequest extends FormRequest
     {
         $normalized_data = $this->all();
 
-        $variant_id = $this->input('product_variant_id', $this->route('cart_id'));
-        $quantity   = $this->input('quantity', 1);
-        $cart_mode  = Str::lower((string) $this->input('cart_mode', 'regular'));
+        $cart_id   = $this->input('cart_id', $this->route('cart_id'));
+        $quantity  = $this->input('quantity', 1);
+        $cart_mode = Str::lower((string) $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
 
-        Arr::set($normalized_data, 'product_variant_id', is_numeric($variant_id) ? (int) $variant_id : $variant_id);
+        Arr::set($normalized_data, 'cart_id', is_numeric($cart_id) ? (int) $cart_id : $cart_id);
         Arr::set($normalized_data, 'quantity', is_numeric($quantity) ? (int) $quantity : $quantity);
-        Arr::set($normalized_data, 'cart_mode', in_array($cart_mode, ['regular', 'fast_order'], true) ? $cart_mode : 'regular');
-        Arr::set($normalized_data, 'is_call_from_modal', $this->boolean('is_call_from_modal', false));
+        $allowed_modes = array_column(CartModeEnum::cases(), 'value');
+        Arr::set($normalized_data, CartRequestKeyEnum::CartMode->value, in_array($cart_mode, $allowed_modes, true) ? $cart_mode : CartModeEnum::Regular->value);
+        Arr::set($normalized_data, CartRequestKeyEnum::IsCallFromModal->value, $this->boolean(CartRequestKeyEnum::IsCallFromModal->value));
 
         $this->replace($normalized_data);
     }
