@@ -20,7 +20,7 @@ export const getSessionStorage    = (key: string, defaultValue: any = null): str
 export const removeSessionStorage = (key: string): void => sessionStorage.removeItem(key);
 export const isContainsClass      = <T extends HTMLElement>(element: T | null, className: string): boolean => element ? element.classList.contains(className) : false;
 export const redirect             = (url: string): string => location.href = url;
-export const goBack              = (fallbackUrl: string = '/'): void => {
+export const goBack               = (fallbackUrl: string = '/'): void => {
     if (history.length > 1) {
         history.back();
 
@@ -54,7 +54,7 @@ export const getRandomNums        = (): string => Math.random().toString(36).sub
 export const windowMatchMedia     = (query: string): boolean => matchMedia(`(${query.replace(/^\(+/, '').replace(/\)+$/, '')})`).matches;
 export const getClosestParentEl   = <T extends HTMLElement>(selector: string, childEl: T | null): T | null => childEl ? childEl.closest(selector) : null;
 export const isClosestClass       = <T extends HTMLElement>(selector: string, context: T | null): boolean => getClosestParentEl(selector, context) !== null;
-export const setHistoryState       = (url: string, title: string = '', stateObj: any = {}): void => history.pushState(stateObj, title, url);
+export const setHistoryState      = (url: string, title: string = '', stateObj: any = {}): void => history.pushState(stateObj, title, url);
 export const sprintF              = (str: string, ... args: (string | number)[]): string => {
     let index: number = 0;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     // Texts
-    'texts' => [
+    'texts'        => [
         'sku'                         => 'Артикул: :sku',
         'products_not_found'          => 'Товари не знайдено!',
         'category_title_fallback'     => 'Колекції',
@@ -18,7 +18,7 @@ return [
     ],
 
     // Links
-    'links' => [
+    'links'        => [
         'home'       => 'Головна',
         'previous'   => 'Попередня',
         'next'       => 'Наступна',
@@ -26,7 +26,7 @@ return [
     ],
 
     // Buttons
-    'buttons' => [
+    'buttons'      => [
         'catalog'   => 'Каталог',
         'show_more' => 'Показати ще',
         'filter'    => 'Фільтр',
@@ -36,7 +36,7 @@ return [
     ],
 
     // Sort labels
-    'sort' => [
+    'sort'         => [
         'default'     => 'За замовчуванням',
         'newest'      => 'Спочатку нові',
         'bestsellers' => 'Бестселери',
@@ -50,7 +50,7 @@ return [
     ],
 
     // Aria-Labels
-    'aria_labels' => [
+    'aria_labels'  => [
         'toggle_main_menu'       => 'Перемкнути головне меню',
         'toggle_catalog_menu'    => 'Перемкнути меню каталогу',
         'back_to_main_mob_menu'  => 'Повернутися до головного меню',
@@ -61,7 +61,7 @@ return [
     ],
 
     // Errors
-    'errors' => [
+    'errors'       => [
         'keyword_required'   => 'Пошукове слово є обов\'язковим!',
         'keyword_string'     => 'Пошукове слово повинно бути рядком!',
         'keyword_min'        => 'Пошук повинен містити щонайменше 3 символи!',
@@ -71,18 +71,18 @@ return [
     ],
 
     // Product page
-    'product' => [
+    'product'      => [
         'option_groups' => [
             'color'              => 'Колір',
             'length'             => 'Довжина, см',
             'size'               => 'Розмір',
             'attribute_fallback' => 'Характеристика',
         ],
-        'details' => [
+        'details'       => [
             'composition' => 'Склад:',
             'care'        => 'Догляд:',
         ],
-        'labels' => [
+        'labels'        => [
             'size_help'     => 'Перевір свій розмір',
             'buy_one_click' => 'Купити в 1 клік',
             'add_to_cart'   => 'Додати в кошик',
@@ -92,24 +92,26 @@ return [
     ],
 
     'cart' => [
-        'labels' => [
-            'cart'       => 'Кошик',
-            'fast_order' => 'Швидке замовлення',
-            'empty'      => 'Ваш кошик порожній',
-            'quantity'   => 'К-сть',
-            'total'      => 'Сума',
-            'first_name' => 'Імʼя',
-            'last_name'  => 'Прізвище',
-            'phone'      => 'Телефон',
+        'labels'   => [
+            'cart'                    => 'Кошик',
+            'fast_order'              => 'Швидке замовлення',
+            'empty'                   => 'Ваш кошик порожній',
+            'quantity'                => 'К-сть',
+            'selected_items'          => 'Вибрано :selected з :total',
+            'selected_items_in_modal' => 'Вибрано %d з %d',
+            'total'                   => 'Сума',
+            'first_name'              => 'Імʼя',
+            'last_name'               => 'Прізвище',
+            'phone'                   => 'Телефон',
         ],
-        'buttons' => [
+        'buttons'  => [
             'continue_shopping' => 'Продовжити покупки',
             'checkout'          => 'Оформити замовлення',
             'submit_fast_order' => 'Оформити швидке замовлення',
             'show_more_items'   => 'Показати інші товари (:count)',
             'hide_more_items'   => 'Приховати інші товари',
         ],
-        'totals' => [
+        'totals'   => [
             'items_subtotal' => 'Сума товарів',
             'grand_total'    => 'Разом до сплати',
         ],

@@ -8,46 +8,70 @@
 @endphp
 
 <div class="flex flex-col h-full" data-cart-root data-cart-mode="{{ $cart_mode }}">
-    <div class="flex-1 px-4 md:px-8 py-4 overflow-y-auto">
+    <div class="flex-1 px-4 md:px-8 lg:px-6 2xl:px-6 py-4 md:py-6 overflow-y-auto">
         @if(($cart_data['is_empty'] ?? true) === true)
             <p class="text-light-gray text-sm md:text-base">
                 {{ __('catalog/default.cart.labels.empty') }}
             </p>
         @else
-            <div class="mb-4 flex items-center justify-between gap-3 text-sm md:text-base">
-                <div class="inline-flex items-center gap-2 text-light-gray">
-                    <span class="inline-block size-4 border border-light-gray/80"></span>
-                    <span>{{ __('catalog/default.cart.labels.quantity') }}: {{ $cart_data['items_count'] ?? 0 }}</span>
-                </div>
+            <div class="mb-4 md:mb-6 flex items-center justify-between gap-3 text-sm md:text-base lg:text-base 2xl:text-lg">
+                @if($cart_mode === 'regular')
+                    <label class="inline-flex items-center gap-2 text-light-gray cursor-pointer" data-cart-select-all-label>
+                        <input class="checkbox checkbox-xs border border-light-gray rounded-none cursor-pointer"
+                               data-cart-select-all
+                               type="checkbox"/>
+                        <span data-cart-selected-summary
+                              data-template="{{ __('catalog/default.cart.labels.selected_items_in_modal') }}">
+                            {{ __('catalog/default.cart.labels.selected_items', ['selected' => 0, 'total' => $cart_data['items_count'] ?? 0]) }}
+                        </span>
+                    </label>
+
+                    <button class="btn btn-text p-0"
+                            data-remove-selected-cart-items
+                            type="button"
+                            aria-label="{{ __('catalog/default.cart.messages.item_removed') }}">
+                        <span class="icon-[iconamoon--trash-light] custom-icon size-6 md:size-6"></span>
+                    </button>
+                @else
+                    <div class="inline-flex items-center gap-2 text-light-gray">
+                        <span class="inline-block size-4 border border-light-gray/80"></span>
+                        <span>{{ __('catalog/default.cart.labels.quantity') }} {{ $cart_data['items_count'] ?? 0 }}</span>
+                    </div>
+                @endif
             </div>
 
-            <div class="flex flex-col gap-3" data-cart-items-list>
+            <div class="flex flex-col gap-y-6.5" data-cart-items-list>
                 @if(is_array($first_item))
                     @include('catalog.partials.cart.modal-item', ['cart_item' => $first_item])
                 @endif
 
                 @if($hidden_items !== [])
-                    <div class="accordion" data-cart-extra-items-accordion>
-                        <div class="accordion-item border-b border-b-opacity-light-gray-40%">
-                            <button class="accordion-toggle py-2 inline-flex items-center justify-between gap-2 w-full"
-                                    aria-expanded="false"
-                                    aria-controls="cart-extra-items-collapse">
-                            <span class="text-sm md:text-base">
-                                {{ __('catalog/default.cart.buttons.show_more_items', ['count' => count($hidden_items)]) }}
-                            </span>
-
-                                <span class="icon-[solar--alt-arrow-right-linear] accordion-item-active:-rotate-90 custom-icon transition-transform duration-300 size-5 md:size-6"></span>
-                            </button>
-
-                            <div class="accordion-content hidden overflow-hidden transition-[height] duration-300"
+                    <div class="accordion group" data-cart-extra-items-accordion>
+                        <div class="accordion-item">
+                            <div class="accordion-content hidden overflow-hidden transition-[height]"
                                  id="cart-extra-items-collapse"
                                  role="region">
-                                <div class="flex flex-col gap-3 pb-3">
+                                <div class="flex flex-col gap-0 pb-3">
                                     @foreach($hidden_items as $cart_item)
                                         @include('catalog.partials.cart.modal-item', ['cart_item' => $cart_item])
                                     @endforeach
                                 </div>
                             </div>
+
+                            <button class="accordion-toggle inline-flex items-center justify-start gap-2 w-full p-0"
+                                    aria-expanded="false"
+                                    aria-controls="cart-extra-items-collapse">
+                                <span class="text-sm md:text-base group-[.active]:hidden">
+                                    {{ __('catalog/default.cart.buttons.show_more_items', ['count' => count($hidden_items)]) }}
+                                </span>
+
+                                <span class="hidden text-sm md:text-base group-[.active]:inline">
+                                    {{ __('catalog/default.cart.buttons.hide_more_items') }} ({{ count($hidden_items) }})
+                                </span>
+
+                                <span class="icon-[ep--arrow-down] custom-icon transition-transform size-5 md:size-6
+                                             group-[.active]:rotate-180"></span>
+                            </button>
                         </div>
                     </div>
                 @endif
@@ -55,7 +79,7 @@
         @endif
     </div>
 
-    <div class="border-t border-t-opacity-light-gray-40% px-4 md:px-8 pt-3 pb-4 md:pb-6">
+    <div class="px-4 pb-4 md:px-6">
         @if($cart_mode === 'fast_order')
             <form class="flex flex-col gap-2 md:gap-3" data-fast-order-form>
                 <label class="flex flex-col gap-1 text-sm text-white">
@@ -120,14 +144,14 @@
                         </div>
                     @endforeach
 
-                    <div class="flex items-center justify-between gap-2 font-bold text-lg md:text-xl uppercase">
+                    <div class="flex items-center justify-between gap-2 font-bold text-lg md:text-lg 2xl:text-2xl uppercase">
                         <span>{{ __('catalog/default.cart.totals.grand_total') }}</span>
                         <span>{{ $totals['grand_total_formatted'] ?? '' }}</span>
                     </div>
                 </div>
             @endif
 
-            <a class="white-btn default-btn w-full mt-3 text-lg"
+            <a class="white-btn default-btn w-full md:max-w-85.75 lg:max-w-91.75 2xl:max-w-md text-lg mt-3 mx-auto"
                href="{{ localized_route('localized.catalog.cart.index') }}">
                 {{ __('catalog/default.cart.buttons.checkout') }}
             </a>

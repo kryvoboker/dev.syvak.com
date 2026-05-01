@@ -147,10 +147,10 @@
                             </span>
 
                             <span class="icon-[solar--alt-arrow-right-linear] accordion-item-active:-rotate-90 custom-icon shrink-0
-                                         transition-transform duration-300"></span>
+                                         transition-transform"></span>
                         </button>
 
-                        <div id="{{ $filter_data['group_id'] }}-collapse" class="accordion-content hidden w-full overflow-hidden transition-[height] duration-300"
+                        <div id="{{ $filter_data['group_id'] }}-collapse" class="accordion-content hidden w-full overflow-hidden transition-[height]"
                              aria-labelledby="{{ $filter_data['group_id'] }}"
                              role="region">
                             <div class="flex flex-col gap-2 ps-2 pb-3">

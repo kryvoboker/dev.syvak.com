@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     // Texts
-    'texts' => [
+    'texts'        => [
         'sku'                         => 'SKU: :sku',
         'products_not_found'          => 'Products not found!',
         'category_title_fallback'     => 'Collections',
@@ -18,7 +18,7 @@ return [
     ],
 
     // Links
-    'links' => [
+    'links'        => [
         'home'       => 'Home',
         'previous'   => 'Previous',
         'next'       => 'Next',
@@ -26,7 +26,7 @@ return [
     ],
 
     // Buttons
-    'buttons' => [
+    'buttons'      => [
         'catalog'   => 'Catalog',
         'show_more' => 'Show more',
         'filter'    => 'Filter',
@@ -36,7 +36,7 @@ return [
     ],
 
     // Sort labels
-    'sort' => [
+    'sort'         => [
         'default'     => 'Default',
         'newest'      => 'Newest first',
         'bestsellers' => 'Bestsellers',
@@ -50,7 +50,7 @@ return [
     ],
 
     // Aria-Labels
-    'aria_labels' => [
+    'aria_labels'  => [
         'toggle_main_menu'       => 'Toggle main menu',
         'toggle_catalog_menu'    => 'Toggle catalog menu',
         'back_to_main_mob_menu'  => 'Back to main menu',
@@ -61,7 +61,7 @@ return [
     ],
 
     // Errors
-    'errors' => [
+    'errors'       => [
         'keyword_required'   => 'Search keyword is required!',
         'keyword_string'     => 'Search keyword must be a string!',
         'keyword_min'        => 'Search must be at least 3 characters long!',
@@ -71,18 +71,18 @@ return [
     ],
 
     // Product page
-    'product' => [
+    'product'      => [
         'option_groups' => [
             'color'              => 'Color',
             'length'             => 'Length, cm',
             'size'               => 'Size',
             'attribute_fallback' => 'Attribute',
         ],
-        'details' => [
+        'details'       => [
             'composition' => 'Composition:',
             'care'        => 'Care:',
         ],
-        'labels' => [
+        'labels'        => [
             'size_help'     => 'Check your size',
             'buy_one_click' => 'Buy in one click',
             'add_to_cart'   => 'Add to cart',
@@ -92,24 +92,26 @@ return [
     ],
 
     'cart' => [
-        'labels' => [
-            'cart'       => 'Cart',
-            'fast_order' => 'Fast order',
-            'empty'      => 'Your cart is empty',
-            'quantity'   => 'Qty',
-            'total'      => 'Total',
-            'first_name' => 'First name',
-            'last_name'  => 'Last name',
-            'phone'      => 'Phone',
+        'labels'   => [
+            'cart'                    => 'Cart',
+            'fast_order'              => 'Fast order',
+            'empty'                   => 'Your cart is empty',
+            'quantity'                => 'Qty',
+            'selected_items'          => 'Selected :selected of :total',
+            'selected_items_in_modal' => 'Selected %d of %d',
+            'total'                   => 'Total',
+            'first_name'              => 'First name',
+            'last_name'               => 'Last name',
+            'phone'                   => 'Phone',
         ],
-        'buttons' => [
+        'buttons'  => [
             'continue_shopping' => 'Continue shopping',
             'checkout'          => 'Checkout',
             'submit_fast_order' => 'Submit fast order',
             'show_more_items'   => 'Show other items (:count)',
             'hide_more_items'   => 'Hide other items',
         ],
-        'totals' => [
+        'totals'   => [
             'items_subtotal' => 'Items subtotal',
             'grand_total'    => 'Grand total',
         ],
