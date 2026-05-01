@@ -5,9 +5,9 @@ import {
 }                                       from "@ts-features/cart/cartCrud.ts";
 import { getCartMode, setCartMode }     from "@ts-features/cart/cartModeStorage.ts";
 import { initAccordion }                from "@ts-shared/accordion/initAccordion.ts";
-import { initDrawer }                   from "@ts-shared/drawer/initDrawer.ts";
-import { findElem, getClosestParentEl } from "@ts-shared/lib/helpers.ts";
-import { Cart }                         from "@ts-features/cart/constants.ts";
+import { initDrawer }                                            from "@ts-shared/drawer/initDrawer.ts";
+import { findElem, findArrayElems, getClosestParentEl, sprintF } from "@ts-shared/lib/helpers.ts";
+import { Cart }                                                  from "@ts-features/cart/constants.ts";
 import $FAST_ORDER = Cart.$FAST_ORDER;
 import $REGULAR = Cart.$REGULAR;
 
@@ -30,6 +30,32 @@ const openSelectedCartDrawer = async (mode: CartMode): Promise<void> => {
 
     if (accordionElement) {
         initAccordion(accordionElement);
+    }
+};
+
+const updateSelectedCartItemsSummary = (): void => {
+    const cartRoot = <HTMLElement | null>findElem('[data-cart-root][data-cart-mode="regular"]');
+
+    if (!cartRoot) {
+        return;
+    }
+
+    const itemCheckboxes = <HTMLInputElement[] | []>findArrayElems('[data-cart-item-select]', cartRoot) as HTMLInputElement[];
+    const selectAllCheckbox = <HTMLInputElement | null>findElem('[data-cart-select-all]', cartRoot);
+    const summaryElement = <HTMLElement | null>findElem('[data-cart-selected-summary]', cartRoot);
+
+    const totalCount = itemCheckboxes.length;
+    const selectedCount = itemCheckboxes.filter((checkbox: HTMLInputElement): boolean => checkbox.checked).length;
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = totalCount > 0 && selectedCount === totalCount;
+        selectAllCheckbox.indeterminate = selectedCount > 0 && selectedCount < totalCount;
+    }
+
+    if (summaryElement) {
+        const template:string = summaryElement.dataset.template ?? 'Вибрано %d з %d';
+
+        summaryElement.textContent = sprintF(template, selectedCount, totalCount);
     }
 };
 
@@ -86,6 +112,29 @@ const bindMutationHandlers = (): void => {
 
     document.addEventListener('change', async (event: Event): Promise<void> => {
         const target        = event.target as HTMLElement;
+        const itemSelectCheckbox = <HTMLInputElement | null>getClosestParentEl('[data-cart-item-select]', target);
+        const selectAllCheckbox = <HTMLInputElement | null>getClosestParentEl('[data-cart-select-all]', target);
+
+        if (itemSelectCheckbox) {
+            updateSelectedCartItemsSummary();
+            return;
+        }
+
+        if (selectAllCheckbox) {
+            const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root][data-cart-mode="regular"]', selectAllCheckbox);
+
+            if (cartRoot) {
+                const itemCheckboxes = <HTMLInputElement[] | []>findArrayElems('[data-cart-item-select]', cartRoot) as HTMLInputElement[];
+
+                itemCheckboxes.forEach((checkbox: HTMLInputElement): void => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+            }
+
+            updateSelectedCartItemsSummary();
+            return;
+        }
+
         const quantityInput = <HTMLInputElement | null>getClosestParentEl('[data-cart-item-quantity]', target);
 
         if (!quantityInput) {
@@ -110,10 +159,56 @@ const bindMutationHandlers = (): void => {
         if (accordionElement) {
             initAccordion(accordionElement);
         }
+
+        updateSelectedCartItemsSummary();
     });
 
     document.addEventListener('click', async (event: Event): Promise<void> => {
         const target       = event.target as HTMLElement;
+        const removeSelectedButton = <HTMLElement | null>getClosestParentEl('[data-remove-selected-cart-items]', target);
+
+        if (removeSelectedButton) {
+            const mode: CartMode = getCartMode();
+
+            if (mode !== $REGULAR) {
+                return;
+            }
+
+            const cartRoot = <HTMLElement | null>findElem('[data-cart-root][data-cart-mode="regular"]');
+
+            if (!cartRoot) {
+                return;
+            }
+
+            const selectedCheckboxes = (<HTMLInputElement[] | []>findArrayElems('[data-cart-item-select]:checked', cartRoot) as HTMLInputElement[]);
+            const selectedCartIds = selectedCheckboxes
+                .map((checkbox: HTMLInputElement): number => Number(checkbox.dataset.cartId ?? 0))
+                .filter((cartId: number): boolean => Number.isInteger(cartId) && cartId > 0);
+
+            if (selectedCartIds.length === 0) {
+                return;
+            }
+
+            toggleCartLoader(true);
+
+            try {
+                for (const cartId of selectedCartIds) {
+                    await removeCartItem(cartId, mode);
+                }
+            } finally {
+                toggleCartLoader(false);
+            }
+
+            const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
+
+            if (accordionElement) {
+                initAccordion(accordionElement);
+            }
+
+            updateSelectedCartItemsSummary();
+            return;
+        }
+
         const removeButton = <HTMLElement | null>getClosestParentEl('[data-remove-cart-item]', target);
 
         if (!removeButton) {
@@ -137,6 +232,8 @@ const bindMutationHandlers = (): void => {
         if (accordionElement) {
             initAccordion(accordionElement);
         }
+
+        updateSelectedCartItemsSummary();
     });
 };
 
@@ -170,4 +267,5 @@ export const handleCartModal = (): void => {
     bindOpenCartButton();
     bindAddToCartButtons();
     bindMutationHandlers();
+    updateSelectedCartItemsSummary();
 };

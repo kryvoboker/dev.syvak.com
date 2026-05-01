@@ -18,12 +18,6 @@ document.addEventListener('DOMContentLoaded', (): void => {
     import('@ts-shared/lib/validateForm.ts')
         .then(module => module.handleValidateForms());
 
-    import('@ts-features/cart/cartModal.ts')
-        .then(module => module.handleCartModal());
-
-    import('@ts-features/cart/fastOrderModal.ts')
-        .then(module => module.handleFastOrderModal());
-
     import('@ts-features/menu/language.ts')
         .then(module => module.handleLanguageMenu());
 
@@ -74,5 +68,11 @@ document.addEventListener('DOMContentLoaded', (): void => {
     if (pageType === $CART_PAGE_TYPE) {
         import('@ts-features/cart/cartPage.ts')
             .then(module => module.handleCartPage());
+    } else {
+        import('@ts-features/cart/cartModal.ts')
+            .then(module => module.handleCartModal());
+
+        import('@ts-features/cart/fastOrderModal.ts')
+            .then(module => module.handleFastOrderModal());
     }
 });

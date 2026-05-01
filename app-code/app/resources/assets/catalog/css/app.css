@@ -1,4 +1,4 @@
-@layer theme, base, utilities, components, app;
+@layer theme, base, app, utilities, components;
 
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
@@ -53,28 +53,34 @@
 
 @source "./_source.txt";
 
-:root {
-    --base-font-size: 16;
-    --max-viewport-width: 1920;
-    --max-viewport-width-rem: calc(1920 / var(--base-font-size) * 1rem);
-    --container-padding: calc(16 / var(--base-font-size) * 1rem);
-    --site-header-height: calc(76 / var(--base-font-size) * 1rem);
+@layer theme {
+    :root {
+        --base-font-size: 16;
 
-    /* 48rem - 768px */
-    @media (width >= 48rem) {
-        --container-padding: calc(32 / var(--base-font-size) * 1rem);
-        --site-header-height: calc(88 / var(--base-font-size) * 1rem);
-    }
+        --max-viewport-width: 1920;
+        --max-viewport-width-rem: calc(1920 / var(--base-font-size) * 1rem);
 
-    /* 64rem - 1024px */
-    @media (width >= 64rem) {
-        --container-padding: calc(60 / var(--base-font-size) * 1rem);
-        --site-header-height: calc(96 / var(--base-font-size) * 1rem);
-    }
+        --container-padding: calc(16 / var(--base-font-size) * 1rem);
 
-    /* 96rem - 1920px */
-    @media (width >= 120rem) {
-        --container-padding: calc(76 / var(--base-font-size) * 1rem);
+        --site-header-height: calc(76 / var(--base-font-size) * 1rem);
+        --default-transition-duration: 300ms;
+
+        /* 48rem - 768px */
+        @media (width >= 48rem) {
+            --container-padding: calc(32 / var(--base-font-size) * 1rem);
+            --site-header-height: calc(88 / var(--base-font-size) * 1rem);
+        }
+
+        /* 64rem - 1024px */
+        @media (width >= 64rem) {
+            --container-padding: calc(60 / var(--base-font-size) * 1rem);
+            --site-header-height: calc(96 / var(--base-font-size) * 1rem);
+        }
+
+        /* 96rem - 1920px */
+        @media (width >= 120rem) {
+            --container-padding: calc(76 / var(--base-font-size) * 1rem);
+        }
     }
 }
 
@@ -349,12 +355,6 @@
         @apply text-26px md:text-32px 2xl:text-64px leading-0.9em tracking-0.028em;
     }
 
-    .modal-shadow {
-        box-shadow: 0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset,
-        -0.0625rem -0.25rem 1.5625rem 0 rgba(255, 255, 255, 0.40) inset,
-        0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset;
-    }
-
     .footer-contacts,
     .footer-menu,
     .footer-info {
@@ -443,9 +443,9 @@
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23fffbfe' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'%3E%3Cpath d='M41.5 10H35.5'/%3E%3Cpath d='M27.5 6V14'/%3E%3Cpath d='M27.5 10L5.5 10'/%3E%3Cpath d='M13.5 24H5.5'/%3E%3Cpath d='M21.5 20V28'/%3E%3Cpath d='M43.5 24H21.5'/%3E%3Cpath d='M41.5 38H35.5'/%3E%3Cpath d='M27.5 34V42'/%3E%3Cpath d='M27.5 38H5.5'/%3E%3C/g%3E%3C/svg%3E");
     }
 
-    .custom-icon {
+    /*.custom-icon {
         @apply size-6 md:size-8 text-white;
-    }
+    }*/
 }
 
 .drawer-body {
@@ -471,4 +471,14 @@
 
 @utility default-btn {
     @apply font-inter font-normal tracking-normal leading-1.4em text-lg lg:text-2xl;
+}
+
+@utility custom-icon {
+    @apply size-6 md:size-8 text-white;
+}
+
+@utility modal-shadow {
+    box-shadow: 0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset,
+    -0.0625rem -0.25rem 1.5625rem 0 rgba(255, 255, 255, 0.40) inset,
+    0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset;
 }
