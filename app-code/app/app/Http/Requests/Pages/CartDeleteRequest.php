@@ -40,7 +40,7 @@ class CartDeleteRequest extends FormRequest
         Arr::set($normalized_data, 'cart_id', is_numeric($cart_id) ? (int) $cart_id : $cart_id);
         $allowed_modes = array_column(CartModeEnum::cases(), 'value');
         Arr::set($normalized_data, CartRequestKeyEnum::CartMode->value, in_array($cart_mode, $allowed_modes, true) ? $cart_mode : CartModeEnum::Regular->value);
-        Arr::set($normalized_data, CartRequestKeyEnum::IsCallFromModal->value, $this->boolean(CartRequestKeyEnum::IsCallFromModal->value, false));
+        Arr::set($normalized_data, CartRequestKeyEnum::IsCallFromModal->value, $this->boolean(CartRequestKeyEnum::IsCallFromModal->value));
 
         $this->replace($normalized_data);
     }
