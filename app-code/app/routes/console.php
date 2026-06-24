@@ -41,3 +41,4 @@ Schedule::call(function (): void {
 
 Schedule::command('telescope:prune --hours=48')->daily();
 Schedule::command('cart:cleanup-expired-items')->daily();
+Schedule::command('app:update-currency-rates-command')->cron('0 4 * * *');

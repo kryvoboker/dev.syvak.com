@@ -162,7 +162,7 @@ return [
             'handler'        => TelegramBotHandler::class,
             'formatter'      => LineFormatter::class,
             'formatter_with' => [
-                'format'                     => '[%datetime%] ' . config('app.name') . " - %channel%.%level_name%: %message% %context% %extra%\n",
+                'format'                     => '[%datetime%] ' . env('APP_NAME') . " - %channel%.%level_name%: %message% %context% %extra%\n",
                 'dateFormat'                 => 'Y-m-d H:i:s',
                 'allowInlineLineBreaks'      => true,
                 'ignoreEmptyContextAndExtra' => true,

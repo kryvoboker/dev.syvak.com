@@ -1,4 +1,4 @@
-name: "dev-syvak"
+name: "syvak"
 
 services:
   dev-syvak-php-fpm:
@@ -13,6 +13,7 @@ services:
         USERNAME: www-data
     image: dev-syvak-php-fpm:1.0
     container_name: dev-syvak-php-fpm
+    restart: unless-stopped
     env_file:
       - ../../.docker/dev/env/.env
       - ../../.docker/dev/env/.env.mariadb
@@ -20,6 +21,7 @@ services:
       - ../../app-code/app:/var/webroot/sites/syvak.com/app
       - ../../app-code/httpdocs:/var/webroot/sites/syvak.com/httpdocs
       - ../../app-code/storage:/var/webroot/sites/syvak.com/storage
+      - ../../app-code/xhprof:/var/webroot/sites/syvak.com/xhprof
       - ../../.docker/dev/php/php.ini:/usr/local/etc/php/php.ini:ro
     security_opt:
       - no-new-privileges:true       # Disables setuid/setgid
@@ -31,7 +33,6 @@ services:
         condition: service_healthy
     networks:
       - dev-syvak-net
-      - buggregator-net
 
   dev-syvak-cron:
     build:
@@ -66,7 +67,6 @@ services:
         condition: service_healthy
     networks:
       - dev-syvak-net
-      - buggregator-net
 
   dev-syvak-nginx:
     build:
@@ -77,8 +77,9 @@ services:
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
         USERNAME: www-data
-    image: dev-syvak-nginx:1.0-alpine
+    image: dev-syvak-nginx:1.0-alpine-slim
     container_name: dev-syvak-nginx
+    restart: unless-stopped
     env_file:
       - ../../.docker/dev/env/.env
     labels:
@@ -113,15 +114,15 @@ services:
         USERNAME: mysql
     image: dev-syvak-mariadb:1.0
     container_name: dev-syvak-mariadb
+    restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "$$MYSQL_USER", "-p$$MYSQL_PASSWORD" ]
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     ports:
       - "3340:3306"
-    restart: unless-stopped
     env_file:
       - ../../.docker/dev/env/.env
       - ../../.docker/dev/env/.env.mariadb
@@ -142,9 +143,5 @@ networks:
     external: true
   dev-syvak-net:
     name: dev-syvak-net
-    driver: bridge
-    external: true
-  buggregator-net:
-    name: buggregator-net
     driver: bridge
     external: true

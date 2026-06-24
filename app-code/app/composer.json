@@ -34,7 +34,6 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^v4.2.8",
-        "buggregator/trap": "^1.15.2",
         "fakerphp/faker": "^v1.24.1",
         "larastan/larastan": "^v3.9.6",
         "laravel/boost": "^v2.4.6",
