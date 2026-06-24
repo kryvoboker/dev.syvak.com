@@ -12,6 +12,9 @@ RUN apt update \
       unzip \
       zip \
       tzdata \
+      graphviz \
+      fontconfig \
+      fonts-dejavu-core \
   && rm -rf /var/lib/apt/lists/*
 
 RUN ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
@@ -31,11 +34,6 @@ RUN install-php-extensions \
     intl \
     bcmath \
   && rm -f /usr/local/bin/install-php-extensions
-
-RUN echo "xhprof.output_dir = /tmp/xhprof" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini \
-  && echo "xhprof.collect_additional_info = 1" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini \
-  && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-  && echo "xdebug.client_host = host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 RUN docker-php-ext-enable xdebug xhprof
 
@@ -70,13 +68,36 @@ ENV NPM_CONFIG_PREFIX=${HOME}/.npm-global
 ENV NPM_CONFIG_CACHE=${HOME}/.npm
 ENV PATH="${NPM_CONFIG_PREFIX}/bin:${PATH}"
 
-RUN groupmod -o -g ${GID} ${USERNAME} \
-  && usermod  -o -u ${UID} -g ${GID} ${USERNAME}
+RUN set -eux; \
+    if getent group "${USERNAME}" > /dev/null; then \
+        groupmod -o -g "${GID}" "${USERNAME}"; \
+    else \
+        groupadd -o -g "${GID}" "${USERNAME}"; \
+    fi; \
+    if id "${USERNAME}" > /dev/null 2>&1; then \
+        usermod -o -u "${UID}" -g "${GID}" -d "${HOME}" "${USERNAME}"; \
+    else \
+        useradd -o -u "${UID}" -g "${GID}" -d "${HOME}" -m -s /bin/sh "${USERNAME}"; \
+    fi; \
+    mkdir -p "${HOME}"; \
+    chown -R "${UID}:${GID}" "${HOME}"
 
 # Create npm global directory for www-data and set ownership
-RUN mkdir -p ${NPM_CONFIG_PREFIX}/ ${NPM_CONFIG_CACHE}/ ${COMPOSER_CACHE_DIR}/ \
-  && chown -R ${UID}:${GID} ${COMPOSER_HOME}/ ${NPM_CONFIG_PREFIX}/ ${NPM_CONFIG_CACHE}/ \
-  && chmod -R 755 ${COMPOSER_HOME}/ ${NPM_CONFIG_CACHE}/ ${NPM_CONFIG_PREFIX}/
+RUN mkdir -p \
+    ${NPM_CONFIG_PREFIX}/ \
+    ${NPM_CONFIG_CACHE}/ \
+    ${COMPOSER_CACHE_DIR}/ \
+  && chown -R ${UID}:${GID} \
+    ${COMPOSER_HOME}/ \
+    ${NPM_CONFIG_PREFIX}/ \
+    ${NPM_CONFIG_CACHE}/ \
+  && chmod -R 755 \
+    ${COMPOSER_HOME}/ \
+    ${NPM_CONFIG_CACHE}/ \
+    ${NPM_CONFIG_PREFIX}/
+
+# Rebuild the font cache after installing fonts
+RUN fc-cache -f -v
 
 # Copy and set permissions for entrypoint script
 COPY --chown=${UID}:${GID} .docker/dev/php/entrypoint.sh /usr/local/bin/entrypoint.sh

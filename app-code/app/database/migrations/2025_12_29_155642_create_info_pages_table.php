@@ -16,7 +16,7 @@ return new class() extends Migration
         Schema::create('info_pages', function (Blueprint $table) {
             $table->id();
 
-            $table->json('positions')->nullable();
+            $table->json('positions')->nullable()->comment('Where show links, in Header or Footer or Both');
             $table->smallInteger('sort_order')->nullable(false)->default(1);
             $table->boolean('is_active')->nullable(false)->default(false);
             $table->boolean('is_noindex')->nullable(false)->default(false);
