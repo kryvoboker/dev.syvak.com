@@ -12,7 +12,8 @@ readonly class CartService
     public function __construct(
         private CartSessionService $cart_session_service,
         private CartViewDataBuilderService $cart_view_data_builder_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<string, mixed>

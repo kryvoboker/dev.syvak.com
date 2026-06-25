@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\ProductsCarousel\Services;
 
-use App\Models\Catalogs\Categories\Category;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Catalogs\Categories\Category;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +22,8 @@ readonly class ModuleSettingsNormalizerService
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<string, mixed>  $settings

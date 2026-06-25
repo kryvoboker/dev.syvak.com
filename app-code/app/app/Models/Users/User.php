@@ -20,11 +20,13 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory;
 
     use HasPanelShield {
         HasPanelShield::canAccessPanel as shieldCanAccessPanel;
     }
+    use HasRoles;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.

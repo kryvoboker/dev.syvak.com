@@ -13,7 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InfoPage extends Model
 {
-    use HasSlugsTrait, SlugTrait;
+    use HasSlugsTrait;
+    use SlugTrait;
 
     protected $fillable = [
         'positions',

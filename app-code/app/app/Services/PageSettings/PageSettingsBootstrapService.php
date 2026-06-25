@@ -783,7 +783,16 @@ class PageSettingsBootstrapService
             $settings,
         );
 
-        Arr::set($settings, 'customer.stock.minimum_stock_quantity', max(0, (int) Arr::get($settings, 'customer.stock.minimum_stock_quantity', (int) Arr::get($settings, 'stock.minimum_stock_quantity', $defaults['customer_minimum_stock_quantity']))));
+        $customer_stock_minimum_quantity = max(
+            0,
+            (int) Arr::get(
+                $settings,
+                'customer.stock.minimum_stock_quantity',
+                (int) Arr::get($settings, 'stock.minimum_stock_quantity', $defaults['customer_minimum_stock_quantity']),
+            ),
+        );
+
+        Arr::set($settings, 'customer.stock.minimum_stock_quantity', $customer_stock_minimum_quantity);
         Arr::set($settings, 'customer.images.product.width', max(1, (int) Arr::get($settings, 'customer.images.product.width', $defaults['customer_image_width'])));
         Arr::set($settings, 'customer.images.product.height', max(1, (int) Arr::get($settings, 'customer.images.product.height', $defaults['customer_image_height'])));
         Arr::set($settings, 'admin.validation.ean_max_length', max(1, (int) Arr::get($settings, 'admin.validation.ean_max_length', (int) Arr::get($settings, 'validation.ean_max_length', $defaults['admin_ean_max_length']))));
@@ -916,7 +925,7 @@ class PageSettingsBootstrapService
             $localized_data = [];
         }
 
-        $active_languages = new Language()->getActiveLanguages();
+        $active_languages = (new Language())->getActiveLanguages();
 
         foreach ($active_languages as $language) {
             $language_id = (string) $language->id;

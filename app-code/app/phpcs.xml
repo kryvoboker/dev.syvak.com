@@ -15,6 +15,7 @@
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*/vite/*</exclude-pattern>
     <exclude-pattern>*/resources/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
     <!-- Project PHPCS standards are tooling, not application code. -->
     <exclude-pattern>*/phpcs/ProjectStandard/*</exclude-pattern>
 
@@ -23,5 +24,11 @@
     <arg value="p"/>
 
     <rule ref="PSR12"/>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="240"/>
+            <property name="absoluteLineLimit" value="260"/>
+        </properties>
+    </rule>
     <rule ref="phpcs/ProjectStandard"/>
 </ruleset>

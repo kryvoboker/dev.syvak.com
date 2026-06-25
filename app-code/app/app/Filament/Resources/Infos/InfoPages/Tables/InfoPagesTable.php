@@ -55,7 +55,7 @@ class InfoPagesTable
                         }
 
                         /** @var InfoPageDescription|null $info_page_description */
-                        return $info_page_description?->title ?? '-';
+                        return $info_page_description->title ?? '-';
                     }),
 
                 TextColumn::make('positions')
@@ -96,7 +96,7 @@ class InfoPagesTable
                         }
 
                         $slug = $info_page->slugs
-                            ->firstWhere('language_id', $current_language_id)?->slug;
+                            ->firstWhere('language_id', $current_language_id)->slug;
 
                         return $slug ?? '-';
                     }),

@@ -151,7 +151,7 @@ class EditAppSetting extends EditRecord
                     ),
                 ),
             ],
-            'image_path'                => normalize_upload_path_template((string) Arr::get($user_settings, 'image_path', (string) config('app.images.user.image_path', 'images/avatars/' . date('Y/m')))),
+            'image_path'               => normalize_upload_path_template((string) Arr::get($user_settings, 'image_path', (string) config('app.images.user.image_path', 'images/avatars/' . date('Y/m')))),
             'no_image'                 => (string) Arr::get($user_settings, 'no_image', (string) config('app.images.user.no_image', 'images/no-avatar.png')),
             'preview_in_list_in_admin' => [
                 'width' => max(
@@ -189,7 +189,7 @@ class EditAppSetting extends EditRecord
                     (int) Arr::get($user_settings, 'upload.max_size_mb', 5) * 1024,
                 ),
             ],
-            'image_path'                => normalize_upload_path_template((string) Arr::get($user_settings, 'image_path', (string) config('app.images.user.image_path', 'images/avatars/' . date('Y/m')))),
+            'image_path'               => normalize_upload_path_template((string) Arr::get($user_settings, 'image_path', (string) config('app.images.user.image_path', 'images/avatars/' . date('Y/m')))),
             'no_image'                 => (string) Arr::get($user_settings, 'no_image', (string) config('app.images.user.no_image', 'images/no-avatar.png')),
             'preview_in_list_in_admin' => [
                 'width' => max(
@@ -272,8 +272,8 @@ class EditAppSetting extends EditRecord
                 (int) Arr::get($system_settings, 'frontend.max_viewport_width', (int) config('app.frontend.max_viewport_width', 1920)),
             ),
             'images' => [
-                'path_to_logo' => (string) Arr::get($system_settings, 'images.path_to_logo', (string) config('app.images.path_to_logo', 'images/logo.png')),
-                'default_no_image' => (string) Arr::get($system_settings, 'images.default_no_image', (string) config('app.images.default_no_image', 'images/no-image.png')),
+                'path_to_logo'      => (string) Arr::get($system_settings, 'images.path_to_logo', (string) config('app.images.path_to_logo', 'images/logo.png')),
+                'default_no_image'  => (string) Arr::get($system_settings, 'images.default_no_image', (string) config('app.images.default_no_image', 'images/no-image.png')),
                 'prototype_quality' => max(
                     1,
                     (int) Arr::get($system_settings, 'images.prototype_quality', (int) config('app.images.prototype_quality', 100)),
@@ -316,8 +316,8 @@ class EditAppSetting extends EditRecord
                 ),
             ],
             'images' => [
-                'path_to_logo' => (string) Arr::get($system_settings, 'images.path_to_logo', (string) config('app.images.path_to_logo', 'images/logo.png')),
-                'default_no_image' => (string) Arr::get($system_settings, 'images.default_no_image', (string) config('app.images.default_no_image', 'images/no-image.png')),
+                'path_to_logo'      => (string) Arr::get($system_settings, 'images.path_to_logo', (string) config('app.images.path_to_logo', 'images/logo.png')),
+                'default_no_image'  => (string) Arr::get($system_settings, 'images.default_no_image', (string) config('app.images.default_no_image', 'images/no-image.png')),
                 'prototype_quality' => max(
                     1,
                     (int) Arr::get($system_settings, 'images.prototype_quality', (int) config('app.images.prototype_quality', 100)),

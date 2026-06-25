@@ -13,19 +13,11 @@ use Throwable;
 
 class LoadMoreProductsByAjaxController extends Controller
 {
-    /**
-     * @param LoadMoreProductsByAjaxIndexRequest $request
-     * @param LoadMoreProductsByAjaxAction       $load_more_products_by_ajax_action
-     * @param string                             $locale
-     * @param string|null                        $slug
-     *
-     * @return JsonResponse
-     */
     public function index(
         LoadMoreProductsByAjaxIndexRequest $request,
-        LoadMoreProductsByAjaxAction       $load_more_products_by_ajax_action,
-        string                             $locale,
-        ?string                            $slug,
+        LoadMoreProductsByAjaxAction $load_more_products_by_ajax_action,
+        string $locale,
+        ?string $slug,
     ): JsonResponse {
         $locale    = normalize_locale($locale);
         $page_type = $request->query('page_type');
@@ -34,8 +26,8 @@ class LoadMoreProductsByAjaxController extends Controller
             $response_data = $load_more_products_by_ajax_action->handle(
                 request      : $request,
                 locale       : $locale,
-                category_slug: (string)$slug,
-                params       : compact('page_type')
+                category_slug: (string) $slug,
+                params       : compact('page_type'),
             );
 
             $html = view('catalog.pages.partials.category.category-content-container', $response_data)->render();

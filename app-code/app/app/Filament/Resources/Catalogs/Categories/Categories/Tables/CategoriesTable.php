@@ -27,7 +27,7 @@ class CategoriesTable
 
     public static function configure(Table $table): Table
     {
-        $current_language_id = self::getCurrentLanguageId();
+        $current_language_id  = self::getCurrentLanguageId();
         $admin_image_settings = [
             'images' => [
                 'no_image' => [

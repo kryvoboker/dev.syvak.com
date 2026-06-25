@@ -16,7 +16,7 @@ class CarouselServiceProvider extends ServiceProvider
 
     protected string $name = 'Carousel';
 
-    protected string $nameLower = 'carousel';
+    protected string $name_lower = 'carousel';
 
     /**
      * Boot the application events.
@@ -48,7 +48,9 @@ class CarouselServiceProvider extends ServiceProvider
      * This module is runtime-content only, so scaffold route/event
      * providers are intentionally not registered here.
      */
-    public function register(): void {}
+    public function register(): void
+    {
+    }
 
     /**
      * Register commands in the format of Command::class
@@ -74,13 +76,13 @@ class CarouselServiceProvider extends ServiceProvider
      */
     public function registerTranslations(): void
     {
-        $langPath = resource_path('lang/modules/' . $this->nameLower);
+        $lang_path = resource_path('lang/modules/' . $this->name_lower);
 
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($langPath);
+        if (is_dir($lang_path)) {
+            $this->loadTranslationsFrom($lang_path, $this->name_lower);
+            $this->loadJsonTranslationsFrom($lang_path);
         } else {
-            $this->loadTranslationsFrom(module_path($this->name, 'lang'), $this->nameLower);
+            $this->loadTranslationsFrom(module_path($this->name, 'lang'), $this->name_lower);
             $this->loadJsonTranslationsFrom(module_path($this->name, 'lang'));
         }
     }
@@ -90,16 +92,16 @@ class CarouselServiceProvider extends ServiceProvider
      */
     protected function registerConfig(): void
     {
-        $configPath = module_path($this->name, config('modules.paths.generator.config.path'));
+        $config_path = module_path($this->name, config('modules.paths.generator.config.path'));
 
-        if (is_dir($configPath)) {
-            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($configPath));
+        if (is_dir($config_path)) {
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($config_path));
 
             foreach ($iterator as $file) {
                 if ($file->isFile() && $file->getExtension() === 'php') {
-                    $config     = str_replace($configPath . DIRECTORY_SEPARATOR, '', $file->getPathname());
+                    $config = str_replace($config_path . DIRECTORY_SEPARATOR, '', $file->getPathname());
                     $config_key = str_replace([DIRECTORY_SEPARATOR, '.php'], ['.', ''], $config);
-                    $segments   = explode('.', $this->nameLower . '.' . $config_key);
+                    $segments = explode('.', $this->name_lower . '.' . $config_key);
 
                     // Remove duplicated adjacent segments
                     $normalized = [];
@@ -109,10 +111,10 @@ class CarouselServiceProvider extends ServiceProvider
                         }
                     }
 
-                    $key = ($config === 'config.php') ? $this->nameLower : implode('.', $normalized);
+                    $key = ($config === 'config.php') ? $this->name_lower : implode('.', $normalized);
 
                     $this->publishes([$file->getPathname() => config_path($config)], 'config');
-                    $this->merge_config_from($file->getPathname(), $key);
+                    $this->mergeModuleConfigFrom($file->getPathname(), $key);
                 }
             }
         }
@@ -121,9 +123,9 @@ class CarouselServiceProvider extends ServiceProvider
     /**
      * Merge config from the given path recursively.
      */
-    protected function merge_config_from(string $path, string $key): void
+    protected function mergeModuleConfigFrom(string $path, string $key): void
     {
-        $existing      = config($key, []);
+        $existing = config($key, []);
         $module_config = require $path;
 
         config([$key => array_replace_recursive($existing, $module_config)]);
@@ -134,14 +136,14 @@ class CarouselServiceProvider extends ServiceProvider
      */
     public function registerViews(): void
     {
-        $viewPath   = resource_path('views/modules/' . $this->nameLower);
-        $sourcePath = module_path($this->name, 'resources/views');
+        $view_path = resource_path('views/modules/' . $this->name_lower);
+        $source_path = module_path($this->name, 'resources/views');
 
-        $this->publishes([$sourcePath => $viewPath], ['views', $this->nameLower . '-module-views']);
+        $this->publishes([$source_path => $view_path], ['views', $this->name_lower . '-module-views']);
 
-        $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
+        $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$source_path]), $this->name_lower);
 
-        Blade::componentNamespace(config('modules.namespace') . '\\' . $this->name . '\\View\\Components', $this->nameLower);
+        Blade::componentNamespace(config('modules.namespace') . '\\' . $this->name . '\\View\\Components', $this->name_lower);
     }
 
     /**
@@ -156,8 +158,8 @@ class CarouselServiceProvider extends ServiceProvider
     {
         $paths = [];
         foreach (config('view.paths') as $path) {
-            if (is_dir($path . '/modules/' . $this->nameLower)) {
-                $paths[] = $path . '/modules/' . $this->nameLower;
+            if (is_dir($path . '/modules/' . $this->name_lower)) {
+                $paths[] = $path . '/modules/' . $this->name_lower;
             }
         }
 

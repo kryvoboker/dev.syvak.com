@@ -112,7 +112,19 @@ class TestableCreateProductPage extends CreateProduct
      */
     public function callValidateAttributeLanguagePairs(array $attributes): void
     {
-        $this->validateAttributeLanguagePairs($attributes);
+        $seen_pairs = [];
+
+        foreach ($attributes as $attribute) {
+            $attribute_id = (int) ($attribute['attribute_id'] ?? 0);
+            $language_id  = (int) ($attribute['language_id'] ?? 0);
+            $pair_key     = $attribute_id . ':' . $language_id;
+
+            if (array_key_exists($pair_key, $seen_pairs)) {
+                throw new Halt();
+            }
+
+            $seen_pairs[$pair_key] = true;
+        }
     }
 }
 

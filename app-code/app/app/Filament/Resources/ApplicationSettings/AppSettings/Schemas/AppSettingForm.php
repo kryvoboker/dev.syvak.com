@@ -366,7 +366,7 @@ class AppSettingForm
     protected static function getSchemaForSection(string $section, string $lang_code): array
     {
         return match ($section) {
-            'seo'      => [
+            'seo' => [
                 TextInput::make("titles.$lang_code")
                     ->label(__('admin/settings/app_settings.labels.titles'))
                     ->helperText(__('admin/settings/app_settings.helpers.titles'))
@@ -470,7 +470,7 @@ class AppSettingForm
                     ->rules(['nullable', 'string', 'max:1000'])
                     ->nullable(),
             ],
-            default    => [],
+            default => [],
         };
     }
 }

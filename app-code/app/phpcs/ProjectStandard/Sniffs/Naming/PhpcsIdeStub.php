@@ -6,18 +6,20 @@ declare(strict_types=1);
 // This file must not be required from the sniff itself, otherwise it can shadow the real PHPCS classes at runtime.
 
 namespace PHP_CodeSniffer\Sniffs {
-    if (interface_exists(\PHP_CodeSniffer\Sniffs\Sniff::class, false) === false) {
+    use PHP_CodeSniffer\Files\File;
+
+    if (interface_exists(Sniff::class, false) === false) {
         interface Sniff
         {
             public function register();
 
-            public function process(\PHP_CodeSniffer\Files\File $phpcsFile, int $stackPtr);
+            public function process(File $phpcsFile, int $stackPtr);
         }
     }
 }
 
 namespace PHP_CodeSniffer\Files {
-    if (class_exists(\PHP_CodeSniffer\Files\File::class, false) === false) {
+    if (class_exists(File::class, false) === false) {
         class File
         {
             public function getTokens(): array
@@ -35,9 +37,7 @@ namespace PHP_CodeSniffer\Files {
                 return false;
             }
 
-            public function addError(string $error, int $stackPtr, string $code = '', array $data = []): void
-            {
-            }
+            public function addError(string $error, int $stackPtr, string $code = '', array $data = []): void {}
         }
     }
 }

@@ -50,12 +50,13 @@ class CategoryController extends Controller
         $fallback_active_sort    = resolve_sort_code($page_setting, $requested_sort_value);
 
         try {
-            $response_data = $filter_products_action->handle([
+            $response_data = $filter_products_action->handle(
+                [
                 'validated_data'      => $request->validated(),
                 'category_slug'       => $slug,
                 'is_get_filters_data' => true,
                 'page_path'           => localized_route('localized.catalog.category.show', ['slug' => $slug], absolute: false),
-            ],
+                ],
                 locale: $locale,
             );
         } catch (Throwable $e) {
@@ -326,7 +327,7 @@ class CategoryController extends Controller
             ];
         }
 
-        $path_ids = new CategoryPath()
+        $path_ids = (new CategoryPath())
             ->getPathIdsByCategoryId((int) $category->id)
             ->pluck('path_id')
             ->map(fn (mixed $path_id): int => (int) $path_id)

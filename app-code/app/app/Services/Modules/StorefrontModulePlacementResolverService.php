@@ -31,7 +31,8 @@ class StorefrontModulePlacementResolverService
 
     public function __construct(
         private readonly ModuleClassResolverService $module_class_resolver_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, array{
@@ -43,7 +44,8 @@ class StorefrontModulePlacementResolverService
      */
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
-        $cache_key = $placement . '|' . ($page_type ?? 'null');
+        $cache_key   = $placement . '|' . ($page_type ?? 'null');
+        $definitions = collect();
 
         if (array_key_exists($cache_key, $this->resolved_placements_cache)) {
             return $this->resolved_placements_cache[$cache_key];
@@ -52,12 +54,12 @@ class StorefrontModulePlacementResolverService
         try {
             /** @var Collection<int, ModuleDefinition> $definitions */
             $definitions = resolve_modules_for_context($placement);
-        } catch (BindingResolutionException|CircularDependencyException $e) {
+        } catch (BindingResolutionException | CircularDependencyException $e) {
             report($e);
         }
 
         $resolved_items = $definitions
-            ->map(fn(ModuleDefinition $definition): array => $this->resolveDefinitionEntries($definition, $placement, $page_type))
+            ->map(fn (ModuleDefinition $definition): array => $this->resolveDefinitionEntries($definition, $placement, $page_type))
             ->collapse()
             ->values()
             ->all();
@@ -90,7 +92,7 @@ class StorefrontModulePlacementResolverService
             return [];
         }
 
-        $view = Str::trim((string)Arr::get($module_config, 'runtime.storefront.view', ''));
+        $view = Str::trim((string) Arr::get($module_config, 'runtime.storefront.view', ''));
 
         if (blank($view) || View::exists($view) === false) {
             Log::channel('stack')->warning('Storefront module view is missing or invalid.', [
@@ -118,13 +120,13 @@ class StorefrontModulePlacementResolverService
         /** @var array<int, array<string, mixed>> $module_items */
         $module_items = $data_service->resolveForPlacement($placement, $page_type);
 
-        $view_data_key = Str::trim((string)Arr::get($module_config, 'runtime.storefront.view_data_key', 'module_data'));
+        $view_data_key = Str::trim((string) Arr::get($module_config, 'runtime.storefront.view_data_key', 'module_data'));
 
         return collect($module_items)
             ->map(function (array $item) use ($definition, $view, $view_data_key, $page_type): array {
                 return [
-                    'module_definition_id' => (int)$definition->id,
-                    'module_name'          => (string)$definition->nwidart_name,
+                    'module_definition_id' => (int) $definition->id,
+                    'module_name'          => (string) $definition->nwidart_name,
                     'view'                 => $view,
                     'view_data'            => [
                         $view_data_key => $item,
@@ -137,13 +139,13 @@ class StorefrontModulePlacementResolverService
     }
 
     /**
-     * @param array<string, mixed> $module_config
+     * @param  array<string, mixed>  $module_config
      */
     private function resolveDataServiceClass(ModuleDefinition $definition, array $module_config): ?string
     {
         $service_relative_class = Arr::get($module_config, 'runtime.storefront.data_service');
 
-        if (!is_string($service_relative_class) || blank($service_relative_class)) {
+        if (! is_string($service_relative_class) || blank($service_relative_class)) {
             $service_relative_class = sprintf('Services\\%sModuleDataService', $definition->nwidart_name);
         }
 
@@ -155,7 +157,7 @@ class StorefrontModulePlacementResolverService
      */
     private function loadModuleConfig(ModuleDefinition $definition): array
     {
-        $module_path = Str::trim((string)$definition->module_path);
+        $module_path = Str::trim((string) $definition->module_path);
 
         if ($module_path === '') {
             return [];

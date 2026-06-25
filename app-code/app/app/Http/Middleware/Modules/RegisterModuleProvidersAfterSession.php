@@ -20,7 +20,7 @@ use Throwable;
 class RegisterModuleProvidersAfterSession
 {
     /**
-     * @param Closure(Request): Response $next
+     * @param  Closure(Request): Response  $next
      *
      * @throws Throwable
      */

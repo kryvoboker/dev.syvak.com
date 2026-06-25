@@ -132,7 +132,7 @@ class ProductsTable
                     ->sortable()
                     ->limit(50)
                     ->getStateUsing(function (Product $record) {
-                        $discount   = new Product()->getLastActualAndLastModifiedDiscountFromModel($record);
+                        $discount   = (new Product())->getLastActualAndLastModifiedDiscountFromModel($record);
                         $base_price = (float) ($record->defaultVariant->price ?? $record->price);
 
                         $currency      = config('app.currency.current_currency_code');

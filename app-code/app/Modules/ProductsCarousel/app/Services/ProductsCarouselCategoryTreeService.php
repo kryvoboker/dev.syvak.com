@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\ProductsCarousel\Services;
 
-use App\Models\Catalogs\Categories\Category;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Catalogs\Categories\Category;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -100,7 +100,7 @@ class ProductsCarouselCategoryTreeService
             return (int) $language_by_locale->id;
         }
 
-        $default_language = new Language()->getDefaultLanguage();
+        $default_language = (new Language())->getDefaultLanguage();
 
         if ($default_language !== null) {
             return (int) $default_language->id;

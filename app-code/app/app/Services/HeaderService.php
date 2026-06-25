@@ -33,7 +33,7 @@ class HeaderService
                     'slug'         => $category->slugs->first()->slug,
                 ];
             });
-        $languages   = new Language()->getActiveLanguages();
+        $languages   = (new Language())->getActiveLanguages();
         $logo_width  = (int) ($logo_sizes['width'] ?? config('app.images.logo_width'));
         $logo_height = (int) ($logo_sizes['height'] ?? config('app.images.logo_height'));
         $socials     = array_map(function ($item) {

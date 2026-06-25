@@ -25,7 +25,8 @@ class Product extends Model
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
 
-    use HasSlugsTrait, SlugTrait;
+    use HasSlugsTrait;
+    use SlugTrait;
 
     protected $fillable = [
         'default_variant_id',

@@ -9,12 +9,9 @@ use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Categories\Category;
 use Exception;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use LogicException;
-use Throwable;
 
 class CreateCategory extends CreateRecord
 {
@@ -32,9 +29,6 @@ class CreateCategory extends CreateRecord
 
     public ?Model $record = null;
 
-    /**
-     * Mutate form data before creating record
-     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Store related data temporarily
@@ -48,45 +42,22 @@ class CreateCategory extends CreateRecord
         return $data;
     }
 
-    /**
-     * Handle record creation with transaction
-     *
-     *
-     * @throws Halt
-     */
     protected function handleRecordCreation(array $data): Model
     {
-        try {
-            return DB::transaction(function () use ($data) {
-                // Create main record
-                $this->record = static::getModel()::create($data);
+        return DB::transaction(function () use ($data) {
+            $this->record = static::getModel()::create($data);
 
-                // Create image
-                $this->createImage();
+            $this->createImage();
 
-                // Process slugs
-                if ($this->updateOrCreateSlugs() === false) {
-                    throw new Exception('Failed to create slugs');
-                }
+            if ($this->updateOrCreateSlugs() === false) {
+                throw new Exception('Failed to create slugs');
+            }
 
-                // Create descriptions
-                $this->createDescriptions();
+            $this->createDescriptions();
+            $this->getCategoryRecord()->rebuildPaths();
 
-                // Rebuild category paths
-                $this->getCategoryRecord()->rebuildPaths();
-
-                return $this->record;
-            });
-        } catch (Exception|Throwable $e) {
-            Log::channel('stack')->error('Failed to create Category: ' . $e->getMessage(), [
-                'data'      => $data,
-                'exception' => $e,
-            ]);
-
-            $this->halt();
-
-            throw $e;
-        }
+            return $this->record;
+        });
     }
 
     /**

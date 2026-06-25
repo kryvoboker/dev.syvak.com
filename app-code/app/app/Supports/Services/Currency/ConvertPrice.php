@@ -30,7 +30,8 @@ final class ConvertPrice
         }
 
         if ($this->currencies->has($currency_code) === false) {
-            $currency = new Currency()->getActiveCurrencyByCode($currency_code);
+            $currency_model = new Currency();
+            $currency = $currency_model->getActiveCurrencyByCode($currency_code);
 
             if ($currency !== null) {
                 $this->currencies->offsetSet($currency_code, $currency);
@@ -76,7 +77,8 @@ final class ConvertPrice
         } elseif ($this->currencies->has($code_from)) {
             $code_from = $this->currencies->get($code_from)->exchange_rate;
         } else {
-            $currency = new Currency()->getActiveCurrencyByCode($code_from);
+            $currency_model = new Currency();
+            $currency = $currency_model->getActiveCurrencyByCode($code_from);
 
             if ($currency !== null) {
                 $this->currencies->offsetSet($code_from, $currency);
@@ -92,7 +94,8 @@ final class ConvertPrice
         } elseif ($this->currencies->has($code_to)) {
             $code_to = $this->currencies->get($code_to)->exchange_rate;
         } else {
-            $currency = new Currency()->getActiveCurrencyByCode($code_to);
+            $currency_model = new Currency();
+            $currency = $currency_model->getActiveCurrencyByCode($code_to);
 
             if ($currency !== null) {
                 $this->currencies->offsetSet($code_to, $currency);
@@ -113,7 +116,8 @@ final class ConvertPrice
         }
 
         if (! isset($this->default_currency)) {
-            $currency = new Currency()->getActiveCurrencyByCode(
+            $currency_model = new Currency();
+            $currency = $currency_model->getActiveCurrencyByCode(
                 config('app.currency.current_currency_code'),
             );
 

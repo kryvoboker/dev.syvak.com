@@ -27,7 +27,9 @@ use Throwable;
 
 readonly class CatalogFilterIndexRebuildService
 {
-    public function __construct(private PriceSourceResolverService $price_source_resolver_service) {}
+    public function __construct(private PriceSourceResolverService $price_source_resolver_service)
+    {
+    }
 
     /**
      * @throws Throwable

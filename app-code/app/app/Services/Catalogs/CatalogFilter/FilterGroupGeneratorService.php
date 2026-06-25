@@ -169,7 +169,7 @@ class FilterGroupGeneratorService
 
     private function syncSystemGroupTranslations(CatalogFilterGroup $group): void
     {
-        foreach (new Language()->getActiveLanguages() as $language) {
+        foreach ((new Language())->getActiveLanguages() as $language) {
             $language_code = (string) $language->code;
             $translate     = __('admin/catalogs/catalog-filter/catalog-filter-set.labels.price', locale: $language_code);
 
@@ -187,7 +187,7 @@ class FilterGroupGeneratorService
 
     private function syncAttributeGroupTranslations(CatalogFilterGroup $group, Attribute $attribute): void
     {
-        foreach (new Language()->getActiveLanguages() as $language) {
+        foreach ((new Language())->getActiveLanguages() as $language) {
             $attribute_name = (string) optional(
                 $attribute->attributeDescription
                     ->firstWhere('language_id', (int) $language->id),

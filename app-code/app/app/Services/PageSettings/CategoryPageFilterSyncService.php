@@ -42,13 +42,13 @@ class CategoryPageFilterSyncService
 
     private function resolveDefaultLanguageId(): int
     {
-        $default_language = new Language()->getDefaultLanguage();
+        $default_language = (new Language())->getDefaultLanguage();
 
         if ($default_language !== null) {
             return (int) $default_language->id;
         }
 
-        $first_active_language = new Language()->getActiveLanguages()->first();
+        $first_active_language = (new Language())->getActiveLanguages()->first();
 
         if ($first_active_language instanceof Language) {
             return (int) $first_active_language->id;

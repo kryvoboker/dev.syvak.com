@@ -9,20 +9,13 @@ use App\Services\Cart\CartService;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\Trait\CartTrait;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CartController extends Controller
 {
     use CartTrait;
 
-    /**
-     * @param Request     $request
-     * @param string|null $locale
-     *
-     * @return View
-     */
-    public function index(Request $request, ?string $locale): View
+    public function index(?string $locale): View
     {
         $locale      = normalize_locale($locale);
         $header_data = app(HeaderService::class)();
@@ -38,7 +31,7 @@ class CartController extends Controller
                 breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
                 breadcrumb(__('catalog/default.cart.labels.cart')),
             ],
-            'cart_data'   => $cart_data,
+            'cart_data' => $cart_data,
         ];
 
         return view('catalog.pages.cart', $data);

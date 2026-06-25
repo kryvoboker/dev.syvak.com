@@ -22,7 +22,8 @@ readonly class ModuleProviderResolverService
 {
     public function __construct(
         private ModuleClassResolverService $module_class_resolver_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return list<class-string>
@@ -154,7 +155,7 @@ readonly class ModuleProviderResolverService
         $default_strategy = (string) config('modules-runtime.default_strategy', 'route_matched');
 
         if (! in_array($default_strategy, $allowed_strategies, true)) {
-            $default_strategy = (string)array_first($allowed_strategies);
+            $default_strategy = (string) array_first($allowed_strategies);
         }
 
         if (is_string($strategy) && in_array($strategy, $allowed_strategies, true)) {

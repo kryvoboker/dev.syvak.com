@@ -272,7 +272,7 @@ class EditCatalogFilterSet extends EditRecord
         /** @var array<string, Language> $languages_by_code */
         $languages_by_code = [];
 
-        foreach (new Language()->getActiveLanguages() as $language) {
+        foreach ((new Language())->getActiveLanguages() as $language) {
             $languages_by_code[(string) $language->code] = $language;
         }
 

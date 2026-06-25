@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Seeders\Catalogs\Products;
 
-use App\Models\Catalogs\Products\Product;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Catalogs\Products\Product;
 use App\Supports\Services\Ai\AiTranslationService;
 use App\Supports\Services\SeoSlug\EnSeoSlugService;
 use App\Supports\Services\SeoSlug\UaSeoSlugService;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Throwable;
 
@@ -22,7 +23,7 @@ class ProductImportSeeder extends Seeder
         $path = database_path('seeders/Catalogs/Products/data/products_2025_12.json');
 
         if (! is_file($path)) {
-            $this->command?->error("Import file not found: $path!");
+            $this->command->error("Import file not found: $path!");
 
             return;
         }
@@ -31,10 +32,10 @@ class ProductImportSeeder extends Seeder
         $language       = new Language();
 
         // Get current locale language ID (adjust based on your logic)
-        $current_language_id = $language->getLanguageByCode($default_locale)?->id;
+        $current_language_id = $language->getLanguageByCode($default_locale)->id;
 
         if ($current_language_id === null) {
-            $this->command?->error("$default_locale language not found in the database!");
+            $this->command->error("$default_locale language not found in the database!");
 
             return;
         }
@@ -86,7 +87,11 @@ class ProductImportSeeder extends Seeder
                 ['slug' => UaSeoSlugService::make($item['name'] ?? '', 500)],
             );
 
-            $languages->each(function (Language $lang) use ($ai_translation_service, $product, $product_name, $default_locale) {
+            $languages->each(function (Model $lang) use ($ai_translation_service, $product, $product_name, $default_locale): void {
+                if (! $lang instanceof Language) {
+                    return;
+                }
+
                 $prompt = "Translate the product name from $default_locale to $lang->code. The product name is: $product_name.";
 
                 $translated_name = $ai_translation_service->productName($product->id, $prompt);

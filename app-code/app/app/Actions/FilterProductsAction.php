@@ -30,7 +30,8 @@ readonly class FilterProductsAction
     public function __construct(
         private PageSettingsBootstrapService $page_settings_bootstrap_service,
         private PriceSourceResolverService $price_source_resolver_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<string, mixed>  $params
@@ -236,17 +237,11 @@ readonly class FilterProductsAction
 
         return $groups
             ->filter(function (CatalogFilterGroup $group) use ($filter_set): bool {
-                $source_type = (string) $group->getRawOriginal('source_type');
-
-                if ($source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
-                    return (bool) $filter_set->is_price_filter_enabled;
-                }
-
-                if ($source_type === CatalogFilterGroupSourceTypeEnum::Attribute->value) {
-                    return (bool) $filter_set->is_attribute_filtering_enabled;
-                }
-
-                return false;
+                return match ((string) $group->getRawOriginal('source_type')) {
+                    CatalogFilterGroupSourceTypeEnum::Price->value => (bool) $filter_set->is_price_filter_enabled,
+                    CatalogFilterGroupSourceTypeEnum::Attribute->value => (bool) $filter_set->is_attribute_filtering_enabled,
+                    default => false,
+                };
             })
             ->values();
     }
@@ -477,19 +472,12 @@ readonly class FilterProductsAction
         $discount_only_policy = $this->resolveDiscountOnlyPolicy($filter_set);
         $db_prefix            = config('database.prefix');
 
-        if ($price_source_mode === CatalogFilterPriceSourceModeEnum::RrcOnly) {
-            return $db_prefix . 'default_product_variant.price';
-        }
-
-        if ($price_source_mode === CatalogFilterPriceSourceModeEnum::Both) {
-            return "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)";
-        }
-
-        if ($discount_only_policy === CatalogFilterDiscountOnlyPolicyEnum::FallbackToBase) {
-            return "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)";
-        }
-
-        return $db_prefix . 'active_product_discount.price';
+        return match (true) {
+            $price_source_mode === CatalogFilterPriceSourceModeEnum::RrcOnly => $db_prefix . 'default_product_variant.price',
+            $price_source_mode === CatalogFilterPriceSourceModeEnum::Both => "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)",
+            $discount_only_policy === CatalogFilterDiscountOnlyPolicyEnum::FallbackToBase => "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)",
+            default => $db_prefix . 'active_product_discount.price',
+        };
     }
 
     private function resolvePriceSourceMode(?CatalogFilterSet $filter_set): CatalogFilterPriceSourceModeEnum
