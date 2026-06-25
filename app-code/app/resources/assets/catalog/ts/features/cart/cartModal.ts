@@ -48,6 +48,7 @@ const updateSelectedCartItemsSummary = (mode: CartMode): void => {
 
     const totalCount = itemCheckboxes.length;
     const selectedCount = itemCheckboxes.filter((checkbox: HTMLInputElement): boolean => checkbox.checked).length;
+    const removeSelectedButton = <HTMLElement | null>findElem('[data-remove-selected-cart-items]', cartRoot);
 
     if (selectAllCheckbox) {
         selectAllCheckbox.checked = totalCount > 0 && selectedCount === totalCount;
@@ -58,6 +59,10 @@ const updateSelectedCartItemsSummary = (mode: CartMode): void => {
         const template:string = summaryElement.dataset.template ?? 'Вибрано %d з %d';
 
         summaryElement.textContent = sprintF(template, selectedCount, totalCount);
+    }
+
+    if (removeSelectedButton) {
+        removeSelectedButton.classList.toggle('hidden', selectedCount === 0);
     }
 };
 

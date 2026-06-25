@@ -57,10 +57,12 @@ const renderMutationResponse = (response: CartMutationResponse, mode: CartMode):
         cartPageRoot.innerHTML = response.rendered.cart_page_html;
     }
 
-    const generalErrorMessage = extractCartGeneralErrorMessage(response);
+    const generalMessage = response.success === true
+        ? String(response.message ?? '').trim()
+        : extractCartGeneralErrorMessage(response);
 
-    if (response.success === false && generalErrorMessage !== '') {
-        setCartModalGeneralError(mode, generalErrorMessage);
+    if (generalMessage !== '') {
+        setCartModalGeneralError(mode, generalMessage, response.success === true);
     } else {
         clearCartModalGeneralError(mode);
     }

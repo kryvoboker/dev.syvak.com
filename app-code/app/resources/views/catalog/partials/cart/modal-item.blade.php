@@ -2,6 +2,8 @@
     $image_data = $cart_item['image_data'] ?? null;
     $item_attributes = is_array($cart_item['attributes'] ?? null) ? $cart_item['attributes'] : [];
     $display_price_formatted = $display_price_formatted ?? ($cart_item['unit_price_formatted'] ?? $cart_item['line_total_formatted'] ?? '');
+    $minimum_quantity = max(1, (int) ($cart_item['minimum_quantity'] ?? 1));
+    $available_quantity = max(0, (int) ($cart_item['available_quantity'] ?? 0));
 @endphp
 
 <div class="flex items-start gap-2 md:gap-4 border-b border-b-opacity-light-gray-40% py-3 md:py-4 cart-item-row"
@@ -72,8 +74,8 @@
                        data-cart-item-quantity
                        data-cart-id="{{ $cart_item['cart_id'] }}"
                        type="number"
-                       min="{{ $cart_item['minimum_quantity'] }}"
-                       max="{{ max($cart_item['minimum_quantity'], $cart_item['available_quantity']) }}"
+                       min="{{ $minimum_quantity }}"
+                       max="{{ max($minimum_quantity, $available_quantity) }}"
                        value="{{ $cart_item['quantity'] }}"/>
 
                 <button class="inline-flex size-6 md:size-9 items-center justify-center border border-white/80"
