@@ -1,6 +1,7 @@
 @php
     $image_data = $cart_item['image_data'] ?? null;
     $item_attributes = is_array($cart_item['attributes'] ?? null) ? $cart_item['attributes'] : [];
+    $display_price_formatted = $display_price_formatted ?? ($cart_item['unit_price_formatted'] ?? $cart_item['line_total_formatted'] ?? '');
 @endphp
 
 <div class="flex items-start gap-2 md:gap-4 border-b border-b-opacity-light-gray-40% py-3 md:py-4 cart-item-row"
@@ -84,7 +85,7 @@
             </div>
 
             <p class="text-sm md:text-base lg:text-2xl whitespace-nowrap">
-                {{ $cart_item['unit_price_formatted'] ?? $cart_item['line_total_formatted'] ?? '' }}
+                {{ $display_price_formatted }}
             </p>
 
             <button class="btn btn-text p-0"

@@ -40,7 +40,10 @@
 
             <div class="flex flex-col gap-y-6.5" data-cart-items-list>
                 @if(is_array($first_item))
-                    @include('catalog.partials.cart.modal-item', ['cart_item' => $first_item])
+                    @include('catalog.partials.cart.modal-item', [
+                        'cart_item' => $first_item,
+                        'display_price_formatted' => $first_item['line_total_formatted'] ?? $first_item['unit_price_formatted'] ?? '',
+                    ])
                 @endif
 
                 @if($hidden_items !== [])
@@ -51,7 +54,10 @@
                                  role="region">
                                 <div class="flex flex-col gap-0 pb-3">
                                     @foreach($hidden_items as $cart_item)
-                                        @include('catalog.partials.cart.modal-item', ['cart_item' => $cart_item])
+                                        @include('catalog.partials.cart.modal-item', [
+                                            'cart_item' => $cart_item,
+                                            'display_price_formatted' => $cart_item['line_total_formatted'] ?? $cart_item['unit_price_formatted'] ?? '',
+                                        ])
                                     @endforeach
                                 </div>
                             </div>
