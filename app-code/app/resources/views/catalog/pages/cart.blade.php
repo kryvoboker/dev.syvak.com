@@ -24,5 +24,7 @@
         <div class="container flex flex-col gap-4" id="cart-page-root">
             @include('catalog.partials.cart.page-content', ['cart_data' => $cart_data ?? []])
         </div>
+
+        <x-catalog::common.loader class="cart-loader z-20"/>
     </section>
 @endsection

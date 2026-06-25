@@ -5,6 +5,7 @@
     $totals = $cart_data['totals'] ?? [];
     $total_lines = $totals['lines'] ?? [];
     $cart_mode = $cart_mode ?? ($cart_data['mode'] ?? 'regular');
+    $show_checkout_button = $show_checkout_button ?? true;
 @endphp
 
 <div class="flex flex-col h-full" data-cart-root data-cart-mode="{{ $cart_mode }}">
@@ -30,7 +31,7 @@
                         </span>
                 </label>
 
-                <button class="btn btn-text p-0"
+                <button class="btn btn-text p-0 hidden"
                         data-remove-selected-cart-items
                         type="button"
                         aria-label="{{ __('catalog/default.cart.messages.item_removed') }}">
@@ -102,7 +103,7 @@
             </div>
         @endif
 
-        @if($cart_mode === 'regular')
+        @if($cart_mode === 'regular' && $show_checkout_button === true)
             <a class="white-btn default-btn w-full md:max-w-85.75 lg:max-w-91.75 2xl:max-w-md text-lg mt-3 mx-auto"
                href="{{ localized_route('localized.catalog.cart.index') }}">
                 {{ __('catalog/default.cart.buttons.checkout') }}

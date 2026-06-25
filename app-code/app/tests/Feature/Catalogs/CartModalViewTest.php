@@ -19,9 +19,11 @@ class CartModalViewTest extends TestCase
 
         $this->assertStringContainsString('30 грн', $html);
         $this->assertStringNotContainsString('15 грн', $html);
+        $this->assertStringContainsString('data-remove-selected-cart-items', $html);
+        $this->assertStringContainsString('class="btn btn-text p-0 hidden"', $html);
     }
 
-    public function testCartPageContentKeepsUnitPriceForEachCartItem(): void
+    public function testCartPageContentRendersTheSameInteractiveCartControls(): void
     {
         $cart_data = $this->makeCartData();
 
@@ -29,8 +31,12 @@ class CartModalViewTest extends TestCase
             'cart_data' => $cart_data,
         ])->render();
 
-        $this->assertStringContainsString('15 грн', $html);
+        $this->assertStringContainsString('data-cart-page-content', $html);
+        $this->assertStringContainsString('data-cart-root', $html);
         $this->assertStringContainsString('30 грн', $html);
+        $this->assertStringNotContainsString('15 грн', $html);
+        $this->assertStringNotContainsString('checkout', $html);
+        $this->assertStringContainsString('class="btn btn-text p-0 hidden"', $html);
     }
 
     /**
