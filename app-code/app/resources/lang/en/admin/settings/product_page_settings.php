@@ -27,7 +27,7 @@ return [
     ],
 
     'helpers' => [
-        'no_image_path' => 'Image used when product has no own image.',
+        'no_image_path'          => 'Image used when product has no own image.',
         'image_upload_directory' => 'Use placeholders {year} and {month} for dynamic folders (for example: images/products/{year}/{month}).',
     ],
 ];

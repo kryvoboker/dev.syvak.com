@@ -9,11 +9,11 @@ use Illuminate\Support\Arr;
 
 class PageSetting extends Model
 {
-    public const string PAGE_TYPE_CATEGORY = 'category';
+    public const PAGE_TYPE_CATEGORY = 'category';
 
-    public const string PAGE_TYPE_PRODUCT = 'product';
+    public const PAGE_TYPE_PRODUCT = 'product';
 
-    public const string PAGE_TYPE_SEARCH = 'search';
+    public const PAGE_TYPE_SEARCH = 'search';
 
     protected $fillable = [
         'page_type',

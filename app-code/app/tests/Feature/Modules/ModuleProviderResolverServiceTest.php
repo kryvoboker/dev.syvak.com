@@ -42,13 +42,14 @@ class ModuleProviderResolverServiceTest extends TestCase
 
         Storage::fake('local');
 
-        $module_class_resolver_service = new class() extends ModuleClassResolverService
+        $module_class_resolver_service = new class () extends ModuleClassResolverService
         {
             public function resolve(ModuleDefinition|string|null $module_definition, string $relative_class): string
             {
                 return sprintf(
-                    'Modules\\%1$s\\Providers\\%1$sServiceProvider',
+                    'Modules\\%1$s\\%2$s',
                     $module_definition instanceof ModuleDefinition ? $module_definition->nwidart_name : (string) $module_definition,
+                    ltrim($relative_class, '\\'),
                 );
             }
         };

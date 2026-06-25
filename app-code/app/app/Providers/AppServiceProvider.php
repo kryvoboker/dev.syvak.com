@@ -19,11 +19,8 @@ use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\Images\ImageUrlBuilderService;
-use DateTimeInterface;
 use Detection\Exception\MobileDetectException;
 use Detection\MobileDetect;
-use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -105,7 +102,7 @@ class AppServiceProvider extends ServiceProvider
             Route::pattern($locale_key, $allowed_locales_pattern);
         }
 
-        $currency             = new Currency()->getDefaultActiveCurrency();
+        $currency             = (new Currency())->getDefaultActiveCurrency();
         $app_settings_service = app(AppSettingsService::class);
         $app_settings_service->setSettings();
         $detect = new MobileDetect();
@@ -176,33 +173,5 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function (LaravelView $view): void {
             $view->with('current_locale', app()->getLocale());
         });
-
-        if (app()->isLocal() && app()->hasDebugModeEnabled() === true) {
-            // Check SQL queries in the local environment for remote debugging
-            DB::listen(function (QueryExecuted $query): void {
-                $bindings = $query->bindings;
-
-                // Replace placeholders with quoted bindings for readable SQL.
-                $sql_template = str_replace('?', '%s', $query->sql);
-
-                $sql = vsprintf($sql_template, array_map(function ($binding) {
-                    if (is_string($binding)) {
-                        return "'" . addslashes($binding) . "'";
-                    }
-
-                    if ($binding instanceof DateTimeInterface) {
-                        return "'" . $binding->format('Y-m-d H:i:s') . "'";
-                    }
-
-                    if (is_bool($binding)) {
-                        return $binding ? '1' : '0';
-                    }
-
-                    return $binding === null ? 'NULL' : $binding;
-                }, $bindings)) ?: $query->sql;
-
-                $res = $sql;
-            });
-        }
     }
 }

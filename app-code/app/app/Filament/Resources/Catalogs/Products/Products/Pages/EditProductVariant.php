@@ -131,7 +131,7 @@ class EditProductVariant extends EditRecord
 
         if ($language_ids->count() !== $language_ids->unique()->count()) {
             $this->sendDangerAndHalt(
-                __('admin/catalogs/products/products.errors.duplicate_variant_slug_language')
+                __('admin/catalogs/products/products.errors.duplicate_variant_slug_language'),
             );
         }
 
@@ -155,7 +155,7 @@ class EditProductVariant extends EditRecord
 
             if ($slug_exists) {
                 $this->sendDangerAndHalt(
-                    __('admin/catalogs/products/products.errors.duplicate_product_or_variant_slug_value')
+                    __('admin/catalogs/products/products.errors.duplicate_product_or_variant_slug_value'),
                 );
             }
         }
@@ -202,7 +202,7 @@ class EditProductVariant extends EditRecord
 
         if ($duplicate_exists) {
             $this->sendDangerAndHalt(
-                __('admin/catalogs/products/products.errors.duplicate_variant_attributes_combination')
+                __('admin/catalogs/products/products.errors.duplicate_variant_attributes_combination'),
             );
         }
     }

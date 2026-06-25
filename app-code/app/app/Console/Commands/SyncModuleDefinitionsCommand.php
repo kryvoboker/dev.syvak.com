@@ -15,9 +15,6 @@ class SyncModuleDefinitionsCommand extends Command
     protected $description = 'Synchronize nwidart filesystem modules with database definitions';
 
     /**
-     * @param ModuleDefinitionSyncService $module_definition_sync_service
-     *
-     * @return int
      * @throws Throwable
      */
     public function handle(ModuleDefinitionSyncService $module_definition_sync_service): int

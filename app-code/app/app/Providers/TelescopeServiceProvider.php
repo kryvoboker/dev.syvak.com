@@ -22,10 +22,10 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         $this->hideSensitiveRequestDetails();
 
-        $isLocal = $this->app->environment('local');
+        $is_local = $this->app->environment('local');
 
-        Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
-            return $isLocal ||
+        Telescope::filter(function (IncomingEntry $entry) use ($is_local) {
+            return $is_local ||
                 $entry->isReportableException() ||
                 $entry->isFailedRequest() ||
                 $entry->isFailedJob() ||
@@ -34,9 +34,6 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         });
     }
 
-    /**
-     * @return void
-     */
     public function boot(): void
     {
         parent::boot();
@@ -47,7 +44,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             $user  = $request->user();
 
             if (
-                !($user instanceof User) ||
+                ! ($user instanceof User) ||
                 $request->getUser() !== $login ||
                 $request->getPassword() !== $pass
             ) {

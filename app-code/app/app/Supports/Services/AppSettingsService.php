@@ -16,13 +16,15 @@ final class AppSettingsService
 {
     private ?AppSettingsData $app_settings_data = null;
 
-    private const string CACHE_KEY = 'app.settings';
+    private const CACHE_KEY = 'app.settings';
 
-    private const int    TTL = 3600; // 1 hour
+    private const TTL = 3600;
 
     public function getSettings(): ?AppSettingsData
     {
-        $this->app_settings_data ??= Cache::get(self::CACHE_KEY);
+        if ($this->app_settings_data === null) {
+            $this->app_settings_data = Cache::get(self::CACHE_KEY);
+        }
 
         return $this->app_settings_data;
     }
@@ -37,8 +39,14 @@ final class AppSettingsService
             return;
         }
 
-        $language_id   = $this->resolveLanguageId($locale);
-        $user_group_id = Auth::user()?->user_group_id ?: new UserGroup()->getDefaultUserGroupId();
+        $language_id = $this->resolveLanguageId($locale);
+
+        $user = Auth::user();
+        $user_group_id = $user !== null ? $user->user_group_id : null;
+
+        if ($user_group_id === null) {
+            $user_group_id = (new UserGroup())->getDefaultUserGroupId();
+        }
 
         if ($user_group_id === null) {
             Log::channel('stack')->warning('Unable to resolve default user group ID while building app settings.', [
@@ -46,8 +54,11 @@ final class AppSettingsService
             ]);
         }
 
+        $app_setting = (new AppSetting())->getAppSettings();
+        $app_settings = $app_setting !== null ? $app_setting->toArray() : [];
+
         $this->app_settings_data = AppSettingsData::fromArray(array_merge(
-            new AppSetting()->getAppSettings()?->toArray() ?? [],
+            $app_settings,
             compact('language_id', 'user_group_id'),
         ));
 
@@ -61,10 +72,27 @@ final class AppSettingsService
     private function resolveLanguageId(string $locale): ?int
     {
         $language_model = new Language();
-        $language_id    = $language_model->getLanguageByCode($locale)?->id
-            ?: $language_model->getDefaultLanguage()?->id
-            ?: Language::query()->where('is_active', true)->orderByDesc('is_default')->orderBy('name')->value('id')
-            ?: Language::query()->value('id');
+        $language = $language_model->getLanguageByCode($locale);
+
+        if ($language !== null) {
+            $language_id = $language->id;
+        } else {
+            $default_language = $language_model->getDefaultLanguage();
+
+            if ($default_language !== null) {
+                $language_id = $default_language->id;
+            } else {
+                $language_id = Language::query()
+                    ->where('is_active', true)
+                    ->orderByDesc('is_default')
+                    ->orderBy('name')
+                    ->value('id');
+
+                if ($language_id === null) {
+                    $language_id = Language::query()->value('id');
+                }
+            }
+        }
 
         if ($language_id === null) {
             Log::channel('stack')->warning('Unable to resolve language ID while building app settings.', [

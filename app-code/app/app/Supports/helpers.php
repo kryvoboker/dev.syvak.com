@@ -493,9 +493,11 @@ if (! function_exists('normalize_locale')) {
 
         $languages = $language->getActiveLanguages();
 
-        if ($languages->contains(function (mixed $language) use ($locale): bool {
-            return $language instanceof Language && $language->code === $locale;
-        }) === false) {
+        if (
+            $languages->contains(function (mixed $language) use ($locale): bool {
+                return $language instanceof Language && $language->code === $locale;
+            }) === false
+        ) {
             $locale = app()->getLocale();
         }
 

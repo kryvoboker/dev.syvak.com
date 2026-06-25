@@ -19,25 +19,25 @@ final readonly class ImageUrlBuilderService
 {
     public function __construct(
         private Request $request,
-    ) {}
+    ) {
+    }
 
     /**
-     * @param string $bg_color HEX or transparent color
-     *
+     * @param  string  $bg_color  HEX or transparent color
      * @return string[]
      */
     public function multipleUrl(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
     {
         $total_sizes_for_generate = max(
             1,
-            (int)data_get(
+            (int) data_get(
                 get_app_settings(),
                 'system_settings.images.total_sizes_for_generate',
-                (int)config('app.images.total_sizes_for_generate', 4),
+                (int) config('app.images.total_sizes_for_generate', 4),
             ),
         );
-        $path                     = (string)$path;
-        $height                   ??= $width;
+        $path = (string) $path;
+        $height ??= $width;
 
         $this->checkSourceImage($path);
 
@@ -55,23 +55,23 @@ final readonly class ImageUrlBuilderService
     /**
      * Generate URL for image with specified dimensions.
      *
-     * @param string|null $path     Original path (relative to public), e.g: "images/products/2025/12/ABC123.jpg"
-     * @param int         $width    Required width
-     * @param int|null    $height   Required height (defaults to width)
-     * @param string      $bg_color HEX or transparent color
+     * @param  string|null  $path  Original path (relative to public), e.g: "images/products/2025/12/ABC123.jpg"
+     * @param  int  $width  Required width
+     * @param  int|null  $height  Required height (defaults to width)
+     * @param  string  $bg_color  HEX or transparent color
      */
     public function url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): string
     {
-        $path   = (string)$path;
+        $path = (string) $path;
         $height ??= $width;
-        $path   = Str::ltrim($path, '/');
+        $path = Str::ltrim($path, '/');
 
         $this->validateArgs($path, $width, $height);
 
         if (
             Storage::fileExists($path) === false ||
-            $width > (int)data_get(get_app_settings(), 'system_settings.images.max_image_width_for_convert', (int)config('app.images.max_image_width_for_convert', 2500)) ||
-            $height > (int)data_get(get_app_settings(), 'system_settings.images.max_image_height_for_convert', (int)config('app.images.max_image_height_for_convert', 2500))
+            $width > (int) data_get(get_app_settings(), 'system_settings.images.max_image_width_for_convert', (int) config('app.images.max_image_width_for_convert', 2500)) ||
+            $height > (int) data_get(get_app_settings(), 'system_settings.images.max_image_height_for_convert', (int) config('app.images.max_image_height_for_convert', 2500))
         ) {
             return $this->assetVersioned($path);
         }
@@ -117,7 +117,7 @@ final readonly class ImageUrlBuilderService
         $prototype_rel = $this->prototypeRelativePath($path, $width, $height);
 
         // If prototype not created yet - create it
-        if (!$this->publicFileExists($prototype_rel)) {
+        if (! $this->publicFileExists($prototype_rel)) {
             $this->createPrototype($path, $prototype_rel, $width, $height, $is_square, $bg_color);
         }
 
@@ -144,10 +144,10 @@ final readonly class ImageUrlBuilderService
 
         if ($original_width > $original_height) {
             $k             = min($original_width, $target_width) / max($original_width, $target_width);
-            $target_height = (int)round($original_height * $k);
+            $target_height = (int) round($original_height * $k);
         } else {
             $k            = min($original_height, $target_height) / max($original_height, $target_height);
-            $target_width = (int)round($original_width * $k);
+            $target_width = (int) round($original_width * $k);
         }
     }
 
@@ -168,10 +168,10 @@ final readonly class ImageUrlBuilderService
     private function checkSourceImage(string &$path): void
     {
         if (Storage::fileExists($path) === false) {
-            $path = (string)data_get(
+            $path = (string) data_get(
                 get_app_settings(),
                 'system_settings.images.default_no_image',
-                (string)config('app.images.default_no_image', 'images/no-image.png'),
+                (string) config('app.images.default_no_image', 'images/no-image.png'),
             );
         }
     }
@@ -180,16 +180,16 @@ final readonly class ImageUrlBuilderService
     {
         $supported_formats = $this->request->header('X-Supported-Image-Formats', '');
         $formats_array     = explode(',', $supported_formats);
-        $accept            = (string)$this->request->header('Accept', '');
+        $accept            = (string) $this->request->header('Accept', '');
 
         return Str::contains($accept, $mime) || Arr::some($formats_array, function (string $format) use ($mime) {
-                return Str::contains($mime, $format);
-            });
+            return Str::contains($mime, $format);
+        });
     }
 
     private function assetVersioned(string $public_relative): string
     {
-        $v   = (string)config('app.images.image_version');
+        $v   = (string) config('app.images.image_version');
         $url = asset("storage/$public_relative");
 
         // Add version to query string
@@ -207,7 +207,7 @@ final readonly class ImageUrlBuilderService
     {
         $dir = dirname($public_relative_file);
 
-        if (!Storage::directoryExists($dir)) {
+        if (! Storage::directoryExists($dir)) {
             Storage::makeDirectory($dir);
         }
     }
@@ -242,7 +242,7 @@ final readonly class ImageUrlBuilderService
     private function webRelativePath(string $format, string $original_path, int $w, int $h): string
     {
         [$dir, $name] = $this->splitPath($original_path);
-        $file = sprintf('%s_%d_%d.%s', $name, $w, $h, $format);
+        $file         = sprintf('%s_%d_%d.%s', $name, $w, $h, $format);
 
         if (empty($dir)) {
             return Str::trim("images/cache/$format/$file", '/');
@@ -255,7 +255,7 @@ final readonly class ImageUrlBuilderService
      * Create prototype of original format with required dimensions.
      * Implementation uses Intervention Image.
      *
-     * @param string $bg_color HEX or transparent color
+     * @param  string  $bg_color  HEX or transparent color
      */
     private function createPrototype(string $original_rel, string $prototype_rel, int $w, int $h, bool $is_square, string $bg_color = '000000'): void
     {
@@ -285,7 +285,7 @@ final readonly class ImageUrlBuilderService
                     $image_obj->resizeCanvas($w, $h, $bg_color);
                 }
 
-                $image_obj->save($dst, (int)data_get(get_app_settings(), 'system_settings.images.prototype_quality', (int)config('app.images.prototype_quality', 100)));
+                $image_obj->save($dst, (int) data_get(get_app_settings(), 'system_settings.images.prototype_quality', (int) config('app.images.prototype_quality', 100)));
 
                 return;
             }
@@ -293,7 +293,7 @@ final readonly class ImageUrlBuilderService
             // Non-square: use cover to fill the dimensions
             $image_obj
                 ->cover($w, $h)
-                ->save($dst, (int)data_get(get_app_settings(), 'system_settings.images.prototype_quality', (int)config('app.images.prototype_quality', 100)));
+                ->save($dst, (int) data_get(get_app_settings(), 'system_settings.images.prototype_quality', (int) config('app.images.prototype_quality', 100)));
         } catch (Exception $e) {
             Log::channel('images')->error($e->getMessage(), [
                 'line' => $e->getLine(),

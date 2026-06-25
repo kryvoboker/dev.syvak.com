@@ -9,12 +9,9 @@ use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Infos\InfoPage;
 use Exception;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use LogicException;
-use Throwable;
 
 class CreateInfoPage extends CreateRecord
 {
@@ -39,39 +36,19 @@ class CreateInfoPage extends CreateRecord
         return $data;
     }
 
-    /**
-     * Handle record creation with transaction.
-     *
-     *
-     * @throws Halt
-     */
     protected function handleRecordCreation(array $data): Model
     {
-        try {
-            return DB::transaction(function () use ($data) {
-                // Create main record
-                $this->record = static::getModel()::create($data);
+        return DB::transaction(function () use ($data) {
+            $this->record = static::getModel()::create($data);
 
-                // Process slugs
-                if ($this->updateOrCreateSlugs() === false) {
-                    throw new Exception('Failed to create slugs');
-                }
+            if ($this->updateOrCreateSlugs() === false) {
+                throw new Exception('Failed to create slugs');
+            }
 
-                // Create descriptions
-                $this->createDescriptions();
+            $this->createDescriptions();
 
-                return $this->record;
-            });
-        } catch (Exception|Throwable $e) {
-            Log::channel('stack')->error('Failed to create InfoPage: ' . $e->getMessage(), [
-                'data'      => $data,
-                'exception' => $e,
-            ]);
-
-            $this->halt();
-
-            throw $e;
-        }
+            return $this->record;
+        });
     }
 
     /**

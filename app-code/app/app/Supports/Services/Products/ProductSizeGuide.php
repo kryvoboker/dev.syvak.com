@@ -31,7 +31,7 @@ class ProductSizeGuide
 
                 if (str_contains($trimmed_row, "\t")) {
                     $cells = explode("\t", $trimmed_row);
-                } else if (str_contains($trimmed_row, ';')) {
+                } elseif (str_contains($trimmed_row, ';')) {
                     $cells = str_getcsv($trimmed_row, ';');
                 } else {
                     $cells = str_getcsv($trimmed_row, ';');
@@ -42,7 +42,7 @@ class ProductSizeGuide
                     ->values()
                     ->all();
             })
-            ->filter(fn(array $cells): bool => $cells !== [])
+            ->filter(fn (array $cells): bool => $cells !== [])
             ->values()
             ->all();
     }

@@ -25,7 +25,8 @@ readonly class ProductsCarouselModuleDataService
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, array{
@@ -670,7 +671,7 @@ readonly class ProductsCarouselModuleDataService
             return (int) $language_by_locale->id;
         }
 
-        $default_language = new Language()->getDefaultLanguage();
+        $default_language = (new Language())->getDefaultLanguage();
 
         if ($default_language !== null) {
             return (int) $default_language->id;

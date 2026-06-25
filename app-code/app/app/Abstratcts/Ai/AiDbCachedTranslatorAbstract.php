@@ -23,7 +23,8 @@ abstract class AiDbCachedTranslatorAbstract
 
     public function __construct(
         protected OpenAiTranslatorService $ai,
-    ) {}
+    ) {
+    }
 
     /**
      * @throws Throwable

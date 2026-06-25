@@ -13,7 +13,7 @@ use Throwable;
 class ModuleProviderRegistrarService
 {
     /**
-     * @param list<class-string> $provider_classes
+     * @param  list<class-string>  $provider_classes
      *
      * @throws Throwable
      */

@@ -18,14 +18,12 @@ class ProductToAttributeSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const int PRODUCT_CHUNK_SIZE = 200;
+    private const PRODUCT_CHUNK_SIZE = 200;
 
-    private const int UPSERT_CHUNK_SIZE = 1000;
-
-    private const int STABLE_SEED = 20260323;
+    private const UPSERT_CHUNK_SIZE = 1000;
 
     /** @var array<int, string> */
-    private const array ATTRIBUTE_POOL_TYPES = [
+    private const ATTRIBUTE_POOL_TYPES = [
         5  => 'size',
         7  => 'color',
         8  => 'weight',
@@ -34,12 +32,14 @@ class ProductToAttributeSeeder extends Seeder
         11 => 'length',
         12 => 'print_type',
     ];
-    private array $attributes_values_indexes        = [
+
+    private array $attributes_values_indexes = [
         0 => 0,
         1 => 1,
         2 => 2,
-        3 => 3
+        3 => 3,
     ];
+
     private array $product_to_attribute_value_index = [];
 
     public function run(): void
@@ -76,9 +76,6 @@ class ProductToAttributeSeeder extends Seeder
             active_languages : $active_languages,
         );
 
-        $processed_products_count = 0;
-        $upserted_rows_count      = 0;
-
         Product::query()
             ->select(['id'])
             ->orderBy('id')
@@ -86,8 +83,6 @@ class ProductToAttributeSeeder extends Seeder
                 $active_languages,
                 $active_attributes,
                 $attribute_value_pools,
-                &$processed_products_count,
-                &$upserted_rows_count,
             ): void {
                 $now_timestamp   = now(config('app.timezone'));
                 $rows_for_upsert = [];
@@ -96,17 +91,17 @@ class ProductToAttributeSeeder extends Seeder
                     foreach ($active_attributes as $attribute) {
                         foreach ($active_languages as $language) {
                             $rows_for_upsert[] = [
-                                'product_id'   => (int)$product->id,
-                                'attribute_id' => (int)$attribute->id,
-                                'language_id'  => (int)$language->id,
+                                'product_id'   => (int) $product->id,
+                                'attribute_id' => (int) $attribute->id,
+                                'language_id'  => (int) $language->id,
                                 'text'         => $this->resolveAttributeValue(
                                     attribute_value_pools: $attribute_value_pools,
-                                    attribute_id         : (int)$attribute->id,
-                                    language_id          : (int)$language->id,
-                                    product_id           : (int)$product->id
+                                    attribute_id         : (int) $attribute->id,
+                                    language_id          : (int) $language->id,
+                                    product_id           : (int) $product->id,
                                 ),
-                                'created_at'   => $now_timestamp,
-                                'updated_at'   => $now_timestamp,
+                                'created_at' => $now_timestamp,
+                                'updated_at' => $now_timestamp,
                             ];
                         }
                     }
@@ -119,16 +114,12 @@ class ProductToAttributeSeeder extends Seeder
                         update  : ['text', 'updated_at'],
                     );
                 }
-
-                $processed_products_count += $products_chunk->count();
-                $upserted_rows_count      += count($rows_for_upsert);
             });
     }
 
     /**
-     * @param EloquentCollection<int, Attribute> $active_attributes
-     * @param EloquentCollection<int, Language>  $active_languages
-     *
+     * @param  EloquentCollection<int, Attribute>  $active_attributes
+     * @param  EloquentCollection<int, Language>  $active_languages
      * @return array<int, array<int, array<int, string>>>
      */
     private function buildAttributeValuePools(EloquentCollection $active_attributes, EloquentCollection $active_languages): array
@@ -136,12 +127,12 @@ class ProductToAttributeSeeder extends Seeder
         $attribute_value_pools = [];
 
         foreach ($active_attributes as $attribute) {
-            $pool_type = self::ATTRIBUTE_POOL_TYPES[(int)$attribute->id] ?? 'generic';
+            $pool_type = self::ATTRIBUTE_POOL_TYPES[(int) $attribute->id] ?? 'generic';
 
             foreach ($active_languages as $language) {
-                $attribute_value_pools[(int)$attribute->id][(int)$language->id] = $this->resolveLocalizedValuesPool(
+                $attribute_value_pools[(int) $attribute->id][(int) $language->id] = $this->resolveLocalizedValuesPool(
                     pool_type    : $pool_type,
-                    language_code: (string)$language->code,
+                    language_code: (string) $language->code,
                 );
             }
         }
@@ -155,37 +146,37 @@ class ProductToAttributeSeeder extends Seeder
     private function resolveLocalizedValuesPool(string $pool_type, string $language_code): array
     {
         $pools_by_type = [
-            'size'       => [
+            'size' => [
                 'uk'      => ['20x20 см', '30x30 см', '40x40 см', '50x50 см'],
                 'en'      => ['20x20 cm', '30x30 cm', '40x40 cm', '50x50 cm'],
                 'ru'      => ['20x20 см', '30x30 см', '40x40 см', '50x50 см'],
                 'default' => ['20x20', '30x30', '40x40', '50x50'],
             ],
-            'color'      => [
+            'color' => [
                 'uk'      => ['Чорний', 'Білий', 'Синій', 'Червоний'],
                 'en'      => ['Black', 'White', 'Blue', 'Red'],
                 'ru'      => ['Черный', 'Белый', 'Синий', 'Красный'],
                 'default' => ['Black', 'White', 'Blue', 'Red'],
             ],
-            'weight'     => [
+            'weight' => [
                 'uk'      => ['100 г', '250 г', '500 г', '1 кг'],
                 'en'      => ['100 g', '250 g', '500 g', '1 kg'],
                 'ru'      => ['100 г', '250 г', '500 г', '1 кг'],
                 'default' => ['100 g', '250 g', '500 g', '1 kg'],
             ],
-            'type'       => [
+            'type' => [
                 'uk'      => ['Класичний', 'Спортивний', 'Повсякденний', 'Преміум'],
                 'en'      => ['Classic', 'Sport', 'Casual', 'Premium'],
                 'ru'      => ['Классический', 'Спортивный', 'Повседневный', 'Премиум'],
                 'default' => ['Classic', 'Sport', 'Casual', 'Premium'],
             ],
-            'material'   => [
+            'material' => [
                 'uk'      => ['Бавовна', 'Поліестер', 'Льон', 'Віскоза'],
                 'en'      => ['Cotton', 'Polyester', 'Linen', 'Viscose'],
                 'ru'      => ['Хлопок', 'Полиэстер', 'Лен', 'Вискоза'],
                 'default' => ['Cotton', 'Polyester', 'Linen', 'Viscose'],
             ],
-            'length'     => [
+            'length' => [
                 'uk'      => ['30 см', '50 см', '70 см', '100 см'],
                 'en'      => ['30 cm', '50 cm', '70 cm', '100 cm'],
                 'ru'      => ['30 см', '50 см', '70 см', '100 см'],
@@ -197,7 +188,7 @@ class ProductToAttributeSeeder extends Seeder
                 'ru'      => ['Шелкография', 'Термопечать', 'Вышивка', 'Сублимация'],
                 'default' => ['Silkscreen', 'Heat transfer', 'Embroidery', 'Sublimation'],
             ],
-            'generic'    => [
+            'generic' => [
                 'uk'      => ['Стандарт', 'Преміум', 'Комфорт', 'Базовий'],
                 'en'      => ['Standard', 'Premium', 'Comfort', 'Basic'],
                 'ru'      => ['Стандарт', 'Премиум', 'Комфорт', 'Базовый'],
@@ -211,13 +202,13 @@ class ProductToAttributeSeeder extends Seeder
     }
 
     /**
-     * @param array<int, array<int, array<int, string>>> $attribute_value_pools
+     * @param  array<int, array<int, array<int, string>>>  $attribute_value_pools
      */
     private function resolveAttributeValue(
         array $attribute_value_pools,
-        int   $attribute_id,
-        int   $language_id,
-        int   $product_id,
+        int $attribute_id,
+        int $language_id,
+        int $product_id,
     ): string {
         $values_pool = $attribute_value_pools[$attribute_id][$language_id] ?? ['Standard'];
 

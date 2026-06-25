@@ -8,16 +8,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
-if (!function_exists('string_to_array')) {
-    /**
-     * @param string|null $string
-     * @param string      $separator
-     *
-     * @return array
-     */
+if (! function_exists('string_to_array')) {
     function string_to_array(?string $string, string $separator = ','): array
     {
         if ($string === null || Str::trim($string) === '') {
@@ -25,7 +19,7 @@ if (!function_exists('string_to_array')) {
         }
 
         return explode($separator, $string)
-                |> (fn($array) => array_map(static fn(string $val): string => Str::trim($val), $array))
+                |> (fn ($array) => array_map(static fn (string $val): string => Str::trim($val), $array))
                 |> array_filter(...)
                 |> array_values(...);
     }
@@ -56,7 +50,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             }
 
             // Return null to let Laravel handle other errors by default
-            return null;
+
         });
     })->create();
 

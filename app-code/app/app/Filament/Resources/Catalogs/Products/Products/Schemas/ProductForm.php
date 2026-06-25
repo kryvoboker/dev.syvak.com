@@ -265,7 +265,7 @@ class ProductForm
      */
     protected static function getCategoryHierarchy(int $language_id): array
     {
-        $categories = new Category()->getActiveCategoriesWithDescriptionsAndPathByLanguageId($language_id);
+        $categories = (new Category())->getActiveCategoriesWithDescriptionsAndPathByLanguageId($language_id);
 
         $hierarchy = [];
 
@@ -287,7 +287,7 @@ class ProductForm
     protected static function getCategoryFullPath(int $category_id, int $language_id): string
     {
         // Get all path IDs for this category ordered by level (root first)
-        $path_ids = new CategoryPath()->getPathIdsByCategoryId($category_id)
+        $path_ids = (new CategoryPath())->getPathIdsByCategoryId($category_id)
             ->pluck('path_id')
             ->toArray();
 
@@ -298,7 +298,7 @@ class ProductForm
         );
 
         // Get all categories in the path with descriptions
-        $categories = new Category()->getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds($language_id, $path_ids)
+        $categories = (new Category())->getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds($language_id, $path_ids)
             ->keyBy('id');
 
         $path = [];
@@ -559,7 +559,7 @@ class ProductForm
                                             return '-';
                                         }
 
-                                        $attribute = new Attribute()->getActiveAttributeWithDescriptionByAttributeIdAndLanguageId(
+                                        $attribute = (new Attribute())->getActiveAttributeWithDescriptionByAttributeIdAndLanguageId(
                                             $attribute_id,
                                             $current_language_id,
                                         );

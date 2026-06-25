@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Navigation;
 
 use Filament\Support\Contracts\HasLabel;
-use Illuminate\Contracts\Support\Htmlable;
 
 enum AdminNavigationGroupEnum: string implements HasLabel
 {
@@ -17,7 +16,7 @@ enum AdminNavigationGroupEnum: string implements HasLabel
     case PageSettings        = 'page_settings';
     case ApplicationSettings = 'application_settings';
 
-    public function getLabel(): string|Htmlable|null
+    public function getLabel(): string
     {
         return match ($this) {
             self::Catalog             => __('admin/default.menu.item_catalog'),

@@ -256,7 +256,7 @@ class EditCategoryPageSettings extends EditRecord
 
     /**
      * @param  array<string, mixed>  $settings
-     * @return array<string, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function mapLocalizedContentForForm(array $settings): array
     {
@@ -267,7 +267,7 @@ class EditCategoryPageSettings extends EditRecord
             $localized_data = [];
         }
 
-        foreach (new Language()->getActiveLanguages() as $language) {
+        foreach ((new Language())->getActiveLanguages() as $language) {
             $language_id = (string) $language->id;
             $content     = Arr::get($localized_data, $language_id, []);
 
@@ -363,8 +363,8 @@ class EditCategoryPageSettings extends EditRecord
             }
         }
 
-        $persisted_labels = $this->normalizeStringMap((array)Arr::get($persisted_config, 'labels', []));
-        $submitted_labels = $this->normalizeStringMap((array)Arr::get($config_payload, 'labels', []));
+        $persisted_labels = $this->normalizeStringMap((array) Arr::get($persisted_config, 'labels', []));
+        $submitted_labels = $this->normalizeStringMap((array) Arr::get($config_payload, 'labels', []));
 
         /**
          * Keep labels from DB for locales that are absent in the current admin form
@@ -462,7 +462,7 @@ class EditCategoryPageSettings extends EditRecord
                         ),
                     ],
                     'config' => $this->normalizeItemConfigFromForm(
-                        config_payload : (array)Arr::get($row, 'config', []),
+                        config_payload : (array) Arr::get($row, 'config', []),
                         persisted_config: $persisted_config,
                     ),
                 ];
@@ -545,13 +545,13 @@ class EditCategoryPageSettings extends EditRecord
 
     /**
      * @param  array<string, mixed>  $localized_content
-     * @return array<string, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function normalizeLocalizedContentFromForm(array $localized_content): array
     {
         $normalized_localized_content = [];
 
-        foreach (new Language()->getActiveLanguages() as $language) {
+        foreach ((new Language())->getActiveLanguages() as $language) {
             $language_id      = (string) $language->id;
             $language_content = Arr::get($localized_content, $language_id, []);
 

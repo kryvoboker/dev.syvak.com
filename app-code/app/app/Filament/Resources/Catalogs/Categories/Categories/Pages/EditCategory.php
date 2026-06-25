@@ -11,13 +11,10 @@ use App\Models\Catalogs\Categories\CategoryDescription;
 use Exception;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
 use LogicException;
-use Throwable;
 
 class EditCategory extends EditRecord
 {
@@ -43,15 +40,12 @@ class EditCategory extends EditRecord
         ];
     }
 
-    /**
-     * Mutate form data before filling form
-     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $record         = $this->getCategoryRecord();
         $category_image = $record->categoryImage()->first();
-        $preview_image  = $category_image?->preview_image ?? null;
-        $icon           = $category_image?->icon ?? null;
+        $preview_image  = $category_image->preview_image ?? null;
+        $icon           = $category_image->icon ?? null;
 
         $data['preview_image'] = $preview_image;
         $data['icon']          = $icon;
@@ -78,9 +72,6 @@ class EditCategory extends EditRecord
         return $data;
     }
 
-    /**
-     * Mutate form data before saving
-     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $this->descriptions  = trim_strs_in_arr($data['descriptions'] ?? []);
@@ -93,53 +84,27 @@ class EditCategory extends EditRecord
         return $data;
     }
 
-    /**
-     * Handle record update with transaction
-     *
-     *
-     * @throws Halt
-     */
     protected function handleRecordUpdate(Model|Category $record, array $data): Model
     {
         if (! $record instanceof Category) {
             throw new LogicException('Category record has invalid type.');
         }
 
-        try {
-            return DB::transaction(function () use ($record, $data) {
-                // Update main record
-                $record->update($data);
+        return DB::transaction(function () use ($record, $data) {
+            $record->update($data);
 
-                // Update image
-                $this->updateImage();
+            $this->updateImage();
 
-                // Process slugs
-                if ($this->updateOrCreateSlugs() === false) {
-                    throw new Exception('Failed to update slugs');
-                }
+            if ($this->updateOrCreateSlugs() === false) {
+                throw new Exception('Failed to update slugs');
+            }
 
-                // Update descriptions
-                $this->updateDescriptions();
+            $this->updateDescriptions();
+            $record->rebuildPaths();
+            $this->rebuildChildrenPaths($record->id);
 
-                // Rebuild category paths
-                $record->rebuildPaths();
-
-                // Rebuild paths for all children
-                $this->rebuildChildrenPaths($record->id);
-
-                return $record;
-            });
-        } catch (Exception|Throwable $e) {
-            Log::channel('stack')->error('Failed to update Category: ' . $e->getMessage(), [
-                'record_id' => $record->id,
-                'data'      => $data,
-                'exception' => $e,
-            ]);
-
-            $this->halt();
-
-            throw $e;
-        }
+            return $record;
+        });
     }
 
     /**
@@ -210,7 +175,7 @@ class EditCategory extends EditRecord
      */
     protected function rebuildChildrenPaths(int $parent_id): void
     {
-        $children = new Category()->getCategoryByParentId($parent_id);
+        $children = (new Category())->getCategoryByParentId($parent_id);
 
         foreach ($children as $child) {
             $child->rebuildPaths();

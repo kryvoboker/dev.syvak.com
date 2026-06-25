@@ -35,9 +35,7 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
 
         $this->setProductAttributeTextHash($product_attribute_text_hash);
 
-        $ai_answer_cache = $product_attribute_text_hash
-            ?->aiAnswerCache()
-            ->first();
+        $ai_answer_cache = $product_attribute_text_hash->aiAnswerCache()->first();
 
         return $ai_answer_cache?->answer;
     }
@@ -57,14 +55,12 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
             ]);
         }
 
-        return $product_attribute_text_hash
-            ?->aiAnswerCache()
-            ->updateOrCreate(
-                [],
-                [
-                    'prompt' => $prompt,
-                    'answer' => $translated_text,
-                ],
-            );
+        return $product_attribute_text_hash->aiAnswerCache()->updateOrCreate(
+            [],
+            [
+                'prompt' => $prompt,
+                'answer' => $translated_text,
+            ],
+        );
     }
 }

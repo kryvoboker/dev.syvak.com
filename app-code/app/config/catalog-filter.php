@@ -5,53 +5,53 @@ declare(strict_types=1);
 use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 
 return [
-    'contexts'                          => [
+    'contexts' => [
         'category' => 'Category',
         'catalog'  => 'Catalog',
         'search'   => 'Search',
     ],
-    'price_source_modes'                => [
+    'price_source_modes' => [
         'base_only'     => 'Base only',
         'discount_only' => 'Discount only',
         'both'          => 'Both',
     ],
-    'discount_only_policies'            => [
+    'discount_only_policies' => [
         'exclude_without_discount' => 'Exclude products without active discount',
         'fallback_to_base'         => 'Fallback to base price when discount is missing',
     ],
-    'facet_strategies'                  => [
+    'facet_strategies' => [
         'all_results'    => 'All results',
         'self_excluding' => 'Self excluding',
     ],
-    'filter_modes'                      => [
+    'filter_modes' => [
         'range'    => 'Range',
         'boolean'  => 'Boolean',
         'multiple' => 'Multiple',
     ],
-    'group_source_types'                => [
+    'group_source_types' => [
         'attribute' => 'Attribute',
         'price'     => 'Price',
         'system'    => 'System',
     ],
-    'value_types'                       => [
+    'value_types' => [
         'string'  => 'String',
         'int'     => 'Integer',
         'decimal' => 'Decimal',
         'boolean' => 'Boolean',
         'range'   => 'Range',
     ],
-    'index_statuses'                    => [
+    'index_statuses' => [
         'ok'      => 'Ok',
         'warning' => 'Warning',
         'failed'  => 'Failed',
         'running' => 'Running',
     ],
-    'index_run_modes'                   => [
+    'index_run_modes' => [
         'full'        => 'Full',
         'incremental' => 'Incremental',
         'dry_run'     => 'Dry run',
     ],
-    'defaults'                          => [
+    'defaults' => [
         'context'                         => 'category',
         'contexts'                        => ['category'],
         'set_code'                        => 'default_category',
@@ -67,9 +67,9 @@ return [
         'max_selected_values_per_group'   => 30,
         'base_currency_indexing_required' => true,
     ],
-    'canonical_url'                     => [
-        'enabled'        => true,
-        'sort_keys'      => [
+    'canonical_url' => [
+        'enabled'   => true,
+        'sort_keys' => [
             'sort',
             'price_from',
             'price_to',
@@ -83,7 +83,7 @@ return [
             'per_page',
         ],
     ],
-    'filter_groups'                     => [
+    'filter_groups' => [
         'attribute' => CatalogFilterGroupSourceTypeEnum::Attribute->value,
         'price'     => CatalogFilterGroupSourceTypeEnum::Price->value,
         'system'    => CatalogFilterGroupSourceTypeEnum::System->value,

@@ -8,6 +8,7 @@ use App\Filament\Resources\Modules\ModuleDefinitions\ModuleDefinitionResource;
 use App\Filament\Resources\Modules\ModuleInstances\ModuleInstanceResource;
 use App\Filament\Resources\Modules\ModuleInstances\Schemas\ModuleInstanceForm;
 use App\Models\Modules\ModuleDefinition;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 use Livewire\Attributes\Locked;
@@ -71,7 +72,7 @@ class CreateModuleInstance extends CreateRecord
         return ModuleInstanceResource::getUrl('edit', ['record' => $this->getRecord()]);
     }
 
-    protected function getCancelFormAction(): \Filament\Actions\Action
+    protected function getCancelFormAction(): Action
     {
         return parent::getCancelFormAction()
             ->url(ModuleDefinitionResource::getUrl());

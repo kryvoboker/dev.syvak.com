@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
-    use HasSlugsTrait, SlugTrait;
+    use HasSlugsTrait;
+    use SlugTrait;
 
     protected $fillable = [
         'parent_id',

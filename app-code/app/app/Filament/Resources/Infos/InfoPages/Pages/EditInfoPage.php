@@ -13,6 +13,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use LogicException;
@@ -32,7 +33,7 @@ class EditInfoPage extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        /** @var \Illuminate\Support\Collection<int, InfoPageDescription> $descriptions_collection */
+        /** @var Collection<int, InfoPageDescription> $descriptions_collection */
         $descriptions_collection = $this->getInfoPageRecord()->infoPageDescription()->get();
 
         $descriptions = $descriptions_collection

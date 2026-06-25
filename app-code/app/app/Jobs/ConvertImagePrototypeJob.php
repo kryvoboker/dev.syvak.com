@@ -21,7 +21,10 @@ use Throwable;
 
 class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * The time (seconds) during which a job is considered unique.
@@ -32,9 +35,10 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
     public function __construct(
         public readonly string $original_relative_path,
         public readonly string $prototype_relative_path,
-        public readonly int    $width,
-        public readonly int    $height,
-    ) {}
+        public readonly int $width,
+        public readonly int $height,
+    ) {
+    }
 
     /**
      * A unique task key.
@@ -50,7 +54,7 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
 
     public function handle(): void
     {
-        if (!Storage::fileExists($this->prototype_relative_path)) {
+        if (! Storage::fileExists($this->prototype_relative_path)) {
             return;
         }
 
@@ -63,7 +67,7 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
     {
         $format = Str::lower($format);
 
-        if (!in_array($format, ['webp', 'avif'], true)) {
+        if (! in_array($format, ['webp', 'avif'], true)) {
             return;
         }
 
@@ -82,10 +86,10 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
     {
         // Target path: cache/(webp|avif)/[original path] + name_w_h.format
         $original_rel = Str::ltrim($this->original_relative_path, '/');
-        $dir          = $original_rel
-                |> dirname(...)
-                |> (fn($x) => Str::trim($x, '.'))
-                |> (fn($x) => Str::after($x, 'images/'));
+        $dir          = Str::after(
+            Str::trim(dirname($original_rel), '.'),
+            'images/',
+        );
 
         if ($dir == 'images' || $dir == '.') {
             $dir = '';
@@ -101,7 +105,7 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
     {
         $target_dir = dirname($target_abs);
 
-        if (!Storage::directoryExists($target_dir)) {
+        if (! Storage::directoryExists($target_dir)) {
             Storage::makeDirectory($target_dir);
         }
     }
@@ -114,18 +118,18 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
             $target_abs   = Storage::path($target_abs);
             $webp_quality = max(
                 1,
-                (int)data_get(
+                (int) data_get(
                     get_app_settings(),
                     'system_settings.images.webp_quality',
-                    (int)config('app.images.webp_quality', 80),
+                    (int) config('app.images.webp_quality', 80),
                 ),
             );
             $avif_quality = max(
                 1,
-                (int)data_get(
+                (int) data_get(
                     get_app_settings(),
                     'system_settings.images.avif_quality',
-                    (int)config('app.images.avif_quality', 50),
+                    (int) config('app.images.avif_quality', 50),
                 ),
             );
 

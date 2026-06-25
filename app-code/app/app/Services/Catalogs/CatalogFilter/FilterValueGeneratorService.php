@@ -158,7 +158,7 @@ class FilterValueGeneratorService
         string $fallback_label,
         array $labels_by_language,
     ): void {
-        foreach (new Language()->getActiveLanguages() as $language) {
+        foreach ((new Language())->getActiveLanguages() as $language) {
             $translated_label = trim((string) ($labels_by_language[(int) $language->id] ?? ''));
 
             CatalogFilterValueTranslation::query()->updateOrCreate(

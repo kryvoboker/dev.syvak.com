@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\ProductsCarousel\Services;
 
-use App\Models\Catalogs\Products\Product;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Catalogs\Products\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
@@ -17,7 +17,8 @@ readonly class ProductsCarouselProductSearchService
 {
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<int|string, mixed>  $category_ids
@@ -224,7 +225,7 @@ readonly class ProductsCarouselProductSearchService
             return (int) $language_by_locale->id;
         }
 
-        $default_language = new Language()->getDefaultLanguage();
+        $default_language = (new Language())->getDefaultLanguage();
 
         if ($default_language !== null) {
             return (int) $default_language->id;

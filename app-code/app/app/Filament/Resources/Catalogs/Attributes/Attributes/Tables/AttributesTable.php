@@ -47,7 +47,7 @@ class AttributesTable
                             $description = $record->attributeDescription->first();
                         }
 
-                        return $description?->name ?? '-';
+                        return $description->name ?? '-';
                     }),
 
                 TextColumn::make('sort_order')

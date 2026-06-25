@@ -114,7 +114,7 @@ class CategoryForm
 
     protected static function createImagesTab(): Tabs\Tab
     {
-        $admin_image_settings         = self::resolveCategoryAdminImageSettings();
+        $admin_image_settings        = self::resolveCategoryAdminImageSettings();
         $category_upload_max_size_kb = max(1, (int) data_get($admin_image_settings, 'upload.max_size_kb', (int) config('app.images.category.upload.max_size_kb', 5120)));
         $category_upload_max_size_mb = self::resolveMegabytesFromKilobytes($category_upload_max_size_kb);
         $image_upload_directory      = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))));

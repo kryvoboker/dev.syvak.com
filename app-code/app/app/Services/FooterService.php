@@ -15,32 +15,27 @@ class FooterService
 {
     use SocialServiceTrait;
 
-    /**
-     * @param array $params
-     *
-     * @return array
-     */
     public function __invoke(array $params = []): array
     {
         $app_settings = get_app_settings();
         $logo_sizes   = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
-        $logo_width   = (int)($logo_sizes['width'] ?? config('app.images.logo_width'));
-        $logo_height  = (int)($logo_sizes['height'] ?? config('app.images.logo_height'));
-        $logo_path    = (string)data_get(
+        $logo_width   = (int) ($logo_sizes['width'] ?? config('app.images.logo_width'));
+        $logo_height  = (int) ($logo_sizes['height'] ?? config('app.images.logo_height'));
+        $logo_path    = (string) data_get(
             $app_settings,
             'system_settings.images.path_to_logo',
-            (string)config('app.images.path_to_logo', 'images/logo.png'),
+            (string) config('app.images.path_to_logo', 'images/logo.png'),
         );
 
         /** @var Collection<Category>|SupportCollection<Category> $categories */
-        $categories   = $params['categories'] ?? new Category()->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
+        $categories = $params['categories'] ?? (new Category())->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
             $app_settings->language_id,
         );
         $social_items = $this->getSocialItems();
 
         return [
-            'logo_data'          => [
-                'urls'   => multiple_convert_img_and_get_url(
+            'logo_data' => [
+                'urls' => multiple_convert_img_and_get_url(
                     $logo_path,
                     $logo_width,
                     $logo_height,
@@ -63,7 +58,7 @@ class FooterService
     {
         $locale       = app()->getLocale();
         $telegram_row = collect($social_items)
-            ->first(fn(mixed $social_item): bool => (string)data_get($social_item, 'social_type') === 'telegram');
+            ->first(fn (mixed $social_item): bool => (string) data_get($social_item, 'social_type') === 'telegram');
         $telegram_url = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
         return [
@@ -79,9 +74,9 @@ class FooterService
         $locale = app()->getLocale();
 
         return [
-            'title'          => '/ КОНТАКТИ /',
-            'phones'         => $this->parsePhones(
-                (string)data_get(get_app_settings(), "contact_phones.$locale"),
+            'title'  => '/ КОНТАКТИ /',
+            'phones' => $this->parsePhones(
+                (string) data_get(get_app_settings(), "contact_phones.$locale"),
             ),
             'find_us_label'  => 'ДЕ НАС ЗНАЙТИ',
             'contacts_label' => 'КОНТАКТИ',
@@ -89,19 +84,19 @@ class FooterService
     }
 
     /**
-     * @param Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>> $categories
+     * @param  Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>>  $categories
      */
     private function getMenuItems(Collection|SupportCollection $categories): array
     {
         return $categories
             ->map(function (Category|array $category): array {
                 $label = $category instanceof Category
-                    ? (string)$category->categoryDescription->first()?->name
-                    : (string)Arr::get($category, 'descriptions.name');
+                    ? (string) $category->categoryDescription->first()?->name
+                    : (string) Arr::get($category, 'descriptions.name');
 
                 $slug = $category instanceof Category
-                    ? (string)$category->slugs->first()?->slug
-                    : (string)Arr::get($category, 'slug');
+                    ? (string) $category->slugs->first()?->slug
+                    : (string) Arr::get($category, 'slug');
 
                 return [
                     'label' => Str::upper($label),
@@ -110,7 +105,7 @@ class FooterService
                     ]),
                 ];
             })
-            ->filter(fn(array $item): bool => filled($item['label']) && filled($item['url']))
+            ->filter(fn (array $item): bool => filled($item['label']) && filled($item['url']))
             ->values()
             ->all();
     }
@@ -135,18 +130,18 @@ class FooterService
 
         $social_items = collect(data_get(get_app_settings(), "socials.$locale", []))
             ->map(function (mixed $item) use ($locale): array {
-                $social_type = (string)data_get($item, 'social_type');
+                $social_type = (string) data_get($item, 'social_type');
                 $label       = Str::title($social_type);
                 $social_url  = $this->normalizeSocialUrl(data_get($item, 'url'), $locale);
 
                 return [
                     'social_type' => $social_type,
                     'url'         => filled($social_url) ? $social_url : '#',
-                    'svg_icon'    => escape_special_html((string)data_get($item, 'svg_icon')),
+                    'svg_icon'    => escape_special_html((string) data_get($item, 'svg_icon')),
                     'label'       => filled($label) ? $label : 'Link',
                 ];
             })
-            ->filter(fn(array $item) => filled($item['url']))
+            ->filter(fn (array $item) => filled($item['url']))
             ->values()
             ->all();
 
@@ -181,7 +176,7 @@ class FooterService
     {
         $phone_list = trim_strs_in_arr(explode(',', $phones));
         $phone_list = collect($phone_list)
-            ->filter(fn($phone) => filled($phone))
+            ->filter(fn ($phone) => filled($phone))
             ->values()
             ->all();
 

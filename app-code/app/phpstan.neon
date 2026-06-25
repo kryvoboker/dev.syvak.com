@@ -4,5 +4,10 @@ includes:
 parameters:
     paths:
         - app
+        - Modules
+        - routes
+        - config
+        - database
+        - tests
     level: 5
     treatPhpDocTypesAsCertain: false

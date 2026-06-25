@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Ajax;
 use App\Actions\SearchProductsAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ajax\LiveSearchProductsAjaxIndexRequest;
-use App\Http\Requests\Pages\SearchProductsShowRequest;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
@@ -66,6 +65,4 @@ class LiveSearchProductsAjaxController extends Controller
 
         return null;
     }
-
-    public function show(SearchProductsShowRequest $request) {}
 }

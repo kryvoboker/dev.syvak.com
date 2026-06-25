@@ -22,5 +22,6 @@ class FilterRuntimeRequestData extends Data
         public ?string $sort,
         public int $page,
         public int $per_page,
-    ) {}
+    ) {
+    }
 }

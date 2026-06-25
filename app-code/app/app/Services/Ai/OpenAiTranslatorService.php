@@ -14,8 +14,9 @@ final readonly class OpenAiTranslatorService
 {
     public function __construct(
         private Client $client,
-        private OpenAiRateLimiterService $rateLimiter,
-    ) {}
+        private OpenAiRateLimiterService $rate_limiter,
+    ) {
+    }
 
     /**
      * @throws RuntimeException
@@ -37,7 +38,7 @@ final readonly class OpenAiTranslatorService
 
             try {
                 // standard wait (according to settings) after N requests
-                $this->rateLimiter->throttle();
+                $this->rate_limiter->throttle();
 
                 $resp = $this->client->chat()->create([
                     'model'                 => $model,

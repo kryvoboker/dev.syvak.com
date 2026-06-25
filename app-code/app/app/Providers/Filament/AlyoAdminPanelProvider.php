@@ -54,7 +54,7 @@ class AlyoAdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 function (): View {
-                    $languages = new Language()->getActiveLanguages();
+                    $languages = (new Language())->getActiveLanguages();
 
                     return view('filament.hooks.language-switcher', [
                         'languages'      => $languages,

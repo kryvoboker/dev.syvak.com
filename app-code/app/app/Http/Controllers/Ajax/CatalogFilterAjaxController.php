@@ -26,12 +26,13 @@ class CatalogFilterAjaxController extends Controller
         $locale = normalize_locale($locale);
 
         try {
-            $response_data = $filter_products_action->handle([
+            $response_data = $filter_products_action->handle(
+                [
                 'validated_data'      => $request->validated(),
                 'category_slug'       => $slug,
                 'is_get_filters_data' => false,
                 'page_path'           => localized_route('localized.catalog.category.show', ['slug' => $slug], absolute: false),
-            ],
+                ],
                 locale: $locale,
             );
 

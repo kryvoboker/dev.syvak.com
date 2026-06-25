@@ -14,9 +14,10 @@ use Throwable;
 readonly class ModuleInstanceService
 {
     public function __construct(
-        private ModuleCacheService                      $module_cache_service,
+        private ModuleCacheService $module_cache_service,
         private ModuleInstanceSettingsNormalizerService $module_instance_settings_normalizer_service,
-    ) {}
+    ) {
+    }
 
     public function setGlobalState(ModuleDefinition $definition, bool $is_enabled): ModuleDefinition
     {
@@ -36,7 +37,7 @@ readonly class ModuleInstanceService
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      *
      * @throws Throwable
      */
@@ -81,7 +82,7 @@ readonly class ModuleInstanceService
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      *
      * @throws Throwable
      */

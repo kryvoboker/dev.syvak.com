@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules;
 
-use App\Models\Modules\ModuleDefinition;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Modules\ModuleDefinition;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

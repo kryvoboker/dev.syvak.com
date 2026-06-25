@@ -8,12 +8,6 @@ use Illuminate\Support\Collection as SupportCollection;
 
 trait SocialServiceTrait
 {
-    /**
-     * @param mixed  $url
-     * @param string $locale
-     *
-     * @return string
-     */
     protected function normalizeSocialUrl(mixed $url, string $locale): string
     {
         if (is_string($url)) {
@@ -24,7 +18,7 @@ trait SocialServiceTrait
             return $this->normalizeSocialUrl($url->toArray(), $locale);
         }
 
-        if (!is_array($url)) {
+        if (! is_array($url)) {
             return '';
         }
 
@@ -35,7 +29,7 @@ trait SocialServiceTrait
         }
 
         $first_valid_url = collect($url)
-            ->first(fn(mixed $value): bool => is_string($value) && filled(trim($value)));
+            ->first(fn (mixed $value): bool => is_string($value) && filled(trim($value)));
 
         return is_string($first_valid_url) ? trim($first_valid_url) : '';
     }

@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\In;
 
 class OrderConfirmValidateRequest extends FormRequest
 {
@@ -19,7 +20,7 @@ class OrderConfirmValidateRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, In|string>>
      */
     public function rules(): array
     {
@@ -39,11 +40,14 @@ class OrderConfirmValidateRequest extends FormRequest
         Arr::set($normalized_data, 'first_name', Str::trim((string) $this->input('first_name', '')));
         Arr::set($normalized_data, 'last_name', Str::trim((string) $this->input('last_name', '')));
         Arr::set($normalized_data, 'phone', Str::trim((string) $this->input('phone', '')));
+        $cart_mode = CartModeEnum::tryFrom(
+            Str::lower((string) $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value)),
+        );
+
         Arr::set(
             $normalized_data,
             CartRequestKeyEnum::CartMode->value,
-            CartModeEnum::tryFrom(Str::lower((string) $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value)))?->value
-            ?? CartModeEnum::Regular->value,
+            $cart_mode === null ? CartModeEnum::Regular->value : $cart_mode->value,
         );
         Arr::set($normalized_data, 'payment_method', Str::lower((string) $this->input('payment_method', 'cash_on_delivery')));
 

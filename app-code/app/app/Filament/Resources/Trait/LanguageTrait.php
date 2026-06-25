@@ -15,10 +15,10 @@ trait LanguageTrait
         $language = new Language();
 
         // Get current locale language ID (adjust based on your logic)
-        $current_language_id = $language->getLanguageByCode(app()->getLocale())?->id;
+        $current_language_id = $language->getLanguageByCode(app()->getLocale())->id;
 
         if ($current_language_id === null) {
-            $current_language_id = $language->getDefaultLanguage()?->id;
+            $current_language_id = $language->getDefaultLanguage()->id;
         }
 
         return $current_language_id;
@@ -44,7 +44,7 @@ trait LanguageTrait
      */
     protected static function getAcriveLanguages(): Collection
     {
-        return new Language()->getActiveLanguages();
+        return (new Language())->getActiveLanguages();
     }
 
     /**
@@ -54,7 +54,7 @@ trait LanguageTrait
     {
         /** @var Language $language */
         $language            = $active_languages->where('is_default', true)->first();
-        $current_language_id = $language?->id;
+        $current_language_id = $language->id;
 
         if (self::validateLanguageIdIsNotNull($current_language_id) !== null) {
             return null;
