@@ -730,6 +730,12 @@ if (! function_exists('get_allowed_locales')) {
             return $allowed_locales;
         }
 
-        return string_to_array(config('app.allowed_locales', []));
+        $configured_locales = config('app.allowed_locales', []);
+
+        if (is_array($configured_locales)) {
+            return $configured_locales;
+        }
+
+        return string_to_array(is_string($configured_locales) ? $configured_locales : null);
     }
 }

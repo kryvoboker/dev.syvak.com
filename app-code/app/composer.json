@@ -48,6 +48,9 @@
         "squizlabs/php_codesniffer": "^4.0"
     },
     "autoload": {
+        "files": [
+            "app/Supports/helpers.php"
+        ],
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
