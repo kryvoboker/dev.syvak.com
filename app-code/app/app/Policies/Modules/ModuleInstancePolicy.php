@@ -12,38 +12,46 @@ class ModuleInstancePolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(AuthUser $authUser): bool
+    public function viewAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('ViewAny:ModuleInstance');
+        return $auth_user->can('ViewAny:ModuleInstance');
     }
 
-    public function view(AuthUser $authUser, ModuleInstance $module_instance): bool
+    public function view(AuthUser $auth_user, ModuleInstance $module_instance): bool
     {
-        return $authUser->can('View:ModuleInstance');
+        unset($module_instance);
+
+        return $auth_user->can('View:ModuleInstance');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(AuthUser $auth_user): bool
     {
-        return $authUser->can('Create:ModuleInstance');
+        return $auth_user->can('Create:ModuleInstance');
     }
 
-    public function update(AuthUser $authUser, ModuleInstance $module_instance): bool
+    public function update(AuthUser $auth_user, ModuleInstance $module_instance): bool
     {
-        return $authUser->can('Update:ModuleInstance');
+        unset($module_instance);
+
+        return $auth_user->can('Update:ModuleInstance');
     }
 
-    public function delete(AuthUser $authUser, ModuleInstance $module_instance): bool
+    public function delete(AuthUser $auth_user, ModuleInstance $module_instance): bool
     {
-        return $authUser->can('Delete:ModuleInstance');
+        unset($module_instance);
+
+        return $auth_user->can('Delete:ModuleInstance');
     }
 
-    public function deleteAny(AuthUser $authUser): bool
+    public function deleteAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('DeleteAny:ModuleInstance');
+        return $auth_user->can('DeleteAny:ModuleInstance');
     }
 
-    public function replicate(AuthUser $authUser, ModuleInstance $module_instance): bool
+    public function replicate(AuthUser $auth_user, ModuleInstance $module_instance): bool
     {
-        return $authUser->can('Replicate:ModuleInstance');
+        unset($module_instance);
+
+        return $auth_user->can('Replicate:ModuleInstance');
     }
 }

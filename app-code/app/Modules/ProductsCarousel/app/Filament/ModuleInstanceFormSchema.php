@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\ProductsCarousel\Filament;
 
+use App\Models\ApplicationSettings\Language;
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
-use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
@@ -33,14 +33,17 @@ readonly class ModuleInstanceFormSchema
         private ProductsCarouselConfig $products_carousel_config,
         private ProductsCarouselCategoryTreeService $products_carousel_category_tree_service,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, Component>
      */
     public function getComponents(?ModuleDefinition $definition = null, ?ModuleInstance $instance = null): array
     {
-        $active_languages = new Language()->getActiveLanguages();
+        unset($definition, $instance);
+
+        $active_languages = (new Language())->getActiveLanguages();
 
         return [
             Section::make()

@@ -12,58 +12,70 @@ class CurrencyPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(AuthUser $authUser): bool
+    public function viewAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('ViewAny:Currency');
+        return $auth_user->can('ViewAny:Currency');
     }
 
-    public function view(AuthUser $authUser, Currency $currency): bool
+    public function view(AuthUser $auth_user, Currency $currency): bool
     {
-        return $authUser->can('View:Currency');
+        unset($currency);
+
+        return $auth_user->can('View:Currency');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(AuthUser $auth_user): bool
     {
-        return $authUser->can('Create:Currency');
+        return $auth_user->can('Create:Currency');
     }
 
-    public function update(AuthUser $authUser, Currency $currency): bool
+    public function update(AuthUser $auth_user, Currency $currency): bool
     {
-        return $authUser->can('Update:Currency');
+        unset($currency);
+
+        return $auth_user->can('Update:Currency');
     }
 
-    public function delete(AuthUser $authUser, Currency $currency): bool
+    public function delete(AuthUser $auth_user, Currency $currency): bool
     {
-        return $authUser->can('Delete:Currency');
+        unset($currency);
+
+        return $auth_user->can('Delete:Currency');
     }
 
-    public function restore(AuthUser $authUser, Currency $currency): bool
+    public function restore(AuthUser $auth_user, Currency $currency): bool
     {
-        return $authUser->can('Restore:Currency');
+        unset($currency);
+
+        return $auth_user->can('Restore:Currency');
     }
 
-    public function forceDelete(AuthUser $authUser, Currency $currency): bool
+    public function forceDelete(AuthUser $auth_user, Currency $currency): bool
     {
-        return $authUser->can('ForceDelete:Currency');
+        unset($currency);
+
+        return $auth_user->can('ForceDelete:Currency');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('ForceDeleteAny:Currency');
+        return $auth_user->can('ForceDeleteAny:Currency');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('RestoreAny:Currency');
+        return $auth_user->can('RestoreAny:Currency');
     }
 
-    public function replicate(AuthUser $authUser, Currency $currency): bool
+    public function replicate(AuthUser $auth_user, Currency $currency): bool
     {
-        return $authUser->can('Replicate:Currency');
+        unset($currency);
+
+        return $auth_user->can('Replicate:Currency');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(AuthUser $auth_user): bool
     {
-        return $authUser->can('Reorder:Currency');
+        return $auth_user->can('Reorder:Currency');
     }
 }

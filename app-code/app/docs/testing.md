@@ -21,18 +21,39 @@ php artisan test --compact tests/Feature/ExampleTest.php
 php artisan test --compact --filter=testName
 
 # Static analysis
-vendor/bin/phpstan analyse --memory-limit=1G
+composer phpstan
 
 # Formatting
-vendor/bin/pint --dirty --format=agent
+composer pint
+
+# Code style checks
+composer phpcs
+
+# Code style fixer
+composer phpcs:fix
+
+# Design smell checks
+composer phpmd
 ```
 
 ## Recommended Change Validation
 
 1. Run focused tests for the changed feature.
-2. Run `phpstan` for touched areas/files.
-3. Run `pint` before commit.
-4. Optionally run full suite before release.
+2. Run `composer phpstan` for touched areas/files.
+3. Run `composer pint` before commit.
+4. Run `composer phpcs` when you need PHPCS warnings checked.
+5. Run `composer phpmd` when you need PHPMD violations checked.
+6. Optionally run full suite before release.
+
+## Tooling Notes
+
+- The Laravel app root is `app-code/app`; run Composer quality scripts from there.
+- The Docker app root is `/var/webroot/sites/syvak.com/app` when you execute commands inside the PHP container.
+- The fixer script is `composer phpcs:fix`; `phpcs:fx` is not defined in this project.
+- PHPCS checks `PSR12`, `Generic.Files.LineLength`, and `phpcs/ProjectStandard`.
+- PHPMD uses `rulesets/unusedcode.xml`.
+- PHPStan uses Larastan with `level: 5` and scans `app`, `Modules`, `routes`, `config`, `database`, and `tests`.
+- Recommended cleanup order is `composer pint` -> `composer phpcs` -> `composer phpcs:fix` if needed -> `composer phpmd` -> `composer phpstan`.
 
 ## See Also
 
