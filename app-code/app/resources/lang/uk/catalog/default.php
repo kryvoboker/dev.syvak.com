@@ -115,6 +115,14 @@ return [
             'items_subtotal' => 'Сума товарів',
             'grand_total'    => 'Разом до сплати',
         ],
+        'validation' => [
+            'first_name_required' => 'Імʼя є обовʼязковим.',
+            'first_name_min'      => 'Імʼя має містити щонайменше :min символи.',
+            'last_name_required'  => 'Прізвище є обовʼязковим.',
+            'last_name_min'       => 'Прізвище має містити щонайменше :min символи.',
+            'phone_required'      => 'Телефон є обовʼязковим.',
+            'phone_min'           => 'Телефон має містити щонайменше :min цифр.',
+        ],
         'messages' => [
             'variant_not_found' => 'Варіант товару не знайдено.',
             'item_added'        => 'Товар додано до кошика.',

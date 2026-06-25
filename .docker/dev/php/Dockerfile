@@ -37,6 +37,14 @@ RUN install-php-extensions \
 
 RUN docker-php-ext-enable xdebug xhprof
 
+ARG PSALM_VERSION=6.16.1
+
+RUN set -eux; \
+    curl -fsSL "https://github.com/vimeo/psalm/releases/download/${PSALM_VERSION}/psalm.phar" \
+        -o /usr/local/bin/psalm; \
+    chmod 755 /usr/local/bin/psalm; \
+    psalm --version
+
 FROM node:25.6.1-bookworm-slim AS nodejs
 
 FROM php-fpm AS development

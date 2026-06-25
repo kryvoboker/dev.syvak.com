@@ -31,10 +31,12 @@ const openSelectedCartDrawer = async (mode: CartMode): Promise<void> => {
     if (accordionElement) {
         initAccordion(accordionElement);
     }
+
+    updateSelectedCartItemsSummary(mode);
 };
 
-const updateSelectedCartItemsSummary = (): void => {
-    const cartRoot = <HTMLElement | null>findElem('[data-cart-root][data-cart-mode="regular"]');
+const updateSelectedCartItemsSummary = (mode: CartMode): void => {
+    const cartRoot = <HTMLElement | null>findElem(`[data-cart-root][data-cart-mode="${mode}"]`);
 
     if (!cartRoot) {
         return;
@@ -116,12 +118,17 @@ const bindMutationHandlers = (): void => {
         const selectAllCheckbox = <HTMLInputElement | null>getClosestParentEl('[data-cart-select-all]', target);
 
         if (itemSelectCheckbox) {
-            updateSelectedCartItemsSummary();
+            const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', itemSelectCheckbox);
+
+            if (cartRoot) {
+                updateSelectedCartItemsSummary((cartRoot.dataset.cartMode as CartMode) ?? $REGULAR);
+            }
+
             return;
         }
 
         if (selectAllCheckbox) {
-            const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root][data-cart-mode="regular"]', selectAllCheckbox);
+            const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', selectAllCheckbox);
 
             if (cartRoot) {
                 const itemCheckboxes = <HTMLInputElement[] | []>findArrayElems('[data-cart-item-select]', cartRoot) as HTMLInputElement[];
@@ -129,9 +136,9 @@ const bindMutationHandlers = (): void => {
                 itemCheckboxes.forEach((checkbox: HTMLInputElement): void => {
                     checkbox.checked = selectAllCheckbox.checked;
                 });
-            }
 
-            updateSelectedCartItemsSummary();
+                updateSelectedCartItemsSummary((cartRoot.dataset.cartMode as CartMode) ?? $REGULAR);
+            }
             return;
         }
 
@@ -160,7 +167,7 @@ const bindMutationHandlers = (): void => {
             initAccordion(accordionElement);
         }
 
-        updateSelectedCartItemsSummary();
+        updateSelectedCartItemsSummary(mode);
     });
 
     document.addEventListener('click', async (event: Event): Promise<void> => {
@@ -168,18 +175,13 @@ const bindMutationHandlers = (): void => {
         const removeSelectedButton = <HTMLElement | null>getClosestParentEl('[data-remove-selected-cart-items]', target);
 
         if (removeSelectedButton) {
-            const mode: CartMode = getCartMode();
-
-            if (mode !== $REGULAR) {
-                return;
-            }
-
-            const cartRoot = <HTMLElement | null>findElem('[data-cart-root][data-cart-mode="regular"]');
+            const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', removeSelectedButton);
 
             if (!cartRoot) {
                 return;
             }
 
+            const mode: CartMode = (cartRoot.dataset.cartMode as CartMode) ?? getCartMode();
             const selectedCheckboxes = (<HTMLInputElement[] | []>findArrayElems('[data-cart-item-select]:checked', cartRoot) as HTMLInputElement[]);
             const selectedCartIds = selectedCheckboxes
                 .map((checkbox: HTMLInputElement): number => Number(checkbox.dataset.cartId ?? 0))
@@ -205,7 +207,7 @@ const bindMutationHandlers = (): void => {
                 initAccordion(accordionElement);
             }
 
-            updateSelectedCartItemsSummary();
+            updateSelectedCartItemsSummary(mode);
             return;
         }
 
@@ -215,7 +217,8 @@ const bindMutationHandlers = (): void => {
             return;
         }
 
-        const mode: CartMode = getCartMode();
+        const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', removeButton);
+        const mode: CartMode = (cartRoot?.dataset?.cartMode as CartMode) ?? getCartMode();
         const cartId: number = Number(removeButton.dataset.cartId ?? 0);
 
         if (!Number.isInteger(cartId) || cartId <= 0) {
@@ -233,7 +236,7 @@ const bindMutationHandlers = (): void => {
             initAccordion(accordionElement);
         }
 
-        updateSelectedCartItemsSummary();
+        updateSelectedCartItemsSummary(mode);
     });
 };
 
@@ -267,5 +270,6 @@ export const handleCartModal = (): void => {
     bindOpenCartButton();
     bindAddToCartButtons();
     bindMutationHandlers();
-    updateSelectedCartItemsSummary();
+    updateSelectedCartItemsSummary($REGULAR);
+    updateSelectedCartItemsSummary($FAST_ORDER);
 };

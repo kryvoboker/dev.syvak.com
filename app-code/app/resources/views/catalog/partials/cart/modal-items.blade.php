@@ -9,35 +9,33 @@
 
 <div class="flex flex-col h-full" data-cart-root data-cart-mode="{{ $cart_mode }}">
     <div class="flex-1 px-4 md:px-8 lg:px-6 2xl:px-6 py-4 md:py-6 overflow-y-auto">
+        <div class="hidden mb-4 rounded border border-light-red/40 bg-light-red/10 px-3 py-2 text-sm text-light-red"
+             aria-live="polite"
+             data-cart-general-error
+             role="alert"></div>
+
         @if(($cart_data['is_empty'] ?? true) === true)
             <p class="text-light-gray text-sm md:text-base">
                 {{ __('catalog/default.cart.labels.empty') }}
             </p>
         @else
             <div class="mb-4 md:mb-6 flex items-center justify-between gap-3 text-sm md:text-base lg:text-base 2xl:text-lg">
-                @if($cart_mode === 'regular')
-                    <label class="inline-flex items-center gap-2 text-light-gray cursor-pointer" data-cart-select-all-label>
-                        <input class="checkbox checkbox-xs border border-light-gray rounded-none cursor-pointer"
-                               data-cart-select-all
-                               type="checkbox"/>
-                        <span data-cart-selected-summary
-                              data-template="{{ __('catalog/default.cart.labels.selected_items_in_modal') }}">
+                <label class="inline-flex items-center gap-2 text-light-gray cursor-pointer" data-cart-select-all-label>
+                    <input class="checkbox checkbox-xs border border-light-gray rounded-none cursor-pointer"
+                           data-cart-select-all
+                           type="checkbox"/>
+                    <span data-cart-selected-summary
+                          data-template="{{ __('catalog/default.cart.labels.selected_items_in_modal') }}">
                             {{ __('catalog/default.cart.labels.selected_items', ['selected' => 0, 'total' => $cart_data['items_count'] ?? 0]) }}
                         </span>
-                    </label>
+                </label>
 
-                    <button class="btn btn-text p-0"
-                            data-remove-selected-cart-items
-                            type="button"
-                            aria-label="{{ __('catalog/default.cart.messages.item_removed') }}">
-                        <span class="icon-[iconamoon--trash-light] custom-icon size-6 md:size-6"></span>
-                    </button>
-                @else
-                    <div class="inline-flex items-center gap-2 text-light-gray">
-                        <span class="inline-block size-4 border border-light-gray/80"></span>
-                        <span>{{ __('catalog/default.cart.labels.quantity') }} {{ $cart_data['items_count'] ?? 0 }}</span>
-                    </div>
-                @endif
+                <button class="btn btn-text p-0"
+                        data-remove-selected-cart-items
+                        type="button"
+                        aria-label="{{ __('catalog/default.cart.messages.item_removed') }}">
+                    <span class="icon-[iconamoon--trash-light] custom-icon size-6 md:size-6"></span>
+                </button>
             </div>
 
             <div class="flex flex-col gap-y-6.5" data-cart-items-list>
@@ -80,77 +78,25 @@
     </div>
 
     <div class="px-4 pb-4 md:px-6">
-        @if($cart_mode === 'fast_order')
-            <form class="flex flex-col gap-2 md:gap-3" data-fast-order-form>
-                <label class="flex flex-col gap-1 text-sm text-white">
-                    <span>{{ __('catalog/default.cart.labels.first_name') }}*</span>
-                    <input class="border-0 border-b border-b-opacity-light-gray-40% px-0 py-2 bg-transparent text-sm md:text-base"
-                           data-order-first-name
-                           name="first_name"
-                           placeholder="{{ __('catalog/default.cart.labels.first_name') }}"
-                           type="text"/>
-                </label>
+        @if(($cart_data['is_empty'] ?? true) === false)
+            <div class="mt-3 flex flex-col gap-2" data-cart-totals>
+                @foreach($total_lines as $line_data)
+                    @continue(($line_data['is_visible'] ?? false) === false)
 
-                <label class="flex flex-col gap-1 text-sm text-white">
-                    <span>{{ __('catalog/default.cart.labels.last_name') }}*</span>
-                    <input class="border-0 border-b border-b-opacity-light-gray-40% px-0 py-2 bg-transparent text-sm md:text-base"
-                           data-order-last-name
-                           name="last_name"
-                           placeholder="{{ __('catalog/default.cart.labels.last_name') }}"
-                           type="text"/>
-                </label>
-
-                <label class="flex flex-col gap-1 text-sm text-white">
-                    <span>{{ __('catalog/default.cart.labels.phone') }}*</span>
-                    <input class="border-0 border-b border-b-opacity-light-gray-40% px-0 py-2 bg-transparent text-sm md:text-base"
-                           data-order-phone
-                           name="phone"
-                           placeholder="{{ __('catalog/default.cart.labels.phone') }}"
-                           type="tel"/>
-                </label>
-                @if(($cart_data['is_empty'] ?? true) === false)
-                    <div class="mt-3 flex flex-col gap-2" data-cart-totals>
-                        @foreach($total_lines as $line_data)
-                            @continue(($line_data['is_visible'] ?? false) === false)
-
-                            <div class="flex items-center justify-between gap-2 text-sm md:text-base">
-                                <span class="text-light-gray">{{ $line_data['label'] }}</span>
-                                <span>{{ $line_data['formatted'] }}</span>
-                            </div>
-                        @endforeach
-
-                        <div class="flex items-center justify-between gap-2 font-bold text-lg md:text-xl uppercase">
-                            <span>{{ __('catalog/default.cart.totals.grand_total') }}</span>
-                            <span>{{ $totals['grand_total_formatted'] ?? '' }}</span>
-                        </div>
+                    <div class="flex items-center justify-between gap-2 text-sm md:text-base">
+                        <span class="text-light-gray">{{ $line_data['label'] }}</span>
+                        <span>{{ $line_data['formatted'] }}</span>
                     </div>
-                @endif
+                @endforeach
 
-                <button class="white-btn default-btn w-full mt-3 text-lg"
-                        data-submit-fast-order
-                        type="submit">
-                    {{ __('catalog/default.cart.buttons.submit_fast_order') }}
-                </button>
-            </form>
-        @else
-            @if(($cart_data['is_empty'] ?? true) === false)
-                <div class="mt-3 flex flex-col gap-2" data-cart-totals>
-                    @foreach($total_lines as $line_data)
-                        @continue(($line_data['is_visible'] ?? false) === false)
-
-                        <div class="flex items-center justify-between gap-2 text-sm md:text-base">
-                            <span class="text-light-gray">{{ $line_data['label'] }}</span>
-                            <span>{{ $line_data['formatted'] }}</span>
-                        </div>
-                    @endforeach
-
-                    <div class="flex items-center justify-between gap-2 font-bold text-lg md:text-lg 2xl:text-2xl uppercase">
-                        <span>{{ __('catalog/default.cart.totals.grand_total') }}</span>
-                        <span>{{ $totals['grand_total_formatted'] ?? '' }}</span>
-                    </div>
+                <div class="flex items-center justify-between gap-2 font-bold text-lg md:text-lg 2xl:text-2xl uppercase">
+                    <span>{{ __('catalog/default.cart.totals.grand_total') }}</span>
+                    <span>{{ $totals['grand_total_formatted'] ?? '' }}</span>
                 </div>
-            @endif
+            </div>
+        @endif
 
+        @if($cart_mode === 'regular')
             <a class="white-btn default-btn w-full md:max-w-85.75 lg:max-w-91.75 2xl:max-w-md text-lg mt-3 mx-auto"
                href="{{ localized_route('localized.catalog.cart.index') }}">
                 {{ __('catalog/default.cart.buttons.checkout') }}

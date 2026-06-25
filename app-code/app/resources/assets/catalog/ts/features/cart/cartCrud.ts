@@ -3,9 +3,13 @@ import {
     fetchFunc, findElem, findArrayElems,
     toggleElement, isEmpty
 }                                              from "@ts-shared/lib/helpers.ts";
-import { handleParsePhone }                    from "@ts-shared/lib/parsePhone.ts";
 import type { WindowAppParams }                from "@ts-types/global";
 import { getAppParam }                         from "@ts-shared/lib/getAppParam.ts";
+import {
+    clearCartModalGeneralError,
+    extractCartGeneralErrorMessage,
+    setCartModalGeneralError,
+} from "@ts-features/cart/cartErrors.ts";
 
 const resolveUrl = (key: keyof WindowAppParams): string => {
     const value: null | any = getAppParam(key);
@@ -37,16 +41,28 @@ const renderMutationResponse = (response: CartMutationResponse, mode: CartMode):
 
     if (modalContent && response.rendered?.modal_items_html) {
         modalContent.innerHTML = response.rendered.modal_items_html;
+    }
 
-        if (mode === 'fast_order') {
-            handleParsePhone();
-        }
+    const fastOrderFormWrapper = <HTMLElement | null>findElem('[data-fast-order-form-wrapper]');
+
+    if (fastOrderFormWrapper && mode === 'fast_order') {
+        const isCartEmpty = response.cart?.is_empty ?? true;
+
+        fastOrderFormWrapper.classList.toggle('hidden', isCartEmpty);
     }
 
     const cartPageRoot = <HTMLElement | null>findElem('#cart-page-root');
 
     if (cartPageRoot && response.rendered?.cart_page_html) {
         cartPageRoot.innerHTML = response.rendered.cart_page_html;
+    }
+
+    const generalErrorMessage = extractCartGeneralErrorMessage(response);
+
+    if (response.success === false && generalErrorMessage !== '') {
+        setCartModalGeneralError(mode, generalErrorMessage);
+    } else {
+        clearCartModalGeneralError(mode);
     }
 };
 
