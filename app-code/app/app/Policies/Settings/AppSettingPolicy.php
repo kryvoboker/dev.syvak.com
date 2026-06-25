@@ -12,58 +12,70 @@ class AppSettingPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(AuthUser $authUser): bool
+    public function viewAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('ViewAny:AppSetting');
+        return $auth_user->can('ViewAny:AppSetting');
     }
 
-    public function view(AuthUser $authUser, AppSetting $appSetting): bool
+    public function view(AuthUser $auth_user, AppSetting $app_setting): bool
     {
-        return $authUser->can('View:AppSetting');
+        unset($app_setting);
+
+        return $auth_user->can('View:AppSetting');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(AuthUser $auth_user): bool
     {
-        return $authUser->can('Create:AppSetting');
+        return $auth_user->can('Create:AppSetting');
     }
 
-    public function update(AuthUser $authUser, AppSetting $appSetting): bool
+    public function update(AuthUser $auth_user, AppSetting $app_setting): bool
     {
-        return $authUser->can('Update:AppSetting');
+        unset($app_setting);
+
+        return $auth_user->can('Update:AppSetting');
     }
 
-    public function delete(AuthUser $authUser, AppSetting $appSetting): bool
+    public function delete(AuthUser $auth_user, AppSetting $app_setting): bool
     {
-        return $authUser->can('Delete:AppSetting');
+        unset($app_setting);
+
+        return $auth_user->can('Delete:AppSetting');
     }
 
-    public function restore(AuthUser $authUser, AppSetting $appSetting): bool
+    public function restore(AuthUser $auth_user, AppSetting $app_setting): bool
     {
-        return $authUser->can('Restore:AppSetting');
+        unset($app_setting);
+
+        return $auth_user->can('Restore:AppSetting');
     }
 
-    public function forceDelete(AuthUser $authUser, AppSetting $appSetting): bool
+    public function forceDelete(AuthUser $auth_user, AppSetting $app_setting): bool
     {
-        return $authUser->can('ForceDelete:AppSetting');
+        unset($app_setting);
+
+        return $auth_user->can('ForceDelete:AppSetting');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('ForceDeleteAny:AppSetting');
+        return $auth_user->can('ForceDeleteAny:AppSetting');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('RestoreAny:AppSetting');
+        return $auth_user->can('RestoreAny:AppSetting');
     }
 
-    public function replicate(AuthUser $authUser, AppSetting $appSetting): bool
+    public function replicate(AuthUser $auth_user, AppSetting $app_setting): bool
     {
-        return $authUser->can('Replicate:AppSetting');
+        unset($app_setting);
+
+        return $auth_user->can('Replicate:AppSetting');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(AuthUser $auth_user): bool
     {
-        return $authUser->can('Reorder:AppSetting');
+        return $auth_user->can('Reorder:AppSetting');
     }
 }

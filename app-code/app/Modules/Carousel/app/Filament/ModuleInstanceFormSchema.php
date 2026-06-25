@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Carousel\Filament;
 
+use App\Models\ApplicationSettings\Language;
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
-use App\Models\ApplicationSettings\Language;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -27,14 +27,17 @@ readonly class ModuleInstanceFormSchema
 {
     public function __construct(
         private CarouselConfig $carousel_config,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, Component>
      */
     public function getComponents(?ModuleDefinition $definition = null, ?ModuleInstance $instance = null): array
     {
-        $active_languages = new Language()->getActiveLanguages();
+        unset($definition, $instance);
+
+        $active_languages = (new Language())->getActiveLanguages();
 
         return [
             Section::make()

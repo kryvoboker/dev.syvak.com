@@ -12,58 +12,70 @@ class LanguagePolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(AuthUser $authUser): bool
+    public function viewAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('ViewAny:Language');
+        return $auth_user->can('ViewAny:Language');
     }
 
-    public function view(AuthUser $authUser, Language $language): bool
+    public function view(AuthUser $auth_user, Language $language): bool
     {
-        return $authUser->can('View:Language');
+        unset($language);
+
+        return $auth_user->can('View:Language');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(AuthUser $auth_user): bool
     {
-        return $authUser->can('Create:Language');
+        return $auth_user->can('Create:Language');
     }
 
-    public function update(AuthUser $authUser, Language $language): bool
+    public function update(AuthUser $auth_user, Language $language): bool
     {
-        return $authUser->can('Update:Language');
+        unset($language);
+
+        return $auth_user->can('Update:Language');
     }
 
-    public function delete(AuthUser $authUser, Language $language): bool
+    public function delete(AuthUser $auth_user, Language $language): bool
     {
-        return $authUser->can('Delete:Language');
+        unset($language);
+
+        return $auth_user->can('Delete:Language');
     }
 
-    public function restore(AuthUser $authUser, Language $language): bool
+    public function restore(AuthUser $auth_user, Language $language): bool
     {
-        return $authUser->can('Restore:Language');
+        unset($language);
+
+        return $auth_user->can('Restore:Language');
     }
 
-    public function forceDelete(AuthUser $authUser, Language $language): bool
+    public function forceDelete(AuthUser $auth_user, Language $language): bool
     {
-        return $authUser->can('ForceDelete:Language');
+        unset($language);
+
+        return $auth_user->can('ForceDelete:Language');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('ForceDeleteAny:Language');
+        return $auth_user->can('ForceDeleteAny:Language');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('RestoreAny:Language');
+        return $auth_user->can('RestoreAny:Language');
     }
 
-    public function replicate(AuthUser $authUser, Language $language): bool
+    public function replicate(AuthUser $auth_user, Language $language): bool
     {
-        return $authUser->can('Replicate:Language');
+        unset($language);
+
+        return $auth_user->can('Replicate:Language');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(AuthUser $auth_user): bool
     {
-        return $authUser->can('Reorder:Language');
+        return $auth_user->can('Reorder:Language');
     }
 }

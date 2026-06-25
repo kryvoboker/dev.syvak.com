@@ -12,38 +12,46 @@ class ModuleDefinitionPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(AuthUser $authUser): bool
+    public function viewAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('ViewAny:ModuleDefinition');
+        return $auth_user->can('ViewAny:ModuleDefinition');
     }
 
-    public function view(AuthUser $authUser, ModuleDefinition $module_definition): bool
+    public function view(AuthUser $auth_user, ModuleDefinition $module_definition): bool
     {
-        return $authUser->can('View:ModuleDefinition');
+        unset($module_definition);
+
+        return $auth_user->can('View:ModuleDefinition');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(AuthUser $auth_user): bool
     {
-        return $authUser->can('Create:ModuleDefinition');
+        return $auth_user->can('Create:ModuleDefinition');
     }
 
-    public function update(AuthUser $authUser, ModuleDefinition $module_definition): bool
+    public function update(AuthUser $auth_user, ModuleDefinition $module_definition): bool
     {
-        return $authUser->can('Update:ModuleDefinition');
+        unset($module_definition);
+
+        return $auth_user->can('Update:ModuleDefinition');
     }
 
-    public function delete(AuthUser $authUser, ModuleDefinition $module_definition): bool
+    public function delete(AuthUser $auth_user, ModuleDefinition $module_definition): bool
     {
-        return $authUser->can('Delete:ModuleDefinition');
+        unset($module_definition);
+
+        return $auth_user->can('Delete:ModuleDefinition');
     }
 
-    public function deleteAny(AuthUser $authUser): bool
+    public function deleteAny(AuthUser $auth_user): bool
     {
-        return $authUser->can('DeleteAny:ModuleDefinition');
+        return $auth_user->can('DeleteAny:ModuleDefinition');
     }
 
-    public function replicate(AuthUser $authUser, ModuleDefinition $module_definition): bool
+    public function replicate(AuthUser $auth_user, ModuleDefinition $module_definition): bool
     {
-        return $authUser->can('Replicate:ModuleDefinition');
+        unset($module_definition);
+
+        return $auth_user->can('Replicate:ModuleDefinition');
     }
 }
