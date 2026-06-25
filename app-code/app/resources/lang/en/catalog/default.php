@@ -115,6 +115,14 @@ return [
             'items_subtotal' => 'Items subtotal',
             'grand_total'    => 'Grand total',
         ],
+        'validation' => [
+            'first_name_required' => 'First name is required.',
+            'first_name_min'      => 'First name must contain at least :min characters.',
+            'last_name_required'  => 'Last name is required.',
+            'last_name_min'       => 'Last name must contain at least :min characters.',
+            'phone_required'      => 'Phone is required.',
+            'phone_min'           => 'Phone must contain at least :min digits.',
+        ],
         'messages' => [
             'variant_not_found' => 'Product variant was not found.',
             'item_added'        => 'Product was added to cart.',

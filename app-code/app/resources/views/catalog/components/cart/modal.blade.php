@@ -45,9 +45,9 @@
                     'cart_data' => $cart_data ?? null,
                     'cart_mode' => 'regular',
                 ])
-
-                <x-catalog::common.loader class="cart-loader"/>
             </div>
+
+            <x-catalog::common.loader class="cart-loader"/>
         </div>
     </div>
 </div>

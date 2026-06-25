@@ -45,9 +45,96 @@
                     'cart_data' => $cart_data ?? null,
                     'cart_mode' => 'fast_order',
                 ])
-
-                <x-catalog::common.loader class="cart-loader"/>
             </div>
+
+            <div class="border-t border-t-opacity-light-gray-40% px-4 py-4 md:px-8 md:py-6 lg:px-6 2xl:px-6 {{ ($cart_data['is_empty'] ?? true) === true ? 'hidden' : '' }}"
+                 data-fast-order-form-wrapper>
+                <form class="flex flex-col gap-4"
+                      action="{{ localized_route('localized.catalog.order-confirm.store') }}"
+                      data-fast-order-form
+                      method="post"
+                      novalidate>
+                    @csrf
+
+                    <input name="cart_mode" type="hidden" value="fast_order"/>
+                    <input name="payment_method" type="hidden" value="cash_on_delivery"/>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="flex flex-col gap-1 text-sm text-white" for="fast-order-first-name">
+                            <span>{{ __('catalog/default.cart.labels.first_name') }}*</span>
+                            <input class="border-0 border-b border-b-opacity-light-gray-40% bg-transparent px-0 py-2 text-sm md:text-base"
+                                   data-error-min="{{ __('catalog/default.cart.validation.first_name_min', ['min' => 2]) }}"
+                                   data-error-required="{{ __('catalog/default.cart.validation.first_name_required') }}"
+                                   data-order-first-name
+                                   id="fast-order-first-name"
+                                   name="first_name"
+                                   autocomplete="given-name"
+                                   aria-describedby="fast-order-first-name-error"
+                                   placeholder="{{ __('catalog/default.cart.labels.first_name') }}"
+                                   required
+                                   type="text"/>
+                        </label>
+
+                        <span class="_error text-xs md:text-sm"
+                              aria-live="polite"
+                              data-order-field-error="first_name"
+                              id="fast-order-first-name-error"></span>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="flex flex-col gap-1 text-sm text-white" for="fast-order-last-name">
+                            <span>{{ __('catalog/default.cart.labels.last_name') }}*</span>
+                            <input class="border-0 border-b border-b-opacity-light-gray-40% bg-transparent px-0 py-2 text-sm md:text-base"
+                                   data-error-min="{{ __('catalog/default.cart.validation.last_name_min', ['min' => 2]) }}"
+                                   data-error-required="{{ __('catalog/default.cart.validation.last_name_required') }}"
+                                   data-order-last-name
+                                   id="fast-order-last-name"
+                                   name="last_name"
+                                   autocomplete="family-name"
+                                   aria-describedby="fast-order-last-name-error"
+                                   placeholder="{{ __('catalog/default.cart.labels.last_name') }}"
+                                   required
+                                   type="text"/>
+                        </label>
+
+                        <span class="_error text-xs md:text-sm"
+                              aria-live="polite"
+                              data-order-field-error="last_name"
+                              id="fast-order-last-name-error"></span>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="flex flex-col gap-1 text-sm text-white" for="fast-order-phone">
+                            <span>{{ __('catalog/default.cart.labels.phone') }}*</span>
+                            <input class="border-0 border-b border-b-opacity-light-gray-40% bg-transparent px-0 py-2 text-sm md:text-base"
+                                   data-error-min="{{ __('catalog/default.cart.validation.phone_min', ['min' => 10]) }}"
+                                   data-error-required="{{ __('catalog/default.cart.validation.phone_required') }}"
+                                   data-order-phone
+                                   id="fast-order-phone"
+                                   name="phone"
+                                   autocomplete="tel"
+                                   inputmode="tel"
+                                   aria-describedby="fast-order-phone-error"
+                                   placeholder="{{ __('catalog/default.cart.labels.phone') }}"
+                                   required
+                                   type="tel"/>
+                        </label>
+
+                        <span class="_error text-xs md:text-sm"
+                              aria-live="polite"
+                              data-order-field-error="phone"
+                              id="fast-order-phone-error"></span>
+                    </div>
+
+                    <button class="white-btn default-btn w-full text-lg"
+                            data-submit-fast-order
+                            type="submit">
+                        {{ __('catalog/default.cart.buttons.submit_fast_order') }}
+                    </button>
+                </form>
+            </div>
+
+            <x-catalog::common.loader class="cart-loader"/>
         </div>
     </div>
 </div>
