@@ -56,8 +56,8 @@ Route::prefix('{' . $locale_key . '}')
         Route::patch('/cart/{cart_id}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/{cart_id}', [CartController::class, 'delete'])->name('cart.delete');
 
-        Route::post('/order-confirm', [OrderConfirmController::class, 'store'])->name('order-confirm.store');
-        Route::post('/order-validate', [OrderConfirmController::class, 'validate'])->name('order-confirm.validate');
+        Route::post('/order-confirm', [OrderConfirmController::class, 'storeFastOrder'])->name('order-confirm.store');
+        Route::post('/order-validate', [OrderConfirmController::class, 'validateFastOrder'])->name('order-confirm.validate');
 
         Route::get('/thank-you', [ThankYouController::class, 'index'])->name('thank-you.index');
         Route::get('/failure', [FailureOrderController::class, 'index'])->name('failure-order.index');
