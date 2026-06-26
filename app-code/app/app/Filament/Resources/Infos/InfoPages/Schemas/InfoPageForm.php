@@ -19,7 +19,9 @@ use Illuminate\Validation\Rule;
 
 class InfoPageForm
 {
-    use LanguageTrait, MetaTextFormTrait, SlugFormTrait;
+    use LanguageTrait;
+    use MetaTextFormTrait;
+    use SlugFormTrait;
 
     public static function configure(Schema $schema): Schema
     {

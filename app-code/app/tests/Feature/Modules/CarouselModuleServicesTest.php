@@ -22,9 +22,9 @@ class CarouselModuleServicesTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
         config()->set('cache.default', 'array');
@@ -46,30 +46,30 @@ class CarouselModuleServicesTest extends TestCase
     {
         $settings = [
             'shared' => [
-                'page_types'            => ['home'],
+                'page_types' => ['home'],
                 'open_links_in_new_tab' => true,
-                'desktop_image'         => [
-                    'width'      => 1220,
-                    'height'     => 720,
-                    'max_width'  => 1920,
+                'desktop_image' => [
+                    'width' => 1220,
+                    'height' => 720,
+                    'max_width' => 1920,
                     'max_height' => 1080,
                 ],
                 'mobile_image' => [
-                    'width'      => 360,
-                    'height'     => 640,
-                    'max_width'  => 768,
+                    'width' => 360,
+                    'height' => 640,
+                    'max_width' => 768,
                     'max_height' => 1280,
                 ],
             ],
             'slides' => [
                 [
-                    'is_active'    => true,
-                    'sort_order'   => 2,
+                    'is_active' => true,
+                    'sort_order' => 2,
                     'translations' => $this->makeTranslations('Second slide'),
                 ],
                 [
-                    'is_active'    => true,
-                    'sort_order'   => 1,
+                    'is_active' => true,
+                    'sort_order' => 1,
                     'translations' => $this->makeTranslations('First slide'),
                 ],
             ],
@@ -87,37 +87,37 @@ class CarouselModuleServicesTest extends TestCase
     public function test_carousel_module_data_service_returns_only_instances_for_requested_page_type(): void
     {
         $definition = ModuleDefinition::query()->create([
-            'name'                     => 'Carousel',
-            'slug'                     => 'carousel',
-            'nwidart_name'             => 'Carousel',
-            'module_path'              => '/var/modules/Carousel',
-            'description'              => 'Carousel',
-            'is_installed'             => true,
-            'is_enabled'               => true,
+            'name' => 'Carousel',
+            'slug' => 'carousel',
+            'nwidart_name' => 'Carousel',
+            'module_path' => '/var/modules/Carousel',
+            'description' => 'Carousel',
+            'is_installed' => true,
+            'is_enabled' => true,
             'is_enabled_in_filesystem' => true,
-            'sort_order'               => 1,
-            'settings_schema'          => [],
-            'meta'                     => [],
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [],
         ]);
 
         $definition->instances()->create([
-            'name'        => 'Homepage Carousel',
-            'placement'   => 'hero',
+            'name' => 'Homepage Carousel',
+            'placement' => 'hero',
             'context_key' => null,
-            'is_enabled'  => true,
-            'sort_order'  => 1,
-            'settings'    => $this->makeCarouselSettings(['home']),
-            'meta'        => [],
+            'is_enabled' => true,
+            'sort_order' => 1,
+            'settings' => $this->makeCarouselSettings(['home']),
+            'meta' => [],
         ]);
 
         $definition->instances()->create([
-            'name'        => 'Category Carousel',
-            'placement'   => 'hero',
+            'name' => 'Category Carousel',
+            'placement' => 'hero',
             'context_key' => null,
-            'is_enabled'  => true,
-            'sort_order'  => 2,
-            'settings'    => $this->makeCarouselSettings(['category']),
-            'meta'        => [],
+            'is_enabled' => true,
+            'sort_order' => 2,
+            'settings' => $this->makeCarouselSettings(['category']),
+            'meta' => [],
         ]);
 
         $resolved_modules = $this->app->make(CarouselModuleDataService::class)->resolveForPlacement('hero', 'home');
@@ -133,24 +133,24 @@ class CarouselModuleServicesTest extends TestCase
     {
         $settings = [
             'shared' => [
-                'page_types'    => ['home'],
+                'page_types' => ['home'],
                 'desktop_image' => [
-                    'width'      => 1220,
-                    'height'     => 720,
-                    'max_width'  => 1920,
+                    'width' => 1220,
+                    'height' => 720,
+                    'max_width' => 1920,
                     'max_height' => 1080,
                 ],
                 'mobile_image' => [
-                    'width'      => 360,
-                    'height'     => 640,
-                    'max_width'  => 768,
+                    'width' => 360,
+                    'height' => 640,
+                    'max_width' => 768,
                     'max_height' => 1280,
                 ],
             ],
             'slides' => [
                 [
-                    'is_active'    => true,
-                    'sort_order'   => 1,
+                    'is_active' => true,
+                    'sort_order' => 1,
                     'translations' => $this->makeOptionalTranslations(),
                 ],
             ],
@@ -169,24 +169,24 @@ class CarouselModuleServicesTest extends TestCase
     {
         $settings = [
             'shared' => [
-                'page_types'    => ['home'],
+                'page_types' => ['home'],
                 'desktop_image' => [
-                    'width'      => 1220,
-                    'height'     => 720,
-                    'max_width'  => 1920,
+                    'width' => 1220,
+                    'height' => 720,
+                    'max_width' => 1920,
                     'max_height' => 1080,
                 ],
                 'mobile_image' => [
-                    'width'      => 360,
-                    'height'     => 640,
-                    'max_width'  => 768,
+                    'width' => 360,
+                    'height' => 640,
+                    'max_width' => 768,
                     'max_height' => 1280,
                 ],
             ],
             'slides' => [
                 [
-                    'is_active'    => true,
-                    'sort_order'   => 1,
+                    'is_active' => true,
+                    'sort_order' => 1,
                     'translations' => $this->makeTextOnlyTranslations(),
                 ],
             ],
@@ -209,44 +209,44 @@ class CarouselModuleServicesTest extends TestCase
 
         $settings = [
             'shared' => [
-                'page_types'    => ['home'],
+                'page_types' => ['home'],
                 'desktop_image' => [
-                    'width'      => 1220,
-                    'height'     => 720,
-                    'max_width'  => 1920,
+                    'width' => 1220,
+                    'height' => 720,
+                    'max_width' => 1920,
                     'max_height' => 1080,
                 ],
                 'mobile_image' => [
-                    'width'      => 360,
-                    'height'     => 640,
-                    'max_width'  => 768,
+                    'width' => 360,
+                    'height' => 640,
+                    'max_width' => 768,
                     'max_height' => 1280,
                 ],
             ],
             'slides' => [
                 [
-                    'is_active'    => true,
-                    'sort_order'   => 1,
+                    'is_active' => true,
+                    'sort_order' => 1,
                     'translations' => [
                         'uk' => [
                             'language_code' => 'uk',
-                            'title'         => 'Slide uk',
-                            'description'   => '',
-                            'button_text'   => '',
-                            'button_url'    => '',
-                            'image_url'     => '',
+                            'title' => 'Slide uk',
+                            'description' => '',
+                            'button_text' => '',
+                            'button_url' => '',
+                            'image_url' => '',
                             'desktop_image' => 'livewire-file:uk-desktop-temp.jpg',
-                            'mobile_image'  => 'livewire-file:uk-mobile-temp.jpg',
+                            'mobile_image' => 'livewire-file:uk-mobile-temp.jpg',
                         ],
                         'en' => [
                             'language_code' => 'en',
-                            'title'         => 'Slide en',
-                            'description'   => '',
-                            'button_text'   => '',
-                            'button_url'    => '',
-                            'image_url'     => '',
+                            'title' => 'Slide en',
+                            'description' => '',
+                            'button_text' => '',
+                            'button_url' => '',
+                            'image_url' => '',
                             'desktop_image' => 'livewire-file:en-desktop-temp.jpg',
-                            'mobile_image'  => 'livewire-file:en-mobile-temp.jpg',
+                            'mobile_image' => 'livewire-file:en-mobile-temp.jpg',
                         ],
                     ],
                 ],
@@ -257,7 +257,7 @@ class CarouselModuleServicesTest extends TestCase
 
         foreach (['uk', 'en'] as $language_code) {
             $desktop_image = (string) $normalized_settings['slides'][0]['translations'][$language_code]['desktop_image'];
-            $mobile_image  = (string) $normalized_settings['slides'][0]['translations'][$language_code]['mobile_image'];
+            $mobile_image = (string) $normalized_settings['slides'][0]['translations'][$language_code]['mobile_image'];
 
             $this->assertStringNotContainsString('livewire-file:', $desktop_image);
             $this->assertStringNotContainsString('livewire-file:', $mobile_image);
@@ -273,31 +273,31 @@ class CarouselModuleServicesTest extends TestCase
         app()->setLocale('uk');
 
         $definition = ModuleDefinition::query()->create([
-            'name'                     => 'Carousel',
-            'slug'                     => 'carousel-fallback',
-            'nwidart_name'             => 'Carousel',
-            'module_path'              => '/var/modules/Carousel',
-            'description'              => 'Carousel',
-            'is_installed'             => true,
-            'is_enabled'               => true,
+            'name' => 'Carousel',
+            'slug' => 'carousel-fallback',
+            'nwidart_name' => 'Carousel',
+            'module_path' => '/var/modules/Carousel',
+            'description' => 'Carousel',
+            'is_installed' => true,
+            'is_enabled' => true,
             'is_enabled_in_filesystem' => true,
-            'sort_order'               => 1,
-            'settings_schema'          => [],
-            'meta'                     => [],
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [],
         ]);
 
-        $settings                                                     = $this->makeCarouselSettings(['home']);
+        $settings = $this->makeCarouselSettings(['home']);
         $settings['slides'][0]['translations']['uk']['desktop_image'] = null;
-        $settings['slides'][0]['translations']['uk']['mobile_image']  = null;
+        $settings['slides'][0]['translations']['uk']['mobile_image'] = null;
 
         $definition->instances()->create([
-            'name'        => 'Homepage Carousel',
-            'placement'   => 'hero',
+            'name' => 'Homepage Carousel',
+            'placement' => 'hero',
             'context_key' => null,
-            'is_enabled'  => true,
-            'sort_order'  => 1,
-            'settings'    => $settings,
-            'meta'        => [],
+            'is_enabled' => true,
+            'sort_order' => 1,
+            'settings' => $settings,
+            'meta' => [],
         ]);
 
         $resolved_modules = $this->app->make(CarouselModuleDataService::class)->resolveForPlacement('hero', 'home');
@@ -313,30 +313,30 @@ class CarouselModuleServicesTest extends TestCase
         app()->setLocale('uk');
 
         $definition = ModuleDefinition::query()->create([
-            'name'                     => 'Carousel',
-            'slug'                     => 'carousel-text-only',
-            'nwidart_name'             => 'Carousel',
-            'module_path'              => '/var/modules/Carousel',
-            'description'              => 'Carousel',
-            'is_installed'             => true,
-            'is_enabled'               => true,
+            'name' => 'Carousel',
+            'slug' => 'carousel-text-only',
+            'nwidart_name' => 'Carousel',
+            'module_path' => '/var/modules/Carousel',
+            'description' => 'Carousel',
+            'is_installed' => true,
+            'is_enabled' => true,
             'is_enabled_in_filesystem' => true,
-            'sort_order'               => 1,
-            'settings_schema'          => [],
-            'meta'                     => [],
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [],
         ]);
 
-        $settings                              = $this->makeCarouselSettings(['home']);
+        $settings = $this->makeCarouselSettings(['home']);
         $settings['slides'][0]['translations'] = $this->makeTextOnlyTranslations();
 
         $definition->instances()->create([
-            'name'        => 'Text only Carousel',
-            'placement'   => 'hero',
+            'name' => 'Text only Carousel',
+            'placement' => 'hero',
             'context_key' => null,
-            'is_enabled'  => true,
-            'sort_order'  => 1,
-            'settings'    => $settings,
-            'meta'        => [],
+            'is_enabled' => true,
+            'sort_order' => 1,
+            'settings' => $settings,
+            'meta' => [],
         ]);
 
         $resolved_modules = $this->app->make(CarouselModuleDataService::class)->resolveForPlacement('hero', 'home');
@@ -351,16 +351,16 @@ class CarouselModuleServicesTest extends TestCase
     private function seedLanguages(): void
     {
         Language::query()->create([
-            'code'       => 'uk',
-            'name'       => 'Ukrainian',
-            'is_active'  => true,
+            'code' => 'uk',
+            'name' => 'Ukrainian',
+            'is_active' => true,
             'is_default' => true,
         ]);
 
         Language::query()->create([
-            'code'       => 'en',
-            'name'       => 'English',
-            'is_active'  => true,
+            'code' => 'en',
+            'name' => 'English',
+            'is_active' => true,
             'is_default' => false,
         ]);
     }
@@ -384,25 +384,25 @@ class CarouselModuleServicesTest extends TestCase
     {
         return [
             'shared' => [
-                'page_types'            => $page_types,
+                'page_types' => $page_types,
                 'open_links_in_new_tab' => true,
-                'desktop_image'         => [
-                    'width'      => 1220,
-                    'height'     => 720,
-                    'max_width'  => 1920,
+                'desktop_image' => [
+                    'width' => 1220,
+                    'height' => 720,
+                    'max_width' => 1920,
                     'max_height' => 1080,
                 ],
                 'mobile_image' => [
-                    'width'      => 360,
-                    'height'     => 640,
-                    'max_width'  => 768,
+                    'width' => 360,
+                    'height' => 640,
+                    'max_width' => 768,
                     'max_height' => 1280,
                 ],
             ],
             'slides' => [
                 [
-                    'is_active'    => true,
-                    'sort_order'   => 1,
+                    'is_active' => true,
+                    'sort_order' => 1,
                     'translations' => $this->makeTranslations('Main slide'),
                 ],
             ],
@@ -417,23 +417,23 @@ class CarouselModuleServicesTest extends TestCase
         return [
             'uk' => [
                 'language_code' => 'uk',
-                'title'         => $base_title . ' uk',
-                'description'   => $base_title . ' description uk',
-                'button_text'   => 'Open uk',
-                'button_url'    => 'https://example.com/uk',
-                'image_url'     => 'https://example.com/image-uk',
+                'title' => $base_title . ' uk',
+                'description' => $base_title . ' description uk',
+                'button_text' => 'Open uk',
+                'button_url' => 'https://example.com/uk',
+                'image_url' => 'https://example.com/image-uk',
                 'desktop_image' => 'images/modules/carousel/desktop-slide.png',
-                'mobile_image'  => 'images/modules/carousel/mobile-slide.png',
+                'mobile_image' => 'images/modules/carousel/mobile-slide.png',
             ],
             'en' => [
                 'language_code' => 'en',
-                'title'         => $base_title . ' en',
-                'description'   => $base_title . ' description en',
-                'button_text'   => 'Open en',
-                'button_url'    => 'https://example.com/en',
-                'image_url'     => 'https://example.com/image-en',
+                'title' => $base_title . ' en',
+                'description' => $base_title . ' description en',
+                'button_text' => 'Open en',
+                'button_url' => 'https://example.com/en',
+                'image_url' => 'https://example.com/image-en',
                 'desktop_image' => 'images/modules/carousel/desktop-slide.png',
-                'mobile_image'  => 'images/modules/carousel/mobile-slide.png',
+                'mobile_image' => 'images/modules/carousel/mobile-slide.png',
             ],
         ];
     }
@@ -446,23 +446,23 @@ class CarouselModuleServicesTest extends TestCase
         return [
             'uk' => [
                 'language_code' => 'uk',
-                'title'         => '',
-                'description'   => '',
-                'button_text'   => '',
-                'button_url'    => '',
-                'image_url'     => '',
+                'title' => '',
+                'description' => '',
+                'button_text' => '',
+                'button_url' => '',
+                'image_url' => '',
                 'desktop_image' => 'images/modules/carousel/desktop-slide.png',
-                'mobile_image'  => 'images/modules/carousel/mobile-slide.png',
+                'mobile_image' => 'images/modules/carousel/mobile-slide.png',
             ],
             'en' => [
                 'language_code' => 'en',
-                'title'         => '',
-                'description'   => '',
-                'button_text'   => '',
-                'button_url'    => '',
-                'image_url'     => '',
+                'title' => '',
+                'description' => '',
+                'button_text' => '',
+                'button_url' => '',
+                'image_url' => '',
                 'desktop_image' => 'images/modules/carousel/desktop-slide.png',
-                'mobile_image'  => 'images/modules/carousel/mobile-slide.png',
+                'mobile_image' => 'images/modules/carousel/mobile-slide.png',
             ],
         ];
     }
@@ -475,23 +475,23 @@ class CarouselModuleServicesTest extends TestCase
         return [
             'uk' => [
                 'language_code' => 'uk',
-                'title'         => 'Text only slide uk',
-                'description'   => 'Description uk',
-                'button_text'   => '',
-                'button_url'    => '',
-                'image_url'     => '',
+                'title' => 'Text only slide uk',
+                'description' => 'Description uk',
+                'button_text' => '',
+                'button_url' => '',
+                'image_url' => '',
                 'desktop_image' => null,
-                'mobile_image'  => null,
+                'mobile_image' => null,
             ],
             'en' => [
                 'language_code' => 'en',
-                'title'         => 'Text only slide en',
-                'description'   => 'Description en',
-                'button_text'   => '',
-                'button_url'    => '',
-                'image_url'     => '',
+                'title' => 'Text only slide en',
+                'description' => 'Description en',
+                'button_text' => '',
+                'button_url' => '',
+                'image_url' => '',
                 'desktop_image' => null,
-                'mobile_image'  => null,
+                'mobile_image' => null,
             ],
         ];
     }

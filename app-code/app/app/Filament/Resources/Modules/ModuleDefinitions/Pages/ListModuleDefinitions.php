@@ -46,7 +46,7 @@ class ListModuleDefinitions extends ListRecords
 
     public function getDefinitions(): \Illuminate\Support\Collection
     {
-        $search_value  = Str::lower(Str::squish($this->search));
+        $search_value = Str::lower(Str::squish($this->search));
         $status_filter = $this->status_filter;
 
         /** @var Collection<int, ModuleDefinition> $definitions */

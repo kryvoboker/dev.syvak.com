@@ -77,10 +77,10 @@ abstract class BaseWikiPage extends Page
     public function getTableHeadings(): array
     {
         return [
-            'field'      => (string) __('admin/wiki/wiki.common.table.field'),
-            'purpose'    => (string) __('admin/wiki/wiki.common.table.purpose'),
+            'field' => (string) __('admin/wiki/wiki.common.table.field'),
+            'purpose' => (string) __('admin/wiki/wiki.common.table.purpose'),
             'how_to_use' => (string) __('admin/wiki/wiki.common.table.how_to_use'),
-            'example'    => (string) __('admin/wiki/wiki.common.table.example'),
+            'example' => (string) __('admin/wiki/wiki.common.table.example'),
         ];
     }
 
@@ -114,18 +114,18 @@ abstract class BaseWikiPage extends Page
                 return [];
             }
 
-            $screenshot_name          = (string) ($section['screenshot'] ?? '');
+            $screenshot_name = (string) ($section['screenshot'] ?? '');
             $screenshot_relative_path = filled($screenshot_name)
                 ? 'images/wiki/' . static::getWikiScreenshotDirectory() . '/' . $screenshot_name
                 : '';
 
             return [
-                'title'                  => (string) ($section['title'] ?? ''),
-                'description'            => (string) ($section['description'] ?? ''),
-                'items'                  => is_array($section['items'] ?? null) ? $section['items'] : [],
-                'fields'                 => is_array($section['fields'] ?? null) ? $section['fields'] : [],
-                'screenshot_relative'    => $screenshot_relative_path,
-                'screenshot_url'         => $this->resolveScreenshotUrl($screenshot_relative_path),
+                'title' => (string) ($section['title'] ?? ''),
+                'description' => (string) ($section['description'] ?? ''),
+                'items' => is_array($section['items'] ?? null) ? $section['items'] : [],
+                'fields' => is_array($section['fields'] ?? null) ? $section['fields'] : [],
+                'screenshot_relative' => $screenshot_relative_path,
+                'screenshot_url' => $this->resolveScreenshotUrl($screenshot_relative_path),
                 'screenshot_description' => (string) ($section['screenshot_description'] ?? ''),
             ];
         }, $sections);

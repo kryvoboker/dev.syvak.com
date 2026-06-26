@@ -6,7 +6,7 @@ namespace App\Enums;
 
 enum PositionInPageEnum: string
 {
-    case Top    = 'top';
+    case Top = 'top';
     case Center = 'center';
     case Bottom = 'bottom';
 }

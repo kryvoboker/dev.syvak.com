@@ -66,17 +66,17 @@ return [
     */
 
     'temporary_file_upload' => [
-        'disk'          => 'public',        // Example: 'local', 's3'              | Default: 'default'
-        'rules'         => null,       // Example: ['file', 'mimes:png,jpg']  | Default: ['required', 'file', 'max:12288'] (12MB)
-        'directory'     => null,   // Example: 'tmp'                      | Default: 'livewire-tmp'
-        'middleware'    => null,  // Example: 'throttle:5,1'             | Default: 'throttle:60,1'
+        'disk' => 'public',        // Example: 'local', 's3'              | Default: 'default'
+        'rules' => null,       // Example: ['file', 'mimes:png,jpg']  | Default: ['required', 'file', 'max:12288'] (12MB)
+        'directory' => null,   // Example: 'tmp'                      | Default: 'livewire-tmp'
+        'middleware' => null,  // Example: 'throttle:5,1'             | Default: 'throttle:60,1'
         'preview_mimes' => [   // Supported file types for temporary pre-signed file URLs...
                                          'png', 'gif', 'bmp', 'svg', 'wav', 'mp4',
                                          'mov', 'avi', 'wmv', 'mp3', 'm4a',
                                          'jpg', 'jpeg', 'mpga', 'webp', 'wma',
         ],
-        'max_upload_time'         => 5, // Max duration (in minutes) before an upload is invalidated...
-        'cleanup'                 => true, // Should cleanup temporary uploads older than 24 hrs...
+        'max_upload_time' => 5, // Max duration (in minutes) before an upload is invalidated...
+        'cleanup' => true, // Should cleanup temporary uploads older than 24 hrs...
         'use_original_file_names' => true,
     ],
     'manifest_path' => env('NEW_STORAGE_PATH') . '/framework/cache/livewire-components.php',
@@ -132,7 +132,7 @@ return [
     */
 
     'navigate' => [
-        'show_progress_bar'  => true,
+        'show_progress_bar' => true,
         'progress_bar_color' => '#2299dd',
     ],
 
@@ -187,9 +187,9 @@ return [
     */
 
     'payload' => [
-        'max_size'          => 5 * 1024 * 1024,   // 5MB - maximum request payload size in bytes
+        'max_size' => 5 * 1024 * 1024,   // 5MB - maximum request payload size in bytes
         'max_nesting_depth' => 10,   // Maximum depth of dot-notation property paths
-        'max_calls'         => 50,           // Maximum method calls per request
-        'max_components'    => 20,      // Maximum components per batch request
+        'max_calls' => 50,           // Maximum method calls per request
+        'max_components' => 20,      // Maximum components per batch request
     ],
 ];

@@ -37,14 +37,14 @@ class FilterGroupGeneratorService
             return [
                 'created_count' => $created_count,
                 'updated_count' => $updated_count,
-                'total_groups'  => $total_groups,
+                'total_groups' => $total_groups,
             ];
         } catch (Throwable $throwable) {
             Log::channel('stack')->error(
                 'Catalog filter groups synchronization failed.',
                 [
                     'catalog_filter_set_id' => (int) $filter_set->id,
-                    'exception'             => $throwable,
+                    'exception' => $throwable,
                 ],
             );
 
@@ -59,29 +59,29 @@ class FilterGroupGeneratorService
     {
         $system_groups = [
             [
-                'code'        => CatalogFilterGroupSourceTypeEnum::Price->value,
+                'code' => CatalogFilterGroupSourceTypeEnum::Price->value,
                 'source_type' => CatalogFilterGroupSourceTypeEnum::Price->value,
-                'source_id'   => null,
-                'sort_order'  => 10,
-                'get_key'     => CatalogFilterGroupSourceTypeEnum::Price->value,
+                'source_id' => null,
+                'sort_order' => 10,
+                'get_key' => CatalogFilterGroupSourceTypeEnum::Price->value,
             ],
         ];
 
         foreach ($system_groups as $payload) {
             $group = CatalogFilterGroup::query()->firstOrNew([
                 'catalog_filter_set_id' => (int) $filter_set->id,
-                'code'                  => (string) $payload['code'],
+                'code' => (string) $payload['code'],
             ]);
 
             $was_existing_group = $group->exists;
 
             $group->source_type = (string) $payload['source_type'];
-            $group->source_id   = null;
+            $group->source_id = null;
 
             if (! $was_existing_group) {
                 $group->is_enabled = true;
                 $group->sort_order = (int) $payload['sort_order'];
-                $group->get_key    = (string) $payload['get_key'];
+                $group->get_key = (string) $payload['get_key'];
                 $group->setAttribute('config', []);
             }
 
@@ -128,18 +128,18 @@ class FilterGroupGeneratorService
         foreach ($active_attributes as $attribute) {
             $group = CatalogFilterGroup::query()->firstOrNew([
                 'catalog_filter_set_id' => (int) $filter_set->id,
-                'code'                  => CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id,
+                'code' => CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id,
             ]);
 
             $was_existing_group = $group->exists;
 
             $group->source_type = CatalogFilterGroupSourceTypeEnum::Attribute->value;
-            $group->source_id   = (int) $attribute->id;
+            $group->source_id = (int) $attribute->id;
 
             if (! $was_existing_group) {
                 $group->is_enabled = true;
                 $group->sort_order = $sort_order;
-                $group->get_key    = 'filters[' . (int) $attribute->id . ']';
+                $group->get_key = 'filters[' . (int) $attribute->id . ']';
                 $group->setAttribute('config', []);
             }
 
@@ -171,12 +171,12 @@ class FilterGroupGeneratorService
     {
         foreach ((new Language())->getActiveLanguages() as $language) {
             $language_code = (string) $language->code;
-            $translate     = __('admin/catalogs/catalog-filter/catalog-filter-set.labels.price', locale: $language_code);
+            $translate = __('admin/catalogs/catalog-filter/catalog-filter-set.labels.price', locale: $language_code);
 
             CatalogFilterGroupTranslation::query()->updateOrCreate(
                 [
                     'catalog_filter_group_id' => (int) $group->id,
-                    'language_id'             => (int) $language->id,
+                    'language_id' => (int) $language->id,
                 ],
                 [
                     'label' => (string) ($translate ?? ucfirst($group->code)),
@@ -196,7 +196,7 @@ class FilterGroupGeneratorService
             CatalogFilterGroupTranslation::query()->updateOrCreate(
                 [
                     'catalog_filter_group_id' => (int) $group->id,
-                    'language_id'             => (int) $language->id,
+                    'language_id' => (int) $language->id,
                 ],
                 [
                     'label' => filled($attribute_name)

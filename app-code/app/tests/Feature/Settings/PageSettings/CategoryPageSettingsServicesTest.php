@@ -21,9 +21,9 @@ class CategoryPageSettingsServicesTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
 
@@ -68,104 +68,104 @@ class CategoryPageSettingsServicesTest extends TestCase
         $page_setting = app(PageSettingsBootstrapService::class)->bootstrapCategoryPageSetting();
 
         DB::table('categories')->insert([
-            'id'         => 11,
-            'parent_id'  => null,
+            'id' => 11,
+            'parent_id' => null,
             'sort_order' => 1,
-            'is_active'  => true,
+            'is_active' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         DB::table('category_descriptions')->insert([
-            'category_id'      => 11,
-            'language_id'      => 1,
-            'name'             => 'Roses',
-            'description'      => null,
-            'h1_title'         => null,
-            'meta_title'       => null,
+            'category_id' => 11,
+            'language_id' => 1,
+            'name' => 'Roses',
+            'description' => null,
+            'h1_title' => null,
+            'meta_title' => null,
             'meta_description' => null,
-            'meta_keywords'    => null,
-            'created_at'       => now(),
-            'updated_at'       => now(),
+            'meta_keywords' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('attributes')->insert([
-            'id'         => 21,
+            'id' => 21,
             'sort_order' => 1,
-            'is_active'  => true,
+            'is_active' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         DB::table('attribute_descriptions')->insert([
             'attribute_id' => 21,
-            'language_id'  => 1,
-            'name'         => 'Color',
-            'created_at'   => now(),
-            'updated_at'   => now(),
+            'language_id' => 1,
+            'name' => 'Color',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('products')->insert([
-            'id'             => 31,
-            'model'          => 'M-31',
-            'sku'            => 'SKU-31',
-            'ean'            => 31,
-            'quantity'       => 15,
-            'minimum'        => 1,
-            'image'          => null,
-            'price'          => 100,
-            'viewed'         => 0,
-            'is_active'      => true,
+            'id' => 31,
+            'model' => 'M-31',
+            'sku' => 'SKU-31',
+            'ean' => 31,
+            'quantity' => 15,
+            'minimum' => 1,
+            'image' => null,
+            'price' => 100,
+            'viewed' => 0,
+            'is_active' => true,
             'date_available' => now(),
-            'date_added'     => now(),
-            'created_at'     => now(),
-            'updated_at'     => now(),
+            'date_added' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('category_product')->insert([
             'category_id' => 11,
-            'product_id'  => 31,
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'product_id' => 31,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('product_variants')->insert([
-            'id'             => 41,
-            'product_id'     => 31,
-            'is_default'     => true,
-            'is_active'      => true,
-            'quantity'       => 15,
-            'minimum'        => 1,
-            'price'          => 100,
+            'id' => 41,
+            'product_id' => 31,
+            'is_default' => true,
+            'is_active' => true,
+            'quantity' => 15,
+            'minimum' => 1,
+            'price' => 100,
             'date_available' => now(),
-            'created_at'     => now(),
-            'updated_at'     => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('product_variant_attribute_values')->insert([
             'product_variant_id' => 41,
-            'attribute_id'       => 21,
-            'language_id'        => 1,
-            'value_string'       => 'Red',
-            'created_at'         => now(),
-            'updated_at'         => now(),
+            'attribute_id' => 21,
+            'language_id' => 1,
+            'value_string' => 'Red',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('product_variant_discounts')->insert([
             'product_variant_id' => 41,
-            'user_group_id'      => null,
-            'quantity'           => null,
-            'priority'           => 1,
-            'price'              => 80,
-            'date_start'         => now()->subDay(),
-            'date_end'           => now()->addDay(),
-            'created_at'         => now(),
-            'updated_at'         => now(),
+            'user_group_id' => null,
+            'quantity' => null,
+            'priority' => 1,
+            'price' => 80,
+            'date_start' => now()->subDay(),
+            'date_end' => now()->addDay(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $sync_service = app(CategoryPageFilterSyncService::class);
 
-        $first_summary  = $sync_service->sync($page_setting);
+        $first_summary = $sync_service->sync($page_setting);
         $second_summary = $sync_service->sync($page_setting);
 
         $this->assertGreaterThan(0, $first_summary['created_count']);

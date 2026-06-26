@@ -76,7 +76,7 @@ trait MetaTextFormTrait
      */
     protected static function processCreateTranslationsFormTabs(Collection $active_languages): array
     {
-        $tabs            = [];
+        $tabs = [];
         $total_languages = $active_languages->count();
 
         foreach ($active_languages as $language) {

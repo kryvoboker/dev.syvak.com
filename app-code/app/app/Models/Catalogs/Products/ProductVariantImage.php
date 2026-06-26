@@ -23,8 +23,8 @@ class ProductVariantImage extends Model
     {
         return [
             'product_variant_id' => 'integer',
-            'is_primary'         => 'boolean',
-            'sort_order'         => 'integer',
+            'is_primary' => 'boolean',
+            'sort_order' => 'integer',
         ];
     }
 

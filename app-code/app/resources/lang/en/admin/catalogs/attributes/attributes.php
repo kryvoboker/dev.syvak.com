@@ -8,8 +8,8 @@ return [
 
     // Labels
     'labels' => [
-        'model'        => 'Attribute',
+        'model' => 'Attribute',
         'plural_model' => 'Attributes',
-        'settings'     => 'Attributes Settings',
+        'settings' => 'Attributes Settings',
     ],
 ];

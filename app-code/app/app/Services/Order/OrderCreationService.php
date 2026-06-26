@@ -18,7 +18,8 @@ readonly class OrderCreationService
         private CartService $cart_service,
         private WayForPayPaymentModule $way_for_pay_payment_module,
         private CashOnDeliveryPaymentModule $cash_on_delivery_payment_module,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<string, mixed>  $validated_data
@@ -32,7 +33,7 @@ readonly class OrderCreationService
         if ((bool) Arr::get($cart_data, 'is_empty', true) === true) {
             return [
                 'success' => false,
-                'errors'  => [
+                'errors' => [
                     'cart' => [__('catalog/default.cart.messages.cart_is_empty')],
                 ],
             ];
@@ -40,8 +41,8 @@ readonly class OrderCreationService
 
         return [
             'success' => true,
-            'errors'  => [],
-            'cart'    => $cart_data,
+            'errors' => [],
+            'cart' => $cart_data,
         ];
     }
 
@@ -55,25 +56,25 @@ readonly class OrderCreationService
 
         if ((bool) Arr::get($validation_result, 'success', false) === false) {
             return [
-                'success'      => false,
+                'success' => false,
                 'order_number' => null,
                 'redirect_url' => localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
-                'errors'       => (array) Arr::get($validation_result, 'errors', []),
+                'errors' => (array) Arr::get($validation_result, 'errors', []),
             ];
         }
 
-        $order_number   = $this->generateOrderNumber();
+        $order_number = $this->generateOrderNumber();
         $payment_method = (string) Arr::get($validated_data, 'payment_method', 'cash_on_delivery');
 
         // TODO: replace temporary payload with real order entity persistence.
         $order_payload = [
             'order_number' => $order_number,
-            'customer'     => [
+            'customer' => [
                 'first_name' => (string) Arr::get($validated_data, 'first_name', ''),
-                'last_name'  => (string) Arr::get($validated_data, 'last_name', ''),
-                'phone'      => clear_telephone((string) Arr::get($validated_data, 'phone', '')),
+                'last_name' => (string) Arr::get($validated_data, 'last_name', ''),
+                'phone' => clear_telephone((string) Arr::get($validated_data, 'phone', '')),
             ],
-            'cart'   => Arr::get($validation_result, 'cart', []),
+            'cart' => Arr::get($validation_result, 'cart', []),
             'locale' => $locale,
         ];
 
@@ -87,21 +88,21 @@ readonly class OrderCreationService
             $this->cart_service->clearCart((string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value));
 
             return [
-                'success'      => true,
+                'success' => true,
                 'order_number' => $order_number,
                 'redirect_url' => localized_route('localized.catalog.thank-you.index', ['locale' => $locale]),
-                'status'       => 'success',
-                'errors'       => [],
+                'status' => 'success',
+                'errors' => [],
             ];
         }
 
         // Keep cart untouched for failed payment flow.
         return [
-            'success'      => false,
+            'success' => false,
             'order_number' => $order_number,
             'redirect_url' => localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
-            'status'       => 'failed',
-            'errors'       => [
+            'status' => 'failed',
+            'errors' => [
                 'payment' => [__('catalog/default.cart.messages.payment_failed')],
             ],
         ];

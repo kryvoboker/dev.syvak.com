@@ -18,9 +18,9 @@ class ProductToAttributeSeederTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
 
@@ -79,9 +79,9 @@ class ProductToAttributeSeederTest extends TestCase
         $this->prepareSourceDataForSeeder();
 
         DB::table('attributes')->insert([
-            'id'         => 99,
+            'id' => 99,
             'sort_order' => 99,
-            'is_active'  => true,
+            'is_active' => true,
             'created_at' => now(config('app.timezone')),
             'updated_at' => now(config('app.timezone')),
         ]);
@@ -122,17 +122,17 @@ class ProductToAttributeSeederTest extends TestCase
 
         DB::table('languages')->insert([
             [
-                'code'       => 'uk',
-                'name'       => 'Ukrainian',
-                'is_active'  => true,
+                'code' => 'uk',
+                'name' => 'Ukrainian',
+                'is_active' => true,
                 'is_default' => true,
                 'created_at' => $now_timestamp,
                 'updated_at' => $now_timestamp,
             ],
             [
-                'code'       => 'en',
-                'name'       => 'English',
-                'is_active'  => true,
+                'code' => 'en',
+                'name' => 'English',
+                'is_active' => true,
                 'is_default' => false,
                 'created_at' => $now_timestamp,
                 'updated_at' => $now_timestamp,
@@ -145,16 +145,16 @@ class ProductToAttributeSeederTest extends TestCase
 
         DB::table('attributes')->insert([
             [
-                'id'         => 7,
+                'id' => 7,
                 'sort_order' => 1,
-                'is_active'  => true,
+                'is_active' => true,
                 'created_at' => $now_timestamp,
                 'updated_at' => $now_timestamp,
             ],
             [
-                'id'         => 8,
+                'id' => 8,
                 'sort_order' => 2,
-                'is_active'  => true,
+                'is_active' => true,
                 'created_at' => $now_timestamp,
                 'updated_at' => $now_timestamp,
             ],
@@ -163,31 +163,31 @@ class ProductToAttributeSeederTest extends TestCase
         DB::table('attribute_descriptions')->insert([
             [
                 'attribute_id' => 7,
-                'language_id'  => (int) $languages_by_code['uk'],
-                'name'         => 'Розмір',
-                'created_at'   => $now_timestamp,
-                'updated_at'   => $now_timestamp,
+                'language_id' => (int) $languages_by_code['uk'],
+                'name' => 'Розмір',
+                'created_at' => $now_timestamp,
+                'updated_at' => $now_timestamp,
             ],
             [
                 'attribute_id' => 7,
-                'language_id'  => (int) $languages_by_code['en'],
-                'name'         => 'Size',
-                'created_at'   => $now_timestamp,
-                'updated_at'   => $now_timestamp,
+                'language_id' => (int) $languages_by_code['en'],
+                'name' => 'Size',
+                'created_at' => $now_timestamp,
+                'updated_at' => $now_timestamp,
             ],
             [
                 'attribute_id' => 8,
-                'language_id'  => (int) $languages_by_code['uk'],
-                'name'         => 'Колір',
-                'created_at'   => $now_timestamp,
-                'updated_at'   => $now_timestamp,
+                'language_id' => (int) $languages_by_code['uk'],
+                'name' => 'Колір',
+                'created_at' => $now_timestamp,
+                'updated_at' => $now_timestamp,
             ],
             [
                 'attribute_id' => 8,
-                'language_id'  => (int) $languages_by_code['en'],
-                'name'         => 'Color',
-                'created_at'   => $now_timestamp,
-                'updated_at'   => $now_timestamp,
+                'language_id' => (int) $languages_by_code['en'],
+                'name' => 'Color',
+                'created_at' => $now_timestamp,
+                'updated_at' => $now_timestamp,
             ],
         ]);
 
@@ -195,30 +195,30 @@ class ProductToAttributeSeederTest extends TestCase
 
         for ($product_index = 1; $product_index <= 8; $product_index++) {
             $products[] = [
-                'model'          => 'MODEL-' . $product_index,
-                'sku'            => 'SKU-' . $product_index,
-                'ean'            => 'EAN-' . $product_index,
-                'quantity'       => 10,
-                'minimum'        => 1,
-                'image'          => null,
-                'price'          => 199.99,
-                'viewed'         => 0,
-                'is_active'      => true,
+                'model' => 'MODEL-' . $product_index,
+                'sku' => 'SKU-' . $product_index,
+                'ean' => 'EAN-' . $product_index,
+                'quantity' => 10,
+                'minimum' => 1,
+                'image' => null,
+                'price' => 199.99,
+                'viewed' => 0,
+                'is_active' => true,
                 'date_available' => $now_timestamp,
-                'date_added'     => $now_timestamp,
-                'created_at'     => $now_timestamp,
-                'updated_at'     => $now_timestamp,
+                'date_added' => $now_timestamp,
+                'created_at' => $now_timestamp,
+                'updated_at' => $now_timestamp,
             ];
         }
 
         DB::table('products')->insert($products);
 
         return [
-            'products_count'    => 8,
-            'attributes_count'  => 2,
-            'languages_count'   => 2,
+            'products_count' => 8,
+            'attributes_count' => 2,
+            'languages_count' => 2,
             'size_attribute_id' => 7,
-            'uk_language_id'    => (int) $languages_by_code['uk'],
+            'uk_language_id' => (int) $languages_by_code['uk'],
         ];
     }
 

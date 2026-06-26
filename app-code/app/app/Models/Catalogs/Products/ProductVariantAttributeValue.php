@@ -25,8 +25,8 @@ class ProductVariantAttributeValue extends Model
     {
         return [
             'product_variant_id' => 'integer',
-            'attribute_id'       => 'integer',
-            'language_id'        => 'integer',
+            'attribute_id' => 'integer',
+            'language_id' => 'integer',
         ];
     }
 

@@ -37,7 +37,8 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
         public readonly string $prototype_relative_path,
         public readonly int $width,
         public readonly int $height,
-    ) {}
+    ) {
+    }
 
     /**
      * A unique task key.
@@ -85,7 +86,7 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
     {
         // Target path: cache/(webp|avif)/[original path] + name_w_h.format
         $original_rel = Str::ltrim($this->original_relative_path, '/');
-        $dir          = Str::after(
+        $dir = Str::after(
             Str::trim(dirname($original_rel), '.'),
             'images/',
         );
@@ -112,9 +113,9 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
     private function performConversion(string $format, string $prototype_abs, string $target_abs): void
     {
         try {
-            $manager      = new ImageManager(new Driver());
-            $img          = $manager->decodePath($prototype_abs);
-            $target_abs   = Storage::path($target_abs);
+            $manager = new ImageManager(new Driver());
+            $img = $manager->decodePath($prototype_abs);
+            $target_abs = Storage::path($target_abs);
             $webp_quality = max(
                 1,
                 (int) data_get(
@@ -144,7 +145,7 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
         } catch (Throwable $e) {
             Log::channel('stack')->warning('AVIF conversion not supported on this server.', [
                 'error' => $e->getMessage(),
-                'file'  => $prototype_abs,
+                'file' => $prototype_abs,
             ]);
         }
     }

@@ -18,7 +18,7 @@ class CartController extends Controller
 
     public function index(?string $locale): View|RedirectResponse
     {
-        $locale    = normalize_locale($locale);
+        $locale = normalize_locale($locale);
         $cart_data = app(CartService::class)->getSnapshot($locale);
 
         if (($cart_data['is_empty'] ?? true) === true) {
@@ -32,7 +32,7 @@ class CartController extends Controller
             'footer_data' => app(FooterService::class)([
                 'categories' => $header_data['categories'],
             ]),
-            'page_type'   => 'cart',
+            'page_type' => 'cart',
             'breadcrumbs' => [
                 breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
                 breadcrumb(__('catalog/default.cart.labels.cart')),

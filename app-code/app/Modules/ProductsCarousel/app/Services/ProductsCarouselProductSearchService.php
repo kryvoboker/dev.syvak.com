@@ -17,7 +17,8 @@ readonly class ProductsCarouselProductSearchService
 {
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<int|string, mixed>  $category_ids
@@ -30,7 +31,7 @@ readonly class ProductsCarouselProductSearchService
         array $excluded_product_ids = [],
     ): array {
         $normalized_category_ids = $this->normalizeIds($category_ids);
-        $excluded_product_ids    = $this->normalizeIds($excluded_product_ids);
+        $excluded_product_ids = $this->normalizeIds($excluded_product_ids);
 
         if ($normalized_category_ids === []) {
             return [];
@@ -95,7 +96,7 @@ readonly class ProductsCarouselProductSearchService
      */
     public function filterActiveProductIdsByCategories(array $product_ids, array $category_ids): array
     {
-        $normalized_product_ids  = $this->normalizeIds($product_ids);
+        $normalized_product_ids = $this->normalizeIds($product_ids);
         $normalized_category_ids = $this->normalizeIds($category_ids);
 
         if ($normalized_product_ids === [] || $normalized_category_ids === []) {

@@ -28,20 +28,20 @@ class CatalogFilterAjaxController extends Controller
         try {
             $response_data = $filter_products_action->handle(
                 [
-                'validated_data'      => $request->validated(),
-                'category_slug'       => $slug,
+                'validated_data' => $request->validated(),
+                'category_slug' => $slug,
                 'is_get_filters_data' => false,
-                'page_path'           => localized_route('localized.catalog.category.show', ['slug' => $slug], absolute: false),
+                'page_path' => localized_route('localized.catalog.category.show', ['slug' => $slug], absolute: false),
                 ],
                 locale: $locale,
             );
 
             /** @var LengthAwarePaginator|null $paginator */
-            $paginator      = Arr::get($response_data, 'paginator');
+            $paginator = Arr::get($response_data, 'paginator');
             $total_products = (int) $paginator?->total();
 
             return response()->json([
-                'success'        => true,
+                'success' => true,
                 'total_products' => $total_products,
             ]);
         } catch (Throwable $e) {

@@ -20,9 +20,9 @@ class FilterValueGeneratorServiceTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
 
@@ -45,28 +45,28 @@ class FilterValueGeneratorServiceTest extends TestCase
     public function test_sync_generates_dash_separated_codes_for_attribute_values(): void
     {
         $filter_set = CatalogFilterSet::query()->create([
-            'code'                           => 'default_category',
-            'context_type'                   => 'category',
-            'context_types'                  => ['category'],
-            'is_enabled'                     => true,
-            'is_price_filter_enabled'        => true,
+            'code' => 'default_category',
+            'context_type' => 'category',
+            'context_types' => ['category'],
+            'is_enabled' => true,
+            'is_price_filter_enabled' => true,
             'is_attribute_filtering_enabled' => true,
-            'price_source_mode'              => 'both',
-            'facet_strategy'                 => 'self_excluding',
-            'discount_only_policy'           => 'exclude_without_discount',
-            'min_stock_quantity'             => 1,
-            'settings'                       => [],
+            'price_source_mode' => 'both',
+            'facet_strategy' => 'self_excluding',
+            'discount_only_policy' => 'exclude_without_discount',
+            'min_stock_quantity' => 1,
+            'settings' => [],
         ]);
 
         $group = CatalogFilterGroup::query()->create([
             'catalog_filter_set_id' => (int) $filter_set->id,
-            'code'                  => 'attribute_7',
-            'source_type'           => 'attribute',
-            'source_id'             => 7,
-            'is_enabled'            => true,
-            'sort_order'            => 100,
-            'get_key'               => 'filters[7]',
-            'config'                => [],
+            'code' => 'attribute_7',
+            'source_type' => 'attribute',
+            'source_id' => 7,
+            'is_enabled' => true,
+            'sort_order' => 100,
+            'get_key' => 'filters[7]',
+            'config' => [],
         ]);
 
         DB::table('products')->insert([
@@ -98,12 +98,12 @@ class FilterValueGeneratorServiceTest extends TestCase
 
         $this->assertDatabaseMissing('catalog_filter_values', [
             'catalog_filter_group_id' => (int) $group->id,
-            'code'                    => '100_g',
+            'code' => '100_g',
         ]);
 
         $this->assertDatabaseMissing('catalog_filter_values', [
             'catalog_filter_group_id' => (int) $group->id,
-            'code'                    => '50_sm',
+            'code' => '50_sm',
         ]);
     }
 

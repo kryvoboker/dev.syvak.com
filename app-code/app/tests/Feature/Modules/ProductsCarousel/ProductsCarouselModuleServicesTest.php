@@ -23,9 +23,9 @@ class ProductsCarouselModuleServicesTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
 
@@ -52,10 +52,10 @@ class ProductsCarouselModuleServicesTest extends TestCase
         $this->createSlugsTable();
 
         DB::table('languages')->insert([
-            'id'         => 1,
-            'code'       => 'en',
-            'name'       => 'English',
-            'is_active'  => true,
+            'id' => 1,
+            'code' => 'en',
+            'name' => 'English',
+            'is_active' => true,
             'is_default' => true,
         ]);
 
@@ -84,11 +84,11 @@ class ProductsCarouselModuleServicesTest extends TestCase
         $normalizer_service = app(ModuleSettingsNormalizerService::class);
 
         $normalized_settings = $normalizer_service->normalize([
-            'source_mode'    => 'category_based',
+            'source_mode' => 'category_based',
             'category_based' => [
-                'category_ids'               => [1, 2],
+                'category_ids' => [1, 2],
                 'use_selected_products_only' => true,
-                'selected_product_ids'       => [10, 11, 12],
+                'selected_product_ids' => [10, 11, 12],
             ],
             'manual_only' => [
                 'selected_product_ids' => [10, 11, 12],
@@ -111,13 +111,13 @@ class ProductsCarouselModuleServicesTest extends TestCase
 
         $normalized_settings = $normalizer_service->normalize([
             'source_mode' => 'category_based',
-            'shared'      => [
+            'shared' => [
                 'page_types' => ['home'],
             ],
             'category_based' => [
-                'category_ids'               => [1],
+                'category_ids' => [1],
                 'use_selected_products_only' => false,
-                'selected_product_ids'       => [],
+                'selected_product_ids' => [],
             ],
             'manual_only' => [
                 'selected_product_ids' => [],
@@ -145,15 +145,15 @@ class ProductsCarouselModuleServicesTest extends TestCase
         try {
             $normalizer_service->normalize([
                 'source_mode' => 'category_based',
-                'shared'      => [
-                    'page_types'          => ['home'],
-                    'sort_mode'           => 'custom',
+                'shared' => [
+                    'page_types' => ['home'],
+                    'sort_mode' => 'custom',
                     'custom_sort_options' => ['name_asc', 'unknown_sort_option'],
                 ],
                 'category_based' => [
-                    'category_ids'               => [1],
+                    'category_ids' => [1],
                     'use_selected_products_only' => false,
-                    'selected_product_ids'       => [],
+                    'selected_product_ids' => [],
                 ],
                 'manual_only' => [
                     'selected_product_ids' => [],
@@ -179,21 +179,21 @@ class ProductsCarouselModuleServicesTest extends TestCase
 
         $normalized_settings = $normalizer_service->normalize([
             'source_mode' => 'category_based',
-            'shared'      => [
-                'page_types'  => ['home'],
-                'sort_mode'   => 'custom',
+            'shared' => [
+                'page_types' => ['home'],
+                'sort_mode' => 'custom',
                 'custom_sort' => [
-                    'price'      => 'asc',
-                    'name'       => 'none',
+                    'price' => 'asc',
+                    'name' => 'none',
                     'date_added' => 'desc',
-                    'quantity'   => 'none',
+                    'quantity' => 'none',
                 ],
                 'custom_sort_options' => ['price_desc', 'price_asc', 'date_added_desc'],
             ],
             'category_based' => [
-                'category_ids'               => [1],
+                'category_ids' => [1],
                 'use_selected_products_only' => false,
-                'selected_product_ids'       => [],
+                'selected_product_ids' => [],
             ],
             'manual_only' => [
                 'selected_product_ids' => [],
@@ -211,10 +211,10 @@ class ProductsCarouselModuleServicesTest extends TestCase
     public function test_normalizer_maps_legacy_shared_scalars_to_all_active_language_translations(): void
     {
         DB::table('languages')->insert([
-            'id'         => 2,
-            'code'       => 'uk',
-            'name'       => 'Ukrainian',
-            'is_active'  => true,
+            'id' => 2,
+            'code' => 'uk',
+            'name' => 'Ukrainian',
+            'is_active' => true,
             'is_default' => false,
         ]);
 
@@ -226,15 +226,15 @@ class ProductsCarouselModuleServicesTest extends TestCase
 
         $normalized_settings = $normalizer_service->normalize([
             'source_mode' => 'category_based',
-            'shared'      => [
-                'page_types'                 => ['home'],
-                'module_name_for_user'       => 'Legacy title',
+            'shared' => [
+                'page_types' => ['home'],
+                'module_name_for_user' => 'Legacy title',
                 'short_description_for_user' => 'Legacy description',
             ],
             'category_based' => [
-                'category_ids'               => [1],
+                'category_ids' => [1],
                 'use_selected_products_only' => false,
-                'selected_product_ids'       => [],
+                'selected_product_ids' => [],
             ],
             'manual_only' => [
                 'selected_product_ids' => [],
@@ -369,12 +369,12 @@ class ProductsCarouselModuleServicesTest extends TestCase
             $module_data_service,
             ['manual_only' => ['selected_product_ids' => [10, 20, 30]]],
             [
-                'min_quantity'         => 3,
-                'products_limit'       => 1,
-                'product_image_width'  => 300,
+                'min_quantity' => 3,
+                'products_limit' => 1,
+                'product_image_width' => 300,
                 'product_image_height' => 300,
-                'sort_mode'            => 'custom',
-                'sort_sequence'        => ['date_added_desc'],
+                'sort_mode' => 'custom',
+                'sort_sequence' => ['date_added_desc'],
             ],
         );
 
@@ -385,15 +385,15 @@ class ProductsCarouselModuleServicesTest extends TestCase
     public function test_runtime_resolver_uses_current_locale_shared_translation_with_fallback(): void
     {
         DB::table('languages')->insert([
-            'id'         => 2,
-            'code'       => 'uk',
-            'name'       => 'Ukrainian',
-            'is_active'  => true,
+            'id' => 2,
+            'code' => 'uk',
+            'name' => 'Ukrainian',
+            'is_active' => true,
             'is_default' => false,
         ]);
 
         $module_data_service = app(ProductsCarouselModuleDataService::class);
-        $reflection_method   = new \ReflectionMethod($module_data_service, 'resolveLocalizedSharedContent');
+        $reflection_method = new \ReflectionMethod($module_data_service, 'resolveLocalizedSharedContent');
         $reflection_method->setAccessible(true);
 
         app()->setLocale('uk');
@@ -405,11 +405,11 @@ class ProductsCarouselModuleServicesTest extends TestCase
                 'shared' => [
                     'translations' => [
                         'en' => [
-                            'module_name_for_user'       => 'English title',
+                            'module_name_for_user' => 'English title',
                             'short_description_for_user' => 'English description',
                         ],
                         'uk' => [
-                            'module_name_for_user'       => 'Український заголовок',
+                            'module_name_for_user' => 'Український заголовок',
                             'short_description_for_user' => 'Український опис',
                         ],
                     ],
@@ -432,11 +432,11 @@ class ProductsCarouselModuleServicesTest extends TestCase
                 'shared' => [
                     'translations' => [
                         'en' => [
-                            'module_name_for_user'       => 'English title',
+                            'module_name_for_user' => 'English title',
                             'short_description_for_user' => 'English description',
                         ],
                         'uk' => [
-                            'module_name_for_user'       => '',
+                            'module_name_for_user' => '',
                             'short_description_for_user' => '',
                         ],
                     ],

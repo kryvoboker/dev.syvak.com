@@ -25,11 +25,11 @@ class FastOrderValidateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name'                        => ['required', 'string', 'min:2', 'max:255'],
-            'last_name'                         => ['required', 'string', 'min:2', 'max:255'],
-            'phone'                             => ['required', 'string', 'min:10', 'max:30'],
+            'first_name' => ['required', 'string', 'min:2', 'max:255'],
+            'last_name' => ['required', 'string', 'min:2', 'max:255'],
+            'phone' => ['required', 'string', 'min:10', 'max:30'],
             CartRequestKeyEnum::CartMode->value => ['required', 'string', Rule::in([CartModeEnum::FastOrder->value])],
-            'payment_method'                    => ['nullable', 'string', 'in:cash_on_delivery,wayforpay'],
+            'payment_method' => ['nullable', 'string', 'in:cash_on_delivery,wayforpay'],
         ];
     }
 

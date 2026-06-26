@@ -34,28 +34,28 @@ class CategoryController extends Controller
         string $locale,
         ?string $slug,
     ): View|Factory {
-        $locale      = normalize_locale($locale);
-        $language    = resolve_language_by_locale($locale);
+        $locale = normalize_locale($locale);
+        $language = resolve_language_by_locale($locale);
         $language_id = $language instanceof Language ? (int) $language->id : null;
         $header_data = app(HeaderService::class)([
             'sluggable_type' => Category::class,
-            'slug'           => $slug,
+            'slug' => $slug,
         ]);
-        $page_type               = try_detect_page_type($request);
-        $page_setting            = app(PageSettingsBootstrapService::class)->bootstrapCategoryPageSetting();
-        $page_settings_arr       = get_page_settings($page_setting);
-        $category_context        = $this->resolveCategoryContext($slug, $locale);
+        $page_type = try_detect_page_type($request);
+        $page_setting = app(PageSettingsBootstrapService::class)->bootstrapCategoryPageSetting();
+        $page_settings_arr = get_page_settings($page_setting);
+        $category_context = $this->resolveCategoryContext($slug, $locale);
         $products_per_page_limit = ProductsLimitService::getProductsCategoryLimit($page_settings_arr);
-        $requested_sort_value    = $this->normalizeSortValue((string) Arr::get($request->validated(), 'sort', ''));
-        $fallback_active_sort    = resolve_sort_code($page_setting, $requested_sort_value);
+        $requested_sort_value = $this->normalizeSortValue((string) Arr::get($request->validated(), 'sort', ''));
+        $fallback_active_sort = resolve_sort_code($page_setting, $requested_sort_value);
 
         try {
             $response_data = $filter_products_action->handle(
                 [
-                'validated_data'      => $request->validated(),
-                'category_slug'       => $slug,
+                'validated_data' => $request->validated(),
+                'category_slug' => $slug,
                 'is_get_filters_data' => true,
-                'page_path'           => localized_route('localized.catalog.category.show', ['slug' => $slug], absolute: false),
+                'page_path' => localized_route('localized.catalog.category.show', ['slug' => $slug], absolute: false),
                 ],
                 locale: $locale,
             );
@@ -72,9 +72,9 @@ class CategoryController extends Controller
         );
 
         /** @var LengthAwarePaginator|null $paginator */
-        $paginator                        = Arr::get($response_data, 'paginator');
-        $current_page                     = $paginator?->currentPage();
-        $is_has_more_pages                = (bool) $paginator?->hasMorePages();
+        $paginator = Arr::get($response_data, 'paginator');
+        $current_page = $paginator?->currentPage();
+        $is_has_more_pages = (bool) $paginator?->hasMorePages();
         $is_ajax_products_loading_enabled = (bool) Arr::get($page_settings_arr, 'pagination.ajax_products_loading_enabled') === true
             && $products_per_page_limit < (int) $paginator?->total();
 
@@ -84,20 +84,20 @@ class CategoryController extends Controller
                 // Footer uses category links too; pass already loaded categories from header.
                 'categories' => $header_data['categories'],
             ]),
-            'page_type'                        => $page_type,
-            'sort_options'                     => $this->buildSortOptions($page_setting, $language_id),
-            'active_sort_code'                 => (string) Arr::get($response_data, 'active_sort_code', $fallback_active_sort),
-            'selected_sort_value'              => (string) Arr::get($response_data, 'selected_sort_value', $requested_sort_value),
-            'is_has_more_pages'                => $is_has_more_pages,
+            'page_type' => $page_type,
+            'sort_options' => $this->buildSortOptions($page_setting, $language_id),
+            'active_sort_code' => (string) Arr::get($response_data, 'active_sort_code', $fallback_active_sort),
+            'selected_sort_value' => (string) Arr::get($response_data, 'selected_sort_value', $requested_sort_value),
+            'is_has_more_pages' => $is_has_more_pages,
             'is_ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
-            'next_page'                        => $current_page !== null ? ($current_page + 1) : null,
-            'products_per_page_limit'          => $products_per_page_limit,
-            'clear_filters_url'                => localized_route('localized.catalog.category.show', ['slug' => $slug]),
-            'catalog_filter_ajax_url'          => localized_route('localized.catalog.catalog-filter-ajax.index', ['slug' => $slug]),
-            'load_more_products_ajax_url'      => localized_route('localized.catalog.load-more-products-ajax.index', ['slug' => $slug]),
-            'category_slug'                    => $slug,
-            'category_title'                   => $category_context['title'],
-            'breadcrumbs'                      => $category_context['breadcrumbs'],
+            'next_page' => $current_page !== null ? ($current_page + 1) : null,
+            'products_per_page_limit' => $products_per_page_limit,
+            'clear_filters_url' => localized_route('localized.catalog.category.show', ['slug' => $slug]),
+            'catalog_filter_ajax_url' => localized_route('localized.catalog.catalog-filter-ajax.index', ['slug' => $slug]),
+            'load_more_products_ajax_url' => localized_route('localized.catalog.load-more-products-ajax.index', ['slug' => $slug]),
+            'category_slug' => $slug,
+            'category_title' => $category_context['title'],
+            'breadcrumbs' => $category_context['breadcrumbs'],
             ...$response_data,
         ];
 
@@ -113,19 +113,19 @@ class CategoryController extends Controller
     private function buildSortOptions(PageSetting $page_setting, ?int $language_id = null): array
     {
         $sorting_items = get_sorting_items($page_setting);
-        $request_url   = app()->bound('request') ? request()->url() : '';
+        $request_url = app()->bound('request') ? request()->url() : '';
         $request_query = app()->bound('request') ? (array) request()->query() : [];
-        $sorting_keys  = $this->resolveSortingGetKeys($sorting_items);
+        $sorting_keys = $this->resolveSortingGetKeys($sorting_items);
 
         return $sorting_items
             ->map(function (array $sorting_item) use ($request_url, $request_query, $sorting_keys, $language_id): array {
-                $item_get   = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
-                $sort_key   = trim((string) Arr::get($item_get, 'key', config('page-settings.sort_get_keys.sort', 'sort')));
-                $sort_key   = $sort_key !== '' ? $sort_key : (string) config('page-settings.sort_get_keys.sort', 'sort');
+                $item_get = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
+                $sort_key = trim((string) Arr::get($item_get, 'key', config('page-settings.sort_get_keys.sort', 'sort')));
+                $sort_key = $sort_key !== '' ? $sort_key : (string) config('page-settings.sort_get_keys.sort', 'sort');
                 $sort_value = (string) Arr::get($item_get, 'value', (string) Arr::get($sorting_item, 'code', ''));
 
                 return [
-                    'code'  => (string) Arr::get($sorting_item, 'code', ''),
+                    'code' => (string) Arr::get($sorting_item, 'code', ''),
                     'value' => $sort_value,
                     'label' => $this->resolveSortLabel(
                         sort_code   : (string) Arr::get($sorting_item, 'code', ''),
@@ -154,7 +154,7 @@ class CategoryController extends Controller
     private function resolveSortLabel(string $sort_code, array $sorting_item = [], ?int $language_id = null): string
     {
         $config_payload = is_array(Arr::get($sorting_item, 'config')) ? Arr::get($sorting_item, 'config') : [];
-        $labels_map     = is_array(Arr::get($config_payload, 'labels')) ? Arr::get($config_payload, 'labels') : [];
+        $labels_map = is_array(Arr::get($config_payload, 'labels')) ? Arr::get($config_payload, 'labels') : [];
 
         if ($language_id !== null) {
             $label_from_db = trim((string) Arr::get($labels_map, (string) $language_id, ''));
@@ -173,7 +173,7 @@ class CategoryController extends Controller
         }
 
         $translation_key = 'catalog/default.sort.' . $sort_code;
-        $label           = __($translation_key);
+        $label = __($translation_key);
 
         if ($label === $translation_key) {
             return Str::headline((string) Str::replace(['_', '-'], ' ', $sort_code));
@@ -194,18 +194,18 @@ class CategoryController extends Controller
         string $fallback_sort_code,
     ): array {
         return array_replace_recursive([
-            'products'        => [],
-            'paginator'       => null,
+            'products' => [],
+            'paginator' => null,
             'applied_filters' => [
-                'sort'       => $requested_sort_value,
+                'sort' => $requested_sort_value,
                 'price_from' => null,
-                'price_to'   => null,
+                'price_to' => null,
                 'attributes' => [],
             ],
-            'active_sort_code'           => $fallback_sort_code,
-            'selected_sort_value'        => $requested_sort_value,
-            'is_filter_enabled'          => false,
-            'filters_data'               => [],
+            'active_sort_code' => $fallback_sort_code,
+            'selected_sort_value' => $requested_sort_value,
+            'is_filter_enabled' => false,
+            'filters_data' => [],
             'is_show_clear_filters_link' => false,
         ], $response_data);
     }
@@ -313,7 +313,7 @@ class CategoryController extends Controller
 
         if (! $language instanceof Language) {
             return [
-                'title'       => $fallback_title,
+                'title' => $fallback_title,
                 'breadcrumbs' => $breadcrumbs,
             ];
         }
@@ -322,7 +322,7 @@ class CategoryController extends Controller
 
         if (! $category instanceof Category) {
             return [
-                'title'       => $fallback_title,
+                'title' => $fallback_title,
                 'breadcrumbs' => $breadcrumbs,
             ];
         }
@@ -353,7 +353,7 @@ class CategoryController extends Controller
             ->keyBy('id');
 
         $resolved_breadcrumbs = $breadcrumbs;
-        $resolved_title       = $fallback_title;
+        $resolved_title = $fallback_title;
 
         $last_path_index = array_key_last($path_ids);
 
@@ -365,13 +365,13 @@ class CategoryController extends Controller
                 continue;
             }
 
-            $path_title     = $this->resolveCategoryTitle($path_category, (int) $language->id, $fallback_title);
+            $path_title = $this->resolveCategoryTitle($path_category, (int) $language->id, $fallback_title);
             $resolved_title = $path_title;
 
             $is_last = $last_path_index === $index;
 
             $slug = (string) optional($path_category->slugs->first())->slug;
-            $url  = null;
+            $url = null;
 
             if (! $is_last && filled($slug)) {
                 $url = localized_route('localized.catalog.category.show', ['slug' => $slug]);
@@ -384,7 +384,7 @@ class CategoryController extends Controller
         }
 
         return [
-            'title'       => $resolved_title,
+            'title' => $resolved_title,
             'breadcrumbs' => $resolved_breadcrumbs,
         ];
     }

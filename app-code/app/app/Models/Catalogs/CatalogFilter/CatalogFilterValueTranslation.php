@@ -24,7 +24,7 @@ class CatalogFilterValueTranslation extends Model
     {
         return [
             'catalog_filter_value_id' => 'integer',
-            'language_id'             => 'integer',
+            'language_id' => 'integer',
         ];
     }
 

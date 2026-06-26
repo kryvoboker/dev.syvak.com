@@ -27,7 +27,7 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
         ]));
 
         $resolver = app(StorefrontModulePlacementResolverService::class);
-        $items    = $resolver->resolveForPlacement('top', 'home');
+        $items = $resolver->resolveForPlacement('top', 'home');
 
         $this->assertCount(2, $items);
         $this->assertSame(501, $items[0]['module_definition_id']);
@@ -50,7 +50,7 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
         ]));
 
         $resolver = app(StorefrontModulePlacementResolverService::class);
-        $items    = $resolver->resolveForPlacement('bottom', 'home');
+        $items = $resolver->resolveForPlacement('bottom', 'home');
 
         $this->assertSame([], $items);
     }
@@ -60,8 +60,7 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
      */
     private function mockRuntimeResolver(Collection $definitions): void
     {
-        $module_cache_service = new class($definitions) extends ModuleCacheService
-        {
+        $module_cache_service = new class ($definitions) extends ModuleCacheService {
             public ?string $last_key = null;
 
             /**
@@ -69,7 +68,8 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
              */
             public function __construct(
                 private readonly Collection $definitions,
-            ) {}
+            ) {
+            }
 
             public function remember(string $key, Closure $callback, int $ttl_seconds = 3600): mixed
             {
@@ -89,9 +89,9 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
     {
         $definition = new ModuleDefinition();
         $definition->forceFill([
-            'id'           => $id,
+            'id' => $id,
             'nwidart_name' => $nwidart_name,
-            'module_path'  => $module_path,
+            'module_path' => $module_path,
         ]);
 
         return $definition;

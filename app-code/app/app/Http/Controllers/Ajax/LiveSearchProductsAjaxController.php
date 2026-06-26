@@ -23,15 +23,15 @@ class LiveSearchProductsAjaxController extends Controller
         PageSettingsBootstrapService $page_settings_bootstrap_service,
     ): ?JsonResponse {
         $products_per_page_limit = (int) config('app.page_settings.search.products_per_page_limit', 15);
-        $not_found_img_data      = [
-            'path'   => (string) Arr::get(config('app.page_settings.search', []), 'images.search_not_found.path', config('app.images.default_image_search_not_found')),
-            'width'  => (int) config('app.page_settings.search.images.search_not_found.width', 600),
+        $not_found_img_data = [
+            'path' => (string) Arr::get(config('app.page_settings.search', []), 'images.search_not_found.path', config('app.images.default_image_search_not_found')),
+            'width' => (int) config('app.page_settings.search.images.search_not_found.width', 600),
             'height' => (int) config('app.page_settings.search.images.search_not_found.height', 600),
         ];
 
         try {
             $products_per_page_limit = $page_settings_bootstrap_service->getSearchProductsPerPageLimit();
-            $not_found_img_data      = $page_settings_bootstrap_service->getSearchNotFoundImageData();
+            $not_found_img_data = $page_settings_bootstrap_service->getSearchNotFoundImageData();
         } catch (Throwable) {
             // Keep config fallback when page settings are not available.
         }
@@ -47,18 +47,18 @@ class LiveSearchProductsAjaxController extends Controller
             bg_color : 'transparent',
         );
 
-        $search_not_found_img_data['width']  = (int) $not_found_img_data['width'];
+        $search_not_found_img_data['width'] = (int) $not_found_img_data['width'];
         $search_not_found_img_data['height'] = (int) ($not_found_img_data['height'] ?: $not_found_img_data['width']);
 
         if ($request->ajax()) {
             $rendered_html = view('catalog::components.common.search-result', [
-                'products_data'             => $search_products->toArray($request),
+                'products_data' => $search_products->toArray($request),
                 'search_not_found_img_data' => $search_not_found_img_data,
             ])->render();
 
             return response()->json([
-                'success'        => true,
-                'html'           => $rendered_html,
+                'success' => true,
+                'html' => $rendered_html,
                 'total_products' => $search_products->count(),
             ]);
         }

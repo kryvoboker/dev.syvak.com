@@ -6,6 +6,6 @@ namespace App\Enums;
 
 enum CartModeEnum: string
 {
-    case Regular   = 'regular';
+    case Regular = 'regular';
     case FastOrder = 'fast_order';
 }

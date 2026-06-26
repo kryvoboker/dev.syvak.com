@@ -57,8 +57,8 @@ return [
      */
     'transformers' => [
         DateTimeInterface::class => DateTimeInterfaceTransformer::class,
-        Arrayable::class         => ArrayableTransformer::class,
-        BackedEnum::class        => EnumTransformer::class,
+        Arrayable::class => ArrayableTransformer::class,
+        BackedEnum::class => EnumTransformer::class,
     ],
 
     /*
@@ -67,7 +67,7 @@ return [
      */
     'casts' => [
         DateTimeInterface::class => DateTimeInterfaceCast::class,
-        BackedEnum::class        => EnumCast::class,
+        BackedEnum::class => EnumCast::class,
         //        Enumerable::class => Spatie\LaravelData\Casts\EnumerableCast::class,
     ],
 
@@ -125,16 +125,16 @@ return [
      * timeframe.
      */
     'structure_caching' => [
-        'enabled'     => true,
+        'enabled' => true,
         'directories' => [app_path('Data')],
-        'cache'       => [
-            'store'    => env('CACHE_STORE', env('CACHE_DRIVER', 'file')),
-            'prefix'   => 'laravel-data',
+        'cache' => [
+            'store' => env('CACHE_STORE', env('CACHE_DRIVER', 'file')),
+            'prefix' => 'laravel-data',
             'duration' => null,
         ],
         'reflection_discovery' => [
-            'enabled'        => true,
-            'base_path'      => base_path(),
+            'enabled' => true,
+            'base_path' => base_path(),
             'root_namespace' => null,
         ],
     ],
@@ -152,7 +152,7 @@ return [
      * global strategy here, or override it on a specific data object.
      */
     'name_mapping_strategy' => [
-        'input'  => null,
+        'input' => null,
         'output' => null,
     ],
 

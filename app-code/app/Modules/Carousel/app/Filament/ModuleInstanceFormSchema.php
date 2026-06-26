@@ -27,7 +27,8 @@ readonly class ModuleInstanceFormSchema
 {
     public function __construct(
         private CarouselConfig $carousel_config,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, Component>
@@ -159,7 +160,7 @@ readonly class ModuleInstanceFormSchema
                         ->cloneable()
                         ->columnSpanFull()
                         ->itemLabel(function (array $state): string {
-                            $translations   = Arr::get($state, 'translations', []);
+                            $translations = Arr::get($state, 'translations', []);
                             $current_locale = app()->getLocale();
 
                             return Arr::get($translations, $current_locale . '.title')
@@ -300,20 +301,20 @@ readonly class ModuleInstanceFormSchema
     {
         return [
             [
-                'is_active'    => true,
-                'sort_order'   => 1,
+                'is_active' => true,
+                'sort_order' => 1,
                 'translations' => $active_languages
                     ->mapWithKeys(function (Language $language): array {
                         return [
                             $language->code => [
                                 'language_code' => $language->code,
-                                'title'         => '',
-                                'description'   => '',
-                                'button_text'   => '',
-                                'button_url'    => '',
-                                'image_url'     => '',
+                                'title' => '',
+                                'description' => '',
+                                'button_text' => '',
+                                'button_url' => '',
+                                'image_url' => '',
                                 'desktop_image' => null,
-                                'mobile_image'  => null,
+                                'mobile_image' => null,
                             ],
                         ];
                     })

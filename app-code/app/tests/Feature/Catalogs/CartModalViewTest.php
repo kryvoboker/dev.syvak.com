@@ -49,11 +49,11 @@ class CartModalViewTest extends TestCase
 
             $html = view('catalog.partials.cart.modal-items', [
                 'cart_data' => [
-                    'is_empty'     => true,
-                    'items_count'  => 0,
-                    'first_item'   => null,
+                    'is_empty' => true,
+                    'items_count' => 0,
+                    'first_item' => null,
                     'hidden_items' => [],
-                    'totals'       => [],
+                    'totals' => [],
                 ],
                 'cart_mode' => 'regular',
             ])->render();
@@ -69,11 +69,11 @@ class CartModalViewTest extends TestCase
 
         $html = view('catalog.components.cart.modal', [
             'cart_data' => [
-                'is_empty'     => true,
-                'items_count'  => 0,
-                'first_item'   => null,
+                'is_empty' => true,
+                'items_count' => 0,
+                'first_item' => null,
                 'hidden_items' => [],
-                'totals'       => [],
+                'totals' => [],
             ],
         ])->render();
 
@@ -88,67 +88,67 @@ class CartModalViewTest extends TestCase
     private function makeCartData(): array
     {
         return [
-            'is_empty'    => false,
+            'is_empty' => false,
             'items_count' => 1,
-            'items'       => [
+            'items' => [
                 [
-                    'cart_id'              => 1,
-                    'variant_id'           => 11,
-                    'product_id'           => 101,
-                    'name'                 => 'Test product',
-                    'url'                  => '#',
-                    'sku'                  => 'SKU-001',
-                    'quantity'             => 2,
-                    'minimum_quantity'     => 1,
-                    'available_quantity'   => 10,
+                    'cart_id' => 1,
+                    'variant_id' => 11,
+                    'product_id' => 101,
+                    'name' => 'Test product',
+                    'url' => '#',
+                    'sku' => 'SKU-001',
+                    'quantity' => 2,
+                    'minimum_quantity' => 1,
+                    'available_quantity' => 10,
                     'unit_price_formatted' => '15 грн',
                     'line_total_formatted' => '30 грн',
-                    'attributes'           => [],
-                    'image_data'           => [
+                    'attributes' => [],
+                    'image_data' => [
                         'urls' => [
                             'original_thumb' => '',
-                            'thumb_1x'       => '',
+                            'thumb_1x' => '',
                         ],
-                        'width'  => 220,
+                        'width' => 220,
                         'height' => 220,
                     ],
                 ],
             ],
             'first_item' => [
-                'cart_id'              => 1,
-                'variant_id'           => 11,
-                'product_id'           => 101,
-                'name'                 => 'Test product',
-                'url'                  => '#',
-                'sku'                  => 'SKU-001',
-                'quantity'             => 2,
-                'minimum_quantity'     => 1,
-                'available_quantity'   => 10,
+                'cart_id' => 1,
+                'variant_id' => 11,
+                'product_id' => 101,
+                'name' => 'Test product',
+                'url' => '#',
+                'sku' => 'SKU-001',
+                'quantity' => 2,
+                'minimum_quantity' => 1,
+                'available_quantity' => 10,
                 'unit_price_formatted' => '15 грн',
                 'line_total_formatted' => '30 грн',
-                'attributes'           => [],
-                'image_data'           => [
+                'attributes' => [],
+                'image_data' => [
                     'urls' => [
                         'original_thumb' => '',
-                        'thumb_1x'       => '',
+                        'thumb_1x' => '',
                     ],
-                    'width'  => 220,
+                    'width' => 220,
                     'height' => 220,
                 ],
             ],
             'hidden_items' => [],
-            'totals'       => [
+            'totals' => [
                 'lines' => [
                     [
-                        'code'                   => 'items_subtotal',
-                        'label'                  => 'Subtotal',
-                        'amount'                 => 30,
-                        'formatted'              => '30 грн',
-                        'is_visible'             => true,
+                        'code' => 'items_subtotal',
+                        'label' => 'Subtotal',
+                        'amount' => 30,
+                        'formatted' => '30 грн',
+                        'is_visible' => true,
                         'include_in_grand_total' => true,
                     ],
                 ],
-                'grand_total'           => 30,
+                'grand_total' => 30,
                 'grand_total_formatted' => '30 грн',
             ],
         ];

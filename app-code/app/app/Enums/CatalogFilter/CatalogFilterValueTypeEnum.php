@@ -6,9 +6,9 @@ namespace App\Enums\CatalogFilter;
 
 enum CatalogFilterValueTypeEnum: string
 {
-    case String  = 'string';
+    case String = 'string';
     case Integer = 'int';
     case Decimal = 'decimal';
     case Boolean = 'boolean';
-    case Range   = 'range';
+    case Range = 'range';
 }

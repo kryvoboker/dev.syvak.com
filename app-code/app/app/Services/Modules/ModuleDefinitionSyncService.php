@@ -15,7 +15,8 @@ class ModuleDefinitionSyncService
     public function __construct(
         private readonly ModuleDiscoveryService $module_discovery_service,
         private readonly ModuleCacheService $module_cache_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<string, int>
@@ -49,21 +50,21 @@ class ModuleDefinitionSyncService
 
                         Log::channel('daily')->info('Module definition created during sync.', [
                             'nwidart_name' => $nwidart_name,
-                            'slug'         => $module_data['slug'],
+                            'slug' => $module_data['slug'],
                         ]);
 
                         continue;
                     }
 
                     $definition->fill([
-                        'name'                     => $module_data['name'],
-                        'slug'                     => $module_data['slug'],
-                        'module_path'              => $module_data['module_path'],
-                        'description'              => $module_data['description'],
-                        'is_installed'             => true,
+                        'name' => $module_data['name'],
+                        'slug' => $module_data['slug'],
+                        'module_path' => $module_data['module_path'],
+                        'description' => $module_data['description'],
+                        'is_installed' => true,
                         'is_enabled_in_filesystem' => (bool) $module_data['is_enabled_in_filesystem'],
-                        'settings_schema'          => $this->mergeDefinitionArray($definition->settings_schema, $module_data['settings_schema']),
-                        'meta'                     => $this->mergeDefinitionArray($definition->meta, $module_data['meta']),
+                        'settings_schema' => $this->mergeDefinitionArray($definition->settings_schema, $module_data['settings_schema']),
+                        'meta' => $this->mergeDefinitionArray($definition->meta, $module_data['meta']),
                     ]);
 
                     if ($definition->isDirty()) {
@@ -72,7 +73,7 @@ class ModuleDefinitionSyncService
 
                         Log::channel('daily')->info('Module definition updated during sync.', [
                             'definition_id' => $definition->id,
-                            'nwidart_name'  => $definition->nwidart_name,
+                            'nwidart_name' => $definition->nwidart_name,
                         ]);
                     }
                 }
@@ -85,7 +86,7 @@ class ModuleDefinitionSyncService
                     }
 
                     $definition->fill([
-                        'is_installed'             => false,
+                        'is_installed' => false,
                         'is_enabled_in_filesystem' => false,
                     ]);
 
@@ -95,8 +96,8 @@ class ModuleDefinitionSyncService
 
                         Log::channel('stack')->warning('Module definition points to a missing filesystem module.', [
                             'definition_id' => $definition->id,
-                            'nwidart_name'  => $definition->nwidart_name,
-                            'slug'          => $definition->slug,
+                            'nwidart_name' => $definition->nwidart_name,
+                            'slug' => $definition->slug,
                         ]);
                     }
                 }

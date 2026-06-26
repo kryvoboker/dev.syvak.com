@@ -45,9 +45,9 @@ class ModuleInstanceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListModuleInstances::route('/'),
+            'index' => ListModuleInstances::route('/'),
             'create' => CreateModuleInstance::route('/create'),
-            'edit'   => EditModuleInstance::route('/{record}/edit'),
+            'edit' => EditModuleInstance::route('/{record}/edit'),
         ];
     }
 
@@ -145,7 +145,7 @@ class ModuleInstanceResource extends Resource
 
     private static function resolveDefinitionIdFromReferer(Request $request): int
     {
-        $referer_url   = (string) $request->headers->get('referer', '');
+        $referer_url = (string) $request->headers->get('referer', '');
         $referer_query = parse_url($referer_url, PHP_URL_QUERY);
 
         if (! is_string($referer_query) || blank($referer_query)) {

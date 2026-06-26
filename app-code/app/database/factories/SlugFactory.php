@@ -21,9 +21,9 @@ class SlugFactory extends Factory
     {
         return [
             'sluggable_type' => $this->faker->word(),
-            'sluggable_id'   => $this->faker->randomNumber(),
-            'language_id'    => $this->faker->randomNumber(),
-            'slug'           => $this->faker->slug(),
+            'sluggable_id' => $this->faker->randomNumber(),
+            'language_id' => $this->faker->randomNumber(),
+            'slug' => $this->faker->slug(),
         ];
     }
 }

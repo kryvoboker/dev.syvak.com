@@ -35,10 +35,10 @@ class LogFilamentErrors
             }
 
             Log::channel('stack')->error($message, [
-                'url'    => $request->fullUrl(),
+                'url' => $request->fullUrl(),
                 'method' => $request->method(),
                 'status' => $response->getStatusCode(),
-                'input'  => $request->except(['password', '_token']),
+                'input' => $request->except(['password', '_token']),
             ]);
         }
 

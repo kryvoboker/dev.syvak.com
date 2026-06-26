@@ -17,9 +17,9 @@ class ProductDescriptionFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id'  => null,
+            'product_id' => null,
             'language_id' => 1,
-            'name'        => $this->faker->sentence(4),
+            'name' => $this->faker->sentence(4),
             'description' => null,
         ];
     }

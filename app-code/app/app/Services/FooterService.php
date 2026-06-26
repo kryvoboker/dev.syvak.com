@@ -18,10 +18,10 @@ class FooterService
     public function __invoke(array $params = []): array
     {
         $app_settings = get_app_settings();
-        $logo_sizes   = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
-        $logo_width   = (int) ($logo_sizes['width'] ?? config('app.images.logo_width'));
-        $logo_height  = (int) ($logo_sizes['height'] ?? config('app.images.logo_height'));
-        $logo_path    = (string) data_get(
+        $logo_sizes = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
+        $logo_width = (int) ($logo_sizes['width'] ?? config('app.images.logo_width'));
+        $logo_height = (int) ($logo_sizes['height'] ?? config('app.images.logo_height'));
+        $logo_path = (string) data_get(
             $app_settings,
             'system_settings.images.path_to_logo',
             (string) config('app.images.path_to_logo', 'images/logo.png'),
@@ -41,30 +41,30 @@ class FooterService
                     $logo_height,
                     is_square: false,
                 ),
-                'width'  => $logo_width,
+                'width' => $logo_width,
                 'height' => $logo_height,
             ],
-            'subscription_data'  => $this->getSubscriptionData($social_items),
-            'contacts_data'      => $this->getContactsData(),
-            'menu_items'         => $this->getMenuItems($categories),
-            'information_data'   => $this->getInformationData(),
-            'social_items'       => $social_items,
-            'brand_large_text'   => 'SYVAK',
+            'subscription_data' => $this->getSubscriptionData($social_items),
+            'contacts_data' => $this->getContactsData(),
+            'menu_items' => $this->getMenuItems($categories),
+            'information_data' => $this->getInformationData(),
+            'social_items' => $social_items,
+            'brand_large_text' => 'SYVAK',
             'brand_compact_text' => 'SYVAK',
         ];
     }
 
     private function getSubscriptionData(array $social_items): array
     {
-        $locale       = app()->getLocale();
+        $locale = app()->getLocale();
         $telegram_row = collect($social_items)
             ->first(fn (mixed $social_item): bool => (string) data_get($social_item, 'social_type') === 'telegram');
         $telegram_url = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
         return [
-            'title'        => __('catalog/footer.texts.subscribe'),
-            'text'         => __('catalog/footer.buttons.telegram'),
-            'url'          => filled($telegram_url) ? $telegram_url : '#',
+            'title' => __('catalog/footer.texts.subscribe'),
+            'text' => __('catalog/footer.buttons.telegram'),
+            'url' => filled($telegram_url) ? $telegram_url : '#',
             'support_text' => __('catalog/footer.texts.support'),
         ];
     }
@@ -74,11 +74,11 @@ class FooterService
         $locale = app()->getLocale();
 
         return [
-            'title'  => '/ КОНТАКТИ /',
+            'title' => '/ КОНТАКТИ /',
             'phones' => $this->parsePhones(
                 (string) data_get(get_app_settings(), "contact_phones.$locale"),
             ),
-            'find_us_label'  => 'ДЕ НАС ЗНАЙТИ',
+            'find_us_label' => 'ДЕ НАС ЗНАЙТИ',
             'contacts_label' => 'КОНТАКТИ',
         ];
     }
@@ -100,7 +100,7 @@ class FooterService
 
                 return [
                     'label' => Str::upper($label),
-                    'url'   => localized_route('localized.catalog.category.show', [
+                    'url' => localized_route('localized.catalog.category.show', [
                         'slug' => $slug,
                     ]),
                 ];
@@ -131,14 +131,14 @@ class FooterService
         $social_items = collect(data_get(get_app_settings(), "socials.$locale", []))
             ->map(function (mixed $item) use ($locale): array {
                 $social_type = (string) data_get($item, 'social_type');
-                $label       = Str::title($social_type);
-                $social_url  = $this->normalizeSocialUrl(data_get($item, 'url'), $locale);
+                $label = Str::title($social_type);
+                $social_url = $this->normalizeSocialUrl(data_get($item, 'url'), $locale);
 
                 return [
                     'social_type' => $social_type,
-                    'url'         => filled($social_url) ? $social_url : '#',
-                    'svg_icon'    => escape_special_html((string) data_get($item, 'svg_icon')),
-                    'label'       => filled($label) ? $label : 'Link',
+                    'url' => filled($social_url) ? $social_url : '#',
+                    'svg_icon' => escape_special_html((string) data_get($item, 'svg_icon')),
+                    'label' => filled($label) ? $label : 'Link',
                 ];
             })
             ->filter(fn (array $item) => filled($item['url']))
@@ -153,21 +153,21 @@ class FooterService
         return [
             [
                 'social_type' => 'facebook',
-                'url'         => '#',
-                'svg_icon'    => '<span class="icon-[mdi--facebook] text-4xl"></span>',
-                'label'       => 'Facebook',
+                'url' => '#',
+                'svg_icon' => '<span class="icon-[mdi--facebook] text-4xl"></span>',
+                'label' => 'Facebook',
             ],
             [
                 'social_type' => 'instagram',
-                'url'         => '#',
-                'svg_icon'    => '<span class="icon-[mdi--instagram] text-4xl"></span>',
-                'label'       => 'Instagram',
+                'url' => '#',
+                'svg_icon' => '<span class="icon-[mdi--instagram] text-4xl"></span>',
+                'label' => 'Instagram',
             ],
             [
                 'social_type' => 'tiktok',
-                'url'         => '#',
-                'svg_icon'    => '<span class="icon-[ic--baseline-tiktok] text-4xl"></span>',
-                'label'       => 'TikTok',
+                'url' => '#',
+                'svg_icon' => '<span class="icon-[ic--baseline-tiktok] text-4xl"></span>',
+                'label' => 'TikTok',
             ],
         ];
     }

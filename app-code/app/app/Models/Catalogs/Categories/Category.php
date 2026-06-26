@@ -29,9 +29,9 @@ class Category extends Model
     protected function casts(): array
     {
         return [
-            'parent_id'  => 'integer',
+            'parent_id' => 'integer',
             'sort_order' => 'integer',
-            'is_active'  => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -144,8 +144,8 @@ class Category extends Model
         // Добавляем путь к самому себе
         CategoryPath::create([
             'category_id' => $this->id,
-            'path_id'     => $this->id,
-            'level'       => 0,
+            'path_id' => $this->id,
+            'level' => 0,
         ]);
 
         // If there is a parent, copy its paths
@@ -155,8 +155,8 @@ class Category extends Model
             foreach ($parent_paths as $path) {
                 CategoryPath::create([
                     'category_id' => $this->id,
-                    'path_id'     => $path->path_id,
-                    'level'       => $path->level + 1,
+                    'path_id' => $path->path_id,
+                    'level' => $path->level + 1,
                 ]);
             }
         }

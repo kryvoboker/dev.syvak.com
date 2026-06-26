@@ -7,5 +7,5 @@ namespace App\Enums\CatalogFilter;
 enum CatalogFilterDiscountOnlyPolicyEnum: string
 {
     case ExcludeWithoutDiscount = 'exclude_without_discount';
-    case FallbackToBase         = 'fallback_to_base';
+    case FallbackToBase = 'fallback_to_base';
 }

@@ -16,12 +16,12 @@ class ProductCategoriesMutationStateTest extends TestCase
         $page = new TestableCreateProductPage();
 
         $mutated_data = $page->callMutateFormDataBeforeCreate([
-            'categories'   => [10, '2', 10, 0, -1, 1],
+            'categories' => [10, '2', 10, 0, -1, 1],
             'descriptions' => [],
-            'images'       => [],
-            'discounts'    => [],
-            'attributes'   => [],
-            'slugs'        => [],
+            'images' => [],
+            'discounts' => [],
+            'attributes' => [],
+            'slugs' => [],
         ]);
 
         $this->assertArrayNotHasKey('categories', $mutated_data);
@@ -33,12 +33,12 @@ class ProductCategoriesMutationStateTest extends TestCase
         $page = new TestableEditProductPage();
 
         $mutated_data = $page->callMutateFormDataBeforeSave([
-            'categories'   => [5, '7', 5, 0, -3, 1],
+            'categories' => [5, '7', 5, 0, -3, 1],
             'descriptions' => [],
-            'images'       => [],
-            'discounts'    => [],
-            'attributes'   => [],
-            'slugs'        => [],
+            'images' => [],
+            'discounts' => [],
+            'attributes' => [],
+            'slugs' => [],
         ]);
 
         $this->assertArrayNotHasKey('categories', $mutated_data);
@@ -52,13 +52,13 @@ class ProductCategoriesMutationStateTest extends TestCase
         $page->callValidateAttributeLanguagePairs([
             [
                 'attribute_id' => 10,
-                'language_id'  => 1,
-                'text'         => 'Foo',
+                'language_id' => 1,
+                'text' => 'Foo',
             ],
             [
                 'attribute_id' => 10,
-                'language_id'  => 2,
-                'text'         => 'Bar',
+                'language_id' => 2,
+                'text' => 'Bar',
             ],
         ]);
 
@@ -74,13 +74,13 @@ class ProductCategoriesMutationStateTest extends TestCase
         $page->callValidateAttributeLanguagePairs([
             [
                 'attribute_id' => 10,
-                'language_id'  => 1,
-                'text'         => 'Foo',
+                'language_id' => 1,
+                'text' => 'Foo',
             ],
             [
                 'attribute_id' => 10,
-                'language_id'  => 1,
-                'text'         => 'Bar',
+                'language_id' => 1,
+                'text' => 'Bar',
             ],
         ]);
     }
@@ -116,8 +116,8 @@ class TestableCreateProductPage extends CreateProduct
 
         foreach ($attributes as $attribute) {
             $attribute_id = (int) ($attribute['attribute_id'] ?? 0);
-            $language_id  = (int) ($attribute['language_id'] ?? 0);
-            $pair_key     = $attribute_id . ':' . $language_id;
+            $language_id = (int) ($attribute['language_id'] ?? 0);
+            $pair_key = $attribute_id . ':' . $language_id;
 
             if (array_key_exists($pair_key, $seen_pairs)) {
                 throw new Halt();

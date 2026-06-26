@@ -23,7 +23,8 @@ abstract class AiDbCachedTranslatorAbstract
 
     public function __construct(
         protected OpenAiTranslatorService $ai,
-    ) {}
+    ) {
+    }
 
     /**
      * @throws Throwable
@@ -31,7 +32,7 @@ abstract class AiDbCachedTranslatorAbstract
     public function translate(string $prompt): string
     {
         $normalized = AiPromptHasherService::normalize($prompt);
-        $hash       = AiPromptHasherService::hash($normalized);
+        $hash = AiPromptHasherService::hash($normalized);
 
         $cached = $this->findCached($hash);
 

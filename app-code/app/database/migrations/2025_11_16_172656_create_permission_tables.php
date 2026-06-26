@@ -6,17 +6,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        $teams            = config('permission.teams');
-        $table_names      = config('permission.table_names');
-        $column_names     = config('permission.column_names');
-        $pivot_role       = $column_names['role_pivot_key'] ?? 'role_id';
+        $teams = config('permission.teams');
+        $table_names = config('permission.table_names');
+        $column_names = config('permission.column_names');
+        $pivot_role = $column_names['role_pivot_key'] ?? 'role_id';
         $pivot_permission = $column_names['permission_pivot_key'] ?? 'permission_id';
 
         throw_if(empty($table_names), Exception::class, 'Error: config/permission.php not loaded. Run [php artisan config:clear] and try again.');

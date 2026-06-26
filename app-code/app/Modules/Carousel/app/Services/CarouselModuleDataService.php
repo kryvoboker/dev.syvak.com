@@ -55,8 +55,8 @@ class CarouselModuleDataService
             ->filter(fn (ModuleInstance $instance): bool => $this->matchesPageType($instance, $page_type))
             ->map(function (ModuleInstance $instance): array {
                 $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-                $shared_settings   = Arr::get($instance_settings, 'shared', []);
-                $page_types        = collect(Arr::get($shared_settings, 'page_types', []))
+                $shared_settings = Arr::get($instance_settings, 'shared', []);
+                $page_types = collect(Arr::get($shared_settings, 'page_types', []))
                     ->filter(fn (mixed $item): bool => is_string($item) && filled($item))
                     ->values()
                     ->all();
@@ -70,16 +70,16 @@ class CarouselModuleDataService
                     ->all();
 
                 return [
-                    'instance_id'           => $instance->id,
-                    'name'                  => $instance->name,
-                    'placement'             => $instance->placement,
-                    'page_types'            => $page_types,
+                    'instance_id' => $instance->id,
+                    'name' => $instance->name,
+                    'placement' => $instance->placement,
+                    'page_types' => $page_types,
                     'open_links_in_new_tab' => (bool) Arr::get($shared_settings, 'open_links_in_new_tab', true),
-                    'slides'                => $slides,
-                    'desctop_max_width'     => (int) $shared_settings['desktop_image']['max_width'],
-                    'desctop_max_height'    => (int) $shared_settings['desktop_image']['max_height'],
-                    'mobile_max_width'      => (int) $shared_settings['mobile_image']['max_width'],
-                    'mobile_max_height'     => (int) $shared_settings['mobile_image']['max_height'],
+                    'slides' => $slides,
+                    'desctop_max_width' => (int) $shared_settings['desktop_image']['max_width'],
+                    'desctop_max_height' => (int) $shared_settings['desktop_image']['max_height'],
+                    'mobile_max_width' => (int) $shared_settings['mobile_image']['max_width'],
+                    'mobile_max_height' => (int) $shared_settings['mobile_image']['max_height'],
                 ];
             })
             ->filter(fn (array $module_data): bool => $module_data['slides'] !== [])
@@ -94,10 +94,10 @@ class CarouselModuleDataService
      */
     private function mapSlide(array $slide, array $shared_settings): array
     {
-        $translations                = Arr::get($slide, 'translations', []);
-        $current_locale              = app()->getLocale();
+        $translations = Arr::get($slide, 'translations', []);
+        $current_locale = app()->getLocale();
         $primary_translation_payload = $this->resolvePrimaryTranslation($translations, $current_locale);
-        $translation                 = $primary_translation_payload['translation'];
+        $translation = $primary_translation_payload['translation'];
 
         if (! is_array($translation)) {
             Log::channel('stack')->warning('Carousel slide skipped because translation payload is invalid.', [
@@ -108,26 +108,26 @@ class CarouselModuleDataService
         }
 
         $desktop_image_settings = $this->normalizeImageSizeSettings(Arr::get($shared_settings, 'desktop_image', []));
-        $mobile_image_settings  = $this->normalizeImageSizeSettings(Arr::get($shared_settings, 'mobile_image', []));
+        $mobile_image_settings = $this->normalizeImageSizeSettings(Arr::get($shared_settings, 'mobile_image', []));
 
-        $desktop_width              = $desktop_image_settings['width'];
-        $desktop_height             = $desktop_image_settings['height'];
-        $mobile_width               = $mobile_image_settings['width'];
-        $mobile_height              = $mobile_image_settings['height'];
-        $price                      = $this->normalizePrice(Arr::get($translation, 'price'));
+        $desktop_width = $desktop_image_settings['width'];
+        $desktop_height = $desktop_image_settings['height'];
+        $mobile_width = $mobile_image_settings['width'];
+        $mobile_height = $mobile_image_settings['height'];
+        $price = $this->normalizePrice(Arr::get($translation, 'price'));
         $desktop_image_path_payload = $this->resolveTranslationImagePath($translations, 'desktop_image', $current_locale);
-        $mobile_image_path_payload  = $this->resolveTranslationImagePath($translations, 'mobile_image', $current_locale);
+        $mobile_image_path_payload = $this->resolveTranslationImagePath($translations, 'mobile_image', $current_locale);
 
         return [
-            'title'           => (string) Arr::get($translation, 'title', ''),
-            'description'     => (string) Arr::get($translation, 'description', ''),
-            'button_text'     => (string) Arr::get($translation, 'button_text', ''),
-            'button_url'      => (string) Arr::get($translation, 'button_url', ''),
-            'image_url'       => (string) Arr::get($translation, 'image_url', ''),
-            'price'           => $price,
+            'title' => (string) Arr::get($translation, 'title', ''),
+            'description' => (string) Arr::get($translation, 'description', ''),
+            'button_text' => (string) Arr::get($translation, 'button_text', ''),
+            'button_url' => (string) Arr::get($translation, 'button_url', ''),
+            'image_url' => (string) Arr::get($translation, 'image_url', ''),
+            'price' => $price,
             'formatted_price' => $price !== null ? format_price($price) : null,
-            'sort_order'      => (int) Arr::get($slide, 'sort_order', 0),
-            'desktop_image'   => $this->buildImagePayload(
+            'sort_order' => (int) Arr::get($slide, 'sort_order', 0),
+            'desktop_image' => $this->buildImagePayload(
                 $desktop_image_path_payload['path'],
                 $desktop_width,
                 $desktop_height,
@@ -148,7 +148,7 @@ class CarouselModuleDataService
         if (! is_array($translations)) {
             return [
                 config('localization.locale_parameter') => null,
-                'translation'                           => null,
+                'translation' => null,
             ];
         }
 
@@ -157,7 +157,7 @@ class CarouselModuleDataService
         if (is_array($current_translation)) {
             return [
                 config('localization.locale_parameter') => $current_locale,
-                'translation'                           => $current_translation,
+                'translation' => $current_translation,
             ];
         }
 
@@ -166,14 +166,14 @@ class CarouselModuleDataService
         foreach ($translations as $locale => $translation) {
             if (is_array($translation)) {
                 return [
-                    $locale_key   => is_string($locale) ? $locale : null,
+                    $locale_key => is_string($locale) ? $locale : null,
                     'translation' => $translation,
                 ];
             }
         }
 
         return [
-            $locale_key   => null,
+            $locale_key => null,
             'translation' => null,
         ];
     }
@@ -187,19 +187,19 @@ class CarouselModuleDataService
 
         if (! is_array($translations)) {
             return [
-                'path'      => null,
+                'path' => null,
                 $locale_key => null,
             ];
         }
 
         $current_translation = Arr::get($translations, $current_locale, []);
-        $current_path        = is_array($current_translation)
+        $current_path = is_array($current_translation)
             ? Str::trim((string) Arr::get($current_translation, $image_field, ''))
             : '';
 
         if (filled($current_path)) {
             return [
-                'path'      => $current_path,
+                'path' => $current_path,
                 $locale_key => $current_locale,
             ];
         }
@@ -213,14 +213,14 @@ class CarouselModuleDataService
 
             if (filled($candidate_path)) {
                 return [
-                    'path'      => $candidate_path,
+                    'path' => $candidate_path,
                     $locale_key => is_string($locale) ? $locale : null,
                 ];
             }
         }
 
         return [
-            'path'      => null,
+            'path' => null,
             $locale_key => null,
         ];
     }
@@ -232,8 +232,8 @@ class CarouselModuleDataService
     {
         if (blank($image_path)) {
             return [
-                'urls'   => [],
-                'width'  => $width,
+                'urls' => [],
+                'width' => $width,
                 'height' => $height,
             ];
         }
@@ -245,7 +245,7 @@ class CarouselModuleDataService
                 $height,
                 is_square: false,
             ),
-            'width'  => $width,
+            'width' => $width,
             'height' => $height,
         ];
     }
@@ -257,7 +257,7 @@ class CarouselModuleDataService
         }
 
         $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-        $page_types        = collect(Arr::get($instance_settings, 'shared.page_types', []));
+        $page_types = collect(Arr::get($instance_settings, 'shared.page_types', []));
 
         if ($page_types->isEmpty()) {
             return true;
@@ -298,9 +298,9 @@ class CarouselModuleDataService
     private function normalizeImageSizeSettings(array $settings): array
     {
         return [
-            'width'      => max((int) Arr::get($settings, 'width', 1), 1),
-            'height'     => max((int) Arr::get($settings, 'height', 1), 1),
-            'max_width'  => max((int) Arr::get($settings, 'max_width', 1), 1),
+            'width' => max((int) Arr::get($settings, 'width', 1), 1),
+            'height' => max((int) Arr::get($settings, 'height', 1), 1),
+            'max_width' => max((int) Arr::get($settings, 'max_width', 1), 1),
             'max_height' => max((int) Arr::get($settings, 'max_height', 1), 1),
         ];
     }

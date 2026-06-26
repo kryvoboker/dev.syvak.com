@@ -43,7 +43,7 @@ class EditSearchPageSettings extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         /** @var PageSetting $record */
-        $record   = $this->getRecord();
+        $record = $this->getRecord();
         $settings = is_array($record->settings) ? $record->settings : [];
 
         $data['products_per_page_limit'] = max(
@@ -85,18 +85,18 @@ class EditSearchPageSettings extends EditRecord
 
         $settings = array_replace_recursive(
             [
-                'meta'       => ['contract_version' => 2],
+                'meta' => ['contract_version' => 2],
                 'pagination' => [
                     'products_per_page_limit' => (int) config('app.page_settings.search.products_per_page_limit', 15),
                 ],
                 'images' => [
                     'search_product' => [
-                        'width'  => (int) config('app.page_settings.search.images.search_product.width', 219),
+                        'width' => (int) config('app.page_settings.search.images.search_product.width', 219),
                         'height' => (int) config('app.page_settings.search.images.search_product.height', 219),
                     ],
                     'search_not_found' => [
-                        'path'   => (string) Arr::get(config('app.page_settings.search', []), 'images.search_not_found.path', 'images/search/not-found.jpg'),
-                        'width'  => (int) config('app.page_settings.search.images.search_not_found.width', 600),
+                        'path' => (string) Arr::get(config('app.page_settings.search', []), 'images.search_not_found.path', 'images/search/not-found.jpg'),
+                        'width' => (int) config('app.page_settings.search.images.search_not_found.width', 600),
                         'height' => (int) config('app.page_settings.search.images.search_not_found.height', 600),
                     ],
                 ],

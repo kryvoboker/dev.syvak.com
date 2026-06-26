@@ -6,6 +6,6 @@ namespace App\Enums\CatalogFilter;
 
 enum CatalogFilterFacetStrategyEnum: string
 {
-    case AllResults    = 'all_results';
+    case AllResults = 'all_results';
     case SelfExcluding = 'self_excluding';
 }

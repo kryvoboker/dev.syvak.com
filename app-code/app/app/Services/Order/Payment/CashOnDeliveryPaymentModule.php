@@ -14,10 +14,10 @@ class CashOnDeliveryPaymentModule
     public function process(array $order_payload): array
     {
         return [
-            'is_success'    => true,
-            'status'        => 'pending',
+            'is_success' => true,
+            'status' => 'pending',
             'provider_code' => 'cod_not_implemented',
-            'payload'       => $order_payload,
+            'payload' => $order_payload,
         ];
     }
 }

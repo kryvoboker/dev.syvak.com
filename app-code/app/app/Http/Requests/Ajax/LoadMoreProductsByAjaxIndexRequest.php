@@ -21,7 +21,7 @@ class LoadMoreProductsByAjaxIndexRequest extends CatalogFilterAjaxIndexRequest
         ]);
 
         return array_merge(parent::rules(), [
-            'per_page'  => ['sometimes', 'integer', 'min:1', 'max:200'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:200'],
             'page_type' => ['required', 'string', 'in:' . $page_types],
         ]);
     }
@@ -31,7 +31,7 @@ class LoadMoreProductsByAjaxIndexRequest extends CatalogFilterAjaxIndexRequest
         parent::prepareForValidation();
 
         $normalized_data = $this->all();
-        $per_page        = $this->query('per_page');
+        $per_page = $this->query('per_page');
 
         if ($per_page !== null && $per_page !== '') {
             Arr::set($normalized_data, 'per_page', $per_page);

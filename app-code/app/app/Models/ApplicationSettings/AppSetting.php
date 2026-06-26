@@ -34,19 +34,19 @@ class AppSetting extends Model
     protected function casts(): array
     {
         return [
-            'titles'            => 'array',
-            'meta_titles'       => 'array',
+            'titles' => 'array',
+            'meta_titles' => 'array',
             'meta_descriptions' => 'array',
-            'meta_keywords'     => 'array',
-            'contact_emails'    => 'array',
-            'contact_phones'    => 'array',
-            'socials'           => 'array',
-            'work_time'         => 'array',
+            'meta_keywords' => 'array',
+            'contact_emails' => 'array',
+            'contact_phones' => 'array',
+            'socials' => 'array',
+            'work_time' => 'array',
             'contact_addresses' => 'array',
-            'image_sizes'       => 'array',
-            'system_settings'   => 'array',
-            'user_settings'     => 'array',
-            'ai_settings'       => 'array',
+            'image_sizes' => 'array',
+            'system_settings' => 'array',
+            'user_settings' => 'array',
+            'ai_settings' => 'array',
         ];
     }
 

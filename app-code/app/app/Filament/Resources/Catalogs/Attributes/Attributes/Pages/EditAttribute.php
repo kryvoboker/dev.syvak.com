@@ -40,7 +40,7 @@ class EditAttribute extends EditRecord
             ->keyBy('language_id')
             ->map(fn (AttributeDescription $desc) => [
                 'language_id' => $desc->language_id,
-                'name'        => $desc->name,
+                'name' => $desc->name,
             ])
             ->toArray();
 

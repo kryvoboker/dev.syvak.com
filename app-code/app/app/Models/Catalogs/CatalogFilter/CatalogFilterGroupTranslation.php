@@ -24,7 +24,7 @@ class CatalogFilterGroupTranslation extends Model
     {
         return [
             'catalog_filter_group_id' => 'integer',
-            'language_id'             => 'integer',
+            'language_id' => 'integer',
         ];
     }
 

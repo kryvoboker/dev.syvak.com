@@ -25,13 +25,13 @@ class ProductDiscount extends Model
     protected function casts(): array
     {
         return [
-            'product_id'    => 'integer',
+            'product_id' => 'integer',
             'user_group_id' => 'integer',
-            'quantity'      => 'integer',
-            'priority'      => 'integer',
-            'price'         => 'float',
-            'date_start'    => 'datetime',
-            'date_end'      => 'datetime',
+            'quantity' => 'integer',
+            'priority' => 'integer',
+            'price' => 'float',
+            'date_start' => 'datetime',
+            'date_end' => 'datetime',
         ];
     }
 

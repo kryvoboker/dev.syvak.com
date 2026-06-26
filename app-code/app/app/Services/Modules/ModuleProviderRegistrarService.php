@@ -29,7 +29,7 @@ class ModuleProviderRegistrarService
             } catch (Throwable $throwable) {
                 Log::channel('stack')->error('Failed to register module provider.', [
                     'provider_class' => $provider_class,
-                    'message'        => $throwable->getMessage(),
+                    'message' => $throwable->getMessage(),
                 ]);
 
                 throw $throwable;

@@ -15,7 +15,7 @@ class HomeController extends Controller
     public function index(): View|Factory
     {
         $header_data = app(HeaderService::class)();
-        $page_type   = try_detect_page_type();
+        $page_type = try_detect_page_type();
 
         $data = [
             'header_data' => $header_data,

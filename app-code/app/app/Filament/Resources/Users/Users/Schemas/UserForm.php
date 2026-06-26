@@ -21,12 +21,12 @@ class UserForm
     {
         $user_group = new UserGroup();
         /** @var User|null $record */
-        $record                   = $schema->getRecord();
-        $user_image_settings      = self::resolveUserImageSettings();
-        $user_upload_max_size_kb  = max(1, (int) data_get($user_image_settings, 'upload.max_size_kb', (int) config('app.images.user.upload.max_size_kb')));
-        $user_upload_max_size_mb  = self::resolveMegabytesFromKilobytes($user_upload_max_size_kb);
-        $user_image_path          = resolve_upload_path_placeholders((string) data_get($user_image_settings, 'image_path', (string) config('app.images.user.image_path', 'images/avatars/' . date('Y/m'))));
-        $user_preview_page_width  = max(1, (int) data_get($user_image_settings, 'preview_in_page_in_admin.width', (int) config('app.images.user.preview_in_page_in_admin.width')));
+        $record = $schema->getRecord();
+        $user_image_settings = self::resolveUserImageSettings();
+        $user_upload_max_size_kb = max(1, (int) data_get($user_image_settings, 'upload.max_size_kb', (int) config('app.images.user.upload.max_size_kb')));
+        $user_upload_max_size_mb = self::resolveMegabytesFromKilobytes($user_upload_max_size_kb);
+        $user_image_path = resolve_upload_path_placeholders((string) data_get($user_image_settings, 'image_path', (string) config('app.images.user.image_path', 'images/avatars/' . date('Y/m'))));
+        $user_preview_page_width = max(1, (int) data_get($user_image_settings, 'preview_in_page_in_admin.width', (int) config('app.images.user.preview_in_page_in_admin.width')));
         $user_preview_page_height = max(1, (int) data_get($user_image_settings, 'preview_in_page_in_admin.height', (int) config('app.images.user.preview_in_page_in_admin.height')));
 
         return $schema
@@ -72,9 +72,9 @@ class UserForm
                     ->imagePreviewHeight('250')
                     ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png'])
                     ->mimeTypeMap([
-                        'jpg'  => 'image/jpeg',
+                        'jpg' => 'image/jpeg',
                         'jpeg' => 'image/jpeg',
-                        'png'  => 'image/png',
+                        'png' => 'image/png',
                     ])
                     ->rules([
                         'nullable',
@@ -85,8 +85,8 @@ class UserForm
                     ->imageEditorViewportWidth($user_preview_page_width)
                     ->imageEditorViewportHeight($user_preview_page_height)
                     ->imageEditorAspectRatioOptions([
-                        '1:1'  => '1:1',
-                        '4:3'  => '4:3',
+                        '1:1' => '1:1',
+                        '4:3' => '4:3',
                         '16:9' => '16:9',
                     ])
                     ->nullable(),
@@ -135,7 +135,7 @@ class UserForm
     private static function resolveUserImageSettings(): array
     {
         $app_settings = get_app_settings();
-        $settings     = data_get($app_settings, 'user_settings');
+        $settings = data_get($app_settings, 'user_settings');
 
         if ($settings instanceof Collection) {
             return $settings->toArray();

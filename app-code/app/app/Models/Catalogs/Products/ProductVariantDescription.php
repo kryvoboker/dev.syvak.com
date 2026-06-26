@@ -27,7 +27,7 @@ class ProductVariantDescription extends Model
     {
         return [
             'product_variant_id' => 'integer',
-            'language_id'        => 'integer',
+            'language_id' => 'integer',
         ];
     }
 

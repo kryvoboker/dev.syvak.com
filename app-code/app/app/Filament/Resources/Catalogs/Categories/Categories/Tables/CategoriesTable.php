@@ -27,14 +27,14 @@ class CategoriesTable
 
     public static function configure(Table $table): Table
     {
-        $current_language_id  = self::getCurrentLanguageId();
+        $current_language_id = self::getCurrentLanguageId();
         $admin_image_settings = [
             'images' => [
                 'no_image' => [
                     'path' => (string) config('app.images.category.no_image', 'images/no-image.png'),
                 ],
                 'preview_in_list' => [
-                    'width'  => (int) config('app.images.category.preview_in_list_in_admin.width', 100),
+                    'width' => (int) config('app.images.category.preview_in_list_in_admin.width', 100),
                     'height' => (int) config('app.images.category.preview_in_list_in_admin.height', 100),
                 ],
             ],
@@ -50,7 +50,7 @@ class CategoriesTable
         }
 
         $preview_list_width = max(1, (int) data_get($admin_image_settings, 'images.preview_in_list.width', 100));
-        $no_image_path      = (string) data_get($admin_image_settings, 'images.no_image.path', 'images/no-image.png');
+        $no_image_path = (string) data_get($admin_image_settings, 'images.no_image.path', 'images/no-image.png');
 
         return $table
             ->modifyQueryUsing(function (Builder $query) {
@@ -91,8 +91,8 @@ class CategoriesTable
                     ->defaultImageUrl(Storage::url($no_image_path))
                     ->extraImgAttributes([
                         'decoding' => 'async',
-                        'loading'  => 'lazy',
-                        'style'    => 'object-fit: contain; background-color: #f9f9f9;',
+                        'loading' => 'lazy',
+                        'style' => 'object-fit: contain; background-color: #f9f9f9;',
                     ])
                     ->getStateUsing(function (Category $category): ?string {
                         $category_image = $category->categoryImage()->first();

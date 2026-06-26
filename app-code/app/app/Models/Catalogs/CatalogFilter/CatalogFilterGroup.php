@@ -29,11 +29,11 @@ class CatalogFilterGroup extends Model
     {
         return [
             'catalog_filter_set_id' => 'integer',
-            'source_type'           => CatalogFilterGroupSourceTypeEnum::class,
-            'source_id'             => 'integer',
-            'is_enabled'            => 'boolean',
-            'sort_order'            => 'integer',
-            'config'                => 'array',
+            'source_type' => CatalogFilterGroupSourceTypeEnum::class,
+            'source_id' => 'integer',
+            'is_enabled' => 'boolean',
+            'sort_order' => 'integer',
+            'config' => 'array',
         ];
     }
 

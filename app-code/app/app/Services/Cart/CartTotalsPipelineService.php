@@ -22,16 +22,16 @@ class CartTotalsPipelineService
 
         $totals_data = [
             'lines' => [[
-                'code'                   => 'items_subtotal',
-                'label'                  => __('catalog/default.cart.totals.items_subtotal'),
-                'amount'                 => $subtotal,
-                'is_visible'             => true,
+                'code' => 'items_subtotal',
+                'label' => __('catalog/default.cart.totals.items_subtotal'),
+                'amount' => $subtotal,
+                'is_visible' => true,
                 'include_in_grand_total' => true,
             ]],
             'items_subtotal' => $subtotal,
-            'grand_total'    => $subtotal,
-            'currency_code'  => (string) config('app.currency.current_currency_code'),
-            'exchange_rate'  => (float) config('app.currency.current_exchange_rate'),
+            'grand_total' => $subtotal,
+            'currency_code' => (string) config('app.currency.current_currency_code'),
+            'exchange_rate' => (float) config('app.currency.current_exchange_rate'),
         ];
 
         foreach ($callbacks as $callback) {
@@ -58,10 +58,10 @@ class CartTotalsPipelineService
                 $line_data = is_array($line_data) ? $line_data : [];
 
                 return [
-                    'code'                   => (string) Arr::get($line_data, 'code', ''),
-                    'label'                  => (string) Arr::get($line_data, 'label', ''),
-                    'amount'                 => (float) Arr::get($line_data, 'amount', 0),
-                    'is_visible'             => (bool) Arr::get($line_data, 'is_visible', true),
+                    'code' => (string) Arr::get($line_data, 'code', ''),
+                    'label' => (string) Arr::get($line_data, 'label', ''),
+                    'amount' => (float) Arr::get($line_data, 'amount', 0),
+                    'is_visible' => (bool) Arr::get($line_data, 'is_visible', true),
                     'include_in_grand_total' => (bool) Arr::get($line_data, 'include_in_grand_total', true),
                 ];
             })
@@ -88,12 +88,12 @@ class CartTotalsPipelineService
             ->all();
 
         return [
-            'lines'                 => $normalized_lines,
-            'items_subtotal'        => (float) Arr::get($totals_data, 'items_subtotal', 0),
-            'grand_total'           => $grand_total,
+            'lines' => $normalized_lines,
+            'items_subtotal' => (float) Arr::get($totals_data, 'items_subtotal', 0),
+            'grand_total' => $grand_total,
             'grand_total_formatted' => $this->formatMoney($grand_total, $currency_code, $exchange_rate),
-            'currency_code'         => $currency_code,
-            'exchange_rate'         => $exchange_rate,
+            'currency_code' => $currency_code,
+            'exchange_rate' => $exchange_rate,
         ];
     }
 

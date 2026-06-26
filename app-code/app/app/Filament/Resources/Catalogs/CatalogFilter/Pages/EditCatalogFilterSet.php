@@ -56,7 +56,7 @@ class EditCatalogFilterSet extends EditRecord
                 ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.refresh_index_status'))
                 ->action(function (): void {
                     /** @var CatalogFilterSet $record */
-                    $record  = $this->getRecord();
+                    $record = $this->getRecord();
                     $summary = app(CatalogFilterIndexRebuildService::class)->rebuild($record);
 
                     $this->refreshRecord();
@@ -65,9 +65,9 @@ class EditCatalogFilterSet extends EditRecord
                         ->title(__('admin/default.success.title'))
                         ->body(
                             __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_status_refreshed', [
-                                'rows_total'    => (int) ($summary['rows_total'] ?? 0),
+                                'rows_total' => (int) ($summary['rows_total'] ?? 0),
                                 'index_version' => (int) ($summary['index_version'] ?? 0),
-                                'status'        => (string) ($summary['status'] ?? 'ok'),
+                                'status' => (string) ($summary['status'] ?? 'ok'),
                             ]),
                         )
                         ->success()
@@ -78,7 +78,7 @@ class EditCatalogFilterSet extends EditRecord
                 ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.sync_groups'))
                 ->action(function (): void {
                     /** @var CatalogFilterSet $record */
-                    $record  = $this->getRecord();
+                    $record = $this->getRecord();
                     $summary = app(FilterGroupGeneratorService::class)->sync($record);
 
                     Notification::make()
@@ -87,7 +87,7 @@ class EditCatalogFilterSet extends EditRecord
                             __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.groups_synced', [
                                 'created' => (int) $summary['created_count'],
                                 'updated' => (int) $summary['updated_count'],
-                                'total'   => (int) $summary['total_groups'],
+                                'total' => (int) $summary['total_groups'],
                             ]),
                         )
                         ->success()
@@ -100,7 +100,7 @@ class EditCatalogFilterSet extends EditRecord
                 ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.sync_values'))
                 ->action(function (): void {
                     /** @var CatalogFilterSet $record */
-                    $record  = $this->getRecord();
+                    $record = $this->getRecord();
                     $summary = app(FilterValueGeneratorService::class)->sync($record);
 
                     Notification::make()
@@ -110,7 +110,7 @@ class EditCatalogFilterSet extends EditRecord
                                 'created' => (int) $summary['created_count'],
                                 'updated' => (int) $summary['updated_count'],
                                 'removed' => (int) $summary['removed_count'],
-                                'total'   => (int) $summary['total_values'],
+                                'total' => (int) $summary['total_values'],
                             ]),
                         )
                         ->success()
@@ -136,9 +136,9 @@ class EditCatalogFilterSet extends EditRecord
                                 'groups_total' => (int) $group_summary['total_groups'],
                                 'values_total' => (int) $value_summary['total_values'],
                             ]) . ' ' . __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_status_refreshed', [
-                                'rows_total'    => (int) ($index_summary['rows_total'] ?? 0),
+                                'rows_total' => (int) ($index_summary['rows_total'] ?? 0),
                                 'index_version' => (int) ($index_summary['index_version'] ?? 0),
-                                'status'        => (string) ($index_summary['status'] ?? 'ok'),
+                                'status' => (string) ($index_summary['status'] ?? 'ok'),
                             ]),
                         )
                         ->success()
@@ -185,7 +185,7 @@ class EditCatalogFilterSet extends EditRecord
             ->reject(fn (CatalogFilterGroup $group): bool => (string) $group->code === 'stock')
             ->map(function (CatalogFilterGroup $group): array {
                 $config_data = (array) ($group->config ?? []);
-                $get_data    = (array) ($config_data['get'] ?? []);
+                $get_data = (array) ($config_data['get'] ?? []);
 
                 $labels = $group->translations
                     ->mapWithKeys(function (CatalogFilterGroupTranslation $translation): array {
@@ -202,22 +202,22 @@ class EditCatalogFilterSet extends EditRecord
                     ->all();
 
                 return [
-                    'code'        => (string) $group->code,
+                    'code' => (string) $group->code,
                     'source_type' => (string) $group->getRawOriginal('source_type'),
-                    'source_id'   => $group->source_id,
-                    'is_enabled'  => (bool) $group->is_enabled,
-                    'sort_order'  => (int) $group->sort_order,
-                    'get'         => [
-                        'key'   => (string) ($group->get_key ?? ''),
+                    'source_id' => $group->source_id,
+                    'is_enabled' => (bool) $group->is_enabled,
+                    'sort_order' => (int) $group->sort_order,
+                    'get' => [
+                        'key' => (string) ($group->get_key ?? ''),
                         'value' => (string) ($get_data['value'] ?? ''),
                         'extra' => is_array($get_data['extra'] ?? null) ? (array) $get_data['extra'] : [],
                     ],
                     'config' => [
-                        'mode'      => (string) ($config_data['mode'] ?? $this->getDefaultFilterMode()),
+                        'mode' => (string) ($config_data['mode'] ?? $this->getDefaultFilterMode()),
                         'min_price' => $config_data['min_price'] ?? null,
                         'max_price' => $config_data['max_price'] ?? null,
-                        'step'      => $config_data['step'] ?? null,
-                        'labels'    => $labels,
+                        'step' => $config_data['step'] ?? null,
+                        'labels' => $labels,
                     ],
                 ];
             })
@@ -291,13 +291,13 @@ class EditCatalogFilterSet extends EditRecord
             $is_new_group = ! $group instanceof CatalogFilterGroup;
 
             if ($is_new_group) {
-                $group                        = new CatalogFilterGroup();
+                $group = new CatalogFilterGroup();
                 $group->catalog_filter_set_id = (int) $record->id;
-                $group->code                  = $group_code;
+                $group->code = $group_code;
             }
 
             $config_data = (array) Arr::get($filter_item, 'config', []);
-            $get_data    = [
+            $get_data = [
                 'value' => (string) Arr::get($filter_item, 'get.value', ''),
                 'extra' => is_array(Arr::get($filter_item, 'get.extra', []))
                     ? (array) Arr::get($filter_item, 'get.extra', [])
@@ -307,11 +307,11 @@ class EditCatalogFilterSet extends EditRecord
             $next_config = array_merge(
                 (array) ($group->config ?? []),
                 [
-                    'mode'      => (string) Arr::get($config_data, 'mode', $this->getDefaultFilterMode()),
-                    'get'       => $get_data,
+                    'mode' => (string) Arr::get($config_data, 'mode', $this->getDefaultFilterMode()),
+                    'get' => $get_data,
                     'min_price' => $group_code === $price_filter_group_name ? Arr::get($config_data, 'min_price') : null,
                     'max_price' => $group_code === $price_filter_group_name ? Arr::get($config_data, 'max_price') : null,
-                    'step'      => $group_code === $price_filter_group_name ? Arr::get($config_data, 'step') : null,
+                    'step' => $group_code === $price_filter_group_name ? Arr::get($config_data, 'step') : null,
                 ],
             );
 
@@ -331,13 +331,13 @@ class EditCatalogFilterSet extends EditRecord
 
             $group->fill([
                 'source_type' => (string) Arr::get($filter_item, 'source_type', $group->getRawOriginal('source_type') ?? 'system'),
-                'source_id'   => filled(Arr::get($filter_item, 'source_id'))
+                'source_id' => filled(Arr::get($filter_item, 'source_id'))
                     ? (int) Arr::get($filter_item, 'source_id')
                     : null,
                 'is_enabled' => (bool) Arr::get($filter_item, 'is_enabled', true),
                 'sort_order' => (int) Arr::get($filter_item, 'sort_order', 0),
-                'get_key'    => $next_get_key,
-                'config'     => $next_config,
+                'get_key' => $next_get_key,
+                'config' => $next_config,
             ]);
             $group->save();
 
@@ -347,10 +347,10 @@ class EditCatalogFilterSet extends EditRecord
                 CatalogFilterGroupTranslation::query()->updateOrCreate(
                     [
                         'catalog_filter_group_id' => (int) $group->id,
-                        'language_id'             => (int) $language->id,
+                        'language_id' => (int) $language->id,
                     ],
                     [
-                        'label'       => (string) ($labels[$language_code] ?? ''),
+                        'label' => (string) ($labels[$language_code] ?? ''),
                         'description' => null,
                     ],
                 );
@@ -388,7 +388,7 @@ class EditCatalogFilterSet extends EditRecord
     private function refreshRecord(): void
     {
         /** @var CatalogFilterSet $record */
-        $record       = $this->getRecord();
+        $record = $this->getRecord();
         $this->record = $record->fresh(['indexMeta', 'groups.translations.language']) ?? $record;
 
         $this->fillForm();

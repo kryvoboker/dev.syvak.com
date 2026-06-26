@@ -39,11 +39,11 @@ class AppServiceProvider extends ServiceProvider
         if ($new_storage_path) {
             config([
                 // Override compiled views path
-                'view.compiled'                => $new_storage_path . '/framework/views',
-                'debugbar.storage.path'        => $new_storage_path . '/debugbar',
+                'view.compiled' => $new_storage_path . '/framework/views',
+                'debugbar.storage.path' => $new_storage_path . '/debugbar',
                 'logging.channels.single.path' => $new_storage_path . '/logs/laravel.log',
-                'logging.channels.daily.path'  => $new_storage_path . '/logs/laravel.log',
-                'logging.channels.stack.path'  => $new_storage_path . '/logs/laravel.log',
+                'logging.channels.daily.path' => $new_storage_path . '/logs/laravel.log',
+                'logging.channels.stack.path' => $new_storage_path . '/logs/laravel.log',
             ]);
         }
 
@@ -76,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $new_storage_path = config('filesystems.new_storage_path');
-        $new_public_path  = config('filesystems.new_public_path');
+        $new_public_path = config('filesystems.new_public_path');
 
         if ($new_storage_path && $new_public_path) {
             // Override symbolic links configuration
@@ -94,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
          * locale-aware routes and stabilizes URL matching for storefront/admin routes.
          */
         $allowed_locales = get_allowed_locales();
-        $locale_key      = config('localization.locale_parameter', 'locale');
+        $locale_key = config('localization.locale_parameter', 'locale');
 
         if ($allowed_locales !== []) {
             $allowed_locales_pattern = implode('|', array_map('preg_quote', $allowed_locales));
@@ -111,12 +111,12 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $default_no_image_path = (string) config('app.images.default_no_image', 'images/no-image.png');
-        $app_settings_service  = null;
-        $device_type           = config('devices.types.desktop');
-        $max_viewport_width    = (int) config('app.frontend.max_viewport_width', 1920);
+        $app_settings_service = null;
+        $device_type = config('devices.types.desktop');
+        $max_viewport_width = (int) config('app.frontend.max_viewport_width', 1920);
 
         if (! $this->app->runningUnitTests()) {
-            $currency             = (new Currency())->getDefaultActiveCurrency();
+            $currency = (new Currency())->getDefaultActiveCurrency();
             $app_settings_service = app(AppSettingsService::class);
             $app_settings_service->setSettings();
             $detect = new MobileDetect();
@@ -141,12 +141,12 @@ class AppServiceProvider extends ServiceProvider
 
             if ($currency !== null) {
                 config([
-                    'app.currency.current_currency_code'          => $currency->code,
-                    'app.currency.current_currency_symbol'        => $currency->symbol_left ?: $currency->symbol_right,
+                    'app.currency.current_currency_code' => $currency->code,
+                    'app.currency.current_currency_symbol' => $currency->symbol_left ?: $currency->symbol_right,
                     'app.currency.current_currency_exchange_rate' => $currency->exchange_rate,
-                    'app.currency.current_format_locale'          => $currency->format_locale,
-                    'app.currency.current_decimal_places'         => $currency->decimal_places,
-                    'devices.current_device_type'                 => $device_type,
+                    'app.currency.current_format_locale' => $currency->format_locale,
+                    'app.currency.current_decimal_places' => $currency->decimal_places,
+                    'devices.current_device_type' => $device_type,
                 ]);
 
                 app(ConvertPrice::class)->setDefaultCurrency($currency);
@@ -162,11 +162,11 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::share([
-            'app_settings'        => $app_settings_service?->getSettings(),
-            'no_image_url'        => asset('storage/' . $default_no_image_path),
-            'max_viewport_width'  => $max_viewport_width,
+            'app_settings' => $app_settings_service?->getSettings(),
+            'no_image_url' => asset('storage/' . $default_no_image_path),
+            'max_viewport_width' => $max_viewport_width,
             'current_device_type' => $device_type,
-            'locale_key'          => $locale_key,
+            'locale_key' => $locale_key,
         ]);
 
         /**

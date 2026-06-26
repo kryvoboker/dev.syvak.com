@@ -80,8 +80,8 @@ $app->useStoragePath($new_storage_path);
 $app->usePublicPath($new_public_path);*/
 
 $new_storage_path = getenv('NEW_STORAGE_PATH');
-$new_public_path  = getenv('NEW_PUBLIC_PATH');
-$app_env          = getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? null);
+$new_public_path = getenv('NEW_PUBLIC_PATH');
+$app_env = getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? null);
 
 if ($app_env === 'testing') {
     return $app;

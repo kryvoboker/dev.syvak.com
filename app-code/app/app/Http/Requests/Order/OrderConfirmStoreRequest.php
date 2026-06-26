@@ -7,4 +7,6 @@ namespace App\Http\Requests\Order;
 /**
  * @deprecated Use FastOrderStoreRequest instead.
  */
-class OrderConfirmStoreRequest extends FastOrderStoreRequest {}
+class OrderConfirmStoreRequest extends FastOrderStoreRequest
+{
+}

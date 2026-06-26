@@ -22,7 +22,7 @@ class CatalogFilterSetForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $active_languages        = (new Language())->getActiveLanguages();
+        $active_languages = (new Language())->getActiveLanguages();
         $price_filter_group_name = CatalogFilterGroupSourceTypeEnum::Price->value;
 
         return $schema

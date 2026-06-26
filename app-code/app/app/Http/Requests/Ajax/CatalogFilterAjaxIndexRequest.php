@@ -24,12 +24,12 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'page'           => ['sometimes', 'integer', 'min:1'],
-            'sort'           => ['nullable', 'string', 'max:120'],
-            'price_from'     => ['nullable', 'numeric', 'min:0'],
-            'price_to'       => ['nullable', 'numeric', 'min:0'],
-            'attributes'     => ['sometimes', 'array'],
-            'attributes.*'   => ['array'],
+            'page' => ['sometimes', 'integer', 'min:1'],
+            'sort' => ['nullable', 'string', 'max:120'],
+            'price_from' => ['nullable', 'numeric', 'min:0'],
+            'price_to' => ['nullable', 'numeric', 'min:0'],
+            'attributes' => ['sometimes', 'array'],
+            'attributes.*' => ['array'],
             'attributes.*.*' => ['string', 'max:120'],
         ];
     }
@@ -38,7 +38,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
     {
         $validator->after(function (Validator $validator): void {
             $price_from = $this->input('price_from');
-            $price_to   = $this->input('price_to');
+            $price_to = $this->input('price_to');
 
             if (is_numeric($price_from) && is_numeric($price_to) && (float) $price_from > (float) $price_to) {
                 $validator->errors()->add('price_from', __('catalog/default.errors.price_from'));
@@ -49,9 +49,9 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $normalized_data = [
-            'sort'       => $this->query('sort'),
+            'sort' => $this->query('sort'),
             'price_from' => $this->query('price_from'),
-            'price_to'   => $this->query('price_to'),
+            'price_to' => $this->query('price_to'),
             'attributes' => [],
         ];
 
@@ -85,9 +85,9 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
      */
     private function normalizeGroupInput(CatalogFilterGroup $group, array &$normalized_data): void
     {
-        $source_type     = (string) $group->getRawOriginal('source_type');
-        $group_get_key   = (string) $group->get_key;
-        $group_config    = is_array($group->config) ? $group->config : [];
+        $source_type = (string) $group->getRawOriginal('source_type');
+        $group_get_key = (string) $group->get_key;
+        $group_config = is_array($group->config) ? $group->config : [];
         $group_get_value = trim((string) Arr::get($group_config, 'get.value', ''));
 
         if ($source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
@@ -97,7 +97,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
         }
 
         $group_input_values = $this->normalizeToStringArray($this->extractByGetKey($group_get_key));
-        $query_key_exists   = $this->hasQueryKey($group_get_key);
+        $query_key_exists = $this->hasQueryKey($group_get_key);
 
         if (
             $group_input_values !== []
@@ -139,10 +139,10 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
     private function normalizePriceGroupInput(array $group_config, array &$normalized_data): void
     {
         $from_key = (string) Arr::get($group_config, 'get.extra.from_key', 'price_from');
-        $to_key   = (string) Arr::get($group_config, 'get.extra.to_key', 'price_to');
+        $to_key = (string) Arr::get($group_config, 'get.extra.to_key', 'price_to');
 
         $normalized_data['price_from'] = $this->extractByGetKey($from_key) ?? $normalized_data['price_from'];
-        $normalized_data['price_to']   = $this->extractByGetKey($to_key) ?? $normalized_data['price_to'];
+        $normalized_data['price_to'] = $this->extractByGetKey($to_key) ?? $normalized_data['price_to'];
     }
 
     private function shouldSkipGroup(CatalogFilterSet $filter_set, CatalogFilterGroup $group): bool

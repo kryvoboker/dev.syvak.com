@@ -33,7 +33,8 @@ readonly class ModuleInstanceFormSchema
         private ProductsCarouselConfig $products_carousel_config,
         private ProductsCarouselCategoryTreeService $products_carousel_category_tree_service,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, Component>
@@ -214,7 +215,7 @@ readonly class ModuleInstanceFormSchema
                                 ->label(__('admin/modules/module_instances.products_carousel.labels.source_mode'))
                                 ->options([
                                     'category_based' => __('admin/modules/module_instances.products_carousel.options.source_mode.category_based'),
-                                    'manual_only'    => __('admin/modules/module_instances.products_carousel.options.source_mode.manual_only'),
+                                    'manual_only' => __('admin/modules/module_instances.products_carousel.options.source_mode.manual_only'),
                                 ])
                                 ->default((string) $this->products_carousel_config->get('settings.default_source_mode', 'category_based'))
                                 ->live()
@@ -493,7 +494,7 @@ readonly class ModuleInstanceFormSchema
     {
         return [
             'none' => __('admin/modules/module_instances.products_carousel.options.sort_direction.none'),
-            'asc'  => __('admin/modules/module_instances.products_carousel.options.sort_direction.asc'),
+            'asc' => __('admin/modules/module_instances.products_carousel.options.sort_direction.asc'),
             'desc' => __('admin/modules/module_instances.products_carousel.options.sort_direction.desc'),
         ];
     }

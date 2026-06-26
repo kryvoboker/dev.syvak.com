@@ -27,7 +27,9 @@ use Throwable;
 
 readonly class CatalogFilterIndexRebuildService
 {
-    public function __construct(private PriceSourceResolverService $price_source_resolver_service) {}
+    public function __construct(private PriceSourceResolverService $price_source_resolver_service)
+    {
+    }
 
     /**
      * @throws Throwable
@@ -40,20 +42,20 @@ readonly class CatalogFilterIndexRebuildService
         $index_meta = $filter_set->indexMeta()->firstOrCreate(
             ['catalog_filter_set_id' => (int) $filter_set->id],
             [
-                'index_version'        => 1,
+                'index_version' => 1,
                 'active_index_version' => 1,
-                'last_status'          => CatalogFilterIndexStatusEnum::Ok->value,
-                'last_run_mode'        => CatalogFilterIndexRunModeEnum::Full->value,
+                'last_status' => CatalogFilterIndexStatusEnum::Ok->value,
+                'last_run_mode' => CatalogFilterIndexRunModeEnum::Full->value,
             ],
         );
 
-        $started_at                   = now(config('app.timezone'));
+        $started_at = now(config('app.timezone'));
         $rebuild_lock_timeout_seconds = $this->resolveRebuildLockTimeoutSeconds($filter_set);
 
         if (! $this->canAcquireRebuildLock($index_meta, $started_at, $rebuild_lock_timeout_seconds)) {
             return [
-                'status'        => 'locked',
-                'rows_total'    => (int) $index_meta->index_rows_total,
+                'status' => 'locked',
+                'rows_total' => (int) $index_meta->index_rows_total,
                 'index_version' => (int) $index_meta->active_index_version,
             ];
         }
@@ -65,13 +67,13 @@ readonly class CatalogFilterIndexRebuildService
         ) + 1;
 
         $index_meta->forceFill([
-            'building_index_version'   => $next_index_version,
-            'rebuild_lock_key'         => (string) Str::uuid(),
+            'building_index_version' => $next_index_version,
+            'rebuild_lock_key' => (string) Str::uuid(),
             'rebuild_lock_acquired_at' => $started_at,
-            'last_status'              => CatalogFilterIndexStatusEnum::Running->value,
-            'last_run_mode'            => CatalogFilterIndexRunModeEnum::Full->value,
-            'last_progress_percent'    => 0,
-            'last_error'               => null,
+            'last_status' => CatalogFilterIndexStatusEnum::Running->value,
+            'last_run_mode' => CatalogFilterIndexRunModeEnum::Full->value,
+            'last_progress_percent' => 0,
+            'last_error' => null,
         ])->save();
 
         try {
@@ -102,33 +104,33 @@ readonly class CatalogFilterIndexRebuildService
             $finished_at = now(config('app.timezone'));
 
             $index_meta->forceFill([
-                'index_version'            => $next_index_version,
-                'active_index_version'     => $next_index_version,
-                'building_index_version'   => null,
-                'rebuild_lock_key'         => null,
+                'index_version' => $next_index_version,
+                'active_index_version' => $next_index_version,
+                'building_index_version' => null,
+                'rebuild_lock_key' => null,
                 'rebuild_lock_acquired_at' => null,
-                'last_full_rebuild_at'     => $finished_at,
-                'last_status'              => CatalogFilterIndexStatusEnum::Ok->value,
-                'last_error'               => null,
-                'last_progress_percent'    => 100,
-                'items_total'              => $enabled_groups_count,
-                'values_total'             => $enabled_values_count,
-                'index_rows_total'         => $indexed_rows_total,
+                'last_full_rebuild_at' => $finished_at,
+                'last_status' => CatalogFilterIndexStatusEnum::Ok->value,
+                'last_error' => null,
+                'last_progress_percent' => 100,
+                'items_total' => $enabled_groups_count,
+                'values_total' => $enabled_values_count,
+                'index_rows_total' => $indexed_rows_total,
             ])->save();
 
             return [
-                'status'        => 'ok',
-                'rows_total'    => $indexed_rows_total,
+                'status' => 'ok',
+                'rows_total' => $indexed_rows_total,
                 'index_version' => $next_index_version,
             ];
         } catch (Throwable $throwable) {
             $index_meta->forceFill([
-                'building_index_version'   => null,
-                'rebuild_lock_key'         => null,
+                'building_index_version' => null,
+                'rebuild_lock_key' => null,
                 'rebuild_lock_acquired_at' => null,
-                'last_status'              => CatalogFilterIndexStatusEnum::Failed->value,
-                'last_error'               => $throwable->getMessage(),
-                'last_progress_percent'    => 0,
+                'last_status' => CatalogFilterIndexStatusEnum::Failed->value,
+                'last_error' => $throwable->getMessage(),
+                'last_progress_percent' => 0,
             ])->save();
 
             throw $throwable;
@@ -145,14 +147,14 @@ readonly class CatalogFilterIndexRebuildService
         }
 
         $lock_acquired_at = Carbon::parse((string) $index_meta->getRawOriginal('rebuild_lock_acquired_at'));
-        $lock_expires_at  = $lock_acquired_at->copy()->addSeconds($rebuild_lock_timeout_seconds);
+        $lock_expires_at = $lock_acquired_at->copy()->addSeconds($rebuild_lock_timeout_seconds);
 
         return $lock_expires_at->lte($started_at);
     }
 
     private function resolveRebuildLockTimeoutSeconds(CatalogFilterSet $filter_set): int
     {
-        $settings                = (array) ($filter_set->settings ?? []);
+        $settings = (array) ($filter_set->settings ?? []);
         $default_timeout_seconds = (int) config('catalog-filter.defaults.rebuild_lock_timeout_seconds', 600);
 
         return max(1, (int) ($settings['rebuild_lock_timeout_seconds'] ?? $default_timeout_seconds));
@@ -190,9 +192,9 @@ readonly class CatalogFilterIndexRebuildService
             ->all();
 
         $value_lookup_by_attribute = $this->buildAttributeValueLookup($attribute_groups);
-        $minimum_stock_quantity    = max(0, (int) $filter_set->min_stock_quantity);
+        $minimum_stock_quantity = max(0, (int) $filter_set->min_stock_quantity);
 
-        $insert_chunk_size  = max(1, (int) config('catalog-filter.defaults.rebuild_chunk_size', 1000));
+        $insert_chunk_size = max(1, (int) config('catalog-filter.defaults.rebuild_chunk_size', 1000));
         $indexed_rows_total = 0;
 
         $this->buildProductsBaseQuery()->chunkById(200, function (Collection $products) use (
@@ -209,7 +211,7 @@ readonly class CatalogFilterIndexRebuildService
             $rows_to_insert = [];
 
             foreach ($products as $product) {
-                $product_id   = (int) $product->id;
+                $product_id = (int) $product->id;
                 $category_ids = collect($product->categories)
                     ->map(fn (mixed $category): int => (int) data_get($category, 'id', 0))
                     ->filter(fn (int $category_id): bool => $category_id > 0)
@@ -234,7 +236,7 @@ readonly class CatalogFilterIndexRebuildService
                 );
 
                 $stock_quantity = (int) ($product->getAttribute('default_variant_quantity') ?? 0);
-                $is_in_stock    = $stock_quantity >= $minimum_stock_quantity;
+                $is_in_stock = $stock_quantity >= $minimum_stock_quantity;
 
                 foreach ($category_ids as $category_id) {
                     foreach (collect(optional($product->defaultVariant)->attributeValues) as $attribute_value) {
@@ -341,9 +343,9 @@ readonly class CatalogFilterIndexRebuildService
      */
     private function buildProductsBaseQuery(): Builder
     {
-        $app_settings     = get_app_settings();
+        $app_settings = get_app_settings();
         $current_datetime = now(config('app.timezone'));
-        $db_prefix        = config('database.prefix');
+        $db_prefix = config('database.prefix');
 
         return Product::query()
             ->select('products.*')
@@ -469,23 +471,23 @@ readonly class CatalogFilterIndexRebuildService
         CarbonInterface $indexed_at,
     ): array {
         return [
-            'catalog_filter_set_id'   => $filter_set_id,
-            'index_version'           => $index_version,
-            'context_type'            => CatalogFilterContextTypeEnum::Category->value,
-            'category_id'             => $category_id,
-            'product_id'              => $product_id,
+            'catalog_filter_set_id' => $filter_set_id,
+            'index_version' => $index_version,
+            'context_type' => CatalogFilterContextTypeEnum::Category->value,
+            'category_id' => $category_id,
+            'product_id' => $product_id,
             'catalog_filter_group_id' => $group_id,
             'catalog_filter_value_id' => $value_id,
-            'attribute_id'            => $attribute_id,
-            'base_price'              => $base_price,
-            'discount_price'          => $discount_price,
-            'effective_price'         => $effective_price,
-            'stock_quantity'          => $stock_quantity,
-            'is_in_stock'             => $is_in_stock,
-            'is_active_product'       => $is_active_product,
-            'indexed_at'              => $indexed_at,
-            'created_at'              => $indexed_at,
-            'updated_at'              => $indexed_at,
+            'attribute_id' => $attribute_id,
+            'base_price' => $base_price,
+            'discount_price' => $discount_price,
+            'effective_price' => $effective_price,
+            'stock_quantity' => $stock_quantity,
+            'is_in_stock' => $is_in_stock,
+            'is_active_product' => $is_active_product,
+            'indexed_at' => $indexed_at,
+            'created_at' => $indexed_at,
+            'updated_at' => $indexed_at,
         ];
     }
 }

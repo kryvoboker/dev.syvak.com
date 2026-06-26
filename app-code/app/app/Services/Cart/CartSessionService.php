@@ -39,11 +39,11 @@ class CartSessionService
             }
 
             $resolved_items[] = [
-                'cart_id'            => (int) $cart_row->id,
+                'cart_id' => (int) $cart_row->id,
                 'product_variant_id' => (int) $cart_row->product_variant_id,
-                'quantity'           => max(1, (int) $cart_row->quantity),
-                'chosen_attributes'  => is_array($cart_row->chosen_attributes) ? $cart_row->chosen_attributes : [],
-                'added_at'           => $cart_row->created_at?->toDateTimeString() ?? get_now_date()->toDateTimeString(),
+                'quantity' => max(1, (int) $cart_row->quantity),
+                'chosen_attributes' => is_array($cart_row->chosen_attributes) ? $cart_row->chosen_attributes : [],
+                'added_at' => $cart_row->created_at?->toDateTimeString() ?? get_now_date()->toDateTimeString(),
             ];
         }
 
@@ -67,9 +67,9 @@ class CartSessionService
 
         $this->migrateGuestItemsToUserScope($owner_context, $mode);
 
-        $normalized_quantity   = max(1, $quantity);
+        $normalized_quantity = max(1, $quantity);
         $normalized_attributes = $this->normalizeAttributes($chosen_attributes);
-        $attributes_signature  = $this->buildAttributesSignature($normalized_attributes);
+        $attributes_signature = $this->buildAttributesSignature($normalized_attributes);
 
         $matching_rows = $this->resolveOwnerQuery($owner_context)
             ->where('cart_mode', $mode)
@@ -101,12 +101,12 @@ class CartSessionService
         }
 
         CartItem::query()->create([
-            'session_id'         => $owner_context['session_id'],
-            'user_id'            => $owner_context['user_id'],
-            'cart_mode'          => $mode,
+            'session_id' => $owner_context['session_id'],
+            'user_id' => $owner_context['user_id'],
+            'cart_mode' => $mode,
             'product_variant_id' => $product_variant_id,
-            'quantity'           => $normalized_quantity,
-            'chosen_attributes'  => $normalized_attributes,
+            'quantity' => $normalized_quantity,
+            'chosen_attributes' => $normalized_attributes,
         ]);
     }
 
@@ -128,7 +128,7 @@ class CartSessionService
         if (! $cart_item instanceof CartItem) {
             Log::channel('stack')->warning('Cart item update rejected due to missing row in owner scope.', [
                 'cart_id' => $cart_id,
-                'mode'    => $mode,
+                'mode' => $mode,
                 'user_id' => $owner_context['user_id'],
             ]);
 
@@ -159,7 +159,7 @@ class CartSessionService
         if ($deleted_rows <= 0) {
             Log::channel('stack')->warning('Cart item delete rejected due to missing row in owner scope.', [
                 'cart_id' => $cart_id,
-                'mode'    => $mode,
+                'mode' => $mode,
                 'user_id' => $owner_context['user_id'],
             ]);
 
@@ -208,7 +208,7 @@ class CartSessionService
 
         return [
             'session_id' => is_string($session_id) && $session_id !== '' ? $session_id : null,
-            'user_id'    => $user_id !== null && $user_id > 0 ? $user_id : null,
+            'user_id' => $user_id !== null && $user_id > 0 ? $user_id : null,
         ];
     }
 
@@ -233,7 +233,7 @@ class CartSessionService
      */
     private function migrateGuestItemsToUserScope(array $owner_context, string $mode): void
     {
-        $user_id    = (int) ($owner_context['user_id'] ?? 0);
+        $user_id = (int) ($owner_context['user_id'] ?? 0);
         $session_id = (string) ($owner_context['session_id'] ?? '');
 
         if ($user_id <= 0 || $session_id === '') {
@@ -252,7 +252,7 @@ class CartSessionService
 
         foreach ($guest_rows as $guest_row) {
             $item_attributes = is_array($guest_row->chosen_attributes) ? $guest_row->chosen_attributes : [];
-            $signature       = $this->buildAttributesSignature($item_attributes);
+            $signature = $this->buildAttributesSignature($item_attributes);
 
             $user_rows = CartItem::query()
                 ->where('user_id', $user_id)

@@ -34,12 +34,12 @@ class ModuleDefinition extends Model
     protected function casts(): array
     {
         return [
-            'is_installed'             => 'boolean',
-            'is_enabled'               => 'boolean',
+            'is_installed' => 'boolean',
+            'is_enabled' => 'boolean',
             'is_enabled_in_filesystem' => 'boolean',
-            'sort_order'               => 'integer',
-            'settings_schema'          => 'array',
-            'meta'                     => 'array',
+            'sort_order' => 'integer',
+            'settings_schema' => 'array',
+            'meta' => 'array',
         ];
     }
 

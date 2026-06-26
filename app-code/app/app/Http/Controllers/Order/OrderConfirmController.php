@@ -19,7 +19,7 @@ class OrderConfirmController extends Controller
         OrderCreationService $fast_order_creation_service,
         ?string $locale,
     ): RedirectResponse|JsonResponse {
-        $locale      = normalize_locale($locale);
+        $locale = normalize_locale($locale);
         $result_data = $fast_order_creation_service->createFastOrder($request->validated(), $locale);
 
         if ($request->expectsJson()) {
@@ -40,7 +40,7 @@ class OrderConfirmController extends Controller
         OrderCreationService $fast_order_creation_service,
         ?string $locale,
     ): JsonResponse {
-        $locale      = normalize_locale($locale);
+        $locale = normalize_locale($locale);
         $result_data = $fast_order_creation_service->validateFastOrderData($request->validated(), $locale);
 
         return response()->json($result_data);

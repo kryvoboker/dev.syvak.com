@@ -13,7 +13,8 @@ readonly class ModuleRuntimeResolverService
 {
     public function __construct(
         private ModuleCacheService $module_cache_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return Collection<int, ModuleDefinition>
@@ -48,7 +49,7 @@ readonly class ModuleRuntimeResolverService
 
                 if ($definitions->isEmpty()) {
                     Log::channel('stack')->warning('Module runtime resolver returned no enabled module instances.', [
-                        'placement'   => $placement,
+                        'placement' => $placement,
                         'context_key' => $context_key,
                     ]);
                 }
@@ -72,7 +73,7 @@ readonly class ModuleRuntimeResolverService
             return $placement;
         }
 
-        $placement_keys       = array_map('strval', array_keys($modules_placements));
+        $placement_keys = array_map('strval', array_keys($modules_placements));
         $normalized_placement = Str::lower(trim($placement));
 
         foreach ($modules_placements as $placement_key => $placement_label) {
@@ -85,7 +86,7 @@ readonly class ModuleRuntimeResolverService
         }
 
         Log::channel('stack')->warning('Module runtime resolver received unsupported placement value.', [
-            'placement'          => $placement,
+            'placement' => $placement,
             'allowed_placements' => $placement_keys,
         ]);
 

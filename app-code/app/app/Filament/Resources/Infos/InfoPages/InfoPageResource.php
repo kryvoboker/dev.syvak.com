@@ -49,9 +49,9 @@ class InfoPageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListInfoPages::route('/'),
+            'index' => ListInfoPages::route('/'),
             'create' => CreateInfoPage::route('/create'),
-            'edit'   => EditInfoPage::route('/{record}/edit'),
+            'edit' => EditInfoPage::route('/{record}/edit'),
         ];
     }
 

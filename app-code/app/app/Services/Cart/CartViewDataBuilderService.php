@@ -19,7 +19,8 @@ readonly class CartViewDataBuilderService
 {
     public function __construct(
         private CartTotalsPipelineService $cart_totals_pipeline_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<int, array{cart_id: int, product_variant_id: int, quantity: int, chosen_attributes: array<int|string, mixed>, added_at: string}>  $cart_items
@@ -27,7 +28,7 @@ readonly class CartViewDataBuilderService
      */
     public function build(array $cart_items, string $locale, string $mode = CartModeEnum::Regular->value): array
     {
-        $language    = resolve_language_by_locale($locale);
+        $language = resolve_language_by_locale($locale);
         $language_id = $language instanceof Language ? (int) $language->id : 0;
 
         if ($cart_items === []) {
@@ -49,12 +50,12 @@ readonly class CartViewDataBuilderService
         /** @var Collection<int, ProductVariant> $variants */
         $variants = ProductVariant::query()
             ->with([
-                'descriptions'               => fn ($query) => $query->where('language_id', $language_id),
-                'slugs'                      => fn ($query) => $query->where('language_id', $language_id),
-                'images'                     => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order')->orderBy('id'),
+                'descriptions' => fn ($query) => $query->where('language_id', $language_id),
+                'slugs' => fn ($query) => $query->where('language_id', $language_id),
+                'images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order')->orderBy('id'),
                 'product.productDescription' => fn ($query) => $query->where('language_id', $language_id),
-                'product.slugs'              => fn ($query) => $query->where('language_id', $language_id),
-                'attributeValues'            => function ($query) use ($language_id) {
+                'product.slugs' => fn ($query) => $query->where('language_id', $language_id),
+                'attributeValues' => function ($query) use ($language_id) {
                     return $query
                         ->with([
                             'attribute' => function ($query) use ($language_id) {
@@ -82,11 +83,11 @@ readonly class CartViewDataBuilderService
                 }
 
                 $quantity = max(1, (int) Arr::get($item_data, 'quantity', 1));
-                $price    = max(0, (float) ($variant->price ?? $variant->product->price ?? 0));
+                $price = max(0, (float) ($variant->price ?? $variant->product->price ?? 0));
 
                 $variant_name = Str::trim((string) $variant->descriptions->first()?->name);
                 $product_name = Str::trim((string) $variant->product->productDescription->first()?->name);
-                $item_name    = filled($variant_name) ? $variant_name : $product_name;
+                $item_name = filled($variant_name) ? $variant_name : $product_name;
 
                 $product_slug = Str::trim((string) $variant->product->slugs->first()?->slug);
                 $variant_slug = Str::trim((string) $variant->slugs->first()?->slug);
@@ -94,7 +95,7 @@ readonly class CartViewDataBuilderService
                 if (filled($product_slug)) {
                     if (filled($variant_slug)) {
                         $item_url = localized_route('localized.catalog.product.variant.show', [
-                            'slug'         => $product_slug,
+                            'slug' => $product_slug,
                             'variant_slug' => $variant_slug,
                         ]);
                     } else {
@@ -106,9 +107,9 @@ readonly class CartViewDataBuilderService
 
                 $image_path = $this->resolveVariantImagePath($variant);
                 $image_data = [
-                    'path'   => $image_path,
-                    'urls'   => multiple_convert_img_and_get_url($image_path, 220, 220),
-                    'width'  => 220,
+                    'path' => $image_path,
+                    'urls' => multiple_convert_img_and_get_url($image_path, 220, 220),
+                    'width' => 220,
                     'height' => 220,
                 ];
 
@@ -120,33 +121,33 @@ readonly class CartViewDataBuilderService
                 );
 
                 return [
-                    'cart_id'              => (int) Arr::get($item_data, 'cart_id', 0),
-                    'variant_id'           => (int) $variant->id,
-                    'product_id'           => (int) $variant->product_id,
-                    'language_id'          => $language_id,
-                    'sku'                  => (string) $variant->product->sku,
-                    'name'                 => $item_name,
-                    'url'                  => $item_url,
-                    'quantity'             => $quantity,
-                    'minimum_quantity'     => max(1, (int) ($variant->minimum ?: $variant->product->minimum ?: 1)),
-                    'available_quantity'   => max(0, (int) $variant->quantity),
-                    'is_in_stock'          => (int) $variant->quantity >= max(1, (int) ($variant->minimum ?: $variant->product->minimum ?: 1)),
-                    'unit_price'           => $price,
+                    'cart_id' => (int) Arr::get($item_data, 'cart_id', 0),
+                    'variant_id' => (int) $variant->id,
+                    'product_id' => (int) $variant->product_id,
+                    'language_id' => $language_id,
+                    'sku' => (string) $variant->product->sku,
+                    'name' => $item_name,
+                    'url' => $item_url,
+                    'quantity' => $quantity,
+                    'minimum_quantity' => max(1, (int) ($variant->minimum ?: $variant->product->minimum ?: 1)),
+                    'available_quantity' => max(0, (int) $variant->quantity),
+                    'is_in_stock' => (int) $variant->quantity >= max(1, (int) ($variant->minimum ?: $variant->product->minimum ?: 1)),
+                    'unit_price' => $price,
                     'unit_price_formatted' => replace_currency_symbol_to_code(format_price(
                         $price,
                         config('app.currency.current_currency_code'),
                         (float) config('app.currency.current_exchange_rate'),
                     )),
-                    'line_total'           => $line_total,
+                    'line_total' => $line_total,
                     'line_total_formatted' => replace_currency_symbol_to_code(format_price(
                         $line_total,
                         config('app.currency.current_currency_code'),
                         (float) config('app.currency.current_exchange_rate'),
                     )),
-                    'attributes'            => $selected_attributes,
-                    'selected_attributes'   => $selected_attributes,
+                    'attributes' => $selected_attributes,
+                    'selected_attributes' => $selected_attributes,
                     'chosen_attributes_raw' => (array) Arr::get($item_data, 'chosen_attributes', []),
-                    'image_data'            => $image_data,
+                    'image_data' => $image_data,
                 ];
             })
             ->filter(fn (?array $item_data): bool => is_array($item_data))
@@ -160,20 +161,20 @@ readonly class CartViewDataBuilderService
         $total_quantity = (int) $resolved_items->sum(fn (array $item_data): int => (int) $item_data['quantity']);
 
         return [
-            'mode'           => $mode,
-            'items'          => $resolved_items->all(),
-            'first_item'     => $resolved_items->first(),
-            'hidden_items'   => $resolved_items->slice(1)->values()->all(),
-            'items_count'    => $resolved_items->count(),
+            'mode' => $mode,
+            'items' => $resolved_items->all(),
+            'first_item' => $resolved_items->first(),
+            'hidden_items' => $resolved_items->slice(1)->values()->all(),
+            'items_count' => $resolved_items->count(),
             'total_quantity' => $total_quantity,
-            'is_empty'       => $resolved_items->isEmpty(),
-            'totals'         => $totals,
-            'routes'         => [
-                'modal_index'    => localized_route('localized.catalog.cart-modal-ajax.index'),
-                'modal_store'    => localized_route('localized.catalog.cart-modal-ajax.store'),
-                'cart_store'     => localized_route('localized.catalog.cart.store'),
+            'is_empty' => $resolved_items->isEmpty(),
+            'totals' => $totals,
+            'routes' => [
+                'modal_index' => localized_route('localized.catalog.cart-modal-ajax.index'),
+                'modal_store' => localized_route('localized.catalog.cart-modal-ajax.store'),
+                'cart_store' => localized_route('localized.catalog.cart.store'),
                 'order_validate' => localized_route('localized.catalog.order-confirm.validate'),
-                'order_store'    => localized_route('localized.catalog.order-confirm.store'),
+                'order_store' => localized_route('localized.catalog.order-confirm.store'),
             ],
         ];
     }
@@ -192,8 +193,8 @@ readonly class CartViewDataBuilderService
 
                 if (is_array($value)) {
                     $raw_attribute_id = Arr::get($value, 'attribute_id');
-                    $attribute_id     = is_numeric($raw_attribute_id) ? (int) $raw_attribute_id : null;
-                    $label            = Str::trim((string) Arr::get(
+                    $attribute_id = is_numeric($raw_attribute_id) ? (int) $raw_attribute_id : null;
+                    $label = Str::trim((string) Arr::get(
                         $value,
                         'label',
                         Arr::get($value, 'attribute_name', Arr::get($value, 'name', $key)),
@@ -205,8 +206,8 @@ readonly class CartViewDataBuilderService
                     ));
                 } else {
                     $attribute_id = is_int($key) || ctype_digit((string) $key) ? (int) $key : null;
-                    $label        = Str::trim((string) $key);
-                    $text         = Str::trim((string) $value);
+                    $label = Str::trim((string) $key);
+                    $text = Str::trim((string) $value);
                 }
 
                 if ($text === '') {
@@ -215,14 +216,14 @@ readonly class CartViewDataBuilderService
 
                 return [
                     'attribute_id' => $attribute_id,
-                    'label'        => $label,
-                    'value'        => $text,
+                    'label' => $label,
+                    'value' => $text,
                 ];
             })
             ->filter(fn (?array $attribute): bool => is_array($attribute))
             ->map(static function (array $attribute) use ($attribute_label_map): array {
                 $attribute_id = Arr::get($attribute, 'attribute_id');
-                $label        = Str::trim((string) Arr::get($attribute, 'label', ''));
+                $label = Str::trim((string) Arr::get($attribute, 'label', ''));
 
                 if (is_int($attribute_id) && filled($attribute_label_map[$attribute_id] ?? null)) {
                     $label = (string) $attribute_label_map[$attribute_id];
@@ -326,20 +327,20 @@ readonly class CartViewDataBuilderService
         $totals = $this->cart_totals_pipeline_service->calculate([]);
 
         return [
-            'mode'           => $mode,
-            'items'          => [],
-            'first_item'     => null,
-            'hidden_items'   => [],
-            'items_count'    => 0,
+            'mode' => $mode,
+            'items' => [],
+            'first_item' => null,
+            'hidden_items' => [],
+            'items_count' => 0,
             'total_quantity' => 0,
-            'is_empty'       => true,
-            'totals'         => $totals,
-            'routes'         => [
-                'modal_index'    => localized_route('localized.catalog.cart-modal-ajax.index'),
-                'modal_store'    => localized_route('localized.catalog.cart-modal-ajax.store'),
-                'cart_store'     => localized_route('localized.catalog.cart.store'),
+            'is_empty' => true,
+            'totals' => $totals,
+            'routes' => [
+                'modal_index' => localized_route('localized.catalog.cart-modal-ajax.index'),
+                'modal_store' => localized_route('localized.catalog.cart-modal-ajax.store'),
+                'cart_store' => localized_route('localized.catalog.cart.store'),
                 'order_validate' => localized_route('localized.catalog.order-confirm.validate'),
-                'order_store'    => localized_route('localized.catalog.order-confirm.store'),
+                'order_store' => localized_route('localized.catalog.order-confirm.store'),
             ],
         ];
     }

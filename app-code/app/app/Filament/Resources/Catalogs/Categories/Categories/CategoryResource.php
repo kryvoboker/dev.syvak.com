@@ -50,9 +50,9 @@ class CategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListCategories::route('/'),
+            'index' => ListCategories::route('/'),
             'create' => CreateCategory::route('/create'),
-            'edit'   => EditCategory::route('/{record}/edit'),
+            'edit' => EditCategory::route('/{record}/edit'),
         ];
     }
 

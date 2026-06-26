@@ -23,8 +23,8 @@ class CategoryPath extends Model
     {
         return [
             'category_id' => 'integer',
-            'path_id'     => 'integer',
-            'level'       => 'integer',
+            'path_id' => 'integer',
+            'level' => 'integer',
         ];
     }
 

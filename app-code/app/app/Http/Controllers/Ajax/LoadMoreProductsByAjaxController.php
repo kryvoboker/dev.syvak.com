@@ -19,7 +19,7 @@ class LoadMoreProductsByAjaxController extends Controller
         string $locale,
         ?string $slug,
     ): JsonResponse {
-        $locale    = normalize_locale($locale);
+        $locale = normalize_locale($locale);
         $page_type = $request->query('page_type');
 
         try {
@@ -33,19 +33,19 @@ class LoadMoreProductsByAjaxController extends Controller
             $html = view('catalog.pages.partials.category.category-content-container', $response_data)->render();
 
             return response()->json([
-                'html'              => $html,
-                'success'           => Arr::get($response_data, 'success', false),
+                'html' => $html,
+                'success' => Arr::get($response_data, 'success', false),
                 'is_has_more_pages' => Arr::get($response_data, 'is_has_more_pages', false),
-                'next_page'         => Arr::get($response_data, 'next_page'),
+                'next_page' => Arr::get($response_data, 'next_page'),
             ]);
         } catch (Throwable $e) {
             report($e);
 
             return response()->json([
-                'success'           => false,
-                'message'           => __('catalog/default.errors.filtering_products'),
-                'paginator'         => null,
-                'next_page'         => null,
+                'success' => false,
+                'message' => __('catalog/default.errors.filtering_products'),
+                'paginator' => null,
+                'next_page' => null,
                 'is_has_more_pages' => false,
             ]);
         }

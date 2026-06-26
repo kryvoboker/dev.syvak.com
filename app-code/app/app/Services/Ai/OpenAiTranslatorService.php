@@ -15,20 +15,21 @@ final readonly class OpenAiTranslatorService
     public function __construct(
         private Client $client,
         private OpenAiRateLimiterService $rate_limiter,
-    ) {}
+    ) {
+    }
 
     /**
      * @throws RuntimeException
      */
     public function translate(string $prompt): string
     {
-        $app_settings                = get_app_settings();
-        $model                       = (string) data_get($app_settings, 'ai_settings.api_model', (string) config('open-ai.api_model'));
-        $max_tokens                  = (int) data_get($app_settings, 'ai_settings.api_max_tokens', (int) config('open-ai.api_max_tokens'));
-        $system                      = (string) data_get($app_settings, 'ai_settings.system_prompt', (string) config('open-ai.system_prompt'));
-        $max_retries                 = (int) data_get($app_settings, 'ai_settings.api_max_retries', (int) config('open-ai.api_max_retries'));
+        $app_settings = get_app_settings();
+        $model = (string) data_get($app_settings, 'ai_settings.api_model', (string) config('open-ai.api_model'));
+        $max_tokens = (int) data_get($app_settings, 'ai_settings.api_max_tokens', (int) config('open-ai.api_max_tokens'));
+        $system = (string) data_get($app_settings, 'ai_settings.system_prompt', (string) config('open-ai.system_prompt'));
+        $max_retries = (int) data_get($app_settings, 'ai_settings.api_max_retries', (int) config('open-ai.api_max_retries'));
         $max_retry_wait_time_seconds = (int) data_get($app_settings, 'ai_settings.api_max_retry_wait_time_seconds', (int) config('open-ai.api_max_retry_wait_time_seconds'));
-        $fallback_wait               = (int) data_get($app_settings, 'ai_settings.api_wait_time_seconds', (int) config('open-ai.api_wait_time_seconds'));
+        $fallback_wait = (int) data_get($app_settings, 'ai_settings.api_wait_time_seconds', (int) config('open-ai.api_wait_time_seconds'));
 
         $attempts = 0;
 
@@ -40,9 +41,9 @@ final readonly class OpenAiTranslatorService
                 $this->rate_limiter->throttle();
 
                 $resp = $this->client->chat()->create([
-                    'model'                 => $model,
+                    'model' => $model,
                     'max_completion_tokens' => $max_tokens,
-                    'messages'              => [
+                    'messages' => [
                         ['role' => 'system', 'content' => $system],
                         ['role' => 'user', 'content' => $prompt],
                     ],
@@ -104,7 +105,7 @@ final readonly class OpenAiTranslatorService
 
         // 2) According to (best-effort)
         $msg = $e->getMessage();
-        $m   = Str::match('~retry[- ]after[: ]+(\d+)~i', $msg);
+        $m = Str::match('~retry[- ]after[: ]+(\d+)~i', $msg);
 
         if (! empty($m)) {
             return (int) $m[1];

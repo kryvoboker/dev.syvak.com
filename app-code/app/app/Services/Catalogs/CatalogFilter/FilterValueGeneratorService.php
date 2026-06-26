@@ -42,7 +42,7 @@ class FilterValueGeneratorService
             foreach ($groups as $group) {
                 $summary = match ($group->source_type) {
                     CatalogFilterGroupSourceTypeEnum::Attribute => $this->syncAttributeValues($group),
-                    default                                     => [
+                    default => [
                         'created_count' => 0,
                         'updated_count' => 0,
                         'removed_count' => 0,
@@ -62,14 +62,14 @@ class FilterValueGeneratorService
                 'created_count' => $created_count,
                 'updated_count' => $updated_count,
                 'removed_count' => $removed_count,
-                'total_values'  => $total_values,
+                'total_values' => $total_values,
             ];
         } catch (Throwable $throwable) {
             Log::channel('stack')->error(
                 'Catalog filter values synchronization failed.',
                 [
                     'catalog_filter_set_id' => (int) $filter_set->id,
-                    'exception'             => $throwable,
+                    'exception' => $throwable,
                 ],
             );
 
@@ -94,37 +94,37 @@ class FilterValueGeneratorService
 
         $value_options = $this->resolveAttributeValueOptions($attribute_id);
 
-        $active_codes  = [];
+        $active_codes = [];
         $created_count = 0;
         $updated_count = 0;
 
         foreach ($value_options as $sort_index => $value_option) {
             $canonical_key = (string) Arr::get($value_option, 'canonical_key', '');
-            $value_label   = (string) Arr::get($value_option, 'canonical_label', '');
+            $value_label = (string) Arr::get($value_option, 'canonical_label', '');
 
             if (blank($canonical_key) || blank($value_label)) {
                 continue;
             }
 
-            $value_code     = $this->buildValueCode($canonical_key);
+            $value_code = $this->buildValueCode($canonical_key);
             $active_codes[] = $value_code;
 
             $value = CatalogFilterValue::query()->firstOrNew([
                 'catalog_filter_group_id' => (int) $group->id,
-                'code'                    => $value_code,
+                'code' => $value_code,
             ]);
 
             $was_existing_value = $value->exists;
 
             $value->fill([
-                'value_type'   => CatalogFilterValueTypeEnum::String->value,
+                'value_type' => CatalogFilterValueTypeEnum::String->value,
                 'value_string' => $value_label,
                 'value_number' => null,
-                'range_from'   => null,
-                'range_to'     => null,
-                'is_enabled'   => true,
-                'sort_order'   => ($sort_index + 1) * 10,
-                'meta'         => [],
+                'range_from' => null,
+                'range_to' => null,
+                'is_enabled' => true,
+                'sort_order' => ($sort_index + 1) * 10,
+                'meta' => [],
             ]);
             $value->save();
 
@@ -164,7 +164,7 @@ class FilterValueGeneratorService
             CatalogFilterValueTranslation::query()->updateOrCreate(
                 [
                     'catalog_filter_value_id' => (int) $value->id,
-                    'language_id'             => (int) $language->id,
+                    'language_id' => (int) $language->id,
                 ],
                 [
                     'label' => filled($translated_label) ? $translated_label : $fallback_label,
@@ -200,14 +200,14 @@ class FilterValueGeneratorService
         }
 
         $preferred_language_ids = $this->resolvePreferredLanguageIds();
-        $options_by_key         = [];
+        $options_by_key = [];
 
         foreach (collect($attribute_rows)->groupBy('product_variant_id') as $product_rows) {
             $labels_by_language = [];
 
             foreach ($product_rows as $product_row) {
                 $language_id = (int) $product_row->language_id;
-                $label       = trim((string) $product_row->value_string);
+                $label = trim((string) $product_row->value_string);
 
                 if ($language_id <= 0 || blank($label)) {
                     continue;
@@ -221,17 +221,17 @@ class FilterValueGeneratorService
             }
 
             $canonical_label = $this->resolveCanonicalLabel($labels_by_language, $preferred_language_ids);
-            $canonical_key   = $this->normalizeValueKey($canonical_label);
+            $canonical_key = $this->normalizeValueKey($canonical_label);
 
             if (blank($canonical_key)) {
                 continue;
             }
 
             $option = $options_by_key[$canonical_key] ?? [
-                'canonical_key'      => $canonical_key,
-                'canonical_label'    => $canonical_label,
+                'canonical_key' => $canonical_key,
+                'canonical_label' => $canonical_label,
                 'labels_by_language' => [],
-                'labels_frequency'   => [],
+                'labels_frequency' => [],
             ];
 
             $option['canonical_label'] = $option['canonical_label'] ?: $canonical_label;
@@ -243,7 +243,7 @@ class FilterValueGeneratorService
                     continue;
                 }
 
-                $option['labels_frequency'][$language_id][$normalized_label_key]   = ($option['labels_frequency'][$language_id][$normalized_label_key] ?? 0) + 1;
+                $option['labels_frequency'][$language_id][$normalized_label_key] = ($option['labels_frequency'][$language_id][$normalized_label_key] ?? 0) + 1;
                 $option['labels_by_language'][$language_id][$normalized_label_key] = $label;
             }
 
@@ -258,7 +258,7 @@ class FilterValueGeneratorService
                 foreach ($option['labels_frequency'] as $language_id => $variants_frequency) {
                     arsort($variants_frequency);
                     $selected_variant_key = (string) array_key_first($variants_frequency);
-                    $variant_labels       = (array) ($option['labels_by_language'][$language_id] ?? []);
+                    $variant_labels = (array) ($option['labels_by_language'][$language_id] ?? []);
 
                     $selected_label = (string) ($variant_labels[$selected_variant_key] ?? '');
 
@@ -270,7 +270,7 @@ class FilterValueGeneratorService
                 $canonical_label = trim((string) $option['canonical_label']);
 
                 return [
-                    'canonical_key'   => (string) $option['canonical_key'],
+                    'canonical_key' => (string) $option['canonical_key'],
                     'canonical_label' => filled($canonical_label)
                         ? $canonical_label
                         : (string) (collect($labels_by_language)->first() ?? ''),

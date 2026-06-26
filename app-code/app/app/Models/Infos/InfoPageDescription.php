@@ -26,7 +26,7 @@ class InfoPageDescription extends Model
     {
         return [
             'info_page_id' => 'integer',
-            'language_id'  => 'integer',
+            'language_id' => 'integer',
         ];
     }
 

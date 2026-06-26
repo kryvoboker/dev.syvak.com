@@ -57,7 +57,7 @@ class AlyoAdminPanelProvider extends PanelProvider
                     $languages = (new Language())->getActiveLanguages();
 
                     return view('filament.hooks.language-switcher', [
-                        'languages'      => $languages,
+                        'languages' => $languages,
                         'current_locale' => app()->getLocale(),
                     ]);
                 },

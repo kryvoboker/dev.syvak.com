@@ -21,7 +21,7 @@ class CategoryPageSettingsForm
     public static function configure(Schema $schema): Schema
     {
         $active_languages = (new Language())->getActiveLanguages();
-        $language_tabs    = [];
+        $language_tabs = [];
 
         foreach ($active_languages as $language) {
             $language_id = (string) $language->id;

@@ -19,17 +19,17 @@ class ProductFactory extends Factory
         $sku = (string) $this->faker->unique()->numberBetween(10000, 99999);
 
         return [
-            'model'          => $sku,
-            'sku'            => $sku,
-            'ean'            => $this->faker->optional()->ean13(),
-            'quantity'       => 0,
-            'minimum'        => 1,
-            'image'          => null,
-            'price'          => $this->faker->randomFloat(2, 100, 5000),
-            'viewed'         => 0,
-            'is_active'      => true,
+            'model' => $sku,
+            'sku' => $sku,
+            'ean' => $this->faker->optional()->ean13(),
+            'quantity' => 0,
+            'minimum' => 1,
+            'image' => null,
+            'price' => $this->faker->randomFloat(2, 100, 5000),
+            'viewed' => 0,
+            'is_active' => true,
             'date_available' => now(config('app.timezone')),
-            'date_added'     => now(config('app.timezone')),
+            'date_added' => now(config('app.timezone')),
         ];
     }
 }

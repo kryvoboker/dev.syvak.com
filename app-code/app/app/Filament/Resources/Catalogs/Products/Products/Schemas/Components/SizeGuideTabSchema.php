@@ -50,13 +50,13 @@ class SizeGuideTabSchema
     {
         $upload_max_size_kb = (int) config('app.images.product.upload.max_size_kb', 5120);
         $upload_max_size_mb = self::resolveMegabytesFromKilobytes($upload_max_size_kb);
-        $upload_directory   = resolve_upload_path_placeholders((string) config('app.images.product.image_path', 'images/products/{year}/{month}/'));
+        $upload_directory = resolve_upload_path_placeholders((string) config('app.images.product.image_path', 'images/products/{year}/{month}/'));
 
         return $active_languages
             ->map(function (Language $language) use ($upload_max_size_kb, $upload_max_size_mb, $upload_directory): Tab {
                 $language_path = "size_guide_data.translations.$language->id";
-                $table_path    = "$language_path.table_rows";
-                $image_path    = "$language_path.image";
+                $table_path = "$language_path.table_rows";
+                $image_path = "$language_path.image";
 
                 return Tab::make((string) $language->name)
                     ->badge((string) $language->code)

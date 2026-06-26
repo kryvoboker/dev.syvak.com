@@ -34,16 +34,16 @@ class CatalogFilterSet extends Model
     protected function casts(): array
     {
         return [
-            'context_type'                   => CatalogFilterContextTypeEnum::class,
-            'context_types'                  => 'array',
-            'is_enabled'                     => 'boolean',
-            'is_price_filter_enabled'        => 'boolean',
+            'context_type' => CatalogFilterContextTypeEnum::class,
+            'context_types' => 'array',
+            'is_enabled' => 'boolean',
+            'is_price_filter_enabled' => 'boolean',
             'is_attribute_filtering_enabled' => 'boolean',
-            'price_source_mode'              => CatalogFilterPriceSourceModeEnum::class,
-            'facet_strategy'                 => CatalogFilterFacetStrategyEnum::class,
-            'discount_only_policy'           => CatalogFilterDiscountOnlyPolicyEnum::class,
-            'min_stock_quantity'             => 'integer',
-            'settings'                       => 'array',
+            'price_source_mode' => CatalogFilterPriceSourceModeEnum::class,
+            'facet_strategy' => CatalogFilterFacetStrategyEnum::class,
+            'discount_only_policy' => CatalogFilterDiscountOnlyPolicyEnum::class,
+            'min_stock_quantity' => 'integer',
+            'settings' => 'array',
         ];
     }
 

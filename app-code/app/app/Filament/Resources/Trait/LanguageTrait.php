@@ -53,7 +53,7 @@ trait LanguageTrait
     protected static function tryGetCurrentLanguageIdFromActiveLangs(Collection $active_languages): ?int
     {
         /** @var Language $language */
-        $language            = $active_languages->where('is_default', true)->first();
+        $language = $active_languages->where('is_default', true)->first();
         $current_language_id = $language->id;
 
         if (self::validateLanguageIdIsNotNull($current_language_id) !== null) {

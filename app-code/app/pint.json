@@ -1,5 +1,5 @@
 {
-    "preset": "laravel",
+    "preset": "psr12",
     "rules": {
         "declare_strict_types": true,
         "ordered_imports": {
@@ -20,11 +20,7 @@
         "phpdoc_order": true,
         "phpdoc_trim": true,
         "binary_operator_spaces": {
-            "default": "single_space",
-            "operators": {
-                "=": "align_single_space_minimal",
-                "=>": "align_single_space_minimal"
-            }
+            "default": "single_space"
         },
         "simplified_null_return": true,
         "array_indentation": false,

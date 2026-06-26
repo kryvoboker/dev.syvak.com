@@ -22,7 +22,8 @@ readonly class ModuleProviderResolverService
 {
     public function __construct(
         private ModuleClassResolverService $module_class_resolver_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return list<class-string>
@@ -97,7 +98,7 @@ readonly class ModuleProviderResolverService
                 if ($provider_class === null) {
                     Log::channel('stack')->warning('Module provider class could not be resolved.', [
                         'module_definition_id' => $definition->id,
-                        'module_name'          => $definition->nwidart_name,
+                        'module_name' => $definition->nwidart_name,
                     ]);
                 }
 
@@ -164,9 +165,9 @@ readonly class ModuleProviderResolverService
         if (filled($strategy)) {
             Log::channel('stack')->warning('Invalid module provider loading strategy. Fallback to default strategy.', [
                 'module_definition_id' => $definition?->id,
-                'module_name'          => $definition?->nwidart_name,
-                'provided_strategy'    => $strategy,
-                'default_strategy'     => $default_strategy,
+                'module_name' => $definition?->nwidart_name,
+                'provided_strategy' => $strategy,
+                'default_strategy' => $default_strategy,
             ]);
         }
 

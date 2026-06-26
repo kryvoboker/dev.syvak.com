@@ -35,7 +35,7 @@ class PageSettingsBootstrapService
         $settings = $this->getCategorySettings();
 
         return [
-            'width'  => max(1, (int) Arr::get($settings, 'images.products.width', (int) config('app.page_settings.category.product_image_width', 420))),
+            'width' => max(1, (int) Arr::get($settings, 'images.products.width', (int) config('app.page_settings.category.product_image_width', 420))),
             'height' => max(1, (int) Arr::get($settings, 'images.products.height', (int) config('app.page_settings.category.product_image_height', 420))),
         ];
     }
@@ -301,7 +301,7 @@ class PageSettingsBootstrapService
         $settings = $this->getSearchSettings();
 
         return [
-            'width'  => max(1, (int) Arr::get($settings, 'images.search_product.width', (int) config('app.page_settings.search.images.search_product.width', 219))),
+            'width' => max(1, (int) Arr::get($settings, 'images.search_product.width', (int) config('app.page_settings.search.images.search_product.width', 219))),
             'height' => max(1, (int) Arr::get($settings, 'images.search_product.height', (int) config('app.page_settings.search.images.search_product.height', 219))),
         ];
     }
@@ -321,7 +321,7 @@ class PageSettingsBootstrapService
                 'images.search_not_found.path',
                 (string) Arr::get(config('app.page_settings.search', []), 'images.search_not_found.path', config('app.images.default_image_search_not_found')),
             ),
-            'width'  => max(1, (int) Arr::get($settings, 'images.search_not_found.width', (int) config('app.page_settings.search.images.search_not_found.width', 600))),
+            'width' => max(1, (int) Arr::get($settings, 'images.search_not_found.width', (int) config('app.page_settings.search.images.search_not_found.width', 600))),
             'height' => max(1, (int) Arr::get($settings, 'images.search_not_found.height', (int) config('app.page_settings.search.images.search_not_found.height', 600))),
         ];
     }
@@ -451,17 +451,17 @@ class PageSettingsBootstrapService
     private function resolveCategoryDefaults(): array
     {
         return [
-            'products_per_page_limit'       => (int) config('app.page_settings.category.products_per_page_limit', 20),
+            'products_per_page_limit' => (int) config('app.page_settings.category.products_per_page_limit', 20),
             'ajax_products_loading_enabled' => (bool) config('app.page_settings.category.ajax_products_loading_enabled', true),
-            'product_image_width'           => (int) config('app.page_settings.category.product_image_width', 420),
-            'product_image_height'          => (int) config('app.page_settings.category.product_image_height', 420),
-            'category_upload_max_size_kb'   => max(1, (int) config('app.images.category.upload.max_size_kb', 5120)),
-            'category_upload_directory'     => normalize_upload_path_template((string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))),
-            'category_no_image_path'        => (string) config('app.images.category.no_image', 'images/no-image.png'),
-            'category_preview_list_width'   => max(1, (int) config('app.images.category.preview_in_list_in_admin.width', 100)),
-            'category_preview_list_height'  => max(1, (int) config('app.images.category.preview_in_list_in_admin.height', 100)),
-            'category_preview_page_width'   => max(1, (int) config('app.images.category.preview_in_page_in_admin.width', 500)),
-            'category_preview_page_height'  => max(1, (int) config('app.images.category.preview_in_page_in_admin.height', 500)),
+            'product_image_width' => (int) config('app.page_settings.category.product_image_width', 420),
+            'product_image_height' => (int) config('app.page_settings.category.product_image_height', 420),
+            'category_upload_max_size_kb' => max(1, (int) config('app.images.category.upload.max_size_kb', 5120)),
+            'category_upload_directory' => normalize_upload_path_template((string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))),
+            'category_no_image_path' => (string) config('app.images.category.no_image', 'images/no-image.png'),
+            'category_preview_list_width' => max(1, (int) config('app.images.category.preview_in_list_in_admin.width', 100)),
+            'category_preview_list_height' => max(1, (int) config('app.images.category.preview_in_list_in_admin.height', 100)),
+            'category_preview_page_width' => max(1, (int) config('app.images.category.preview_in_page_in_admin.width', 500)),
+            'category_preview_page_height' => max(1, (int) config('app.images.category.preview_in_page_in_admin.height', 500)),
         ];
     }
 
@@ -545,7 +545,7 @@ class PageSettingsBootstrapService
 
         return [
             'products_per_page_limit' => max(1, (int) config('app.page_settings.search.products_per_page_limit', 15)),
-            'search_product_width'    => max(
+            'search_product_width' => max(
                 1,
                 (int) Arr::get((array) $legacy_search_product_size, 'width', (int) config('app.page_settings.search.images.search_product.width', 219)),
             ),
@@ -600,30 +600,30 @@ class PageSettingsBootstrapService
                 ],
             ],
             'pagination' => [
-                'products_per_page_limit'       => max(1, $products_per_page_limit),
+                'products_per_page_limit' => max(1, $products_per_page_limit),
                 'ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
             ],
             'images' => [
                 'products' => [
-                    'width'  => max(1, $product_image_width),
+                    'width' => max(1, $product_image_width),
                     'height' => max(1, $product_image_height),
                 ],
             ],
             'admin' => [
                 'upload' => [
                     'max_size_kb' => max(1, $category_upload_max_size_kb),
-                    'directory'   => $category_upload_directory,
+                    'directory' => $category_upload_directory,
                 ],
                 'images' => [
                     'no_image' => [
                         'path' => $category_no_image_path,
                     ],
                     'preview_in_list' => [
-                        'width'  => max(1, $category_preview_list_width),
+                        'width' => max(1, $category_preview_list_width),
                         'height' => max(1, $category_preview_list_height),
                     ],
                     'preview_in_page' => [
-                        'width'  => max(1, $category_preview_page_width),
+                        'width' => max(1, $category_preview_page_width),
                         'height' => max(1, $category_preview_page_height),
                     ],
                 ],
@@ -713,7 +713,7 @@ class PageSettingsBootstrapService
                 ],
                 'images' => [
                     'product' => [
-                        'width'  => $defaults['customer_image_width'],
+                        'width' => $defaults['customer_image_width'],
                         'height' => $defaults['customer_image_height'],
                     ],
                 ],
@@ -724,18 +724,18 @@ class PageSettingsBootstrapService
                 ],
                 'upload' => [
                     'max_size_kb' => $defaults['admin_upload_max_size_kb'],
-                    'directory'   => $defaults['admin_image_upload_directory'],
+                    'directory' => $defaults['admin_image_upload_directory'],
                 ],
                 'images' => [
                     'no_image' => [
                         'path' => $defaults['admin_no_image_path'],
                     ],
                     'preview_in_list' => [
-                        'width'  => $defaults['admin_preview_in_list_width'],
+                        'width' => $defaults['admin_preview_in_list_width'],
                         'height' => $defaults['admin_preview_in_list_height'],
                     ],
                     'preview_in_page' => [
-                        'width'  => $defaults['admin_preview_in_page_width'],
+                        'width' => $defaults['admin_preview_in_page_width'],
                         'height' => $defaults['admin_preview_in_page_height'],
                     ],
                 ],
@@ -769,16 +769,16 @@ class PageSettingsBootstrapService
         $settings = array_replace_recursive(
             $this->buildProductSettingsContract([
                 'customer_minimum_stock_quantity' => max(0, (int) Arr::get($settings, 'customer.stock.minimum_stock_quantity', $defaults['customer_minimum_stock_quantity'])),
-                'customer_image_width'            => max(1, (int) Arr::get($settings, 'customer.images.product.width', (int) Arr::get($settings, 'images.product.width', $defaults['customer_image_width']))),
-                'customer_image_height'           => max(1, (int) Arr::get($settings, 'customer.images.product.height', (int) Arr::get($settings, 'images.product.height', $defaults['customer_image_height']))),
-                'admin_ean_max_length'            => max(1, (int) Arr::get($settings, 'admin.validation.ean_max_length', (int) Arr::get($settings, 'validation.ean_max_length', $defaults['admin_ean_max_length']))),
-                'admin_upload_max_size_kb'        => max(1, (int) Arr::get($settings, 'admin.upload.max_size_kb', $defaults['admin_upload_max_size_kb'])),
-                'admin_image_upload_directory'    => (string) Arr::get($settings, 'admin.upload.directory', $defaults['admin_image_upload_directory']),
-                'admin_no_image_path'             => (string) Arr::get($settings, 'admin.images.no_image.path', $defaults['admin_no_image_path']),
-                'admin_preview_in_list_width'     => max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.width', $defaults['admin_preview_in_list_width'])),
-                'admin_preview_in_list_height'    => max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.height', $defaults['admin_preview_in_list_height'])),
-                'admin_preview_in_page_width'     => max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.width', $defaults['admin_preview_in_page_width'])),
-                'admin_preview_in_page_height'    => max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.height', $defaults['admin_preview_in_page_height'])),
+                'customer_image_width' => max(1, (int) Arr::get($settings, 'customer.images.product.width', (int) Arr::get($settings, 'images.product.width', $defaults['customer_image_width']))),
+                'customer_image_height' => max(1, (int) Arr::get($settings, 'customer.images.product.height', (int) Arr::get($settings, 'images.product.height', $defaults['customer_image_height']))),
+                'admin_ean_max_length' => max(1, (int) Arr::get($settings, 'admin.validation.ean_max_length', (int) Arr::get($settings, 'validation.ean_max_length', $defaults['admin_ean_max_length']))),
+                'admin_upload_max_size_kb' => max(1, (int) Arr::get($settings, 'admin.upload.max_size_kb', $defaults['admin_upload_max_size_kb'])),
+                'admin_image_upload_directory' => (string) Arr::get($settings, 'admin.upload.directory', $defaults['admin_image_upload_directory']),
+                'admin_no_image_path' => (string) Arr::get($settings, 'admin.images.no_image.path', $defaults['admin_no_image_path']),
+                'admin_preview_in_list_width' => max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.width', $defaults['admin_preview_in_list_width'])),
+                'admin_preview_in_list_height' => max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.height', $defaults['admin_preview_in_list_height'])),
+                'admin_preview_in_page_width' => max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.width', $defaults['admin_preview_in_page_width'])),
+                'admin_preview_in_page_height' => max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.height', $defaults['admin_preview_in_page_height'])),
             ]),
             $settings,
         );
@@ -834,12 +834,12 @@ class PageSettingsBootstrapService
             ],
             'images' => [
                 'search_product' => [
-                    'width'  => $defaults['search_product_width'],
+                    'width' => $defaults['search_product_width'],
                     'height' => $defaults['search_product_height'],
                 ],
                 'search_not_found' => [
-                    'path'   => $defaults['search_not_found_path'],
-                    'width'  => $defaults['search_not_found_width'],
+                    'path' => $defaults['search_not_found_path'],
+                    'width' => $defaults['search_not_found_width'],
                     'height' => $defaults['search_not_found_height'],
                 ],
             ],
@@ -860,10 +860,10 @@ class PageSettingsBootstrapService
         $settings = array_replace_recursive(
             $this->buildSearchSettingsContract([
                 'products_per_page_limit' => max(1, (int) Arr::get($settings, 'pagination.products_per_page_limit', $defaults['products_per_page_limit'])),
-                'search_product_width'    => max(1, (int) Arr::get($settings, 'images.search_product.width', $defaults['search_product_width'])),
-                'search_product_height'   => max(1, (int) Arr::get($settings, 'images.search_product.height', $defaults['search_product_height'])),
-                'search_not_found_path'   => (string) Arr::get($settings, 'images.search_not_found.path', $defaults['search_not_found_path']),
-                'search_not_found_width'  => max(1, (int) Arr::get($settings, 'images.search_not_found.width', $defaults['search_not_found_width'])),
+                'search_product_width' => max(1, (int) Arr::get($settings, 'images.search_product.width', $defaults['search_product_width'])),
+                'search_product_height' => max(1, (int) Arr::get($settings, 'images.search_product.height', $defaults['search_product_height'])),
+                'search_not_found_path' => (string) Arr::get($settings, 'images.search_not_found.path', $defaults['search_not_found_path']),
+                'search_not_found_width' => max(1, (int) Arr::get($settings, 'images.search_not_found.width', $defaults['search_not_found_width'])),
                 'search_not_found_height' => max(1, (int) Arr::get($settings, 'images.search_not_found.height', $defaults['search_not_found_height'])),
             ]),
             $settings,
@@ -895,17 +895,17 @@ class PageSettingsBootstrapService
         $sorting_items = [];
 
         foreach ($this->getDefaultSortingItemPayloads() as $index => $item_payload) {
-            $code          = (string) $item_payload['code'];
+            $code = (string) $item_payload['code'];
             $existing_item = $existing_items->get($code, []);
 
             $sorting_items[] = [
-                'code'        => $code,
+                'code' => $code,
                 'source_type' => (string) Arr::get($existing_item, 'source_type', $item_payload['source_type']),
-                'source_id'   => Arr::get($existing_item, 'source_id'),
-                'is_enabled'  => (bool) Arr::get($existing_item, 'is_enabled', true),
-                'sort_order'  => (int) Arr::get($existing_item, 'sort_order', ($index + 1) * 10),
-                'get'         => array_replace_recursive((array) $item_payload['get'], (array) Arr::get($existing_item, 'get', [])),
-                'config'      => array_replace_recursive((array) $item_payload['config'], (array) Arr::get($existing_item, 'config', [])),
+                'source_id' => Arr::get($existing_item, 'source_id'),
+                'is_enabled' => (bool) Arr::get($existing_item, 'is_enabled', true),
+                'sort_order' => (int) Arr::get($existing_item, 'sort_order', ($index + 1) * 10),
+                'get' => array_replace_recursive((array) $item_payload['get'], (array) Arr::get($existing_item, 'get', [])),
+                'config' => array_replace_recursive((array) $item_payload['config'], (array) Arr::get($existing_item, 'config', [])),
             ];
         }
 
@@ -918,7 +918,7 @@ class PageSettingsBootstrapService
 
     private function syncMissingTranslations(PageSetting $page_setting): void
     {
-        $settings       = is_array($page_setting->settings) ? $page_setting->settings : [];
+        $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
         $localized_data = Arr::get($settings, 'localized', []);
 
         if (! is_array($localized_data)) {
@@ -967,34 +967,34 @@ class PageSettingsBootstrapService
     {
         return [
             [
-                'code'        => 'default',
+                'code' => 'default',
                 'source_type' => 'static',
-                'get'         => ['key' => 'sort', 'value' => 'default', 'extra' => []],
-                'config'      => ['selection' => 'single'],
+                'get' => ['key' => 'sort', 'value' => 'default', 'extra' => []],
+                'config' => ['selection' => 'single'],
             ],
             [
-                'code'        => 'newest',
+                'code' => 'newest',
                 'source_type' => 'static',
-                'get'         => ['key' => 'sort', 'value' => 'newest', 'extra' => []],
-                'config'      => ['selection' => 'single'],
+                'get' => ['key' => 'sort', 'value' => 'newest', 'extra' => []],
+                'config' => ['selection' => 'single'],
             ],
             [
-                'code'        => 'bestsellers',
+                'code' => 'bestsellers',
                 'source_type' => 'static',
-                'get'         => ['key' => 'sort', 'value' => 'bestsellers', 'extra' => []],
-                'config'      => ['selection' => 'single'],
+                'get' => ['key' => 'sort', 'value' => 'bestsellers', 'extra' => []],
+                'config' => ['selection' => 'single'],
             ],
             [
-                'code'        => 'price-asc',
+                'code' => 'price-asc',
                 'source_type' => 'static',
-                'get'         => ['key' => 'sort', 'value' => 'price-asc', 'extra' => []],
-                'config'      => ['selection' => 'single'],
+                'get' => ['key' => 'sort', 'value' => 'price-asc', 'extra' => []],
+                'config' => ['selection' => 'single'],
             ],
             [
-                'code'        => 'price-desc',
+                'code' => 'price-desc',
                 'source_type' => 'static',
-                'get'         => ['key' => 'sort', 'value' => 'price-desc', 'extra' => []],
-                'config'      => ['selection' => 'single'],
+                'get' => ['key' => 'sort', 'value' => 'price-desc', 'extra' => []],
+                'config' => ['selection' => 'single'],
             ],
         ];
     }
@@ -1006,7 +1006,7 @@ class PageSettingsBootstrapService
     {
         return [
             'sorting' => [
-                'title'       => '',
+                'title' => '',
                 'description' => '',
             ],
         ];
@@ -1024,13 +1024,13 @@ class PageSettingsBootstrapService
                 $item_get = Arr::get($item, 'get', []);
 
                 return [
-                    'code'        => (string) Arr::get($item, 'code', ''),
-                    'is_enabled'  => (bool) Arr::get($item, 'is_enabled', true),
-                    'sort_order'  => max(0, (int) Arr::get($item, 'sort_order', 0)),
+                    'code' => (string) Arr::get($item, 'code', ''),
+                    'is_enabled' => (bool) Arr::get($item, 'is_enabled', true),
+                    'sort_order' => max(0, (int) Arr::get($item, 'sort_order', 0)),
                     'source_type' => Arr::get($item, 'source_type'),
-                    'source_id'   => Arr::get($item, 'source_id'),
-                    'get'         => [
-                        'key'   => (string) Arr::get($item_get, 'key', ''),
+                    'source_id' => Arr::get($item, 'source_id'),
+                    'get' => [
+                        'key' => (string) Arr::get($item_get, 'key', ''),
                         'value' => Arr::get($item_get, 'value'),
                         'extra' => is_array(Arr::get($item_get, 'extra')) ? Arr::get($item_get, 'extra') : [],
                     ],

@@ -40,9 +40,9 @@ class ProductVariantResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListProductVariants::route('/'),
+            'index' => ListProductVariants::route('/'),
             'create' => CreateProductVariant::route('/create'),
-            'edit'   => EditProductVariant::route('/{record}/edit'),
+            'edit' => EditProductVariant::route('/{record}/edit'),
         ];
     }
 

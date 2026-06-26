@@ -13,7 +13,8 @@ readonly class ModuleInstanceSettingsNormalizerService
 {
     public function __construct(
         private ModuleClassResolverService $module_class_resolver_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<string, mixed>  $attributes
@@ -31,11 +32,11 @@ readonly class ModuleInstanceSettingsNormalizerService
 
         Log::channel('daily')->info('Normalizing module instance settings for definition.', [
             'definition_id' => $definition->id,
-            'nwidart_name'  => $definition->nwidart_name,
+            'nwidart_name' => $definition->nwidart_name,
         ]);
 
         /** @var object{normalize: callable} $normalizer */
-        $normalizer             = app($normalizer_class);
+        $normalizer = app($normalizer_class);
         $attributes['settings'] = $normalizer->normalize(is_array($settings) ? $settings : []);
 
         return $attributes;

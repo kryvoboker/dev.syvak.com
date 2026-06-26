@@ -26,21 +26,21 @@ class ModuleDiscoveryService
             $discovered_modules = collect($modules)
                 ->map(function (NwidartModule $module): array {
                     return [
-                        'name'                     => $module->getStudlyName(),
-                        'slug'                     => $module->getKebabName(),
-                        'nwidart_name'             => $module->getName(),
-                        'module_path'              => $module->getPath(),
-                        'description'              => $module->getDescription(),
-                        'is_installed'             => true,
+                        'name' => $module->getStudlyName(),
+                        'slug' => $module->getKebabName(),
+                        'nwidart_name' => $module->getName(),
+                        'module_path' => $module->getPath(),
+                        'description' => $module->getDescription(),
+                        'is_installed' => true,
                         'is_enabled_in_filesystem' => $module->isEnabled(),
-                        'settings_schema'          => [],
-                        'meta'                     => [
-                            'priority'      => $module->getPriority(),
-                            'keywords'      => $module->get('keywords', []),
-                            'aliases'       => $module->get('aliases', []),
-                            'files'         => $module->get('files', []),
-                            'providers'     => $module->get('providers', []),
-                            'requires'      => $module->get('requires', []),
+                        'settings_schema' => [],
+                        'meta' => [
+                            'priority' => $module->getPriority(),
+                            'keywords' => $module->get('keywords', []),
+                            'aliases' => $module->get('aliases', []),
+                            'files' => $module->get('files', []),
+                            'providers' => $module->get('providers', []),
+                            'requires' => $module->get('requires', []),
                             'composer_name' => $module->getComposerAttr('name'),
                         ],
                     ];

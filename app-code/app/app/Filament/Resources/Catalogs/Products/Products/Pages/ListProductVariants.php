@@ -60,7 +60,7 @@ class ListProductVariants extends ListRecords
                     ->label(__('admin/default.buttons.edit'))
                     ->icon('heroicon-o-pencil-square')
                     ->url(fn ($record): string => ProductVariantResource::getUrl('edit', [
-                        'record'  => $record,
+                        'record' => $record,
                         'product' => $this->product_id,
                     ])),
                 DeleteAction::make(),

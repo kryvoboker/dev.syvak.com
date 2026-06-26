@@ -30,7 +30,7 @@ class EditProductVariant extends EditRecord
     {
         parent::mount($record);
 
-        $query_product_id  = request()->integer('product');
+        $query_product_id = request()->integer('product');
         $record_product_id = (int) data_get($this->getRecord(), 'product_id');
 
         if ($query_product_id !== null && $query_product_id > 0 && $query_product_id !== $record_product_id) {
@@ -137,7 +137,7 @@ class EditProductVariant extends EditRecord
 
         foreach ($slug_rows as $slug_row) {
             $language_id = (int) ($slug_row['language_id'] ?? 0);
-            $slug_value  = Str::of((string) ($slug_row['slug'] ?? ''))->trim()->toString();
+            $slug_value = Str::of((string) ($slug_row['slug'] ?? ''))->trim()->toString();
 
             if ($language_id < 1 || $slug_value === '') {
                 continue;
@@ -172,7 +172,7 @@ class EditProductVariant extends EditRecord
             return;
         }
 
-        $product_id         = (int) $this->product_id;
+        $product_id = (int) $this->product_id;
         $current_variant_id = (int) data_get($this->getRecord(), 'id');
 
         $duplicate_exists = ProductVariant::query()
@@ -185,7 +185,7 @@ class EditProductVariant extends EditRecord
                     $variant->attributeValues
                         ->map(fn ($attribute_row): array => [
                             'attribute_id' => (int) data_get($attribute_row, 'attribute_id'),
-                            'language_id'  => (int) data_get($attribute_row, 'language_id'),
+                            'language_id' => (int) data_get($attribute_row, 'language_id'),
                             'value_string' => (string) data_get($attribute_row, 'value_string'),
                         ])
                         ->all(),
@@ -225,7 +225,7 @@ class EditProductVariant extends EditRecord
                 return collect($language_rows)
                     ->map(fn (array $row): array => [
                         'attribute_id' => (int) ($row['attribute_id'] ?? 0),
-                        'language_id'  => $language_id,
+                        'language_id' => $language_id,
                         'value_string' => (string) ($row['value_string'] ?? ''),
                     ])
                     ->all();
