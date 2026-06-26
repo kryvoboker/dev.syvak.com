@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Order;
 
-class OrderConfirmStoreRequest extends OrderConfirmValidateRequest
-{
-}
+class OrderConfirmStoreRequest extends OrderConfirmValidateRequest {}

@@ -22,8 +22,7 @@ readonly class ModuleProviderResolverService
 {
     public function __construct(
         private ModuleClassResolverService $module_class_resolver_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @return list<class-string>

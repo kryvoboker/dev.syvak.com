@@ -15,8 +15,7 @@ readonly class LoadMoreProductsByAjaxAction
 {
     public function __construct(
         private FilterProductsAction $filter_products_action,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $params

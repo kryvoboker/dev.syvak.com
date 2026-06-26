@@ -327,9 +327,9 @@ class ProductController extends Controller
             'title'       => $product_title,
             'description' => escape_special_html((string) Arr::get($product_meta_data, 'description', '')),
             // In HTML the short_description is not decoded!
-            'meta_title' => Str::trim(strip_tags((string) Arr::get($product_meta_data, 'meta_title', ''))),
-            'meta_description' => Str::trim(strip_tags((string) Arr::get($product_meta_data, 'meta_description', ''))),
-            'meta_keywords' => Str::trim(strip_tags((string) Arr::get($product_meta_data, 'meta_keywords', ''))),
+            'meta_title'             => Str::trim(strip_tags((string) Arr::get($product_meta_data, 'meta_title', ''))),
+            'meta_description'       => Str::trim(strip_tags((string) Arr::get($product_meta_data, 'meta_description', ''))),
+            'meta_keywords'          => Str::trim(strip_tags((string) Arr::get($product_meta_data, 'meta_keywords', ''))),
             'sku'                    => $product_sku,
             'price_formatted'        => $formatted_price,
             'is_in_stock'            => $is_in_stock,

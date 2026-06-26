@@ -8,7 +8,5 @@ use App\Http\Controllers\Controller;
 
 class SearchProductsController extends Controller
 {
-    public function index(): void
-    {
-    }
+    public function index(): void {}
 }

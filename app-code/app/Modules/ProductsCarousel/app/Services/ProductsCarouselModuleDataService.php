@@ -25,8 +25,7 @@ readonly class ProductsCarouselModuleDataService
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, array{

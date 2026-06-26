@@ -27,8 +27,7 @@ readonly class ModuleInstanceFormSchema
 {
     public function __construct(
         private CarouselConfig $carousel_config,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, Component>

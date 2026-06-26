@@ -12,8 +12,7 @@ readonly class ModuleInstanceFormSchemaResolverService
 {
     public function __construct(
         private ModuleClassResolverService $module_class_resolver_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, Component>|null

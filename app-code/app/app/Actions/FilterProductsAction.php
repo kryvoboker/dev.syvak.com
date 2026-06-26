@@ -30,8 +30,7 @@ readonly class FilterProductsAction
     public function __construct(
         private PageSettingsBootstrapService $page_settings_bootstrap_service,
         private PriceSourceResolverService $price_source_resolver_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $params
@@ -238,9 +237,9 @@ readonly class FilterProductsAction
         return $groups
             ->filter(function (CatalogFilterGroup $group) use ($filter_set): bool {
                 return match ((string) $group->getRawOriginal('source_type')) {
-                    CatalogFilterGroupSourceTypeEnum::Price->value => (bool) $filter_set->is_price_filter_enabled,
+                    CatalogFilterGroupSourceTypeEnum::Price->value     => (bool) $filter_set->is_price_filter_enabled,
                     CatalogFilterGroupSourceTypeEnum::Attribute->value => (bool) $filter_set->is_attribute_filtering_enabled,
-                    default => false,
+                    default                                            => false,
                 };
             })
             ->values();
@@ -473,10 +472,10 @@ readonly class FilterProductsAction
         $db_prefix            = config('database.prefix');
 
         return match (true) {
-            $price_source_mode === CatalogFilterPriceSourceModeEnum::RrcOnly => $db_prefix . 'default_product_variant.price',
-            $price_source_mode === CatalogFilterPriceSourceModeEnum::Both => "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)",
+            $price_source_mode === CatalogFilterPriceSourceModeEnum::RrcOnly              => $db_prefix . 'default_product_variant.price',
+            $price_source_mode === CatalogFilterPriceSourceModeEnum::Both                 => "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)",
             $discount_only_policy === CatalogFilterDiscountOnlyPolicyEnum::FallbackToBase => "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)",
-            default => $db_prefix . 'active_product_discount.price',
+            default                                                                       => $db_prefix . 'active_product_discount.price',
         };
     }
 

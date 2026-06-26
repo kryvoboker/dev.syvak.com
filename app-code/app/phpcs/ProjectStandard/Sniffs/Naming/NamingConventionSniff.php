@@ -111,7 +111,7 @@ final class NamingConventionSniff implements Sniff
         $tokens = $file->getTokens();
 
         $conditions = $tokens[$ptr]['conditions'] ?? [];
-        $is_method = false;
+        $is_method  = false;
 
         foreach ($conditions as $conditionCode) {
             if (in_array($conditionCode, [T_CLASS, T_INTERFACE, T_TRAIT, T_ENUM], true)) {

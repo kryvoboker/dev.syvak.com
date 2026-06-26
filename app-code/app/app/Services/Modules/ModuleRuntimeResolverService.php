@@ -13,8 +13,7 @@ readonly class ModuleRuntimeResolverService
 {
     public function __construct(
         private ModuleCacheService $module_cache_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @return Collection<int, ModuleDefinition>

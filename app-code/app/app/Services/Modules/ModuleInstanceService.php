@@ -16,8 +16,7 @@ readonly class ModuleInstanceService
     public function __construct(
         private ModuleCacheService $module_cache_service,
         private ModuleInstanceSettingsNormalizerService $module_instance_settings_normalizer_service,
-    ) {
-    }
+    ) {}
 
     public function setGlobalState(ModuleDefinition $definition, bool $is_enabled): ModuleDefinition
     {

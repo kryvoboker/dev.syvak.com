@@ -19,8 +19,7 @@ final readonly class ImageUrlBuilderService
 {
     public function __construct(
         private Request $request,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  string  $bg_color  HEX or transparent color

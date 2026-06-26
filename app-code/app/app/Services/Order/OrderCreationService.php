@@ -18,8 +18,7 @@ readonly class OrderCreationService
         private CartService $cart_service,
         private WayForPayPaymentModule $way_for_pay_payment_module,
         private CashOnDeliveryPaymentModule $cash_on_delivery_payment_module,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $validated_data

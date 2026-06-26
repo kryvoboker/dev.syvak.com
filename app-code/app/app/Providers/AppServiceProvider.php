@@ -111,9 +111,9 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $default_no_image_path = (string) config('app.images.default_no_image', 'images/no-image.png');
-        $app_settings_service   = null;
-        $device_type            = config('devices.types.desktop');
-        $max_viewport_width     = (int) config('app.frontend.max_viewport_width', 1920);
+        $app_settings_service  = null;
+        $device_type           = config('devices.types.desktop');
+        $max_viewport_width    = (int) config('app.frontend.max_viewport_width', 1920);
 
         if (! $this->app->runningUnitTests()) {
             $currency             = (new Currency())->getDefaultActiveCurrency();

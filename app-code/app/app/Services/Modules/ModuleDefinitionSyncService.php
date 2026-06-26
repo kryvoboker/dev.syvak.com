@@ -15,8 +15,7 @@ class ModuleDefinitionSyncService
     public function __construct(
         private readonly ModuleDiscoveryService $module_discovery_service,
         private readonly ModuleCacheService $module_cache_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, int>

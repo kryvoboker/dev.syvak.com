@@ -31,8 +31,7 @@ class StorefrontModulePlacementResolverService
 
     public function __construct(
         private readonly ModuleClassResolverService $module_class_resolver_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, array{
@@ -54,7 +53,7 @@ class StorefrontModulePlacementResolverService
         try {
             /** @var Collection<int, ModuleDefinition> $definitions */
             $definitions = resolve_modules_for_context($placement);
-        } catch (BindingResolutionException | CircularDependencyException $e) {
+        } catch (BindingResolutionException|CircularDependencyException $e) {
             report($e);
         }
 
