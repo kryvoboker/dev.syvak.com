@@ -1,4 +1,4 @@
-import { $CART_PAGE_TYPE, $CATEGORY_PAGE_TYPE, $PRODUCT_PAGE_TYPE, $SEARCH_PAGE_TYPE } from "@ts-shared/lib/constants.ts";
+import { $CART_PAGE_TYPE, $CATEGORY_PAGE_TYPE, $CHECKOUT_PAGE_TYPE, $PRODUCT_PAGE_TYPE, $SEARCH_PAGE_TYPE } from "@ts-shared/lib/constants.ts";
 
 document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsDropdownCollection  = window.$hsDropdownCollection || [];
@@ -77,5 +77,10 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
         import('@ts-features/cart/fastOrderModal.ts')
             .then(module => module.handleFastOrderModal());
+
+        if (pageType === $CHECKOUT_PAGE_TYPE) {
+            import('@ts-features/order/index.ts')
+                .then(module => module.handleCheckoutPage());
+        }
     }
 });
