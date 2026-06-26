@@ -24,9 +24,9 @@ readonly class OrderCreationService
      * @param  array<string, mixed>  $validated_data
      * @return array<string, mixed>
      */
-    public function validateOrderData(array $validated_data, string $locale): array
+    public function validateFastOrderData(array $validated_data, string $locale): array
     {
-        $cart_mode = (string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
+        $cart_mode = (string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value);
         $cart_data = $this->cart_service->getSnapshot($locale, $cart_mode);
 
         if ((bool) Arr::get($cart_data, 'is_empty', true) === true) {
@@ -49,9 +49,9 @@ readonly class OrderCreationService
      * @param  array<string, mixed>  $validated_data
      * @return array<string, mixed>
      */
-    public function createOrder(array $validated_data, string $locale): array
+    public function createFastOrder(array $validated_data, string $locale): array
     {
-        $validation_result = $this->validateOrderData($validated_data, $locale);
+        $validation_result = $this->validateFastOrderData($validated_data, $locale);
 
         if ((bool) Arr::get($validation_result, 'success', false) === false) {
             return [
@@ -84,7 +84,7 @@ readonly class OrderCreationService
         $is_success = (bool) Arr::get($payment_result, 'is_success', false);
 
         if ($is_success === true) {
-            $this->cart_service->clearCart((string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
+            $this->cart_service->clearCart((string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value));
 
             return [
                 'success'      => true,
@@ -105,6 +105,24 @@ readonly class OrderCreationService
                 'payment' => [__('catalog/default.cart.messages.payment_failed')],
             ],
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated_data
+     * @return array<string, mixed>
+     */
+    public function validateOrderData(array $validated_data, string $locale): array
+    {
+        return $this->validateFastOrderData($validated_data, $locale);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated_data
+     * @return array<string, mixed>
+     */
+    public function createOrder(array $validated_data, string $locale): array
+    {
+        return $this->createFastOrder($validated_data, $locale);
     }
 
     private function generateOrderNumber(): string

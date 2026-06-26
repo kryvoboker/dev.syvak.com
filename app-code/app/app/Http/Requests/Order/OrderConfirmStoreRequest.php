@@ -4,4 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Order;
 
-class OrderConfirmStoreRequest extends OrderConfirmValidateRequest {}
+/**
+ * @deprecated Use FastOrderStoreRequest instead.
+ */
+class OrderConfirmStoreRequest extends FastOrderStoreRequest {}
