@@ -9,6 +9,7 @@ use App\Http\Controllers\Ajax\LoadMoreProductsByAjaxController;
 use App\Http\Controllers\Order\OrderConfirmController;
 use App\Http\Controllers\Pages\CartController;
 use App\Http\Controllers\Pages\CategoryController;
+use App\Http\Controllers\Pages\CheckoutController;
 use App\Http\Controllers\Pages\FailureOrderController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ProductController;
@@ -55,6 +56,8 @@ Route::prefix('{' . $locale_key . '}')
         Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
         Route::patch('/cart/{cart_id}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/{cart_id}', [CartController::class, 'delete'])->name('cart.delete');
+
+        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 
         Route::post('/order-confirm', [OrderConfirmController::class, 'storeFastOrder'])->name('order-confirm.store');
         Route::post('/order-validate', [OrderConfirmController::class, 'validateFastOrder'])->name('order-confirm.validate');

@@ -4,6 +4,7 @@ export const $PRODUCT_PAGE_TYPE: string = 'product';
 export const $CATEGORY_PAGE_TYPE: string = 'category';
 export const $SEARCH_PAGE_TYPE: string = 'search';
 export const $CART_PAGE_TYPE: string = 'cart';
+export const $CHECKOUT_PAGE_TYPE: string = 'checkout';
 export const $PAGE_TYPE_KEY: string = 'page_type';
 export const $HIDDEN_CLASS_NAME = 'hidden';
 export const $ANIMATION_SPIN_CLASS_NAME: string = 'animate-spin';
