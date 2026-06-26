@@ -20,6 +20,5 @@ class FilterRuntimeResultData extends Data
         public array $groups,
         public array $price_range,
         public array $meta,
-    ) {
-    }
+    ) {}
 }

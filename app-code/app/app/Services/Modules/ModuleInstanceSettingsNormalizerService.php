@@ -13,8 +13,7 @@ readonly class ModuleInstanceSettingsNormalizerService
 {
     public function __construct(
         private ModuleClassResolverService $module_class_resolver_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $attributes

@@ -28,8 +28,7 @@ class AppSettingsData extends Data
         public ?Collection $ai_settings,
         public ?int $language_id,
         public ?int $user_group_id,
-    ) {
-    }
+    ) {}
 
     /**
      * Cast arrays to collections when creating from array.

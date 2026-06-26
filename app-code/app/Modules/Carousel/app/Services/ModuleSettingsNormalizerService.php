@@ -19,8 +19,7 @@ class ModuleSettingsNormalizerService
 {
     public function __construct(
         private readonly CarouselConfig $carousel_config,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $settings

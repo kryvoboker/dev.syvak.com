@@ -50,9 +50,7 @@ class ProductsCarouselServiceProvider extends ServiceProvider
      * This module is runtime-content only, so scaffold route/event
      * providers are intentionally not registered here.
      */
-    public function register(): void
-    {
-    }
+    public function register(): void {}
 
     /**
      * Register commands in the format of Command::class
@@ -103,7 +101,7 @@ class ProductsCarouselServiceProvider extends ServiceProvider
                 if ($file->isFile() && $file->getExtension() === 'php') {
                     $config     = str_replace($config_path . DIRECTORY_SEPARATOR, '', $file->getPathname());
                     $config_key = str_replace([DIRECTORY_SEPARATOR, '.php'], ['.', ''], $config);
-                    $segments = explode('.', $this->name_lower . '.' . $config_key);
+                    $segments   = explode('.', $this->name_lower . '.' . $config_key);
 
                     // Remove duplicated adjacent segments.
                     $normalized = [];
@@ -138,7 +136,7 @@ class ProductsCarouselServiceProvider extends ServiceProvider
      */
     public function registerViews(): void
     {
-        $view_path = resource_path('views/modules/' . $this->name_lower);
+        $view_path   = resource_path('views/modules/' . $this->name_lower);
         $source_path = module_path($this->name, 'resources/views');
 
         $this->publishes([$source_path => $view_path], ['views', $this->name_lower . '-module-views']);

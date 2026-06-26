@@ -17,8 +17,7 @@ readonly class ProductsCarouselProductSearchService
 {
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<int|string, mixed>  $category_ids

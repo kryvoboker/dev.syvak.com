@@ -41,7 +41,7 @@ final class AppSettingsService
 
         $language_id = $this->resolveLanguageId($locale);
 
-        $user = Auth::user();
+        $user          = Auth::user();
         $user_group_id = $user !== null ? $user->user_group_id : null;
 
         if ($user_group_id === null) {
@@ -54,7 +54,7 @@ final class AppSettingsService
             ]);
         }
 
-        $app_setting = (new AppSetting())->getAppSettings();
+        $app_setting  = (new AppSetting())->getAppSettings();
         $app_settings = $app_setting !== null ? $app_setting->toArray() : [];
 
         $this->app_settings_data = AppSettingsData::fromArray(array_merge(
@@ -72,7 +72,7 @@ final class AppSettingsService
     private function resolveLanguageId(string $locale): ?int
     {
         $language_model = new Language();
-        $language = $language_model->getLanguageByCode($locale);
+        $language       = $language_model->getLanguageByCode($locale);
 
         if ($language !== null) {
             $language_id = $language->id;

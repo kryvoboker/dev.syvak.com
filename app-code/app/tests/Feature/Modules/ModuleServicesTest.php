@@ -92,12 +92,11 @@ class ModuleServicesTest extends TestCase
             ],
         ]);
 
-        $this->app->instance(ModuleDiscoveryService::class, new class ($discovered_modules) extends ModuleDiscoveryService
+        $this->app->instance(ModuleDiscoveryService::class, new class($discovered_modules) extends ModuleDiscoveryService
         {
             public function __construct(
                 private readonly Collection $discovered_modules,
-            ) {
-            }
+            ) {}
 
             public function discover(): Collection
             {

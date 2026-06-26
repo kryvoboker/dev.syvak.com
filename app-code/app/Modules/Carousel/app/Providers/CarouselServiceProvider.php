@@ -48,9 +48,7 @@ class CarouselServiceProvider extends ServiceProvider
      * This module is runtime-content only, so scaffold route/event
      * providers are intentionally not registered here.
      */
-    public function register(): void
-    {
-    }
+    public function register(): void {}
 
     /**
      * Register commands in the format of Command::class
@@ -99,9 +97,9 @@ class CarouselServiceProvider extends ServiceProvider
 
             foreach ($iterator as $file) {
                 if ($file->isFile() && $file->getExtension() === 'php') {
-                    $config = str_replace($config_path . DIRECTORY_SEPARATOR, '', $file->getPathname());
+                    $config     = str_replace($config_path . DIRECTORY_SEPARATOR, '', $file->getPathname());
                     $config_key = str_replace([DIRECTORY_SEPARATOR, '.php'], ['.', ''], $config);
-                    $segments = explode('.', $this->name_lower . '.' . $config_key);
+                    $segments   = explode('.', $this->name_lower . '.' . $config_key);
 
                     // Remove duplicated adjacent segments
                     $normalized = [];
@@ -125,7 +123,7 @@ class CarouselServiceProvider extends ServiceProvider
      */
     protected function mergeModuleConfigFrom(string $path, string $key): void
     {
-        $existing = config($key, []);
+        $existing      = config($key, []);
         $module_config = require $path;
 
         config([$key => array_replace_recursive($existing, $module_config)]);
@@ -136,7 +134,7 @@ class CarouselServiceProvider extends ServiceProvider
      */
     public function registerViews(): void
     {
-        $view_path = resource_path('views/modules/' . $this->name_lower);
+        $view_path   = resource_path('views/modules/' . $this->name_lower);
         $source_path = module_path($this->name, 'resources/views');
 
         $this->publishes([$source_path => $view_path], ['views', $this->name_lower . '-module-views']);

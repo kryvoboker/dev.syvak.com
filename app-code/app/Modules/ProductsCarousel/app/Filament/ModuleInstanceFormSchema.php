@@ -33,8 +33,7 @@ readonly class ModuleInstanceFormSchema
         private ProductsCarouselConfig $products_carousel_config,
         private ProductsCarouselCategoryTreeService $products_carousel_category_tree_service,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, Component>

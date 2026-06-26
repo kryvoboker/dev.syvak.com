@@ -21,9 +21,7 @@ class ModuleProvidersServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
-    }
+    public function register(): void {}
 
     /**
      * Bootstrap module providers after application providers are fully booted.

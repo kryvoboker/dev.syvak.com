@@ -15,8 +15,7 @@ final readonly class OpenAiTranslatorService
     public function __construct(
         private Client $client,
         private OpenAiRateLimiterService $rate_limiter,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws RuntimeException

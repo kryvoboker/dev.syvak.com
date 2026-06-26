@@ -19,8 +19,7 @@ readonly class CartViewDataBuilderService
 {
     public function __construct(
         private CartTotalsPipelineService $cart_totals_pipeline_service,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<int, array{cart_id: int, product_variant_id: int, quantity: int, chosen_attributes: array<int|string, mixed>, added_at: string}>  $cart_items

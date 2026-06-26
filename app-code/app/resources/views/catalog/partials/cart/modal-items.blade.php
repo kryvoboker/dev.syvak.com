@@ -17,7 +17,7 @@
 
         @if(($cart_data['is_empty'] ?? true) === true)
             <p class="text-light-gray text-sm md:text-base">
-                {{ __('catalog/default.cart.labels.empty') }}
+                {{ __('catalog/pages/category/show.texts.empty_cart') }}
             </p>
         @else
             <div class="mb-4 md:mb-6 flex items-center justify-between gap-3 text-sm md:text-base lg:text-base 2xl:text-lg">
@@ -103,7 +103,7 @@
             </div>
         @endif
 
-        @if($cart_mode === 'regular' && $show_checkout_button === true)
+        @if(($cart_data['is_empty'] ?? true) === false && $cart_mode === 'regular' && $show_checkout_button === true)
             <a class="white-btn default-btn w-full md:max-w-85.75 lg:max-w-91.75 2xl:max-w-md text-lg mt-3 mx-auto"
                href="{{ localized_route('localized.catalog.cart.index') }}">
                 {{ __('catalog/default.cart.buttons.checkout') }}

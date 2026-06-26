@@ -9,17 +9,23 @@ use App\Services\Cart\CartService;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\Trait\CartTrait;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class CartController extends Controller
 {
     use CartTrait;
 
-    public function index(?string $locale): View
+    public function index(?string $locale): View|RedirectResponse
     {
-        $locale      = normalize_locale($locale);
+        $locale    = normalize_locale($locale);
+        $cart_data = app(CartService::class)->getSnapshot($locale);
+
+        if (($cart_data['is_empty'] ?? true) === true) {
+            return redirect()->to(localized_route('catalog.home'));
+        }
+
         $header_data = app(HeaderService::class)();
-        $cart_data   = app(CartService::class)->getSnapshot($locale);
 
         $data = [
             'header_data' => $header_data,

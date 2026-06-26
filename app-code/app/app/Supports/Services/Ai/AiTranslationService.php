@@ -14,8 +14,7 @@ final readonly class AiTranslationService
 {
     public function __construct(
         private OpenAiTranslatorService $ai,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws Throwable

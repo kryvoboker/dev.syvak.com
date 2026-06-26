@@ -37,8 +37,7 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
         public readonly string $prototype_relative_path,
         public readonly int $width,
         public readonly int $height,
-    ) {
-    }
+    ) {}
 
     /**
      * A unique task key.

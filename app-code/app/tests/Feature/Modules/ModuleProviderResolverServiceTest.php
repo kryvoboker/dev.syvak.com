@@ -42,7 +42,7 @@ class ModuleProviderResolverServiceTest extends TestCase
 
         Storage::fake('local');
 
-        $module_class_resolver_service = new class () extends ModuleClassResolverService
+        $module_class_resolver_service = new class() extends ModuleClassResolverService
         {
             public function resolve(ModuleDefinition|string|null $module_definition, string $relative_class): string
             {

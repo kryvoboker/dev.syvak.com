@@ -60,7 +60,7 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
      */
     private function mockRuntimeResolver(Collection $definitions): void
     {
-        $module_cache_service = new class ($definitions) extends ModuleCacheService
+        $module_cache_service = new class($definitions) extends ModuleCacheService
         {
             public ?string $last_key = null;
 
@@ -69,8 +69,7 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
              */
             public function __construct(
                 private readonly Collection $definitions,
-            ) {
-            }
+            ) {}
 
             public function remember(string $key, Closure $callback, int $ttl_seconds = 3600): mixed
             {
