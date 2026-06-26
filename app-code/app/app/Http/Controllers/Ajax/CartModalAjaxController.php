@@ -23,7 +23,7 @@ class CartModalAjaxController extends Controller
      */
     public function index(Request $request, ?string $locale): JsonResponse
     {
-        $locale    = normalize_locale($locale);
+        $locale = normalize_locale($locale);
         $cart_mode = Str::lower((string) $request->query(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
         $cart_mode = in_array($cart_mode, array_column(CartModeEnum::cases(), 'value'), true)
             ? $cart_mode
@@ -31,12 +31,12 @@ class CartModalAjaxController extends Controller
         $cart_data = app(CartService::class)->getSnapshot($locale, $cart_mode);
 
         return response()->json([
-            'success'  => true,
-            'mode'     => $cart_mode,
-            'cart'     => $cart_data,
+            'success' => true,
+            'mode' => $cart_mode,
+            'cart' => $cart_data,
             'rendered' => [
                 'modal_items_html' => view('catalog.partials.cart.modal-items', [
-                    'cart_data'                         => $cart_data,
+                    'cart_data' => $cart_data,
                     CartRequestKeyEnum::CartMode->value => $cart_mode,
                 ])->render(),
             ],

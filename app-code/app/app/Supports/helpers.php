@@ -42,7 +42,7 @@ if (! function_exists('parse_telephone')) {
     {
         $telephone = clear_telephone($telephone, true);
 
-        $mask         = '+38 (___) ___-__-__';
+        $mask = '+38 (___) ___-__-__';
         $phone_length = Str::length($telephone);
 
         for ($index_number = 0; $index_number < $phone_length; $index_number++) {
@@ -111,7 +111,7 @@ if (! function_exists('breadcrumb')) {
     {
         return [
             'title' => sanitaze_str($title),
-            'url'   => $url,
+            'url' => $url,
         ];
     }
 }
@@ -139,7 +139,7 @@ if (! function_exists('try_detect_page_type')) {
                 Str::endsWith($route_name, '.category.show') => (string) config('page-settings.page_type.category'),
                 Str::endsWith($route_name, '.search'),
                 Str::endsWith($route_name, '.search-products.index') => (string) config('page-settings.page_type.search'),
-                default                                              => null,
+                default => null,
             };
         }
 
@@ -152,10 +152,10 @@ if (! function_exists('try_detect_page_type')) {
         }
 
         return match ($segments->get(1)) {
-            'product'  => (string) config('page-settings.page_type.product'),
+            'product' => (string) config('page-settings.page_type.product'),
             'category' => (string) config('page-settings.page_type.category'),
-            'search'   => (string) config('page-settings.page_type.search'),
-            default    => null,
+            'search' => (string) config('page-settings.page_type.search'),
+            default => null,
         };
     }
 }
@@ -241,8 +241,8 @@ if (! function_exists('localized_product_variant_route')) {
     ): string {
         $normalized_filters = prepare_product_attrs($attribute_filters);
 
-        $language     = resolve_language_by_locale(app()->getLocale());
-        $language_id  = (int) ($language->id ?? 0);
+        $language = resolve_language_by_locale(app()->getLocale());
+        $language_id = (int) ($language->id ?? 0);
         $variant_slug = '';
 
         if ($language_id > 0) {
@@ -274,7 +274,7 @@ if (! function_exists('localized_product_variant_route')) {
 
         if (filled($variant_slug)) {
             return localized_route('localized.catalog.product.variant.show', [
-                'slug'         => $product_slug,
+                'slug' => $product_slug,
                 'variant_slug' => $variant_slug,
             ], $absolute);
         }
@@ -412,7 +412,7 @@ if (! function_exists('resolve_upload_path_placeholders')) {
     function resolve_upload_path_placeholders(?string $path): string
     {
         $normalized_path = (string) $path;
-        $now_date        = get_now_date();
+        $now_date = get_now_date();
 
         return Str::replace(
             ['{year}', '{month}'],
@@ -462,11 +462,11 @@ if (! function_exists('resolve_sort_code')) {
             return 'default';
         }
 
-        $sorting_items          = get_sorting_items($page_setting);
+        $sorting_items = get_sorting_items($page_setting);
         $sorting_values_to_code = [];
 
         foreach ($sorting_items as $sorting_item) {
-            $item_get   = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
+            $item_get = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
             $item_value = (string) Arr::get($item_get, 'value', '');
 
             if (filled($item_value)) {
@@ -645,7 +645,7 @@ if (! function_exists('resolve_product_variant_slug_variants')) {
             }
 
             $result[$language_code] = [
-                'slug'         => $localized_product_slug,
+                'slug' => $localized_product_slug,
                 'variant_slug' => $localized_variant_slug,
             ];
         }
@@ -684,7 +684,7 @@ if (! function_exists('resolve_product_variant_id_for_slug_variants')) {
         }
 
         $normalized_filters = prepare_product_attrs($attribute_filters);
-        $variant_query      = ProductVariant::query()
+        $variant_query = ProductVariant::query()
             ->where('product_id', $product_id);
 
         if ($normalized_filters !== []) {

@@ -52,16 +52,16 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'default_variant_id'        => 'integer',
-            'default_category_id'       => 'integer',
-            'quantity'                  => 'integer',
-            'minimum'                   => 'integer',
-            'price'                     => 'float',
-            'viewed'                    => 'integer',
-            'date_available'            => 'datetime',
-            'date_added'                => 'datetime',
-            'is_active'                 => 'boolean',
-            'size_guide_data'           => 'array',
+            'default_variant_id' => 'integer',
+            'default_category_id' => 'integer',
+            'quantity' => 'integer',
+            'minimum' => 'integer',
+            'price' => 'float',
+            'viewed' => 'integer',
+            'date_available' => 'datetime',
+            'date_added' => 'datetime',
+            'is_active' => 'boolean',
+            'size_guide_data' => 'array',
             'composition_and_care_data' => 'array',
         ];
     }
@@ -223,7 +223,7 @@ class Product extends Model
     public function getLastActualAndLastModifiedDiscountFromModel(self $product): ?ProductVariantDiscount
     {
         $app_settings = get_app_settings();
-        $variant      = $product->defaultVariant;
+        $variant = $product->defaultVariant;
 
         if (! $variant instanceof ProductVariant) {
             return null;
@@ -234,7 +234,7 @@ class Product extends Model
 
     public function search(string $keyword, int $per_page): LengthAwarePaginator
     {
-        $app_settings           = get_app_settings();
+        $app_settings = get_app_settings();
         $minimum_stock_quantity = (int) config('app.products.minimum_stock_quantity', 1);
 
         try {

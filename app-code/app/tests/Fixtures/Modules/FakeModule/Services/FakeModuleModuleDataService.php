@@ -14,13 +14,13 @@ class FakeModuleModuleDataService
         return [
             [
                 'instance_id' => 7001,
-                'placement'   => $placement,
-                'page_type'   => $page_type,
+                'placement' => $placement,
+                'page_type' => $page_type,
             ],
             [
                 'instance_id' => 7002,
-                'placement'   => $placement,
-                'page_type'   => $page_type,
+                'placement' => $placement,
+                'page_type' => $page_type,
             ],
         ];
     }

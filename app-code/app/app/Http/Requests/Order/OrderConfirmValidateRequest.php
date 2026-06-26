@@ -7,4 +7,6 @@ namespace App\Http\Requests\Order;
 /**
  * @deprecated Use FastOrderValidateRequest instead.
  */
-class OrderConfirmValidateRequest extends FastOrderValidateRequest {}
+class OrderConfirmValidateRequest extends FastOrderValidateRequest
+{
+}

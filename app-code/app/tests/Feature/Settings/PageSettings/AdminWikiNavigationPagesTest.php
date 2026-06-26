@@ -30,17 +30,17 @@ class AdminWikiNavigationPagesTest extends TestCase
     public function test_wiki_pages_are_in_wiki_navigation_group_and_have_stable_urls(): void
     {
         $wiki_pages = [
-            CatalogProductsWikiPage::class       => AdminNavigationGroupEnum::Catalog,
-            CatalogCategoriesWikiPage::class     => AdminNavigationGroupEnum::Catalog,
-            CatalogAttributesWikiPage::class     => AdminNavigationGroupEnum::Catalog,
-            CategoryPageSettingsWikiPage::class  => AdminNavigationGroupEnum::PageSettings,
-            InfoPagesWikiPage::class             => AdminNavigationGroupEnum::InfoPages,
-            UsersWikiPage::class                 => AdminNavigationGroupEnum::Users,
-            UserGroupsWikiPage::class            => AdminNavigationGroupEnum::Users,
-            ModulesWikiPage::class               => AdminNavigationGroupEnum::Modules,
+            CatalogProductsWikiPage::class => AdminNavigationGroupEnum::Catalog,
+            CatalogCategoriesWikiPage::class => AdminNavigationGroupEnum::Catalog,
+            CatalogAttributesWikiPage::class => AdminNavigationGroupEnum::Catalog,
+            CategoryPageSettingsWikiPage::class => AdminNavigationGroupEnum::PageSettings,
+            InfoPagesWikiPage::class => AdminNavigationGroupEnum::InfoPages,
+            UsersWikiPage::class => AdminNavigationGroupEnum::Users,
+            UserGroupsWikiPage::class => AdminNavigationGroupEnum::Users,
+            ModulesWikiPage::class => AdminNavigationGroupEnum::Modules,
             ApplicationCurrenciesWikiPage::class => AdminNavigationGroupEnum::ApplicationSettings,
-            ApplicationLanguagesWikiPage::class  => AdminNavigationGroupEnum::ApplicationSettings,
-            ApplicationSettingsWikiPage::class   => AdminNavigationGroupEnum::ApplicationSettings,
+            ApplicationLanguagesWikiPage::class => AdminNavigationGroupEnum::ApplicationSettings,
+            ApplicationSettingsWikiPage::class => AdminNavigationGroupEnum::ApplicationSettings,
         ];
 
         foreach ($wiki_pages as $wiki_page_class => $navigation_parent_group) {

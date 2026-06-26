@@ -23,7 +23,7 @@ class CategoryPageFilterSyncService
     public function sync(PageSetting $page_setting): array
     {
         try {
-            $default_language_id  = $this->resolveDefaultLanguageId();
+            $default_language_id = $this->resolveDefaultLanguageId();
             $filter_item_payloads = $this->buildFilterItemPayloads($default_language_id);
 
             return $this->syncFilterItems($page_setting, $filter_item_payloads);
@@ -32,7 +32,7 @@ class CategoryPageFilterSyncService
                 'Category page filters synchronization failed.',
                 [
                     'page_setting_id' => (int) $page_setting->id,
-                    'exception'       => $throwable,
+                    'exception' => $throwable,
                 ],
             );
 
@@ -120,23 +120,23 @@ class CategoryPageFilterSyncService
             ->max();
 
         return [
-            'code'        => CatalogFilterGroupSourceTypeEnum::Price->value,
+            'code' => CatalogFilterGroupSourceTypeEnum::Price->value,
             'source_type' => CatalogFilterGroupSourceTypeEnum::Price->value,
-            'source_id'   => null,
-            'is_enabled'  => true,
-            'get'         => [
-                'key'   => CatalogFilterGroupSourceTypeEnum::Price->value,
+            'source_id' => null,
+            'is_enabled' => true,
+            'get' => [
+                'key' => CatalogFilterGroupSourceTypeEnum::Price->value,
                 'value' => null,
                 'extra' => [
                     'from_key' => 'price_from',
-                    'to_key'   => 'price_to',
+                    'to_key' => 'price_to',
                 ],
             ],
             'config' => [
-                'mode'      => 'range',
+                'mode' => 'range',
                 'min_price' => $min_price,
                 'max_price' => $max_price,
-                'step'      => 1,
+                'step' => 1,
             ],
         ];
     }
@@ -147,12 +147,12 @@ class CategoryPageFilterSyncService
     private function buildStockFilterPayload(): array
     {
         return [
-            'code'        => 'stock',
+            'code' => 'stock',
             'source_type' => 'stock',
-            'source_id'   => null,
-            'is_enabled'  => true,
-            'get'         => [
-                'key'   => 'stock',
+            'source_id' => null,
+            'is_enabled' => true,
+            'get' => [
+                'key' => 'stock',
                 'value' => 'available',
                 'extra' => [],
             ],
@@ -183,15 +183,15 @@ class CategoryPageFilterSyncService
 
         return $attributes->map(function (Attribute $attribute): array {
             $attribute_discription = $attribute->attributeDescription->first();
-            $attribute_name        = (string) $attribute_discription?->name;
+            $attribute_name = (string) $attribute_discription?->name;
 
             return [
-                'code'        => CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id,
+                'code' => CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id,
                 'source_type' => CatalogFilterGroupSourceTypeEnum::Attribute->value,
-                'source_id'   => (int) $attribute->id,
-                'is_enabled'  => true,
-                'get'         => [
-                    'key'   => CatalogFilterGroupSourceTypeEnum::Attribute->value . 's[' . (int) $attribute->id . ']',
+                'source_id' => (int) $attribute->id,
+                'is_enabled' => true,
+                'get' => [
+                    'key' => CatalogFilterGroupSourceTypeEnum::Attribute->value . 's[' . (int) $attribute->id . ']',
                     'value' => null,
                     'extra' => [
                         'mode' => 'multiple',
@@ -199,7 +199,7 @@ class CategoryPageFilterSyncService
                 ],
                 'config' => [
                     'label' => $attribute_name,
-                    'mode'  => 'multiple',
+                    'mode' => 'multiple',
                 ],
             ];
         })->values()->all();
@@ -219,7 +219,7 @@ class CategoryPageFilterSyncService
 
         $created_count = 0;
         $updated_count = 0;
-        $next_items    = [];
+        $next_items = [];
 
         foreach ($payloads as $payload) {
             $code = (string) Arr::get($payload, 'code', '');
@@ -229,16 +229,16 @@ class CategoryPageFilterSyncService
             }
 
             $existing_item = $existing_filter_items->get($code);
-            $is_existing   = is_array($existing_item);
+            $is_existing = is_array($existing_item);
 
             $next_items[] = [
-                'code'        => $code,
+                'code' => $code,
                 'source_type' => Arr::get($payload, 'source_type'),
-                'source_id'   => Arr::get($payload, 'source_id'),
-                'is_enabled'  => (bool) Arr::get($existing_item, 'is_enabled', Arr::get($payload, 'is_enabled', true)),
-                'sort_order'  => (int) Arr::get($payload, 'sort_order', Arr::get($existing_item, 'sort_order', 0)),
-                'get'         => [
-                    'key'   => (string) Arr::get($payload, 'get.key', ''),
+                'source_id' => Arr::get($payload, 'source_id'),
+                'is_enabled' => (bool) Arr::get($existing_item, 'is_enabled', Arr::get($payload, 'is_enabled', true)),
+                'sort_order' => (int) Arr::get($payload, 'sort_order', Arr::get($existing_item, 'sort_order', 0)),
+                'get' => [
+                    'key' => (string) Arr::get($payload, 'get.key', ''),
                     'value' => Arr::get($payload, 'get.value'),
                     'extra' => is_array(Arr::get($payload, 'get.extra')) ? Arr::get($payload, 'get.extra') : [],
                 ],

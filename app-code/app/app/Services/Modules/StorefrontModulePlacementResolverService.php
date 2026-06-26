@@ -31,7 +31,8 @@ class StorefrontModulePlacementResolverService
 
     public function __construct(
         private readonly ModuleClassResolverService $module_class_resolver_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, array{
@@ -43,7 +44,7 @@ class StorefrontModulePlacementResolverService
      */
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
-        $cache_key   = $placement . '|' . ($page_type ?? 'null');
+        $cache_key = $placement . '|' . ($page_type ?? 'null');
         $definitions = collect();
 
         if (array_key_exists($cache_key, $this->resolved_placements_cache)) {
@@ -53,7 +54,7 @@ class StorefrontModulePlacementResolverService
         try {
             /** @var Collection<int, ModuleDefinition> $definitions */
             $definitions = resolve_modules_for_context($placement);
-        } catch (BindingResolutionException|CircularDependencyException $e) {
+        } catch (BindingResolutionException | CircularDependencyException $e) {
             report($e);
         }
 
@@ -85,7 +86,7 @@ class StorefrontModulePlacementResolverService
         if ($data_service_class === null) {
             Log::channel('stack')->warning('Storefront module data service could not be resolved.', [
                 'module_definition_id' => $definition->id,
-                'module_name'          => $definition->nwidart_name,
+                'module_name' => $definition->nwidart_name,
             ]);
 
             return [];
@@ -96,8 +97,8 @@ class StorefrontModulePlacementResolverService
         if (blank($view) || View::exists($view) === false) {
             Log::channel('stack')->warning('Storefront module view is missing or invalid.', [
                 'module_definition_id' => $definition->id,
-                'module_name'          => $definition->nwidart_name,
-                'view'                 => $view,
+                'module_name' => $definition->nwidart_name,
+                'view' => $view,
             ]);
 
             return [];
@@ -109,8 +110,8 @@ class StorefrontModulePlacementResolverService
         if (method_exists($data_service, 'resolveForPlacement') === false) {
             Log::channel('stack')->warning('Storefront module data service has no resolveForPlacement method.', [
                 'module_definition_id' => $definition->id,
-                'module_name'          => $definition->nwidart_name,
-                'data_service_class'   => $data_service_class,
+                'module_name' => $definition->nwidart_name,
+                'data_service_class' => $data_service_class,
             ]);
 
             return [];
@@ -125,11 +126,11 @@ class StorefrontModulePlacementResolverService
             ->map(function (array $item) use ($definition, $view, $view_data_key, $page_type): array {
                 return [
                     'module_definition_id' => (int) $definition->id,
-                    'module_name'          => (string) $definition->nwidart_name,
-                    'view'                 => $view,
-                    'view_data'            => [
+                    'module_name' => (string) $definition->nwidart_name,
+                    'view' => $view,
+                    'view_data' => [
                         $view_data_key => $item,
-                        'page_type'    => $page_type,
+                        'page_type' => $page_type,
                     ],
                 ];
             })

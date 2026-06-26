@@ -32,7 +32,7 @@ class EditCategoryPageSettings extends EditRecord
     public function getBreadcrumbs(): array
     {
         return [
-            'admin/page-settings'                        => __('admin/default.menu.item_page_settings'),
+            'admin/page-settings' => __('admin/default.menu.item_page_settings'),
             CategoryPageSettingResource::getUrl('index') => __('admin/settings/category_page_settings.navigation_label'),
         ];
     }
@@ -63,12 +63,12 @@ class EditCategoryPageSettings extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         /** @var PageSetting $record */
-        $record          = $this->getRecord();
+        $record = $this->getRecord();
         $record_settings = is_array($record->settings) ? $record->settings : [];
 
-        $data['is_sorting_enabled']      = (bool) Arr::get($record_settings, 'ui.sorting.enabled', true);
-        $data['localized_content']       = $this->mapLocalizedContentForForm($record_settings);
-        $data['sorting_items']           = $this->mapSortingItemsForForm($record_settings);
+        $data['is_sorting_enabled'] = (bool) Arr::get($record_settings, 'ui.sorting.enabled', true);
+        $data['localized_content'] = $this->mapLocalizedContentForForm($record_settings);
+        $data['sorting_items'] = $this->mapSortingItemsForForm($record_settings);
         $data['products_per_page_limit'] = (int) Arr::get(
             $record_settings,
             'pagination.products_per_page_limit',
@@ -181,35 +181,35 @@ class EditCategoryPageSettings extends EditRecord
         $settings = array_replace_recursive(
             [
                 'meta' => ['contract_version' => 2],
-                'ui'   => [
-                    'sorting'   => ['enabled' => true],
+                'ui' => [
+                    'sorting' => ['enabled' => true],
                     'filtering' => ['enabled' => false],
                 ],
                 'pagination' => [
-                    'products_per_page_limit'       => (int) config('app.page_settings.category.products_per_page_limit', 20),
+                    'products_per_page_limit' => (int) config('app.page_settings.category.products_per_page_limit', 20),
                     'ajax_products_loading_enabled' => (bool) config('app.page_settings.category.ajax_products_loading_enabled', true),
                 ],
                 'images' => [
                     'products' => [
-                        'width'  => (int) config('app.page_settings.category.product_image_width', 420),
+                        'width' => (int) config('app.page_settings.category.product_image_width', 420),
                         'height' => (int) config('app.page_settings.category.product_image_height', 420),
                     ],
                 ],
                 'admin' => [
                     'upload' => [
                         'max_size_kb' => (int) config('app.images.category.upload.max_size_kb', 5120),
-                        'directory'   => normalize_upload_path_template((string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))),
+                        'directory' => normalize_upload_path_template((string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))),
                     ],
                     'images' => [
                         'no_image' => [
                             'path' => (string) config('app.images.category.no_image', 'images/no-image.png'),
                         ],
                         'preview_in_list' => [
-                            'width'  => (int) config('app.images.category.preview_in_list_in_admin.width', 100),
+                            'width' => (int) config('app.images.category.preview_in_list_in_admin.width', 100),
                             'height' => (int) config('app.images.category.preview_in_list_in_admin.height', 100),
                         ],
                         'preview_in_page' => [
-                            'width'  => (int) config('app.images.category.preview_in_page_in_admin.width', 500),
+                            'width' => (int) config('app.images.category.preview_in_page_in_admin.width', 500),
                             'height' => (int) config('app.images.category.preview_in_page_in_admin.height', 500),
                         ],
                     ],
@@ -260,7 +260,7 @@ class EditCategoryPageSettings extends EditRecord
      */
     private function mapLocalizedContentForForm(array $settings): array
     {
-        $localized_data    = Arr::get($settings, 'localized', []);
+        $localized_data = Arr::get($settings, 'localized', []);
         $localized_content = [];
 
         if (! is_array($localized_data)) {
@@ -269,7 +269,7 @@ class EditCategoryPageSettings extends EditRecord
 
         foreach ((new Language())->getActiveLanguages() as $language) {
             $language_id = (string) $language->id;
-            $content     = Arr::get($localized_data, $language_id, []);
+            $content = Arr::get($localized_data, $language_id, []);
 
             if (! is_array($content)) {
                 $content = [];
@@ -277,7 +277,7 @@ class EditCategoryPageSettings extends EditRecord
 
             $localized_content[$language_id] = [
                 'sorting' => [
-                    'title'       => (string) Arr::get($content, 'sorting.title', ''),
+                    'title' => (string) Arr::get($content, 'sorting.title', ''),
                     'description' => (string) Arr::get($content, 'sorting.description', ''),
                 ],
             ];
@@ -295,15 +295,15 @@ class EditCategoryPageSettings extends EditRecord
         return collect((array) Arr::get($settings, 'items.sorting', []))
             ->filter(fn (mixed $item): bool => is_array($item) && filled((string) Arr::get($item, 'code')))
             ->map(function (array $item): array {
-                $get_payload    = is_array(Arr::get($item, 'get')) ? Arr::get($item, 'get') : [];
+                $get_payload = is_array(Arr::get($item, 'get')) ? Arr::get($item, 'get') : [];
                 $config_payload = is_array(Arr::get($item, 'config')) ? Arr::get($item, 'config') : [];
 
                 return [
-                    'code'       => (string) Arr::get($item, 'code', ''),
+                    'code' => (string) Arr::get($item, 'code', ''),
                     'is_enabled' => (bool) Arr::get($item, 'is_enabled', true),
                     'sort_order' => (int) Arr::get($item, 'sort_order', 0),
-                    'get'        => [
-                        'key'   => (string) Arr::get($get_payload, 'key', ''),
+                    'get' => [
+                        'key' => (string) Arr::get($get_payload, 'key', ''),
                         'value' => Arr::get($get_payload, 'value'),
                         'extra' => $this->normalizeStringMap((array) Arr::get($get_payload, 'extra', [])),
                     ],
@@ -406,15 +406,15 @@ class EditCategoryPageSettings extends EditRecord
             ->filter(fn (array $row): bool => filled((string) Arr::get($row, 'code')))
             ->keyBy(fn (array $row): string => (string) Arr::get($row, 'code'));
 
-        $allowed_sort_codes      = $this->resolveAllowedSortCodes();
-        $allowed_sort_get_keys   = $this->resolveAllowedSortGetKeys();
+        $allowed_sort_codes = $this->resolveAllowedSortCodes();
+        $allowed_sort_get_keys = $this->resolveAllowedSortGetKeys();
         $allowed_sort_get_values = $this->resolveAllowedSortGetValues();
 
         return collect($rows)
             ->values()
             ->map(function (array $row, int $index) use ($persisted_by_code, $persisted_rows, $allowed_sort_codes, $allowed_sort_get_keys, $allowed_sort_get_values): ?array {
                 $indexed_persisted_row = (array) Arr::get($persisted_rows, $index, []);
-                $incoming_code         = $this->resolveSortingSelectValue(
+                $incoming_code = $this->resolveSortingSelectValue(
                     value: Arr::get($row, 'code'),
                     allowed_values: $allowed_sort_codes,
                     fallback: (string) Arr::get($indexed_persisted_row, 'code', ''),
@@ -434,7 +434,7 @@ class EditCategoryPageSettings extends EditRecord
                 }
 
                 $persisted_get = is_array(Arr::get($persisted_row, 'get')) ? Arr::get($persisted_row, 'get') : [];
-                $resolved_key  = $this->resolveSortingSelectValue(
+                $resolved_key = $this->resolveSortingSelectValue(
                     value: Arr::get($row, 'get.key'),
                     allowed_values: $allowed_sort_get_keys,
                     fallback: (string) Arr::get($persisted_get, 'key', ''),
@@ -448,13 +448,13 @@ class EditCategoryPageSettings extends EditRecord
                 $persisted_config = is_array(Arr::get($persisted_row, 'config')) ? Arr::get($persisted_row, 'config') : [];
 
                 return [
-                    'code'        => $code,
-                    'is_enabled'  => (bool) Arr::get($row, 'is_enabled', true),
-                    'sort_order'  => max(0, (int) Arr::get($row, 'sort_order', 0)),
+                    'code' => $code,
+                    'is_enabled' => (bool) Arr::get($row, 'is_enabled', true),
+                    'sort_order' => max(0, (int) Arr::get($row, 'sort_order', 0)),
                     'source_type' => Arr::get($persisted_row, 'source_type', 'static'),
-                    'source_id'   => Arr::get($persisted_row, 'source_id'),
-                    'get'         => [
-                        'key'   => $resolved_key,
+                    'source_id' => Arr::get($persisted_row, 'source_id'),
+                    'get' => [
+                        'key' => $resolved_key,
                         'value' => $resolved_value,
                         'extra' => $this->resolvePersistedGetExtra(
                             form_row: $row,
@@ -530,7 +530,7 @@ class EditCategoryPageSettings extends EditRecord
         string $fallback = '',
     ): ?string {
         $resolved_value = is_string($value) ? trim($value) : '';
-        $fallback       = trim($fallback);
+        $fallback = trim($fallback);
 
         if ($resolved_value !== '' && in_array($resolved_value, $allowed_values, true)) {
             return $resolved_value;
@@ -552,12 +552,12 @@ class EditCategoryPageSettings extends EditRecord
         $normalized_localized_content = [];
 
         foreach ((new Language())->getActiveLanguages() as $language) {
-            $language_id      = (string) $language->id;
+            $language_id = (string) $language->id;
             $language_content = Arr::get($localized_content, $language_id, []);
 
             $normalized_localized_content[$language_id] = [
                 'sorting' => [
-                    'title'       => (string) Arr::get($language_content, 'sorting.title', ''),
+                    'title' => (string) Arr::get($language_content, 'sorting.title', ''),
                     'description' => (string) Arr::get($language_content, 'sorting.description', ''),
                 ],
             ];

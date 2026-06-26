@@ -8,9 +8,9 @@ return [
 
     // Labels
     'labels' => [
-        'model'        => 'Info Page',
+        'model' => 'Info Page',
         'plural_model' => 'Info Pages',
-        'position'     => 'Position on Page',
+        'position' => 'Position on Page',
     ],
 
     // Columns

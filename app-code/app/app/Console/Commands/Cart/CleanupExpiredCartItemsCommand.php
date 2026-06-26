@@ -16,10 +16,10 @@ class CleanupExpiredCartItemsCommand extends Command
 
     public function handle(): int
     {
-        $ttl_days   = max(1, (int) config('cart-modal.item_ttl_days', 30));
+        $ttl_days = max(1, (int) config('cart-modal.item_ttl_days', 30));
         $chunk_size = max(100, (int) config('cart-modal.cleanup_chunk_size', 500));
-        $threshold  = now(config('app.timezone'))->subDays($ttl_days);
-        $deleted    = 0;
+        $threshold = now(config('app.timezone'))->subDays($ttl_days);
+        $deleted = 0;
 
         try {
             CartItem::query()
@@ -38,7 +38,7 @@ class CleanupExpiredCartItemsCommand extends Command
 
             Log::channel('daily')->info('Expired cart items cleanup completed.', [
                 'deleted_rows' => $deleted,
-                'ttl_days'     => $ttl_days,
+                'ttl_days' => $ttl_days,
             ]);
 
             $this->info("Deleted rows: {$deleted}");
@@ -47,8 +47,8 @@ class CleanupExpiredCartItemsCommand extends Command
         } catch (\Throwable $exception) {
             Log::channel('stack')->error('Expired cart items cleanup failed.', [
                 'message' => $exception->getMessage(),
-                'file'    => $exception->getFile(),
-                'line'    => $exception->getLine(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
             ]);
 
             $this->error('Expired cart items cleanup failed.');

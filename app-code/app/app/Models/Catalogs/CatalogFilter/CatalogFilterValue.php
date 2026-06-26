@@ -32,14 +32,14 @@ class CatalogFilterValue extends Model
     {
         return [
             'catalog_filter_group_id' => 'integer',
-            'value_type'              => CatalogFilterValueTypeEnum::class,
-            'value_number'            => 'decimal:4',
-            'range_from'              => 'decimal:4',
-            'range_to'                => 'decimal:4',
-            'is_enabled'              => 'boolean',
-            'sort_order'              => 'integer',
-            'products_count_cached'   => 'integer',
-            'meta'                    => 'array',
+            'value_type' => CatalogFilterValueTypeEnum::class,
+            'value_number' => 'decimal:4',
+            'range_from' => 'decimal:4',
+            'range_to' => 'decimal:4',
+            'is_enabled' => 'boolean',
+            'sort_order' => 'integer',
+            'products_count_cached' => 'integer',
+            'meta' => 'array',
         ];
     }
 

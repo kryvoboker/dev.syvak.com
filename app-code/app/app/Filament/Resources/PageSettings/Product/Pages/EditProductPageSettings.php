@@ -43,7 +43,7 @@ class EditProductPageSettings extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         /** @var PageSetting $record */
-        $record   = $this->getRecord();
+        $record = $this->getRecord();
         $settings = is_array($record->settings) ? $record->settings : [];
 
         $data['minimum_stock_quantity'] = max(
@@ -162,14 +162,14 @@ class EditProductPageSettings extends EditRecord
 
         $settings = array_replace_recursive(
             [
-                'meta'     => ['contract_version' => 2],
+                'meta' => ['contract_version' => 2],
                 'customer' => [
                     'stock' => [
                         'minimum_stock_quantity' => (int) config('app.page_settings.product.for_customer.minimum_stock_quantity', (int) config('app.page_settings.product.minimum_stock_quantity', 1)),
                     ],
                     'images' => [
                         'product' => [
-                            'width'  => (int) config('app.page_settings.product.for_customer.image_width', (int) config('app.page_settings.product.image_width', 500)),
+                            'width' => (int) config('app.page_settings.product.for_customer.image_width', (int) config('app.page_settings.product.image_width', 500)),
                             'height' => (int) config('app.page_settings.product.for_customer.image_height', (int) config('app.page_settings.product.image_height', 500)),
                         ],
                     ],
@@ -180,18 +180,18 @@ class EditProductPageSettings extends EditRecord
                     ],
                     'upload' => [
                         'max_size_kb' => (int) config('app.page_settings.product.for_admin.upload_max_size_kb', (int) config('app.images.product.upload.max_size_kb', 5120)),
-                        'directory'   => normalize_upload_path_template((string) config('app.page_settings.product.for_admin.image_upload_directory', (string) config('app.images.product.image_path', 'images/products/' . date('Y/m')))),
+                        'directory' => normalize_upload_path_template((string) config('app.page_settings.product.for_admin.image_upload_directory', (string) config('app.images.product.image_path', 'images/products/' . date('Y/m')))),
                     ],
                     'images' => [
                         'no_image' => [
                             'path' => (string) config('app.page_settings.product.for_admin.no_image', (string) config('app.images.product.no_image', 'images/no-image.png')),
                         ],
                         'preview_in_list' => [
-                            'width'  => (int) config('app.page_settings.product.for_admin.preview_in_list_width', (int) config('app.images.product.preview_in_list_in_admin.width', 100)),
+                            'width' => (int) config('app.page_settings.product.for_admin.preview_in_list_width', (int) config('app.images.product.preview_in_list_in_admin.width', 100)),
                             'height' => (int) config('app.page_settings.product.for_admin.preview_in_list_height', (int) config('app.images.product.preview_in_list_in_admin.height', 100)),
                         ],
                         'preview_in_page' => [
-                            'width'  => (int) config('app.page_settings.product.for_admin.preview_in_page_width', (int) config('app.images.product.preview_in_page_in_admin.width', 500)),
+                            'width' => (int) config('app.page_settings.product.for_admin.preview_in_page_width', (int) config('app.images.product.preview_in_page_in_admin.width', 500)),
                             'height' => (int) config('app.page_settings.product.for_admin.preview_in_page_height', (int) config('app.images.product.preview_in_page_in_admin.height', 500)),
                         ],
                     ],

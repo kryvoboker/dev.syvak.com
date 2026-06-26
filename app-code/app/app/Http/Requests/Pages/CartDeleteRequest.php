@@ -24,8 +24,8 @@ class CartDeleteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cart_id'                                  => ['required', 'integer', 'min:1'],
-            CartRequestKeyEnum::CartMode->value        => ['nullable', 'string', Rule::in(array_column(CartModeEnum::cases(), 'value'))],
+            'cart_id' => ['required', 'integer', 'min:1'],
+            CartRequestKeyEnum::CartMode->value => ['nullable', 'string', Rule::in(array_column(CartModeEnum::cases(), 'value'))],
             CartRequestKeyEnum::IsCallFromModal->value => ['nullable', 'boolean'],
         ];
     }
@@ -34,7 +34,7 @@ class CartDeleteRequest extends FormRequest
     {
         $normalized_data = $this->all();
 
-        $cart_id   = $this->input('cart_id', $this->route('cart_id'));
+        $cart_id = $this->input('cart_id', $this->route('cart_id'));
         $cart_mode = Str::lower((string) $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
 
         Arr::set($normalized_data, 'cart_id', is_numeric($cart_id) ? (int) $cart_id : $cart_id);

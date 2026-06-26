@@ -12,7 +12,8 @@ readonly class CartService
     public function __construct(
         private CartSessionService $cart_session_service,
         private CartViewDataBuilderService $cart_view_data_builder_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<string, mixed>
@@ -39,7 +40,7 @@ readonly class CartService
             return [
                 'success' => false,
                 'message' => __('catalog/default.cart.messages.variant_not_found'),
-                'cart'    => $this->getSnapshot($locale, $mode),
+                'cart' => $this->getSnapshot($locale, $mode),
             ];
         }
 
@@ -48,7 +49,7 @@ readonly class CartService
         return [
             'success' => true,
             'message' => __('catalog/default.cart.messages.item_added'),
-            'cart'    => $this->getSnapshot($locale, $mode),
+            'cart' => $this->getSnapshot($locale, $mode),
         ];
     }
 

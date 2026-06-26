@@ -47,7 +47,7 @@ class UpdateRatesService
             return __('admin/settings/currencies.error_failed_to_update_rates');
         }
 
-        $currencies      = $currency->getAllCurrencies();
+        $currencies = $currency->getAllCurrencies();
         $currencies_data = [
             $default_active_currency->code => $default_active_currency->exchange_rate,
         ];

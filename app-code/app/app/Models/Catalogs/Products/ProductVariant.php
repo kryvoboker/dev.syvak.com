@@ -33,15 +33,15 @@ class ProductVariant extends Model
     protected function casts(): array
     {
         return [
-            'product_id'                => 'integer',
-            'is_default'                => 'boolean',
-            'is_active'                 => 'boolean',
-            'quantity'                  => 'integer',
-            'minimum'                   => 'integer',
-            'price'                     => 'float',
-            'date_available'            => 'datetime',
-            'sort_order'                => 'integer',
-            'size_guide_data'           => 'array',
+            'product_id' => 'integer',
+            'is_default' => 'boolean',
+            'is_active' => 'boolean',
+            'quantity' => 'integer',
+            'minimum' => 'integer',
+            'price' => 'float',
+            'date_available' => 'datetime',
+            'sort_order' => 'integer',
+            'size_guide_data' => 'array',
             'composition_and_care_data' => 'array',
         ];
     }

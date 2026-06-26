@@ -16,8 +16,8 @@ class PriceSourceResolverService
         CatalogFilterDiscountOnlyPolicyEnum $discount_only_policy,
     ): ?float {
         return match ($price_source_mode) {
-            CatalogFilterPriceSourceModeEnum::RrcOnly      => $rrc_price,
-            CatalogFilterPriceSourceModeEnum::Both         => $this->resolveBothModePrice($rrc_price, $discount_price),
+            CatalogFilterPriceSourceModeEnum::RrcOnly => $rrc_price,
+            CatalogFilterPriceSourceModeEnum::Both => $this->resolveBothModePrice($rrc_price, $discount_price),
             CatalogFilterPriceSourceModeEnum::DiscountOnly => $this->resolveDiscountOnlyModePrice(
                 $rrc_price,
                 $discount_price,

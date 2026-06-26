@@ -23,7 +23,7 @@ class CategoryImage extends Model
     {
         return [
             'category_id' => 'integer',
-            'sort_order'  => 'integer',
+            'sort_order' => 'integer',
         ];
     }
 

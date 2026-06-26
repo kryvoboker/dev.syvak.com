@@ -32,10 +32,10 @@ class CreateCategory extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Store related data temporarily
-        $this->descriptions  = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
         $this->preview_image = $data['preview_image'] ?? null;
-        $this->icon          = $data['icon'] ?? null;
-        $this->slugs         = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->icon = $data['icon'] ?? null;
+        $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
 
         unset($data['descriptions'], $data['preview_image'], $data['icon'], $data['slugs']);
 
@@ -67,7 +67,7 @@ class CreateCategory extends CreateRecord
     {
         if (! empty($this->preview_image) || ! empty($this->icon)) {
             $this->getCategoryRecord()->categoryImage()->create([
-                'icon'          => $this->icon,
+                'icon' => $this->icon,
                 'preview_image' => $this->preview_image,
             ]);
         }
@@ -83,13 +83,13 @@ class CreateCategory extends CreateRecord
         foreach ($this->descriptions as $language_id => $description) {
             if (! empty($description['name'])) {
                 $descriptions_data[] = [
-                    'language_id'      => (int) $language_id,
-                    'name'             => $description['name'],
-                    'description'      => $description['description'] ?? null,
-                    'h1_title'         => $description['h1_title'] ?? null,
-                    'meta_title'       => $description['meta_title'] ?? null,
+                    'language_id' => (int) $language_id,
+                    'name' => $description['name'],
+                    'description' => $description['description'] ?? null,
+                    'h1_title' => $description['h1_title'] ?? null,
+                    'meta_title' => $description['meta_title'] ?? null,
                     'meta_description' => $description['meta_description'] ?? null,
-                    'meta_keywords'    => $description['meta_keywords'] ?? null,
+                    'meta_keywords' => $description['meta_keywords'] ?? null,
                 ];
             }
         }

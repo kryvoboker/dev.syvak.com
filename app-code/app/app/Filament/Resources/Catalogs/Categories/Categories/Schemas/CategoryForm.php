@@ -23,7 +23,9 @@ use Throwable;
 
 class CategoryForm
 {
-    use LanguageTrait, MetaTextFormTrait, SlugFormTrait;
+    use LanguageTrait;
+    use MetaTextFormTrait;
+    use SlugFormTrait;
 
     public static function configure(Schema $schema): Schema
     {
@@ -114,12 +116,12 @@ class CategoryForm
 
     protected static function createImagesTab(): Tabs\Tab
     {
-        $admin_image_settings        = self::resolveCategoryAdminImageSettings();
+        $admin_image_settings = self::resolveCategoryAdminImageSettings();
         $category_upload_max_size_kb = max(1, (int) data_get($admin_image_settings, 'upload.max_size_kb', (int) config('app.images.category.upload.max_size_kb', 5120)));
         $category_upload_max_size_mb = self::resolveMegabytesFromKilobytes($category_upload_max_size_kb);
-        $image_upload_directory      = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))));
-        $preview_in_page_width       = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.width', (int) config('app.images.category.preview_in_page_in_admin.width', 500)));
-        $preview_in_page_height      = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.height', (int) config('app.images.category.preview_in_page_in_admin.height', 500)));
+        $image_upload_directory = resolve_upload_path_placeholders((string) data_get($admin_image_settings, 'upload.directory', (string) config('app.images.category.image_path', 'images/categories/' . date('Y/m'))));
+        $preview_in_page_width = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.width', (int) config('app.images.category.preview_in_page_in_admin.width', 500)));
+        $preview_in_page_height = max(1, (int) data_get($admin_image_settings, 'images.preview_in_page.height', (int) config('app.images.category.preview_in_page_in_admin.height', 500)));
 
         return Tabs\Tab::make(__('admin/default.tabs.images'))
             ->schema([
@@ -137,8 +139,8 @@ class CategoryForm
                             ->imageEditorViewportWidth($preview_in_page_width)
                             ->imageEditorViewportHeight($preview_in_page_height)
                             ->imageEditorAspectRatios([
-                                '1:1'  => '1:1',
-                                '4:3'  => '4:3',
+                                '1:1' => '1:1',
+                                '4:3' => '4:3',
                                 '16:9' => '16:9',
                             ])
                             ->nullable(),
@@ -155,8 +157,8 @@ class CategoryForm
                             ->imageEditorViewportWidth($preview_in_page_width)
                             ->imageEditorViewportHeight($preview_in_page_height)
                             ->imageEditorAspectRatios([
-                                '1:1'  => '1:1',
-                                '4:3'  => '4:3',
+                                '1:1' => '1:1',
+                                '4:3' => '4:3',
                                 '16:9' => '16:9',
                             ])
                             ->nullable(),
@@ -178,11 +180,11 @@ class CategoryForm
         $settings = [
             'upload' => [
                 'max_size_kb' => (int) config('app.images.category.upload.max_size_kb', 5120),
-                'directory'   => (string) config('app.images.category.image_path', 'images/categories/' . date('Y/m')),
+                'directory' => (string) config('app.images.category.image_path', 'images/categories/' . date('Y/m')),
             ],
             'images' => [
                 'preview_in_page' => [
-                    'width'  => (int) config('app.images.category.preview_in_page_in_admin.width', 500),
+                    'width' => (int) config('app.images.category.preview_in_page_in_admin.width', 500),
                     'height' => (int) config('app.images.category.preview_in_page_in_admin.height', 500),
                 ],
             ],

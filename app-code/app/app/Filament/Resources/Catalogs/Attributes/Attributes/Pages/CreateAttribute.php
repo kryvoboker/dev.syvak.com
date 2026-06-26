@@ -43,7 +43,7 @@ class CreateAttribute extends CreateRecord
                 if (! empty($description['name'])) {
                     $descriptions_data[] = [
                         'language_id' => (int) $language_id,
-                        'name'        => $description['name'],
+                        'name' => $description['name'],
                     ];
                 }
             }

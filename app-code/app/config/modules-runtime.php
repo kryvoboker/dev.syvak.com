@@ -13,8 +13,8 @@ return [
     |
     */
     'allowed_strategies' => [
-        'eager'                    => 'eager',
-        'route_matched'            => 'route_matched',
+        'eager' => 'eager',
+        'route_matched' => 'route_matched',
         'middleware_after_session' => 'middleware_after_session',
     ],
 

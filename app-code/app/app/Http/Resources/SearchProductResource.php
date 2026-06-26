@@ -26,7 +26,7 @@ class SearchProductResource extends JsonResource
 
         if (! is_array($search_product_sizes_cache)) {
             $search_product_sizes_cache = [
-                'width'  => (int) config('app.page_settings.search.images.search_product.width', 219),
+                'width' => (int) config('app.page_settings.search.images.search_product.width', 219),
                 'height' => (int) config('app.page_settings.search.images.search_product.height', 219),
             ];
 
@@ -37,9 +37,9 @@ class SearchProductResource extends JsonResource
             }
         }
 
-        $variant          = $this->defaultVariant;
-        $price_source     = $variant->price ?? $this->price;
-        $image_source     = $variant->image ?? $this->image;
+        $variant = $this->defaultVariant;
+        $price_source = $variant->price ?? $this->price;
+        $image_source = $variant->image ?? $this->image;
         $variant_discount = $variant?->discounts?->first();
 
         $price = format_price(
@@ -49,16 +49,16 @@ class SearchProductResource extends JsonResource
         );
 
         return [
-            'id'         => $this->id,
-            'sku'        => escape_special_html($this->sku),
-            'price'      => replace_currency_symbol_to_code($price),
+            'id' => $this->id,
+            'sku' => escape_special_html($this->sku),
+            'price' => replace_currency_symbol_to_code($price),
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
                     $image_source,
                     (int) $search_product_sizes_cache['width'],
                     (int) $search_product_sizes_cache['height'],
                 ),
-                'width'  => (int) $search_product_sizes_cache['width'],
+                'width' => (int) $search_product_sizes_cache['width'],
                 'height' => (int) $search_product_sizes_cache['height'],
             ],
             'link' => $this->whenLoaded('slugs', function () {
@@ -70,8 +70,8 @@ class SearchProductResource extends JsonResource
                 $product_description = $this->productDescription->first();
 
                 return [
-                    'id'          => $product_description?->id,
-                    'name'        => escape_special_html($product_description?->name),
+                    'id' => $product_description?->id,
+                    'name' => escape_special_html($product_description?->name),
                     'description' => escape_special_html($product_description?->description),
                 ];
             }),
@@ -84,10 +84,10 @@ class SearchProductResource extends JsonResource
                     );
 
                     return [
-                        'id'               => $variant_discount->id,
+                        'id' => $variant_discount->id,
                         'discounted_price' => replace_currency_symbol_to_code($discounted_price),
-                        'start_date'       => $variant_discount->date_start,
-                        'end_date'         => $variant_discount->date_end,
+                        'start_date' => $variant_discount->date_start,
+                        'end_date' => $variant_discount->date_end,
                     ];
                 }
 

@@ -35,7 +35,7 @@ class PageSetting extends Model
      */
     public function getSortingItemsFromSettings(): array
     {
-        $settings       = is_array($this->settings) ? $this->settings : [];
+        $settings = is_array($this->settings) ? $this->settings : [];
         $settings_items = Arr::get($settings, 'items.sorting', []);
 
         if (! is_array($settings_items)) {
@@ -54,7 +54,7 @@ class PageSetting extends Model
      */
     public function getFilterItemsFromSettings(): array
     {
-        $settings       = is_array($this->settings) ? $this->settings : [];
+        $settings = is_array($this->settings) ? $this->settings : [];
         $settings_items = Arr::get($settings, 'items.filters', []);
 
         if (! is_array($settings_items)) {

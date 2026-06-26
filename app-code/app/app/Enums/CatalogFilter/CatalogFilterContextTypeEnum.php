@@ -7,6 +7,6 @@ namespace App\Enums\CatalogFilter;
 enum CatalogFilterContextTypeEnum: string
 {
     case Category = 'category';
-    case Catalog  = 'catalog';
-    case Search   = 'search';
+    case Catalog = 'catalog';
+    case Search = 'search';
 }

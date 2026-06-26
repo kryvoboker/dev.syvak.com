@@ -21,9 +21,9 @@ class UsersTable
 {
     public static function configure(Table $table): Table
     {
-        $user_image_settings     = self::resolveUserImageSettings();
+        $user_image_settings = self::resolveUserImageSettings();
         $user_preview_list_width = max(1, (int) data_get($user_image_settings, 'preview_in_list_in_admin.width', (int) config('app.images.user.preview_in_list_in_admin.width')));
-        $user_no_image_path      = (string) data_get($user_image_settings, 'no_image', (string) config('app.images.user.no_image'));
+        $user_no_image_path = (string) data_get($user_image_settings, 'no_image', (string) config('app.images.user.no_image'));
 
         return $table
             ->columns([
@@ -63,8 +63,8 @@ class UsersTable
                     ->defaultImageUrl(Storage::url($user_no_image_path))
                     ->extraImgAttributes([
                         'decoding' => 'async',
-                        'loading'  => 'lazy',
-                        'style'    => 'object-fit: contain;',
+                        'loading' => 'lazy',
+                        'style' => 'object-fit: contain;',
                     ]),
 
                 IconColumn::make('is_active')
@@ -121,7 +121,7 @@ class UsersTable
     private static function resolveUserImageSettings(): array
     {
         $app_settings = get_app_settings();
-        $settings     = data_get($app_settings, 'user_settings');
+        $settings = data_get($app_settings, 'user_settings');
 
         if ($settings instanceof SupportCollection) {
             return $settings->toArray();

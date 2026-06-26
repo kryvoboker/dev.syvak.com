@@ -51,9 +51,9 @@ class UserGroupResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListUserGroups::route('/'),
+            'index' => ListUserGroups::route('/'),
             'create' => CreateUserGroup::route('/create'),
-            'edit'   => EditUserGroup::route('/{record}/edit'),
+            'edit' => EditUserGroup::route('/{record}/edit'),
         ];
     }
 

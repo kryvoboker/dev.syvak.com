@@ -78,19 +78,19 @@ final class NamingConventionSniff implements Sniff
         $tokens = $phpcsFile->getTokens();
 
         match ($tokens[$stackPtr]['code']) {
-            T_VARIABLE                            => $this->checkVariable($phpcsFile, $stackPtr),
-            T_FUNCTION                            => $this->checkFunctionOrMethod($phpcsFile, $stackPtr),
+            T_VARIABLE => $this->checkVariable($phpcsFile, $stackPtr),
+            T_FUNCTION => $this->checkFunctionOrMethod($phpcsFile, $stackPtr),
             T_CLASS, T_INTERFACE, T_TRAIT, T_ENUM => $this->checkClassLike($phpcsFile, $stackPtr),
-            T_CONST                               => $this->checkConstants($phpcsFile, $stackPtr),
-            T_CASE                                => $this->checkEnumCase($phpcsFile, $stackPtr),
-            default                               => null,
+            T_CONST => $this->checkConstants($phpcsFile, $stackPtr),
+            T_CASE => $this->checkEnumCase($phpcsFile, $stackPtr),
+            default => null,
         };
     }
 
     private function checkVariable(File $file, int $ptr): void
     {
         $tokens = $file->getTokens();
-        $name   = ltrim($tokens[$ptr]['content'], '$');
+        $name = ltrim($tokens[$ptr]['content'], '$');
 
         if (in_array($name, self::ALLOWED_VARIABLES, true)) {
             return;
@@ -111,7 +111,7 @@ final class NamingConventionSniff implements Sniff
         $tokens = $file->getTokens();
 
         $conditions = $tokens[$ptr]['conditions'] ?? [];
-        $is_method  = false;
+        $is_method = false;
 
         foreach ($conditions as $conditionCode) {
             if (in_array($conditionCode, [T_CLASS, T_INTERFACE, T_TRAIT, T_ENUM], true)) {

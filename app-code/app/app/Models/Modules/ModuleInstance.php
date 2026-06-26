@@ -31,10 +31,10 @@ class ModuleInstance extends Model
     {
         return [
             'module_definition_id' => 'integer',
-            'is_enabled'           => 'boolean',
-            'sort_order'           => 'integer',
-            'settings'             => 'array',
-            'meta'                 => 'array',
+            'is_enabled' => 'boolean',
+            'sort_order' => 'integer',
+            'settings' => 'array',
+            'meta' => 'array',
         ];
     }
 

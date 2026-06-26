@@ -22,7 +22,7 @@ trait CartTrait
     public function store(CartStoreRequest $request, ?string $locale): JsonResponse
     {
         $locale = normalize_locale($locale);
-        $mode   = $this->resolveCartMode($request->validated());
+        $mode = $this->resolveCartMode($request->validated());
 
         $result_data = app(CartService::class)->addItem(
             product_variant_id: (int) Arr::get($request->validated(), 'product_variant_id', 0),
@@ -41,7 +41,7 @@ trait CartTrait
     public function update(CartUpdateRequest $request, ?string $locale): JsonResponse
     {
         $locale = normalize_locale($locale);
-        $mode   = $this->resolveCartMode($request->validated());
+        $mode = $this->resolveCartMode($request->validated());
 
         $result_data = app(CartService::class)->updateItem(
             cart_id : (int) Arr::get($request->validated(), 'cart_id', 0),
@@ -59,7 +59,7 @@ trait CartTrait
     public function delete(CartDeleteRequest $request, ?string $locale): JsonResponse
     {
         $locale = normalize_locale($locale);
-        $mode   = $this->resolveCartMode($request->validated());
+        $mode = $this->resolveCartMode($request->validated());
 
         $result_data = app(CartService::class)->removeItem(
             cart_id: (int) Arr::get($request->validated(), 'cart_id', 0),
@@ -80,13 +80,13 @@ trait CartTrait
         $cart_data = Arr::get($result_data, 'cart', []);
 
         return response()->json([
-            'success'  => (bool) Arr::get($result_data, 'success', false),
-            'message'  => (string) Arr::get($result_data, 'message', ''),
-            'mode'     => $mode,
-            'cart'     => $cart_data,
+            'success' => (bool) Arr::get($result_data, 'success', false),
+            'message' => (string) Arr::get($result_data, 'message', ''),
+            'mode' => $mode,
+            'cart' => $cart_data,
             'rendered' => [
                 'modal_items_html' => view('catalog.partials.cart.modal-items', [
-                    'cart_data'                         => $cart_data,
+                    'cart_data' => $cart_data,
                     CartRequestKeyEnum::CartMode->value => $mode,
                 ])->render(),
                 'cart_page_html' => view('catalog.partials.cart.page-content', [

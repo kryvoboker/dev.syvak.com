@@ -29,9 +29,9 @@ class InfoPage extends Model
     protected function casts(): array
     {
         return [
-            'positions'  => 'array',
+            'positions' => 'array',
             'sort_order' => 'integer',
-            'is_active'  => 'boolean',
+            'is_active' => 'boolean',
             'is_noindex' => 'boolean',
         ];
     }

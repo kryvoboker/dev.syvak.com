@@ -112,7 +112,7 @@ class CurrenciesTable
 
                             // Check if trying to delete all active currencies
                             $active_to_delete = $records->where('is_active', true)->count();
-                            $total_active     = Currency::where('is_active', true)->count();
+                            $total_active = Currency::where('is_active', true)->count();
 
                             if ($active_to_delete >= $total_active) {
                                 Notification::make()

@@ -24,10 +24,10 @@ class CartStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_variant_id'                       => ['required', 'integer', 'min:1'],
-            'quantity'                                 => ['nullable', 'integer', 'min:1', 'max:999'],
-            'chosen_attributes'                        => ['nullable', 'array'],
-            CartRequestKeyEnum::CartMode->value        => ['nullable', 'string', Rule::in(array_column(CartModeEnum::cases(), 'value'))],
+            'product_variant_id' => ['required', 'integer', 'min:1'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:999'],
+            'chosen_attributes' => ['nullable', 'array'],
+            CartRequestKeyEnum::CartMode->value => ['nullable', 'string', Rule::in(array_column(CartModeEnum::cases(), 'value'))],
             CartRequestKeyEnum::IsCallFromModal->value => ['nullable', 'boolean'],
         ];
     }
@@ -37,8 +37,8 @@ class CartStoreRequest extends FormRequest
         $normalized_data = $this->all();
 
         $variant_id = $this->input('product_variant_id');
-        $quantity   = $this->input('quantity', 1);
-        $cart_mode  = Str::lower((string) $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
+        $quantity = $this->input('quantity', 1);
+        $cart_mode = Str::lower((string) $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
 
         Arr::set($normalized_data, 'product_variant_id', is_numeric($variant_id) ? (int) $variant_id : $variant_id);
         Arr::set($normalized_data, 'quantity', is_numeric($quantity) ? (int) $quantity : $quantity);

@@ -64,10 +64,10 @@ class User extends Authenticatable implements FilamentUser
     protected function casts(): array
     {
         return [
-            'user_group_id'     => 'integer',
+            'user_group_id' => 'integer',
             'email_verified_at' => 'datetime',
-            'is_active'         => 'boolean',
-            'password'          => 'hashed',
+            'is_active' => 'boolean',
+            'password' => 'hashed',
         ];
     }
 

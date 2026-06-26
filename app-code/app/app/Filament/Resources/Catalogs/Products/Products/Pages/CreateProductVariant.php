@@ -119,7 +119,7 @@ class CreateProductVariant extends CreateRecord
 
         foreach ($slug_rows as $row_index => $slug_row) {
             $language_id = (int) ($slug_row['language_id'] ?? 0);
-            $slug_value  = Str::of((string) ($slug_row['slug'] ?? ''))->trim()->toString();
+            $slug_value = Str::of((string) ($slug_row['slug'] ?? ''))->trim()->toString();
 
             if ($language_id < 1 || $slug_value === '') {
                 continue;
@@ -160,7 +160,7 @@ class CreateProductVariant extends CreateRecord
                     $variant->attributeValues
                         ->map(fn ($attribute_row): array => [
                             'attribute_id' => (int) data_get($attribute_row, 'attribute_id'),
-                            'language_id'  => (int) data_get($attribute_row, 'language_id'),
+                            'language_id' => (int) data_get($attribute_row, 'language_id'),
                             'value_string' => (string) data_get($attribute_row, 'value_string'),
                         ])
                         ->all(),
@@ -200,7 +200,7 @@ class CreateProductVariant extends CreateRecord
                 return collect($language_rows)
                     ->map(fn (array $row): array => [
                         'attribute_id' => (int) ($row['attribute_id'] ?? 0),
-                        'language_id'  => $language_id,
+                        'language_id' => $language_id,
                         'value_string' => (string) ($row['value_string'] ?? ''),
                     ])
                     ->all();

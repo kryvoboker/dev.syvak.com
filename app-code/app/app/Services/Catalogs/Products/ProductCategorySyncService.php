@@ -22,17 +22,17 @@ class ProductCategorySyncService
     public function syncWithRetry(Product $product, mixed $category_ids): void
     {
         $normalized_category_ids = $this->normalizeCategoryIds($category_ids);
-        $max_attempts            = 3;
-        $product_id              = (int) $product->getKey();
+        $max_attempts = 3;
+        $product_id = (int) $product->getKey();
 
         for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
             try {
                 $product->categories()->sync($normalized_category_ids);
 
                 Log::channel('daily')->info('[FIX:product-categories-lock] Product categories synced.', [
-                    'product_id'       => $product_id,
+                    'product_id' => $product_id,
                     'categories_count' => count($normalized_category_ids),
-                    'attempt'          => $attempt,
+                    'attempt' => $attempt,
                 ]);
 
                 return;
@@ -40,8 +40,8 @@ class ProductCategorySyncService
                 if (! $this->isLockWaitTimeoutException($throwable) || $attempt === $max_attempts) {
                     Log::channel('stack')->error('[FIX:product-categories-lock] Product category sync failed.', [
                         'product_id' => $product_id,
-                        'attempt'    => $attempt,
-                        'exception'  => $throwable,
+                        'attempt' => $attempt,
+                        'exception' => $throwable,
                     ]);
 
                     throw $throwable;
@@ -49,7 +49,7 @@ class ProductCategorySyncService
 
                 Log::channel('stack')->warning('[FIX:product-categories-lock] Retrying product category sync after lock timeout.', [
                     'product_id' => $product_id,
-                    'attempt'    => $attempt,
+                    'attempt' => $attempt,
                 ]);
 
                 usleep($attempt * 200_000);

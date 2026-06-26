@@ -42,7 +42,7 @@ class ModuleInstanceForm
         } catch (BindingResolutionException|CircularDependencyException $e) {
             Log::channel('stack')->error('Error resolving module instance form schema.', [
                 'definition_id' => $definition?->id,
-                'instance_id'   => $instance?->id,
+                'instance_id' => $instance?->id,
                 'error_message' => $e->getMessage(),
             ]);
         }

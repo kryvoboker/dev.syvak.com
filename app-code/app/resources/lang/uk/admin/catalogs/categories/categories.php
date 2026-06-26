@@ -8,7 +8,7 @@ return [
 
     // Labels
     'labels' => [
-        'model'        => 'Категорія',
+        'model' => 'Категорія',
         'plural_model' => 'Категорії',
     ],
 ];

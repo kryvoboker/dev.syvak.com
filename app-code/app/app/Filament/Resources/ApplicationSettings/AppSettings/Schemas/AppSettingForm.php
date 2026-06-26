@@ -147,7 +147,7 @@ class AppSettingForm
                                                 $timezones = [];
 
                                                 foreach (timezone_identifiers_list() as $timezone) {
-                                                    $offset               = Carbon::now($timezone)->format('P'); // +02:00 format
+                                                    $offset = Carbon::now($timezone)->format('P'); // +02:00 format
                                                     $timezones[$timezone] = "$timezone ($offset)";
                                                 }
 
@@ -422,13 +422,13 @@ class AppSettingForm
                                 Select::make('social_type')
                                     ->label(__('admin/settings/app_settings.labels.social_type'))
                                     ->options([
-                                        'facebook'  => __('admin/default.texts.facebook'),
+                                        'facebook' => __('admin/default.texts.facebook'),
                                         'instagram' => __('admin/default.texts.instagram'),
-                                        'twitter'   => __('admin/default.texts.twitter'),
-                                        'linkedin'  => __('admin/default.texts.linkedin'),
-                                        'youtube'   => __('admin/default.texts.youtube'),
-                                        'telegram'  => __('admin/default.texts.telegram'),
-                                        'tiktok'    => __('admin/default.texts.tiktok'),
+                                        'twitter' => __('admin/default.texts.twitter'),
+                                        'linkedin' => __('admin/default.texts.linkedin'),
+                                        'youtube' => __('admin/default.texts.youtube'),
+                                        'telegram' => __('admin/default.texts.telegram'),
+                                        'tiktok' => __('admin/default.texts.tiktok'),
                                     ])
                                     ->searchable()
                                     ->rules(['required', 'string', 'in:' . implode(',', config('app.socials_list'))])

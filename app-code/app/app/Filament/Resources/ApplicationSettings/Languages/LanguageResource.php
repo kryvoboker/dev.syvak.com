@@ -51,9 +51,9 @@ class LanguageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListLanguages::route('/'),
+            'index' => ListLanguages::route('/'),
             'create' => CreateLanguage::route('/create'),
-            'edit'   => EditLanguage::route('/{record}/edit'),
+            'edit' => EditLanguage::route('/{record}/edit'),
         ];
     }
 

@@ -19,9 +19,9 @@ class ProductVariantDefaultUniquenessTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
 
@@ -35,37 +35,37 @@ class ProductVariantDefaultUniquenessTest extends TestCase
     public function test_only_one_variant_can_remain_default_for_the_same_product(): void
     {
         $product = Product::query()->create([
-            'model'          => 'MODEL-DEFAULT-001',
-            'sku'            => 'SKU-DEFAULT-001',
-            'ean'            => '2999999990011',
-            'quantity'       => 10,
-            'minimum'        => 1,
-            'price'          => 1000,
-            'viewed'         => 0,
-            'is_active'      => true,
+            'model' => 'MODEL-DEFAULT-001',
+            'sku' => 'SKU-DEFAULT-001',
+            'ean' => '2999999990011',
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+            'viewed' => 0,
+            'is_active' => true,
             'date_available' => now(config('app.timezone')),
-            'date_added'     => now(config('app.timezone')),
+            'date_added' => now(config('app.timezone')),
         ]);
 
         $first_default_variant = ProductVariant::query()->create([
-            'product_id'      => (int) $product->id,
-            'is_default'      => true,
-            'is_active'       => true,
-            'quantity'        => 10,
-            'minimum'         => 1,
-            'price'           => 1000,
-            'sort_order'      => 1,
+            'product_id' => (int) $product->id,
+            'is_default' => true,
+            'is_active' => true,
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+            'sort_order' => 1,
             'size_guide_data' => null,
         ]);
 
         $second_default_variant = ProductVariant::query()->create([
-            'product_id'      => (int) $product->id,
-            'is_default'      => true,
-            'is_active'       => true,
-            'quantity'        => 10,
-            'minimum'         => 1,
-            'price'           => 1200,
-            'sort_order'      => 2,
+            'product_id' => (int) $product->id,
+            'is_default' => true,
+            'is_active' => true,
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1200,
+            'sort_order' => 2,
             'size_guide_data' => null,
         ]);
 

@@ -29,7 +29,7 @@ class CreateInfoPage extends CreateRecord
     {
         // Store related data temporarily
         $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
-        $this->slugs        = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
 
         unset($data['descriptions'], $data['slugs']);
 
@@ -61,12 +61,12 @@ class CreateInfoPage extends CreateRecord
         foreach ($this->descriptions as $language_id => $description) {
             if (! empty($description['name'])) {
                 $descriptions_data[] = [
-                    'language_id'      => (int) $language_id,
-                    'title'            => $description['name'],
-                    'description'      => $description['description'] ?? null,
-                    'meta_title'       => $description['meta_title'] ?? null,
+                    'language_id' => (int) $language_id,
+                    'title' => $description['name'],
+                    'description' => $description['description'] ?? null,
+                    'meta_title' => $description['meta_title'] ?? null,
                     'meta_description' => $description['meta_description'] ?? null,
-                    'meta_keywords'    => $description['meta_keywords'] ?? null,
+                    'meta_keywords' => $description['meta_keywords'] ?? null,
                 ];
             }
         }

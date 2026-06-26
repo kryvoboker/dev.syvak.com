@@ -23,9 +23,9 @@ class ModuleServicesTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
         config()->set('cache.default', 'array');
@@ -40,63 +40,63 @@ class ModuleServicesTest extends TestCase
     public function test_module_definition_sync_service_creates_updates_and_marks_missing_records(): void
     {
         $existing_definition = ModuleDefinition::query()->create([
-            'name'                     => 'Carousel Legacy',
-            'slug'                     => 'carousel',
-            'nwidart_name'             => 'Carousel',
-            'module_path'              => '/legacy/modules/Carousel',
-            'description'              => 'Legacy description',
-            'is_installed'             => true,
-            'is_enabled'               => false,
+            'name' => 'Carousel Legacy',
+            'slug' => 'carousel',
+            'nwidart_name' => 'Carousel',
+            'module_path' => '/legacy/modules/Carousel',
+            'description' => 'Legacy description',
+            'is_installed' => true,
+            'is_enabled' => false,
             'is_enabled_in_filesystem' => true,
-            'sort_order'               => 1,
-            'settings_schema'          => ['legacy' => 'keep'],
-            'meta'                     => ['owner' => 'catalog'],
+            'sort_order' => 1,
+            'settings_schema' => ['legacy' => 'keep'],
+            'meta' => ['owner' => 'catalog'],
         ]);
 
         ModuleDefinition::query()->create([
-            'name'                     => 'Missing Module',
-            'slug'                     => 'missing-module',
-            'nwidart_name'             => 'MissingModule',
-            'module_path'              => '/legacy/modules/MissingModule',
-            'description'              => 'Should become missing',
-            'is_installed'             => true,
-            'is_enabled'               => true,
+            'name' => 'Missing Module',
+            'slug' => 'missing-module',
+            'nwidart_name' => 'MissingModule',
+            'module_path' => '/legacy/modules/MissingModule',
+            'description' => 'Should become missing',
+            'is_installed' => true,
+            'is_enabled' => true,
             'is_enabled_in_filesystem' => true,
-            'sort_order'               => 2,
-            'settings_schema'          => [],
-            'meta'                     => [],
+            'sort_order' => 2,
+            'settings_schema' => [],
+            'meta' => [],
         ]);
 
         $discovered_modules = collect([
             [
-                'name'                     => 'Carousel',
-                'slug'                     => 'carousel',
-                'nwidart_name'             => 'Carousel',
-                'module_path'              => '/var/modules/Carousel',
-                'description'              => 'Fresh description',
-                'is_installed'             => true,
+                'name' => 'Carousel',
+                'slug' => 'carousel',
+                'nwidart_name' => 'Carousel',
+                'module_path' => '/var/modules/Carousel',
+                'description' => 'Fresh description',
+                'is_installed' => true,
                 'is_enabled_in_filesystem' => true,
-                'settings_schema'          => ['layout' => 'slider'],
-                'meta'                     => ['priority' => '10'],
+                'settings_schema' => ['layout' => 'slider'],
+                'meta' => ['priority' => '10'],
             ],
             [
-                'name'                     => 'Hero Banner',
-                'slug'                     => 'hero-banner',
-                'nwidart_name'             => 'HeroBanner',
-                'module_path'              => '/var/modules/HeroBanner',
-                'description'              => 'Hero banner module',
-                'is_installed'             => true,
+                'name' => 'Hero Banner',
+                'slug' => 'hero-banner',
+                'nwidart_name' => 'HeroBanner',
+                'module_path' => '/var/modules/HeroBanner',
+                'description' => 'Hero banner module',
+                'is_installed' => true,
                 'is_enabled_in_filesystem' => false,
-                'settings_schema'          => ['variant' => 'full-width'],
-                'meta'                     => ['priority' => '20'],
+                'settings_schema' => ['variant' => 'full-width'],
+                'meta' => ['priority' => '20'],
             ],
         ]);
 
-        $this->app->instance(ModuleDiscoveryService::class, new class($discovered_modules) extends ModuleDiscoveryService
-        {
+        $this->app->instance(ModuleDiscoveryService::class, new class ($discovered_modules) extends ModuleDiscoveryService {
             public function __construct(
                 private readonly Collection $discovered_modules,
-            ) {}
+            ) {
+            }
 
             public function discover(): Collection
             {
@@ -114,7 +114,7 @@ class ModuleServicesTest extends TestCase
 
         $existing_definition->refresh();
         $existing_definition_settings_schema = is_array($existing_definition->settings_schema) ? $existing_definition->settings_schema : [];
-        $existing_definition_meta            = is_array($existing_definition->meta) ? $existing_definition->meta : [];
+        $existing_definition_meta = is_array($existing_definition->meta) ? $existing_definition->meta : [];
 
         $this->assertFalse($existing_definition->is_enabled);
         $this->assertSame('/var/modules/Carousel', $existing_definition->module_path);
@@ -131,15 +131,15 @@ class ModuleServicesTest extends TestCase
         $this->assertSame('10', $existing_definition_meta['priority']);
 
         $this->assertDatabaseHas('module_definitions', [
-            'nwidart_name'             => 'HeroBanner',
-            'slug'                     => 'hero-banner',
-            'is_enabled'               => false,
+            'nwidart_name' => 'HeroBanner',
+            'slug' => 'hero-banner',
+            'is_enabled' => false,
             'is_enabled_in_filesystem' => false,
         ]);
 
         $this->assertDatabaseHas('module_definitions', [
-            'nwidart_name'             => 'MissingModule',
-            'is_installed'             => false,
+            'nwidart_name' => 'MissingModule',
+            'is_installed' => false,
             'is_enabled_in_filesystem' => false,
         ]);
     }
@@ -147,17 +147,17 @@ class ModuleServicesTest extends TestCase
     public function test_module_instance_service_can_toggle_definition_and_duplicate_isolated_instances(): void
     {
         $definition = ModuleDefinition::query()->create([
-            'name'                     => 'Promo Banner',
-            'slug'                     => 'promo-banner',
-            'nwidart_name'             => 'PromoBanner',
-            'module_path'              => '/var/modules/PromoBanner',
-            'description'              => 'Promo Banner',
-            'is_installed'             => true,
-            'is_enabled'               => true,
+            'name' => 'Promo Banner',
+            'slug' => 'promo-banner',
+            'nwidart_name' => 'PromoBanner',
+            'module_path' => '/var/modules/PromoBanner',
+            'description' => 'Promo Banner',
+            'is_installed' => true,
+            'is_enabled' => true,
             'is_enabled_in_filesystem' => true,
-            'sort_order'               => 1,
-            'settings_schema'          => [],
-            'meta'                     => [],
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [],
         ]);
 
         $service = $this->app->make(ModuleInstanceService::class);
@@ -169,15 +169,15 @@ class ModuleServicesTest extends TestCase
         $this->assertFalse($definition->is_enabled);
 
         $instance = $service->createFromDefinition($definition, [
-            'name'        => 'Promo Banner Home',
-            'placement'   => 'home.hero',
+            'name' => 'Promo Banner Home',
+            'placement' => 'home.hero',
             'context_key' => 'homepage',
-            'settings'    => ['slides' => '5'],
-            'meta'        => ['theme' => 'dark'],
+            'settings' => ['slides' => '5'],
+            'meta' => ['theme' => 'dark'],
         ]);
 
         $duplicate = $service->duplicate($instance, [
-            'name'        => 'Promo Banner Product',
+            'name' => 'Promo Banner Product',
             'context_key' => 'product.card',
         ]);
 
@@ -189,7 +189,7 @@ class ModuleServicesTest extends TestCase
 
         $instance->refresh();
         $duplicate->refresh();
-        $instance_settings  = is_array($instance->settings) ? $instance->settings : [];
+        $instance_settings = is_array($instance->settings) ? $instance->settings : [];
         $duplicate_settings = is_array($duplicate->settings) ? $duplicate->settings : [];
 
         $this->assertNotSame($instance->id, $duplicate->id);
@@ -206,61 +206,61 @@ class ModuleServicesTest extends TestCase
     public function test_module_runtime_resolver_returns_only_enabled_instances_for_requested_context(): void
     {
         $enabled_definition = ModuleDefinition::query()->create([
-            'name'                     => 'Carousel',
-            'slug'                     => 'carousel',
-            'nwidart_name'             => 'Carousel',
-            'module_path'              => '/var/modules/Carousel',
-            'description'              => 'Carousel',
-            'is_installed'             => true,
-            'is_enabled'               => true,
+            'name' => 'Carousel',
+            'slug' => 'carousel',
+            'nwidart_name' => 'Carousel',
+            'module_path' => '/var/modules/Carousel',
+            'description' => 'Carousel',
+            'is_installed' => true,
+            'is_enabled' => true,
             'is_enabled_in_filesystem' => true,
-            'sort_order'               => 1,
-            'settings_schema'          => [],
-            'meta'                     => [],
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [],
         ]);
 
         $disabled_definition = ModuleDefinition::query()->create([
-            'name'                     => 'Hero Banner',
-            'slug'                     => 'hero-banner',
-            'nwidart_name'             => 'HeroBanner',
-            'module_path'              => '/var/modules/HeroBanner',
-            'description'              => 'Hero',
-            'is_installed'             => true,
-            'is_enabled'               => false,
+            'name' => 'Hero Banner',
+            'slug' => 'hero-banner',
+            'nwidart_name' => 'HeroBanner',
+            'module_path' => '/var/modules/HeroBanner',
+            'description' => 'Hero',
+            'is_installed' => true,
+            'is_enabled' => false,
             'is_enabled_in_filesystem' => true,
-            'sort_order'               => 2,
-            'settings_schema'          => [],
-            'meta'                     => [],
+            'sort_order' => 2,
+            'settings_schema' => [],
+            'meta' => [],
         ]);
 
         $enabled_definition->instances()->create([
-            'name'        => 'Homepage Carousel',
-            'placement'   => 'home.hero',
+            'name' => 'Homepage Carousel',
+            'placement' => 'home.hero',
             'context_key' => 'homepage',
-            'is_enabled'  => true,
-            'sort_order'  => 1,
-            'settings'    => ['slides' => '5'],
-            'meta'        => [],
+            'is_enabled' => true,
+            'sort_order' => 1,
+            'settings' => ['slides' => '5'],
+            'meta' => [],
         ]);
 
         $enabled_definition->instances()->create([
-            'name'        => 'Disabled Carousel',
-            'placement'   => 'home.hero',
+            'name' => 'Disabled Carousel',
+            'placement' => 'home.hero',
             'context_key' => 'homepage',
-            'is_enabled'  => false,
-            'sort_order'  => 2,
-            'settings'    => ['slides' => '6'],
-            'meta'        => [],
+            'is_enabled' => false,
+            'sort_order' => 2,
+            'settings' => ['slides' => '6'],
+            'meta' => [],
         ]);
 
         $disabled_definition->instances()->create([
-            'name'        => 'Disabled Definition Instance',
-            'placement'   => 'home.hero',
+            'name' => 'Disabled Definition Instance',
+            'placement' => 'home.hero',
             'context_key' => 'homepage',
-            'is_enabled'  => true,
-            'sort_order'  => 1,
-            'settings'    => ['slides' => '1'],
-            'meta'        => [],
+            'is_enabled' => true,
+            'sort_order' => 1,
+            'settings' => ['slides' => '1'],
+            'meta' => [],
         ]);
 
         $resolved_modules = $this->app

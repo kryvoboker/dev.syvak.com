@@ -22,7 +22,8 @@ readonly class ModuleSettingsNormalizerService
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<string, mixed>  $settings
@@ -46,11 +47,11 @@ readonly class ModuleSettingsNormalizerService
             ->values()
             ->all();
         $allowed_page_types = collect(config('page-type', []))->values()->all();
-        $active_languages   = (new Language())->getActiveLanguages();
-        $shared_settings    = Arr::get($settings, 'shared', []);
+        $active_languages = (new Language())->getActiveLanguages();
+        $shared_settings = Arr::get($settings, 'shared', []);
 
         $default_source_mode = (string) $this->products_carousel_config->get('settings.default_source_mode', 'category_based');
-        $source_mode         = (string) Arr::get($settings, 'source_mode', $default_source_mode);
+        $source_mode = (string) Arr::get($settings, 'source_mode', $default_source_mode);
 
         Log::channel('daily')->info('Normalizing ProductsCarousel settings payload.', [
             'source_mode' => $source_mode,
@@ -77,7 +78,7 @@ readonly class ModuleSettingsNormalizerService
             $manual_only_settings = [];
         }
 
-        $category_ids        = $this->normalizeIds(Arr::get($category_based_settings, 'category_ids', []));
+        $category_ids = $this->normalizeIds(Arr::get($category_based_settings, 'category_ids', []));
         $active_category_ids = Category::query()
             ->where('is_active', true)
             ->whereIn('id', $category_ids)
@@ -106,21 +107,21 @@ readonly class ModuleSettingsNormalizerService
         );
 
         Log::channel('daily')->info('ProductsCarousel settings normalized.', [
-            'source_mode'                       => $source_mode,
-            'category_ids_count'                => count($active_category_ids),
-            'category_mode_product_ids_count'   => count($category_based_selected_product_ids),
-            'manual_mode_product_ids_count'     => count($manual_only_selected_product_ids),
-            'shared_page_types_count'           => count($normalized_shared_settings['page_types']),
-            'use_selected_products_only'        => $use_selected_products_only,
-            'min_quantity'                      => $normalized_shared_settings['min_quantity'],
-            'products_limit'                    => $normalized_shared_settings['products_limit'],
-            'product_image_width'               => $normalized_shared_settings['product_image_width'],
-            'product_image_height'              => $normalized_shared_settings['product_image_height'],
-            'sort_mode'                         => $normalized_shared_settings['sort_mode'],
-            'custom_sort_options_count'         => count($normalized_shared_settings['custom_sort_options']),
-            'custom_sort'                       => $normalized_shared_settings['custom_sort'],
+            'source_mode' => $source_mode,
+            'category_ids_count' => count($active_category_ids),
+            'category_mode_product_ids_count' => count($category_based_selected_product_ids),
+            'manual_mode_product_ids_count' => count($manual_only_selected_product_ids),
+            'shared_page_types_count' => count($normalized_shared_settings['page_types']),
+            'use_selected_products_only' => $use_selected_products_only,
+            'min_quantity' => $normalized_shared_settings['min_quantity'],
+            'products_limit' => $normalized_shared_settings['products_limit'],
+            'product_image_width' => $normalized_shared_settings['product_image_width'],
+            'product_image_height' => $normalized_shared_settings['product_image_height'],
+            'sort_mode' => $normalized_shared_settings['sort_mode'],
+            'custom_sort_options_count' => count($normalized_shared_settings['custom_sort_options']),
+            'custom_sort' => $normalized_shared_settings['custom_sort'],
             'shared_translations_locales_count' => count($normalized_shared_settings['translations']),
-            'filled_module_titles_count'        => collect($normalized_shared_settings['translations'])
+            'filled_module_titles_count' => collect($normalized_shared_settings['translations'])
                 ->filter(fn (array $translation): bool => filled($translation['module_name_for_user']))
                 ->count(),
             'filled_module_descriptions_count' => collect($normalized_shared_settings['translations'])
@@ -129,12 +130,12 @@ readonly class ModuleSettingsNormalizerService
         ]);
 
         return [
-            'shared'         => $normalized_shared_settings,
-            'source_mode'    => $source_mode,
+            'shared' => $normalized_shared_settings,
+            'source_mode' => $source_mode,
             'category_based' => [
-                'category_ids'               => $active_category_ids,
+                'category_ids' => $active_category_ids,
                 'use_selected_products_only' => $use_selected_products_only,
-                'selected_product_ids'       => $category_based_selected_product_ids,
+                'selected_product_ids' => $category_based_selected_product_ids,
             ],
             'manual_only' => [
                 'selected_product_ids' => $manual_only_selected_product_ids,
@@ -171,7 +172,7 @@ readonly class ModuleSettingsNormalizerService
         Collection $active_languages,
     ): array {
         $shared_settings = is_array($shared_settings) ? $shared_settings : [];
-        $sort_mode       = $this->normalizeSortMode(
+        $sort_mode = $this->normalizeSortMode(
             Arr::get($shared_settings, 'sort_mode', $this->products_carousel_config->get('settings.default_sort_mode', 'custom')),
             $allowed_sort_modes,
         );
@@ -195,7 +196,7 @@ readonly class ModuleSettingsNormalizerService
 
         return [
             'translations' => $translations,
-            'page_types'   => $this->normalizePageTypes(
+            'page_types' => $this->normalizePageTypes(
                 Arr::get($shared_settings, 'page_types', $this->products_carousel_config->get('settings.default_page_types', [])),
                 $allowed_page_types,
             ),
@@ -215,8 +216,8 @@ readonly class ModuleSettingsNormalizerService
                 Arr::get($shared_settings, 'product_image_height', $this->products_carousel_config->get('settings.default_image_height', 420)),
                 'settings.shared.product_image_height',
             ),
-            'sort_mode'           => $sort_mode,
-            'custom_sort'         => $custom_sort,
+            'sort_mode' => $sort_mode,
+            'custom_sort' => $custom_sort,
             'custom_sort_options' => $custom_sort_options,
         ];
     }
@@ -240,14 +241,14 @@ readonly class ModuleSettingsNormalizerService
 
         return $active_languages
             ->mapWithKeys(function (Language $language) use ($shared_translations, $shared_settings): array {
-                $language_code        = (string) $language->code;
+                $language_code = (string) $language->code;
                 $language_translation = Arr::get($shared_translations, $language_code, []);
 
                 if (! is_array($language_translation)) {
                     $language_translation = [];
                 }
 
-                $module_name_for_user       = Str::squish((string) Arr::get($language_translation, 'module_name_for_user'));
+                $module_name_for_user = Str::squish((string) Arr::get($language_translation, 'module_name_for_user'));
                 $short_description_for_user = Str::squish((string) Arr::get($language_translation, 'short_description_for_user'));
 
                 if (blank($module_name_for_user)) {
@@ -260,7 +261,7 @@ readonly class ModuleSettingsNormalizerService
 
                 return [
                     $language_code => [
-                        'module_name_for_user'       => $module_name_for_user,
+                        'module_name_for_user' => $module_name_for_user,
                         'short_description_for_user' => $short_description_for_user,
                     ],
                 ];
@@ -340,7 +341,7 @@ readonly class ModuleSettingsNormalizerService
 
         if ($invalid_sort_options->isNotEmpty()) {
             Log::channel('stack')->warning('ProductsCarousel received invalid custom sort options payload.', [
-                'sort_mode'            => $sort_mode,
+                'sort_mode' => $sort_mode,
                 'invalid_sort_options' => $invalid_sort_options->all(),
             ]);
 
@@ -366,10 +367,10 @@ readonly class ModuleSettingsNormalizerService
         $custom_sort = is_array($custom_sort) ? $custom_sort : [];
 
         return [
-            'price'      => $this->normalizeSortDirection(Arr::get($custom_sort, 'price', 'none')),
-            'name'       => $this->normalizeSortDirection(Arr::get($custom_sort, 'name', 'none')),
+            'price' => $this->normalizeSortDirection(Arr::get($custom_sort, 'price', 'none')),
+            'name' => $this->normalizeSortDirection(Arr::get($custom_sort, 'name', 'none')),
             'date_added' => $this->normalizeSortDirection(Arr::get($custom_sort, 'date_added', 'none')),
-            'quantity'   => $this->normalizeSortDirection(Arr::get($custom_sort, 'quantity', 'none')),
+            'quantity' => $this->normalizeSortDirection(Arr::get($custom_sort, 'quantity', 'none')),
         ];
     }
 
@@ -420,14 +421,14 @@ readonly class ModuleSettingsNormalizerService
         }
 
         $derived_map = [
-            'price'      => 'none',
-            'name'       => 'none',
+            'price' => 'none',
+            'name' => 'none',
             'date_added' => 'none',
-            'quantity'   => 'none',
+            'quantity' => 'none',
         ];
 
         foreach ($custom_sort_options as $sort_option) {
-            $field     = Str::beforeLast($sort_option, '_');
+            $field = Str::beforeLast($sort_option, '_');
             $direction = Str::afterLast($sort_option, '_');
 
             if (! array_key_exists($field, $derived_map)) {

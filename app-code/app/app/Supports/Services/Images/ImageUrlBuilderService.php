@@ -19,7 +19,8 @@ final readonly class ImageUrlBuilderService
 {
     public function __construct(
         private Request $request,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  string  $bg_color  HEX or transparent color
@@ -82,14 +83,14 @@ final readonly class ImageUrlBuilderService
             [$original_width, $original_height] = $image_size;
 
             if ($original_width < $width || $original_height < $height) {
-                $width  = $original_width;
+                $width = $original_width;
                 $height = $original_height;
             }
 
             if ($is_square === false) {
                 $this->calculateAspectionSizes($original_width, $original_height, $width, $height);
             } else {
-                $width  = max($width, $height);
+                $width = max($width, $height);
                 $height = $width;
             }
         }
@@ -135,17 +136,17 @@ final readonly class ImageUrlBuilderService
     private function calculateAspectionSizes(int $original_width, int $original_height, int &$target_width, int &$target_height): void
     {
         if ($original_width == $original_height) {
-            $target_width  = $original_width;
+            $target_width = $original_width;
             $target_height = $original_height;
 
             return;
         }
 
         if ($original_width > $original_height) {
-            $k             = min($original_width, $target_width) / max($original_width, $target_width);
+            $k = min($original_width, $target_width) / max($original_width, $target_width);
             $target_height = (int) round($original_height * $k);
         } else {
-            $k            = min($original_height, $target_height) / max($original_height, $target_height);
+            $k = min($original_height, $target_height) / max($original_height, $target_height);
             $target_width = (int) round($original_width * $k);
         }
     }
@@ -178,8 +179,8 @@ final readonly class ImageUrlBuilderService
     private function clientSupports(string $mime): bool
     {
         $supported_formats = $this->request->header('X-Supported-Image-Formats', '');
-        $formats_array     = explode(',', $supported_formats);
-        $accept            = (string) $this->request->header('Accept', '');
+        $formats_array = explode(',', $supported_formats);
+        $accept = (string) $this->request->header('Accept', '');
 
         return Str::contains($accept, $mime) || Arr::some($formats_array, function (string $format) use ($mime) {
             return Str::contains($mime, $format);
@@ -188,7 +189,7 @@ final readonly class ImageUrlBuilderService
 
     private function assetVersioned(string $public_relative): string
     {
-        $v   = (string) config('app.images.image_version');
+        $v = (string) config('app.images.image_version');
         $url = asset("storage/$public_relative");
 
         // Add version to query string
@@ -214,9 +215,9 @@ final readonly class ImageUrlBuilderService
     private function splitPath(string $path): array
     {
         // "images/products/2025/12/ABC.jpg" -> ["images/products/2025/12", "ABC", "jpg"]
-        $dir  = Str::after(Str::trim(dirname($path), '.'), 'images/');
+        $dir = Str::after(Str::trim(dirname($path), '.'), 'images/');
         $name = pathinfo($path, PATHINFO_FILENAME);
-        $ext  = Str::lower(pathinfo($path, PATHINFO_EXTENSION));
+        $ext = Str::lower(pathinfo($path, PATHINFO_EXTENSION));
 
         if ($dir == 'images') {
             $dir = '';
@@ -241,7 +242,7 @@ final readonly class ImageUrlBuilderService
     private function webRelativePath(string $format, string $original_path, int $w, int $h): string
     {
         [$dir, $name] = $this->splitPath($original_path);
-        $file         = sprintf('%s_%d_%d.%s', $name, $w, $h, $format);
+        $file = sprintf('%s_%d_%d.%s', $name, $w, $h, $format);
 
         if (empty($dir)) {
             return Str::trim("images/cache/$format/$file", '/');
@@ -275,7 +276,7 @@ final readonly class ImageUrlBuilderService
                 $image_obj->scaleDown($w, $h);
 
                 // Get actual dimensions after scaling
-                $actual_width  = $image_obj->width();
+                $actual_width = $image_obj->width();
                 $actual_height = $image_obj->height();
 
                 // If image is smaller than target size, we need to add padding

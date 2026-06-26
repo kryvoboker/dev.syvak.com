@@ -20,9 +20,9 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
 
@@ -46,37 +46,37 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
     public function test_sync_preserves_user_managed_fields_for_existing_system_group(): void
     {
         $filter_set = CatalogFilterSet::query()->create([
-            'code'                           => 'default_category',
-            'context_type'                   => 'category',
-            'context_types'                  => ['category'],
-            'is_enabled'                     => true,
-            'is_price_filter_enabled'        => true,
+            'code' => 'default_category',
+            'context_type' => 'category',
+            'context_types' => ['category'],
+            'is_enabled' => true,
+            'is_price_filter_enabled' => true,
             'is_attribute_filtering_enabled' => true,
-            'price_source_mode'              => 'both',
-            'facet_strategy'                 => 'self_excluding',
-            'discount_only_policy'           => 'exclude_without_discount',
-            'min_stock_quantity'             => 1,
-            'settings'                       => [],
+            'price_source_mode' => 'both',
+            'facet_strategy' => 'self_excluding',
+            'discount_only_policy' => 'exclude_without_discount',
+            'min_stock_quantity' => 1,
+            'settings' => [],
         ]);
 
         DB::table('catalog_filter_groups')->insert([
-            'id'                    => 10,
+            'id' => 10,
             'catalog_filter_set_id' => (int) $filter_set->id,
-            'code'                  => 'price',
-            'source_type'           => 'stock',
-            'source_id'             => 501,
-            'is_enabled'            => false,
-            'sort_order'            => 777,
-            'get_key'               => 'custom_price_key',
-            'config'                => json_encode([
+            'code' => 'price',
+            'source_type' => 'stock',
+            'source_id' => 501,
+            'is_enabled' => false,
+            'sort_order' => 777,
+            'get_key' => 'custom_price_key',
+            'config' => json_encode([
                 'mode' => 'range',
-                'get'  => [
+                'get' => [
                     'value' => 'custom',
                     'extra' => ['from_key' => 'custom_from'],
                 ],
                 'min_price' => 12,
                 'max_price' => 120,
-                'step'      => 3,
+                'step' => 3,
             ], JSON_THROW_ON_ERROR),
             'created_at' => now(),
             'updated_at' => now(),
@@ -106,36 +106,36 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
 
         $this->assertDatabaseHas('catalog_filter_group_translations', [
             'catalog_filter_group_id' => (int) $price_group->id,
-            'language_id'             => 1,
-            'label'                   => 'Price',
+            'language_id' => 1,
+            'label' => 'Price',
         ]);
         $this->assertDatabaseHas('catalog_filter_group_translations', [
             'catalog_filter_group_id' => (int) $price_group->id,
-            'language_id'             => 2,
-            'label'                   => 'Ціна',
+            'language_id' => 2,
+            'label' => 'Ціна',
         ]);
     }
 
     public function test_sync_creates_attribute_group_with_translations_for_active_attribute_values(): void
     {
         $filter_set = CatalogFilterSet::query()->create([
-            'code'                           => 'default_category',
-            'context_type'                   => 'category',
-            'context_types'                  => ['category'],
-            'is_enabled'                     => true,
-            'is_price_filter_enabled'        => true,
+            'code' => 'default_category',
+            'context_type' => 'category',
+            'context_types' => ['category'],
+            'is_enabled' => true,
+            'is_price_filter_enabled' => true,
             'is_attribute_filtering_enabled' => true,
-            'price_source_mode'              => 'both',
-            'facet_strategy'                 => 'self_excluding',
-            'discount_only_policy'           => 'exclude_without_discount',
-            'min_stock_quantity'             => 1,
-            'settings'                       => [],
+            'price_source_mode' => 'both',
+            'facet_strategy' => 'self_excluding',
+            'discount_only_policy' => 'exclude_without_discount',
+            'min_stock_quantity' => 1,
+            'settings' => [],
         ]);
 
         DB::table('attributes')->insert([
-            'id'         => 21,
+            'id' => 21,
             'sort_order' => 1,
-            'is_active'  => true,
+            'is_active' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -146,37 +146,37 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
         ]);
 
         DB::table('products')->insert([
-            'id'         => 31,
-            'model'      => 'P-31',
-            'sku'        => 'SKU-31',
-            'ean'        => 31,
-            'quantity'   => 15,
-            'minimum'    => 1,
-            'price'      => 100,
-            'is_active'  => true,
+            'id' => 31,
+            'model' => 'P-31',
+            'sku' => 'SKU-31',
+            'ean' => 31,
+            'quantity' => 15,
+            'minimum' => 1,
+            'price' => 100,
+            'is_active' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         DB::table('product_variants')->insert([
-            'id'         => 41,
+            'id' => 41,
             'product_id' => 31,
             'is_default' => true,
-            'is_active'  => true,
-            'quantity'   => 10,
-            'minimum'    => 1,
-            'price'      => 100,
+            'is_active' => true,
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 100,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         DB::table('product_variant_attribute_values')->insert([
             'product_variant_id' => 41,
-            'attribute_id'       => 21,
-            'language_id'        => 1,
-            'value_string'       => '7+',
-            'created_at'         => now(),
-            'updated_at'         => now(),
+            'attribute_id' => 21,
+            'language_id' => 1,
+            'value_string' => '7+',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         app(FilterGroupGeneratorService::class)->sync($filter_set);
@@ -193,13 +193,13 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
 
         $this->assertDatabaseHas('catalog_filter_group_translations', [
             'catalog_filter_group_id' => (int) $attribute_group->id,
-            'language_id'             => 1,
-            'label'                   => 'Age',
+            'language_id' => 1,
+            'label' => 'Age',
         ]);
         $this->assertDatabaseHas('catalog_filter_group_translations', [
             'catalog_filter_group_id' => (int) $attribute_group->id,
-            'language_id'             => 2,
-            'label'                   => 'Вік',
+            'language_id' => 2,
+            'label' => 'Вік',
         ]);
     }
 

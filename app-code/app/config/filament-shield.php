@@ -21,13 +21,13 @@ return [
     */
 
     'shield_resource' => [
-        'slug'            => 'shield/roles',
+        'slug' => 'shield/roles',
         'show_model_path' => true,
-        'cluster'         => null,
-        'tabs'            => [
-            'pages'              => true,
-            'widgets'            => true,
-            'resources'          => true,
+        'cluster' => null,
+        'tabs' => [
+            'pages' => true,
+            'widgets' => true,
+            'resources' => true,
             'custom_permissions' => false,
         ],
     ],
@@ -70,10 +70,10 @@ return [
     */
 
     'super_admin' => [
-        'enabled'         => true,
-        'name'            => 'super_admin',
+        'enabled' => true,
+        'name' => 'super_admin',
         'define_via_gate' => false,
-        'intercept_gate'  => 'before',
+        'intercept_gate' => 'before',
     ],
 
     /*
@@ -89,7 +89,7 @@ return [
 
     'panel_user' => [
         'enabled' => true,
-        'name'    => 'panel_user',
+        'name' => 'panel_user',
     ],
 
     /*
@@ -107,8 +107,8 @@ return [
 
     'permissions' => [
         'separator' => ':',
-        'case'      => 'pascal',
-        'generate'  => true,
+        'case' => 'pascal',
+        'generate' => true,
     ],
 
     /*
@@ -123,10 +123,10 @@ return [
     */
 
     'policies' => [
-        'path'     => app_path('Policies'),
-        'merge'    => true,
+        'path' => app_path('Policies'),
+        'merge' => true,
         'generate' => true,
-        'methods'  => [
+        'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'restore',
             'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',
         ],
@@ -153,7 +153,7 @@ return [
 
     'localization' => [
         'enabled' => false,
-        'key'     => 'filament-shield::filament-shield',
+        'key' => 'filament-shield::filament-shield',
     ],
 
     /*
@@ -169,7 +169,7 @@ return [
 
     'resources' => [
         'subject' => 'model',
-        'manage'  => [
+        'manage' => [
             RoleResource::class => [
                 'viewAny',
                 'view',
@@ -196,7 +196,7 @@ return [
 
     'pages' => [
         'subject' => 'class',
-        'prefix'  => 'view',
+        'prefix' => 'view',
         'exclude' => [
             Dashboard::class,
         ],
@@ -215,7 +215,7 @@ return [
 
     'widgets' => [
         'subject' => 'class',
-        'prefix'  => 'view',
+        'prefix' => 'view',
         'exclude' => [
             AccountWidget::class,
             FilamentInfoWidget::class,
@@ -248,8 +248,8 @@ return [
 
     'discovery' => [
         'discover_all_resources' => false,
-        'discover_all_widgets'   => false,
-        'discover_all_pages'     => false,
+        'discover_all_widgets' => false,
+        'discover_all_pages' => false,
     ],
 
     /*

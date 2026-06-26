@@ -17,7 +17,7 @@ class CatalogFilterBootstrapService
     public function bootstrapDefaultCategorySet(): CatalogFilterSet
     {
         try {
-            $defaults               = (array) config('catalog-filter.defaults', []);
+            $defaults = (array) config('catalog-filter.defaults', []);
             $selected_context_types = $this->normalizeContextTypes($defaults);
 
             $filter_set = CatalogFilterSet::query()->firstOrCreate(
@@ -25,16 +25,16 @@ class CatalogFilterBootstrapService
                     'code' => (string) ($defaults['set_code'] ?? 'default_category'),
                 ],
                 [
-                    'context_type'                   => $selected_context_types[0] ?? 'category',
-                    'context_types'                  => $selected_context_types,
-                    'is_enabled'                     => (bool) ($defaults['is_enabled'] ?? true),
-                    'is_price_filter_enabled'        => (bool) ($defaults['is_price_filter_enabled'] ?? true),
+                    'context_type' => $selected_context_types[0] ?? 'category',
+                    'context_types' => $selected_context_types,
+                    'is_enabled' => (bool) ($defaults['is_enabled'] ?? true),
+                    'is_price_filter_enabled' => (bool) ($defaults['is_price_filter_enabled'] ?? true),
                     'is_attribute_filtering_enabled' => (bool) ($defaults['is_attribute_filtering_enabled'] ?? true),
-                    'price_source_mode'              => (string) ($defaults['price_source_mode'] ?? 'both'),
-                    'facet_strategy'                 => (string) ($defaults['facet_strategy'] ?? 'self_excluding'),
-                    'discount_only_policy'           => (string) ($defaults['discount_only_policy'] ?? 'exclude_without_discount'),
-                    'min_stock_quantity'             => (int) ($defaults['min_stock_quantity'] ?? 1),
-                    'settings'                       => [],
+                    'price_source_mode' => (string) ($defaults['price_source_mode'] ?? 'both'),
+                    'facet_strategy' => (string) ($defaults['facet_strategy'] ?? 'self_excluding'),
+                    'discount_only_policy' => (string) ($defaults['discount_only_policy'] ?? 'exclude_without_discount'),
+                    'min_stock_quantity' => (int) ($defaults['min_stock_quantity'] ?? 1),
+                    'settings' => [],
                 ],
             );
 
@@ -49,12 +49,12 @@ class CatalogFilterBootstrapService
                     'catalog_filter_set_id' => (int) $filter_set->id,
                 ],
                 [
-                    'index_version'        => 1,
+                    'index_version' => 1,
                     'active_index_version' => 1,
-                    'last_status'          => 'ok',
-                    'items_total'          => 0,
-                    'values_total'         => 0,
-                    'index_rows_total'     => 0,
+                    'last_status' => 'ok',
+                    'items_total' => 0,
+                    'values_total' => 0,
+                    'index_rows_total' => 0,
                 ],
             );
 

@@ -25,7 +25,8 @@ readonly class ProductsCarouselModuleDataService
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
         private ProductsCarouselProductSearchService $products_carousel_product_search_service,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<int, array{
@@ -75,11 +76,11 @@ readonly class ProductsCarouselModuleDataService
         return $instances
             ->filter(fn (ModuleInstance $instance): bool => $this->matchesPageType($instance, $page_type))
             ->map(function (ModuleInstance $instance): array {
-                $instance_settings        = is_array($instance->settings) ? $instance->settings : [];
-                $source_mode              = (string) Arr::get($instance_settings, 'source_mode', 'category_based');
-                $runtime_shared_settings  = $this->resolveRuntimeSharedSettings($instance_settings);
+                $instance_settings = is_array($instance->settings) ? $instance->settings : [];
+                $source_mode = (string) Arr::get($instance_settings, 'source_mode', 'category_based');
+                $runtime_shared_settings = $this->resolveRuntimeSharedSettings($instance_settings);
                 $localized_shared_content = $this->resolveLocalizedSharedContent($instance_settings);
-                $products                 = $this->resolveProductsForInstance(
+                $products = $this->resolveProductsForInstance(
                     $source_mode,
                     $instance_settings,
                     $runtime_shared_settings,
@@ -95,17 +96,17 @@ readonly class ProductsCarouselModuleDataService
                     ->all();
 
                 return [
-                    'instance_id'                => $instance->id,
-                    'name'                       => $instance->name,
-                    'module_name_for_user'       => $localized_shared_content['module_name_for_user'],
+                    'instance_id' => $instance->id,
+                    'name' => $instance->name,
+                    'module_name_for_user' => $localized_shared_content['module_name_for_user'],
                     'short_description_for_user' => $localized_shared_content['short_description_for_user'],
-                    'page_types'                 => collect(Arr::get($instance_settings, 'shared.page_types', []))
+                    'page_types' => collect(Arr::get($instance_settings, 'shared.page_types', []))
                         ->filter(fn (mixed $page_type): bool => is_string($page_type) && filled($page_type))
                         ->values()
                         ->all(),
-                    'placement'   => $instance->placement,
+                    'placement' => $instance->placement,
                     'source_mode' => $source_mode,
-                    'products'    => $products_payload,
+                    'products' => $products_payload,
                 ];
             })
             ->filter(fn (array $module_data): bool => $module_data['products'] !== [])
@@ -125,9 +126,9 @@ readonly class ProductsCarouselModuleDataService
      */
     private function resolveLocalizedSharedContent(array $instance_settings): array
     {
-        $requested_locale     = app()->getLocale();
-        $shared_settings      = Arr::get($instance_settings, 'shared', []);
-        $shared_settings      = is_array($shared_settings) ? $shared_settings : [];
+        $requested_locale = app()->getLocale();
+        $shared_settings = Arr::get($instance_settings, 'shared', []);
+        $shared_settings = is_array($shared_settings) ? $shared_settings : [];
         $translations_payload = Arr::get($shared_settings, 'translations', []);
         $translations_payload = is_array($translations_payload) ? $translations_payload : [];
 
@@ -135,13 +136,13 @@ readonly class ProductsCarouselModuleDataService
             ->filter(fn (mixed $translation): bool => is_array($translation))
             ->map(function (array $translation): array {
                 return [
-                    'module_name_for_user'       => Str::squish((string) Arr::get($translation, 'module_name_for_user')),
+                    'module_name_for_user' => Str::squish((string) Arr::get($translation, 'module_name_for_user')),
                     'short_description_for_user' => Str::squish((string) Arr::get($translation, 'short_description_for_user')),
                 ];
             });
 
-        $resolved_locale      = $requested_locale;
-        $fallback_used        = false;
+        $resolved_locale = $requested_locale;
+        $fallback_used = false;
         $resolved_translation = $translations_by_locale->get($requested_locale, []);
         $resolved_translation = is_array($resolved_translation) ? $resolved_translation : [];
 
@@ -165,8 +166,8 @@ readonly class ProductsCarouselModuleDataService
 
             if ($default_has_values) {
                 $resolved_translation = $default_translation;
-                $resolved_locale      = (string) $default_locale;
-                $fallback_used        = true;
+                $resolved_locale = (string) $default_locale;
+                $fallback_used = true;
             }
         }
 
@@ -181,9 +182,9 @@ readonly class ProductsCarouselModuleDataService
                     filled((string) Arr::get($translation, 'module_name_for_user'))
                     || filled((string) Arr::get($translation, 'short_description_for_user'))
                 ) {
-                    $first_filled_locale  = (string) $locale_code;
+                    $first_filled_locale = (string) $locale_code;
                     $resolved_translation = $translation;
-                    $fallback_used        = true;
+                    $fallback_used = true;
 
                     break;
                 }
@@ -203,7 +204,7 @@ readonly class ProductsCarouselModuleDataService
 
             if (filled($legacy_module_name) || filled($legacy_description)) {
                 $resolved_translation = [
-                    'module_name_for_user'       => $legacy_module_name,
+                    'module_name_for_user' => $legacy_module_name,
                     'short_description_for_user' => $legacy_description,
                 ];
                 $fallback_used = true;
@@ -211,11 +212,11 @@ readonly class ProductsCarouselModuleDataService
         }
 
         return [
-            'module_name_for_user'       => (string) Arr::get($resolved_translation, 'module_name_for_user', ''),
+            'module_name_for_user' => (string) Arr::get($resolved_translation, 'module_name_for_user', ''),
             'short_description_for_user' => (string) Arr::get($resolved_translation, 'short_description_for_user', ''),
-            'requested_locale'           => $requested_locale,
-            'resolved_locale'            => $resolved_locale,
-            'fallback_used'              => $fallback_used,
+            'requested_locale' => $requested_locale,
+            'resolved_locale' => $resolved_locale,
+            'fallback_used' => $fallback_used,
         ];
     }
 
@@ -238,7 +239,7 @@ readonly class ProductsCarouselModuleDataService
     ): EloquentCollection {
         return match ($source_mode) {
             'manual_only' => $this->resolveManualOnlyProducts($instance_settings, $runtime_shared_settings),
-            default       => $this->resolveCategoryBasedProducts($instance_settings, $runtime_shared_settings),
+            default => $this->resolveCategoryBasedProducts($instance_settings, $runtime_shared_settings),
         };
     }
 
@@ -358,7 +359,7 @@ readonly class ProductsCarouselModuleDataService
      */
     private function applySortPipeline(Builder $products_query, array $sort_sequence, int $language_id): void
     {
-        $product_table          = $products_query->getModel()->getTable();
+        $product_table = $products_query->getModel()->getTable();
         $name_sort_join_applied = false;
 
         foreach ($sort_sequence as $sort_option) {
@@ -462,12 +463,12 @@ readonly class ProductsCarouselModuleDataService
             : $this->resolveCustomSortSequence($instance_settings);
 
         return [
-            'min_quantity'         => $min_quantity,
-            'products_limit'       => $products_limit,
-            'product_image_width'  => $product_image_width,
+            'min_quantity' => $min_quantity,
+            'products_limit' => $products_limit,
+            'product_image_width' => $product_image_width,
             'product_image_height' => $product_image_height,
-            'sort_mode'            => $sort_mode,
-            'sort_sequence'        => $sort_sequence,
+            'sort_mode' => $sort_mode,
+            'sort_sequence' => $sort_sequence,
         ];
     }
 
@@ -518,10 +519,10 @@ readonly class ProductsCarouselModuleDataService
     private function generateRandomSortSequence(): array
     {
         $grouped_sort_options = [
-            'price'      => ['price_asc', 'price_desc'],
-            'name'       => ['name_asc', 'name_desc'],
+            'price' => ['price_asc', 'price_desc'],
+            'name' => ['name_asc', 'name_desc'],
             'date_added' => ['date_added_asc', 'date_added_desc'],
-            'quantity'   => ['quantity_asc', 'quantity_desc'],
+            'quantity' => ['quantity_asc', 'quantity_desc'],
         ];
 
         $randomized_fields = collect(array_keys($grouped_sort_options))
@@ -595,13 +596,13 @@ readonly class ProductsCarouselModuleDataService
     private function mapProductCard(Product $product, int $product_image_width, int $product_image_height): array
     {
         $product_description = $product->productDescription->first();
-        $slug                = $product->slugs->first()?->slug;
+        $slug = $product->slugs->first()?->slug;
 
         return [
-            'id'    => (int) $product->id,
-            'name'  => escape_special_html((string) $product_description?->name),
+            'id' => (int) $product->id,
+            'name' => escape_special_html((string) $product_description?->name),
             'model' => escape_special_html((string) $product->model),
-            'sku'   => escape_special_html((string) $product->sku),
+            'sku' => escape_special_html((string) $product->sku),
             'price' => format_price(
                 (float) $product->price,
                 config('app.currency.current_currency_code'),
@@ -614,7 +615,7 @@ readonly class ProductsCarouselModuleDataService
                     $product_image_height,
                     is_square: false,
                 ),
-                'width'  => $product_image_width,
+                'width' => $product_image_width,
                 'height' => $product_image_height,
             ],
             'url' => filled($slug)
@@ -630,7 +631,7 @@ readonly class ProductsCarouselModuleDataService
         }
 
         $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-        $page_types        = collect(Arr::get($instance_settings, 'shared.page_types', []));
+        $page_types = collect(Arr::get($instance_settings, 'shared.page_types', []));
 
         if ($page_types->isEmpty()) {
             return true;

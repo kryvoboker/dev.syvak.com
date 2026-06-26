@@ -55,7 +55,7 @@ trait ProcessSlugsTrait
             ->keyBy('language_id')
             ->map(fn (Slug $slug): array => [
                 'language_id' => $slug->language_id,
-                'name'        => $slug->slug,
+                'name' => $slug->slug,
             ])
             ->toArray();
 

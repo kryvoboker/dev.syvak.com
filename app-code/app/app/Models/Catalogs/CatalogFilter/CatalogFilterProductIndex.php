@@ -39,21 +39,21 @@ class CatalogFilterProductIndex extends Model
     protected function casts(): array
     {
         return [
-            'catalog_filter_set_id'   => 'integer',
-            'index_version'           => 'integer',
-            'context_type'            => CatalogFilterContextTypeEnum::class,
-            'category_id'             => 'integer',
-            'product_id'              => 'integer',
+            'catalog_filter_set_id' => 'integer',
+            'index_version' => 'integer',
+            'context_type' => CatalogFilterContextTypeEnum::class,
+            'category_id' => 'integer',
+            'product_id' => 'integer',
             'catalog_filter_group_id' => 'integer',
             'catalog_filter_value_id' => 'integer',
-            'attribute_id'            => 'integer',
-            'base_price'              => 'decimal:4',
-            'discount_price'          => 'decimal:4',
-            'effective_price'         => 'decimal:4',
-            'stock_quantity'          => 'integer',
-            'is_in_stock'             => 'boolean',
-            'is_active_product'       => 'boolean',
-            'indexed_at'              => 'datetime',
+            'attribute_id' => 'integer',
+            'base_price' => 'decimal:4',
+            'discount_price' => 'decimal:4',
+            'effective_price' => 'decimal:4',
+            'stock_quantity' => 'integer',
+            'is_in_stock' => 'boolean',
+            'is_active_product' => 'boolean',
+            'indexed_at' => 'datetime',
         ];
     }
 

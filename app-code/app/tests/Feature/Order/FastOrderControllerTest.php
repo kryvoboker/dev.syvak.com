@@ -20,23 +20,23 @@ class FastOrderControllerTest extends TestCase
         $this->bindFastOrderCreationService(
             [
                 'success' => true,
-                'errors'  => [],
-                'cart'    => [
+                'errors' => [],
+                'cart' => [
                     'is_empty' => false,
                 ],
             ],
             [
                 'success' => false,
-                'errors'  => [],
+                'errors' => [],
             ],
         );
 
         $response = $this->postJson(route('localized.catalog.order-confirm.validate', ['locale' => $locale]), [
-            'first_name'                        => 'John',
-            'last_name'                         => 'Doe',
-            'phone'                             => '1234567890',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'phone' => '1234567890',
             CartRequestKeyEnum::CartMode->value => CartModeEnum::FastOrder->value,
-            'payment_method'                    => 'cash_on_delivery',
+            'payment_method' => 'cash_on_delivery',
         ]);
 
         $response->assertOk();
@@ -50,26 +50,26 @@ class FastOrderControllerTest extends TestCase
         $this->bindFastOrderCreationService(
             [
                 'success' => true,
-                'errors'  => [],
-                'cart'    => [
+                'errors' => [],
+                'cart' => [
                     'is_empty' => false,
                 ],
             ],
             [
-                'success'      => true,
+                'success' => true,
                 'order_number' => 'TMP-20260101010101-ABCDEF',
                 'redirect_url' => localized_route('localized.catalog.thank-you.index', ['locale' => $locale]),
-                'status'       => 'success',
-                'errors'       => [],
+                'status' => 'success',
+                'errors' => [],
             ],
         );
 
         $response = $this->post(route('localized.catalog.order-confirm.store', ['locale' => $locale]), [
-            'first_name'                        => 'John',
-            'last_name'                         => 'Doe',
-            'phone'                             => '1234567890',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'phone' => '1234567890',
             CartRequestKeyEnum::CartMode->value => CartModeEnum::FastOrder->value,
-            'payment_method'                    => 'cash_on_delivery',
+            'payment_method' => 'cash_on_delivery',
         ]);
 
         $response->assertRedirect(localized_route('localized.catalog.thank-you.index', ['locale' => $locale]));
@@ -82,25 +82,25 @@ class FastOrderControllerTest extends TestCase
         $this->bindFastOrderCreationService(
             [
                 'success' => true,
-                'errors'  => [],
-                'cart'    => [
+                'errors' => [],
+                'cart' => [
                     'is_empty' => false,
                 ],
             ],
             [
-                'success'      => true,
+                'success' => true,
                 'order_number' => 'TMP-20260101010101-ABCDEF',
                 'redirect_url' => localized_route('localized.catalog.thank-you.index', ['locale' => $locale]),
-                'status'       => 'success',
-                'errors'       => [],
+                'status' => 'success',
+                'errors' => [],
             ],
         );
 
         $response = $this->postJson(route('localized.catalog.order-confirm.store', ['locale' => $locale]), [
-            'last_name'                         => 'Doe',
-            'phone'                             => '1234567890',
+            'last_name' => 'Doe',
+            'phone' => '1234567890',
             CartRequestKeyEnum::CartMode->value => CartModeEnum::FastOrder->value,
-            'payment_method'                    => 'cash_on_delivery',
+            'payment_method' => 'cash_on_delivery',
         ]);
 
         $response->assertUnprocessable();
@@ -109,8 +109,7 @@ class FastOrderControllerTest extends TestCase
 
     private function bindFastOrderCreationService(array $validate_result, array $create_result): void
     {
-        $this->app->instance(Language::class, new class() extends Language
-        {
+        $this->app->instance(Language::class, new class () extends Language {
             public function getActiveLanguages(): Collection
             {
                 $language = new Language();
@@ -120,8 +119,7 @@ class FastOrderControllerTest extends TestCase
             }
         });
 
-        $fast_order_creation_service = new readonly class($validate_result, $create_result) extends OrderCreationService
-        {
+        $fast_order_creation_service = new readonly class ($validate_result, $create_result) extends OrderCreationService {
             /**
              * @param  array<string, mixed>  $validate_result
              * @param  array<string, mixed>  $create_result
@@ -129,7 +127,8 @@ class FastOrderControllerTest extends TestCase
             public function __construct(
                 private array $validate_result,
                 private array $create_result,
-            ) {}
+            ) {
+            }
 
             /**
              * @param  array<string, mixed>  $validated_data

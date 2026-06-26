@@ -20,9 +20,9 @@ class LocalizedProductVariantRouteTest extends TestCase
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
-            'driver'                  => 'sqlite',
-            'database'                => ':memory:',
-            'prefix'                  => '',
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
 
@@ -41,57 +41,57 @@ class LocalizedProductVariantRouteTest extends TestCase
         $this->seedLanguages();
 
         $product = Product::query()->create([
-            'model'          => 'MODEL-840',
-            'sku'            => 'SKU-840',
-            'ean'            => 'EAN-840',
-            'quantity'       => 10,
-            'minimum'        => 1,
-            'price'          => 1000,
-            'is_active'      => true,
+            'model' => 'MODEL-840',
+            'sku' => 'SKU-840',
+            'ean' => 'EAN-840',
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+            'is_active' => true,
             'date_available' => now(config('app.timezone')),
-            'date_added'     => now(config('app.timezone')),
+            'date_added' => now(config('app.timezone')),
         ]);
 
         $variant = ProductVariant::query()->create([
             'product_id' => (int) $product->id,
             'is_default' => true,
-            'is_active'  => true,
-            'quantity'   => 10,
-            'minimum'    => 1,
-            'price'      => 1000,
+            'is_active' => true,
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
             'sort_order' => 1,
         ]);
 
         $uk_attribute_value = DB::table('product_variant_attribute_values')->insertGetId([
             'product_variant_id' => (int) $variant->id,
-            'attribute_id'       => 5,
-            'language_id'        => 1,
-            'value_string'       => '20x20 см',
-            'created_at'         => now(config('app.timezone')),
-            'updated_at'         => now(config('app.timezone')),
+            'attribute_id' => 5,
+            'language_id' => 1,
+            'value_string' => '20x20 см',
+            'created_at' => now(config('app.timezone')),
+            'updated_at' => now(config('app.timezone')),
         ]);
 
         DB::table('product_variant_attribute_values')->insert([
             'product_variant_id' => (int) $variant->id,
-            'attribute_id'       => 5,
-            'language_id'        => 2,
-            'value_string'       => '20x20 cm',
-            'created_at'         => now(config('app.timezone')),
-            'updated_at'         => now(config('app.timezone')),
+            'attribute_id' => 5,
+            'language_id' => 2,
+            'value_string' => '20x20 cm',
+            'created_at' => now(config('app.timezone')),
+            'updated_at' => now(config('app.timezone')),
         ]);
 
         Slug::query()->create([
             'sluggable_type' => ProductVariant::class,
-            'sluggable_id'   => (int) $variant->id,
-            'language_id'    => 1,
-            'slug'           => 'bereginya-sadu',
+            'sluggable_id' => (int) $variant->id,
+            'language_id' => 1,
+            'slug' => 'bereginya-sadu',
         ]);
 
         Slug::query()->create([
             'sluggable_type' => ProductVariant::class,
-            'sluggable_id'   => (int) $variant->id,
-            'language_id'    => 2,
-            'slug'           => 'garden-guardian',
+            'sluggable_id' => (int) $variant->id,
+            'language_id' => 2,
+            'slug' => 'garden-guardian',
         ]);
 
         app()->setLocale('en');
@@ -110,57 +110,57 @@ class LocalizedProductVariantRouteTest extends TestCase
         $this->seedLanguages();
 
         $product = Product::query()->create([
-            'model'          => 'MODEL-841',
-            'sku'            => 'SKU-841',
-            'ean'            => 'EAN-841',
-            'quantity'       => 10,
-            'minimum'        => 1,
-            'price'          => 1000,
-            'is_active'      => true,
+            'model' => 'MODEL-841',
+            'sku' => 'SKU-841',
+            'ean' => 'EAN-841',
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+            'is_active' => true,
             'date_available' => now(config('app.timezone')),
-            'date_added'     => now(config('app.timezone')),
+            'date_added' => now(config('app.timezone')),
         ]);
 
         $variant = ProductVariant::query()->create([
             'product_id' => (int) $product->id,
             'is_default' => true,
-            'is_active'  => true,
-            'quantity'   => 10,
-            'minimum'    => 1,
-            'price'      => 1000,
+            'is_active' => true,
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
             'sort_order' => 1,
         ]);
 
         $attribute_value_id_five = DB::table('product_variant_attribute_values')->insertGetId([
             'product_variant_id' => (int) $variant->id,
-            'attribute_id'       => 5,
-            'language_id'        => 1,
-            'value_string'       => '20x20 см',
-            'created_at'         => now(config('app.timezone')),
-            'updated_at'         => now(config('app.timezone')),
+            'attribute_id' => 5,
+            'language_id' => 1,
+            'value_string' => '20x20 см',
+            'created_at' => now(config('app.timezone')),
+            'updated_at' => now(config('app.timezone')),
         ]);
 
         $attribute_value_id_seven = DB::table('product_variant_attribute_values')->insertGetId([
             'product_variant_id' => (int) $variant->id,
-            'attribute_id'       => 7,
-            'language_id'        => 1,
-            'value_string'       => 'Чорний',
-            'created_at'         => now(config('app.timezone')),
-            'updated_at'         => now(config('app.timezone')),
+            'attribute_id' => 7,
+            'language_id' => 1,
+            'value_string' => 'Чорний',
+            'created_at' => now(config('app.timezone')),
+            'updated_at' => now(config('app.timezone')),
         ]);
 
         Slug::query()->create([
             'sluggable_type' => ProductVariant::class,
-            'sluggable_id'   => (int) $variant->id,
-            'language_id'    => 1,
-            'slug'           => 'bereginya-sadu',
+            'sluggable_id' => (int) $variant->id,
+            'language_id' => 1,
+            'slug' => 'bereginya-sadu',
         ]);
 
         Slug::query()->create([
             'sluggable_type' => ProductVariant::class,
-            'sluggable_id'   => (int) $variant->id,
-            'language_id'    => 2,
-            'slug'           => 'garden-guardian',
+            'sluggable_id' => (int) $variant->id,
+            'language_id' => 2,
+            'slug' => 'garden-guardian',
         ]);
 
         app()->setLocale('en');
@@ -181,19 +181,19 @@ class LocalizedProductVariantRouteTest extends TestCase
     {
         DB::table('languages')->insert([
             [
-                'id'         => 1,
-                'code'       => 'uk',
-                'name'       => 'Ukrainian',
-                'is_active'  => true,
+                'id' => 1,
+                'code' => 'uk',
+                'name' => 'Ukrainian',
+                'is_active' => true,
                 'is_default' => true,
                 'created_at' => now(config('app.timezone')),
                 'updated_at' => now(config('app.timezone')),
             ],
             [
-                'id'         => 2,
-                'code'       => 'en',
-                'name'       => 'English',
-                'is_active'  => true,
+                'id' => 2,
+                'code' => 'en',
+                'name' => 'English',
+                'is_active' => true,
                 'is_default' => false,
                 'created_at' => now(config('app.timezone')),
                 'updated_at' => now(config('app.timezone')),

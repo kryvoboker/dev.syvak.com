@@ -22,7 +22,7 @@ class AttributeDescription extends Model
     {
         return [
             'attribute_id' => 'integer',
-            'language_id'  => 'integer',
+            'language_id' => 'integer',
         ];
     }
 

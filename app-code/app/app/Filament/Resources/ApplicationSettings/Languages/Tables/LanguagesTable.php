@@ -84,7 +84,7 @@ class LanguagesTable
 
                             // Check if trying to delete all active languages
                             $active_to_delete = $records->where('is_active', true)->count();
-                            $total_active     = Language::where('is_active', true)->count();
+                            $total_active = Language::where('is_active', true)->count();
 
                             if ($active_to_delete >= $total_active) {
                                 Notification::make()

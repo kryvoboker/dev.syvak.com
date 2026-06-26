@@ -29,9 +29,9 @@ class Currency extends Model
     {
         return [
             'decimal_places' => 'integer',
-            'exchange_rate'  => 'decimal:6',
-            'is_active'      => 'boolean',
-            'is_default'     => 'boolean',
+            'exchange_rate' => 'decimal:6',
+            'is_active' => 'boolean',
+            'is_default' => 'boolean',
         ];
     }
 

@@ -16,8 +16,7 @@ class ModuleRuntimeResolverServiceTest extends TestCase
 {
     public function test_it_normalizes_human_readable_placement_label_to_key(): void
     {
-        $module_cache_service = new class() extends ModuleCacheService
-        {
+        $module_cache_service = new class () extends ModuleCacheService {
             public ?string $last_key = null;
 
             public function remember(string $key, Closure $callback, int $ttl_seconds = 3600): mixed
@@ -54,8 +53,7 @@ class ModuleRuntimeResolverServiceTest extends TestCase
                 }),
             );
 
-        $module_cache_service = new class() extends ModuleCacheService
-        {
+        $module_cache_service = new class () extends ModuleCacheService {
             public ?string $last_key = null;
 
             public function remember(string $key, Closure $callback, int $ttl_seconds = 3600): mixed

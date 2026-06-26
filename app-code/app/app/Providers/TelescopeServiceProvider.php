@@ -40,8 +40,8 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         Telescope::auth(function (Request $request) {
             $login = config('telescope.auth_credentials.login');
-            $pass  = config('telescope.auth_credentials.password');
-            $user  = $request->user();
+            $pass = config('telescope.auth_credentials.password');
+            $user = $request->user();
 
             if (
                 ! ($user instanceof User) ||

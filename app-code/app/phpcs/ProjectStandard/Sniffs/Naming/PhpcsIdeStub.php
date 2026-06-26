@@ -37,7 +37,9 @@ namespace PHP_CodeSniffer\Files {
                 return false;
             }
 
-            public function addError(string $error, int $stackPtr, string $code = '', array $data = []): void {}
+            public function addError(string $error, int $stackPtr, string $code = '', array $data = []): void
+            {
+            }
         }
     }
 }

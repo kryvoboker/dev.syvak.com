@@ -45,7 +45,7 @@ class VariantsRelationManager extends RelationManager
                     ->label(__('admin/default.buttons.edit'))
                     ->icon('heroicon-o-pencil-square')
                     ->url(fn ($record): string => ProductVariantResource::getUrl('edit', [
-                        'record'  => $record,
+                        'record' => $record,
                         'product' => (int) data_get($this->getOwnerRecord(), 'id'),
                     ])),
                 DeleteAction::make(),

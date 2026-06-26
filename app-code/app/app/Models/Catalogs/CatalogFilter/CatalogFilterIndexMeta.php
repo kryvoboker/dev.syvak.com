@@ -37,19 +37,19 @@ class CatalogFilterIndexMeta extends Model
     protected function casts(): array
     {
         return [
-            'catalog_filter_set_id'    => 'integer',
-            'index_version'            => 'integer',
-            'active_index_version'     => 'integer',
-            'building_index_version'   => 'integer',
+            'catalog_filter_set_id' => 'integer',
+            'index_version' => 'integer',
+            'active_index_version' => 'integer',
+            'building_index_version' => 'integer',
             'rebuild_lock_acquired_at' => 'datetime',
-            'last_full_rebuild_at'     => 'datetime',
+            'last_full_rebuild_at' => 'datetime',
             'last_incremental_sync_at' => 'datetime',
-            'last_status'              => CatalogFilterIndexStatusEnum::class,
-            'last_progress_percent'    => 'integer',
-            'last_run_mode'            => CatalogFilterIndexRunModeEnum::class,
-            'items_total'              => 'integer',
-            'values_total'             => 'integer',
-            'index_rows_total'         => 'integer',
+            'last_status' => CatalogFilterIndexStatusEnum::class,
+            'last_progress_percent' => 'integer',
+            'last_run_mode' => CatalogFilterIndexRunModeEnum::class,
+            'items_total' => 'integer',
+            'values_total' => 'integer',
+            'index_rows_total' => 'integer',
         ];
     }
 

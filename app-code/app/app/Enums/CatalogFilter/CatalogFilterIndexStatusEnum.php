@@ -6,8 +6,8 @@ namespace App\Enums\CatalogFilter;
 
 enum CatalogFilterIndexStatusEnum: string
 {
-    case Ok      = 'ok';
+    case Ok = 'ok';
     case Warning = 'warning';
-    case Failed  = 'failed';
+    case Failed = 'failed';
     case Running = 'running';
 }

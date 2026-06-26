@@ -16,14 +16,15 @@ readonly class ModuleInstanceService
     public function __construct(
         private ModuleCacheService $module_cache_service,
         private ModuleInstanceSettingsNormalizerService $module_instance_settings_normalizer_service,
-    ) {}
+    ) {
+    }
 
     public function setGlobalState(ModuleDefinition $definition, bool $is_enabled): ModuleDefinition
     {
         Log::channel('daily')->info('Changing module global state.', [
             'definition_id' => $definition->id,
-            'slug'          => $definition->slug,
-            'is_enabled'    => $is_enabled,
+            'slug' => $definition->slug,
+            'is_enabled' => $is_enabled,
         ]);
 
         $definition->forceFill([
@@ -44,7 +45,7 @@ readonly class ModuleInstanceService
     {
         Log::channel('daily')->info('Creating module instance from definition.', [
             'definition_id' => $definition->id,
-            'nwidart_name'  => $definition->nwidart_name,
+            'nwidart_name' => $definition->nwidart_name,
         ]);
 
         try {
@@ -53,17 +54,17 @@ readonly class ModuleInstanceService
             /** @var ModuleInstance $instance */
             $instance = DB::transaction(function () use ($definition, $attributes): ModuleInstance {
                 $next_sort_order = ((int) $definition->instances()->max('sort_order')) + 1;
-                $default_name    = trim($definition->name . ' ' . $next_sort_order);
-                $name            = (string) Arr::get($attributes, 'name', $default_name);
+                $default_name = trim($definition->name . ' ' . $next_sort_order);
+                $name = (string) Arr::get($attributes, 'name', $default_name);
 
                 return $definition->instances()->create([
-                    'name'        => $name,
-                    'placement'   => Arr::get($attributes, 'placement'),
+                    'name' => $name,
+                    'placement' => Arr::get($attributes, 'placement'),
                     'context_key' => Arr::get($attributes, 'context_key'),
-                    'is_enabled'  => (bool) Arr::get($attributes, 'is_enabled', true),
-                    'sort_order'  => (int) Arr::get($attributes, 'sort_order', $next_sort_order),
-                    'settings'    => Arr::get($attributes, 'settings', []),
-                    'meta'        => Arr::get($attributes, 'meta', []),
+                    'is_enabled' => (bool) Arr::get($attributes, 'is_enabled', true),
+                    'sort_order' => (int) Arr::get($attributes, 'sort_order', $next_sort_order),
+                    'settings' => Arr::get($attributes, 'settings', []),
+                    'meta' => Arr::get($attributes, 'meta', []),
                 ]);
             });
 
@@ -73,7 +74,7 @@ readonly class ModuleInstanceService
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('Creating module instance failed.', [
                 'definition_id' => $definition->id,
-                'message'       => $throwable->getMessage(),
+                'message' => $throwable->getMessage(),
             ]);
 
             throw $throwable;
@@ -88,9 +89,9 @@ readonly class ModuleInstanceService
     public function duplicate(ModuleInstance $instance, array $attributes = []): ModuleInstance
     {
         Log::channel('daily')->info('Duplicating module instance.', [
-            'instance_id'     => $instance->id,
-            'definition_id'   => $instance->module_definition_id,
-            'instance_name'   => $instance->name,
+            'instance_id' => $instance->id,
+            'definition_id' => $instance->module_definition_id,
+            'instance_name' => $instance->name,
             'definition_name' => $instance->definition?->name,
         ]);
 
@@ -99,18 +100,18 @@ readonly class ModuleInstanceService
 
             /** @var ModuleInstance $duplicated_instance */
             $duplicated_instance = DB::transaction(function () use ($instance, $attributes): ModuleInstance {
-                $definition      = $instance->definition()->firstOrFail();
+                $definition = $instance->definition()->firstOrFail();
                 $next_sort_order = ((int) $definition->instances()->max('sort_order')) + 1;
                 $duplicated_name = (string) Arr::get($attributes, 'name', $instance->name . ' Copy');
 
                 return $definition->instances()->create([
-                    'name'        => $duplicated_name,
-                    'placement'   => Arr::get($attributes, 'placement', $instance->placement),
+                    'name' => $duplicated_name,
+                    'placement' => Arr::get($attributes, 'placement', $instance->placement),
                     'context_key' => Arr::get($attributes, 'context_key', $instance->context_key),
-                    'is_enabled'  => (bool) Arr::get($attributes, 'is_enabled', $instance->is_enabled),
-                    'sort_order'  => (int) Arr::get($attributes, 'sort_order', $next_sort_order),
-                    'settings'    => Arr::get($attributes, 'settings', $instance->settings ?? []),
-                    'meta'        => Arr::get($attributes, 'meta', $instance->meta ?? []),
+                    'is_enabled' => (bool) Arr::get($attributes, 'is_enabled', $instance->is_enabled),
+                    'sort_order' => (int) Arr::get($attributes, 'sort_order', $next_sort_order),
+                    'settings' => Arr::get($attributes, 'settings', $instance->settings ?? []),
+                    'meta' => Arr::get($attributes, 'meta', $instance->meta ?? []),
                 ]);
             });
 
@@ -120,7 +121,7 @@ readonly class ModuleInstanceService
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('Duplicating module instance failed.', [
                 'instance_id' => $instance->id,
-                'message'     => $throwable->getMessage(),
+                'message' => $throwable->getMessage(),
             ]);
 
             throw $throwable;
@@ -133,20 +134,20 @@ readonly class ModuleInstanceService
     public function update(ModuleInstance $instance, array $attributes): ModuleInstance
     {
         Log::channel('daily')->info('Updating module instance.', [
-            'instance_id'   => $instance->id,
+            'instance_id' => $instance->id,
             'definition_id' => $instance->module_definition_id,
         ]);
 
         $attributes = $this->module_instance_settings_normalizer_service->normalizeForInstance($instance, $attributes);
 
         $instance->forceFill([
-            'name'        => Arr::get($attributes, 'name', $instance->name),
-            'placement'   => Arr::get($attributes, 'placement', $instance->placement),
+            'name' => Arr::get($attributes, 'name', $instance->name),
+            'placement' => Arr::get($attributes, 'placement', $instance->placement),
             'context_key' => Arr::get($attributes, 'context_key', $instance->context_key),
-            'is_enabled'  => (bool) Arr::get($attributes, 'is_enabled', $instance->is_enabled),
-            'sort_order'  => (int) Arr::get($attributes, 'sort_order', $instance->sort_order),
-            'settings'    => Arr::get($attributes, 'settings', $instance->settings ?? []),
-            'meta'        => Arr::get($attributes, 'meta', $instance->meta ?? []),
+            'is_enabled' => (bool) Arr::get($attributes, 'is_enabled', $instance->is_enabled),
+            'sort_order' => (int) Arr::get($attributes, 'sort_order', $instance->sort_order),
+            'settings' => Arr::get($attributes, 'settings', $instance->settings ?? []),
+            'meta' => Arr::get($attributes, 'meta', $instance->meta ?? []),
         ])->save();
 
         $this->module_cache_service->flush();
@@ -157,9 +158,9 @@ readonly class ModuleInstanceService
     public function setInstanceState(ModuleInstance $instance, bool $is_enabled): ModuleInstance
     {
         Log::channel('daily')->info('Changing module instance state.', [
-            'instance_id'   => $instance->id,
+            'instance_id' => $instance->id,
             'definition_id' => $instance->module_definition_id,
-            'is_enabled'    => $is_enabled,
+            'is_enabled' => $is_enabled,
         ]);
 
         $instance->forceFill([
@@ -174,7 +175,7 @@ readonly class ModuleInstanceService
     public function delete(ModuleInstance $instance): void
     {
         Log::channel('daily')->info('Deleting module instance.', [
-            'instance_id'   => $instance->id,
+            'instance_id' => $instance->id,
             'definition_id' => $instance->module_definition_id,
         ]);
 

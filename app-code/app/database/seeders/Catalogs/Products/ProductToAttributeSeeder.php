@@ -24,10 +24,10 @@ class ProductToAttributeSeeder extends Seeder
 
     /** @var array<int, string> */
     private const ATTRIBUTE_POOL_TYPES = [
-        5  => 'size',
-        7  => 'color',
-        8  => 'weight',
-        9  => 'type',
+        5 => 'size',
+        7 => 'color',
+        8 => 'weight',
+        9 => 'type',
         10 => 'material',
         11 => 'length',
         12 => 'print_type',
@@ -84,17 +84,17 @@ class ProductToAttributeSeeder extends Seeder
                 $active_attributes,
                 $attribute_value_pools,
             ): void {
-                $now_timestamp   = now(config('app.timezone'));
+                $now_timestamp = now(config('app.timezone'));
                 $rows_for_upsert = [];
 
                 foreach ($products_chunk as $product) {
                     foreach ($active_attributes as $attribute) {
                         foreach ($active_languages as $language) {
                             $rows_for_upsert[] = [
-                                'product_id'   => (int) $product->id,
+                                'product_id' => (int) $product->id,
                                 'attribute_id' => (int) $attribute->id,
-                                'language_id'  => (int) $language->id,
-                                'text'         => $this->resolveAttributeValue(
+                                'language_id' => (int) $language->id,
+                                'text' => $this->resolveAttributeValue(
                                     attribute_value_pools: $attribute_value_pools,
                                     attribute_id         : (int) $attribute->id,
                                     language_id          : (int) $language->id,
@@ -147,51 +147,51 @@ class ProductToAttributeSeeder extends Seeder
     {
         $pools_by_type = [
             'size' => [
-                'uk'      => ['20x20 см', '30x30 см', '40x40 см', '50x50 см'],
-                'en'      => ['20x20 cm', '30x30 cm', '40x40 cm', '50x50 cm'],
-                'ru'      => ['20x20 см', '30x30 см', '40x40 см', '50x50 см'],
+                'uk' => ['20x20 см', '30x30 см', '40x40 см', '50x50 см'],
+                'en' => ['20x20 cm', '30x30 cm', '40x40 cm', '50x50 cm'],
+                'ru' => ['20x20 см', '30x30 см', '40x40 см', '50x50 см'],
                 'default' => ['20x20', '30x30', '40x40', '50x50'],
             ],
             'color' => [
-                'uk'      => ['Чорний', 'Білий', 'Синій', 'Червоний'],
-                'en'      => ['Black', 'White', 'Blue', 'Red'],
-                'ru'      => ['Черный', 'Белый', 'Синий', 'Красный'],
+                'uk' => ['Чорний', 'Білий', 'Синій', 'Червоний'],
+                'en' => ['Black', 'White', 'Blue', 'Red'],
+                'ru' => ['Черный', 'Белый', 'Синий', 'Красный'],
                 'default' => ['Black', 'White', 'Blue', 'Red'],
             ],
             'weight' => [
-                'uk'      => ['100 г', '250 г', '500 г', '1 кг'],
-                'en'      => ['100 g', '250 g', '500 g', '1 kg'],
-                'ru'      => ['100 г', '250 г', '500 г', '1 кг'],
+                'uk' => ['100 г', '250 г', '500 г', '1 кг'],
+                'en' => ['100 g', '250 g', '500 g', '1 kg'],
+                'ru' => ['100 г', '250 г', '500 г', '1 кг'],
                 'default' => ['100 g', '250 g', '500 g', '1 kg'],
             ],
             'type' => [
-                'uk'      => ['Класичний', 'Спортивний', 'Повсякденний', 'Преміум'],
-                'en'      => ['Classic', 'Sport', 'Casual', 'Premium'],
-                'ru'      => ['Классический', 'Спортивный', 'Повседневный', 'Премиум'],
+                'uk' => ['Класичний', 'Спортивний', 'Повсякденний', 'Преміум'],
+                'en' => ['Classic', 'Sport', 'Casual', 'Premium'],
+                'ru' => ['Классический', 'Спортивный', 'Повседневный', 'Премиум'],
                 'default' => ['Classic', 'Sport', 'Casual', 'Premium'],
             ],
             'material' => [
-                'uk'      => ['Бавовна', 'Поліестер', 'Льон', 'Віскоза'],
-                'en'      => ['Cotton', 'Polyester', 'Linen', 'Viscose'],
-                'ru'      => ['Хлопок', 'Полиэстер', 'Лен', 'Вискоза'],
+                'uk' => ['Бавовна', 'Поліестер', 'Льон', 'Віскоза'],
+                'en' => ['Cotton', 'Polyester', 'Linen', 'Viscose'],
+                'ru' => ['Хлопок', 'Полиэстер', 'Лен', 'Вискоза'],
                 'default' => ['Cotton', 'Polyester', 'Linen', 'Viscose'],
             ],
             'length' => [
-                'uk'      => ['30 см', '50 см', '70 см', '100 см'],
-                'en'      => ['30 cm', '50 cm', '70 cm', '100 cm'],
-                'ru'      => ['30 см', '50 см', '70 см', '100 см'],
+                'uk' => ['30 см', '50 см', '70 см', '100 см'],
+                'en' => ['30 cm', '50 cm', '70 cm', '100 cm'],
+                'ru' => ['30 см', '50 см', '70 см', '100 см'],
                 'default' => ['30 cm', '50 cm', '70 cm', '100 cm'],
             ],
             'print_type' => [
-                'uk'      => ['Шовкотрафарет', 'Термодрук', 'Вишивка', 'Сублімація'],
-                'en'      => ['Silkscreen', 'Heat transfer', 'Embroidery', 'Sublimation'],
-                'ru'      => ['Шелкография', 'Термопечать', 'Вышивка', 'Сублимация'],
+                'uk' => ['Шовкотрафарет', 'Термодрук', 'Вишивка', 'Сублімація'],
+                'en' => ['Silkscreen', 'Heat transfer', 'Embroidery', 'Sublimation'],
+                'ru' => ['Шелкография', 'Термопечать', 'Вышивка', 'Сублимация'],
                 'default' => ['Silkscreen', 'Heat transfer', 'Embroidery', 'Sublimation'],
             ],
             'generic' => [
-                'uk'      => ['Стандарт', 'Преміум', 'Комфорт', 'Базовий'],
-                'en'      => ['Standard', 'Premium', 'Comfort', 'Basic'],
-                'ru'      => ['Стандарт', 'Премиум', 'Комфорт', 'Базовый'],
+                'uk' => ['Стандарт', 'Преміум', 'Комфорт', 'Базовий'],
+                'en' => ['Standard', 'Premium', 'Comfort', 'Basic'],
+                'ru' => ['Стандарт', 'Премиум', 'Комфорт', 'Базовый'],
                 'default' => ['Standard', 'Premium', 'Comfort', 'Basic'],
             ],
         ];
@@ -217,7 +217,7 @@ class ProductToAttributeSeeder extends Seeder
         if ($value_index === null) {
             shuffle($this->attributes_values_indexes);
 
-            $value_index                                         = array_rand($this->attributes_values_indexes);
+            $value_index = array_rand($this->attributes_values_indexes);
             $this->product_to_attribute_value_index[$product_id] = $value_index;
         }
 

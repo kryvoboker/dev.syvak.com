@@ -19,7 +19,8 @@ class ModuleSettingsNormalizerService
 {
     public function __construct(
         private readonly CarouselConfig $carousel_config,
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<string, mixed>  $settings
@@ -30,13 +31,13 @@ class ModuleSettingsNormalizerService
      */
     public function normalize(array $settings): array
     {
-        $active_languages   = (new Language())->getActiveLanguages();
+        $active_languages = (new Language())->getActiveLanguages();
         $allowed_page_types = collect(config('page-type', []))->values()->all();
-        $shared_settings    = Arr::get($settings, 'shared', []);
-        $slides             = Arr::get($settings, 'slides', []);
+        $shared_settings = Arr::get($settings, 'shared', []);
+        $slides = Arr::get($settings, 'slides', []);
 
         Log::channel('daily')->info('Normalizing carousel module settings.', [
-            'slides_count'    => is_countable($slides) ? count($slides) : 0,
+            'slides_count' => is_countable($slides) ? count($slides) : 0,
             'languages_count' => $active_languages->count(),
         ]);
 
@@ -52,7 +53,7 @@ class ModuleSettingsNormalizerService
                 $allowed_page_types,
             ),
             'open_links_in_new_tab' => (bool) Arr::get($shared_settings, 'open_links_in_new_tab', true),
-            'desktop_image'         => $this->normalizeImageSizeBlock(
+            'desktop_image' => $this->normalizeImageSizeBlock(
                 Arr::get($shared_settings, 'desktop_image', []),
                 $this->carousel_config->get('storefront.desktop_image', []),
                 'desktop',
@@ -100,7 +101,7 @@ class ModuleSettingsNormalizerService
         $normalized_translations = $active_languages
             ->mapWithKeys(function (Language $language) use ($translations, $index): array {
                 $language_code = (string) $language->code;
-                $translation   = Arr::get($translations, $language_code, []);
+                $translation = Arr::get($translations, $language_code, []);
 
                 if (! is_array($translation)) {
                     throw ValidationException::withMessages([
@@ -110,11 +111,11 @@ class ModuleSettingsNormalizerService
 
                 $normalized_translation = [
                     'language_code' => $language_code,
-                    'title'         => Str::squish((string) Arr::get($translation, 'title')),
-                    'description'   => Str::squish((string) Arr::get($translation, 'description')),
-                    'button_text'   => Str::squish((string) Arr::get($translation, 'button_text')),
-                    'button_url'    => Str::trim((string) Arr::get($translation, 'button_url')),
-                    'image_url'     => Str::trim((string) Arr::get($translation, 'image_url')),
+                    'title' => Str::squish((string) Arr::get($translation, 'title')),
+                    'description' => Str::squish((string) Arr::get($translation, 'description')),
+                    'button_text' => Str::squish((string) Arr::get($translation, 'button_text')),
+                    'button_url' => Str::trim((string) Arr::get($translation, 'button_url')),
+                    'image_url' => Str::trim((string) Arr::get($translation, 'image_url')),
                     'desktop_image' => $this->normalizeImagePath(
                         Arr::get($translation, 'desktop_image'),
                         "settings.slides.{$index}.translations.{$language_code}.desktop_image",
@@ -126,13 +127,13 @@ class ModuleSettingsNormalizerService
                 ];
 
                 $validator = Validator::make($normalized_translation, [
-                    'title'         => ['nullable', 'string', 'max:255'],
-                    'description'   => ['nullable', 'string'],
-                    'button_text'   => ['nullable', 'string', 'max:255'],
-                    'button_url'    => ['nullable', 'url'],
-                    'image_url'     => ['nullable', 'url'],
+                    'title' => ['nullable', 'string', 'max:255'],
+                    'description' => ['nullable', 'string'],
+                    'button_text' => ['nullable', 'string', 'max:255'],
+                    'button_url' => ['nullable', 'url'],
+                    'image_url' => ['nullable', 'url'],
                     'desktop_image' => ['nullable', 'string'],
-                    'mobile_image'  => ['nullable', 'string'],
+                    'mobile_image' => ['nullable', 'string'],
                 ]);
 
                 if ($validator->fails()) {
@@ -150,8 +151,8 @@ class ModuleSettingsNormalizerService
             ->all();
 
         Log::channel('daily')->info('Carousel slide translation payload normalized.', [
-            'slide_index'                           => $index,
-            'translations_count'                    => count($normalized_translations),
+            'slide_index' => $index,
+            'translations_count' => count($normalized_translations),
             'translations_with_desktop_image_count' => collect($normalized_translations)
                 ->filter(fn (array $translation): bool => filled($translation['desktop_image'] ?? null))
                 ->count(),
@@ -164,8 +165,8 @@ class ModuleSettingsNormalizerService
         ]);
 
         return [
-            'is_active'    => (bool) Arr::get($slide, 'is_active', true),
-            'sort_order'   => max((int) Arr::get($slide, 'sort_order', $index + 1), 1),
+            'is_active' => (bool) Arr::get($slide, 'is_active', true),
+            'sort_order' => max((int) Arr::get($slide, 'sort_order', $index + 1), 1),
             'translations' => $normalized_translations,
         ];
     }
@@ -188,14 +189,14 @@ class ModuleSettingsNormalizerService
             ]);
         }
 
-        $mime_type          = (string) Storage::mimeType($image_path);
+        $mime_type = (string) Storage::mimeType($image_path);
         $allowed_mime_types = $this->carousel_config->get('uploads.accepted_mime_types', []);
 
         if (! in_array($mime_type, $allowed_mime_types, true)) {
             Log::channel('stack')->warning('Carousel image mime type is not allowed.', [
-                'field'      => $field,
+                'field' => $field,
                 'image_path' => $image_path,
-                'mime_type'  => $mime_type,
+                'mime_type' => $mime_type,
             ]);
 
             throw ValidationException::withMessages([
@@ -297,19 +298,19 @@ class ModuleSettingsNormalizerService
     private function normalizeImageSizeBlock(mixed $image_size_block, mixed $defaults, string $device_type): array
     {
         $image_size_block = is_array($image_size_block) ? $image_size_block : [];
-        $defaults         = is_array($defaults) ? $defaults : [];
+        $defaults = is_array($defaults) ? $defaults : [];
 
         $normalized_block = [
-            'width'      => max((int) Arr::get($image_size_block, 'width', Arr::get($defaults, 'width', 1)), 1),
-            'height'     => max((int) Arr::get($image_size_block, 'height', Arr::get($defaults, 'height', 1)), 1),
-            'max_width'  => max((int) Arr::get($image_size_block, 'max_width', Arr::get($defaults, 'max_width', 1)), 1),
+            'width' => max((int) Arr::get($image_size_block, 'width', Arr::get($defaults, 'width', 1)), 1),
+            'height' => max((int) Arr::get($image_size_block, 'height', Arr::get($defaults, 'height', 1)), 1),
+            'max_width' => max((int) Arr::get($image_size_block, 'max_width', Arr::get($defaults, 'max_width', 1)), 1),
             'max_height' => max((int) Arr::get($image_size_block, 'max_height', Arr::get($defaults, 'max_height', 1)), 1),
         ];
 
         $validator = Validator::make($normalized_block, [
-            'width'      => ['required', 'integer', 'min:1'],
-            'height'     => ['required', 'integer', 'min:1'],
-            'max_width'  => ['required', 'integer', 'min:1'],
+            'width' => ['required', 'integer', 'min:1'],
+            'height' => ['required', 'integer', 'min:1'],
+            'max_width' => ['required', 'integer', 'min:1'],
             'max_height' => ['required', 'integer', 'min:1'],
         ]);
 

@@ -39,11 +39,11 @@ class EditInfoPage extends EditRecord
         $descriptions = $descriptions_collection
             ->keyBy('language_id')
             ->map(fn (InfoPageDescription $descr): array => [
-                'name'             => $descr->title,
-                'description'      => $descr->description,
-                'meta_title'       => $descr->meta_title,
+                'name' => $descr->title,
+                'description' => $descr->description,
+                'meta_title' => $descr->meta_title,
                 'meta_description' => $descr->meta_description,
-                'meta_keywords'    => $descr->meta_keywords,
+                'meta_keywords' => $descr->meta_keywords,
             ])
             ->toArray();
 
@@ -58,7 +58,7 @@ class EditInfoPage extends EditRecord
     {
         // Store related data temporarily
         $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
-        $this->slugs        = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
 
         unset($data['descriptions'], $data['slugs']);
 
@@ -96,7 +96,7 @@ class EditInfoPage extends EditRecord
         } catch (Exception $e) {
             Log::channel('stack')->error('Failed to update InfoPage: ' . $e->getMessage(), [
                 'record_id' => $record->id,
-                'data'      => $data,
+                'data' => $data,
                 'exception' => $e,
             ]);
 
@@ -116,11 +116,11 @@ class EditInfoPage extends EditRecord
                 $this->getInfoPageRecord()->infoPageDescription()->updateOrCreate(
                     ['language_id' => (int) $language_id],
                     [
-                        'title'            => $description['name'],
-                        'description'      => $description['description'] ?? null,
-                        'meta_title'       => $description['meta_title'] ?? null,
+                        'title' => $description['name'],
+                        'description' => $description['description'] ?? null,
+                        'meta_title' => $description['meta_title'] ?? null,
                         'meta_description' => $description['meta_description'] ?? null,
-                        'meta_keywords'    => $description['meta_keywords'] ?? null,
+                        'meta_keywords' => $description['meta_keywords'] ?? null,
                     ],
                 );
             }

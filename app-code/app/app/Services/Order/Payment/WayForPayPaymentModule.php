@@ -15,10 +15,10 @@ class WayForPayPaymentModule
     public function process(array $order_payload): array
     {
         return [
-            'is_success'    => false,
-            'status'        => 'failed',
+            'is_success' => false,
+            'status' => 'failed',
             'provider_code' => 'wayforpay_not_implemented',
-            'payload'       => $order_payload,
+            'payload' => $order_payload,
         ];
     }
 }

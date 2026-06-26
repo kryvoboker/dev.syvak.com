@@ -30,15 +30,15 @@ class ProductsTable
     public static function configure(Table $table): Table
     {
         $current_language_id = self::getCurrentLanguageId();
-        $preview_size        = [
-            'width'  => (int) config('app.images.product.preview_in_list_in_admin.width', 100),
+        $preview_size = [
+            'width' => (int) config('app.images.product.preview_in_list_in_admin.width', 100),
             'height' => (int) config('app.images.product.preview_in_list_in_admin.height', 100),
         ];
         $fallback_no_image = (string) config('app.images.product.no_image', 'images/no-image.png');
 
         try {
-            $service           = app(PageSettingsBootstrapService::class);
-            $preview_size      = $service->getProductPreviewInListSize();
+            $service = app(PageSettingsBootstrapService::class);
+            $preview_size = $service->getProductPreviewInListSize();
             $fallback_no_image = $service->getProductNoImagePath();
         } catch (Throwable) {
             // Keep config fallback when page settings are not available.
@@ -118,8 +118,8 @@ class ProductsTable
                     ->defaultImageUrl(Storage::url($fallback_no_image))
                     ->extraImgAttributes([
                         'decoding' => 'async',
-                        'loading'  => 'lazy',
-                        'style'    => 'object-fit: contain;',
+                        'loading' => 'lazy',
+                        'style' => 'object-fit: contain;',
                     ])
                     ->getStateUsing(function (Product $record): ?string {
                         return $record->defaultVariant->image;
@@ -132,10 +132,10 @@ class ProductsTable
                     ->sortable()
                     ->limit(50)
                     ->getStateUsing(function (Product $record) {
-                        $discount   = (new Product())->getLastActualAndLastModifiedDiscountFromModel($record);
+                        $discount = (new Product())->getLastActualAndLastModifiedDiscountFromModel($record);
                         $base_price = (float) ($record->defaultVariant->price ?? $record->price);
 
-                        $currency      = config('app.currency.current_currency_code');
+                        $currency = config('app.currency.current_currency_code');
                         $exchange_rate = (float) config('app.currency.default_exchange_rate');
 
                         $convert_price = app(ConvertPrice::class);

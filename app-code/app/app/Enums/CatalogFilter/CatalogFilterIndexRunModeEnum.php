@@ -6,7 +6,7 @@ namespace App\Enums\CatalogFilter;
 
 enum CatalogFilterIndexRunModeEnum: string
 {
-    case Full        = 'full';
+    case Full = 'full';
     case Incremental = 'incremental';
-    case DryRun      = 'dry_run';
+    case DryRun = 'dry_run';
 }

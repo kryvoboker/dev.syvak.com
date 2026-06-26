@@ -27,7 +27,7 @@ Route::get('/alyo-admin/login', function (): RedirectResponse {
     return redirect('/' . app()->getLocale() . '/alyo-admin/login');
 });
 
-$locale_key      = config('localization.locale_parameter', 'locale');
+$locale_key = config('localization.locale_parameter', 'locale');
 $allowed_locales = get_allowed_locales();
 
 Route::prefix('{' . $locale_key . '}')

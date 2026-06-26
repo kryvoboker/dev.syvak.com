@@ -27,12 +27,12 @@ class ProductVariantDiscount extends Model
     {
         return [
             'product_variant_id' => 'integer',
-            'user_group_id'      => 'integer',
-            'quantity'           => 'integer',
-            'priority'           => 'integer',
-            'price'              => 'float',
-            'date_start'         => 'datetime',
-            'date_end'           => 'datetime',
+            'user_group_id' => 'integer',
+            'quantity' => 'integer',
+            'priority' => 'integer',
+            'price' => 'float',
+            'date_start' => 'datetime',
+            'date_end' => 'datetime',
         ];
     }
 
