@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/novaposhta",
+    "description": "",
+    "authors": [
+        {
+            "name": "Roman Kryvobok",
+            "email": "fast.kamaz@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\NovaPoshta\\": "app/",
+            "Modules\\NovaPoshta\\Database\\Factories\\": "database/factories/",
+            "Modules\\NovaPoshta\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\NovaPoshta\\Tests\\": "tests/"
+        }
+    }
+}
