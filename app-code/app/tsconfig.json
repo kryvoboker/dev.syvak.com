@@ -20,6 +20,9 @@
             "@carousel-ts/*": [
                 "./Modules/Carousel/resources/assets/ts/*"
             ],
+            "@nova-poshta-ts/*": [
+                "./Modules/NovaPoshta/resources/assets/ts/*"
+            ]
         },
         "target": "ES2024",
         "useDefineForClassFields": true,

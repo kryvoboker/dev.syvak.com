@@ -1,0 +1,11 @@
+{
+    "name": "NovaPoshta",
+    "alias": "novaposhta",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\NovaPoshta\\Providers\\NovaPoshtaServiceProvider"
+    ],
+    "files": []
+}

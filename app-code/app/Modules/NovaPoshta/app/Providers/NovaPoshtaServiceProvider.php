@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Modules\Carousel\Providers;
+namespace Modules\NovaPoshta\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
-class CarouselServiceProvider extends ModuleServiceProvider
+class NovaPoshtaServiceProvider extends ModuleServiceProvider
 {
     /**
      * The name of the module.
      */
-    protected string $name = 'Carousel';
+    protected string $name = 'NovaPoshta';
 
     /**
      * The lowercase version of the module name.
      */
-    protected string $nameLower = 'carousel';
+    protected string $nameLower = 'novaposhta';
 }
