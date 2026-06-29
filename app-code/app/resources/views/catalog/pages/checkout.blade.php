@@ -381,7 +381,7 @@
                                             </div>
                                         </div>
 
-                                        <button class="accordion-toggle inline-flex items-center gap-2 text-sm md:text-base"
+                                        <button class="accordion-toggle inline-flex items-center gap-2 text-sm md:text-base p-0"
                                                 type="button"
                                                 aria-expanded="false"
                                                 aria-controls="checkout-hidden-items-collapse">
@@ -395,7 +395,7 @@
                                 </div>
                             @endif
 
-                            <a class="inline-flex w-full items-center justify-end border-b border-opacity-light-gray-40% pb-2 text-sm uppercase tracking-0.04em underline decoration-1 underline-offset-4 md:text-base"
+                            <a class="inline-flex w-full items-center justify-end text-sm uppercase tracking-0.04em underline decoration-1 underline-offset-4 md:text-base"
                                href="{{ $edit_items_url }}">
                                 {{ __('catalog/pages/category/show.checkout.buttons.edit_items') }}
                             </a>

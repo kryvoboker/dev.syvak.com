@@ -1,10 +1,12 @@
 @php
+    use App\Enums\CartModeEnum;
+
     $cart_data = is_array($cart_data ?? null) ? $cart_data : [];
     $first_item = $cart_data['first_item'] ?? null;
     $hidden_items = $cart_data['hidden_items'] ?? [];
     $totals = $cart_data['totals'] ?? [];
     $total_lines = $totals['lines'] ?? [];
-    $cart_mode = $cart_mode ?? ($cart_data['mode'] ?? 'regular');
+    $cart_mode = $cart_mode ?? ($cart_data['mode'] ?? CartModeEnum::Regular->value);
     $show_checkout_button = $show_checkout_button ?? true;
 @endphp
 
@@ -84,7 +86,7 @@
         @endif
     </div>
 
-    <div class="px-4 pb-4 md:px-6">
+    <div class="px-4 pb-4 md:pb-6 md:px-6">
         @if(($cart_data['is_empty'] ?? true) === false)
             <div class="mt-3 flex flex-col gap-2" data-cart-totals>
                 @foreach($total_lines as $line_data)
@@ -103,9 +105,9 @@
             </div>
         @endif
 
-        @if(($cart_data['is_empty'] ?? true) === false && $cart_mode === 'regular' && $show_checkout_button === true)
+        @if(($cart_data['is_empty'] ?? true) === false && $cart_mode === CartModeEnum::Regular->value && $show_checkout_button === true)
             <a class="white-btn default-btn w-full md:max-w-85.75 lg:max-w-91.75 2xl:max-w-md text-lg mt-3 mx-auto"
-               href="{{ localized_route('localized.catalog.cart.index') }}">
+               href="{{ localized_route('localized.catalog.checkout.index') }}">
                 {{ __('catalog/default.cart.buttons.checkout') }}
             </a>
         @endif

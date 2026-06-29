@@ -6,6 +6,6 @@
     @include('catalog.partials.cart.modal-items', [
         'cart_data' => $cart_data,
         'cart_mode' => $cart_data['mode'] ?? 'regular',
-        'show_checkout_button' => false,
+        'show_checkout_button' => ($show_checkout_button ?? false),
     ])
 </div>

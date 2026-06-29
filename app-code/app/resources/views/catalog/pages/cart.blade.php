@@ -22,7 +22,10 @@
 
     <section class="cart section" id="cart">
         <div class="container flex flex-col gap-4" id="cart-page-root">
-            @include('catalog.partials.cart.page-content', ['cart_data' => $cart_data ?? []])
+            @include('catalog.partials.cart.page-content', [
+                'cart_data' => $cart_data ?? [],
+                'show_checkout_button' => $show_checkout_button,
+            ])
         </div>
 
         <x-catalog::common.loader class="cart-loader z-20"/>
