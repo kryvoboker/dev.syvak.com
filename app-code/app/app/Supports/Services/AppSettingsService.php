@@ -6,11 +6,13 @@ namespace App\Supports\Services;
 
 use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\AppSetting;
+use App\Models\ApplicationSettings\GlobalConfig;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Users\UserGroup;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 final class AppSettingsService
 {
@@ -56,9 +58,16 @@ final class AppSettingsService
 
         $app_setting = (new AppSetting())->getAppSettings();
         $app_settings = $app_setting !== null ? $app_setting->toArray() : [];
+        $global_configs = Schema::hasTable('global_configs')
+            ? GlobalConfig::query()
+                ->where('is_active', true)
+                ->orderBy('key')
+                ->pluck('value', 'key')
+            : collect();
 
         $this->app_settings_data = AppSettingsData::fromArray(array_merge(
             $app_settings,
+            ['global_configs' => $global_configs],
             compact('language_id', 'user_group_id'),
         ));
 

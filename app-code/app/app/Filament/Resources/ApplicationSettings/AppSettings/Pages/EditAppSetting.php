@@ -7,6 +7,7 @@ namespace App\Filament\Resources\ApplicationSettings\AppSettings\Pages;
 use App\Filament\Pages\Wiki\ApplicationSettingsWikiPage;
 use App\Filament\Resources\ApplicationSettings\AppSettings\AppSettingResource;
 use App\Models\ApplicationSettings\AppSetting;
+use App\Supports\Services\AppSettingsService;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
@@ -129,6 +130,8 @@ class EditAppSetting extends EditRecord
             'user_settings' => $user_settings,
             'ai_settings' => $ai_settings,
         ]);
+
+        app(AppSettingsService::class)->removeSettings();
 
         return $record;
     }
