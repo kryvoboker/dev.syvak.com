@@ -42,6 +42,7 @@ class ModuleDiscoveryService
                             'providers' => $module->get('providers', []),
                             'requires' => $module->get('requires', []),
                             'composer_name' => $module->getComposerAttr('name'),
+                            'admin' => $module->get('admin', []),
                         ],
                     ];
                 })

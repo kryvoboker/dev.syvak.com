@@ -8,6 +8,9 @@ return [
         'model' => 'Module',
         'plural_model' => 'Modules',
         'name' => 'Name',
+        'created' => 'Created',
+        'updated' => 'Updated',
+        'missing' => 'Missing',
         'slug' => 'Slug',
         'nwidart_name' => 'Code Module',
         'module_path' => 'Path',
@@ -46,12 +49,14 @@ return [
         'state' => 'State',
         'settings_schema' => 'Settings Schema',
         'meta' => 'Meta',
+        'last_sync_summary' => 'Last Sync',
     ],
     'actions' => [
         'enable' => 'Enable',
         'disable' => 'Disable',
         'add_instance' => 'Add',
         'edit_instance' => 'Edit',
+        'open_module' => 'Open module',
         'sync_modules' => 'Sync modules',
         'enable_instance' => 'Enable',
         'disable_instance' => 'Disable',
@@ -79,5 +84,6 @@ return [
     'empty' => [
         'list' => 'No modules or module settings were found for the current filters.',
         'definition_instances' => 'No settings have been created for this module yet.',
+        'sync_summary' => 'No sync has been run yet.',
     ],
 ];

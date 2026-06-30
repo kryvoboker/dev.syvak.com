@@ -20,7 +20,7 @@ class CheckoutControllerTest extends TestCase
             /**
              * @return array<string, mixed>
              */
-            public function getSnapshot(string $locale, string $mode = 'regular'): array
+            public function getSnapshot(): array
             {
                 return [
                     'is_empty' => true,
@@ -42,10 +42,9 @@ class CheckoutControllerTest extends TestCase
 
         $this->app->instance(FooterService::class, new class () {
             /**
-             * @param  array<string, mixed>  $footer_data
              * @return array<string, mixed>
              */
-            public function __invoke(array $footer_data = []): array
+            public function __invoke(): array
             {
                 return [];
             }
@@ -63,7 +62,7 @@ class CheckoutControllerTest extends TestCase
             /**
              * @return array<string, mixed>
              */
-            public function getSnapshot(string $locale, string $mode = 'regular'): array
+            public function getSnapshot(): array
             {
                 return [
                     'is_empty' => false,
@@ -117,10 +116,9 @@ class CheckoutControllerTest extends TestCase
 
         $this->app->instance(FooterService::class, new class () {
             /**
-             * @param  array<string, mixed>  $footer_data
              * @return array<string, mixed>
              */
-            public function __invoke(array $footer_data = []): array
+            public function __invoke(): array
             {
                 return [];
             }

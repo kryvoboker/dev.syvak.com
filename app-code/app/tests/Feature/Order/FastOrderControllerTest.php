@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class FastOrderControllerTest extends TestCase
 {
-    public function test_validate_fast_order_returns_success_json(): void
+    public function testValidateFastOrderReturnsSuccessJson(): void
     {
         $locale = app()->getLocale();
 
@@ -43,7 +43,7 @@ class FastOrderControllerTest extends TestCase
         $response->assertJsonPath('success', true);
     }
 
-    public function test_store_fast_order_redirects_to_thank_you_page(): void
+    public function testStoreFastOrderRedirectsToThankYouPage(): void
     {
         $locale = app()->getLocale();
 
@@ -75,7 +75,7 @@ class FastOrderControllerTest extends TestCase
         $response->assertRedirect(localized_route('localized.catalog.thank-you.index', ['locale' => $locale]));
     }
 
-    public function test_store_fast_order_requires_first_name(): void
+    public function testStoreFastOrderRequiresFirstName(): void
     {
         $locale = app()->getLocale();
 
@@ -107,7 +107,7 @@ class FastOrderControllerTest extends TestCase
         $response->assertJsonValidationErrors(['first_name']);
     }
 
-    private function bindFastOrderCreationService(array $validate_result, array $create_result): void
+    private function bindFastOrderCreationService(array $validateResult, array $createResult): void
     {
         $this->app->instance(Language::class, new class () extends Language {
             public function getActiveLanguages(): Collection
@@ -119,36 +119,40 @@ class FastOrderControllerTest extends TestCase
             }
         });
 
-        $fast_order_creation_service = new readonly class ($validate_result, $create_result) extends OrderCreationService {
+        $fastOrderService = new class ($validateResult, $createResult) {
             /**
-             * @param  array<string, mixed>  $validate_result
-             * @param  array<string, mixed>  $create_result
+             * @param  array<string, mixed>  $validateResult
+             * @param  array<string, mixed>  $createResult
              */
             public function __construct(
-                private array $validate_result,
-                private array $create_result,
+                private array $validateResult,
+                private array $createResult,
             ) {
             }
 
             /**
-             * @param  array<string, mixed>  $validated_data
+             * @param  array<string, mixed>  $validatedData
              * @return array<string, mixed>
              */
-            public function validateFastOrderData(array $validated_data, string $locale): array
+            public function validateFastOrderData(array $validatedData, string $locale): array
             {
-                return $this->validate_result;
+                unset($validatedData, $locale);
+
+                return $this->validateResult;
             }
 
             /**
-             * @param  array<string, mixed>  $validated_data
+             * @param  array<string, mixed>  $validatedData
              * @return array<string, mixed>
              */
-            public function createFastOrder(array $validated_data, string $locale): array
+            public function createFastOrder(array $validatedData, string $locale): array
             {
-                return $this->create_result;
+                unset($validatedData, $locale);
+
+                return $this->createResult;
             }
         };
 
-        $this->app->instance(OrderCreationService::class, $fast_order_creation_service);
+        $this->app->instance(OrderCreationService::class, $fastOrderService);
     }
 }

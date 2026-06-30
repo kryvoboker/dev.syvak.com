@@ -16,5 +16,6 @@ class CarouselServiceProvider extends ModuleServiceProvider
     /**
      * The lowercase version of the module name.
      */
+    // phpcs:ignore
     protected string $nameLower = 'carousel';
 }

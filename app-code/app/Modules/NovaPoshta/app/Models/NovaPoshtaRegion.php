@@ -21,9 +21,9 @@ class NovaPoshtaRegion extends Model
     /**
      * @return HasMany<NovaPoshtaCity, $this>
      */
-    public function novaPoshtaCity(): HasMany
+    public function novaPoshtaCities(): HasMany
     {
-        return $this->hasMany(NovaPoshtaCity::class);
+        return $this->hasMany(NovaPoshtaCity::class, 'nova_poshta_region_id');
     }
 
     // protected static function newFactory(): NovaPoshtaRegionFactory

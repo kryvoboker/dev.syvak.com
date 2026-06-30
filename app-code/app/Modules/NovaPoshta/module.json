@@ -1,11 +1,12 @@
 {
     "name": "NovaPoshta",
     "alias": "novaposhta",
-    "description": "",
+    "description": "Nova Poshta checkout module.",
     "keywords": [],
     "priority": 0,
     "providers": [
-        "Modules\\NovaPoshta\\Providers\\NovaPoshtaServiceProvider"
+        "Modules\\NovaPoshta\\Providers\\NovaPoshtaServiceProvider",
+        "Modules\\NovaPoshta\\Providers\\RouteServiceProvider"
     ],
     "files": []
 }
