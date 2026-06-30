@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\CheckForbiddenIpMiddleware;
 use App\Http\Middleware\Modules\RegisterModuleProvidersAfterSession;
 use App\Http\Middleware\SetDefaultLocalePrefix;
 use Illuminate\Foundation\Application;
@@ -36,6 +37,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
             SetDefaultLocalePrefix::class,
             RegisterModuleProvidersAfterSession::class,
         ]);
+
+        $middleware->web(prepend: [
+            CheckForbiddenIpMiddleware::class,
+        ]);
+
+        $middleware->api(prepend: [
+            CheckForbiddenIpMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (Throwable $e, Request $request) {
@@ -50,7 +59,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             }
 
             // Return null to let Laravel handle other errors by default
-
+            return null;
         });
     })->create();
 
