@@ -11,6 +11,7 @@ use App\Models\Slug;
 use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
+use App\Supports\Services\GlobalConfigService;
 use App\Supports\Services\Images\ImageUrlBuilderService;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -90,6 +91,56 @@ if (!function_exists('get_app_settings')) {
     function get_app_settings(): ?AppSettingsData
     {
         return app(AppSettingsService::class)->getSettings();
+    }
+}
+
+if (!function_exists('get_global_config')) {
+    function get_global_config(string $key, mixed $default = null): mixed
+    {
+        return app(GlobalConfigService::class)->getGlobalConfig($key, $default);
+    }
+}
+
+if (!function_exists('set_global_config')) {
+    /**
+     * @param  array<string, mixed>|string  $key
+     */
+    function set_global_config(array|string $key, mixed $value = null, bool $is_active = true): mixed
+    {
+        $global_config_service = app(GlobalConfigService::class);
+
+        if (is_array($key)) {
+            return $global_config_service->upsertGlobalConfig($key, null, $is_active);
+        }
+
+        return $global_config_service->upsertGlobalConfig($key, $value, $is_active);
+    }
+}
+
+if (!function_exists('get_global_configs')) {
+    function get_global_configs(): Collection
+    {
+        return app(GlobalConfigService::class)->getGlobalConfigs();
+    }
+}
+
+if (!function_exists('delete_global_config')) {
+    /**
+     * @param  array<string, mixed>|string  $key
+     */
+    function delete_global_config(array|string $key): int
+    {
+        return app(GlobalConfigService::class)->deleteGlobalConfig($key);
+    }
+}
+
+if (!function_exists('disable_global_config')) {
+    /**
+     * @param  array<string, mixed>|string  $key
+     */
+    function disable_global_config(array|string $key): int
+    {
+        return app(GlobalConfigService::class)->disableGlobalConfig($key);
     }
 }
 

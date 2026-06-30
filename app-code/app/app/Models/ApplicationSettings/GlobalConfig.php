@@ -36,7 +36,23 @@ class GlobalConfig extends Model
     public function value(): Attribute
     {
         return Attribute::make(
-            set: fn (mixed $value): ?string => blank($value) ? null : (string) $value,
+            set: function (mixed $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+
+                if (is_bool($value)) {
+                    return $value ? '1' : '0';
+                }
+
+                if (is_array($value) || is_object($value)) {
+                    return json_encode($value, JSON_UNESCAPED_UNICODE) ?: null;
+                }
+
+                $string_value = (string) $value;
+
+                return $string_value === '' ? null : $string_value;
+            },
         );
     }
 
