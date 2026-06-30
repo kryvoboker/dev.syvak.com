@@ -32,8 +32,8 @@ class NovaPoshtaPostOffice extends Model
     {
         return [
             'nova_poshta_city_id' => 'integer',
-            'number'              => 'integer',
-            'site_key'            => 'integer',
+            'number' => 'integer',
+            'site_key' => 'integer',
         ];
     }
 
@@ -42,7 +42,7 @@ class NovaPoshtaPostOffice extends Model
      */
     public function novaPoshtaCity(): BelongsTo
     {
-        return $this->belongsTo(NovaPoshtaCity::class);
+        return $this->belongsTo(NovaPoshtaCity::class, 'nova_poshta_city_id');
     }
 
     // protected static function newFactory(): NovaPoshtaPostOfficeFactory

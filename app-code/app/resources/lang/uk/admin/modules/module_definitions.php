@@ -8,6 +8,9 @@ return [
         'model' => 'Модуль',
         'plural_model' => 'Модулі',
         'name' => 'Назва',
+        'created' => 'Створено',
+        'updated' => 'Оновлено',
+        'missing' => 'Відсутні',
         'slug' => 'Slug',
         'nwidart_name' => 'Кодовий модуль',
         'module_path' => 'Шлях',
@@ -46,12 +49,14 @@ return [
         'state' => 'Стан',
         'settings_schema' => 'Схема налаштувань',
         'meta' => 'Мета-дані',
+        'last_sync_summary' => 'Останній синк',
     ],
     'actions' => [
         'enable' => 'Увімкнути',
         'disable' => 'Вимкнути',
         'add_instance' => 'Додати',
         'edit_instance' => 'Редагувати',
+        'open_module' => 'Відкрити модуль',
         'sync_modules' => 'Синхронізувати модулі',
         'enable_instance' => 'Увімкнути',
         'disable_instance' => 'Вимкнути',
@@ -79,5 +84,6 @@ return [
     'empty' => [
         'list' => 'Модулі або налаштування за цими фільтрами не знайдено.',
         'definition_instances' => 'Для цього модуля ще немає жодних налаштувань.',
+        'sync_summary' => 'Синхронізацію ще не запускали.',
     ],
 ];

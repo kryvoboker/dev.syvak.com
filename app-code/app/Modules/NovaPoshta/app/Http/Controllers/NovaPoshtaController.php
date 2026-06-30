@@ -1,56 +1,95 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\NovaPoshta\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\NovaPoshta\Services\NovaPoshtaCheckoutDataService;
+use Modules\NovaPoshta\Support\NovaPoshtaCheckoutStateService;
 
 class NovaPoshtaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return view('catalog.novaposhta::index');
+    public function __construct(
+        private readonly NovaPoshtaCheckoutDataService $checkout_data_service,
+        private readonly NovaPoshtaCheckoutStateService $checkout_state_service,
+    ) {
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function state(): JsonResponse
     {
-        return view('novaposhta::create');
+        return response()->json([
+            'state' => $this->checkout_state_service->getState(),
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function regions(): JsonResponse
     {
-        return view('novaposhta::show');
+        $regions = $this->checkout_data_service->getRegionRows();
+
+        return response()->json([
+            'items' => $regions->toArray(),
+            'html' => $this->checkout_data_service->renderRegionsHtml($regions),
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function cities(Request $request): JsonResponse
     {
-        return view('novaposhta::edit');
+        $validated = $request->validate([
+            'region_ref' => ['required', 'string', 'max:255'],
+        ]);
+
+        $cities = $this->checkout_data_service->getCityRows((string) $validated['region_ref']);
+
+        return response()->json([
+            'items' => $cities->toArray(),
+            'html' => $this->checkout_data_service->renderCitiesHtml($cities),
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
+    public function postOffices(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'city_ref' => ['required', 'string', 'max:255'],
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+        $post_offices = $this->checkout_data_service->getPostOfficeRows((string) $validated['city_ref']);
+
+        return response()->json([
+            'items' => $post_offices->toArray(),
+            'html' => $this->checkout_data_service->renderPostOfficesHtml($post_offices),
+        ]);
+    }
+
+    public function poshtomats(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'city_ref' => ['required', 'string', 'max:255'],
+        ]);
+
+        $poshtomats = $this->checkout_data_service->getPoshtomatRows((string) $validated['city_ref']);
+
+        return response()->json([
+            'items' => $poshtomats->toArray(),
+            'html' => $this->checkout_data_service->renderPoshtomatsHtml($poshtomats),
+        ]);
+    }
+
+    public function saveSelection(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'delivery_method' => ['nullable', 'string', 'max:255'],
+            'region' => ['nullable', 'array'],
+            'city' => ['nullable', 'array'],
+            'delivery_point' => ['nullable', 'array'],
+        ]);
+
+        $state = $this->checkout_state_service->replaceState($validated);
+
+        return response()->json([
+            'state' => $state,
+        ]);
+    }
 }

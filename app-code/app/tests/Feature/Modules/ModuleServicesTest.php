@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules;
 
+use App\Filament\Pages\Modules\NovaPoshtaSyncPage;
+use App\Filament\Resources\Modules\ModuleDefinitions\Pages\ListModuleDefinitions;
 use App\Models\Modules\ModuleDefinition;
 use App\Services\Modules\ModuleDefinitionSyncService;
 use App\Services\Modules\ModuleDiscoveryService;
@@ -11,6 +13,7 @@ use App\Services\Modules\ModuleInstanceService;
 use App\Services\Modules\ModuleRuntimeResolverService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -201,6 +204,137 @@ class ModuleServicesTest extends TestCase
         /** @var array{slides: string} $duplicate_settings */
         $this->assertSame('5', $instance_settings['slides']);
         $this->assertSame('2', $duplicate_settings['slides']);
+    }
+
+    public function test_module_definition_can_disable_instance_creation_and_expose_module_list_action_url(): void
+    {
+        $definition = ModuleDefinition::query()->create([
+            'name' => 'Nova Poshta',
+            'slug' => 'nova-poshta',
+            'nwidart_name' => 'NovaPoshta',
+            'module_path' => '/var/modules/NovaPoshta',
+            'description' => 'Nova Poshta',
+            'is_installed' => true,
+            'is_enabled' => true,
+            'is_enabled_in_filesystem' => true,
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [
+                'admin' => [
+                    'can_create_instances' => false,
+                    'module_list_action' => [
+                        'page' => NovaPoshtaSyncPage::class,
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->assertFalse($definition->canCreateInstances());
+        $this->assertSame(NovaPoshtaSyncPage::getUrl(), $definition->getAdminModuleListActionUrl());
+    }
+
+    public function test_module_definition_reads_module_config_from_modules_directory(): void
+    {
+        $definition = ModuleDefinition::query()->create([
+            'name' => 'Nova Poshta',
+            'slug' => 'nova-poshta',
+            'nwidart_name' => 'NovaPoshta',
+            'module_path' => base_path('Modules/NovaPoshta'),
+            'description' => 'Nova Poshta',
+            'is_installed' => true,
+            'is_enabled' => true,
+            'is_enabled_in_filesystem' => true,
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [],
+        ]);
+
+        $this->assertFalse($definition->canCreateInstances());
+    }
+
+    public function test_module_definition_list_uses_edit_action_for_singleton_modules_and_hides_empty_state(): void
+    {
+        $definition = ModuleDefinition::query()->create([
+            'name' => 'Nova Poshta',
+            'slug' => 'nova-poshta',
+            'nwidart_name' => 'NovaPoshta',
+            'module_path' => '/var/modules/NovaPoshta',
+            'description' => 'Nova Poshta',
+            'is_installed' => true,
+            'is_enabled' => true,
+            'is_enabled_in_filesystem' => true,
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [
+                'admin' => [
+                    'can_create_instances' => false,
+                ],
+            ],
+        ]);
+
+        $page = app(ListModuleDefinitions::class);
+
+        $this->assertFalse($page->shouldRenderDefinitionInstancesEmptyState($definition));
+        $this->assertSame(__('admin/modules/module_definitions.actions.edit_instance'), $page->getDefinitionInstanceActionLabel($definition));
+        $this->assertNull($page->getDefinitionInstanceActionUrl($definition));
+
+        $instance = $definition->instances()->create([
+            'name' => 'Nova Poshta settings',
+            'placement' => 'checkout',
+            'context_key' => null,
+            'is_enabled' => true,
+            'sort_order' => 1,
+            'settings' => [
+                'shared' => [
+                    'page_types' => ['checkout'],
+                    'api_key' => 'test-key',
+                ],
+            ],
+            'meta' => [],
+        ]);
+
+        $definition->refresh()->load('instances');
+
+        $this->assertTrue($page->shouldRenderDefinitionInstancesEmptyState($definition));
+        $this->assertSame(
+            \App\Filament\Resources\Modules\ModuleInstances\ModuleInstanceResource::getUrl('edit', ['record' => $instance]),
+            $page->getDefinitionInstanceActionUrl($definition),
+        );
+    }
+
+    public function test_module_definition_list_sync_action_calls_sync_service_and_caches_summary(): void
+    {
+        $summary = [
+            'created' => 2,
+            'updated' => 1,
+            'missing' => 0,
+        ];
+
+        $sync_service = new class ($summary) {
+            /**
+             * @param  array{created: int, updated: int, missing: int}  $summary
+             */
+            public function __construct(
+                private readonly array $summary,
+            ) {
+            }
+
+            public function sync(): array
+            {
+                return $this->summary;
+            }
+        };
+
+        $this->app->instance(ModuleDefinitionSyncService::class, $sync_service);
+
+        Cache::forget('module_definitions.last_sync_summary');
+
+        $page = app(ListModuleDefinitions::class);
+        $this->assertSame([], $page->getLastSyncSummary());
+        $page->syncModuleDefinitions();
+
+        $this->assertSame($summary, Cache::get('module_definitions.last_sync_summary'));
+        $this->assertSame($summary, $page->getLastSyncSummary());
     }
 
     public function test_module_runtime_resolver_returns_only_enabled_instances_for_requested_context(): void

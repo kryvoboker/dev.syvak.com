@@ -32,7 +32,7 @@ class NovaPoshtaCity extends Model
     {
         return [
             'nova_poshta_region_id' => 'integer',
-            'city_id'               => 'integer',
+            'city_id' => 'integer',
         ];
     }
 
@@ -41,23 +41,23 @@ class NovaPoshtaCity extends Model
      */
     public function novaPoshtaRegion(): BelongsTo
     {
-        return $this->belongsTo(NovaPoshtaRegion::class);
+        return $this->belongsTo(NovaPoshtaRegion::class, 'nova_poshta_region_id');
     }
 
     /**
      * @return HasMany<NovaPoshtaPostOffice, $this>
      */
-    public function novaPoshtaPostOffice(): HasMany
+    public function novaPoshtaPostOffices(): HasMany
     {
-        return $this->hasMany(NovaPoshtaPostOffice::class);
+        return $this->hasMany(NovaPoshtaPostOffice::class, 'nova_poshta_city_id');
     }
 
     /**
      * @return HasMany<NovaPoshtaPoshtomat, $this>
      */
-    public function novaPoshtaPoshtoman(): HasMany
+    public function novaPoshtaPoshtomats(): HasMany
     {
-        return $this->hasMany(NovaPoshtaPoshtomat::class);
+        return $this->hasMany(NovaPoshtaPoshtomat::class, 'nova_poshta_city_id');
     }
 
     // protected static function newFactory(): NovaPoshtaCityFactory

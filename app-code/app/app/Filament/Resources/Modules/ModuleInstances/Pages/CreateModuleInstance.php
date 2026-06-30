@@ -28,9 +28,11 @@ class CreateModuleInstance extends CreateRecord
 
     public function mount(): void
     {
-        $this->definition_id = $this->getDefinition()?->id;
+        $definition = $this->getDefinition();
+        $this->definition_id = $definition?->id;
 
         abort_if($this->definition_id === null, 404);
+        abort_if($definition instanceof ModuleDefinition && ! $definition->canCreateInstances(), 404);
 
         parent::mount();
     }
@@ -61,6 +63,7 @@ class CreateModuleInstance extends CreateRecord
         $definition = $this->getDefinition();
 
         abort_if($definition === null, 404);
+        abort_if(! $definition->canCreateInstances(), 404);
 
         $data['module_definition_id'] = $definition->id;
 

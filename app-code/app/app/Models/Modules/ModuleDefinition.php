@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Modules;
 
+use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -81,5 +82,52 @@ class ModuleDefinition extends Model
         $instances = $this->instances()->where('is_enabled', true)->get();
 
         return $instances;
+    }
+
+    public function canCreateInstances(): bool
+    {
+        return (bool) data_get($this->getAdminModuleConfig(), 'can_create_instances', true);
+    }
+
+    public function getAdminModuleListActionUrl(): ?string
+    {
+        $page_class = (string) data_get($this->getAdminModuleConfig(), 'module_list_action.page', '');
+
+        if (blank($page_class) || ! class_exists($page_class) || ! is_subclass_of($page_class, Page::class)) {
+            return null;
+        }
+
+        /** @var class-string<Page> $page_class */
+        return $page_class::getUrl();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getAdminModuleConfig(): array
+    {
+        $admin_config = data_get($this->meta, 'admin', []);
+
+        if (is_array($admin_config) && $admin_config !== []) {
+            return $admin_config;
+        }
+
+        $module_config_path = base_path(
+            'Modules' . DIRECTORY_SEPARATOR . $this->nwidart_name . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php',
+        );
+
+        if (! is_file($module_config_path)) {
+            return [];
+        }
+
+        $module_config = require $module_config_path;
+
+        if (! is_array($module_config)) {
+            return [];
+        }
+
+        $admin_config = data_get($module_config, 'admin', []);
+
+        return is_array($admin_config) ? $admin_config : [];
     }
 }

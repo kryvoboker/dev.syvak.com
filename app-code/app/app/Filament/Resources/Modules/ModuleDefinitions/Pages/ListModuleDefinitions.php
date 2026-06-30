@@ -15,6 +15,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -33,6 +34,8 @@ class ListModuleDefinitions extends ListRecords
     public string $search = '';
 
     public string $status_filter = 'all';
+
+    public ?array $last_sync_summary = null;
 
     public function getTitle(): string
     {
@@ -110,6 +113,52 @@ class ListModuleDefinitions extends ListRecords
         return ModuleInstanceResource::getUrl('create', ['definition' => $definition->id]);
     }
 
+    public function canCreateInstance(ModuleDefinition $definition): bool
+    {
+        return $definition->canCreateInstances();
+    }
+
+    public function getDefinitionInstanceActionUrl(ModuleDefinition $definition): ?string
+    {
+        if ($definition->canCreateInstances()) {
+            return $this->getCreateUrl($definition);
+        }
+
+        $instance = $definition->instances->first();
+
+        return $instance instanceof ModuleInstance
+            ? $this->getEditUrl($instance)
+            : null;
+    }
+
+    public function getDefinitionInstanceActionLabel(ModuleDefinition $definition): string
+    {
+        if ($definition->canCreateInstances()) {
+            return __('admin/modules/module_definitions.actions.add_instance');
+        }
+
+        return __('admin/modules/module_definitions.actions.edit_instance');
+    }
+
+    public function shouldRenderDefinitionInstancesEmptyState(ModuleDefinition $definition): bool
+    {
+        if ($definition->canCreateInstances()) {
+            return true;
+        }
+
+        return $definition->instances->isNotEmpty();
+    }
+
+    public function getModuleActionUrl(ModuleDefinition $definition): ?string
+    {
+        return $definition->getAdminModuleListActionUrl();
+    }
+
+    public function getLastSyncSummary(): array
+    {
+        return $this->last_sync_summary ?? [];
+    }
+
     public function getEditUrl(ModuleInstance $instance): string
     {
         return ModuleInstanceResource::getUrl('edit', ['record' => $instance]);
@@ -180,6 +229,30 @@ class ListModuleDefinitions extends ListRecords
             ->send();
     }
 
+    public function syncModuleDefinitions(): void
+    {
+        try {
+            $summary = app()->make(\App\Services\Modules\ModuleDefinitionSyncService::class)->sync();
+
+            Cache::put('module_definitions.last_sync_summary', $summary, now()->addDay());
+            $this->last_sync_summary = $summary;
+
+            Notification::make()
+                ->title(__('admin/default.success.title'))
+                ->body(__('admin/modules/module_definitions.notifications.sync_completed'))
+                ->success()
+                ->send();
+        } catch (Throwable $throwable) {
+            report($throwable);
+
+            Notification::make()
+                ->title(__('admin/default.errors.title'))
+                ->body(__('admin/modules/module_definitions.notifications.sync_failed'))
+                ->danger()
+                ->send();
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -187,21 +260,7 @@ class ListModuleDefinitions extends ListRecords
                 ->label(__('admin/modules/module_definitions.actions.sync_modules'))
                 ->icon(Heroicon::ArrowPath)
                 ->action(function (): void {
-                    try {
-                        Notification::make()
-                            ->title(__('admin/default.success.title'))
-                            ->body(__('admin/modules/module_definitions.notifications.sync_completed'))
-                            ->success()
-                            ->send();
-                    } catch (Throwable $throwable) {
-                        report($throwable);
-
-                        Notification::make()
-                            ->title(__('admin/default.errors.title'))
-                            ->body(__('admin/modules/module_definitions.notifications.sync_failed'))
-                            ->danger()
-                            ->send();
-                    }
+                    $this->syncModuleDefinitions();
                 }),
             Action::make('open_wiki')
                 ->label(__('admin/wiki/wiki.actions.open_wiki'))
