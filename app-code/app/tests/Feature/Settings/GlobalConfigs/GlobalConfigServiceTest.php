@@ -329,6 +329,107 @@ class GlobalConfigServiceTest extends TestCase
         $this->assertFalse((bool) $updated_global_config->is_active);
     }
 
+    public function test_global_config_helper_supports_bulk_payloads_and_reads_active_values(): void
+    {
+        $saved_global_configs = set_global_config([
+            'feature.flag' => [
+                'value' => true,
+                'is_active' => false,
+            ],
+            'json.payload' => [
+                'foo' => 'bar',
+            ],
+            'raw.number' => 123,
+        ], null, false);
+
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $saved_global_configs);
+        $this->assertCount(3, $saved_global_configs);
+
+        $this->assertDatabaseHas('global_configs', [
+            'key' => 'feature.flag',
+            'value' => '1',
+            'is_active' => 0,
+        ]);
+
+        $this->assertDatabaseHas('global_configs', [
+            'key' => 'json.payload',
+            'value' => '{"foo":"bar"}',
+            'is_active' => 0,
+        ]);
+
+        $this->assertDatabaseHas('global_configs', [
+            'key' => 'raw.number',
+            'value' => '123',
+            'is_active' => 0,
+        ]);
+
+        set_global_config('active_config', 'active-value');
+
+        $this->assertSame('active-value', get_global_config('active_config'));
+        $this->assertNull(get_global_config('json.payload'));
+    }
+
+    public function test_get_global_configs_helper_returns_active_global_configs_collection(): void
+    {
+        GlobalConfig::query()->insert([
+            [
+                'key' => 'active_one',
+                'value' => 'one',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'inactive_two',
+                'value' => 'two',
+                'is_active' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $global_configs = get_global_configs();
+
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $global_configs);
+        $this->assertSame('one', $global_configs->get('active_one'));
+        $this->assertNull($global_configs->get('inactive_two'));
+    }
+
+    public function test_disable_and_delete_global_config_helpers_work_with_string_keys(): void
+    {
+        GlobalConfig::query()->insert([
+            [
+                'key' => 'disabled_by_helper',
+                'value' => 'value',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'deleted_by_helper',
+                'value' => 'value',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $disabled_count = disable_global_config('disabled_by_helper');
+        $deleted_count = delete_global_config('deleted_by_helper');
+
+        $this->assertSame(1, $disabled_count);
+        $this->assertSame(1, $deleted_count);
+
+        $this->assertDatabaseHas('global_configs', [
+            'key' => 'disabled_by_helper',
+            'is_active' => 0,
+        ]);
+
+        $this->assertDatabaseMissing('global_configs', [
+            'key' => 'deleted_by_helper',
+        ]);
+    }
+
     public function test_disable_global_configs_by_ids_sets_records_inactive(): void
     {
         $first_global_config = GlobalConfig::query()->create([

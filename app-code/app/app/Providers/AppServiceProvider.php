@@ -18,6 +18,7 @@ use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
+use App\Supports\Services\GlobalConfigService;
 use App\Supports\Services\Images\ImageUrlBuilderService;
 use Detection\Exception\MobileDetectException;
 use Detection\MobileDetect;
@@ -66,6 +67,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleProviderResolverService::class);
         $this->app->singleton(ModuleProviderRegistrarService::class);
         $this->app->singleton(PageSettingsBootstrapService::class);
+        $this->app->singleton(GlobalConfigService::class);
     }
 
     /**
