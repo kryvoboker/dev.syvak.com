@@ -22,7 +22,7 @@
         "binary_operator_spaces": {
             "default": "single_space"
         },
-        "simplified_null_return": true,
+        "simplified_null_return": false,
         "array_indentation": false,
         "new_with_parentheses": {
             "anonymous_class": true,
