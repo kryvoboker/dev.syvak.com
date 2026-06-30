@@ -26,6 +26,7 @@ class AppSettingsData extends Data
         public ?Collection $system_settings,
         public ?Collection $user_settings,
         public ?Collection $ai_settings,
+        public ?Collection $global_configs,
         public ?int $language_id,
         public ?int $user_group_id,
     ) {
@@ -53,6 +54,7 @@ class AppSettingsData extends Data
             system_settings  : isset($data['system_settings']) ? collect($data['system_settings']) : null,
             user_settings    : isset($data['user_settings']) ? collect($data['user_settings']) : null,
             ai_settings      : isset($data['ai_settings']) ? collect($data['ai_settings']) : null,
+            global_configs   : isset($data['global_configs']) ? collect($data['global_configs']) : null,
             language_id      : $data['language_id'] ?? null,
             user_group_id    : $data['user_group_id'] ?? null,
         );
