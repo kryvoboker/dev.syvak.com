@@ -119,6 +119,7 @@ class NovaPoshtaSyncPage extends Page
                 Section::make(__('admin/modules/nova_poshta.sections.sync.title'))
                     ->description(__('admin/modules/nova_poshta.sections.sync.description'))
                     ->columnSpanFull()
+                    ->visible(fn (): bool => (bool) Arr::get($this->sync_state, 'is_running', false))
                     ->schema([
                         Html::make(fn (): string => $this->renderSyncWorkspace()),
                     ]),
@@ -137,6 +138,7 @@ class NovaPoshtaSyncPage extends Page
             Action::make('syncNovaPoshta')
                 ->label(__('admin/modules/nova_poshta.actions.sync'))
                 ->icon(Heroicon::ArrowPath)
+                ->color('success')
                 ->requiresConfirmation()
                 ->modalHeading(__('admin/modules/nova_poshta.actions.sync'))
                 ->modalDescription(__('admin/modules/nova_poshta.actions.sync_confirmation'))
@@ -165,6 +167,7 @@ class NovaPoshtaSyncPage extends Page
             Action::make('stopNovaPoshtaSync')
                 ->label(__('admin/modules/nova_poshta.actions.stop_sync'))
                 ->icon(Heroicon::XMark)
+                ->color('warning')
                 ->visible(fn (): bool => (bool) Arr::get($this->sync_state, 'is_running', false))
                 ->action(function (): void {
                     try {
@@ -264,11 +267,7 @@ class NovaPoshtaSyncPage extends Page
         $sync_stats = $this->getSyncStats();
 
         if ($is_running === false) {
-            return '
-            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div class="text-sm text-gray-600">' . e(__('admin/modules/nova_poshta.sections.sync.idle')) . '</div>
-            </div>
-        ';
+            return '';
         }
 
         return '
@@ -341,11 +340,42 @@ class NovaPoshtaSyncPage extends Page
             return '<p class="text-sm text-gray-600">' . e(__('admin/modules/nova_poshta.sections.summary.empty')) . '</p>';
         }
 
-        return '
-            <pre class="overflow-x-auto rounded-lg bg-gray-950 p-4 text-xs text-gray-100">'
-            . e((string) json_encode($last_sync_summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))
-            . '</pre>
-        ';
+        $rows = [
+            [
+                'label' => __('admin/modules/nova_poshta.stats.regions'),
+                'value' => (int) data_get($last_sync_summary, 'regions.imported', 0),
+            ],
+            [
+                'label' => __('admin/modules/nova_poshta.stats.cities'),
+                'value' => (int) data_get($last_sync_summary, 'cities.imported', 0),
+            ],
+            [
+                'label' => __('admin/modules/nova_poshta.stats.post_offices'),
+                'value' => (int) data_get($last_sync_summary, 'post_offices.imported', 0),
+            ],
+            [
+                'label' => __('admin/modules/nova_poshta.stats.poshtomats'),
+                'value' => (int) data_get($last_sync_summary, 'poshtomats.imported', 0),
+            ],
+        ];
+
+        $html = '<div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">';
+        $html .= '<table class="min-w-full divide-y divide-gray-200 text-sm">';
+        $html .= '<thead class="bg-gray-50"><tr>';
+        $html .= '<th class="px-4 py-3 text-left font-medium text-gray-600">' . e(__('admin/modules/nova_poshta.sync.labels.stage')) . '</th>';
+        $html .= '<th class="px-4 py-3 text-right font-medium text-gray-600">' . e(__('admin/modules/nova_poshta.sync.labels.processed_rows')) . '</th>';
+        $html .= '</tr></thead><tbody class="divide-y divide-gray-200 bg-white">';
+
+        foreach ($rows as $row) {
+            $html .= '<tr>';
+            $html .= '<td class="px-4 py-3 text-gray-700">' . e((string) $row['label']) . '</td>';
+            $html .= '<td class="px-4 py-3 text-right font-medium text-gray-900">' . e((string) $row['value']) . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody></table></div>';
+
+        return $html;
     }
 
     private function renderStatCard(string $label, int $value): string

@@ -85,6 +85,7 @@ return [
         'sync_completed' => 'Nova Poshta data was refreshed successfully.',
         'sync_stopped' => 'Nova Poshta sync was stopped.',
         'sync_failed' => 'Failed to refresh Nova Poshta data.',
+        'sync_not_running' => 'The sync is not running right now.',
         'settings_saved' => 'Nova Poshta settings saved.',
     ],
     'helpers' => [
