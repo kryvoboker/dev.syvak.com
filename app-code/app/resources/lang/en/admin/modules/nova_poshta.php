@@ -38,7 +38,7 @@ return [
             'stage' => 'Stage',
             'phase' => 'Phase',
             'page' => 'Page',
-            'buffered_rows' => 'Buffered rows',
+            'processed_rows' => 'Processed rows',
             'stage_progress' => 'Stage progress',
         ],
         'states' => [

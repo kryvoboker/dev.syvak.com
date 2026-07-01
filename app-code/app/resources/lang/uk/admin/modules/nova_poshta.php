@@ -38,7 +38,7 @@ return [
             'stage' => 'Етап',
             'phase' => 'Фаза',
             'page' => 'Сторінка',
-            'buffered_rows' => 'Проміжні рядки',
+            'processed_rows' => 'Оброблено рядків',
             'stage_progress' => 'Прогрес етапу',
         ],
         'states' => [
