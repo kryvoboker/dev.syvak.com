@@ -319,6 +319,7 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
         $this->assertFalse((bool) data_get($state, 'is_running'));
         $this->assertSame('completed', (string) data_get($state, 'stage'));
         $this->assertSame(100, (int) data_get($state, 'overall_progress'));
+        $this->assertArrayNotHasKey('buffers', (array) Cache::get('nova_poshta.sync_state', []));
         $this->assertSame(1, NovaPoshtaRegion::query()->count());
         $this->assertSame(2, NovaPoshtaCity::query()->count());
         $this->assertSame(1, NovaPoshtaPostOffice::query()->count());

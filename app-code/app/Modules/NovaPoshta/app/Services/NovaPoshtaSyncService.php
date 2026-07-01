@@ -19,21 +19,19 @@ use Throwable;
 
 class NovaPoshtaSyncService
 {
-    private const SYNC_STATE_CACHE_KEY = 'nova_poshta.sync_state';
+    private const string SYNC_STATE_CACHE_KEY = 'nova_poshta.sync_state';
 
-    private const LAST_SYNC_SUMMARY_CACHE_KEY = 'nova_poshta.last_sync_summary';
+    private const string LAST_SYNC_SUMMARY_CACHE_KEY = 'nova_poshta.last_sync_summary';
 
-    private const STAGE_REGIONS = 'regions';
+    private const string STAGE_REGIONS = 'regions';
 
-    private const STAGE_CITIES = 'cities';
+    private const string STAGE_CITIES = 'cities';
 
-    private const STAGE_POST_OFFICES = 'post_offices';
+    private const string STAGE_POST_OFFICES = 'post_offices';
 
-    private const STAGE_POSHTOMATS = 'poshtomats';
+    private const string STAGE_POSHTOMATS = 'poshtomats';
 
-    private const PHASE_COLLECT = 'collect';
-
-    private const PHASE_FINALIZE = 'finalize';
+    private const string PHASE_COLLECT = 'collect';
 
     public function __construct(
         private readonly NovaPoshtaApiService $api_service,
@@ -46,12 +44,16 @@ class NovaPoshtaSyncService
      */
     public function syncAll(): array
     {
-        return [
-            'regions' => $this->syncRegions(),
-            'cities' => $this->syncCities(),
-            'post_offices' => $this->syncPostOffices(),
-            'poshtomats' => $this->syncPoshtomats(),
-        ];
+        try {
+            return [
+                'regions' => $this->syncRegions(),
+                'cities' => $this->syncCities(),
+                'post_offices' => $this->syncPostOffices(),
+                'poshtomats' => $this->syncPoshtomats(),
+            ];
+        } catch (Throwable $throwable) {
+            throw new RuntimeException('Nova Poshta sync failed.', previous: $throwable);
+        }
     }
 
     /**
@@ -61,7 +63,7 @@ class NovaPoshtaSyncService
     {
         $current_state = $this->getQueuedSyncState();
 
-        if ((bool) Arr::get($current_state, 'is_running', false)) {
+        if (Arr::get($current_state, 'is_running', false) === true) {
             throw new RuntimeException('Nova Poshta sync is already running.');
         }
 
@@ -95,7 +97,7 @@ class NovaPoshtaSyncService
     {
         $state = $this->getQueuedSyncState();
 
-        if (! (bool) Arr::get($state, 'is_running', false)) {
+        if (Arr::get($state, 'is_running', false) !== true) {
             return $state;
         }
 
@@ -112,58 +114,82 @@ class NovaPoshtaSyncService
     }
 
     /**
+     * @throws Throwable
      * @return array<string, int>
      */
     public function syncRegions(): array
     {
         $response = $this->api_service->getRegions();
-        $rows = $this->extractRows($response, 'regions');
-
+        $rows = $this->extractRows($response, self::STAGE_REGIONS);
         $normalized_rows = $this->normalizeRegionRows($rows);
 
         if ($normalized_rows === []) {
             throw new RuntimeException('Nova Poshta API returned no usable regions.');
         }
 
-        return DB::transaction(function () use ($normalized_rows): array {
-            NovaPoshtaRegion::query()->delete();
-            NovaPoshtaRegion::query()->insert($normalized_rows);
-
-            return [
-                'imported' => count($normalized_rows),
-            ];
-        });
+        return [
+            'imported' => $this->persistRows(
+                $normalized_rows,
+                static function (): void {
+                    NovaPoshtaRegion::query()->delete();
+                },
+                static function (array $rows): void {
+                    NovaPoshtaRegion::query()->insert($rows);
+                },
+                true,
+            ),
+        ];
     }
 
     /**
+     * @throws Throwable
      * @return array<string, int>
      */
     public function syncCities(): array
     {
-        $response = $this->api_service->getCities(1);
-        $rows = $this->extractRows($response, 'cities');
-        $total_pages = $this->resolveTotalPages($response);
-
-        for ($page = 2; $page <= $total_pages; $page++) {
-            $page_response = $this->api_service->getCities($page);
-            $rows = array_merge($rows, $this->extractRows($page_response, 'cities'));
-        }
-
         $region_ids_by_ref = NovaPoshtaRegion::query()->pluck('id', 'ref')->all();
+        $response = $this->api_service->getCities(1);
+        $rows = $this->extractRows($response, self::STAGE_CITIES);
+        $total_pages = $this->resolveTotalPages($response);
+        $imported_rows = 0;
+
         $normalized_rows = $this->normalizeCityRows($rows, $region_ids_by_ref);
 
-        if ($normalized_rows === []) {
+        if ($total_pages === 1 && $normalized_rows === []) {
             throw new RuntimeException('Nova Poshta API returned no usable cities.');
         }
 
-        return DB::transaction(function () use ($normalized_rows): array {
-            NovaPoshtaCity::query()->delete();
-            NovaPoshtaCity::query()->insert($normalized_rows);
+        $imported_rows += $this->persistRows(
+            $normalized_rows,
+            static function (): void {
+                NovaPoshtaCity::query()->delete();
+            },
+            static function (array $rows): void {
+                NovaPoshtaCity::query()->insert($rows);
+            },
+            true,
+        );
 
-            return [
-                'imported' => count($normalized_rows),
-            ];
-        });
+        for ($page = 2; $page <= $total_pages; $page++) {
+            $page_response = $this->api_service->getCities($page);
+            $page_rows = $this->extractRows($page_response, self::STAGE_CITIES);
+            $page_normalized_rows = $this->normalizeCityRows($page_rows, $region_ids_by_ref);
+
+            $imported_rows += $this->persistRows(
+                $page_normalized_rows,
+                static function (): void {
+                    NovaPoshtaCity::query()->delete();
+                },
+                static function (array $rows): void {
+                    NovaPoshtaCity::query()->insert($rows);
+                },
+                false,
+            );
+        }
+
+        return [
+            'imported' => $imported_rows,
+        ];
     }
 
     /**
@@ -188,7 +214,7 @@ class NovaPoshtaSyncService
      */
     private function extractRows(array $response, string $dataset_name): array
     {
-        if (! (bool) Arr::get($response, 'success', false)) {
+        if (Arr::get($response, 'success', false) !== true) {
             throw new RuntimeException(sprintf('Nova Poshta API returned unsuccessful response for %s.', $dataset_name));
         }
 
@@ -229,15 +255,12 @@ class NovaPoshtaSyncService
             'phase' => null,
             'current_page' => 1,
             'total_pages' => 1,
+            'stage_total_rows' => 0,
+            'stage_processed_rows' => 0,
             'stage_progress' => 0,
             'overall_progress' => 0,
             'message' => null,
             'summary' => [],
-            'buffers' => [
-                self::STAGE_CITIES => [],
-                self::STAGE_POST_OFFICES => [],
-                self::STAGE_POSHTOMATS => [],
-            ],
             'started_at' => null,
             'updated_at' => null,
             'completed_at' => null,
@@ -251,28 +274,15 @@ class NovaPoshtaSyncService
     private function processRegionsStage(array $state): array
     {
         try {
-            $response = $this->api_service->getRegions();
-            $rows = $this->extractRows($response, self::STAGE_REGIONS);
-            $normalized_rows = $this->normalizeRegionRows($rows);
-
-            if ($normalized_rows === []) {
-                throw new RuntimeException('Nova Poshta API returned no usable regions.');
-            }
-
-            $summary = DB::transaction(function () use ($normalized_rows): array {
-                NovaPoshtaRegion::query()->delete();
-                NovaPoshtaRegion::query()->insert($normalized_rows);
-
-                return [
-                    'imported' => count($normalized_rows),
-                ];
-            });
+            $summary = $this->syncRegions();
 
             $state['summary'][self::STAGE_REGIONS] = $summary;
             $state['stage'] = self::STAGE_CITIES;
             $state['phase'] = self::PHASE_COLLECT;
             $state['current_page'] = 1;
             $state['total_pages'] = 1;
+            $state['stage_total_rows'] = 0;
+            $state['stage_processed_rows'] = 0;
             $state['stage_progress'] = 0;
             $state['overall_progress'] = 25;
             $state['message'] = __('admin/modules/nova_poshta.sync.messages.regions_completed');
@@ -289,26 +299,21 @@ class NovaPoshtaSyncService
      */
     private function processCitiesStage(array $state): array
     {
-        return $this->processCollectingStage(
+        return $this->processPaginatedStage(
             $state,
             self::STAGE_CITIES,
             fn (int $page): array => $this->api_service->getCities($page),
             function (array $rows): array {
                 $region_ids_by_ref = NovaPoshtaRegion::query()->pluck('id', 'ref')->all();
-                $normalized_rows = $this->normalizeCityRows($rows, $region_ids_by_ref);
 
-                if ($normalized_rows === []) {
-                    throw new RuntimeException('Nova Poshta API returned no usable cities.');
-                }
-
-                return DB::transaction(function () use ($normalized_rows): array {
-                    NovaPoshtaCity::query()->delete();
-                    NovaPoshtaCity::query()->insert($normalized_rows);
-
-                    return [
-                        'imported' => count($normalized_rows),
-                    ];
-                });
+                return $this->normalizeCityRows($rows, $region_ids_by_ref);
+            },
+            static function (array $normalized_rows, bool $reset_table): int {
+                return self::persistQueueRows(
+                    NovaPoshtaCity::class,
+                    $normalized_rows,
+                    $reset_table,
+                );
             },
             self::STAGE_POST_OFFICES,
             __('admin/modules/nova_poshta.sync.messages.cities_completed'),
@@ -321,30 +326,21 @@ class NovaPoshtaSyncService
      */
     private function processWarehousesStage(array $state, string $model_class, bool $is_poshtomat): array
     {
-        return $this->processCollectingStage(
+        return $this->processPaginatedStage(
             $state,
             $is_poshtomat ? self::STAGE_POSHTOMATS : self::STAGE_POST_OFFICES,
             fn (int $page): array => $this->api_service->getWarehouses($page),
-            function (array $rows) use ($model_class, $is_poshtomat): array {
+            function (array $rows) use ($is_poshtomat): array {
                 $city_ids_by_ref = NovaPoshtaCity::query()->pluck('id', 'ref')->all();
-                $normalized_rows = $this->normalizeWarehouseRows($rows, $city_ids_by_ref, $is_poshtomat);
 
-                if ($normalized_rows === []) {
-                    throw new RuntimeException(
-                        $is_poshtomat
-                            ? 'Nova Poshta API returned no usable poshtomats.'
-                            : 'Nova Poshta API returned no usable post offices.',
-                    );
-                }
-
-                return DB::transaction(function () use ($model_class, $normalized_rows): array {
-                    $model_class::query()->delete();
-                    $model_class::query()->insert($normalized_rows);
-
-                    return [
-                        'imported' => count($normalized_rows),
-                    ];
-                });
+                return $this->normalizeWarehouseRows($rows, $city_ids_by_ref, $is_poshtomat);
+            },
+            static function (array $normalized_rows, bool $reset_table) use ($model_class): int {
+                return self::persistQueueRows(
+                    $model_class,
+                    $normalized_rows,
+                    $reset_table,
+                );
             },
             $is_poshtomat ? null : self::STAGE_POSHTOMATS,
             $is_poshtomat
@@ -356,29 +352,52 @@ class NovaPoshtaSyncService
     /**
      * @param  array<string, mixed>  $state
      * @param  Closure(int): array<string, mixed>  $response_resolver
-     * @param  Closure(array<int, array<string, mixed>>): array<string, int>  $finalize_callback
+     * @param  Closure(array<int, array<string, mixed>>): array<int, array<string, mixed>>  $normalize_rows_callback
+     * @param  Closure(array<int, array<string, mixed>>, bool): int  $persist_rows_callback
      * @return array<string, mixed>
      */
-    private function processCollectingStage(
+    private function processPaginatedStage(
         array $state,
         string $stage,
         Closure $response_resolver,
-        Closure $finalize_callback,
+        Closure $normalize_rows_callback,
+        Closure $persist_rows_callback,
         ?string $next_stage,
         string $completed_message,
     ): array {
-        $current_phase = (string) Arr::get($state, 'phase', self::PHASE_COLLECT);
         $current_page = max(1, (int) Arr::get($state, 'current_page', 1));
         $total_pages = max(1, (int) Arr::get($state, 'total_pages', 1));
-        $buffers = Arr::get($state, 'buffers', []);
-        $stage_buffer = is_array(Arr::get($buffers, $stage, [])) ? Arr::get($buffers, $stage, []) : [];
+        $stage_total_rows = max(1, (int) Arr::get($state, 'stage_total_rows', 0));
+        $stage_processed_rows = max(0, (int) Arr::get($state, 'stage_processed_rows', 0));
 
         try {
-            if ($current_phase === self::PHASE_FINALIZE) {
-                $summary = $finalize_callback($stage_buffer);
+            $response = $response_resolver($current_page);
+            $rows = $this->extractRows($response, $stage);
 
-                $state['summary'][$stage] = $summary;
-                $state['buffers'][$stage] = [];
+            if ($current_page === 1) {
+                $total_pages = $this->resolveTotalPages($response);
+                $stage_total_rows = max(1, (int) Arr::get($response, 'info.totalCount', 0));
+                $state['total_pages'] = $total_pages;
+                $state['stage_total_rows'] = $stage_total_rows;
+                $state['stage_processed_rows'] = 0;
+            }
+
+            $normalized_rows = $normalize_rows_callback($rows);
+
+            if ($current_page === 1 && $total_pages === 1 && $normalized_rows === []) {
+                throw new RuntimeException(sprintf('Nova Poshta API returned no usable %s.', $stage));
+            }
+
+            $imported_rows = (int) $persist_rows_callback($normalized_rows, $current_page === 1);
+            $state['summary'][$stage] = [
+                'imported' => (int) Arr::get($state, 'summary.' . $stage . '.imported', 0) + $imported_rows,
+            ];
+
+            $stage_processed_rows = min($stage_total_rows, $stage_processed_rows + count($rows));
+            $state['stage_processed_rows'] = $stage_processed_rows;
+            $state['stage_progress'] = (int) floor(($stage_processed_rows / $stage_total_rows) * 100);
+
+            if ($current_page >= $total_pages) {
                 $state['stage_progress'] = 100;
                 $state['overall_progress'] = $this->getOverallProgressForCompletedStage($stage);
                 $state['message'] = $completed_message;
@@ -392,44 +411,21 @@ class NovaPoshtaSyncService
                     $state['message'] = __('admin/modules/nova_poshta.sync.messages.completed');
 
                     Cache::put(self::LAST_SYNC_SUMMARY_CACHE_KEY, $state['summary'], now()->addDay());
-
-                    return $this->persistQueuedSyncState($state);
+                } else {
+                    $state['stage'] = $next_stage;
+                    $state['phase'] = self::PHASE_COLLECT;
+                    $state['current_page'] = 1;
+                    $state['total_pages'] = 1;
+                    $state['stage_total_rows'] = 0;
+                    $state['stage_processed_rows'] = 0;
+                    $state['stage_progress'] = 0;
+                    $state['overall_progress'] = $this->getOverallProgressForCompletedStage($stage);
+                    $state['message'] = __('admin/modules/nova_poshta.sync.messages.next_stage', [
+                        'stage' => $this->getStageLabel($next_stage),
+                    ]);
                 }
-
-                $state['stage'] = $next_stage;
-                $state['phase'] = self::PHASE_COLLECT;
-                $state['current_page'] = 1;
-                $state['total_pages'] = 1;
-                $state['stage_progress'] = 0;
-                $state['message'] = __('admin/modules/nova_poshta.sync.messages.next_stage', [
-                    'stage' => $this->getStageLabel($next_stage),
-                ]);
-
-                return $this->persistQueuedSyncState($state);
-            }
-
-            $response = $response_resolver($current_page);
-            $rows = $this->extractRows($response, $stage);
-
-            if ($current_page === 1) {
-                $total_pages = $this->resolveTotalPages($response);
-                $state['total_pages'] = $total_pages;
-            }
-
-            $stage_buffer = array_merge($stage_buffer, $rows);
-            $state['buffers'][$stage] = $stage_buffer;
-
-            if ($current_page >= $total_pages) {
-                $state['phase'] = self::PHASE_FINALIZE;
-                $state['stage_progress'] = 100;
-                $state['overall_progress'] = $this->getOverallProgressForStage($stage, 100);
-                $state['message'] = __('admin/modules/nova_poshta.sync.messages.ready_to_finalize', [
-                    'stage' => $this->getStageLabel($stage),
-                ]);
             } else {
-                $next_page = $current_page + 1;
-                $state['current_page'] = $next_page;
-                $state['stage_progress'] = (int) floor(($current_page / $total_pages) * 100);
+                $state['current_page'] = $current_page + 1;
                 $state['overall_progress'] = $this->getOverallProgressForStage($stage, $state['stage_progress']);
                 $state['message'] = __('admin/modules/nova_poshta.sync.messages.collecting_page', [
                     'current' => $current_page,
@@ -442,6 +438,56 @@ class NovaPoshtaSyncService
         } catch (Throwable $throwable) {
             return $this->markQueuedSyncFailed($state, $throwable->getMessage());
         }
+    }
+
+    /**
+     * @param  class-string<NovaPoshtaRegion|NovaPoshtaCity|NovaPoshtaPostOffice|NovaPoshtaPoshtomat>  $model_class
+     */
+    private static function persistQueueRows(string $model_class, array $normalized_rows, bool $reset_table): int
+    {
+        if ($normalized_rows === []) {
+            return 0;
+        }
+
+        return DB::transaction(function () use ($model_class, $normalized_rows, $reset_table): int {
+            if ($reset_table) {
+                $model_class::query()->delete();
+            }
+
+            $model_class::query()->insert($normalized_rows);
+
+            return count($normalized_rows);
+        });
+    }
+
+    /**
+     * @param  Closure(): void  $reset_table
+     * @param  Closure(array<int, array<string, mixed>>): void  $insert_rows
+     */
+    private function persistRows(
+        array $normalized_rows,
+        Closure $reset_table,
+        Closure $insert_rows,
+        bool $reset_before_insert,
+    ): int {
+        if ($normalized_rows === []) {
+            return 0;
+        }
+
+        return DB::transaction(function () use (
+            $normalized_rows,
+            $reset_table,
+            $insert_rows,
+            $reset_before_insert,
+        ): int {
+            if ($reset_before_insert) {
+                $reset_table();
+            }
+
+            $insert_rows($normalized_rows);
+
+            return count($normalized_rows);
+        });
     }
 
     /**
@@ -521,7 +567,7 @@ class NovaPoshtaSyncService
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            array_filter($rows, fn (array $row): bool => filled((string) Arr::get($row, 'Ref', ''))),
+            array_filter($rows, static fn (array $row): bool => filled((string) Arr::get($row, 'Ref', ''))),
         ));
     }
 
@@ -569,34 +615,51 @@ class NovaPoshtaSyncService
      */
     private function syncWarehousesTable(string $model_class, bool $is_poshtomat): array
     {
+        $city_ids_by_ref = NovaPoshtaCity::query()->pluck('id', 'ref')->all();
         $response = $this->api_service->getWarehouses(1);
         $rows = $this->extractRows($response, 'warehouses');
         $total_pages = $this->resolveTotalPages($response);
+        $imported_rows = 0;
+        $normalized_rows = $this->normalizeWarehouseRows($rows, $city_ids_by_ref, $is_poshtomat);
+        $empty_message = $is_poshtomat
+            ? 'Nova Poshta API returned no usable poshtomats.'
+            : 'Nova Poshta API returned no usable post offices.';
+
+        if ($total_pages === 1 && $normalized_rows === []) {
+            throw new RuntimeException($empty_message);
+        }
+
+        $imported_rows += $this->persistRows(
+            $normalized_rows,
+            static function () use ($model_class): void {
+                $model_class::query()->delete();
+            },
+            static function (array $rows) use ($model_class): void {
+                $model_class::query()->insert($rows);
+            },
+            true,
+        );
 
         for ($page = 2; $page <= $total_pages; $page++) {
             $page_response = $this->api_service->getWarehouses($page);
-            $rows = array_merge($rows, $this->extractRows($page_response, 'warehouses'));
-        }
+            $page_rows = $this->extractRows($page_response, 'warehouses');
+            $page_normalized_rows = $this->normalizeWarehouseRows($page_rows, $city_ids_by_ref, $is_poshtomat);
 
-        $city_ids_by_ref = NovaPoshtaCity::query()->pluck('id', 'ref')->all();
-        $normalized_rows = $this->normalizeWarehouseRows($rows, $city_ids_by_ref, $is_poshtomat);
-
-        if ($normalized_rows === []) {
-            throw new RuntimeException(
-                $is_poshtomat
-                    ? 'Nova Poshta API returned no usable poshtomats.'
-                    : 'Nova Poshta API returned no usable post offices.',
+            $imported_rows += $this->persistRows(
+                $page_normalized_rows,
+                static function () use ($model_class): void {
+                    $model_class::query()->delete();
+                },
+                static function (array $rows) use ($model_class): void {
+                    $model_class::query()->insert($rows);
+                },
+                false,
             );
         }
 
-        return DB::transaction(function () use ($model_class, $normalized_rows): array {
-            $model_class::query()->delete();
-            $model_class::query()->insert($normalized_rows);
-
-            return [
-                'imported' => count($normalized_rows),
-            ];
-        });
+        return [
+            'imported' => $imported_rows,
+        ];
     }
 
     /**

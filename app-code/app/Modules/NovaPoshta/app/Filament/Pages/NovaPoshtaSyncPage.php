@@ -225,9 +225,10 @@ class NovaPoshtaSyncPage extends Page
             default => $is_running ? __('admin/modules/nova_poshta.sync.states.running') : __('admin/modules/nova_poshta.sync.states.idle'),
         };
 
-        $buffer_count = count((array) Arr::get($sync_state, 'buffers.' . $stage, []));
         $current_page = (int) Arr::get($sync_state, 'current_page', 1);
         $total_pages = (int) Arr::get($sync_state, 'total_pages', 1);
+        $stage_total_rows = (int) Arr::get($sync_state, 'stage_total_rows', 0);
+        $stage_processed_rows = (int) Arr::get($sync_state, 'stage_processed_rows', 0);
         $current_stage_label = $this->getStageLabel($stage);
         $polling_attribute = $is_running ? ' wire:poll.2s="processSyncStep"' : '';
         $sync_stats = $this->getSyncStats();
@@ -254,7 +255,7 @@ class NovaPoshtaSyncPage extends Page
                                 <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.stage')) . ':</span> ' . e($current_stage_label) . '</div>
                                 <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.phase')) . ':</span> ' . e($this->getPhaseLabel($phase)) . '</div>
                                 <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.page')) . ':</span> ' . e($current_page . ' / ' . $total_pages) . '</div>
-                                <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.buffered_rows')) . ':</span> ' . e((string) $buffer_count) . '</div>
+                                <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.processed_rows')) . ':</span> ' . e($stage_processed_rows . ' / ' . $stage_total_rows) . '</div>
                                 <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.stage_progress')) . ':</span> ' . e((string) $stage_progress) . '%</div>
                             </div>
                         </div>
