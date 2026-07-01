@@ -327,6 +327,96 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
         $this->assertSame('1', (string) data_get(Cache::get('nova_poshta.last_sync_summary', []), 'regions.imported'));
     }
 
+    public function test_queued_sync_can_be_stopped_before_next_batch(): void
+    {
+        Cache::flush();
+
+        Http::fake(function (HttpRequest $request) {
+            $payload = $request->data();
+            $called_method = (string) data_get($payload, 'calledMethod');
+
+            if ($called_method === 'getSettlementAreas') {
+                return Http::response([
+                    'success' => true,
+                    'data' => [
+                        [
+                            'Ref' => 'region-1',
+                            'AreasCenter' => 'Київ',
+                            'Description' => 'Київська область',
+                        ],
+                    ],
+                ]);
+            }
+
+            return Http::response([
+                'success' => false,
+                'data' => [],
+            ], 500);
+        });
+
+        $sync_service = $this->app->make(NovaPoshtaSyncService::class);
+        $state = $sync_service->startQueuedSync();
+
+        $this->assertTrue((bool) data_get($state, 'is_running'));
+
+        $state = $sync_service->requestQueuedSyncStop();
+
+        $this->assertTrue((bool) data_get($state, 'stop_requested'));
+
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertFalse((bool) data_get($state, 'is_running'));
+        $this->assertSame('stopped', (string) data_get($state, 'stage'));
+        $this->assertSame('stopped', (string) data_get($state, 'phase'));
+        Http::assertNothingSent();
+    }
+
+    public function test_queued_sync_stops_immediately_on_critical_error(): void
+    {
+        Cache::flush();
+
+        Http::fake(function (HttpRequest $request) {
+            $payload = $request->data();
+            $called_method = (string) data_get($payload, 'calledMethod');
+            $page = (int) data_get($payload, 'methodProperties.Page', 1);
+
+            if ($called_method === 'getSettlementAreas') {
+                return Http::response([
+                    'success' => true,
+                    'data' => [
+                        [
+                            'Ref' => 'region-1',
+                            'AreasCenter' => 'Київ',
+                            'Description' => 'Київська область',
+                        ],
+                    ],
+                ]);
+            }
+
+            if ($called_method === 'getSettlements' && $page === 1) {
+                return Http::response([
+                    'success' => false,
+                    'data' => [],
+                ], 500);
+            }
+
+            return Http::response([
+                'success' => false,
+                'data' => [],
+            ], 500);
+        });
+
+        $sync_service = $this->app->make(NovaPoshtaSyncService::class);
+        $sync_service->startQueuedSync();
+        $sync_service->processQueuedSyncStep();
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertFalse((bool) data_get($state, 'is_running'));
+        $this->assertSame('failed', (string) data_get($state, 'stage'));
+        $this->assertSame('failed', (string) data_get($state, 'phase'));
+        $this->assertNotEmpty((string) data_get($state, 'message'));
+    }
+
     public function test_sync_regions_aborts_when_api_returns_empty_payload(): void
     {
         NovaPoshtaRegion::query()->create([

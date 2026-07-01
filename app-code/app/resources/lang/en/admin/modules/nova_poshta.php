@@ -14,6 +14,7 @@ return [
         'sync' => [
             'title' => 'Dictionary refresh',
             'description' => 'Running a full Nova Poshta sync rebuilds the regions, cities, post offices, and poshtomats tables.',
+            'idle' => 'Sync is not running.',
         ],
         'summary' => [
             'title' => 'Current state',
@@ -28,6 +29,7 @@ return [
     ],
     'actions' => [
         'sync' => 'Run update',
+        'stop_sync' => 'Stop sync',
         'sync_confirmation' => 'This will fully refresh the local Nova Poshta tables. Continue?',
         'save_settings' => 'Save settings',
     ],
@@ -46,6 +48,7 @@ return [
             'running' => 'Running',
             'completed' => 'Completed',
             'failed' => 'Failed',
+            'stopped' => 'Stopped',
         ],
         'phases' => [
             'collect' => 'Collecting data',
@@ -59,6 +62,8 @@ return [
         ],
         'messages' => [
             'started' => 'Sync has started.',
+            'stop_requested' => 'The sync stop request was accepted. The current batch will finish first.',
+            'stopped' => 'Sync stopped.',
             'regions_completed' => 'Regions updated. Moving to cities.',
             'cities_completed' => 'Cities updated. Moving to post offices.',
             'post_offices_completed' => 'Post offices updated. Moving to poshtomats.',
@@ -78,6 +83,7 @@ return [
     'notifications' => [
         'sync_started' => 'Nova Poshta sync has started. The page will refresh automatically.',
         'sync_completed' => 'Nova Poshta data was refreshed successfully.',
+        'sync_stopped' => 'Nova Poshta sync was stopped.',
         'sync_failed' => 'Failed to refresh Nova Poshta data.',
         'settings_saved' => 'Nova Poshta settings saved.',
     ],

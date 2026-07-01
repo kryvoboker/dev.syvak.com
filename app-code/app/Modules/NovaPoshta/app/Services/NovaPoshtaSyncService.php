@@ -33,6 +33,8 @@ class NovaPoshtaSyncService
 
     private const string PHASE_COLLECT = 'collect';
 
+    private const string PHASE_STOPPED = 'stopped';
+
     public function __construct(
         private readonly NovaPoshtaApiService $api_service,
         private readonly NovaPoshtaConfig $config,
@@ -69,6 +71,7 @@ class NovaPoshtaSyncService
 
         $state = $this->makeInitialQueuedSyncState();
         $state['is_running'] = true;
+        $state['stop_requested'] = false;
         $state['stage'] = self::STAGE_REGIONS;
         $state['phase'] = self::PHASE_COLLECT;
         $state['started_at'] = now()->toIso8601String();
@@ -99,6 +102,10 @@ class NovaPoshtaSyncService
 
         if (Arr::get($state, 'is_running', false) !== true) {
             return $state;
+        }
+
+        if (Arr::get($state, 'stop_requested', false) === true) {
+            return $this->markQueuedSyncStopped($state);
         }
 
         $stage = (string) Arr::get($state, 'stage', '');
@@ -261,9 +268,11 @@ class NovaPoshtaSyncService
             'overall_progress' => 0,
             'message' => null,
             'summary' => [],
+            'stop_requested' => false,
             'started_at' => null,
             'updated_at' => null,
             'completed_at' => null,
+            'stopped_at' => null,
         ];
     }
 
@@ -425,6 +434,10 @@ class NovaPoshtaSyncService
                     ]);
                 }
             } else {
+                if (Arr::get($state, 'stop_requested', false) === true) {
+                    return $this->markQueuedSyncStopped($state);
+                }
+
                 $state['current_page'] = $current_page + 1;
                 $state['overall_progress'] = $this->getOverallProgressForStage($stage, $state['stage_progress']);
                 $state['message'] = __('admin/modules/nova_poshta.sync.messages.collecting_page', [
@@ -501,6 +514,38 @@ class NovaPoshtaSyncService
         $state['stage'] = 'failed';
         $state['phase'] = 'failed';
         $state['message'] = $message;
+
+        return $this->persistQueuedSyncState($state);
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @return array<string, mixed>
+     */
+    private function markQueuedSyncStopped(array $state): array
+    {
+        $state['is_running'] = false;
+        $state['stage'] = 'stopped';
+        $state['phase'] = self::PHASE_STOPPED;
+        $state['message'] = __('admin/modules/nova_poshta.sync.messages.stopped');
+        $state['stopped_at'] = now()->toIso8601String();
+
+        return $this->persistQueuedSyncState($state);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function requestQueuedSyncStop(): array
+    {
+        $state = $this->getQueuedSyncState();
+
+        if (Arr::get($state, 'is_running', false) !== true) {
+            return $state;
+        }
+
+        $state['stop_requested'] = true;
+        $state['message'] = __('admin/modules/nova_poshta.sync.messages.stop_requested');
 
         return $this->persistQueuedSyncState($state);
     }

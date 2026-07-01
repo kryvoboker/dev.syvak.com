@@ -162,6 +162,31 @@ class NovaPoshtaSyncPage extends Page
                             ->send();
                     }
                 }),
+            Action::make('stopNovaPoshtaSync')
+                ->label(__('admin/modules/nova_poshta.actions.stop_sync'))
+                ->icon(Heroicon::XMark)
+                ->visible(fn (): bool => (bool) Arr::get($this->sync_state, 'is_running', false))
+                ->action(function (): void {
+                    try {
+                        $sync_service = app(NovaPoshtaSyncService::class);
+
+                        $this->sync_state = $sync_service->requestQueuedSyncStop();
+
+                        Notification::make()
+                            ->title(__('admin/default.success.title'))
+                            ->body(__('admin/modules/nova_poshta.notifications.stop_requested'))
+                            ->warning()
+                            ->send();
+                    } catch (Throwable $throwable) {
+                        report($throwable);
+
+                        Notification::make()
+                            ->title(__('admin/default.errors.title'))
+                            ->body(__('admin/modules/nova_poshta.notifications.sync_failed'))
+                            ->danger()
+                            ->send();
+                    }
+                }),
             Action::make('openWiki')
                 ->label(__('admin/wiki/wiki.actions.open_wiki'))
                 ->icon(Heroicon::BookOpen)
@@ -184,12 +209,16 @@ class NovaPoshtaSyncPage extends Page
             if ($was_running && ! $is_running) {
                 $notification = Notification::make()
                     ->title(__('admin/default.success.title'))
-                    ->body($stage === 'completed'
-                        ? __('admin/modules/nova_poshta.notifications.sync_completed')
-                        : __('admin/modules/nova_poshta.notifications.sync_failed'));
+                    ->body(match ($stage) {
+                        'completed' => __('admin/modules/nova_poshta.notifications.sync_completed'),
+                        'stopped' => __('admin/modules/nova_poshta.notifications.sync_stopped'),
+                        default => __('admin/modules/nova_poshta.notifications.sync_failed'),
+                    });
 
                 if ($stage === 'completed') {
                     $notification->success();
+                } elseif ($stage === 'stopped') {
+                    $notification->warning();
                 } else {
                     $notification->danger();
                 }
@@ -222,6 +251,7 @@ class NovaPoshtaSyncPage extends Page
         $status_label = match ($stage) {
             'completed' => __('admin/modules/nova_poshta.sync.states.completed'),
             'failed' => __('admin/modules/nova_poshta.sync.states.failed'),
+            'stopped' => __('admin/modules/nova_poshta.sync.states.stopped'),
             default => $is_running ? __('admin/modules/nova_poshta.sync.states.running') : __('admin/modules/nova_poshta.sync.states.idle'),
         };
 
@@ -232,6 +262,14 @@ class NovaPoshtaSyncPage extends Page
         $current_stage_label = $this->getStageLabel($stage);
         $polling_attribute = $is_running ? ' wire:poll.2s="processSyncStep"' : '';
         $sync_stats = $this->getSyncStats();
+
+        if ($is_running === false) {
+            return '
+            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="text-sm text-gray-600">' . e(__('admin/modules/nova_poshta.sections.sync.idle')) . '</div>
+            </div>
+        ';
+        }
 
         return '
             <div class="space-y-6"' . $polling_attribute . '>
