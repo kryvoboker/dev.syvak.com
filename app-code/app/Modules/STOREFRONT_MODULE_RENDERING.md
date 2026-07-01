@@ -4,6 +4,9 @@ This document explains how modules are automatically connected to storefront pag
 - `page_type` (for example: `home`, `category`, `product`)
 - `placement` (`top`, `bottom`)
 
+It applies primarily to instance-based modules such as `Carousel` and `ProductsCarousel`.
+Singleton modules such as `NovaPoshta` usually do not participate in the same placement-driven instance model and instead expose their own dedicated storefront or checkout integration logic.
+
 ## Why this exists
 
 Previously, storefront pages had hardcoded module includes (for example, Carousel and ProductsCarousel in Home page templates/controllers). Any placement or page-type change required manual code updates.

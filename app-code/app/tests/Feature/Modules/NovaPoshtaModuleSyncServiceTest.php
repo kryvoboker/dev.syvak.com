@@ -6,6 +6,7 @@ namespace Tests\Feature\Modules;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Client\Request as HttpRequest;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -35,7 +36,16 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
         DB::purge('sqlite');
         DB::setDefaultConnection('sqlite');
 
+        $this->createGlobalConfigsTable();
         $this->createNovaPoshtaTables();
+
+        DB::table('global_configs')->insert([
+            'key' => 'novaposhta.api_key',
+            'value' => 'test-api-key',
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     public function test_sync_all_imports_regions_cities_post_offices_and_poshtomats(): void
@@ -178,6 +188,144 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
         $this->assertSame('city-2', (string) data_get($poshtomat, 'novaPoshtaCity.ref'));
     }
 
+    public function test_queued_sync_step_by_step_rebuilds_all_tables_and_persists_summary(): void
+    {
+        Cache::flush();
+
+        Http::fake(function (HttpRequest $request) {
+            $payload = $request->data();
+            $called_method = (string) data_get($payload, 'calledMethod');
+            $page = (int) data_get($payload, 'methodProperties.Page', 1);
+
+            if ($called_method === 'getSettlementAreas') {
+                return Http::response([
+                    'success' => true,
+                    'data' => [
+                        [
+                            'Ref' => 'region-1',
+                            'AreasCenter' => 'Київ',
+                            'Description' => 'Київська область',
+                        ],
+                    ],
+                ]);
+            }
+
+            if ($called_method === 'getSettlements' && $page === 1) {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 501,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'city-1',
+                            'Area' => 'region-1',
+                            'AreaDescription' => 'Київська',
+                            'Description' => 'Київ',
+                            'Latitude' => '50.4501',
+                            'Longitude' => '30.5234',
+                            'CityID' => 101,
+                        ],
+                    ],
+                ]);
+            }
+
+            if ($called_method === 'getSettlements' && $page === 2) {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 501,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'city-2',
+                            'Area' => 'region-1',
+                            'AreaDescription' => 'Київська',
+                            'Description' => 'Ірпінь',
+                            'Latitude' => '50.5191',
+                            'Longitude' => '30.2405',
+                            'CityID' => 102,
+                        ],
+                    ],
+                ]);
+            }
+
+            if ($called_method === 'getWarehouses' && $page === 1) {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 501,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'office-1',
+                            'SettlementRef' => 'city-1',
+                            'Description' => 'Відділення № 12',
+                            'Latitude' => '50.4501',
+                            'Longitude' => '30.5234',
+                            'Schedule' => [
+                                'Monday' => '09:00-18:00',
+                            ],
+                            'CityDescription' => 'Київ',
+                            'SiteKey' => 12,
+                        ],
+                    ],
+                ]);
+            }
+
+            if ($called_method === 'getWarehouses' && $page === 2) {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 501,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'poshtomat-1',
+                            'SettlementRef' => 'city-2',
+                            'Description' => 'Поштомат "Нова Пошта" № 7',
+                            'Latitude' => '50.5191',
+                            'Longitude' => '30.2405',
+                            'Schedule' => [
+                                'Monday' => '00:00-23:59',
+                            ],
+                            'CityDescription' => 'Ірпінь',
+                            'SiteKey' => 7,
+                        ],
+                    ],
+                ]);
+            }
+
+            return Http::response([
+                'success' => false,
+                'data' => [],
+            ], 500);
+        });
+
+        $sync_service = $this->app->make(NovaPoshtaSyncService::class);
+        $state = $sync_service->startQueuedSync();
+
+        $this->assertTrue((bool) data_get($state, 'is_running'));
+        $this->assertSame('regions', (string) data_get($state, 'stage'));
+
+        for ($i = 0; $i < 10; $i++) {
+            $state = $sync_service->processQueuedSyncStep();
+
+            if ((bool) data_get($state, 'is_running') === false) {
+                break;
+            }
+        }
+
+        $this->assertFalse((bool) data_get($state, 'is_running'));
+        $this->assertSame('completed', (string) data_get($state, 'stage'));
+        $this->assertSame(100, (int) data_get($state, 'overall_progress'));
+        $this->assertSame(1, NovaPoshtaRegion::query()->count());
+        $this->assertSame(2, NovaPoshtaCity::query()->count());
+        $this->assertSame(1, NovaPoshtaPostOffice::query()->count());
+        $this->assertSame(1, NovaPoshtaPoshtomat::query()->count());
+        $this->assertSame('1', (string) data_get(Cache::get('nova_poshta.last_sync_summary', []), 'regions.imported'));
+    }
+
     public function test_sync_regions_aborts_when_api_returns_empty_payload(): void
     {
         NovaPoshtaRegion::query()->create([
@@ -261,6 +409,17 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
             $table->unsignedInteger('number')->nullable();
             $table->string('city_description', 500)->nullable();
             $table->unsignedBigInteger('site_key')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    private function createGlobalConfigsTable(): void
+    {
+        Schema::create('global_configs', function (Blueprint $table): void {
+            $table->id();
+            $table->string('key', 191)->unique();
+            $table->text('value')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
