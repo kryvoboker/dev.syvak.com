@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Modules\NovaPoshta\Filament\Pages\NovaPoshtaSyncPage;
+use Modules\NovaPoshta\Support\NovaPoshtaConfig;
 use Tests\TestCase;
 
 class ModuleServicesTest extends TestCase
@@ -338,7 +339,7 @@ class ModuleServicesTest extends TestCase
         $this->assertSame($summary, $page->getLastSyncSummary());
     }
 
-    public function test_nova_poshta_instance_settings_normalizer_persists_api_key_in_global_configs(): void
+    public function test_nova_poshta_instance_settings_are_kept_on_the_instance_and_not_synced_to_global_configs(): void
     {
         $definition = ModuleDefinition::query()->create([
             'name' => 'Nova Poshta',
@@ -369,9 +370,25 @@ class ModuleServicesTest extends TestCase
 
         $instance->refresh();
 
-        $this->assertSame('np-test-key', (string) get_global_config('novaposhta.api_key'));
+        $this->assertSame('', (string) get_global_config(NovaPoshtaConfig::API_KEY_GLOBAL_CONFIG_KEY));
         $this->assertSame(['checkout'], data_get($instance->settings, 'shared.page_types'));
-        $this->assertNull(data_get($instance->settings, 'shared.api_key'));
+        $this->assertSame('np-test-key', data_get($instance->settings, 'shared.api_key'));
+    }
+
+    public function test_nova_poshta_sync_page_saves_shared_settings_in_global_configs(): void
+    {
+        $page = $this->app->make(NovaPoshtaSyncPage::class);
+        $page->settings_form = [
+            'api_key' => 'np-test-key',
+            'delivery_cost' => '149.90',
+            'is_delivery_cost_enabled' => true,
+        ];
+
+        $page->saveSettings();
+
+        $this->assertSame('np-test-key', (string) get_global_config(NovaPoshtaConfig::API_KEY_GLOBAL_CONFIG_KEY));
+        $this->assertSame('149.90', (string) get_global_config(NovaPoshtaConfig::DELIVERY_COST_GLOBAL_CONFIG_KEY));
+        $this->assertSame('1', (string) get_global_config(NovaPoshtaConfig::IS_DELIVERY_COST_ENABLED_GLOBAL_CONFIG_KEY));
     }
 
     public function test_nova_poshta_api_service_fails_without_global_api_key(): void

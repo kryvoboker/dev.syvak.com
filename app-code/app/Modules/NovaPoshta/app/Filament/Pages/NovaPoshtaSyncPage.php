@@ -9,6 +9,7 @@ use App\Filament\Pages\Wiki\ModulesWikiPage;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Html;
@@ -38,14 +39,16 @@ class NovaPoshtaSyncPage extends Page
 
     protected static string|null|UnitEnum $navigationGroup = AdminNavigationGroupEnum::Modules;
 
-    public array $api_key_form = [];
+    public array $settings_form = [];
 
     public array $sync_state = [];
 
     public function mount(NovaPoshtaConfig $nova_poshta_config): void
     {
-        $this->api_key_form = [
+        $this->settings_form = [
             'api_key' => $nova_poshta_config->getApiKey(),
+            'delivery_cost' => $nova_poshta_config->getDeliveryCost(),
+            'is_delivery_cost_enabled' => $nova_poshta_config->isDeliveryCostEnabled(),
         ];
         $this->sync_state = app(NovaPoshtaSyncService::class)->getQueuedSyncState();
     }
@@ -79,10 +82,10 @@ class NovaPoshtaSyncPage extends Page
     {
         return $schema
             ->components([
-                Section::make(__('admin/modules/nova_poshta.sections.api_key.title'))
-                    ->description(__('admin/modules/nova_poshta.sections.api_key.description'))
+                Section::make(__('admin/modules/nova_poshta.sections.shared.title'))
+                    ->description(__('admin/modules/nova_poshta.sections.shared.description'))
                     ->columnSpanFull()
-                    ->statePath('api_key_form')
+                    ->statePath('settings_form')
                     ->schema([
                         TextInput::make('api_key')
                             ->label(__('admin/modules/nova_poshta.labels.api_key'))
@@ -90,13 +93,26 @@ class NovaPoshtaSyncPage extends Page
                             ->revealable()
                             ->required()
                             ->helperText(__('admin/modules/nova_poshta.helpers.api_key')),
+                        TextInput::make('delivery_cost')
+                            ->label(__('admin/modules/nova_poshta.labels.delivery_cost'))
+                            ->numeric()
+                            ->minValue(0)
+                            ->required()
+                            ->default('0.00')
+                            ->step(0.01)
+                            ->prefix('₴')
+                            ->helperText(__('admin/modules/nova_poshta.helpers.delivery_cost')),
+                        Toggle::make('is_delivery_cost_enabled')
+                            ->label(__('admin/modules/nova_poshta.labels.is_delivery_cost_enabled'))
+                            ->helperText(__('admin/modules/nova_poshta.helpers.is_delivery_cost_enabled'))
+                            ->default(false),
                     ])
                     ->footerActions([
-                        Action::make('saveApiKey')
-                            ->label(__('admin/modules/nova_poshta.actions.save_api_key'))
+                        Action::make('saveSettings')
+                            ->label(__('admin/modules/nova_poshta.actions.save_settings'))
                             ->icon(Heroicon::CheckCircle)
                             ->action(function (): void {
-                                $this->saveApiKey();
+                                $this->saveSettings();
                             }),
                     ]),
 
@@ -314,21 +330,44 @@ class NovaPoshtaSyncPage extends Page
         };
     }
 
-    public function saveApiKey(): void
+    public function saveSettings(): void
     {
-        $api_key = trim((string) Arr::get($this->api_key_form, 'api_key', ''));
+        $api_key = trim((string) Arr::get($this->settings_form, 'api_key', ''));
 
         if ($api_key === '') {
             throw ValidationException::withMessages([
-                'api_key_form.api_key' => __('admin/modules/nova_poshta.validation.api_key_required'),
+                'settings_form.api_key' => __('admin/modules/nova_poshta.validation.api_key_required'),
             ]);
         }
 
-        set_global_config('novaposhta.api_key', $api_key);
+        $delivery_cost = trim((string) Arr::get($this->settings_form, 'delivery_cost', ''));
+
+        if ($delivery_cost === '') {
+            throw ValidationException::withMessages([
+                'settings_form.delivery_cost' => __('admin/modules/nova_poshta.validation.delivery_cost_required'),
+            ]);
+        }
+
+        $is_delivery_cost_enabled = (bool) Arr::get($this->settings_form, 'is_delivery_cost_enabled', false);
+
+        set_global_config([
+            NovaPoshtaConfig::API_KEY_GLOBAL_CONFIG_KEY => [
+                'value' => $api_key,
+                'is_active' => true,
+            ],
+            NovaPoshtaConfig::DELIVERY_COST_GLOBAL_CONFIG_KEY => [
+                'value' => number_format((float) $delivery_cost, 2, '.', ''),
+                'is_active' => true,
+            ],
+            NovaPoshtaConfig::IS_DELIVERY_COST_ENABLED_GLOBAL_CONFIG_KEY => [
+                'value' => $is_delivery_cost_enabled,
+                'is_active' => true,
+            ],
+        ]);
 
         Notification::make()
             ->title(__('admin/default.success.title'))
-            ->body(__('admin/modules/nova_poshta.notifications.api_key_saved'))
+            ->body(__('admin/modules/nova_poshta.notifications.settings_saved'))
             ->success()
             ->send();
     }

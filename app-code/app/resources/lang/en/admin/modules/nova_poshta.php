@@ -7,10 +7,9 @@ return [
     'title' => 'Nova Poshta Sync',
     'description' => 'Refresh regions, cities, post offices, and poshtomats from the Nova Poshta API.',
     'sections' => [
-        'shared' => 'Shared settings',
-        'api_key' => [
-            'title' => 'API key',
-            'description' => 'Set the current Nova Poshta key. The value is stored in the application global configs.',
+        'shared' => [
+            'title' => 'Shared settings',
+            'description' => 'Set the current Nova Poshta API key and delivery cost options. The values are stored in the application global configs.',
         ],
         'sync' => [
             'title' => 'Dictionary refresh',
@@ -24,11 +23,13 @@ return [
     'labels' => [
         'page_types' => 'Show on pages',
         'api_key' => 'API key',
+        'delivery_cost' => 'Delivery cost',
+        'is_delivery_cost_enabled' => 'Count delivery cost?',
     ],
     'actions' => [
         'sync' => 'Run update',
         'sync_confirmation' => 'This will fully refresh the local Nova Poshta tables. Continue?',
-        'save_api_key' => 'Save API key',
+        'save_settings' => 'Save settings',
     ],
     'sync' => [
         'labels' => [
@@ -78,12 +79,15 @@ return [
         'sync_started' => 'Nova Poshta sync has started. The page will refresh automatically.',
         'sync_completed' => 'Nova Poshta data was refreshed successfully.',
         'sync_failed' => 'Failed to refresh Nova Poshta data.',
-        'api_key_saved' => 'Nova Poshta API key saved.',
+        'settings_saved' => 'Nova Poshta settings saved.',
     ],
     'helpers' => [
         'api_key' => 'The Nova Poshta key is stored in the application global configs and is used to synchronize data from the API.',
+        'delivery_cost' => 'This value is used as the Nova Poshta delivery cost in the module.',
+        'is_delivery_cost_enabled' => 'When disabled, the module will ignore the saved delivery cost.',
     ],
     'validation' => [
         'api_key_required' => 'The Nova Poshta API key must be set in the global configs.',
+        'delivery_cost_required' => 'The Nova Poshta delivery cost must be set.',
     ],
 ];

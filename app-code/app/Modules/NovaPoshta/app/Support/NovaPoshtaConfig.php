@@ -12,6 +12,12 @@ use RuntimeException;
  */
 class NovaPoshtaConfig
 {
+    public const API_KEY_GLOBAL_CONFIG_KEY = 'novaposhta.api_key';
+
+    public const DELIVERY_COST_GLOBAL_CONFIG_KEY = 'novaposhta.delivery_cost';
+
+    public const IS_DELIVERY_COST_ENABLED_GLOBAL_CONFIG_KEY = 'novaposhta.is_delivery_cost_enabled';
+
     /**
      * @var array<string, mixed>|null
      */
@@ -24,13 +30,29 @@ class NovaPoshtaConfig
 
     public function getApiKey(): string
     {
-        $api_key = trim((string) get_global_config('novaposhta.api_key', ''));
+        $api_key = trim((string) get_global_config(self::API_KEY_GLOBAL_CONFIG_KEY, ''));
 
         if ($api_key === '') {
             throw new RuntimeException('Nova Poshta API key is not configured in global configs.');
         }
 
         return $api_key;
+    }
+
+    public function getDeliveryCost(): string
+    {
+        $delivery_cost = trim((string) get_global_config(self::DELIVERY_COST_GLOBAL_CONFIG_KEY, '0'));
+
+        if ($delivery_cost === '') {
+            return '0.00';
+        }
+
+        return number_format((float) $delivery_cost, 2, '.', '');
+    }
+
+    public function isDeliveryCostEnabled(): bool
+    {
+        return filter_var(get_global_config(self::IS_DELIVERY_COST_ENABLED_GLOBAL_CONFIG_KEY, false), FILTER_VALIDATE_BOOL);
     }
 
     /**

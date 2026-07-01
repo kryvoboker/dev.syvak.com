@@ -215,6 +215,21 @@ final class NamingConventionSniff implements Sniff
                 continue;
             }
 
+            $nextNonEmpty = $file->findNext(
+                [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT],
+                $i + 1,
+                $endPtr,
+                true,
+            );
+
+            if ($nextNonEmpty === false) {
+                continue;
+            }
+
+            if ($tokens[$nextNonEmpty]['code'] !== T_EQUAL) {
+                continue;
+            }
+
             $name = $tokens[$i]['content'];
 
             if (! preg_match(self::UPPER_SNAKE_CASE, $name)) {
