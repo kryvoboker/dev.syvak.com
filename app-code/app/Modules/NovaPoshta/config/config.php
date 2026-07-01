@@ -8,7 +8,7 @@ return [
     'admin' => [
         'can_create_instances' => false,
         'module_list_action' => [
-            'page' => 'App\\Filament\\Pages\\Modules\\NovaPoshtaSyncPage',
+            'page' => 'Modules\\NovaPoshta\\Filament\\Pages\\NovaPoshtaSyncPage',
         ],
     ],
     'runtime' => [
@@ -27,7 +27,6 @@ return [
     ],
     'api' => [
         'url' => env('NOVA_POSHTA_API_URL') ?? 'https://api.novaposhta.ua/v2.0/json/',
-        'key' => env('NOVA_POSHTA_API_KEY') ?? null,
         'timeout' => (int)(env('NOVA_POSHTA_TIMEOUT') ?? 30),
         'limit' => (int)(env('NOVA_POSHTA_LIMIT') ?? 500),
         'language' => env('NOVA_POSHTA_LANGUAGE') ?? 'UA',

@@ -1,4 +1,4 @@
-[← Catalog Storefront](catalog-storefront.md) · [Back to README](../README.md) · [Testing →](testing.md)
+[← Catalog Storefront](catalog-storefront.md) · [Back to README](../../../README.md) · [Testing →](testing.md)
 
 # Admin Panel
 
@@ -29,6 +29,9 @@
 
 ## See Also
 
+- [Project README](../../../README.md) — project landing page and navigation hub.
 - [Catalog Storefront](catalog-storefront.md) — where admin-managed data is rendered.
 - [Architecture](architecture.md) — module boundaries for admin code.
 - [Configuration](configuration.md) — settings and fallback behavior.
+- [Modules Guide](../Modules/README.md) — module registration/loading rules and singleton module guidance.
+- [NovaPoshta Module](../Modules/NovaPoshta/README.md) — module-specific admin sync page and API key handling.

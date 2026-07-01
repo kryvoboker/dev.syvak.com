@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\NovaPoshta\Services;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -11,14 +12,15 @@ use Illuminate\Support\Str;
 use Modules\NovaPoshta\Support\NovaPoshtaConfig;
 use RuntimeException;
 
-class NovaPoshtaApiService
+readonly class NovaPoshtaApiService
 {
     public function __construct(
-        private readonly NovaPoshtaConfig $config,
+        private NovaPoshtaConfig $config,
     ) {
     }
 
     /**
+     * @throws ConnectionException
      * @return array<string, mixed>
      */
     public function getRegions(): array
@@ -29,6 +31,7 @@ class NovaPoshtaApiService
     }
 
     /**
+     * @throws ConnectionException
      * @return array<string, mixed>
      */
     public function getCities(int $page = 1): array
@@ -41,6 +44,7 @@ class NovaPoshtaApiService
     }
 
     /**
+     * @throws ConnectionException
      * @return array<string, mixed>
      */
     public function getWarehouses(int $page = 1): array
@@ -53,7 +57,9 @@ class NovaPoshtaApiService
     }
 
     /**
-     * @param  array<string, mixed>  $method_properties
+     * @param array<string, mixed> $method_properties
+     *
+     * @throws ConnectionException
      * @return array<string, mixed>
      */
     public function call(string $model_name, string $called_method, array $method_properties = []): array
@@ -78,7 +84,7 @@ class NovaPoshtaApiService
 
     private function getApiKey(): string
     {
-        return (string) $this->config->get('api.key', '');
+        return $this->config->getApiKey();
     }
 
     private function getLanguage(): string

@@ -1,4 +1,4 @@
-[Back to README](../README.md) · [Architecture →](architecture.md)
+[Back to README](../../../README.md) · [Architecture →](architecture.md)
 
 # Getting Started
 
@@ -48,6 +48,7 @@ Expected: tests run successfully and Pint returns pass/fixed output.
 
 ## See Also
 
+- [Project README](../../../README.md) — project landing page and navigation hub.
 - [Architecture](architecture.md) — module boundaries and dependency rules.
 - [Configuration](configuration.md) — env and config details.
 - [Testing](testing.md) — test/static analysis workflow.

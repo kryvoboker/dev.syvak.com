@@ -1,30 +1,60 @@
 # Modules: Registration and Loading Guide
 
-Этот документ описывает, как в проекте регистрируются модульные провайдеры (`nwidart/laravel-modules`), какие есть стратегии загрузки и какие правила нужно соблюдать при добавлении нового модуля.
+This document explains how module providers are registered in the project (`nwidart/laravel-modules`), which loading strategies exist, and what rules should be followed when adding a new module.
 
-## 1. Кто управляет загрузкой модулей
+It also covers two module shapes used in the project:
 
-Основная цепочка:
+- **instance-based modules** like `Carousel` and `ProductsCarousel`
+- **singleton modules** like `NovaPoshta`, where the whole module has one shared configuration and creating instances is forbidden
+
+## Navigation
+
+- [Back to project README](../../../README.md)
+
+## 1. Who controls module loading
+
+Main flow:
 
 1. `App\Providers\ModuleProvidersServiceProvider`
 2. `App\Services\Modules\ModuleProviderResolverService`
 3. `App\Services\Modules\ModuleProviderRegistrarService`
 
-Ключевая идея: **модульный `ServiceProvider` не должен сам решать, загружаться ему или нет**. Решение принимается централизованно в `ModuleProviderResolverService`.
+Core idea: a module `ServiceProvider` must not decide on its own whether it should be loaded. The decision is centralized in `ModuleProviderResolverService`.
 
-## 2. Где берётся список модулей
+## 2. Where the module list comes from
 
-Источник данных:
+Source of truth:
 
-- БД: таблица `module_definitions` (активность модуля, `nwidart_name`, путь и мета)
-- БД: таблица `module_instances` (настройки экземпляров, `is_enabled`, `placement`, `settings.shared.page_types`)
-- Конфиг модуля: `Modules/<ModuleName>/config/config.php`
+- DB table `module_definitions` (module activity, `nwidart_name`, path, and metadata)
+- DB table `module_instances` (instance settings, `is_enabled`, `placement`, `settings.shared.page_types`)
+- Module config: `Modules/<ModuleName>/config/config.php`
 
-`ModuleProviderResolverService` берёт только активные модули (`enabled()`) и фильтрует их по текущему request-контексту.
+`ModuleProviderResolverService` only considers active modules (`enabled()`) and filters them by the current request context.
 
-## 3. Стратегии загрузки провайдеров
+## 2.1 Singleton modules
 
-Разрешённые стратегии задаются в `config/modules-runtime.php`:
+A singleton module is a module that:
+
+- has exactly one global configuration set for the whole application;
+- does not allow module instances;
+- stores its runtime secrets or credentials outside instance settings, usually in global configs;
+- usually exposes a dedicated admin page instead of create/edit instance flows.
+
+Typical example:
+
+- `NovaPoshta`
+
+For singleton modules:
+
+1. Set `admin.can_create_instances` to `false` in the module config.
+2. Do not create `ModuleInstance` rows for the module.
+3. Keep module-wide settings in module services or global configs.
+4. Expose admin actions/pages directly from the module Filament namespace.
+5. If the module also renders storefront content, follow [the storefront rendering guide](STOREFRONT_MODULE_RENDERING.md).
+
+## 3. Provider loading strategies
+
+Allowed strategies are defined in `config/modules-runtime.php`:
 
 - `eager`
 - `route_matched`
@@ -32,59 +62,59 @@
 
 ### `eager`
 
-Загружается сразу в `ModuleProvidersServiceProvider::boot()`.
+Loaded immediately in `ModuleProvidersServiceProvider::boot()`.
 
-Когда использовать:
-- модуль нужен рано в lifecycle;
-- модуль не зависит от `request()->route()` и session.
+Use when:
+- the module is needed early in the lifecycle;
+- the module does not depend on `request()->route()` or session.
 
 ### `route_matched`
 
-Загружается по событию `Illuminate\Routing\Events\RouteMatched`.
+Loaded on the `Illuminate\Routing\Events\RouteMatched` event.
 
-Когда использовать:
-- модуль зависит от route name/page type;
-- нужно, чтобы маршрут уже был сопоставлен.
+Use when:
+- the module depends on route name/page type;
+- the route must already be matched.
 
 ### `middleware_after_session`
 
-Загружается middleware `App\Http\Middleware\Modules\RegisterModuleProvidersAfterSession`.
+Loaded by middleware `App\Http\Middleware\Modules\RegisterModuleProvidersAfterSession`.
 
-Когда использовать:
-- модуль зависит от данных сессии/пользовательских предпочтений;
-- модуль должен стартовать после `StartSession`.
+Use when:
+- the module depends on session data or user preferences;
+- the module must start after `StartSession`.
 
-## 4. Как resolver выбирает конкретный провайдер
+## 4. How the resolver selects a specific provider
 
-Для каждого релевантного модуля resolver строит FQCN по шаблону:
+For each relevant module, the resolver builds the FQCN using this pattern:
 
 `Modules\\<NwidartName>\\Providers\\<NwidartName>ServiceProvider`
 
-Пример:
+Example:
 
 - `nwidart_name = ProductsCarousel`
-- провайдер: `Modules\\ProductsCarousel\\Providers\\ProductsCarouselServiceProvider`
+- provider: `Modules\\ProductsCarousel\\Providers\\ProductsCarouselServiceProvider`
 
-Если класс не существует, провайдер не регистрируется, а в `stack` пишется warning.
+If the class does not exist, the provider is not registered, and a warning is written to the `stack` log channel.
 
-## 5. Правила для модульного ServiceProvider
+## 5. Rules for module service providers
 
-1. В `boot()` не дублировать lazy-логику (не делать второй resolver внутри провайдера).
-2. Если провайдер зарегистрирован — он должен корректно завершать `registerViews()`, `registerConfig()` и т.д.
-3. Не использовать хардкод чужого namespace.
-4. `name` и `nameLower` должны соответствовать модулю.
+1. Do not duplicate lazy-loading logic in `boot()`.
+2. If a provider is registered, it must correctly finish `registerViews()`, `registerConfig()`, and similar setup steps.
+3. Do not hardcode a foreign namespace.
+4. `name` and `nameLower` must match the module.
 
-## 6. Правила добавления нового модуля
+## 6. Rules for adding a new module
 
-Минимальный checklist:
+Minimum checklist:
 
-1. Создать модуль в `Modules/<ModuleName>/`.
-2. Проверить `module.json`:
-- `name` = `<ModuleName>`
-- `providers` содержит корректный FQCN именно этого модуля.
-3. Проверить `composer.json` модуля:
-- PSR-4: `"Modules\\<ModuleName>\\": "app/"`
-4. Добавить стратегию в `Modules/<ModuleName>/config/config.php`:
+1. Create the module in `Modules/<ModuleName>/`.
+2. Check `module.json`:
+   - `name` = `<ModuleName>`
+   - `providers` contains the correct FQCN for that module only
+3. Check the module `composer.json`:
+   - PSR-4: `"Modules\\<ModuleName>\\": "app/"`
+4. Add a loading strategy in `Modules/<ModuleName>/config/config.php`:
 
 ```php
 'runtime' => [
@@ -92,33 +122,43 @@
 ],
 ```
 
-5. Синхронизировать модульные определения (через существующий механизм sync в проекте).
-6. Убедиться, что модуль активен в `module_definitions` и нужные `module_instances` включены.
-7. Очистить кэш после изменений провайдеров/конфигов:
+5. Synchronize module definitions using the existing sync mechanism.
+6. If the module is instance-based, ensure it is active in `module_definitions` and the required `module_instances` are enabled.
+7. If the module is singleton-based, ensure `can_create_instances` is `false` and do not create module instances.
+8. Clear cache after changing providers or configs:
 
 ```bash
 php artisan optimize:clear
 ```
 
-## 7. Частые ошибки
+## 7. Common mistakes
 
-1. Неверный namespace провайдера в `module.json`.
-2. Дублирование lazy-условий в модульном провайдере и в resolver.
-3. Ожидание `page_types`, когда поле пустое/null, без fallback-условий.
-4. Неочищенный кэш после смены provider/config.
+1. Incorrect provider namespace in `module.json`.
+2. Duplicating lazy conditions in both the module provider and the resolver.
+3. Expecting `page_types` when the field is empty/null, without fallback logic.
+4. Not clearing cache after changing provider/config data.
+5. Treating a singleton module as an instance-based module and wiring create/edit instance screens for it.
 
-## 8. Быстрая диагностика
+## 8. Quick diagnostics
 
-1. Проверить, что класс провайдера существует по PSR-4 пути.
-2. Проверить стратегию в `config/config.php` модуля.
-3. Проверить запись модуля в БД (`module_definitions.is_enabled`, `is_installed`, `is_enabled_in_filesystem`).
-4. Проверить релевантные `module_instances` (`is_enabled`, `placement`, `settings.shared.page_types`).
-5. Проверить логи `stack` и выполнить `php artisan optimize:clear`.
+1. Check that the provider class exists at the expected PSR-4 path.
+2. Check the strategy in the module `config/config.php`.
+3. Check the module record in the database (`module_definitions.is_enabled`, `is_installed`, `is_enabled_in_filesystem`).
+4. Check the relevant `module_instances` (`is_enabled`, `placement`, `settings.shared.page_types`).
+5. Check the `stack` logs and run `php artisan optimize:clear`.
 
 ---
 
-Если модуль должен работать так же, как `Carousel` или `ProductsCarousel`, ориентируйся на текущую связку:
+If a module should work like `Carousel` or `ProductsCarousel`, follow the current chain:
+
 - `ModuleProvidersServiceProvider`
 - `ModuleProviderResolverService`
 - `ModuleProviderRegistrarService`
-и не добавляй вторую независимую систему lazy-загрузки внутри модуля.
+
+and do not add a second independent lazy-loading system inside the module.
+
+If a module should work like `NovaPoshta`, keep it singleton-based and route its admin behavior through dedicated Filament pages and global configs instead of module instances.
+
+## Related docs
+
+- [Storefront module rendering guide](STOREFRONT_MODULE_RENDERING.md)

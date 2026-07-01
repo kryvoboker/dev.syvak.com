@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules;
 
-use App\Filament\Pages\Modules\NovaPoshtaSyncPage;
 use App\Filament\Resources\Modules\ModuleDefinitions\Pages\ListModuleDefinitions;
 use App\Models\Modules\ModuleDefinition;
 use App\Services\Modules\ModuleDefinitionSyncService;
@@ -16,6 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\NovaPoshta\Filament\Pages\NovaPoshtaSyncPage;
 use Tests\TestCase;
 
 class ModuleServicesTest extends TestCase
@@ -36,6 +36,7 @@ class ModuleServicesTest extends TestCase
         DB::purge('sqlite');
         DB::setDefaultConnection('sqlite');
 
+        $this->createGlobalConfigsTable();
         $this->createModuleDefinitionsTable();
         $this->createModuleInstancesTable();
     }
@@ -337,6 +338,50 @@ class ModuleServicesTest extends TestCase
         $this->assertSame($summary, $page->getLastSyncSummary());
     }
 
+    public function test_nova_poshta_instance_settings_normalizer_persists_api_key_in_global_configs(): void
+    {
+        $definition = ModuleDefinition::query()->create([
+            'name' => 'Nova Poshta',
+            'slug' => 'nova-poshta',
+            'nwidart_name' => 'NovaPoshta',
+            'module_path' => '/var/modules/NovaPoshta',
+            'description' => 'Nova Poshta',
+            'is_installed' => true,
+            'is_enabled' => true,
+            'is_enabled_in_filesystem' => true,
+            'sort_order' => 1,
+            'settings_schema' => [],
+            'meta' => [],
+        ]);
+
+        $service = $this->app->make(ModuleInstanceService::class);
+
+        $instance = $service->createFromDefinition($definition, [
+            'name' => 'Nova Poshta settings',
+            'placement' => 'checkout',
+            'settings' => [
+                'shared' => [
+                    'page_types' => ['checkout'],
+                    'api_key' => 'np-test-key',
+                ],
+            ],
+        ]);
+
+        $instance->refresh();
+
+        $this->assertSame('np-test-key', (string) get_global_config('novaposhta.api_key'));
+        $this->assertSame(['checkout'], data_get($instance->settings, 'shared.page_types'));
+        $this->assertNull(data_get($instance->settings, 'shared.api_key'));
+    }
+
+    public function test_nova_poshta_api_service_fails_without_global_api_key(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Nova Poshta API key is not configured in global configs.');
+
+        $this->app->make(\Modules\NovaPoshta\Services\NovaPoshtaApiService::class)->getRegions();
+    }
+
     public function test_module_runtime_resolver_returns_only_enabled_instances_for_requested_context(): void
     {
         $enabled_definition = ModuleDefinition::query()->create([
@@ -422,6 +467,17 @@ class ModuleServicesTest extends TestCase
             $table->unsignedInteger('sort_order')->default(0);
             $table->json('settings_schema')->nullable();
             $table->json('meta')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    private function createGlobalConfigsTable(): void
+    {
+        Schema::create('global_configs', function (Blueprint $table): void {
+            $table->id();
+            $table->string('key', 191)->unique();
+            $table->text('value')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

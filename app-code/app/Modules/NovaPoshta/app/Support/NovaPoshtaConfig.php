@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\NovaPoshta\Support;
 
 use Illuminate\Support\Arr;
+use RuntimeException;
 
 /**
  * Provides deterministic access to the Nova Poshta module config.
@@ -19,6 +20,17 @@ class NovaPoshtaConfig
     public function get(string $key, mixed $default = null): mixed
     {
         return Arr::get($this->all(), $key, $default);
+    }
+
+    public function getApiKey(): string
+    {
+        $api_key = trim((string) get_global_config('novaposhta.api_key', ''));
+
+        if ($api_key === '') {
+            throw new RuntimeException('Nova Poshta API key is not configured in global configs.');
+        }
+
+        return $api_key;
     }
 
     /**
