@@ -1,0 +1,12 @@
+{
+    "name": "UkrPoshta",
+    "alias": "ukrposhta",
+    "description": "UkrPoshta singleton shipping module for Syvak.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\UkrPoshta\\Providers\\UkrPoshtaServiceProvider",
+        "Modules\\UkrPoshta\\Providers\\RouteServiceProvider"
+    ],
+    "files": []
+}

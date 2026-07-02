@@ -35,7 +35,8 @@ use UnitEnum;
 
 class GlobalConfigsPage extends Page implements HasTable
 {
-    use InteractsWithTable, TotalModelItemsResourceTrait;
+    use InteractsWithTable;
+    use TotalModelItemsResourceTrait;
 
     protected static ?string $model = GlobalConfig::class;
 
