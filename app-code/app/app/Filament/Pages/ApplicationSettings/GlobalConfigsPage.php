@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Pages\ApplicationSettings;
 
 use App\Filament\Navigation\AdminNavigationGroupEnum;
+use App\Filament\Resources\Trait\TotalModelItemsResourceTrait;
 use App\Models\ApplicationSettings\GlobalConfig;
 use App\Supports\Services\GlobalConfigService;
 use BackedEnum;
@@ -34,7 +35,9 @@ use UnitEnum;
 
 class GlobalConfigsPage extends Page implements HasTable
 {
-    use InteractsWithTable;
+    use InteractsWithTable, TotalModelItemsResourceTrait;
+
+    protected static ?string $model = GlobalConfig::class;
 
     protected static ?string $slug = 'application-settings/global-configs';
 
@@ -123,7 +126,7 @@ class GlobalConfigsPage extends Page implements HasTable
 
                 Filter::make('key')
                     ->label(__('admin/settings/global_configs.filters.key'))
-                    ->form([
+                    ->schema([
                         TextInput::make('key')
                             ->label(__('admin/settings/global_configs.labels.key'))
                             ->placeholder(__('admin/settings/global_configs.placeholders.key')),
@@ -140,7 +143,7 @@ class GlobalConfigsPage extends Page implements HasTable
 
                 Filter::make('value')
                     ->label(__('admin/settings/global_configs.filters.value'))
-                    ->form([
+                    ->schema([
                         TextInput::make('value')
                             ->label(__('admin/settings/global_configs.labels.value'))
                             ->placeholder(__('admin/settings/global_configs.placeholders.value')),
