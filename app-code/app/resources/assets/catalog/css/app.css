@@ -45,10 +45,10 @@
 @plugin "@iconify/tailwind4";
 
 @source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../../../../storage/framework/views/*.php';
+/*@source '../../../../../storage/framework/views!*.php';*/
 @source '../../../views/catalog/**/*.blade.php';
-@source '../../../../Modules/**/*.blade.php';
-@source '../../../../Modules/**/*.ts';
+@source '../../../../Modules/**/resources/assets/ts/**/*.ts';
+@source '../../../../Modules/**/resources/views/storefront/**/*.blade.php';
 @source '../ts/**/*.ts';
 
 @source "./_source.txt";
