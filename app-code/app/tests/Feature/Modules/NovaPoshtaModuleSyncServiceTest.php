@@ -188,6 +188,75 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
         $this->assertSame('city-2', (string) data_get($poshtomat, 'novaPoshtaCity.ref'));
     }
 
+    public function test_sync_post_offices_skips_rows_without_matching_city(): void
+    {
+        Http::fake(function (HttpRequest $request) {
+            $payload = $request->data();
+            $called_method = (string) data_get($payload, 'calledMethod');
+
+            if ($called_method === 'getWarehouses') {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 2,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'office-0',
+                            'SettlementRef' => 'city-1',
+                            'Description' => 'Відділення № 11',
+                            'Latitude' => '50.4501',
+                            'Longitude' => '30.5234',
+                            'Schedule' => [
+                                'Monday' => '09:00-18:00',
+                            ],
+                            'CityDescription' => 'Київ',
+                            'SiteKey' => 11,
+                        ],
+                        [
+                            'Ref' => 'office-1',
+                            'SettlementRef' => 'missing-city',
+                            'Description' => 'Відділення № 12',
+                            'Latitude' => '50.4501',
+                            'Longitude' => '30.5234',
+                            'Schedule' => [
+                                'Monday' => '09:00-18:00',
+                            ],
+                            'CityDescription' => 'Київ',
+                            'SiteKey' => 12,
+                        ],
+                    ],
+                ]);
+            }
+
+            return Http::response([
+                'success' => false,
+                'data' => [],
+            ], 500);
+        });
+
+        NovaPoshtaCity::query()->create([
+            'nova_poshta_region_id' => NovaPoshtaRegion::query()->create([
+                'ref' => 'region-1',
+                'regions_center' => 'Київ',
+                'description' => 'Київська область',
+            ])->getKey(),
+            'ref' => 'city-1',
+            'region' => 'region-1',
+            'description' => 'Київська обл. / Київ',
+            'city_name' => 'Київ',
+            'latitude' => '50.4501',
+            'longitude' => '30.5234',
+            'city_id' => 101,
+            'region_description' => 'Київська',
+        ]);
+
+        $summary = $this->app->make(NovaPoshtaSyncService::class)->syncPostOffices();
+
+        $this->assertSame(1, $summary['imported']);
+        $this->assertSame(1, NovaPoshtaPostOffice::query()->count());
+    }
+
     public function test_queued_sync_step_by_step_rebuilds_all_tables_and_persists_summary(): void
     {
         Cache::flush();
