@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ModuleDefinition extends Model
 {
@@ -98,7 +100,18 @@ class ModuleDefinition extends Model
         }
 
         /** @var class-string<Page> $page_class */
-        return $page_class::getUrl();
+        try {
+            return $page_class::getUrl();
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->warning('[FIX] Failed to resolve module admin page URL.', [
+                'module_definition_id' => $this->id,
+                'module_name' => $this->nwidart_name,
+                'page_class' => $page_class,
+                'error' => $throwable->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**

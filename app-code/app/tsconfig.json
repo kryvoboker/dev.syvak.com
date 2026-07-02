@@ -22,6 +22,9 @@
             ],
             "@nova-poshta-ts/*": [
                 "./Modules/NovaPoshta/resources/assets/ts/*"
+            ],
+            "@ukr-poshta-ts/*": [
+                "./Modules/UkrPoshta/resources/assets/ts/*"
             ]
         },
         "target": "ES2024",
