@@ -18,7 +18,6 @@
             ]
         },
         "phpdoc_order": true,
-        "phpdoc_trim": true,
         "binary_operator_spaces": {
             "default": "single_space"
         },

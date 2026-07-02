@@ -8,6 +8,7 @@ use App\Filament\Navigation\AdminNavigationGroupEnum;
 use App\Filament\Pages\Wiki\ModulesWikiPage;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -132,6 +133,9 @@ class NovaPoshtaSyncPage extends Page
             ]);
     }
 
+    /**
+     * @return array|Action[]|ActionGroup[]
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -197,6 +201,9 @@ class NovaPoshtaSyncPage extends Page
         ];
     }
 
+    /**
+     * @return void
+     */
     public function processSyncStep(): void
     {
         $previous_state = $this->sync_state;
@@ -241,6 +248,9 @@ class NovaPoshtaSyncPage extends Page
         }
     }
 
+    /**
+     * @return string
+     */
     private function renderSyncWorkspace(): string
     {
         $sync_state = $this->sync_state;
@@ -272,28 +282,31 @@ class NovaPoshtaSyncPage extends Page
 
         return '
             <div class="space-y-6"' . $polling_attribute . '>
-                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                        <div class="max-w-3xl">
-                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">' . e(__('admin/modules/nova_poshta.sync.labels.status')) . '</div>
-                            <div class="mt-2 text-2xl font-semibold text-gray-900">' . e($status_label) . '</div>
-                            <p class="mt-3 text-sm leading-6 text-gray-600">' . e($message !== '' ? $message : __('admin/modules/nova_poshta.sections.sync.description')) . '</p>
+                <div class="rounded-xl border p-6 shadow-sm">
+                    <div class="flex flex-col gap-6">
+                        <div class="max-w-3xl space-y-1">
+                        <div class="flex items-center gap-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.2em] ">' . e(__('admin/modules/nova_poshta.sync.labels.status')) . '</div>
+                            <div>-</div>
+                            <div class="text-2xl font-semibold bg-green-600 border-2 border-green-700 rounded-2xl px-2 py-1">' . e($status_label) . '</div>
+                        </div>
+                            <p class="block text-sm leading-6 ">' . e($message !== '' ? $message : __('admin/modules/nova_poshta.sections.sync.description')) . '</p>
                         </div>
 
-                        <div class="w-full max-w-xl rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div class="w-full rounded-lg border p-4">
                             <div class="flex items-center justify-between gap-4 text-sm">
-                                <span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.overall_progress')) . '</span>
-                                <span class="font-semibold text-gray-900">' . e((string) $overall_progress) . '%</span>
+                                <span class="font-medium ">' . e(__('admin/modules/nova_poshta.sync.labels.overall_progress')) . '</span>
+                                <span class="font-semibold ">' . e((string) $overall_progress) . '%</span>
                             </div>
-                            <div class="mt-3 h-3 overflow-hidden rounded-full bg-gray-200">
+                            <div class="mt-3 h-3 overflow-hidden rounded-full ">
                                 <div class="h-full rounded-full bg-emerald-500 transition-all duration-300" style="width: ' . e((string) $overall_progress) . '%;"></div>
                             </div>
-                            <div class="mt-4 grid gap-2 text-sm text-gray-600">
-                                <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.stage')) . ':</span> ' . e($current_stage_label) . '</div>
-                                <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.phase')) . ':</span> ' . e($this->getPhaseLabel($phase)) . '</div>
-                                <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.page')) . ':</span> ' . e($current_page . ' / ' . $total_pages) . '</div>
-                                <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.processed_rows')) . ':</span> ' . e($stage_processed_rows . ' / ' . $stage_total_rows) . '</div>
-                                <div><span class="font-medium text-gray-700">' . e(__('admin/modules/nova_poshta.sync.labels.stage_progress')) . ':</span> ' . e((string) $stage_progress) . '%</div>
+                            <div class="mt-4 grid gap-2 text-sm ">
+                                <div><span class="font-medium ">' . e(__('admin/modules/nova_poshta.sync.labels.stage')) . ':</span> ' . e($current_stage_label) . '</div>
+                                <div><span class="font-medium ">' . e(__('admin/modules/nova_poshta.sync.labels.phase')) . ':</span> ' . e($this->getPhaseLabel($phase)) . '</div>
+                                <div><span class="font-medium ">' . e(__('admin/modules/nova_poshta.sync.labels.page')) . ':</span> ' . e($current_page . ' / ' . $total_pages) . '</div>
+                                <div><span class="font-medium ">' . e(__('admin/modules/nova_poshta.sync.labels.processed_rows')) . ':</span> ' . e($stage_processed_rows . ' / ' . $stage_total_rows) . '</div>
+                                <div><span class="font-medium ">' . e(__('admin/modules/nova_poshta.sync.labels.stage_progress')) . ':</span> ' . e((string) $stage_progress) . '%</div>
                             </div>
                         </div>
                     </div>
@@ -332,6 +345,9 @@ class NovaPoshtaSyncPage extends Page
         return is_array($last_sync_summary) ? $last_sync_summary : [];
     }
 
+    /**
+     * @return string
+     */
     private function renderLastSyncSummary(): string
     {
         $last_sync_summary = $this->getLastSyncSummary();
@@ -359,17 +375,17 @@ class NovaPoshtaSyncPage extends Page
             ],
         ];
 
-        $html = '<div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">';
-        $html .= '<table class="min-w-full divide-y divide-gray-200 text-sm">';
-        $html .= '<thead class="bg-gray-50"><tr>';
-        $html .= '<th class="px-4 py-3 text-left font-medium text-gray-600">' . e(__('admin/modules/nova_poshta.sync.labels.stage')) . '</th>';
-        $html .= '<th class="px-4 py-3 text-right font-medium text-gray-600">' . e(__('admin/modules/nova_poshta.sync.labels.processed_rows')) . '</th>';
-        $html .= '</tr></thead><tbody class="divide-y divide-gray-200 bg-white">';
+        $html = '<div class="overflow-hidden rounded-xl border shadow-sm">';
+        $html .= '<table class="min-w-full divide-ytext-sm">';
+        $html .= '<thead class="border-b"><tr>';
+        $html .= '<th class="px-4 py-3 text-left font-medium ">' . e(__('admin/modules/nova_poshta.sync.labels.stage')) . '</th>';
+        $html .= '<th class="px-4 py-3 text-right font-medium ">' . e(__('admin/modules/nova_poshta.sync.labels.processed_rows')) . '</th>';
+        $html .= '</tr></thead><tbody class="divide-y ">';
 
         foreach ($rows as $row) {
             $html .= '<tr>';
-            $html .= '<td class="px-4 py-3 text-gray-700">' . e((string) $row['label']) . '</td>';
-            $html .= '<td class="px-4 py-3 text-right font-medium text-gray-900">' . e((string) $row['value']) . '</td>';
+            $html .= '<td class="px-4 py-3 ">' . e((string) $row['label']) . '</td>';
+            $html .= '<td class="px-4 py-3 text-right font-medium ">' . e((string) $row['value']) . '</td>';
             $html .= '</tr>';
         }
 
@@ -378,16 +394,27 @@ class NovaPoshtaSyncPage extends Page
         return $html;
     }
 
+    /**
+     * @param string $label
+     * @param int    $value
+     *
+     * @return string
+     */
     private function renderStatCard(string $label, int $value): string
     {
         return '
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <div class="text-xs uppercase tracking-wide text-gray-500">' . e($label) . '</div>
-                <div class="mt-2 text-2xl font-semibold text-gray-900">' . e((string) $value) . '</div>
+            <div class="rounded-lg border p-4">
+                <div class="text-xs uppercase tracking-wide ">' . e($label) . '</div>
+                <div class="mt-2 text-2xl font-semibold ">' . e((string) $value) . '</div>
             </div>
         ';
     }
 
+    /**
+     * @param string $stage
+     *
+     * @return string
+     */
     private function getStageLabel(string $stage): string
     {
         return match ($stage) {
@@ -399,6 +426,9 @@ class NovaPoshtaSyncPage extends Page
         };
     }
 
+    /**
+     * @return void
+     */
     public function saveSettings(): void
     {
         $api_key = trim((string) Arr::get($this->settings_form, 'api_key', ''));
@@ -441,6 +471,11 @@ class NovaPoshtaSyncPage extends Page
             ->send();
     }
 
+    /**
+     * @param string $phase
+     *
+     * @return string
+     */
     private function getPhaseLabel(string $phase): string
     {
         return match ($phase) {
