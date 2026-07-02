@@ -110,10 +110,6 @@ class NovaPoshtaSyncService
 
         $stage = (string) Arr::get($state, 'stage', '');
 
-        if ($stage === self::STAGE_POST_OFFICES) {
-            $a = $stage;
-        }
-
         return match ($stage) {
             self::STAGE_REGIONS => $this->processRegionsStage($state),
             self::STAGE_CITIES => $this->processCitiesStage($state),
