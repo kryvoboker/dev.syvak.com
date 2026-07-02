@@ -244,7 +244,7 @@ class UkrPoshtaSyncPage extends Page
         $is_running = (bool) Arr::get($sync_state, 'is_running', false);
         $overall_progress = max(0, min(100, (int) Arr::get($sync_state, 'overall_progress', 0)));
         $stage_progress = round(
-            max(0, min(100, (int) Arr::get($sync_state, 'stage_processed_rows', 0) * 100 / max(1, (int) Arr::get($sync_state, 'stage_total_rows', 1))))
+            max(0, min(100, (int) Arr::get($sync_state, 'stage_processed_rows', 0) * 100 / max(1, (int) Arr::get($sync_state, 'stage_total_rows', 1)))),
         );
         $message = (string) Arr::get($sync_state, 'message', '');
         $stage = (string) Arr::get($sync_state, 'stage', '');

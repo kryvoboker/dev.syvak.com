@@ -118,61 +118,79 @@ readonly class UkrPoshtaSyncService
     {
         $state = $this->getQueuedSyncState();
 
-        if (Arr::get($state, 'is_running', false) !== true) {
-            return $state;
-        }
+        try {
+            if (Arr::get($state, 'is_running', false) !== true) {
+                return $state;
+            }
 
-        if (Arr::get($state, 'stop_requested', false) === true) {
-            return $this->markQueuedSyncStopped($state);
-        }
+            if (Arr::get($state, 'stop_requested', false) === true) {
+                return $this->markQueuedSyncStopped($state);
+            }
 
-        return match ((string) Arr::get($state, 'stage', '')) {
-            self::STAGE_REGIONS => $this->processRegionsStage($state),
-            self::STAGE_DISTRICTS => $this->processQueueStage(
+            return match ((string) Arr::get($state, 'stage', '')) {
+                self::STAGE_REGIONS => $this->processRegionsStage($state),
+                self::STAGE_DISTRICTS => $this->processQueueStage(
+                    $state,
+                    self::STAGE_DISTRICTS,
+                    fn (int $region_id): int => $this->syncDistrictBatch($region_id),
+                    function (): void {
+                        UkrPoshtaDistrict::query()->delete();
+                    },
+                    self::STAGE_CITIES,
+                    'districts',
+                    self::STAGE_DISTRICTS,
+                    __('admin/modules/ukr_poshta.sync.messages.districts_completed'),
+                    fn (): array => $this->getRegionIds(),
+                    fn (): array => $this->getDistrictIds(),
+                ),
+                self::STAGE_CITIES => $this->processQueueStage(
+                    $state,
+                    self::STAGE_CITIES,
+                    fn (int $district_id): int => $this->syncCityBatch($district_id),
+                    function (): void {
+                        UkrPoshtaCity::query()->delete();
+                    },
+                    self::STAGE_POST_OFFICES,
+                    'cities',
+                    self::STAGE_CITIES,
+                    __('admin/modules/ukr_poshta.sync.messages.cities_completed'),
+                    fn (): array => $this->getDistrictIds(),
+                    fn (): array => $this->getDistrictIds(),
+                ),
+                self::STAGE_POST_OFFICES => $this->processQueueStage(
+                    $state,
+                    self::STAGE_POST_OFFICES,
+                    fn (int $district_id): int => $this->syncPostOfficeBatch($district_id),
+                    function (): void {
+                        UkrPoshtaPostOffice::query()->delete();
+                    },
+                    'completed',
+                    'post_offices',
+                    self::STAGE_POST_OFFICES,
+                    __('admin/modules/ukr_poshta.sync.messages.completed'),
+                    fn (): array => $this->getDistrictIds(),
+                    static fn (): array => [],
+                ),
+                'completed', 'failed', 'stopped' => $state,
+                default => $this->markQueuedSyncFailed($state, sprintf('Unknown Ukr Poshta sync stage [%s].', (string) Arr::get($state, 'stage', ''))),
+            };
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('[FIX] Ukr Poshta queued sync step failed.', [
+                'stage' => (string) Arr::get($state, 'stage', ''),
+                'phase' => (string) Arr::get($state, 'phase', ''),
+                'error' => $throwable->getMessage(),
+                'exception' => $throwable,
+            ]);
+
+            return $this->markQueuedSyncFailed(
                 $state,
-                self::STAGE_DISTRICTS,
-                fn (int $region_id): int => $this->syncDistrictBatch($region_id),
-                function (): void {
-                    UkrPoshtaDistrict::query()->delete();
-                },
-                self::STAGE_CITIES,
-                'regions',
-                self::STAGE_DISTRICTS,
-                __('admin/modules/ukr_poshta.sync.messages.districts_completed'),
-                fn (): array => $this->getRegionIds(),
-                fn (): array => $this->getDistrictIds(),
-            ),
-            self::STAGE_CITIES => $this->processQueueStage(
-                $state,
-                self::STAGE_CITIES,
-                fn (int $district_id): int => $this->syncCityBatch($district_id),
-                function (): void {
-                    UkrPoshtaCity::query()->delete();
-                },
-                self::STAGE_POST_OFFICES,
-                'districts',
-                self::STAGE_CITIES,
-                __('admin/modules/ukr_poshta.sync.messages.cities_completed'),
-                fn (): array => $this->getDistrictIds(),
-                fn (): array => $this->getDistrictIds(),
-            ),
-            self::STAGE_POST_OFFICES => $this->processQueueStage(
-                $state,
-                self::STAGE_POST_OFFICES,
-                fn (int $district_id): int => $this->syncPostOfficeBatch($district_id),
-                function (): void {
-                    UkrPoshtaPostOffice::query()->delete();
-                },
-                'completed',
-                'post_offices',
-                self::STAGE_POST_OFFICES,
-                __('admin/modules/ukr_poshta.sync.messages.completed'),
-                fn (): array => $this->getDistrictIds(),
-                static fn (): array => [],
-            ),
-            'completed', 'failed', 'stopped' => $state,
-            default => $this->markQueuedSyncFailed($state, sprintf('Unknown Ukr Poshta sync stage [%s].', (string) Arr::get($state, 'stage', ''))),
-        };
+                sprintf(
+                    'Ukr Poshta sync failed during stage [%s]: %s',
+                    (string) Arr::get($state, 'stage', ''),
+                    $throwable->getMessage(),
+                ),
+            );
+        }
     }
 
     /**

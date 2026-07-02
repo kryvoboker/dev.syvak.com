@@ -105,14 +105,21 @@ readonly class UkrPoshtaApiService
                     $endpoint,
                     $response->status(),
                     $response->body(),
-                )
+                ),
             );
         }
 
         $payload = $response->json();
 
         if (! is_array($payload)) {
-            throw new RuntimeException(sprintf('Ukr Poshta API returned invalid payload for [%s].', $endpoint));
+            throw new RuntimeException(
+                sprintf(
+                    "Ukr Poshta API returned invalid payload for endpoint: %s\ncode: %s\nmessage: %s.",
+                    $endpoint,
+                    $response->status(),
+                    $response->body(),
+                ),
+            );
         }
 
         $errors = Arr::wrap(data_get($payload, 'errors', data_get($payload, 'error', [])));
