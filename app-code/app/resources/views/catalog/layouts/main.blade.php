@@ -1,3 +1,9 @@
+@php
+    $page_type = $page_type ?? try_detect_page_type();
+    $top_entrypoint_for_module = 'top';
+    $bottom_entrypoint_for_module = 'bottom';
+@endphp
+
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" data-theme="black">
 <head>
@@ -24,12 +30,6 @@
 </head>
 
 <body>
-@php
-    $page_type = $page_type ?? try_detect_page_type();
-    $top_entrypoint_for_module = 'top';
-    $bottom_entrypoint_for_module = 'bottom';
-@endphp
-
 <script>
     window.app_params = {
         ...(window.app_params ?? {}),

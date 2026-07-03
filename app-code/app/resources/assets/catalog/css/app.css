@@ -482,3 +482,19 @@
     -0.0625rem -0.25rem 1.5625rem 0 rgba(255, 255, 255, 0.40) inset,
     0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset;
 }
+
+.choices__inner,
+.choices__list--dropdown,
+.choices__list[aria-expanded],
+.choices[data-type*=select-one] .choices__input,
+.choices__list--dropdown .choices__item--selectable.is-selected,
+.choices__list[aria-expanded] .choices__item--selectable.is-selected,
+.choices__list--dropdown .choices__item--selectable.is-highlighted,
+.choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+    @apply bg-base-100;
+}
+
+.choices__list--dropdown .choices__list,
+.choices__list[aria-expanded] .choices__list {
+    @apply max-h-52;
+}

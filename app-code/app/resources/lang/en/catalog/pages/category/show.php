@@ -35,11 +35,20 @@ return [
             'payment_methods' => 'Choose payment method',
             'payment_placeholder' => 'No payment methods are available yet',
         ],
+        'delivery_methods' => [
+            'nova_poshta' => 'Nova Poshta',
+            'ukr_poshta' => 'Ukr Poshta',
+        ],
         'buttons' => [
             'show_all_items' => 'Show all items (:count)',
             'find_on_map' => 'Find on map',
             'edit_items' => 'Edit items',
             'submit' => 'Place order',
+        ],
+        'warnings' => [
+            'choose_city_first' => 'Choose a city first',
+            'no_delivery_methods' => 'No delivery methods are available for the selected city',
+            'no_cities_found' => 'No cities found',
         ],
         'texts' => [
             'consent' => 'By placing an order, you confirm your agreement with the terms of service and privacy policy.',
