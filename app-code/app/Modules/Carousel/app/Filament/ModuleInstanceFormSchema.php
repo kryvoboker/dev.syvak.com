@@ -45,7 +45,7 @@ readonly class ModuleInstanceFormSchema
                 ->schema([
                     TextInput::make('name')
                         ->columnSpanFull()
-                        ->label('Module name')
+                        ->label(__('carousel::admin/modules/carousel.labels.module_name'))
                         ->maxLength(255)
                         ->required(),
 
@@ -54,7 +54,7 @@ readonly class ModuleInstanceFormSchema
                         ->columnSpanFull()
                         ->schema([
                             Select::make('placement')
-                                ->label('Placement')
+                                ->label(__('carousel::admin/modules/carousel.labels.placement'))
                                 ->options(config('app.modules_placements', []))
                                 ->rules([
                                     'required',
@@ -64,25 +64,25 @@ readonly class ModuleInstanceFormSchema
                                 ->native(false),
 
                             TextInput::make('sort_order')
-                                ->label('Module sort order')
+                                ->label(__('carousel::admin/modules/carousel.labels.sort_order'))
                                 ->numeric()
                                 ->default(1),
                         ]),
 
                     Toggle::make('is_enabled')
                         ->columnSpanFull()
-                        ->label('Module is active')
+                        ->label(__('carousel::admin/modules/carousel.labels.is_enabled'))
                         ->default(true),
 
                     Hidden::make('context_key')
                         ->default(null),
 
-                    Section::make('Visibility and image sizes')
-                        ->description('Only page placement, display pages, image sizes, and images are required. Text and links can be left empty.')
+                    Section::make(__('carousel::admin/modules/carousel.sections.visibility_and_image_sizes.title'))
+                        ->description(__('carousel::admin/modules/carousel.sections.visibility_and_image_sizes.description'))
                         ->columnSpanFull()
                         ->schema([
                             Select::make('settings.shared.page_types')
-                                ->label('Show on pages')
+                                ->label(__('carousel::admin/modules/carousel.labels.page_types'))
                                 ->columnSpanFull()
                                 ->multiple()
                                 ->options($this->getPageTypeOptions())
@@ -90,7 +90,7 @@ readonly class ModuleInstanceFormSchema
                                 ->native(false),
 
                             Toggle::make('settings.shared.open_links_in_new_tab')
-                                ->label('Open links in a new tab')
+                                ->label(__('carousel::admin/modules/carousel.labels.open_links_in_new_tab'))
                                 ->columnSpanFull()
                                 ->default(true),
 
@@ -99,53 +99,53 @@ readonly class ModuleInstanceFormSchema
                                 ->columnSpan(2)
                                 ->schema([
                                     TextInput::make('settings.shared.desktop_image.width')
-                                        ->label('Desktop image width')
+                                        ->label(__('carousel::admin/modules/carousel.labels.desktop_image_width'))
                                         ->numeric()
                                         ->default((int) $this->carousel_config->get('storefront.desktop_image.width', 1220))
                                         ->required()
-                                        ->helperText('Required field. Use the final image width for desktop slides.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.desktop_image_width')),
 
                                     TextInput::make('settings.shared.desktop_image.height')
-                                        ->label('Desktop image height')
+                                        ->label(__('carousel::admin/modules/carousel.labels.desktop_image_height'))
                                         ->numeric()
                                         ->default((int) $this->carousel_config->get('storefront.desktop_image.height', 720))
                                         ->required()
-                                        ->helperText('Required field. Use the final image height for desktop slides.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.desktop_image_height')),
 
                                     TextInput::make('settings.shared.desktop_image.max_width')
-                                        ->label('Desktop image max width')
+                                        ->label(__('carousel::admin/modules/carousel.labels.desktop_image_max_width'))
                                         ->numeric()
                                         ->default((int) $this->carousel_config->get('storefront.desktop_image.max_width', 1920))
                                         ->required(),
 
                                     TextInput::make('settings.shared.desktop_image.max_height')
-                                        ->label('Desktop image max height')
+                                        ->label(__('carousel::admin/modules/carousel.labels.desktop_image_max_height'))
                                         ->numeric()
                                         ->default((int) $this->carousel_config->get('storefront.desktop_image.max_height', 1080))
                                         ->required(),
 
                                     TextInput::make('settings.shared.mobile_image.width')
-                                        ->label('Mobile image width')
+                                        ->label(__('carousel::admin/modules/carousel.labels.mobile_image_width'))
                                         ->numeric()
                                         ->default((int) $this->carousel_config->get('storefront.mobile_image.width', 360))
                                         ->required()
-                                        ->helperText('Required field. Use the final image width for mobile slides.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.mobile_image_width')),
 
                                     TextInput::make('settings.shared.mobile_image.height')
-                                        ->label('Mobile image height')
+                                        ->label(__('carousel::admin/modules/carousel.labels.mobile_image_height'))
                                         ->numeric()
                                         ->default((int) $this->carousel_config->get('storefront.mobile_image.height', 640))
                                         ->required()
-                                        ->helperText('Required field. Use the final image height for mobile slides.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.mobile_image_height')),
 
                                     TextInput::make('settings.shared.mobile_image.max_width')
-                                        ->label('Mobile image max width')
+                                        ->label(__('carousel::admin/modules/carousel.labels.mobile_image_max_width'))
                                         ->numeric()
                                         ->default((int) $this->carousel_config->get('storefront.mobile_image.max_width', 768))
                                         ->required(),
 
                                     TextInput::make('settings.shared.mobile_image.max_height')
-                                        ->label('Mobile image max height')
+                                        ->label(__('carousel::admin/modules/carousel.labels.mobile_image_max_height'))
                                         ->numeric()
                                         ->default((int) $this->carousel_config->get('storefront.mobile_image.max_height', 1280))
                                         ->required(),
@@ -153,7 +153,7 @@ readonly class ModuleInstanceFormSchema
                         ]),
 
                     Repeater::make('settings.slides')
-                        ->label('Slides')
+                        ->label(__('carousel::admin/modules/carousel.labels.slides'))
                         ->default($this->getDefaultSlides($active_languages))
                         ->defaultItems(1)
                         ->reorderable()
@@ -165,18 +165,18 @@ readonly class ModuleInstanceFormSchema
 
                             return Arr::get($translations, $current_locale . '.title')
                                 ?? Arr::get($translations, array_key_first($translations) . '.title')
-                                ?? 'Slide';
+                                ?? __('carousel::admin/modules/carousel.labels.slide');
                         })
                         ->schema([
-                            Section::make('Slide state')
-                                ->description('Slide text and links are optional. If you leave them empty, they will not be shown in the storefront carousel.')
+                            Section::make(__('carousel::admin/modules/carousel.sections.slide_state.title'))
+                                ->description(__('carousel::admin/modules/carousel.sections.slide_state.description'))
                                 ->schema([
                                     Toggle::make('is_active')
-                                        ->label('Slide is active')
+                                        ->label(__('carousel::admin/modules/carousel.labels.slide_is_active'))
                                         ->default(true),
 
                                     TextInput::make('sort_order')
-                                        ->label('Slide sort order')
+                                        ->label(__('carousel::admin/modules/carousel.labels.slide_sort_order'))
                                         ->numeric()
                                         ->default(1),
                                 ]),
@@ -213,40 +213,40 @@ readonly class ModuleInstanceFormSchema
                             Grid::make()
                                 ->schema([
                                     TextInput::make("translations.$language_code.title")
-                                        ->label('Heading')
+                                        ->label(__('carousel::admin/modules/carousel.labels.heading'))
                                         ->columnSpanFull()
                                         ->maxLength(255)
-                                        ->helperText('Optional. Leave empty to hide the heading for this slide.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.heading')),
 
                                     Textarea::make("translations.$language_code.description")
-                                        ->label('Description')
+                                        ->label(__('carousel::admin/modules/carousel.labels.description'))
                                         ->columnSpanFull()
                                         ->rows(3)
-                                        ->helperText('Optional. Leave empty to hide the description.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.description')),
 
                                     TextInput::make("translations.$language_code.button_text")
-                                        ->label('Button text')
+                                        ->label(__('carousel::admin/modules/carousel.labels.button_text'))
                                         ->columnSpanFull()
                                         ->maxLength(255)
-                                        ->helperText('Optional. The button is shown only when both text and button link are filled.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.button_text')),
 
                                     TextInput::make("translations.$language_code.image_url")
-                                        ->label('Image link')
+                                        ->label(__('carousel::admin/modules/carousel.labels.image_link'))
                                         ->columnSpanFull()
                                         ->url()
-                                        ->helperText('Optional. If empty, the image will not be clickable.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.image_link')),
 
                                     TextInput::make("translations.$language_code.button_url")
-                                        ->label('Button link')
+                                        ->label(__('carousel::admin/modules/carousel.labels.button_link'))
                                         ->columnSpanFull()
                                         ->url()
-                                        ->helperText('Optional. The button is shown only when both text and button link are filled.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.button_link')),
                                 ]),
 
                             Grid::make()
                                 ->schema([
                                     FileUpload::make("translations.$language_code.desktop_image")
-                                        ->label('Desktop image')
+                                        ->label(__('carousel::admin/modules/carousel.labels.desktop_image'))
                                         ->columnSpanFull()
                                         ->image()
                                         ->visibility('public')
@@ -257,10 +257,10 @@ readonly class ModuleInstanceFormSchema
                                             Rule::file()::types(['jpg', 'jpeg', 'png'])
                                                 ->max((int) $this->carousel_config->get('uploads.max_size_kb', 5120)),
                                         ])
-                                        ->helperText('Optional. Upload a desktop slide image for this language. If empty, the storefront fallback strategy will be applied.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.desktop_image')),
 
                                     FileUpload::make("translations.$language_code.mobile_image")
-                                        ->label('Mobile image')
+                                        ->label(__('carousel::admin/modules/carousel.labels.mobile_image'))
                                         ->columnSpanFull()
                                         ->image()
                                         ->visibility('public')
@@ -271,7 +271,7 @@ readonly class ModuleInstanceFormSchema
                                             Rule::file()::types(['jpg', 'jpeg', 'png'])
                                                 ->max((int) $this->carousel_config->get('uploads.max_size_kb', 5120)),
                                         ])
-                                        ->helperText('Optional. Upload a mobile slide image for this language. If empty, the storefront fallback strategy will be applied.'),
+                                        ->helperText(__('carousel::admin/modules/carousel.helpers.mobile_image')),
                                 ]),
                         ]),
                 ]);
@@ -289,7 +289,16 @@ readonly class ModuleInstanceFormSchema
         $page_types = config('page-type', []);
 
         return collect($page_types)
-            ->mapWithKeys(fn (string $value, string $key): array => [$value => ucfirst(str_replace('_', ' ', $key))])
+            ->mapWithKeys(function (string $value, string $key): array {
+                $translation_key = 'carousel::admin/modules/carousel.options.page_types.' . $key;
+                $translated_label = __($translation_key);
+
+                return [
+                    $value => $translated_label !== $translation_key
+                        ? $translated_label
+                        : ucfirst(str_replace('_', ' ', $key)),
+                ];
+            })
             ->all();
     }
 

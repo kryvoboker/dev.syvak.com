@@ -43,7 +43,7 @@ class ModuleSettingsNormalizerService
 
         if (! is_array($slides) || $slides === []) {
             throw ValidationException::withMessages([
-                'settings.slides' => 'At least one slide is required.',
+                'settings.slides' => __('carousel::admin/modules/carousel.validation.at_least_one_slide_is_required'),
             ]);
         }
 
@@ -86,7 +86,7 @@ class ModuleSettingsNormalizerService
     {
         if (! is_array($slide)) {
             throw ValidationException::withMessages([
-                "settings.slides.{$index}" => 'Slide payload must be an array.',
+                "settings.slides.{$index}" => __('carousel::admin/modules/carousel.validation.slide_payload_must_be_an_array'),
             ]);
         }
 
@@ -94,7 +94,7 @@ class ModuleSettingsNormalizerService
 
         if (! is_array($translations)) {
             throw ValidationException::withMessages([
-                "settings.slides.{$index}.translations" => 'Slide translations must be an array.',
+                "settings.slides.{$index}.translations" => __('carousel::admin/modules/carousel.validation.slide_translations_must_be_an_array'),
             ]);
         }
 
@@ -105,7 +105,7 @@ class ModuleSettingsNormalizerService
 
                 if (! is_array($translation)) {
                     throw ValidationException::withMessages([
-                        "settings.slides.{$index}.translations.{$language_code}" => 'Translation payload must be an array.',
+                        "settings.slides.{$index}.translations.{$language_code}" => __('carousel::admin/modules/carousel.validation.translation_payload_must_be_an_array'),
                     ]);
                 }
 
@@ -185,7 +185,7 @@ class ModuleSettingsNormalizerService
 
         if (Storage::fileExists($image_path) === false) {
             throw ValidationException::withMessages([
-                $field => 'Uploaded image was not found in storage.',
+                $field => __('carousel::admin/modules/carousel.validation.uploaded_image_was_not_found_in_storage'),
             ]);
         }
 
@@ -200,7 +200,7 @@ class ModuleSettingsNormalizerService
             ]);
 
             throw ValidationException::withMessages([
-                $field => 'Only JPG and PNG images are allowed.',
+                $field => __('carousel::admin/modules/carousel.validation.only_jpg_and_png_images_are_allowed'),
             ]);
         }
 
@@ -256,7 +256,7 @@ class ModuleSettingsNormalizerService
 
         if (! is_string($stored_path) || blank($stored_path)) {
             throw ValidationException::withMessages([
-                $field => 'Uploaded image could not be persisted.',
+                $field => __('carousel::admin/modules/carousel.validation.uploaded_image_could_not_be_persisted'),
             ]);
         }
 
@@ -277,7 +277,7 @@ class ModuleSettingsNormalizerService
 
         if ($page_types->isEmpty()) {
             throw ValidationException::withMessages([
-                'settings.shared.page_types' => 'Select at least one page type.',
+                'settings.shared.page_types' => __('carousel::admin/modules/carousel.validation.select_at_least_one_page_type'),
             ]);
         }
 
@@ -285,7 +285,7 @@ class ModuleSettingsNormalizerService
 
         if ($invalid_page_types->isNotEmpty()) {
             throw ValidationException::withMessages([
-                'settings.shared.page_types' => 'The selected page types are invalid.',
+                'settings.shared.page_types' => __('carousel::admin/modules/carousel.validation.the_selected_page_types_are_invalid'),
             ]);
         }
 
