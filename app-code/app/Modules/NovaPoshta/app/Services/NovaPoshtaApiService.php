@@ -64,6 +64,8 @@ readonly class NovaPoshtaApiService
      */
     public function call(string $model_name, string $called_method, array $method_properties = []): array
     {
+        sleep($this->getWaihtTimeout());
+
         $response = Http::timeout($this->getTimeout())
             ->acceptJson()
             ->asJson()
@@ -100,6 +102,14 @@ readonly class NovaPoshtaApiService
     private function getTimeout(): int
     {
         return max(1, (int) $this->config->get('api.timeout', 30));
+    }
+
+    /**
+     * @return int
+     */
+    private function getWaihtTimeout(): int
+    {
+        return max(1, (int)$this->config->get('api.wait_timeout', 1));
     }
 
     /**
