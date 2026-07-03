@@ -51,17 +51,17 @@ readonly class ModuleInstanceFormSchema
                 ->schema([
                     TextInput::make('name')
                         ->columnSpanFull()
-                        ->label(__('admin/modules/module_instances.products_carousel.labels.module_name'))
+                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.module_name'))
                         ->maxLength(255)
                         ->required(),
 
                     Select::make('settings.shared.page_types')
-                        ->label(__('admin/modules/module_instances.products_carousel.labels.page_types'))
+                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.page_types'))
                         ->multiple()
                         ->options($this->getPageTypeOptions())
                         ->required()
                         ->native(false)
-                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.page_types')),
+                        ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.page_types')),
 
                     Grid::make()
                         ->columns()
@@ -91,8 +91,8 @@ readonly class ModuleInstanceFormSchema
                     Hidden::make('context_key')
                         ->default(null),
 
-                    Section::make(__('admin/modules/module_instances.products_carousel.sections.shared'))
-                        ->description(__('admin/modules/module_instances.products_carousel.helpers.shared'))
+                    Section::make(__('productscarousel::admin/modules/module_instances.products_carousel.sections.shared'))
+                        ->description(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.shared'))
                         ->columnSpanFull()
                         ->schema([
                             Tabs::make('SharedContentLanguageTabs')
@@ -103,45 +103,45 @@ readonly class ModuleInstanceFormSchema
                             Grid::make(2)
                                 ->schema([
                                     TextInput::make('settings.shared.min_quantity')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.min_quantity'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.min_quantity'))
                                         ->numeric()
                                         ->minValue(1)
                                         ->default((int) $this->products_carousel_config->get('settings.default_min_quantity', 1))
                                         ->required()
-                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.min_quantity')),
+                                        ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.min_quantity')),
 
                                     TextInput::make('settings.shared.products_limit')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.products_limit'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.products_limit'))
                                         ->numeric()
                                         ->minValue(1)
                                         ->default((int) $this->products_carousel_config->get('settings.default_products_limit', 15))
                                         ->required()
-                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.products_limit')),
+                                        ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.products_limit')),
 
                                     TextInput::make('settings.shared.product_image_width')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.product_image_width'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.product_image_width'))
                                         ->numeric()
                                         ->minValue(1)
                                         ->default((int) $this->products_carousel_config->get('settings.default_image_width', 420))
                                         ->required()
-                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.product_image_width')),
+                                        ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.product_image_width')),
 
                                     TextInput::make('settings.shared.product_image_height')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.product_image_height'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.product_image_height'))
                                         ->numeric()
                                         ->minValue(1)
                                         ->default((int) $this->products_carousel_config->get('settings.default_image_height', 420))
                                         ->required()
-                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.product_image_height')),
+                                        ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.product_image_height')),
                                 ]),
                         ]),
 
-                    Section::make(__('admin/modules/module_instances.products_carousel.sections.sorting'))
-                        ->description(__('admin/modules/module_instances.products_carousel.helpers.sorting'))
+                    Section::make(__('productscarousel::admin/modules/module_instances.products_carousel.sections.sorting'))
+                        ->description(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.sorting'))
                         ->columnSpanFull()
                         ->schema([
                             Radio::make('settings.shared.sort_mode')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.sort_mode'))
+                                ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.sort_mode'))
                                 ->options($this->getSortModeOptions())
                                 ->default((string) $this->products_carousel_config->get('settings.default_sort_mode', 'custom'))
                                 ->live()
@@ -154,11 +154,11 @@ readonly class ModuleInstanceFormSchema
                                 })
                                 ->schema([
                                     Radio::make('settings.shared.custom_sort.price')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.custom_sort_price'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.custom_sort_price'))
                                         ->options($this->getSortDirectionOptions())
                                         ->default('none')
                                         ->inline(false)
-                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.custom_sort_options'))
+                                        ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.custom_sort_options'))
                                         ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
                                             if (filled($state)) {
                                                 return;
@@ -168,7 +168,7 @@ readonly class ModuleInstanceFormSchema
                                         }),
 
                                     Radio::make('settings.shared.custom_sort.name')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.custom_sort_name'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.custom_sort_name'))
                                         ->options($this->getSortDirectionOptions())
                                         ->default('none')
                                         ->inline(false)
@@ -181,7 +181,7 @@ readonly class ModuleInstanceFormSchema
                                         }),
 
                                     Radio::make('settings.shared.custom_sort.date_added')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.custom_sort_date_added'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.custom_sort_date_added'))
                                         ->options($this->getSortDirectionOptions())
                                         ->default('none')
                                         ->inline(false)
@@ -194,7 +194,7 @@ readonly class ModuleInstanceFormSchema
                                         }),
 
                                     Radio::make('settings.shared.custom_sort.quantity')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.custom_sort_quantity'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.custom_sort_quantity'))
                                         ->options($this->getSortDirectionOptions())
                                         ->default('none')
                                         ->inline(false)
@@ -208,14 +208,14 @@ readonly class ModuleInstanceFormSchema
                                 ]),
                         ]),
 
-                    Section::make(__('admin/modules/module_instances.products_carousel.sections.source_mode'))
+                    Section::make(__('productscarousel::admin/modules/module_instances.products_carousel.sections.source_mode'))
                         ->columnSpanFull()
                         ->schema([
                             Radio::make('settings.source_mode')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.source_mode'))
+                                ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.source_mode'))
                                 ->options([
-                                    'category_based' => __('admin/modules/module_instances.products_carousel.options.source_mode.category_based'),
-                                    'manual_only' => __('admin/modules/module_instances.products_carousel.options.source_mode.manual_only'),
+                                    'category_based' => __('productscarousel::admin/modules/module_instances.products_carousel.options.source_mode.category_based'),
+                                    'manual_only' => __('productscarousel::admin/modules/module_instances.products_carousel.options.source_mode.manual_only'),
                                 ])
                                 ->default((string) $this->products_carousel_config->get('settings.default_source_mode', 'category_based'))
                                 ->live()
@@ -223,8 +223,8 @@ readonly class ModuleInstanceFormSchema
                                 ->required(),
                         ]),
 
-                    Section::make(__('admin/modules/module_instances.products_carousel.sections.category_based_window'))
-                        ->description(__('admin/modules/module_instances.products_carousel.helpers.category_based_window'))
+                    Section::make(__('productscarousel::admin/modules/module_instances.products_carousel.sections.category_based_window'))
+                        ->description(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.category_based_window'))
                         ->columnSpanFull()
                         ->visible(function (callable $get): bool {
                             return (string) $get('settings.source_mode') === 'category_based';
@@ -233,7 +233,7 @@ readonly class ModuleInstanceFormSchema
                             Grid::make(2)
                                 ->schema([
                                     Toggle::make('settings.category_based.select_all_categories')
-                                        ->label(__('admin/modules/module_instances.products_carousel.actions.select_all_categories'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.actions.select_all_categories'))
                                         ->live()
                                         ->dehydrated(false)
                                         ->afterStateUpdated(function ($state, callable $set): void {
@@ -250,7 +250,7 @@ readonly class ModuleInstanceFormSchema
                                         }),
 
                                     Toggle::make('settings.category_based.clear_all_categories')
-                                        ->label(__('admin/modules/module_instances.products_carousel.actions.clear_all_categories'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.actions.clear_all_categories'))
                                         ->live()
                                         ->dehydrated(false)
                                         ->afterStateUpdated(function ($state, callable $set): void {
@@ -266,7 +266,7 @@ readonly class ModuleInstanceFormSchema
                                 ]),
 
                             CheckboxList::make('settings.category_based.category_ids')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.categories_tree'))
+                                ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.categories_tree'))
                                 ->options($this->products_carousel_category_tree_service->getCheckboxTreeOptions())
                                 ->columns(1)
                                 ->gridDirection('row')
@@ -281,19 +281,19 @@ readonly class ModuleInstanceFormSchema
                                 }),
 
                             Toggle::make('settings.category_based.use_selected_products_only')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.use_selected_products_only'))
+                                ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.use_selected_products_only'))
                                 ->default(false)
                                 ->live(),
 
-                            Section::make(__('admin/modules/module_instances.products_carousel.sections.category_products'))
+                            Section::make(__('productscarousel::admin/modules/module_instances.products_carousel.sections.category_products'))
                                 ->visible(function (callable $get): bool {
                                     return (bool) $get('settings.category_based.use_selected_products_only') === true;
                                 })
                                 ->columnSpanFull()
                                 ->schema([
                                     Select::make('settings.category_based.search_product_id')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.search_products_in_selected_categories'))
-                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.search_products_in_selected_categories'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.search_products_in_selected_categories'))
+                                        ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.search_products_in_selected_categories'))
                                         ->searchable()
                                         ->live(debounce: 300)
                                         ->dehydrated(false)
@@ -334,8 +334,8 @@ readonly class ModuleInstanceFormSchema
                                         }),
 
                                     CheckboxList::make('settings.category_based.selected_product_ids')
-                                        ->label(__('admin/modules/module_instances.products_carousel.labels.selected_products'))
-                                        ->helperText(__('admin/modules/module_instances.products_carousel.helpers.selected_products'))
+                                        ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.selected_products'))
+                                        ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.selected_products'))
                                         ->options(function (callable $get): array {
                                             return $this->products_carousel_product_search_service->getLabelsByIds(
                                                 (array) $get('settings.category_based.selected_product_ids'),
@@ -347,16 +347,16 @@ readonly class ModuleInstanceFormSchema
                                 ]),
                         ]),
 
-                    Section::make(__('admin/modules/module_instances.products_carousel.sections.manual_only_window'))
-                        ->description(__('admin/modules/module_instances.products_carousel.helpers.manual_only_window'))
+                    Section::make(__('productscarousel::admin/modules/module_instances.products_carousel.sections.manual_only_window'))
+                        ->description(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.manual_only_window'))
                         ->columnSpanFull()
                         ->visible(function (callable $get): bool {
                             return (string) $get('settings.source_mode') === 'manual_only';
                         })
                         ->schema([
                             Select::make('settings.manual_only.search_product_id')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.search_all_active_products'))
-                                ->helperText(__('admin/modules/module_instances.products_carousel.helpers.search_all_active_products'))
+                                ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.search_all_active_products'))
+                                ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.search_all_active_products'))
                                 ->searchable()
                                 ->live(debounce: 300)
                                 ->dehydrated(false)
@@ -393,8 +393,8 @@ readonly class ModuleInstanceFormSchema
                                 }),
 
                             CheckboxList::make('settings.manual_only.selected_product_ids')
-                                ->label(__('admin/modules/module_instances.products_carousel.labels.selected_products'))
-                                ->helperText(__('admin/modules/module_instances.products_carousel.helpers.selected_products'))
+                                ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.selected_products'))
+                                ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.selected_products'))
                                 ->options(function (callable $get): array {
                                     return $this->products_carousel_product_search_service->getLabelsByIds(
                                         (array) $get('settings.manual_only.selected_product_ids'),
@@ -422,9 +422,9 @@ readonly class ModuleInstanceFormSchema
                     ->badge($language_code)
                     ->schema([
                         TextInput::make("settings.shared.translations.$language_code.module_name_for_user")
-                            ->label(__('admin/modules/module_instances.products_carousel.labels.module_name_for_user'))
+                            ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.module_name_for_user'))
                             ->maxLength(255)
-                            ->helperText(__('admin/modules/module_instances.products_carousel.helpers.module_name_for_user'))
+                            ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.module_name_for_user'))
                             ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
                                 if (filled($state)) {
                                     return;
@@ -440,10 +440,10 @@ readonly class ModuleInstanceFormSchema
                             }),
 
                         Textarea::make("settings.shared.translations.$language_code.short_description_for_user")
-                            ->label(__('admin/modules/module_instances.products_carousel.labels.short_description_for_user'))
+                            ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.short_description_for_user'))
                             ->rows(3)
                             ->maxLength(1000)
-                            ->helperText(__('admin/modules/module_instances.products_carousel.helpers.short_description_for_user'))
+                            ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.short_description_for_user'))
                             ->afterStateHydrated(function ($component, mixed $state, callable $get): void {
                                 if (filled($state)) {
                                     return;
@@ -482,8 +482,8 @@ readonly class ModuleInstanceFormSchema
     private function getSortModeOptions(): array
     {
         return [
-            'custom' => __('admin/modules/module_instances.products_carousel.options.sort_mode.custom'),
-            'random' => __('admin/modules/module_instances.products_carousel.options.sort_mode.random'),
+            'custom' => __('productscarousel::admin/modules/module_instances.products_carousel.options.sort_mode.custom'),
+            'random' => __('productscarousel::admin/modules/module_instances.products_carousel.options.sort_mode.random'),
         ];
     }
 
@@ -493,9 +493,9 @@ readonly class ModuleInstanceFormSchema
     private function getSortDirectionOptions(): array
     {
         return [
-            'none' => __('admin/modules/module_instances.products_carousel.options.sort_direction.none'),
-            'asc' => __('admin/modules/module_instances.products_carousel.options.sort_direction.asc'),
-            'desc' => __('admin/modules/module_instances.products_carousel.options.sort_direction.desc'),
+            'none' => __('productscarousel::admin/modules/module_instances.products_carousel.options.sort_direction.none'),
+            'asc' => __('productscarousel::admin/modules/module_instances.products_carousel.options.sort_direction.asc'),
+            'desc' => __('productscarousel::admin/modules/module_instances.products_carousel.options.sort_direction.desc'),
         ];
     }
 

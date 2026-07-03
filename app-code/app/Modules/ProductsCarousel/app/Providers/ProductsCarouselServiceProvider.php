@@ -18,4 +18,14 @@ class ProductsCarouselServiceProvider extends ModuleServiceProvider
      */
     // phpcs:ignore
     protected string $nameLower = 'productscarousel';
+
+    protected function registerTranslations(): void
+    {
+        $lang_path = module_path($this->name, 'resources/lang');
+
+        if (is_dir($lang_path)) {
+            $this->loadTranslationsFrom($lang_path, $this->nameLower);
+            $this->loadJsonTranslationsFrom($lang_path);
+        }
+    }
 }

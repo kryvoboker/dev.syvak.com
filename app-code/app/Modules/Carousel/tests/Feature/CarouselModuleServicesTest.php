@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Modules;
+namespace Modules\Carousel\Tests\Feature;
 
 use App\Models\ApplicationSettings\Language;
 use App\Models\Modules\ModuleDefinition;
@@ -28,6 +28,9 @@ class CarouselModuleServicesTest extends TestCase
             'foreign_key_constraints' => true,
         ]);
         config()->set('cache.default', 'array');
+        config()->set('page-type', [
+            'home' => 'home',
+        ]);
 
         DB::purge('sqlite');
         DB::setDefaultConnection('sqlite');
