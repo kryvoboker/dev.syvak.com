@@ -32,8 +32,10 @@ It is intentionally implemented as a **singleton module**: there is one shared c
    - there is no fallback key
    - missing key should be treated as a critical configuration error
 3. Storefront views must stay in `resources/views/storefront/`.
-4. Admin-only page logic belongs in the module Filament namespace.
-5. Keep data language in Ukrainian when reading, storing, and rendering Nova Poshta directory values.
+4. Translations must stay in `resources/lang/`.
+5. Tests must stay in `tests/`.
+6. Admin-only page logic belongs in the module Filament namespace.
+7. Keep data language in Ukrainian when reading, storing, and rendering Nova Poshta directory values.
 
 ## Admin flow
 
@@ -127,6 +129,19 @@ The storefront side:
 - renders HTML fragments for AJAX responses
 - returns regions, cities, post offices, and poshtomats as localized HTML
 
+## Tests and translations
+
+This module owns its tests and translations.
+
+- tests:
+  - `tests/Feature/NovaPoshtaModuleSyncServiceTest.php`
+  - `tests/Unit/`
+- translations:
+  - `resources/lang/en/admin/modules/nova_poshta.php`
+  - `resources/lang/uk/admin/modules/nova_poshta.php`
+
+Keep module-specific tests and translation files inside the module instead of moving them back to the app root.
+
 ## Files to treat with care
 
 - `config/config.php`
@@ -141,6 +156,10 @@ The storefront side:
   - chunked sync state machine
 - `routes/web.php`
   - storefront/AJAX endpoints
+- `resources/lang/`
+  - module translation files
+- `tests/`
+  - module test suite
 
 ## Maintenance checklist
 
@@ -151,7 +170,7 @@ Before changing the module, verify:
 3. The sync page still uses dynamic Filament schema components.
 4. The storefront views remain separate from admin views.
 5. The sync service still rebuilds tables only after full stage collection.
-6. New fields or sync stages are covered by tests.
+6. New fields or sync stages are covered by module tests.
 
 ## Related docs
 
