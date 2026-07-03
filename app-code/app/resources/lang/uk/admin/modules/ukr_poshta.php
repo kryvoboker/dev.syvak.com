@@ -74,6 +74,7 @@ return [
         'districts' => 'Райони',
         'cities' => 'Населені пункти',
         'post_offices' => 'Відділення',
+        'stored' => 'Записів у БД',
     ],
     'notifications' => [
         'sync_started' => 'Синхронізацію Ukr Poshta запущено. Сторінка оновлюватиметься автоматично.',

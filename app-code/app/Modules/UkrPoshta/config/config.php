@@ -29,6 +29,7 @@ return [
         'url' => env('UKR_POSHTA_API_URL') ?? 'https://www.ukrposhta.ua/address-classifier-ws/',
         'timeout' => (int) (env('UKR_POSHTA_TIMEOUT') ?? 30),
         'language' => env('UKR_POSHTA_LANGUAGE') ?? 'UA',
-        'rate_limit_delay' => (int) (env('UKR_POSHTA_RATE_LIMIT_DELAY') ?? 1),
+        'rate_limit_delay' => (int) (env('UKR_POSHTA_RATE_LIMIT_DELAY') ?? 1), // seconds
+        'wait_timeout' => (int) env('UKR_POSHTA_WAIT_TIMEOUT, 1'), // seconds
     ],
 ];

@@ -257,7 +257,7 @@ class UkrPoshtaSyncPage extends Page
         };
         $stage_label = $this->getStageLabel($stage);
         $polling_attribute = $is_running ? ' wire:poll.2s="processSyncStep"' : '';
-        $sync_stats = $this->getSyncStats();
+        $sync_summary_rows = $this->getSyncSummaryRows($is_running);
 
         return '
             <div class="space-y-6"' . $polling_attribute . '>
@@ -291,26 +291,52 @@ class UkrPoshtaSyncPage extends Page
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-4">
-                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.regions'), $sync_stats['regions'] ?? 0) . '
-                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.districts'), ($sync_stats['districts'] ?? 0)) . '
-                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.cities'), ($sync_stats['cities'] ?? 0)) . '
-                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.post_offices'), ($sync_stats['post_offices'] ?? 0)) . '
+                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.regions'), (int) data_get($sync_summary_rows, 'regions.processed', 0), (int) data_get($sync_summary_rows, 'regions.total', 0)) . '
+                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.districts'), (int) data_get($sync_summary_rows, 'districts.processed', 0), (int) data_get($sync_summary_rows, 'districts.total', 0)) . '
+                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.cities'), (int) data_get($sync_summary_rows, 'cities.processed', 0), (int) data_get($sync_summary_rows, 'cities.total', 0)) . '
+                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.post_offices'), (int) data_get($sync_summary_rows, 'post_offices.processed', 0), (int) data_get($sync_summary_rows, 'post_offices.total', 0)) . '
                 </div>
             </div>
         ';
     }
 
     /**
-     * @return array<string, int>
+     * @return array<string, array{processed:int,total:int,imported:int}>
      */
-    private function getSyncStats(): array
+    private function getSyncSummaryRows(bool $preferQueuedSummary = true): array
     {
-        return [
-            'regions' => UkrPoshtaRegion::query()->count(),
-            'districts' => UkrPoshtaDistrict::query()->count(),
-            'cities' => UkrPoshtaCity::query()->count(),
-            'post_offices' => UkrPoshtaPostOffice::query()->count(),
-        ];
+        if ($preferQueuedSummary && Arr::get($this->sync_state, 'summary', []) !== []) {
+            return $this->normalizeSummaryRows((array) Arr::get($this->sync_state, 'summary', []));
+        }
+
+        $last_sync_summary = Cache::get('ukr_poshta.last_sync_summary', []);
+
+        if (! is_array($last_sync_summary) || $last_sync_summary === []) {
+            return $this->normalizeSummaryRows([]);
+        }
+
+        return $this->normalizeSummaryRows([
+            'regions' => [
+                'processed' => (int) data_get($last_sync_summary, 'regions.imported', 0),
+                'total' => (int) data_get($last_sync_summary, 'regions.imported', 0),
+                'imported' => (int) data_get($last_sync_summary, 'regions.imported', 0),
+            ],
+            'districts' => [
+                'processed' => (int) data_get($last_sync_summary, 'districts.imported', 0),
+                'total' => (int) data_get($last_sync_summary, 'districts.imported', 0),
+                'imported' => (int) data_get($last_sync_summary, 'districts.imported', 0),
+            ],
+            'cities' => [
+                'processed' => (int) data_get($last_sync_summary, 'cities.imported', 0),
+                'total' => (int) data_get($last_sync_summary, 'cities.imported', 0),
+                'imported' => (int) data_get($last_sync_summary, 'cities.imported', 0),
+            ],
+            'post_offices' => [
+                'processed' => (int) data_get($last_sync_summary, 'post_offices.imported', 0),
+                'total' => (int) data_get($last_sync_summary, 'post_offices.imported', 0),
+                'imported' => (int) data_get($last_sync_summary, 'post_offices.imported', 0),
+            ],
+        ]);
     }
 
     /**
@@ -318,30 +344,52 @@ class UkrPoshtaSyncPage extends Page
      */
     private function renderLastSyncSummary(): string
     {
-        $last_sync_summary = Cache::get('ukr_poshta.last_sync_summary', []);
+        return $this->renderCurrentStateTable($this->getDatabaseStateRows());
+    }
 
-        if (! is_array($last_sync_summary) || $last_sync_summary === []) {
+    private function renderStatCard(string $label, int $processed, int $total): string
+    {
+        return '
+            <div class="rounded-lg border p-4">
+                <div class="text-xs uppercase tracking-wide">' . e($label) . '</div>
+                <div class="mt-2 text-2xl font-semibold">' . e((string) $processed) . ' / ' . e((string) $total) . '</div>
+            </div>
+        ';
+    }
+
+    /**
+     * @return array<int, array{label:string,count:int}>
+     */
+    private function getDatabaseStateRows(): array
+    {
+        return [
+            ['label' => __('admin/modules/ukr_poshta.stats.regions'), 'count' => UkrPoshtaRegion::query()->count()],
+            ['label' => __('admin/modules/ukr_poshta.stats.districts'), 'count' => UkrPoshtaDistrict::query()->count()],
+            ['label' => __('admin/modules/ukr_poshta.stats.cities'), 'count' => UkrPoshtaCity::query()->count()],
+            ['label' => __('admin/modules/ukr_poshta.stats.post_offices'), 'count' => UkrPoshtaPostOffice::query()->count()],
+        ];
+    }
+
+    /**
+     * @param  array<int, array{label:string,count:int}>  $rows
+     */
+    private function renderCurrentStateTable(array $rows): string
+    {
+        if ($rows === []) {
             return '<p class="text-sm text-gray-600">' . e(__('admin/modules/ukr_poshta.sections.summary.empty')) . '</p>';
         }
-
-        $rows = [
-            ['label' => __('admin/modules/ukr_poshta.stats.regions'), 'value' => (int) data_get($last_sync_summary, 'regions.imported', 0)],
-            ['label' => __('admin/modules/ukr_poshta.stats.districts'), 'value' => (int) data_get($last_sync_summary, 'districts.imported', 0)],
-            ['label' => __('admin/modules/ukr_poshta.stats.cities'), 'value' => (int) data_get($last_sync_summary, 'cities.imported', 0)],
-            ['label' => __('admin/modules/ukr_poshta.stats.post_offices'), 'value' => (int) data_get($last_sync_summary, 'post_offices.imported', 0)],
-        ];
 
         $html = '<div class="overflow-hidden rounded-xl border shadow-sm">';
         $html .= '<table class="min-w-full divide-y text-sm">';
         $html .= '<thead class="border-b"><tr>';
         $html .= '<th class="px-4 py-3 text-left font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.stage')) . '</th>';
-        $html .= '<th class="px-4 py-3 text-right font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.processed_rows')) . '</th>';
+        $html .= '<th class="px-4 py-3 text-right font-medium">' . e(__('admin/modules/ukr_poshta.stats.stored')) . '</th>';
         $html .= '</tr></thead><tbody class="divide-y">';
 
         foreach ($rows as $row) {
             $html .= '<tr>';
             $html .= '<td class="px-4 py-3">' . e((string) $row['label']) . '</td>';
-            $html .= '<td class="px-4 py-3 text-right font-medium">' . e((string) $row['value']) . '</td>';
+            $html .= '<td class="px-4 py-3 text-right font-medium">' . e((string) $row['count']) . '</td>';
             $html .= '</tr>';
         }
 
@@ -350,14 +398,17 @@ class UkrPoshtaSyncPage extends Page
         return $html;
     }
 
-    private function renderStatCard(string $label, int $value): string
+    /**
+     * @return array<string, array{processed:int,total:int,imported:int}>
+     */
+    private function normalizeSummaryRows(array $rows): array
     {
-        return '
-            <div class="rounded-lg border p-4">
-                <div class="text-xs uppercase tracking-wide">' . e($label) . '</div>
-                <div class="mt-2 text-2xl font-semibold">' . e((string) $value) . '</div>
-            </div>
-        ';
+        return array_replace_recursive([
+            'regions' => ['processed' => 0, 'total' => 0, 'imported' => 0],
+            'districts' => ['processed' => 0, 'total' => 0, 'imported' => 0],
+            'cities' => ['processed' => 0, 'total' => 0, 'imported' => 0],
+            'post_offices' => ['processed' => 0, 'total' => 0, 'imported' => 0],
+        ], $rows);
     }
 
     private function getStageLabel(string $stage): string
