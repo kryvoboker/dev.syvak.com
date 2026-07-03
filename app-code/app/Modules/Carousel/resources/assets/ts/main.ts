@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
         return;
     }
 
-    import('@carousel-ts/features/mainCarousel.ts')
-        .then((module): void => {
-            module.handleMainCarousel();
-        });
+    import('@carousel-ts/features/mainCarousel.ts').then((module): void => {
+        module.handleMainCarousel();
+    });
 });

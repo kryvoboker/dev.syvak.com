@@ -1,16 +1,22 @@
+import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
+import { $_ERROR_CLASS_NAME, $DEBOUNCE_DELAY, $LOADER_CLASS_NAME } from '@ts-shared/lib/constants.ts';
 import {
-    addClass, debounce, fetchFunc, findArrayElems, findElem,
-    httpBuildQueryString, isEmpty, redirect, sprintF, toggleElement
-}                               from "@ts-shared/lib/helpers.ts";
-import { initAccordion }        from "@ts-shared/accordion/initAccordion.ts";
-import type { API }             from "nouislider";
-import noUiSlider               from "nouislider";
-import wNumb                    from "wnumb";
-import {
-    $_ERROR_CLASS_NAME, $DEBOUNCE_DELAY, $LOADER_CLASS_NAME
-}                               from "@ts-shared/lib/constants.ts";
-import type { URLParamsType }   from "@ts-types/httpQueryBuild.ts";
-import type { WindowAppParams } from "@ts-types/global";
+    addClass,
+    debounce,
+    fetchFunc,
+    findArrayElems,
+    findElem,
+    httpBuildQueryString,
+    isEmpty,
+    redirect,
+    sprintF,
+    toggleElement,
+} from '@ts-shared/lib/helpers.ts';
+import type { WindowAppParams } from '@ts-types/global';
+import type { URLParamsType } from '@ts-types/httpQueryBuild.ts';
+import type { API } from 'nouislider';
+import noUiSlider from 'nouislider';
+import wNumb from 'wnumb';
 
 interface FireSearchProductsEventResponseType {
     success: boolean;
@@ -18,10 +24,10 @@ interface FireSearchProductsEventResponseType {
     message?: string;
 }
 
-const CHECKED_INPUTS_SELECTOR: string    = '[data-filter-item-code]:checked';
-const CATEGORY_FILTER_DRAWER             = <HTMLElement | null>findElem('#category-filter-drawer');
+const CHECKED_INPUTS_SELECTOR: string = '[data-filter-item-code]:checked';
+const CATEGORY_FILTER_DRAWER = <HTMLElement | null>findElem('#category-filter-drawer');
 const WINDOW_APP_PARAMS: WindowAppParams = window.app_params ?? {};
-let COUNT_UPDATE_NO_UI_SLIDER: number    = 0;
+let COUNT_UPDATE_NO_UI_SLIDER: number = 0;
 let INPUT_PRICE_FROM: HTMLInputElement | null;
 let INPUT_PRICE_TO: HTMLInputElement | null;
 let FILTER_GROUPS_ELS: HTMLElement[] | [];
@@ -32,7 +38,7 @@ let APPLY_BTN_EL: HTMLButtonElement | null;
 let LOADER_EL: HTMLElement | null;
 
 const normalizePrice = (price: string): number => {
-    return parseInt(price.replace(/\D/g, ''));
+    return parseInt(price.replace(/\D/g, ''), 10);
 };
 
 function handleNoUiSlider(): void {
@@ -45,31 +51,31 @@ function handleNoUiSlider(): void {
     const filterRangeData = WINDOW_APP_PARAMS?.catalog_filter_price_data?.range;
 
     const inputs: HTMLInputElement[] = [INPUT_PRICE_TO, INPUT_PRICE_FROM];
-    const startMin: number           = +(filterRangeData?.selected_from ?? filterRangeData?.min ?? 0);
-    const startMax: number           = +(filterRangeData?.selected_to ?? filterRangeData?.max ?? 0);
-    const step: number               = +(filterRangeData?.step ?? 1);
+    const startMin: number = +(filterRangeData?.selected_from ?? filterRangeData?.min ?? 0);
+    const startMax: number = +(filterRangeData?.selected_to ?? filterRangeData?.max ?? 0);
+    const step: number = +(filterRangeData?.step ?? 1);
 
     const NO_UI_SLIDER_API: API = noUiSlider.create(stepsSlider, {
-        start:  [startMin, startMax],
-        step:   step,
-        range:  {
-            'min': [startMin],
-            'max': [startMax]
+        start: [startMin, startMax],
+        step: step,
+        range: {
+            min: [startMin],
+            max: [startMax],
         },
         format: wNumb({
             decimals: 0,
-            prefix:   (stepsSlider?.dataset.currencySign ?? '') + ' ',
-        })
+            prefix: `${stepsSlider?.dataset.currencySign ?? ''} `,
+        }),
     });
 
-    NO_UI_SLIDER_API.on('update', function (values: (string | number)[], handle: number): void {
+    NO_UI_SLIDER_API.on('update', (values: (string | number)[], handle: number): void => {
         const value: string = values[handle] as string;
 
         if (handle) {
-            // @ts-ignore
+            // @ts-expect-error
             INPUT_PRICE_FROM.value = value;
         } else {
-            // @ts-ignore
+            // @ts-expect-error
             INPUT_PRICE_TO.value = value;
         }
 
@@ -80,14 +86,14 @@ function handleNoUiSlider(): void {
         }
     });
 
-    inputs.forEach(function (input: HTMLInputElement, handle: number): void {
+    inputs.forEach((input: HTMLInputElement, handle: number): void => {
         input.addEventListener('change', function () {
             NO_UI_SLIDER_API.setHandle(handle, this.value);
         });
 
         input.addEventListener('keydown', function (e: KeyboardEvent): void {
-            const values        = NO_UI_SLIDER_API.get();
-            // @ts-ignore
+            const values = NO_UI_SLIDER_API.get();
+            // @ts-expect-error
             const value: number = Number(values[handle]);
 
             // [[handle0_down, handle0_up], [handle1_down, handle1_up]]
@@ -96,7 +102,7 @@ function handleNoUiSlider(): void {
             // [down, up]
             const step = steps[handle];
 
-            let position;
+            let position: number | false | null = null;
 
             // 13 is enter,
             // 38 is key up,
@@ -156,11 +162,11 @@ const processCollectUrlParams = (): URLParamsType => {
     }
 
     const priceFrom: number = normalizePrice(INPUT_PRICE_TO?.value ?? '');
-    const priceTo: number   = normalizePrice(INPUT_PRICE_FROM?.value ?? '');
+    const priceTo: number = normalizePrice(INPUT_PRICE_FROM?.value ?? '');
 
-    if (!isNaN(priceFrom) && !isNaN(priceTo)) {
+    if (!Number.isNaN(priceFrom) && !Number.isNaN(priceTo)) {
         urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.from_key ?? 'price_from'] = priceFrom;
-        urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.to_key ?? 'price_to']     = priceTo;
+        urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.to_key ?? 'price_to'] = priceTo;
     }
 
     return urlParams;
@@ -180,20 +186,21 @@ const fireSearchProductsEvent = (): void => {
 
     toggleElement(LOADER_EL, true);
 
-    fetchFunc(WINDOW_APP_PARAMS?.catalog_filter_ajax_url + '?' + urlQueries, {}, 'GET')
+    fetchFunc<FireSearchProductsEventResponseType>(
+        `${WINDOW_APP_PARAMS?.catalog_filter_ajax_url}?${urlQueries}`,
+        {},
+        'GET',
+    )
         .then((json: FireSearchProductsEventResponseType): void => {
             if (json.success && json.total_products !== undefined) {
                 const totalResults: number = json.total_products;
 
                 if (RESULTS_EL) {
-                    RESULTS_EL.textContent = sprintF(
-                        RESULTS_EL.dataset.template ?? '%d products found',
-                        totalResults
-                    );
+                    RESULTS_EL.textContent = sprintF(RESULTS_EL.dataset.template ?? '%d products found', totalResults);
 
                     if (json.total_products > 0) {
                         APPLY_BTN_EL?.addEventListener('click', (): void => {
-                            redirect(location.origin + location.pathname + '?' + urlQueries);
+                            redirect(`${location.origin}${location.pathname}?${urlQueries}`);
                         });
 
                         toggleElement(APPLY_BTN_EL, true);
@@ -216,7 +223,7 @@ const fireSearchProductsEvent = (): void => {
                 }
             }
         })
-        .catch(err => console.error('err: ', err))
+        .catch((err) => console.error('err: ', err))
         .finally((): void => toggleElement(LOADER_EL, false));
 };
 
@@ -224,7 +231,7 @@ const fireSearchProductsEventDebounce = debounce(fireSearchProductsEvent, $DEBOU
 
 function handleFilters(): void {
     for (const filterGroupEl of FILTER_GROUPS_ELS) {
-        const filterInputsEls        = <HTMLInputElement[] | []>findArrayElems('[data-filter-item-code]', filterGroupEl);
+        const filterInputsEls = <HTMLInputElement[] | []>findArrayElems('[data-filter-item-code]', filterGroupEl);
         const filterGroupKey: string = filterGroupEl.dataset.filterGroupGetKey ?? '';
 
         if (isEmpty(filterGroupKey)) {
@@ -234,7 +241,7 @@ function handleFilters(): void {
         }
 
         filterInputsEls.forEach((filterInputEl: HTMLInputElement): void => {
-            filterInputEl.addEventListener('change', function (): void {
+            filterInputEl.addEventListener('change', (): void => {
                 fireSearchProductsEventDebounce();
             });
         });
@@ -243,7 +250,9 @@ function handleFilters(): void {
 
 const handleClearAllChoosenFilters = (): void => {
     CLEAR_ALL_BTN_EL?.addEventListener('click', (): void => {
-        const checkedInputsEls = <HTMLInputElement[] | []>findArrayElems(CHECKED_INPUTS_SELECTOR, CATEGORY_FILTER_DRAWER);
+        const checkedInputsEls = <HTMLInputElement[] | []>(
+            findArrayElems(CHECKED_INPUTS_SELECTOR, CATEGORY_FILTER_DRAWER)
+        );
 
         checkedInputsEls.forEach((input: HTMLInputElement): void => {
             input.checked = false;
@@ -259,14 +268,14 @@ export const handleProductsFilter = (): void => {
         return;
     }
 
-    INPUT_PRICE_FROM            = <HTMLInputElement | null>findElem('#category-filter-steps-input-from');
-    INPUT_PRICE_TO              = <HTMLInputElement | null>findElem('#category-filter-steps-input-to');
-    FILTER_GROUPS_ELS           = <HTMLElement[] | []>findArrayElems('[data-filter-group-get-key]', CATEGORY_FILTER_DRAWER);
-    RESULTS_EL                  = <HTMLElement | null>findElem('#category-filter-total-results', CATEGORY_FILTER_DRAWER);
-    CLEAR_ALL_BTN_EL            = <HTMLButtonElement | null>findElem('#category-filter-clear-all-btn', CATEGORY_FILTER_DRAWER);
-    APPLY_BTN_EL                = <HTMLButtonElement | null>findElem('#category-filter-apply-btn', CATEGORY_FILTER_DRAWER);
+    INPUT_PRICE_FROM = <HTMLInputElement | null>findElem('#category-filter-steps-input-from');
+    INPUT_PRICE_TO = <HTMLInputElement | null>findElem('#category-filter-steps-input-to');
+    FILTER_GROUPS_ELS = <HTMLElement[] | []>findArrayElems('[data-filter-group-get-key]', CATEGORY_FILTER_DRAWER);
+    RESULTS_EL = <HTMLElement | null>findElem('#category-filter-total-results', CATEGORY_FILTER_DRAWER);
+    CLEAR_ALL_BTN_EL = <HTMLButtonElement | null>findElem('#category-filter-clear-all-btn', CATEGORY_FILTER_DRAWER);
+    APPLY_BTN_EL = <HTMLButtonElement | null>findElem('#category-filter-apply-btn', CATEGORY_FILTER_DRAWER);
     CATEGORY_FILTER_CONTROLS_EL = <HTMLElement | null>findElem('#category-filter-controls', CATEGORY_FILTER_DRAWER);
-    LOADER_EL                   = <HTMLElement | null>findElem('.' + $LOADER_CLASS_NAME, CATEGORY_FILTER_DRAWER);
+    LOADER_EL = <HTMLElement | null>findElem(`.${$LOADER_CLASS_NAME}`, CATEGORY_FILTER_DRAWER);
 
     handleNoUiSlider();
 

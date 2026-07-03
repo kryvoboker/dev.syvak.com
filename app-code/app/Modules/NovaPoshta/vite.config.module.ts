@@ -1,6 +1,5 @@
-import path              from 'node:path';
+import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dirname }       from 'node:path';
 
 export interface ModuleViteConfig {
     moduleName: string;
@@ -16,25 +15,25 @@ export interface ModuleViteConfig {
 // This is necessary because ESM does not have __dirname and __filename by default
 // And we can't use debagger to resolve them
 const __filename: string = fileURLToPath(import.meta.url);
-const __dirname: string  = dirname(__filename);
+const __dirname: string = dirname(__filename);
 
 const moduleRootPath: string = __dirname;
 
 export const moduleViteConfig: ModuleViteConfig = {
     moduleName: 'NovaPoshta',
-    refresh:    [
+    refresh: [
         'Modules/NovaPoshta/resources/views/**',
         'Modules/NovaPoshta/resources/assets/css/**',
         'Modules/NovaPoshta/resources/assets/ts/**',
         'Modules/NovaPoshta/app/**',
         'Modules/NovaPoshta/routes/**',
     ],
-    alias:      {
-        '@nova-poshta-ts':  path.resolve(moduleRootPath, 'resources/assets/ts'),
+    alias: {
+        '@nova-poshta-ts': path.resolve(moduleRootPath, 'resources/assets/ts'),
         '@nova-poshta-css': path.resolve(moduleRootPath, 'resources/assets/css'),
     },
-    inject:     {
+    inject: {
         css: ['resources/assets/css/main.css'],
-        ts:  ['resources/assets/ts/main.ts'],
+        ts: ['resources/assets/ts/main.ts'],
     },
 };

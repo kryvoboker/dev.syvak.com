@@ -1,5 +1,5 @@
-import type { CartMode, CartMutationResponse } from "@ts-features/cart/cartTypes.ts";
-import { findElem }                            from "@ts-shared/lib/helpers.ts";
+import type { CartMode, CartMutationResponse } from '@ts-features/cart/cartTypes.ts';
+import { findElem } from '@ts-shared/lib/helpers.ts';
 
 const cartFormFieldNames: string[] = ['first_name', 'last_name', 'phone'];
 const errorClasses: string[] = ['border-light-red/40', 'bg-light-red/10', 'text-light-red'];

@@ -2,6 +2,12 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
+            "flyonui/flyonui": [
+                "./resources/assets/catalog/ts/types/vendor/flyonui/flyonui.d.ts"
+            ],
+            "flyonui/src/js/plugins/*": [
+                "./resources/assets/catalog/ts/types/vendor/flyonui/src/js/plugins/*"
+            ],
             "@ts-shared/*": [
                 "./resources/assets/catalog/ts/shared/*"
             ],
@@ -45,6 +51,7 @@
         "noImplicitAny": true,
         // maybe it need remove
         "allowJs": true,
+        "ignoreDeprecations": "6.0",
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
         "resolveJsonModule": true,
@@ -59,10 +66,7 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
         "types": [
-            "node",
-            "@types/node",
-            "./resources/assets/catalog/ts/types/global.d.ts",
-            "./Modules/**/resources/assets/ts/types/**/*.d.ts",
+            "node"
         ],
         "typeRoots": [
             "node_modules/@types"
@@ -70,10 +74,12 @@
     },
     "include": [
         "./resources/assets/catalog/ts/**/*.ts",
+        "./resources/assets/catalog/ts/**/*.d.ts",
         "./vite.config.ts",
         "./vite-env.d.ts",
         "./Modules/**/vite.config.module.ts",
         "./Modules/**/resources/assets/ts/**/*.ts",
+        "./Modules/**/resources/assets/ts/**/*.d.ts",
         "vite-plugins/**/*"
     ],
     "exclude": [

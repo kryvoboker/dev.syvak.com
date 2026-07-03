@@ -1,19 +1,23 @@
-import type { CartMode }                from "@ts-features/cart/cartTypes.ts";
 import {
-    addCartItem, loadCartSnapshot, removeCartItem,
-    toggleCartLoader, updateCartItemQuantity
-}                                       from "@ts-features/cart/cartCrud.ts";
-import { getCartMode, setCartMode }     from "@ts-features/cart/cartModeStorage.ts";
-import { initAccordion }                from "@ts-shared/accordion/initAccordion.ts";
-import { initDrawer }                                            from "@ts-shared/drawer/initDrawer.ts";
-import { findElem, findArrayElems, getClosestParentEl, sprintF } from "@ts-shared/lib/helpers.ts";
-import { Cart }                                                  from "@ts-features/cart/constants.ts";
+    addCartItem,
+    loadCartSnapshot,
+    removeCartItem,
+    toggleCartLoader,
+    updateCartItemQuantity,
+} from '@ts-features/cart/cartCrud.ts';
+import { getCartMode, setCartMode } from '@ts-features/cart/cartModeStorage.ts';
+import type { CartMode } from '@ts-features/cart/cartTypes.ts';
+import { Cart } from '@ts-features/cart/constants.ts';
+import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
+import { initDrawer } from '@ts-shared/drawer/initDrawer.ts';
+import { findArrayElems, findElem, getClosestParentEl, sprintF } from '@ts-shared/lib/helpers.ts';
+
 import $FAST_ORDER = Cart.$FAST_ORDER;
 import $REGULAR = Cart.$REGULAR;
 
 const openSelectedCartDrawer = async (mode: CartMode): Promise<void> => {
     const selector = mode === $FAST_ORDER ? '.open-cart-modal-fast-order-trigger' : '.open-cart-modal-regular-trigger';
-    const trigger  = <HTMLButtonElement | null>findElem(selector);
+    const trigger = <HTMLButtonElement | null>findElem(selector);
 
     if (!trigger) {
         return;
@@ -23,8 +27,7 @@ const openSelectedCartDrawer = async (mode: CartMode): Promise<void> => {
 
     toggleCartLoader(true);
 
-    await loadCartSnapshot(mode)
-        .finally((): void => toggleCartLoader(false));
+    await loadCartSnapshot(mode).finally((): void => toggleCartLoader(false));
 
     const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
 
@@ -42,7 +45,9 @@ const updateSelectedCartItemsSummary = (mode: CartMode): void => {
         return;
     }
 
-    const itemCheckboxes = <HTMLInputElement[] | []>findArrayElems('[data-cart-item-select]', cartRoot) as HTMLInputElement[];
+    const itemCheckboxes = (<HTMLInputElement[] | []>(
+        findArrayElems('[data-cart-item-select]', cartRoot)
+    )) as HTMLInputElement[];
     const selectAllCheckbox = <HTMLInputElement | null>findElem('[data-cart-select-all]', cartRoot);
     const summaryElement = <HTMLElement | null>findElem('[data-cart-selected-summary]', cartRoot);
 
@@ -56,7 +61,7 @@ const updateSelectedCartItemsSummary = (mode: CartMode): void => {
     }
 
     if (summaryElement) {
-        const template:string = summaryElement.dataset.template ?? 'Вибрано %d з %d';
+        const template: string = summaryElement.dataset.template ?? 'Вибрано %d з %d';
 
         summaryElement.textContent = sprintF(template, selectedCount, totalCount);
     }
@@ -74,15 +79,15 @@ const bindAddToCartButtons = (): void => {
     document.body.dataset.cartAddBound = '1';
 
     document.addEventListener('click', async (event: Event): Promise<void> => {
-        const target          = event.target as HTMLElement;
-        const regularButton   = <HTMLElement | null>getClosestParentEl('[data-add-to-cart]', target);
+        const target = event.target as HTMLElement;
+        const regularButton = <HTMLElement | null>getClosestParentEl('[data-add-to-cart]', target);
         const fastOrderButton = <HTMLElement | null>getClosestParentEl('[data-fast-order]', target);
 
         if (regularButton === null && fastOrderButton === null) {
             return;
         }
 
-        const isFastOrder: boolean             = fastOrderButton !== null;
+        const isFastOrder: boolean = fastOrderButton !== null;
         const sourceButton: HTMLElement | null = isFastOrder ? fastOrderButton : regularButton;
 
         if (!sourceButton) {
@@ -92,7 +97,7 @@ const bindAddToCartButtons = (): void => {
         const rawVariantId: string | undefined = isFastOrder
             ? fastOrderButton?.dataset?.fastOrder
             : regularButton?.dataset?.addToCart;
-        const variantId: number                = Number(rawVariantId ?? 0);
+        const variantId: number = Number(rawVariantId ?? 0);
 
         if (!Number.isInteger(variantId) || variantId <= 0) {
             return;
@@ -103,8 +108,7 @@ const bindAddToCartButtons = (): void => {
         setCartMode(mode);
         toggleCartLoader(true);
 
-        await addCartItem(variantId, mode)
-            .finally((): void => toggleCartLoader(false));
+        await addCartItem(variantId, mode).finally((): void => toggleCartLoader(false));
 
         await openSelectedCartDrawer(mode);
     });
@@ -118,7 +122,7 @@ const bindMutationHandlers = (): void => {
     document.body.dataset.cartMutationBound = '1';
 
     document.addEventListener('change', async (event: Event): Promise<void> => {
-        const target        = event.target as HTMLElement;
+        const target = event.target as HTMLElement;
         const itemSelectCheckbox = <HTMLInputElement | null>getClosestParentEl('[data-cart-item-select]', target);
         const selectAllCheckbox = <HTMLInputElement | null>getClosestParentEl('[data-cart-select-all]', target);
 
@@ -136,7 +140,9 @@ const bindMutationHandlers = (): void => {
             const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', selectAllCheckbox);
 
             if (cartRoot) {
-                const itemCheckboxes = <HTMLInputElement[] | []>findArrayElems('[data-cart-item-select]', cartRoot) as HTMLInputElement[];
+                const itemCheckboxes = (<HTMLInputElement[] | []>(
+                    findArrayElems('[data-cart-item-select]', cartRoot)
+                )) as HTMLInputElement[];
 
                 itemCheckboxes.forEach((checkbox: HTMLInputElement): void => {
                     checkbox.checked = selectAllCheckbox.checked;
@@ -163,8 +169,7 @@ const bindMutationHandlers = (): void => {
 
         toggleCartLoader(true);
 
-        await updateCartItemQuantity(cartId, Math.max(1, quantity), mode)
-            .finally((): void => toggleCartLoader(false));
+        await updateCartItemQuantity(cartId, Math.max(1, quantity), mode).finally((): void => toggleCartLoader(false));
 
         const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
 
@@ -176,8 +181,10 @@ const bindMutationHandlers = (): void => {
     });
 
     document.addEventListener('click', async (event: Event): Promise<void> => {
-        const target       = event.target as HTMLElement;
-        const removeSelectedButton = <HTMLElement | null>getClosestParentEl('[data-remove-selected-cart-items]', target);
+        const target = event.target as HTMLElement;
+        const removeSelectedButton = <HTMLElement | null>(
+            getClosestParentEl('[data-remove-selected-cart-items]', target)
+        );
 
         if (removeSelectedButton) {
             const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', removeSelectedButton);
@@ -187,7 +194,9 @@ const bindMutationHandlers = (): void => {
             }
 
             const mode: CartMode = (cartRoot.dataset.cartMode as CartMode) ?? getCartMode();
-            const selectedCheckboxes = (<HTMLInputElement[] | []>findArrayElems('[data-cart-item-select]:checked', cartRoot) as HTMLInputElement[]);
+            const selectedCheckboxes = (<HTMLInputElement[] | []>(
+                findArrayElems('[data-cart-item-select]:checked', cartRoot)
+            )) as HTMLInputElement[];
             const selectedCartIds = selectedCheckboxes
                 .map((checkbox: HTMLInputElement): number => Number(checkbox.dataset.cartId ?? 0))
                 .filter((cartId: number): boolean => Number.isInteger(cartId) && cartId > 0);
@@ -232,8 +241,7 @@ const bindMutationHandlers = (): void => {
 
         toggleCartLoader(true);
 
-        await removeCartItem(cartId, mode)
-            .finally((): void => toggleCartLoader(false));
+        await removeCartItem(cartId, mode).finally((): void => toggleCartLoader(false));
 
         const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
 
@@ -263,12 +271,12 @@ const bindOpenCartButton = (): void => {
 
 export const handleCartModal = (): void => {
     initDrawer({
-        drawerSelector:  '#cart-modal',
+        drawerSelector: '#cart-modal',
         triggerSelector: '.open-cart-modal-regular-trigger',
     });
 
     initDrawer({
-        drawerSelector:  '#fast-order-cart-modal',
+        drawerSelector: '#fast-order-cart-modal',
         triggerSelector: '.open-cart-modal-fast-order-trigger',
     });
 

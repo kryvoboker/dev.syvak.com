@@ -12,9 +12,15 @@
     },
     "scripts": {
         "build": "cross-env NODE_ENV=production vite build",
-        "dev": "DEBUG=vite:* vite"
+        "dev": "DEBUG=vite:* vite",
+        "ts:check": "biome check . && tsc --noEmit -p tsconfig.json",
+        "ts:fix": "biome check --write .",
+        "ts:format": "biome format --write .",
+        "ts:lint": "biome lint .",
+        "ts:typecheck": "tsc --noEmit -p tsconfig.json"
     },
     "devDependencies": {
+        "@biomejs/biome": "^2.5.2",
         "@iconify-json/tabler": "^1.2.33",
         "@iconify/json": "^2.2.468",
         "@iconify/tailwind4": "^1.2.3",
@@ -26,6 +32,7 @@
         "@types/nouislider": "^15.0.0",
         "@types/wnumb": "^1.2.3",
         "cross-env": "^10.1.0",
+        "knip": "^6.24.0",
         "laravel-vite-plugin": "^3.1.0",
         "postcss": "^8.5.12",
         "sass-embedded": "^1.99.0",

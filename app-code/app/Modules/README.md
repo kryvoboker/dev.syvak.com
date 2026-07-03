@@ -181,6 +181,8 @@ If a module should work like `Carousel` or `ProductsCarousel`, follow the curren
 
 and do not add a second independent lazy-loading system inside the module.
 
+Module-owned TypeScript under `Modules/**/resources/assets/ts/` is part of the storefront quality flow and should pass `npm run ts:check`.
+
 If a module should work like `NovaPoshta`, keep it singleton-based and route its admin behavior through dedicated Filament pages and global configs instead of module instances.
 
 ## Related docs

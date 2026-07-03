@@ -23,7 +23,7 @@ php artisan serve
 - **Filament admin** for products, categories, filters, settings, and localized content.
 - **Multilingual content** with dynamic locale handling and DB-backed language data.
 - **SEO-aware routing** for category/product slugs and variant slugs.
-- **Quality tooling** with Larastan, Pint, and PHPUnit.
+- **Quality tooling** with Larastan, Pint, PHPUnit, Biome, and TypeScript type checking.
 
 ## Example
 
@@ -54,7 +54,7 @@ GET /uk/category/{slug}/load-more
 | [Modules Guide](app-code/app/Modules/README.md)                | Module registration, loading, and singleton module rules |
 | [NovaPoshta Module](app-code/app/Modules/NovaPoshta/README.md) | Module-specific sync, admin, and checkout integration notes |
 | [UkrPoshta Module](app-code/app/Modules/UkrPoshta/README.md)   | Module-specific sync, admin, and checkout integration notes |
-| [Testing](app-code/app/docs/testing.md)                        | PHPUnit, Larastan, Pint workflows |
+| [Testing](app-code/app/docs/testing.md)                        | PHPUnit, Larastan, Pint, Biome, and TypeScript workflows |
 | [Deployment](app-code/app/docs/deployment.md)                  | Docker-based deployment and production checklist |
 
 ## License

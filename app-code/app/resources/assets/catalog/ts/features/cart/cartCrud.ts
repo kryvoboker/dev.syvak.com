@@ -1,18 +1,15 @@
-import type { CartMode, CartMutationResponse } from "@ts-features/cart/cartTypes.ts";
-import {
-    fetchFunc, findElem, findArrayElems,
-    toggleElement, isEmpty
-}                                              from "@ts-shared/lib/helpers.ts";
-import type { WindowAppParams }                from "@ts-types/global";
-import { getAppParam }                         from "@ts-shared/lib/getAppParam.ts";
 import {
     clearCartModalGeneralError,
     extractCartGeneralErrorMessage,
     setCartModalGeneralError,
-} from "@ts-features/cart/cartErrors.ts";
+} from '@ts-features/cart/cartErrors.ts';
+import type { CartMode, CartMutationResponse } from '@ts-features/cart/cartTypes.ts';
+import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
+import { fetchFunc, findArrayElems, findElem, isEmpty, toggleElement } from '@ts-shared/lib/helpers.ts';
+import type { WindowAppParams } from '@ts-types/global';
 
 const resolveUrl = (key: keyof WindowAppParams): string => {
-    const value: null | any = getAppParam(key);
+    const value: string | null = getAppParam<string>(key);
 
     return typeof value === 'string' ? value : '';
 };
@@ -57,9 +54,8 @@ const renderMutationResponse = (response: CartMutationResponse, mode: CartMode):
         cartPageRoot.innerHTML = response.rendered.cart_page_html;
     }
 
-    const generalMessage = response.success === true
-        ? String(response.message ?? '').trim()
-        : extractCartGeneralErrorMessage(response);
+    const generalMessage =
+        response.success === true ? String(response.message ?? '').trim() : extractCartGeneralErrorMessage(response);
 
     if (generalMessage !== '') {
         setCartModalGeneralError(mode, generalMessage, response.success === true);
@@ -102,7 +98,11 @@ export const addCartItem = async (variantId: number, mode: CartMode): Promise<Ca
     return response;
 };
 
-export const updateCartItemQuantity = async (cartId: number, quantity: number, mode: CartMode): Promise<CartMutationResponse> => {
+export const updateCartItemQuantity = async (
+    cartId: number,
+    quantity: number,
+    mode: CartMode,
+): Promise<CartMutationResponse> => {
     const updateUrl: string = resolveMutationUrlByPattern('cart_update_url_pattern', cartId);
 
     if (isEmpty(updateUrl)) {

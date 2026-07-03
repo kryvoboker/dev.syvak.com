@@ -1,26 +1,69 @@
-import { $FLEX_CLASS_NAME, $HIDDEN_CLASS_NAME } from "@ts-shared/lib/constants.ts";
-import type { QueryValueType, URLParamsType }   from "@ts-types/httpQueryBuild.ts";
+import { $FLEX_CLASS_NAME, $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
+import type { QueryValueType, URLParamsType } from '@ts-types/httpQueryBuild.ts';
 
 type FetchFuncOptions = Record<string | number, string | number>;
 
-export const findElem             = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): T | HTMLElement | null => context ? context.querySelector(searchVal) : null;
-export const findElems            = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): NodeListOf<T> | NodeListOf<HTMLElement> | null => context ? context.querySelectorAll(searchVal) : null;
-export const arrayFrom            = <T>(pseudoArray: ArrayLike<T> | null): T[] => pseudoArray ? Array.from(pseudoArray) : [];
-export const findArrayElems       = <T extends HTMLElement>(searchVal: string, context: T | Document | null = document): (T | HTMLElement)[] | [] => context ? arrayFrom(findElems(searchVal, context)) : [];
-export const isArray              = (value: any): value is any[] => Array.isArray(value);
-export const addClass             = <T extends HTMLElement>(element: T | null, selector: string | string[]): void | null => element ? (isArray(selector) ? element.classList.add(... selector) : element.classList.add(selector)) : null;
-export const removeClass          = <T extends HTMLElement>(element: T | null, selector: string | string[]): void | null => element ? (isArray(selector) ? element.classList.remove(... selector) : element.classList.remove(selector)) : null;
-export const toggleClass          = <T extends HTMLElement>(element: T | null, selector: string): boolean => element ? element.classList.toggle(selector) : false;
-export const toggleActive         = (DOMElements: NodeListOf<HTMLElement> | HTMLElement[] = []): void => arrayFrom(DOMElements).forEach((element: HTMLElement) => toggleClass(element, 'active'));
-export const setLocalStorage      = (key: string, value: string): void => localStorage.setItem(key, value);
-export const getLocalStorage      = (key: string, defaultValue: any = null): string | null => (localStorage.getItem(key) ?? defaultValue);
-export const removeLocalStorage   = (key: string): void => localStorage.removeItem(key);
-export const setSessionStorage    = (key: string, value: string): void => sessionStorage.setItem(key, value);
-export const getSessionStorage    = (key: string, defaultValue: any = null): string | null => (sessionStorage.getItem(key) ?? defaultValue);
+export const findElem = <T extends HTMLElement>(
+    searchVal: string,
+    context: T | Document | null = document,
+): T | HTMLElement | null => (context ? context.querySelector(searchVal) : null);
+export const findElems = <T extends HTMLElement>(
+    searchVal: string,
+    context: T | Document | null = document,
+): NodeListOf<T> | NodeListOf<HTMLElement> | null => (context ? context.querySelectorAll(searchVal) : null);
+export const arrayFrom = <T>(pseudoArray: ArrayLike<T> | null): T[] => (pseudoArray ? Array.from(pseudoArray) : []);
+export const findArrayElems = <T extends HTMLElement>(
+    searchVal: string,
+    context: T | Document | null = document,
+): (T | HTMLElement)[] | [] => (context ? arrayFrom(findElems(searchVal, context)) : []);
+export const isArray = (value: unknown): value is unknown[] => Array.isArray(value);
+export const addClass = <T extends HTMLElement>(element: T | null, selector: string | string[]): undefined | null => {
+    if (!element) {
+        return null;
+    }
+
+    if (isArray(selector)) {
+        element.classList.add(...selector);
+    } else {
+        element.classList.add(selector);
+    }
+
+    return undefined;
+};
+export const removeClass = <T extends HTMLElement>(
+    element: T | null,
+    selector: string | string[],
+): undefined | null => {
+    if (!element) {
+        return null;
+    }
+
+    if (isArray(selector)) {
+        element.classList.remove(...selector);
+    } else {
+        element.classList.remove(selector);
+    }
+
+    return undefined;
+};
+export const toggleClass = <T extends HTMLElement>(element: T | null, selector: string): boolean =>
+    element ? element.classList.toggle(selector) : false;
+export const toggleActive = (DOMElements: NodeListOf<HTMLElement> | HTMLElement[] = []): void =>
+    arrayFrom(DOMElements).forEach((element: HTMLElement): void => {
+        toggleClass(element, 'active');
+    });
+export const setLocalStorage = (key: string, value: string): void => localStorage.setItem(key, value);
+export const getLocalStorage = (key: string, defaultValue: string | null = null): string | null =>
+    localStorage.getItem(key) ?? defaultValue;
+export const removeLocalStorage = (key: string): void => localStorage.removeItem(key);
+export const setSessionStorage = (key: string, value: string): void => sessionStorage.setItem(key, value);
+export const getSessionStorage = (key: string, defaultValue: string | null = null): string | null =>
+    sessionStorage.getItem(key) ?? defaultValue;
 export const removeSessionStorage = (key: string): void => sessionStorage.removeItem(key);
-export const isContainsClass      = <T extends HTMLElement>(element: T | null, className: string): boolean => element ? element.classList.contains(className) : false;
-export const redirect             = (url: string): string => location.href = url;
-export const goBack               = (fallbackUrl: string = '/'): void => {
+export const isContainsClass = <T extends HTMLElement>(element: T | null, className: string): boolean =>
+    element ? element.classList.contains(className) : false;
+export const redirect = (url: string): string => (location.href = url);
+export const goBack = (fallbackUrl: string = '/'): void => {
     if (history.length > 1) {
         history.back();
 
@@ -45,17 +88,25 @@ export const goBack               = (fallbackUrl: string = '/'): void => {
 
     redirect(fallbackUrl);
 };
-export const removeElement        = <T extends HTMLElement>(selector: string, context: T | Document = document): void => findElem(selector, context)?.remove();
-export const getSpinnerHtml       = (selector: string = ''): string => `<div class="spinner-border ${selector}" role="status"></div>`;
-export const blockBody            = (isBlock: boolean = true): string => document.body.style.overflow = isBlock ? $HIDDEN_CLASS_NAME : '';
-export const showErrorInConsole   = (errorMessage: string): void => console.error(new Error(errorMessage));
-export const getFormDataInstance  = <T extends HTMLFormElement>(form: T | null = null): FormData => form ? new FormData(form) : new FormData();
-export const getRandomNums        = (): string => Math.random().toString(36).substring(2, 9);
-export const windowMatchMedia     = (query: string): boolean => matchMedia(`(${query.replace(/^\(+/, '').replace(/\)+$/, '')})`).matches;
-export const getClosestParentEl   = <T extends HTMLElement>(selector: string, childEl: T | null): T | null => childEl ? childEl.closest(selector) : null;
-export const isClosestClass       = <T extends HTMLElement>(selector: string, context: T | null): boolean => getClosestParentEl(selector, context) !== null;
-export const setHistoryState      = (url: string, title: string = '', stateObj: any = {}): void => history.pushState(stateObj, title, url);
-export const sprintF              = (str: string, ... args: (string | number)[]): string => {
+export const removeElement = <T extends HTMLElement>(selector: string, context: T | Document = document): void =>
+    findElem(selector, context)?.remove();
+export const getSpinnerHtml = (selector: string = ''): string =>
+    `<div class="spinner-border ${selector}" role="status"></div>`;
+export const blockBody = (isBlock: boolean = true): string =>
+    (document.body.style.overflow = isBlock ? $HIDDEN_CLASS_NAME : '');
+export const showErrorInConsole = (errorMessage: string): void => console.error(new Error(errorMessage));
+export const getFormDataInstance = <T extends HTMLFormElement>(form: T | null = null): FormData =>
+    form ? new FormData(form) : new FormData();
+export const getRandomNums = (): string => Math.random().toString(36).substring(2, 9);
+export const windowMatchMedia = (query: string): boolean =>
+    matchMedia(`(${query.replace(/^\(+/, '').replace(/\)+$/, '')})`).matches;
+export const getClosestParentEl = <T extends HTMLElement>(selector: string, childEl: T | null): T | null =>
+    childEl ? childEl.closest(selector) : null;
+export const isClosestClass = <T extends HTMLElement>(selector: string, context: T | null): boolean =>
+    getClosestParentEl(selector, context) !== null;
+export const setHistoryState = (url: string, title: string = '', stateObj: Record<string, unknown> = {}): void =>
+    history.pushState(stateObj, title, url);
+export const sprintF = (str: string, ...args: (string | number)[]): string => {
     let index: number = 0;
 
     return str.replace(/%[sdif]/g, (match: string): string => {
@@ -85,7 +136,7 @@ export const valueToString = (value: string | number | boolean | undefined | nul
         return '';
     }
 
-    if (typeof value === "boolean") {
+    if (typeof value === 'boolean') {
         value = value ? '1' : '0';
     }
 
@@ -99,25 +150,23 @@ export const normalizeAndEncodeUriComponent = (uriComponent: boolean | string | 
         return '';
     }
 
-    return encodeURIComponent(
-        decodeURIComponent(<string>uriComponent).trim()
-    );
+    return encodeURIComponent(decodeURIComponent(<string>uriComponent).trim());
 };
 
 export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams: boolean = false): string => {
     const queryParamsMap: Map<string, string> = new Map();
-    const queryParamsArray: string[]          = [];
+    const queryParamsArray: string[] = [];
 
     for (const [queriesKey, queryValue] of Object.entries(queries)) {
         if (isEmpty(queryValue) && queryValue !== 0) {
             continue;
         }
 
-        const key: string                              = queriesKey.trim();
+        const key: string = queriesKey.trim();
         const value: QueryValueType | QueryValueType[] = queryValue;
 
         if (isArray(value)) {
-            let values: string[] = [];
+            const values: string[] = [];
 
             value.forEach((item: QueryValueType): void => {
                 values.push(valueToString(item));
@@ -136,19 +185,20 @@ export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams
 
         if (!isEmpty(searchParams)) {
             const searchParamsSplit: string[] = searchParams.slice(1).split('&');
-            const searchParamsLength: number  = searchParamsSplit.length;
+            const searchParamsLength: number = searchParamsSplit.length;
 
             for (let index = 0; index < searchParamsLength; index++) {
                 const searchParamsValues: string[] = searchParamsSplit[index].split('=');
 
-                if (queryParamsMap.has(searchParamsValues[0]) || typeof searchParamsValues[1] === 'undefined' || isEmpty(searchParamsValues[1])) {
+                if (
+                    queryParamsMap.has(searchParamsValues[0]) ||
+                    typeof searchParamsValues[1] === 'undefined' ||
+                    isEmpty(searchParamsValues[1])
+                ) {
                     continue;
                 }
 
-                queryParamsMap.set(
-                    searchParamsValues[0],
-                    searchParamsValues[1]
-                );
+                queryParamsMap.set(searchParamsValues[0], searchParamsValues[1]);
             }
         }
     }
@@ -160,9 +210,11 @@ export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams
     return queryParamsArray.join('&');
 };
 
-export const isEmpty = <T extends Object>(value: string | number | null | undefined | any[] | T): boolean => {
+export const isEmpty = (value: string | number | boolean | null | undefined | unknown[] | object): boolean => {
     if (typeof value === 'number') {
-        return isNaN(value) ? false : value === 0;
+        return Number.isNaN(value) ? false : value === 0;
+    } else if (typeof value === 'boolean') {
+        return false;
     } else if (isArray(value) || typeof value === 'string') {
         if (typeof value === 'string') {
             value = value.trim();
@@ -180,19 +232,23 @@ export const isEmpty = <T extends Object>(value: string | number | null | undefi
     }
 };
 
-export const throttle = (func: Function, delay: number): Function => {
-    let isThrottled: boolean = false,
-        savedArgs: IArguments | null,
-        savedThis: Function | null;
+export const throttle = <Args extends unknown[], ReturnValue>(
+    func: (...args: Args) => ReturnValue,
+    delay: number,
+): ((...args: Args) => void) => {
+    let isThrottled: boolean = false;
+    let savedArgs: Args | null = null;
+    let savedThis: unknown = null;
 
-    function wrapper(this: Function): void {
+    function wrapper(this: unknown, ...args: Args): void {
         if (isThrottled) {
-            savedArgs = arguments;
+            savedArgs = args;
             savedThis = this;
+
             return;
         }
 
-        func.apply(this, arguments);
+        func.apply(this, args);
 
         isThrottled = true;
 
@@ -200,7 +256,7 @@ export const throttle = (func: Function, delay: number): Function => {
             isThrottled = false;
 
             if (savedArgs && savedThis) {
-                wrapper.apply(savedThis, savedArgs as any);
+                wrapper.apply(savedThis, savedArgs);
                 savedArgs = savedThis = null;
             }
         }, delay);
@@ -214,12 +270,12 @@ export const scrollToTop = (anchor: string = ''): void => {
 
     if (anchor) {
         findElem(anchor)?.scrollIntoView({
-            behavior
-        })
+            behavior,
+        });
     } else {
         scrollTo({
             top: 0,
-            behavior
+            behavior,
         });
     }
 };
@@ -233,29 +289,30 @@ export const scrollToBottom = (selector: string = ''): void => {
         if (element) {
             element?.scrollTo({
                 top: element.scrollHeight,
-                behavior
+                behavior,
             });
         }
     } else {
         window.scrollTo({
             top: document.body.scrollHeight,
-            behavior
+            behavior,
         });
     }
 };
 
-export const debounce = <F extends (... args: any[]) => any>(func: F, delay: number): (this: ThisParameterType<F>, ... args: Parameters<F>) => void => {
+export const debounce = <Args extends unknown[], ReturnValue>(
+    func: (...args: Args) => ReturnValue,
+    delay: number,
+): ((...args: Args) => void) => {
     let timeout: ReturnType<typeof setTimeout>;
 
-    return function (this: ThisParameterType<F>, ... args: Parameters<F>): void {
-        const context: ThisParameterType<F> = this;
-
+    return (...args: Args): void => {
         if (timeout) {
             clearTimeout(timeout);
         }
 
         timeout = setTimeout((): void => {
-            func.apply(context, args);
+            func(...args);
         }, delay);
     };
 };
@@ -266,13 +323,13 @@ export const debounce = <F extends (... args: any[]) => any>(func: F, delay: num
 const checkImageFormatSupport = async (format: 'avif' | 'webp'): Promise<boolean> => {
     const testImages: Record<'avif' | 'webp', string> = {
         avif: 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=',
-        webp: 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA='
+        webp: 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=',
     };
 
     return new Promise<boolean>((resolve): void => {
         const img: HTMLImageElement = new Image();
 
-        img.onload  = (): void => resolve(true);
+        img.onload = (): void => resolve(true);
         img.onerror = (): void => resolve(false);
 
         img.src = testImages[format];
@@ -283,7 +340,7 @@ const checkImageFormatSupport = async (format: 'avif' | 'webp'): Promise<boolean
  * Get supported image formats by browser.
  */
 const getSupportedImageFormats = async (): Promise<string[]> => {
-    const CACHE_KEY: string         = 'supported_image_formats';
+    const CACHE_KEY: string = 'supported_image_formats';
     const cachedData: string | null = getLocalStorage(CACHE_KEY);
 
     if (cachedData) {
@@ -322,37 +379,41 @@ const getCachedSupportedFormats = async (): Promise<string[]> => {
     return cachedFormats;
 };
 
-export const fetchFunc = async (url: string, data: FetchFuncOptions | FormData = {}, method: string = 'POST'): Promise<any> => {
+export const fetchFunc = async <T = unknown>(
+    url: string,
+    data: FetchFuncOptions | FormData = {},
+    method: string = 'POST',
+): Promise<T> => {
     type TypeHeaders = {
-        "X-Requested-With": string;
+        'X-Requested-With': string;
         contentType?: string;
-        "X-CSRF-TOKEN"?: string;
-        "X-Supported-Image-Formats"?: string;
+        'X-CSRF-TOKEN'?: string;
+        'X-Supported-Image-Formats'?: string;
     };
 
     type TypeOptions = {
-        method?: string,
-        headers: TypeHeaders,
-        body?: FormData | string
+        method?: string;
+        headers: TypeHeaders;
+        body?: FormData | string;
     };
 
     const supportedFormats: string[] = await getCachedSupportedFormats();
-    const headers: TypeHeaders       = {
-              'X-Requested-With':          'XMLHttpRequest',
-              'X-CSRF-TOKEN':              (<HTMLMetaElement | null>findElem('meta[name="csrf-token"]'))?.content || '',
-              'X-Supported-Image-Formats': supportedFormats.join(','), // "avif,webp" or "webp" or ""
-          },
-          contentType                = 'application/json;charset=utf-8';
-    let options: TypeOptions         = {
+    const headers: TypeHeaders = {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': (<HTMLMetaElement | null>findElem('meta[name="csrf-token"]'))?.content || '',
+        'X-Supported-Image-Formats': supportedFormats.join(','), // "avif,webp" or "webp" or ""
+    };
+    const contentType = 'application/json;charset=utf-8';
+    let options: TypeOptions = {
         method,
-        headers
+        headers,
     };
 
     if (method.toUpperCase() === 'GET') {
         options = { headers };
     } else if (!(data instanceof FormData)) {
         options.headers.contentType = contentType;
-        options.body                = JSON.stringify(data);
+        options.body = JSON.stringify(data);
     } else if (data instanceof FormData) {
         options.body = data;
     }
@@ -363,7 +424,7 @@ export const fetchFunc = async (url: string, data: FetchFuncOptions | FormData =
         console.error(`Network response was not ok: ${response.statusText}`);
     }
 
-    return await response.json();
+    return (await response.json()) as T;
 };
 
 export const scrollToAnchor = (selector: string): void => {
@@ -372,10 +433,10 @@ export const scrollToAnchor = (selector: string): void => {
             e.preventDefault();
 
             findElem((this as HTMLLinkElement).href.replace(/^(.*)(?=#)/, ''))?.scrollIntoView({
-                behavior: 'smooth'
-            })
-        })
-    })
+                behavior: 'smooth',
+            });
+        });
+    });
 };
 
 export const toggleElement = <T extends HTMLElement>(element: T | null, isShow: boolean): void => {
@@ -393,7 +454,7 @@ export const stripUnit = (value: number | string): number => {
     const numericValue: number = parseFloat(value as string);
 
     // If the numeric conversion is unsuccessful, return the original value
-    if (isNaN(numericValue)) {
+    if (Number.isNaN(numericValue)) {
         return 0;
     }
 
@@ -402,18 +463,22 @@ export const stripUnit = (value: number | string): number => {
 
 export const getBaseDocumentFontSize = (): number => {
     const doc: HTMLElement = document.documentElement;
-    const computedStyle    = window.getComputedStyle(doc);
+    const computedStyle = window.getComputedStyle(doc);
 
     return stripUnit(computedStyle.fontSize) || 16;
 };
 
 // Function to convert pixels to rems
-export const toRem = (pxValue: number | string, baseUnitSize: null | number | string = null, sizeUnit: string = 'rem'): string => {
+export const toRem = (
+    pxValue: number | string,
+    baseUnitSize: null | number | string = null,
+    sizeUnit: string = 'rem',
+): string => {
     if (!baseUnitSize) {
         baseUnitSize = getBaseDocumentFontSize();
     }
 
-    const numericPxValue: number      = stripUnit(pxValue);
+    const numericPxValue: number = stripUnit(pxValue);
     const numericBaseUnitSize: number = stripUnit(baseUnitSize);
 
     // Calculate rem value
@@ -421,7 +486,7 @@ export const toRem = (pxValue: number | string, baseUnitSize: null | number | st
 };
 
 export const normalizeNumber = (value: string | number): number => {
-    if (typeof value == 'string') {
+    if (typeof value === 'string') {
         value = value
             .replace(/[^\d.,]+/g, '')
             .replace(/,+/g, '.')

@@ -28,6 +28,7 @@ The project follows a **Modular Monolith** architecture.
 - Actions/Services work with Models and framework adapters.
 - Business logic stays outside Blade templates.
 - Cross-domain access should go through explicit service/action boundaries.
+- Storefront TypeScript should stay compatible with `Biome` formatting/linting and `tsc --noEmit` type checking.
 
 ## Key Entry Points
 
@@ -41,6 +42,7 @@ The project follows a **Modular Monolith** architecture.
 - [Catalog Storefront](catalog-storefront.md) — runtime storefront flows.
 - [Admin Panel](admin-panel.md) — Filament resource structure.
 - [Configuration](configuration.md) — runtime/env contracts.
+- [Testing](testing.md) — PHP and TypeScript quality workflows.
 - [Modules Guide](../Modules/README.md) — module registration, loading, and singleton module rules.
 - [NovaPoshta Module](../Modules/NovaPoshta/README.md) — module-specific runtime, sync, and maintenance notes.
 - [UkrPoshta Module](../Modules/UkrPoshta/README.md) — module-specific runtime, sync, and maintenance notes.

@@ -3,7 +3,7 @@ export function getAppParam<T>(key: string | number): T | null {
         return null;
     }
 
-    const value: unknown | any | undefined = window.app_params[key];
+    const value: unknown = window.app_params[key];
 
-    return value === undefined ? null : value as T;
+    return value === undefined ? null : (value as T);
 }

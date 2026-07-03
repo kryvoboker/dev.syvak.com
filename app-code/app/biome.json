@@ -1,0 +1,48 @@
+{
+    "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+    "files": {
+        "ignoreUnknown": true,
+        "includes": [
+            "resources/assets/catalog/ts/**/*.ts",
+            "resources/assets/catalog/ts/**/*.d.ts",
+            "Modules/**/resources/assets/ts/**/*.ts",
+            "Modules/**/resources/assets/ts/**/*.d.ts",
+            "vite.config.ts",
+            "vite-env.d.ts",
+            "Modules/**/vite.config.module.ts",
+            "vite-plugins/**/*.ts"
+        ]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 120,
+        "trailingNewline": true
+    },
+    "javascript": {
+        "formatter": {
+            "enabled": true,
+            "indentStyle": "space",
+            "indentWidth": 4,
+            "lineWidth": 120,
+            "quoteStyle": "single",
+            "jsxQuoteStyle": "double",
+            "semicolons": "always",
+            "trailingCommas": "all",
+            "bracketSpacing": true,
+            "trailingNewline": true
+        },
+        "linter": {
+            "enabled": true
+        }
+    },
+    "linter": {
+        "enabled": true
+    },
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true
+    }
+}

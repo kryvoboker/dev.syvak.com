@@ -1,4 +1,4 @@
-import { CartMode } from "@ts-features/cart/cartTypes.ts";
+import type { CartMode } from '@ts-features/cart/cartTypes.ts';
 
 export namespace Cart {
     export const $FAST_ORDER: CartMode = 'fast_order';

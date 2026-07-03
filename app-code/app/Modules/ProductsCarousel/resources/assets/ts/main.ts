@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
         return;
     }
 
-    import('@products-carousel-ts/features/mainProductsCarousel.ts')
-        .then((module): void => {
-            module.handleProductsCarousel();
-        });
+    import('@products-carousel-ts/features/mainProductsCarousel.ts').then((module): void => {
+        module.handleProductsCarousel();
+    });
 });

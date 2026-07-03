@@ -1,10 +1,14 @@
-import type { CartMutationResponse }                   from "@ts-features/cart/cartTypes.ts";
-import { clearCartModalGeneralError, extractCartGeneralErrorMessage, setCartModalGeneralError } from "@ts-features/cart/cartErrors.ts";
-import { storeOrder, toggleCartLoader, validateOrder } from "@ts-features/cart/cartCrud.ts";
-import { setCartMode }                                 from "@ts-features/cart/cartModeStorage.ts";
-import { handleParsePhone }                            from "@ts-shared/lib/parsePhone.ts";
-import { findElem, getClosestParentEl, isEmpty, redirect } from "@ts-shared/lib/helpers.ts";
-import { Cart }                                        from "@ts-features/cart/constants.ts";
+import { storeOrder, toggleCartLoader, validateOrder } from '@ts-features/cart/cartCrud.ts';
+import {
+    clearCartModalGeneralError,
+    extractCartGeneralErrorMessage,
+    setCartModalGeneralError,
+} from '@ts-features/cart/cartErrors.ts';
+import { setCartMode } from '@ts-features/cart/cartModeStorage.ts';
+import type { CartMutationResponse } from '@ts-features/cart/cartTypes.ts';
+import { Cart } from '@ts-features/cart/constants.ts';
+import { findElem, getClosestParentEl, isEmpty, redirect } from '@ts-shared/lib/helpers.ts';
+import { handleParsePhone } from '@ts-shared/lib/parsePhone.ts';
 
 type FastOrderFieldName = 'first_name' | 'last_name' | 'phone';
 
@@ -13,8 +17,8 @@ const $REGULAR = Cart.$REGULAR;
 
 const fieldSelectors: Record<FastOrderFieldName, string> = {
     first_name: '[data-order-first-name]',
-    last_name:  '[data-order-last-name]',
-    phone:      '[data-order-phone]',
+    last_name: '[data-order-last-name]',
+    phone: '[data-order-phone]',
 };
 
 const getFastOrderField = (form: HTMLFormElement, fieldName: FastOrderFieldName): HTMLInputElement | null => {

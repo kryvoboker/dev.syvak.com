@@ -11,13 +11,15 @@ document.addEventListener('DOMContentLoaded', (): void => {
             const field = button.dataset.ukrPoshtaField ?? '';
             const value = button.dataset.ukrPoshtaValue ?? '';
 
-            moduleElement.dispatchEvent(new CustomEvent('ukr-poshta:selection-changed', {
-                detail: {
-                    field,
-                    value,
-                },
-                bubbles: true,
-            }));
+            moduleElement.dispatchEvent(
+                new CustomEvent('ukr-poshta:selection-changed', {
+                    detail: {
+                        field,
+                        value,
+                    },
+                    bubbles: true,
+                }),
+            );
         });
     });
 });

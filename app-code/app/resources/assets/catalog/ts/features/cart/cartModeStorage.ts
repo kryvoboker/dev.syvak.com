@@ -1,6 +1,7 @@
-import type { CartMode }                    from "@ts-features/cart/cartTypes.ts";
-import { getLocalStorage, setLocalStorage } from "@ts-shared/lib/helpers.ts";
-import { Cart }                             from "@ts-features/cart/constants.ts";
+import type { CartMode } from '@ts-features/cart/cartTypes.ts';
+import { Cart } from '@ts-features/cart/constants.ts';
+import { getLocalStorage, setLocalStorage } from '@ts-shared/lib/helpers.ts';
+
 import $FAST_ORDER = Cart.$FAST_ORDER;
 import $REGULAR = Cart.$REGULAR;
 

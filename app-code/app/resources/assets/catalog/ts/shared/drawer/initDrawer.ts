@@ -1,5 +1,5 @@
-import { findArrayElems, findElem, isContainsClass } from "@ts-shared/lib/helpers.ts";
-import HSOverlay                                      from "flyonui/src/js/plugins/overlay/index";
+import { findArrayElems, findElem, isContainsClass } from '@ts-shared/lib/helpers.ts';
+import HSOverlay from 'flyonui/src/js/plugins/overlay/index';
 
 interface InitDrawerOptions {
     drawerSelector: string;

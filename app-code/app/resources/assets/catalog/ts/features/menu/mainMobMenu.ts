@@ -1,4 +1,4 @@
-import { initDrawer } from "@ts-shared/drawer/initDrawer.ts";
+import { initDrawer } from '@ts-shared/drawer/initDrawer.ts';
 
 export const handleMainMobMenu = (): void => {
     initDrawer({

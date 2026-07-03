@@ -1,6 +1,7 @@
-import { setCartMode } from "@ts-features/cart/cartModeStorage.ts";
-import { findElem }    from "@ts-shared/lib/helpers.ts";
-import { Cart }        from "@ts-features/cart/constants.ts";
+import { setCartMode } from '@ts-features/cart/cartModeStorage.ts';
+import { Cart } from '@ts-features/cart/constants.ts';
+import { findElem } from '@ts-shared/lib/helpers.ts';
+
 import $REGULAR = Cart.$REGULAR;
 
 export const handleCartPage = (): void => {
