@@ -1,5 +1,9 @@
 @extends('catalog.layouts.main')
 
+@prepend('styles')
+    @vite(['node_modules/choices.js/src/styles/choices.scss'])
+@endprepend
+
 @section('content')
     @php
         $checkout_data = is_array($checkout_data ?? null) ? $checkout_data : [];
@@ -8,7 +12,29 @@
         $items_count = (int) ($checkout_data['items_count'] ?? 0);
         $continue_shopping_url = (string) ($checkout_data['continue_shopping_url'] ?? localized_route('localized.catalog.home'));
         $edit_items_url = (string) ($checkout_data['edit_items_url'] ?? localized_route('localized.catalog.cart.index'));
+        $checkout_selection_state = is_array($checkout_selection_state ?? null) ? $checkout_selection_state : [];
+        $selected_city = is_array($checkout_selection_state['city'] ?? null) ? $checkout_selection_state['city'] : [];
+        $selected_city_description = (string) ($selected_city['city_description'] ?? '');
+        $selected_city_nova_poshta_city_id = (string) ($selected_city['nova_poshta_city_id'] ?? '');
+        $selected_city_ukr_poshta_city_id = (int) ($selected_city['ukr_poshta_city_id'] ?? 0);
+        $selected_city_lat = $selected_city['city_lat'] ?? null;
+        $selected_city_lng = $selected_city['city_lng'] ?? null;
+        $selected_delivery_method = (string) ($checkout_selection_state['delivery_method'] ?? '');
     @endphp
+
+    <script>
+        window.app_params = {
+            ...(window.app_params ?? {}),
+                ...@js([
+                    'checkout_city_search_url' => $checkout_city_search_url ?? localized_route('localized.catalog.checkout.cities'),
+                    'checkout_selection_save_url' => $checkout_selection_save_url ?? localized_route('localized.catalog.checkout.selection.store'),
+                    'checkout_selection_state' => $checkout_selection_state,
+                    'checkout_choose_city_first_text' => __('catalog/pages/category/show.checkout.warnings.choose_city_first'),
+                    'checkout_no_delivery_methods_text' => __('catalog/pages/category/show.checkout.warnings.no_delivery_methods'),
+                    'checkout_no_cities_text' => __('catalog/pages/category/show.checkout.warnings.no_cities_found'),
+                ])
+        };
+    </script>
 
     <div class="container border-b border-b-opacity-light-gray-40%">
         <button class="go-to-previous-page__btn inline-flex items-center gap-2 border-y border-opacity-light-gray-40% px-0 py-3 text-sm md:text-base lg:px-8 lg:py-4"
@@ -98,23 +124,61 @@
                                                         {{ __('catalog/pages/category/show.checkout.labels.city') }}
                                                     </label>
 
-                                                    <div class="flex items-center gap-2 border-b border-opacity-light-gray-40% py-2 text-sm text-light-gray md:text-lg">
-                                                        <span class="icon-[tabler--search] size-4 shrink-0 md:size-5"></span>
-                                                        <span>{{ __('catalog/pages/category/show.checkout.placeholders.city_search') }}</span>
-                                                    </div>
+                                                    <select class="border-0 border-b border-opacity-light-gray-40% bg-transparent py-2 pl-0 pr-8 text-sm text-white md:text-lg"
+                                                            id="checkout-city"
+                                                            name="city"
+                                                            data-placeholder="{{ __('catalog/pages/category/show.checkout.placeholders.city_search') }}">
+                                                        <option value="">
+                                                            {{ __('catalog/pages/category/show.checkout.placeholders.city_search') }}
+                                                        </option>
+
+                                                        @if(filled($selected_city_description))
+                                                            <option value="{{ $selected_city_description }}"
+                                                                    selected
+                                                                    data-nova-poshta-city-id="{{ $selected_city_nova_poshta_city_id }}"
+                                                                    data-ukr-poshta-city-id="{{ $selected_city_ukr_poshta_city_id }}"
+                                                                    data-city-lat="{{ $selected_city_lat }}"
+                                                                    data-city-lng="{{ $selected_city_lng }}">
+                                                                {{ $selected_city_description }}
+                                                            </option>
+                                                        @endif
+                                                    </select>
+
+                                                    <p class="hidden text-sm text-light-red md:text-base"
+                                                       data-checkout-city-warning
+                                                       aria-hidden="true"></p>
                                                 </div>
 
                                                 <div class="flex flex-col gap-2">
-                                                    <label class="text-sm text-white md:text-lg" for="checkout-delivery-method">
+                                                    <span class="text-sm text-white md:text-lg">
                                                         {{ __('catalog/pages/category/show.checkout.labels.delivery_method') }}
-                                                    </label>
+                                                    </span>
 
-                                                    <button class="flex items-center justify-between border-b border-opacity-light-gray-40% py-2 text-left text-sm text-light-gray md:text-lg"
-                                                            id="checkout-delivery-method"
-                                                            type="button">
-                                                        <span>{{ __('catalog/pages/category/show.checkout.placeholders.delivery_methods') }}</span>
-                                                        <span class="icon-[ep--arrow-down] size-5 shrink-0"></span>
-                                                    </button>
+                                                    <div class="flex flex-col gap-3">
+                                                            <label class="flex items-center gap-3 border-b border-opacity-light-gray-40% py-2 text-sm text-white md:text-lg"
+                                                               data-checkout-delivery-method-option="nova_poshta">
+                                                            <input class="radio radio-sm border border-white rounded-none"
+                                                                   data-checkout-delivery-method-input
+                                                                   name="delivery_method"
+                                                                   type="radio"
+                                                                   value="nova_poshta"
+                                                                   @checked($selected_delivery_method === 'nova_poshta')>
+
+                                                            <span>{{ __('catalog/pages/category/show.checkout.delivery_methods.nova_poshta') }}</span>
+                                                        </label>
+
+                                                        <label class="flex items-center gap-3 border-b border-opacity-light-gray-40% py-2 text-sm text-white md:text-lg"
+                                                               data-checkout-delivery-method-option="ukr_poshta">
+                                                            <input class="radio radio-sm border border-white rounded-none"
+                                                                   data-checkout-delivery-method-input
+                                                                   name="delivery_method"
+                                                                   type="radio"
+                                                                   value="ukr_poshta"
+                                                                   @checked($selected_delivery_method === 'ukr_poshta')>
+
+                                                            <span>{{ __('catalog/pages/category/show.checkout.delivery_methods.ukr_poshta') }}</span>
+                                                        </label>
+                                                    </div>
                                                 </div>
 
                                                 <div class="flex flex-col gap-2">

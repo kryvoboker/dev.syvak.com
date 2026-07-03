@@ -58,6 +58,8 @@ Route::prefix('{' . $locale_key . '}')
         Route::delete('/cart/{cart_id}', [CartController::class, 'delete'])->name('cart.delete');
 
         Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+        Route::get('/checkout/cities', [CheckoutController::class, 'cities'])->name('checkout.cities');
+        Route::post('/checkout/selection', [CheckoutController::class, 'storeSelection'])->name('checkout.selection.store');
 
         Route::post('/order-confirm', [OrderConfirmController::class, 'storeFastOrder'])->name('order-confirm.store');
         Route::post('/order-validate', [OrderConfirmController::class, 'validateFastOrder'])->name('order-confirm.validate');

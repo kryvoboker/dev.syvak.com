@@ -29,6 +29,22 @@ export interface WindowAppParams {
     cart_delete_url_pattern?: string;
     order_validate_url?: string;
     order_store_url?: string;
+    checkout_city_search_url?: string | null;
+    checkout_selection_save_url?: string | null;
+    checkout_choose_city_first_text?: string | null;
+    checkout_no_delivery_methods_text?: string | null;
+    checkout_no_cities_text?: string | null;
+    checkout_selection_state?: {
+        delivery_method?: string | null;
+        city?: {
+            city_description?: string | null;
+            nova_poshta_city_id?: string | null;
+            ukr_poshta_city_id?: number | null;
+            city_lat?: number | null;
+            city_lng?: number | null;
+        } | null;
+        delivery_point?: Record<string, unknown> | null;
+    } | null;
 
     [key: string]: unknown;
 }

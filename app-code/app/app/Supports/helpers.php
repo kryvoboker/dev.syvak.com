@@ -6,6 +6,7 @@ use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
+use App\Models\Modules\ModuleDefinition;
 use App\Models\PageSettings\PageSetting;
 use App\Models\Slug;
 use App\Services\Modules\ModuleRuntimeResolverService;
@@ -448,6 +449,34 @@ if (!function_exists('resolve_modules_for_context')) {
     function resolve_modules_for_context(?string $placement = null, ?string $context_key = null): Collection
     {
         return app(ModuleRuntimeResolverService::class)->resolve($placement, $context_key);
+    }
+}
+
+if (!function_exists('is_enabled_singleton_module')) {
+    /**
+     * @param string $module_name
+     *
+     * @return bool
+     */
+    function is_enabled_singleton_module(string $module_name): bool
+    {
+        $module_name = Str::trim($module_name);
+
+        if ($module_name === '') {
+            return false;
+        }
+
+        /** @var ModuleDefinition|null $module_definition */
+        $module_definition = ModuleDefinition::query()
+            ->where('nwidart_name', $module_name)
+            ->enabled()
+            ->first();
+
+        if ($module_definition === null) {
+            return false;
+        }
+
+        return $module_definition->canCreateInstances() === false;
     }
 }
 
