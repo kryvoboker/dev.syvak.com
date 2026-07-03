@@ -45,6 +45,15 @@ composer phpmd
 5. Run `composer phpmd` when you need PHPMD violations checked.
 6. Optionally run full suite before release.
 
+## Module Test Placement
+
+- Tests for a module should live inside that module, next to the module code.
+- Use the module test tree for module-specific coverage, for example:
+  - `Modules/UkrPoshta/tests/Feature/...`
+  - `Modules/NovaPoshta/tests/Feature/...`
+- Keep shared application tests in the main app test tree only when the behavior is truly shared across modules or the core app.
+- When you add or change module behavior, update the module test files in the module itself.
+
 ## Tooling Notes
 
 - The Laravel app root is `app-code/app`; run Composer quality scripts from there.
@@ -63,3 +72,4 @@ composer phpmd
 - [Admin Panel](admin-panel.md) — admin scenarios to cover.
 - [Modules Guide](../Modules/README.md) — module loading and singleton-module rules to validate.
 - [NovaPoshta Module](../Modules/NovaPoshta/README.md) — module-specific sync and API-key flows to test.
+- [UkrPoshta Module](../Modules/UkrPoshta/README.md) — module-specific sync and API-key flows to test.

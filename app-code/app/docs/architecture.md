@@ -43,3 +43,4 @@ The project follows a **Modular Monolith** architecture.
 - [Configuration](configuration.md) — runtime/env contracts.
 - [Modules Guide](../Modules/README.md) — module registration, loading, and singleton module rules.
 - [NovaPoshta Module](../Modules/NovaPoshta/README.md) — module-specific runtime, sync, and maintenance notes.
+- [UkrPoshta Module](../Modules/UkrPoshta/README.md) — module-specific runtime, sync, and maintenance notes.

@@ -104,7 +104,31 @@ If the class does not exist, the provider is not registered, and a warning is wr
 3. Do not hardcode a foreign namespace.
 4. `name` and `nameLower` must match the module.
 
-## 6. Rules for adding a new module
+## 6. What belongs inside a module
+
+As a default rule, module-owned code and assets should live inside the module directory:
+
+- controllers
+- models
+- tests
+- routes
+- translations
+- providers
+- middlewares
+- views
+- JS
+- TS
+- CSS
+- services
+- support classes
+- module-specific config
+- module-specific database migrations, factories, and seeders
+
+The main exception is shared code or shared resources that are intentionally reused by multiple modules or the core app. In that case, place the code outside the module and document the shared contract clearly.
+
+If a file is only used by one module, it should normally stay in that module.
+
+## 7. Rules for adding a new module
 
 Minimum checklist:
 
@@ -131,7 +155,7 @@ Minimum checklist:
 php artisan optimize:clear
 ```
 
-## 7. Common mistakes
+## 8. Common mistakes
 
 1. Incorrect provider namespace in `module.json`.
 2. Duplicating lazy conditions in both the module provider and the resolver.
@@ -139,7 +163,7 @@ php artisan optimize:clear
 4. Not clearing cache after changing provider/config data.
 5. Treating a singleton module as an instance-based module and wiring create/edit instance screens for it.
 
-## 8. Quick diagnostics
+## 9. Quick diagnostics
 
 1. Check that the provider class exists at the expected PSR-4 path.
 2. Check the strategy in the module `config/config.php`.
