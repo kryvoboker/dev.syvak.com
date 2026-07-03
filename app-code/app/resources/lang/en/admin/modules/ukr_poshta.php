@@ -74,6 +74,7 @@ return [
         'districts' => 'Districts',
         'cities' => 'Cities',
         'post_offices' => 'Post offices',
+        'stored' => 'Stored items',
     ],
     'notifications' => [
         'sync_started' => 'Ukr Poshta sync has started. The page will refresh automatically.',

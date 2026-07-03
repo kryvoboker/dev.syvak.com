@@ -155,23 +155,31 @@ class UkrPoshtaSyncServiceTest extends TestCase
         $state = $sync_service->processQueuedSyncStep();
         $this->assertSame('districts', $state['stage']);
         $this->assertSame(2, (int) data_get($state, 'summary.regions.imported', 0));
+        $this->assertSame(0, (int) data_get($state, 'summary.districts.processed', 0));
+        $this->assertSame(2, (int) data_get($state, 'summary.districts.total', 0));
 
         $state = $sync_service->processQueuedSyncStep();
         $this->assertSame('districts', $state['stage']);
         $this->assertSame(2, (int) data_get($state, 'summary.regions.imported', 0));
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.processed', 0));
+        $this->assertSame(2, (int) data_get($state, 'summary.districts.total', 0));
         $this->assertSame(1, (int) data_get($state, 'summary.districts.imported', 0));
 
         $state = $sync_service->processQueuedSyncStep();
         $this->assertSame('cities', $state['stage']);
         $this->assertSame(2, (int) data_get($state, 'summary.districts.imported', 0));
+        $this->assertSame(0, (int) data_get($state, 'summary.cities.processed', 0));
+        $this->assertSame(2, (int) data_get($state, 'summary.cities.total', 0));
 
         $state = $sync_service->processQueuedSyncStep();
         $this->assertSame('cities', $state['stage']);
         $this->assertSame(2, (int) data_get($state, 'summary.districts.imported', 0));
+        $this->assertSame(1, (int) data_get($state, 'summary.cities.processed', 0));
+        $this->assertSame(2, (int) data_get($state, 'summary.cities.total', 0));
         $this->assertSame(1, (int) data_get($state, 'summary.cities.imported', 0));
     }
 
-    public function test_it_stops_queue_processing_after_critical_batch_failure(): void
+    public function test_it_skips_failed_district_batches_and_keeps_queue_running(): void
     {
         set_global_config([
             UkrPoshtaConfig::API_KEY_GLOBAL_CONFIG_KEY => ['value' => 'up-test-key', 'is_active' => true],
@@ -185,13 +193,37 @@ class UkrPoshtaSyncServiceTest extends TestCase
                     'Entries' => [
                         'Entry' => [
                             ['REGION_ID' => 1, 'REGION_UA' => 'Region 1'],
+                            ['REGION_ID' => 2, 'REGION_UA' => 'Region 2'],
                         ],
                     ],
                 ]);
             }
 
             if (str_contains($url, 'get_districts_by_region_id_and_district_ua')) {
-                throw new \RuntimeException('Critical Ukr Poshta districts failure');
+                if (str_contains($url, 'region_id=2')) {
+                    throw new \RuntimeException('Critical Ukr Poshta districts failure');
+                }
+
+                if (str_contains($url, 'region_id=1')) {
+                    return Http::response([
+                        'Entries' => [
+                            'Entry' => [
+                                [
+                                    'DISTRICT_ID' => 101,
+                                    'REGION_UA' => 'Region 1',
+                                    'DISTRICT_UA' => 'District 1',
+                                ],
+                            ],
+                        ],
+                    ]);
+                }
+
+                return Http::response([
+                    'Entries' => [
+                        'Entry' => [
+                        ],
+                    ],
+                ]);
             }
 
             return Http::response(['Entries' => ['Entry' => []]]);
@@ -200,11 +232,53 @@ class UkrPoshtaSyncServiceTest extends TestCase
         $sync_service = $this->app->make(UkrPoshtaSyncService::class);
 
         $sync_service->startQueuedSync();
-        $sync_service->processQueuedSyncStep();
         $state = $sync_service->processQueuedSyncStep();
 
-        $this->assertSame('failed', $state['stage']);
+        $this->assertSame('districts', $state['stage']);
+        $this->assertTrue((bool) $state['is_running']);
+        $this->assertSame(2, (int) data_get($state, 'summary.regions.imported', 0));
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.total', 0));
+
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertSame('districts', $state['stage']);
+        $this->assertTrue((bool) $state['is_running']);
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.processed', 0));
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.imported', 0));
+
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertSame('cities', $state['stage']);
+        $this->assertTrue((bool) $state['is_running']);
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.processed', 0));
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.imported', 0));
+    }
+
+    public function test_it_stops_queued_sync_when_stop_is_requested(): void
+    {
+        set_global_config([
+            UkrPoshtaConfig::API_KEY_GLOBAL_CONFIG_KEY => ['value' => 'up-test-key', 'is_active' => true],
+        ]);
+
+        Http::fake([
+            '*get_regions_by_region_ua*' => Http::response([
+                'Entries' => [
+                    'Entry' => [
+                        ['REGION_ID' => 1, 'REGION_UA' => 'Region 1'],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $sync_service = $this->app->make(UkrPoshtaSyncService::class);
+
+        $sync_service->startQueuedSync();
+        $sync_service->requestQueuedSyncStop();
+
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertSame('stopped', $state['stage']);
         $this->assertFalse((bool) $state['is_running']);
-        $this->assertStringContainsString('Critical Ukr Poshta districts failure', (string) $state['message']);
+        $this->assertTrue((bool) data_get($state, 'stop_requested', false));
     }
 }

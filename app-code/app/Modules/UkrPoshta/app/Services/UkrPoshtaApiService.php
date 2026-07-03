@@ -8,6 +8,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\UkrPoshta\Support\UkrPoshtaConfig;
 use RuntimeException;
@@ -16,12 +17,11 @@ readonly class UkrPoshtaApiService
 {
     public function __construct(
         private UkrPoshtaConfig $config,
-    ) {
-    }
+    ) {}
 
     /**
-     * @throws ConnectionException
      * @return array<string, mixed>
+     * @throws ConnectionException
      */
     public function getRegions(): array
     {
@@ -29,19 +29,25 @@ readonly class UkrPoshtaApiService
     }
 
     /**
-     * @throws ConnectionException
      * @return array<string, mixed>
+     * @throws ConnectionException
      */
     public function getDistricts(int $region_id): array
     {
-        return $this->call('get_districts_by_region_id_and_district_ua', [
-            'region_id' => $region_id,
-        ]);
+        try {
+            return $this->call('get_districts_by_region_id_and_district_ua', [
+                'region_id' => $region_id,
+            ]);
+        } catch (ConnectionException $e) {
+            Log::channel('stack')->error($e->getMessage(), $e->getTrace());
+
+            return [];
+        }
     }
 
     /**
-     * @throws ConnectionException
      * @return array<string, mixed>
+     * @throws ConnectionException
      */
     public function getCities(int $district_id): array
     {
@@ -51,8 +57,8 @@ readonly class UkrPoshtaApiService
     }
 
     /**
-     * @throws ConnectionException
      * @return array<string, mixed>
+     * @throws ConnectionException
      */
     public function getPostOffices(int $district_id): array
     {
@@ -62,12 +68,15 @@ readonly class UkrPoshtaApiService
     }
 
     /**
-     * @param  array<string, mixed>  $query
-     * @throws ConnectionException
+     * @param array<string, mixed> $query
+     *
      * @return array<string, mixed>
+     * @throws ConnectionException
      */
     public function call(string $endpoint, array $query = []): array
     {
+        sleep($this->getWaihtTimeout());
+
         $response = Http::baseUrl(rtrim($this->getApiUrl(), '/') . '/')
             ->timeout($this->getTimeout())
             ->acceptJson()
@@ -80,7 +89,7 @@ readonly class UkrPoshtaApiService
 
     private function getApiUrl(): string
     {
-        return (string) $this->config->get('api.url', 'https://www.ukrposhta.ua/address-classifier-ws/');
+        return (string)$this->config->get('api.url', 'https://www.ukrposhta.ua/address-classifier-ws/');
     }
 
     private function getApiKey(): string
@@ -90,7 +99,15 @@ readonly class UkrPoshtaApiService
 
     private function getTimeout(): int
     {
-        return max(1, (int) $this->config->get('api.timeout', 30));
+        return max(1, (int)$this->config->get('api.timeout', 30));
+    }
+
+    /**
+     * @return int
+     */
+    private function getWaihtTimeout(): int
+    {
+        return max(1, (int)$this->config->get('api.wait_timeout', 1));
     }
 
     /**
@@ -111,7 +128,7 @@ readonly class UkrPoshtaApiService
 
         $payload = $response->json();
 
-        if (! is_array($payload)) {
+        if (!is_array($payload)) {
             throw new RuntimeException(
                 sprintf(
                     "Ukr Poshta API returned invalid payload for endpoint: %s\ncode: %s\nmessage: %s.",
@@ -122,7 +139,7 @@ readonly class UkrPoshtaApiService
             );
         }
 
-        $errors = Arr::wrap(data_get($payload, 'errors', data_get($payload, 'error', [])));
+        $errors   = Arr::wrap(data_get($payload, 'errors', data_get($payload, 'error', [])));
         $warnings = Arr::wrap(data_get($payload, 'warnings', data_get($payload, 'warning', [])));
 
         if ($errors !== [] || $warnings !== []) {
@@ -135,14 +152,14 @@ readonly class UkrPoshtaApiService
 
         $data = data_get($payload, 'Entries.Entry', data_get($payload, 'data', []));
 
-        if (! is_array($data)) {
+        if (!is_array($data)) {
             $data = [];
         }
 
         return [
             'success' => true,
-            'data' => $data,
-            'raw' => $payload,
+            'data'    => $data,
+            'raw'     => $payload,
         ];
     }
 }
