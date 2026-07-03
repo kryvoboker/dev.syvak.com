@@ -34,4 +34,4 @@
 - [Architecture](architecture.md) — module boundaries for admin code.
 - [Configuration](configuration.md) — settings and fallback behavior.
 - [Modules Guide](../Modules/README.md) — module registration/loading rules and singleton module guidance.
-- [NovaPoshta Module](../Modules/NovaPoshta/README.md) — module-specific admin sync page and API key handling.
+- [UkrPoshta Module](../Modules/UkrPoshta/README.md) — module-specific admin sync page and API key handling.
