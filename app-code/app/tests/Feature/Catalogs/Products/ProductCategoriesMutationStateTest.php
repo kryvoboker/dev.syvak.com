@@ -6,6 +6,7 @@ namespace Tests\Feature\Catalogs\Products;
 
 use App\Filament\Resources\Catalogs\Products\Products\Pages\CreateProduct;
 use App\Filament\Resources\Catalogs\Products\Products\Pages\EditProduct;
+use App\Models\Catalogs\Products\Product;
 use Filament\Support\Exceptions\Halt;
 use Tests\TestCase;
 
@@ -31,6 +32,9 @@ class ProductCategoriesMutationStateTest extends TestCase
     public function test_edit_page_preserves_normalized_categories_before_unset(): void
     {
         $page = new TestableEditProductPage();
+        $page->setProductRecordForTest(Product::factory()->make([
+            'id' => 1,
+        ]));
 
         $mutated_data = $page->callMutateFormDataBeforeSave([
             'categories' => [5, '7', 5, 0, -3, 1],
@@ -145,5 +149,10 @@ class TestableEditProductPage extends EditProduct
     public function getCategoryIdsForTest(): array
     {
         return $this->category_ids;
+    }
+
+    public function setProductRecordForTest(Product $product): void
+    {
+        $this->record = $product;
     }
 }
