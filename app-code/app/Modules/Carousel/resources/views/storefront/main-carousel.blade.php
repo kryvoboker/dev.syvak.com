@@ -18,7 +18,7 @@
     : (int) ($carousel_module_data['desctop_max_height'] ?? 0);
 @endphp
 
-<section class="main-carousel-section carousel-section" aria-label="Main carousel">
+<section class="main-carousel-section carousel-section" aria-label="{{ __('carousel::admin/modules/carousel.aria.main_carousel') }}">
     <div class="container">
         <div id="{{ $carousel_dom_id }}"
              class="main-carousel carousel --prevent-on-load-init relative"

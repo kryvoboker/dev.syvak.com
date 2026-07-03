@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'labels' => [
+        'module_name' => 'Module name',
+        'placement' => 'Placement',
+        'sort_order' => 'Module sort order',
+        'is_enabled' => 'Module is active',
+        'page_types' => 'Show on pages',
+        'open_links_in_new_tab' => 'Open links in a new tab',
+        'desktop_image_width' => 'Desktop image width',
+        'desktop_image_height' => 'Desktop image height',
+        'desktop_image_max_width' => 'Desktop image max width',
+        'desktop_image_max_height' => 'Desktop image max height',
+        'mobile_image_width' => 'Mobile image width',
+        'mobile_image_height' => 'Mobile image height',
+        'mobile_image_max_width' => 'Mobile image max width',
+        'mobile_image_max_height' => 'Mobile image max height',
+        'slides' => 'Slides',
+        'slide' => 'Slide',
+        'slide_is_active' => 'Slide is active',
+        'slide_sort_order' => 'Slide sort order',
+        'heading' => 'Heading',
+        'description' => 'Description',
+        'button_text' => 'Button text',
+        'image_link' => 'Image link',
+        'button_link' => 'Button link',
+        'desktop_image' => 'Desktop image',
+        'mobile_image' => 'Mobile image',
+    ],
+    'sections' => [
+        'visibility_and_image_sizes' => [
+            'title' => 'Visibility and image sizes',
+            'description' => 'Only page placement, display pages, image sizes, and images are required. Text and links can be left empty.',
+        ],
+        'slide_state' => [
+            'title' => 'Slide state',
+            'description' => 'Slide text and links are optional. If you leave them empty, they will not be shown in the storefront carousel.',
+        ],
+    ],
+    'helpers' => [
+        'desktop_image_width' => 'Required field. Use the final image width for desktop slides.',
+        'desktop_image_height' => 'Required field. Use the final image height for desktop slides.',
+        'mobile_image_width' => 'Required field. Use the final image width for mobile slides.',
+        'mobile_image_height' => 'Required field. Use the final image height for mobile slides.',
+        'heading' => 'Optional. Leave empty to hide the heading for this slide.',
+        'description' => 'Optional. Leave empty to hide the description.',
+        'button_text' => 'Optional. The button is shown only when both text and button link are filled.',
+        'image_link' => 'Optional. If empty, the image will not be clickable.',
+        'button_link' => 'Optional. The button is shown only when both text and button link are filled.',
+        'desktop_image' => 'Optional. Upload a desktop slide image for this language. If empty, the storefront fallback strategy will be applied.',
+        'mobile_image' => 'Optional. Upload a mobile slide image for this language. If empty, the storefront fallback strategy will be applied.',
+    ],
+    'aria' => [
+        'main_carousel' => 'Main carousel',
+    ],
+    'options' => [
+        'page_types' => [
+            'home' => 'Home',
+            'category' => 'Category',
+            'product' => 'Product',
+            'checkout' => 'Checkout',
+            'search' => 'Search',
+            'cart' => 'Cart',
+        ],
+    ],
+    'validation' => [
+        'at_least_one_slide_is_required' => 'At least one slide is required.',
+        'slide_payload_must_be_an_array' => 'Slide payload must be an array.',
+        'slide_translations_must_be_an_array' => 'Slide translations must be an array.',
+        'translation_payload_must_be_an_array' => 'Translation payload must be an array.',
+        'uploaded_image_was_not_found_in_storage' => 'Uploaded image was not found in storage.',
+        'only_jpg_and_png_images_are_allowed' => 'Only JPG and PNG images are allowed.',
+        'uploaded_image_could_not_be_persisted' => 'Uploaded image could not be persisted.',
+        'select_at_least_one_page_type' => 'Select at least one page type.',
+        'the_selected_page_types_are_invalid' => 'The selected page types are invalid.',
+    ],
+];
