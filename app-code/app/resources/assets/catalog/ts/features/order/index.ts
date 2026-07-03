@@ -1,4 +1,4 @@
-import { handleCheckoutDeliverySelection } from '@ts-features/checkout/checkoutPage.ts';
+import { handleCheckoutDeliverySelection } from '@ts-features/pages/checkout/checkoutPage.ts';
 import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
 import { findArrayElems } from '@ts-shared/lib/helpers.ts';
 
