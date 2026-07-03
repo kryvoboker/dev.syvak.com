@@ -76,7 +76,7 @@ class NovaPoshtaSyncService
         $state['phase'] = self::PHASE_COLLECT;
         $state['started_at'] = now()->toIso8601String();
         $state['updated_at'] = now()->toIso8601String();
-        $state['message'] = __('admin/modules/nova_poshta.sync.messages.started');
+        $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.started');
 
         Cache::put(self::SYNC_STATE_CACHE_KEY, $state, now()->addDay());
 
@@ -295,7 +295,7 @@ class NovaPoshtaSyncService
             $state['stage_processed_rows'] = 0;
             $state['stage_progress'] = 0;
             $state['overall_progress'] = 25;
-            $state['message'] = __('admin/modules/nova_poshta.sync.messages.regions_completed');
+            $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.regions_completed');
 
             return $this->persistQueuedSyncState($state);
         } catch (Throwable $throwable) {
@@ -322,7 +322,7 @@ class NovaPoshtaSyncService
                 );
             },
             self::STAGE_POST_OFFICES,
-            __('admin/modules/nova_poshta.sync.messages.cities_completed'),
+            __('novaposhta::admin/modules/nova_poshta.sync.messages.cities_completed'),
         );
     }
 
@@ -346,8 +346,8 @@ class NovaPoshtaSyncService
             },
             $is_poshtomat ? null : self::STAGE_POSHTOMATS,
             $is_poshtomat
-                ? __('admin/modules/nova_poshta.sync.messages.poshtomats_completed')
-                : __('admin/modules/nova_poshta.sync.messages.post_offices_completed'),
+                ? __('novaposhta::admin/modules/nova_poshta.sync.messages.poshtomats_completed')
+                : __('novaposhta::admin/modules/nova_poshta.sync.messages.post_offices_completed'),
         );
     }
 
@@ -410,7 +410,7 @@ class NovaPoshtaSyncService
                     $state['phase'] = 'completed';
                     $state['completed_at'] = now()->toIso8601String();
                     $state['overall_progress'] = 100;
-                    $state['message'] = __('admin/modules/nova_poshta.sync.messages.completed');
+                    $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.completed');
 
                     Cache::put(self::LAST_SYNC_SUMMARY_CACHE_KEY, $state['summary'], now()->addDay());
                 } else {
@@ -422,7 +422,7 @@ class NovaPoshtaSyncService
                     $state['stage_processed_rows'] = 0;
                     $state['stage_progress'] = 0;
                     $state['overall_progress'] = $this->getOverallProgressForCompletedStage($stage);
-                    $state['message'] = __('admin/modules/nova_poshta.sync.messages.next_stage', [
+                    $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.next_stage', [
                         'stage' => $this->getStageLabel($next_stage),
                     ]);
                 }
@@ -433,7 +433,7 @@ class NovaPoshtaSyncService
 
                 $state['current_page'] = $current_page + 1;
                 $state['overall_progress'] = $this->getOverallProgressForStage($stage, $state['stage_progress']);
-                $state['message'] = __('admin/modules/nova_poshta.sync.messages.collecting_page', [
+                $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.collecting_page', [
                     'current' => $current_page,
                     'total' => $total_pages,
                     'stage' => $this->getStageLabel($stage),
@@ -524,7 +524,7 @@ class NovaPoshtaSyncService
         $state['is_running'] = false;
         $state['stage'] = 'stopped';
         $state['phase'] = self::PHASE_STOPPED;
-        $state['message'] = __('admin/modules/nova_poshta.sync.messages.stopped');
+        $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.stopped');
         $state['stopped_at'] = now()->toIso8601String();
 
         return $this->persistQueuedSyncState($state);
@@ -542,7 +542,7 @@ class NovaPoshtaSyncService
         }
 
         $state['stop_requested'] = true;
-        $state['message'] = __('admin/modules/nova_poshta.sync.messages.stop_requested');
+        $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.stop_requested');
 
         return $this->persistQueuedSyncState($state);
     }
@@ -586,10 +586,10 @@ class NovaPoshtaSyncService
     private function getStageLabel(string $stage): string
     {
         return match ($stage) {
-            self::STAGE_REGIONS => (string) __('admin/modules/nova_poshta.sync.stages.regions'),
-            self::STAGE_CITIES => (string) __('admin/modules/nova_poshta.sync.stages.cities'),
-            self::STAGE_POST_OFFICES => (string) __('admin/modules/nova_poshta.sync.stages.post_offices'),
-            self::STAGE_POSHTOMATS => (string) __('admin/modules/nova_poshta.sync.stages.poshtomats'),
+            self::STAGE_REGIONS => (string) __('novaposhta::admin/modules/nova_poshta.sync.stages.regions'),
+            self::STAGE_CITIES => (string) __('novaposhta::admin/modules/nova_poshta.sync.stages.cities'),
+            self::STAGE_POST_OFFICES => (string) __('novaposhta::admin/modules/nova_poshta.sync.stages.post_offices'),
+            self::STAGE_POSHTOMATS => (string) __('novaposhta::admin/modules/nova_poshta.sync.stages.poshtomats'),
             default => $stage,
         };
     }
