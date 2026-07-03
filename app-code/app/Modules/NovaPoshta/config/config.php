@@ -27,8 +27,9 @@ return [
     ],
     'api' => [
         'url' => env('NOVA_POSHTA_API_URL') ?? 'https://api.novaposhta.ua/v2.0/json/',
-        'timeout' => (int)(env('NOVA_POSHTA_TIMEOUT') ?? 30),
+        'timeout' => (int)(env('NOVA_POSHTA_TIMEOUT') ?? 30), // seconds
         'limit' => (int)(env('NOVA_POSHTA_LIMIT') ?? 500),
         'language' => env('NOVA_POSHTA_LANGUAGE') ?? 'UA',
+        'wait_timeout' => (int) env('NOVA_POSHTA_WAIT_TIMEOUT, 1'), // seconds
     ],
 ];
