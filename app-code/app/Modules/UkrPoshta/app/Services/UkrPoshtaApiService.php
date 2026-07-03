@@ -17,11 +17,12 @@ readonly class UkrPoshtaApiService
 {
     public function __construct(
         private UkrPoshtaConfig $config,
-    ) {}
+    ) {
+    }
 
     /**
-     * @return array<string, mixed>
      * @throws ConnectionException
+     * @return array<string, mixed>
      */
     public function getRegions(): array
     {
@@ -29,8 +30,8 @@ readonly class UkrPoshtaApiService
     }
 
     /**
-     * @return array<string, mixed>
      * @throws ConnectionException
+     * @return array<string, mixed>
      */
     public function getDistricts(int $region_id): array
     {
@@ -46,8 +47,8 @@ readonly class UkrPoshtaApiService
     }
 
     /**
-     * @return array<string, mixed>
      * @throws ConnectionException
+     * @return array<string, mixed>
      */
     public function getCities(int $district_id): array
     {
@@ -57,8 +58,8 @@ readonly class UkrPoshtaApiService
     }
 
     /**
-     * @return array<string, mixed>
      * @throws ConnectionException
+     * @return array<string, mixed>
      */
     public function getPostOffices(int $district_id): array
     {
@@ -70,8 +71,8 @@ readonly class UkrPoshtaApiService
     /**
      * @param array<string, mixed> $query
      *
-     * @return array<string, mixed>
      * @throws ConnectionException
+     * @return array<string, mixed>
      */
     public function call(string $endpoint, array $query = []): array
     {
@@ -139,7 +140,7 @@ readonly class UkrPoshtaApiService
             );
         }
 
-        $errors   = Arr::wrap(data_get($payload, 'errors', data_get($payload, 'error', [])));
+        $errors = Arr::wrap(data_get($payload, 'errors', data_get($payload, 'error', [])));
         $warnings = Arr::wrap(data_get($payload, 'warnings', data_get($payload, 'warning', [])));
 
         if ($errors !== [] || $warnings !== []) {
@@ -158,8 +159,8 @@ readonly class UkrPoshtaApiService
 
         return [
             'success' => true,
-            'data'    => $data,
-            'raw'     => $payload,
+            'data' => $data,
+            'raw' => $payload,
         ];
     }
 }

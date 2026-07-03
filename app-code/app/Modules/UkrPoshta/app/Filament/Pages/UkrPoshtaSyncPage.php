@@ -258,6 +258,28 @@ class UkrPoshtaSyncPage extends Page
         $stage_label = $this->getStageLabel($stage);
         $polling_attribute = $is_running ? ' wire:poll.2s="processSyncStep"' : '';
         $sync_summary_rows = $this->getSyncSummaryRows($is_running);
+        $stage_processed_rows = (string) Arr::get($sync_state, 'stage_processed_rows', 0);
+        $stage_total_rows = (string) Arr::get($sync_state, 'stage_total_rows', 0);
+        $regions_card = $this->renderStatCard(
+            __('admin/modules/ukr_poshta.stats.regions'),
+            (int) data_get($sync_summary_rows, 'regions.processed', 0),
+            (int) data_get($sync_summary_rows, 'regions.total', 0),
+        );
+        $districts_card = $this->renderStatCard(
+            __('admin/modules/ukr_poshta.stats.districts'),
+            (int) data_get($sync_summary_rows, 'districts.processed', 0),
+            (int) data_get($sync_summary_rows, 'districts.total', 0),
+        );
+        $cities_card = $this->renderStatCard(
+            __('admin/modules/ukr_poshta.stats.cities'),
+            (int) data_get($sync_summary_rows, 'cities.processed', 0),
+            (int) data_get($sync_summary_rows, 'cities.total', 0),
+        );
+        $post_offices_card = $this->renderStatCard(
+            __('admin/modules/ukr_poshta.stats.post_offices'),
+            (int) data_get($sync_summary_rows, 'post_offices.processed', 0),
+            (int) data_get($sync_summary_rows, 'post_offices.total', 0),
+        );
 
         return '
             <div class="space-y-6"' . $polling_attribute . '>
@@ -283,7 +305,7 @@ class UkrPoshtaSyncPage extends Page
                             <div class="mt-4 grid gap-2 text-sm">
                                 <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.stage')) . ':</span> ' . e($stage_label) . '</div>
                                 <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.phase')) . ':</span> ' . e($this->getPhaseLabel($phase)) . '</div>
-                                <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.processed_rows')) . ':</span> ' . e((string) Arr::get($sync_state, 'stage_processed_rows', 0)) . ' / ' . e((string) Arr::get($sync_state, 'stage_total_rows', 0)) . '</div>
+                                <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.processed_rows')) . ':</span> ' . e($stage_processed_rows) . ' / ' . e($stage_total_rows) . '</div>
                                 <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.stage_progress')) . ':</span> ' . e((string) $stage_progress) . '%</div>
                             </div>
                         </div>
@@ -291,10 +313,10 @@ class UkrPoshtaSyncPage extends Page
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-4">
-                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.regions'), (int) data_get($sync_summary_rows, 'regions.processed', 0), (int) data_get($sync_summary_rows, 'regions.total', 0)) . '
-                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.districts'), (int) data_get($sync_summary_rows, 'districts.processed', 0), (int) data_get($sync_summary_rows, 'districts.total', 0)) . '
-                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.cities'), (int) data_get($sync_summary_rows, 'cities.processed', 0), (int) data_get($sync_summary_rows, 'cities.total', 0)) . '
-                    ' . $this->renderStatCard(__('admin/modules/ukr_poshta.stats.post_offices'), (int) data_get($sync_summary_rows, 'post_offices.processed', 0), (int) data_get($sync_summary_rows, 'post_offices.total', 0)) . '
+                    ' . $regions_card . '
+                    ' . $districts_card . '
+                    ' . $cities_card . '
+                    ' . $post_offices_card . '
                 </div>
             </div>
         ';
@@ -303,9 +325,9 @@ class UkrPoshtaSyncPage extends Page
     /**
      * @return array<string, array{processed:int,total:int,imported:int}>
      */
-    private function getSyncSummaryRows(bool $preferQueuedSummary = true): array
+    private function getSyncSummaryRows(bool $prefer_queued_summary = true): array
     {
-        if ($preferQueuedSummary && Arr::get($this->sync_state, 'summary', []) !== []) {
+        if ($prefer_queued_summary && Arr::get($this->sync_state, 'summary', []) !== []) {
             return $this->normalizeSummaryRows((array) Arr::get($this->sync_state, 'summary', []));
         }
 
