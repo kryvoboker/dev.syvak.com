@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Modules\ProductsCarousel;
+namespace Modules\ProductsCarousel\Tests\Feature;
 
 use App\Models\Catalogs\Products\Product;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -27,6 +27,9 @@ class ProductsCarouselModuleServicesTest extends TestCase
             'database' => ':memory:',
             'prefix' => '',
             'foreign_key_constraints' => true,
+        ]);
+        config()->set('page-type', [
+            'home' => 'home',
         ]);
 
         DB::purge('sqlite');
