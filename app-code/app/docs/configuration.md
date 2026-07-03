@@ -18,10 +18,17 @@
 ## Frontend Build Config
 
 - `vite.config.ts` — Vite build pipeline
-- `tailwind.config.js` — Tailwind config
+- `biome.json` — TypeScript formatter and lint config
+- `tsconfig.json` — TypeScript compiler and type-checking config
+- `resources/assets/catalog/css/app.css` — Tailwind CSS v4 entrypoint and design tokens
 - `package.json` scripts:
   - `npm run dev`
   - `npm run build`
+  - `npm run ts:check`
+  - `npm run ts:fix`
+  - `npm run ts:format`
+  - `npm run ts:lint`
+  - `npm run ts:typecheck`
 
 ## PHP/Laravel Config
 

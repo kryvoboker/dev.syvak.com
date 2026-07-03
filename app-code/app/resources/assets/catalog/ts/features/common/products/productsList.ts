@@ -1,5 +1,5 @@
-import { initDrawer } from "@ts-shared/drawer/initDrawer.ts";
-import { initDropdown } from "@ts-shared/dropdown/initDropdown.ts";
+import { initDrawer } from '@ts-shared/drawer/initDrawer.ts';
+import { initDropdown } from '@ts-shared/dropdown/initDropdown.ts';
 
 /**
  * Category products-list interactions.
@@ -7,12 +7,12 @@ import { initDropdown } from "@ts-shared/dropdown/initDropdown.ts";
  */
 export const handleCategoryProductsList = (): void => {
     initDropdown({
-        dropdownSelector:    '.category-sort-dropdown',
+        dropdownSelector: '.category-sort-dropdown',
         closeButtonSelector: '.close-category-sort-dropdown-btn',
     });
 
     initDrawer({
-        drawerSelector:  '.category-filter-drawer',
+        drawerSelector: '.category-filter-drawer',
         triggerSelector: '.open-category-filter-drawer-btn',
     });
 };

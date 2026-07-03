@@ -7,6 +7,8 @@
 - PHPUnit `v12` (feature and unit tests)
 - Larastan `v3` (static analysis)
 - Pint `v1` (formatting)
+- Biome `v2` (TypeScript formatting and linting)
+- TypeScript `v6` (`tsc --noEmit` type checking)
 
 ## Common Commands
 
@@ -34,6 +36,13 @@ composer phpcs:fix
 
 # Design smell checks
 composer phpmd
+
+# TypeScript quality
+npm run ts:check
+npm run ts:fix
+npm run ts:format
+npm run ts:lint
+npm run ts:typecheck
 ```
 
 ## Recommended Change Validation
@@ -43,7 +52,8 @@ composer phpmd
 3. Run `composer pint` before commit.
 4. Run `composer phpcs` when you need PHPCS warnings checked.
 5. Run `composer phpmd` when you need PHPMD violations checked.
-6. Optionally run full suite before release.
+6. Run `npm run ts:check` for the storefront TypeScript and module TypeScript tree.
+7. Optionally run full suite before release.
 
 ## Module Test Placement
 
@@ -62,7 +72,11 @@ composer phpmd
 - PHPCS checks `PSR12`, `Generic.Files.LineLength`, and `phpcs/ProjectStandard`.
 - PHPMD uses `rulesets/unusedcode.xml`.
 - PHPStan uses Larastan with `level: 5` and scans `app`, `Modules`, `routes`, `config`, `database`, and `tests`.
+- TypeScript quality uses `Biome` for format/lint and `tsc --noEmit` for type checking.
+- The `ts:check` script runs `biome check .` and `tsc --noEmit -p tsconfig.json` together.
+- The `ts:fix` script runs `biome check --write .` to auto-fix TypeScript formatting and safe lint issues.
 - Recommended cleanup order is `composer pint` -> `composer phpcs` -> `composer phpcs:fix` if needed -> `composer phpmd` -> `composer phpstan`.
+- Recommended frontend cleanup order is `npm run ts:fix` -> `npm run ts:check` -> `npm run ts:typecheck` when you need to isolate type-only failures.
 
 ## See Also
 

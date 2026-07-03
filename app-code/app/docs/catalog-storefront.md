@@ -34,6 +34,7 @@ GET /{locale}/live-search
 - Catalog filters use normalized GET contract.
 - Sorting options are configured from page settings and validated server-side.
 - Filter index table is used to optimize product filtering.
+- Storefront TypeScript that powers catalog interactions is validated with `npm run ts:check` and fixed with `npm run ts:fix`.
 
 ## See Also
 

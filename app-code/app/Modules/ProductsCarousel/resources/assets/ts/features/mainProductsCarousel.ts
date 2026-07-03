@@ -1,6 +1,6 @@
-import { initCarousel }                              from '@ts-shared/carousel/initCarousel.ts';
-import { $PAGE_TYPE_KEY }                            from '@ts-shared/lib/constants.ts';
-import { getAppParam }                               from '@ts-shared/lib/getAppParam.ts';
+import { initCarousel } from '@ts-shared/carousel/initCarousel.ts';
+import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
+import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
 import { arrayFrom, findArrayElems, isEmpty, toRem } from '@ts-shared/lib/helpers.ts';
 
 function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
@@ -33,7 +33,7 @@ function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
 
 function setCardsHeight(): void {
     const carouselsBodiesEls = <HTMLElement[] | []>findArrayElems('.products-carousel-body');
-    let minHeight: number    = 0;
+    let minHeight: number = 0;
 
     carouselsBodiesEls.forEach((carouselBodyEl: HTMLElement): void => {
         const slidersEls = <HTMLElement[] | []>findArrayElems('.products-carousel-slide', carouselBodyEl);
@@ -41,9 +41,12 @@ function setCardsHeight(): void {
         slidersEls.forEach((sliderElChildrenEl: HTMLElement): void => {
             const children = <HTMLElement[] | []>arrayFrom(sliderElChildrenEl.children);
 
-            const sliderElChildrenElsHeight: number = children.reduce((acc2: number, sliderElChildEl: HTMLElement): number => {
-                return acc2 + sliderElChildEl.offsetHeight;
-            }, 0);
+            const sliderElChildrenElsHeight: number = children.reduce(
+                (acc2: number, sliderElChildEl: HTMLElement): number => {
+                    return acc2 + sliderElChildEl.offsetHeight;
+                },
+                0,
+            );
 
             if (sliderElChildrenElsHeight > minHeight) {
                 minHeight = sliderElChildrenElsHeight;

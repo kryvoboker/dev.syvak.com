@@ -1,6 +1,6 @@
-import { initCarousel }            from '@ts-shared/carousel/initCarousel.ts';
-import { $PAGE_TYPE_KEY }          from '@ts-shared/lib/constants.ts';
-import { getAppParam }             from '@ts-shared/lib/getAppParam.ts';
+import { initCarousel } from '@ts-shared/carousel/initCarousel.ts';
+import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
+import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
 import { findArrayElems, isEmpty } from '@ts-shared/lib/helpers.ts';
 
 function isPageTypeAllowed(carouselElement: HTMLElement): boolean {

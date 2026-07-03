@@ -1,6 +1,6 @@
-import { findArrayElems, isContainsClass } from "@ts-shared/lib/helpers.ts";
-import HSDropdown                           from "flyonui/src/js/plugins/dropdown/index";
-import type { IHTMLElementFloatingUI }      from "flyonui/flyonui";
+import { findArrayElems, isContainsClass } from '@ts-shared/lib/helpers.ts';
+import type { IHTMLElementFloatingUI } from 'flyonui/flyonui';
+import HSDropdown from 'flyonui/src/js/plugins/dropdown/index';
 
 interface InitDropdownOptions {
     dropdownSelector: string;

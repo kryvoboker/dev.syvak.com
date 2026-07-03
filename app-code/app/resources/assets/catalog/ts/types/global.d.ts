@@ -1,7 +1,7 @@
-import type HSCarousel  from "flyonui/src/js/plugins/carousel"
-import type HSDropdown  from "flyonui/src/js/plugins/dropdown"
-import type HSOverlay   from "flyonui/src/js/plugins/overlay"
-import type HSAccordion from "flyonui/src/js/plugins/accordion"
+import type HSAccordion from 'flyonui/src/js/plugins/accordion';
+import type HSCarousel from 'flyonui/src/js/plugins/carousel';
+import type HSDropdown from 'flyonui/src/js/plugins/dropdown';
+import type HSOverlay from 'flyonui/src/js/plugins/overlay';
 
 export interface WindowAppParams {
     page_type?: string | null;
@@ -10,15 +10,15 @@ export interface WindowAppParams {
         get_extra?: {
             from_key: string;
             to_key: string;
-        },
+        };
         range?: {
             min: number;
             max: number;
             step: number;
             selected_from: number | null;
             selected_to: number | null;
-        }
-    }
+        };
+    };
     is_has_more_pages?: boolean;
     load_more_products_ajax_url?: string;
     next_page?: number | null;
@@ -55,8 +55,9 @@ declare global {
         HSOverlay: typeof HSOverlay;
         HSCarousel?: typeof HSCarousel;
         HSAccordion?: typeof HSAccordion;
+        $hsDropdownCollection?: HSDropdown[];
+        $hsOverlayCollection?: HSOverlay[];
+        $hsAccordionCollection?: HSAccordion[];
         app_params?: WindowAppParams;
     }
 }
-
-export {};

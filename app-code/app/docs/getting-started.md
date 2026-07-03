@@ -42,9 +42,10 @@ make up-dev
 ```bash
 php artisan test --compact
 vendor/bin/pint --dirty --format=agent
+npm run ts:check
 ```
 
-Expected: tests run successfully and Pint returns pass/fixed output.
+Expected: tests run successfully, Pint returns pass/fixed output, and TypeScript checks pass.
 
 ## See Also
 

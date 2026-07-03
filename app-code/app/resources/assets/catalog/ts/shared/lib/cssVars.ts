@@ -1,4 +1,4 @@
-import { findElem, toRem } from "@ts-shared/lib/helpers.ts";
+import { findElem, toRem } from '@ts-shared/lib/helpers.ts';
 
 type InitCallback = (doc: HTMLElement) => void;
 
@@ -18,7 +18,6 @@ export const handleCssVars = (initCb: InitCallback | null = null): void => {
             }
         };
     }
-
 
     init(doc);
 
