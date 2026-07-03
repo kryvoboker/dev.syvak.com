@@ -37,7 +37,8 @@ It is intentionally implemented as a **singleton module**: there is one shared c
 5. Keep data language in Ukrainian when reading, storing, and rendering Ukr Poshta directory values.
 6. Tests, language files, module services, and sync logic should stay inside the module structure.
    - tests live in `Modules/UkrPoshta/tests/`
-   - translations live in `Modules/UkrPoshta/Resources/lang/`
+   - translations live in `Modules/UkrPoshta/resources/lang/`
+   - `Modules/UkrPoshta/app/Providers/UkrPoshtaServiceProvider.php` registers translations from that path
    - do not move these concerns back into the shared `app/` tree unless the module architecture changes
 
 ## Admin flow
@@ -141,8 +142,8 @@ This module keeps its own test suite and translation files.
   - `Modules/UkrPoshta/tests/Feature/UkrPoshtaSyncServiceTest.php`
   - `Modules/UkrPoshta/tests/Feature/UkrPoshtaConfigTest.php`
 - translations:
-  - `Modules/UkrPoshta/Resources/lang/en/admin/modules/ukr_poshta.php`
-  - `Modules/UkrPoshta/Resources/lang/uk/admin/modules/ukr_poshta.php`
+  - `Modules/UkrPoshta/resources/lang/en/admin/modules/ukr_poshta.php`
+  - `Modules/UkrPoshta/resources/lang/uk/admin/modules/ukr_poshta.php`
 
 When changing module behavior, update the module tests and module translations in the same change.
 
@@ -160,8 +161,8 @@ When changing module behavior, update the module tests and module translations i
   - chunked sync state machine
 - `routes/web.php`
   - storefront/AJAX endpoints
-- `Resources/lang/`
-  - module-owned translations
+- `resources/lang/`
+  - module-owned translations loaded by the module provider
 - `tests/`
   - module-owned regression coverage
 
@@ -175,7 +176,7 @@ Before changing the module, verify:
 4. The storefront views remain separate from admin views.
 5. The sync service still rebuilds tables only after full stage collection.
 6. New fields or sync stages are covered by tests.
-7. Translation strings remain in the module and still resolve from the module-owned language files.
+7. Translation strings remain in the module and still resolve from the module-owned `resources/lang/` files through the module provider registration.
 
 ## Related docs
 
