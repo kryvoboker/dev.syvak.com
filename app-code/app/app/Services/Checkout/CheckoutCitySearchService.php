@@ -15,6 +15,7 @@ class CheckoutCitySearchService
     private const int RESULT_LIMIT = 100;
 
     /**
+     * @throws Throwable
      * @return array{
      *     success: bool,
      *     error_message?: string,
@@ -26,12 +27,11 @@ class CheckoutCitySearchService
      *         city_lng: float|null
      *     }>
      * }
-     * @throws Throwable
      */
     public function searchCities(string $city_keyword): array
     {
-        $normalized_keyword        = Str::squish($city_keyword);
-        $search_term               = Str::lower($normalized_keyword);
+        $normalized_keyword = Str::squish($city_keyword);
+        $search_term = Str::lower($normalized_keyword);
         $min_search_keyword_length = 3;
 
         if (Str::length($search_term) < $min_search_keyword_length) {
@@ -40,17 +40,17 @@ class CheckoutCitySearchService
             ]);
 
             return [
-                'success'       => false,
+                'success' => false,
                 'error_message' => "Search term must be at least $min_search_keyword_length characters long.",
-                'cities_data'   => [],
+                'cities_data' => [],
             ];
         }
 
-        $search_like            = "%$search_term%";
-        $connection             = DB::connection();
-        $prefix                 = $connection->getTablePrefix();
+        $search_like = "%$search_term%";
+        $connection = DB::connection();
+        $prefix = $connection->getTablePrefix();
         $is_enabled_nova_poshta = is_enabled_singleton_module('NovaPoshta');
-        $is_enabled_ukr_poshta  = is_enabled_singleton_module('UkrPoshta');
+        $is_enabled_ukr_poshta = is_enabled_singleton_module('UkrPoshta');
 
         if ($is_enabled_nova_poshta === true && $is_enabled_ukr_poshta === true) {
             $cities_data = [];
@@ -82,7 +82,7 @@ class CheckoutCitySearchService
             ';
 
             try {
-                $ukr_poshta_cities_data  = $this->normalizeResults($connection->select($ukr_poshta_sql, [$search_like]));
+                $ukr_poshta_cities_data = $this->normalizeResults($connection->select($ukr_poshta_sql, [$search_like]));
                 $nova_poshta_cities_data = $this->normalizeResults($connection->select($nova_poshta_sql, [$search_like]));
 
                 if (count($ukr_poshta_cities_data) > count($nova_poshta_cities_data)) {
@@ -92,34 +92,34 @@ class CheckoutCitySearchService
                 }
 
                 $nova_poshta_cities_data = array_filter($nova_poshta_cities_data);
-                $ukr_poshta_cities_data  = array_filter($ukr_poshta_cities_data);
+                $ukr_poshta_cities_data = array_filter($ukr_poshta_cities_data);
 
                 $cities_data = array_merge(
                     $cities_data,
                     $ukr_poshta_cities_data,
-                    $nova_poshta_cities_data
+                    $nova_poshta_cities_data,
                 );
 
                 $this->sortCities($cities_data);
 
                 return [
-                    'success'     => empty($cities_data) === false,
+                    'success' => empty($cities_data) === false,
                     'cities_data' => $cities_data,
                 ];
             } catch (Throwable $throwable) {
                 Log::channel('stack')->error('[CheckoutCitySearchService.searchCities] query failed', [
                     'search_term' => $search_term,
-                    'exception'   => $throwable::class,
-                    'message'     => $throwable->getMessage(),
+                    'exception' => $throwable::class,
+                    'message' => $throwable->getMessage(),
                 ]);
 
                 return [
-                    'success'       => false,
+                    'success' => false,
                     'error_message' => 'Something went wrong. Please try again later.',
-                    'cities_data'   => [],
+                    'cities_data' => [],
                 ];
             }
-        } else if ($is_enabled_nova_poshta === true) {
+        } elseif ($is_enabled_nova_poshta === true) {
             $sql = '
 				SELECT ref         AS nova_poshta_city_id,
 					   description AS city_description,
@@ -131,7 +131,7 @@ class CheckoutCitySearchService
 					ORDER BY region_description
 					LIMIT ' . self::RESULT_LIMIT . '
 			';
-        } else if ($is_enabled_ukr_poshta === true) {
+        } elseif ($is_enabled_ukr_poshta === true) {
             $sql = '
 				SELECT NULL        AS nova_poshta_city_id,
 					   description AS city_description,
@@ -150,9 +150,9 @@ class CheckoutCitySearchService
             ]);
 
             return [
-                'success'       => false,
+                'success' => false,
                 'error_message' => 'No shipping are found. Please contact us.',
-                'cities_data'   => [],
+                'cities_data' => [],
             ];
         }
 
@@ -162,20 +162,20 @@ class CheckoutCitySearchService
             $this->sortCities($cities_data);
 
             return [
-                'success'     => empty($cities_data) === false,
+                'success' => empty($cities_data) === false,
                 'cities_data' => $cities_data,
             ];
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[CheckoutCitySearchService.searchCities] query failed', [
                 'search_term' => $search_term,
-                'exception'   => $throwable::class,
-                'message'     => $throwable->getMessage(),
+                'exception' => $throwable::class,
+                'message' => $throwable->getMessage(),
             ]);
 
             return [
-                'success'       => false,
+                'success' => false,
                 'error_message' => 'Something went wrong. Please try again later.',
-                'cities_data'   => [],
+                'cities_data' => [],
             ];
         }
     }
@@ -189,17 +189,17 @@ class CheckoutCitySearchService
     {
         usort(
             $cities_data,
-            fn($city_one, $city_two) => strcmp(
+            fn ($city_one, $city_two) => strcmp(
                 (string)$city_one['city_description'],
-                (string)$city_two['city_description']
-            )
+                (string)$city_two['city_description'],
+            ),
         );
     }
 
     /**
      * @param array $results
      *
-     * @return array<int, stdClass{
+     * @return array<int, array{
      *     city_name: string,
      *     region_name: string,
      *     nova_poshta_city_id: int|null,
@@ -213,13 +213,13 @@ class CheckoutCitySearchService
     {
         return array_map(function (stdClass $result) {
             $data = [
-                'city_name'           => $result->city_name,
-                'region_name'         => $result->region_name,
+                'city_name' => $result->city_name,
+                'region_name' => $result->region_name,
                 'nova_poshta_city_id' => $result->nova_poshta_city_id ?? null,
-                'ukr_poshta_city_id'  => $result->ukr_poshta_city_id ?? null,
-                'latitude'            => $result->latitude,
-                'longitude'           => $result->longitude,
-                'city_description'    => $result->city_description,
+                'ukr_poshta_city_id' => $result->ukr_poshta_city_id ?? null,
+                'latitude' => $result->latitude,
+                'longitude' => $result->longitude,
+                'city_description' => $result->city_description,
             ];
 
             return array_filter($data);
@@ -240,14 +240,14 @@ class CheckoutCitySearchService
                 break;
             }
 
-            $primary_city_name   = Str::trim(Str::lower((string)$primary_city['city_name']));
+            $primary_city_name = Str::trim(Str::lower((string)$primary_city['city_name']));
             $primary_region_name = Str::trim(Str::lower((string)$primary_city['region_name']));
 
             foreach ($secondary_cities as $secondary_index => $secondary_city_data) {
-                $secondary_city_name   = Str::trim(Str::lower((string)$secondary_city_data['city_name']));
+                $secondary_city_name = Str::trim(Str::lower((string)$secondary_city_data['city_name']));
                 $secondary_region_name = Str::trim(Str::lower((string)$secondary_city_data['region_name']));
 
-                $cities_match  = $primary_city_name === $secondary_city_name;
+                $cities_match = $primary_city_name === $secondary_city_name;
                 $regions_match = $secondary_region_name === $primary_region_name
                     || $secondary_region_name === Str::lower(config('shipping.ukraine_capital_uk_name'));
 
@@ -259,14 +259,14 @@ class CheckoutCitySearchService
                         'nova_poshta_city_id' => $is_primary_nova_poshta
                             ? $primary_city['nova_poshta_city_id']
                             : $secondary_city_data['nova_poshta_city_id'],
-                        'city_description'    => $is_primary_nova_poshta
+                        'city_description' => $is_primary_nova_poshta
                             ? $secondary_city_data['city_description']
                             : $primary_city['city_description'],
-                        'ukr_poshta_city_id'  => $is_primary_nova_poshta
+                        'ukr_poshta_city_id' => $is_primary_nova_poshta
                             ? $secondary_city_data['ukr_poshta_city_id']
                             : $primary_city['ukr_poshta_city_id'],
-                        'city_lat'            => $primary_city['latitude'] ?? $secondary_city_data['latitude'],
-                        'city_lng'            => $primary_city['longitude'] ?? $secondary_city_data['longitude'],
+                        'city_lat' => $primary_city['latitude'] ?? $secondary_city_data['latitude'],
+                        'city_lng' => $primary_city['longitude'] ?? $secondary_city_data['longitude'],
                     ];
 
                     unset($primary_cities[$primary_index]);
