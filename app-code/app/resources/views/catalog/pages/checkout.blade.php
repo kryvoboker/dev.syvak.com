@@ -20,13 +20,22 @@
         $selected_city_lat = $selected_city['city_lat'] ?? null;
         $selected_city_lng = $selected_city['city_lng'] ?? null;
         $selected_delivery_method = (string) ($checkout_selection_state['delivery_method'] ?? '');
+        $selected_delivery_point = is_array($checkout_selection_state['delivery_point'] ?? null) ? $checkout_selection_state['delivery_point'] : [];
+        $selected_delivery_point_description = (string) ($selected_delivery_point['description'] ?? '');
+        $selected_delivery_point_value = (string) (
+            $selected_delivery_point['id']
+            ?? $selected_delivery_point['ref']
+            ?? $selected_delivery_point['postcode']
+            ?? ''
+        );
     @endphp
 
     <script>
         window.app_params = {
             ...(window.app_params ?? {}),
-                ...@js([
+            ...@js([
                     'checkout_city_search_url' => $checkout_city_search_url ?? localized_route('localized.catalog.checkout.cities'),
+                    'checkout_branch_search_url' => $checkout_branch_search_url ?? localized_route('localized.catalog.checkout.branches'),
                     'checkout_selection_save_url' => $checkout_selection_save_url ?? localized_route('localized.catalog.checkout.selection.store'),
                     'checkout_selection_state' => $checkout_selection_state,
                     'checkout_choose_city_first_text' => __('catalog/pages/category/show.checkout.warnings.choose_city_first'),
@@ -51,7 +60,7 @@
                     {{ __('catalog/pages/category/show.checkout.title') }}
                 </h1>
 
-                <div class="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1fr)_21.5rem] 2xl:grid-cols-[minmax(0,1fr)_54.1875rem] 2xl:gap-10">
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1fr)_1fr] lg:grid-cols-[minmax(0,1fr)_0.8fr] xl:grid-cols-[minmax(0,1fr)_0.7fr] 2xl:gap-10">
                     <div class="flex flex-col gap-1">
                         <form class="flex flex-col gap-1" action="#" method="post" novalidate>
                             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-5">
@@ -155,14 +164,14 @@
                                                     </span>
 
                                                     <div class="flex flex-col gap-3">
-                                                            <label class="flex items-center gap-3 border-b border-opacity-light-gray-40% py-2 text-sm text-white md:text-lg"
+                                                        <label class="flex items-center gap-3 border-b border-opacity-light-gray-40% py-2 text-sm text-white md:text-lg"
                                                                data-checkout-delivery-method-option="nova_poshta">
                                                             <input class="radio radio-sm border border-white rounded-none"
                                                                    data-checkout-delivery-method-input
                                                                    name="delivery_method"
                                                                    type="radio"
                                                                    value="nova_poshta"
-                                                                   @checked($selected_delivery_method === 'nova_poshta')>
+                                                                @checked($selected_delivery_method === 'nova_poshta')>
 
                                                             <span>{{ __('catalog/pages/category/show.checkout.delivery_methods.nova_poshta') }}</span>
                                                         </label>
@@ -174,7 +183,7 @@
                                                                    name="delivery_method"
                                                                    type="radio"
                                                                    value="ukr_poshta"
-                                                                   @checked($selected_delivery_method === 'ukr_poshta')>
+                                                                @checked($selected_delivery_method === 'ukr_poshta')>
 
                                                             <span>{{ __('catalog/pages/category/show.checkout.delivery_methods.ukr_poshta') }}</span>
                                                         </label>
@@ -186,9 +195,24 @@
                                                         {{ __('catalog/pages/category/show.checkout.labels.branch') }}
                                                     </label>
 
-                                                    <div class="flex items-center gap-2 border-b border-opacity-light-gray-40% py-2 text-sm text-light-gray md:text-lg">
-                                                        <span class="icon-[tabler--search] size-4 shrink-0 md:size-5"></span>
-                                                        <span>{{ __('catalog/pages/category/show.checkout.placeholders.branch_search') }}</span>
+                                                    <div class="relative flex items-center gap-2 pt-1 text-sm text-light-gray md:text-lg">
+                                                        <span class="absolute bottom-1 md:bottom-2 left-0 icon-[tabler--search] custom-icon"></span>
+                                                        <select class="w-full ps-7 md:ps-9 py-1 md:py-2 pe-0 border-0 border-b border-opacity-light-gray-40% bg-transparent text-sm text-white md:text-lg"
+                                                                id="checkout-branch"
+                                                                name="branch"
+                                                                data-placeholder="{{ __('catalog/pages/category/show.checkout.placeholders.branch_search') }}">
+                                                            <option value="">
+                                                                {{ __('catalog/pages/category/show.checkout.placeholders.branch_search') }}
+                                                            </option>
+
+                                                            @if(filled($selected_delivery_point_description))
+                                                                <option value="{{ $selected_delivery_point_value }}"
+                                                                        selected
+                                                                        data-custom-properties="{{ e(json_encode($selected_delivery_point, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}">
+                                                                    {{ $selected_delivery_point_description }}
+                                                                </option>
+                                                            @endif
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
@@ -335,8 +359,8 @@
                                             : [];
                                     @endphp
 
-                                    <article class="flex items-start gap-4 border-b border-opacity-light-gray-40% pb-4 md:gap-6">
-                                        <a class="shrink-0 w-20 overflow-hidden md:w-26.5 lg:w-35" href="{{ $checkout_item['url'] }}">
+                                    <div class="flex items-start gap-4 border-b border-opacity-light-gray-40% pb-4 md:gap-6">
+                                        <a class="shrink-0 w-20 overflow-hidden md:w-26.5 xl:w-35" href="{{ $checkout_item['url'] }}">
                                             <x-catalog::common.img
                                                 class="aspect-square size-full object-contain"
                                                 :urls_data="$item_image_data['urls'] ?? []"
@@ -378,7 +402,7 @@
                                                 {{ $checkout_item['line_total_formatted'] ?? $checkout_item['unit_price_formatted'] ?? '' }}
                                             </p>
                                         </div>
-                                    </article>
+                                    </div>
                                 @endforeach
                             </div>
 

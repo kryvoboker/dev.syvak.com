@@ -30,6 +30,7 @@ export interface WindowAppParams {
     order_validate_url?: string;
     order_store_url?: string;
     checkout_city_search_url?: string | null;
+    checkout_branch_search_url?: string | null;
     checkout_selection_save_url?: string | null;
     checkout_choose_city_first_text?: string | null;
     checkout_no_delivery_methods_text?: string | null;

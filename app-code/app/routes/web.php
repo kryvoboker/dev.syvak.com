@@ -59,6 +59,7 @@ Route::prefix('{' . $locale_key . '}')
 
         Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
         Route::get('/checkout/cities', [CheckoutController::class, 'cities'])->name('checkout.cities');
+        Route::post('/checkout/branches', [CheckoutController::class, 'branches'])->name('checkout.branches');
         Route::post('/checkout/selection', [CheckoutController::class, 'storeSelection'])->name('checkout.selection.store');
 
         Route::post('/order-confirm', [OrderConfirmController::class, 'storeFastOrder'])->name('order-confirm.store');

@@ -183,6 +183,11 @@
         margin: 0;
     }
 
+    input:focus-visible {
+        outline: 0;
+        @apply border-b border-b-white;
+    }
+
     body {
         @apply font-inter font-normal text-sm lg:text-base 2xl:text-lg leading-1.4em
         tracking-normal lg:tracking-0.02em 2xl:tracking-normal text-white;
@@ -497,4 +502,10 @@
 .choices__list--dropdown .choices__list,
 .choices__list[aria-expanded] .choices__list {
     @apply max-h-52;
+}
+
+.choices,
+.choices__list--dropdown,
+.choices__list[aria-expanded] {
+    @apply w-full top-[unset] bottom-full;
 }
