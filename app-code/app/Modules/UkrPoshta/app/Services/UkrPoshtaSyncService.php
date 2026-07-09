@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\UkrPoshta\Services;
 
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -144,7 +143,6 @@ readonly class UkrPoshtaSyncService
                 self::STAGE_DISTRICTS,
                 __('admin/modules/ukr_poshta.sync.messages.districts_completed'),
                 fn (): array => $this->getRegionIds(),
-                fn (): int => $this->countCityRows($this->getDistrictIds()),
                 fn (): array => $this->getDistrictIds(),
             );
         }
@@ -164,8 +162,7 @@ readonly class UkrPoshtaSyncService
                     self::STAGE_CITIES,
                     __('admin/modules/ukr_poshta.sync.messages.cities_completed'),
                     fn (): array => $this->getDistrictIds(),
-                    fn (): int => $this->countPostOfficeRows($this->getDistrictIds()),
-                    static fn (): array => [],
+                    fn (): array => $this->getDistrictIds(),
                 ),
                 self::STAGE_POST_OFFICES => $this->processQueueStage(
                     $state,
@@ -179,7 +176,6 @@ readonly class UkrPoshtaSyncService
                     self::STAGE_POST_OFFICES,
                     __('admin/modules/ukr_poshta.sync.messages.completed'),
                     fn (): array => $this->getDistrictIds(),
-                    static fn (): int => 0,
                     static fn (): array => [],
                 ),
                 'completed', 'failed', 'stopped' => $state,
@@ -346,7 +342,6 @@ readonly class UkrPoshtaSyncService
      * @param string                      $stage_label
      * @param string                      $completion_message
      * @param callable(): array<int, int> $queue_provider
-     * @param callable|null               $next_total_provider
      * @param callable|null               $next_queue_provider
      *
      * @return array<string, mixed>
@@ -361,17 +356,13 @@ readonly class UkrPoshtaSyncService
         string $stage_label,
         string $completion_message,
         callable $queue_provider,
-        ?callable $next_total_provider = null,
         ?callable $next_queue_provider = null,
     ): array {
         if (Arr::get($state, 'stage_initialized', false) !== true) {
             $reset_callback();
             $state['stage_initialized'] = true;
             $state['stage_queue'] = array_values(array_map('intval', (array) $queue_provider()));
-            $state['stage_total_rows'] = max(
-                0,
-                (int)Arr::get($state, 'summary.' . $summary_key . '.total', count($state['stage_queue'])),
-            );
+            $state['stage_total_rows'] = count($state['stage_queue']);
             $state['stage_processed_rows'] = 0;
             $state['summary'] = $this->normalizeQueuedSyncSummary((array) Arr::get($state, 'summary', []));
             $state['summary'][$summary_key] = [
@@ -387,7 +378,6 @@ readonly class UkrPoshtaSyncService
                     $next_stage,
                     $completion_message,
                     $queue_provider,
-                    $next_total_provider,
                     $next_queue_provider,
                 );
             }
@@ -402,7 +392,6 @@ readonly class UkrPoshtaSyncService
                 $next_stage,
                 $completion_message,
                 $queue_provider,
-                $next_total_provider,
                 $next_queue_provider,
             );
         }
@@ -422,7 +411,7 @@ readonly class UkrPoshtaSyncService
         }
         $current_processed_rows = (int)Arr::get($state, 'summary.' . $summary_key . '.processed', 0);
         $current_total_rows = max(0, (int)Arr::get($state, 'summary.' . $summary_key . '.total', Arr::get($state, 'stage_total_rows', 0)));
-        $next_processed_rows = min($current_total_rows, $current_processed_rows + $imported_rows);
+        $next_processed_rows = $current_processed_rows + $imported_rows;
 
         $summary = $this->getLastSyncSummary();
         $summary[$summary_key] = [
@@ -433,7 +422,7 @@ readonly class UkrPoshtaSyncService
         $state['summary'] = $this->normalizeQueuedSyncSummary((array)Arr::get($state, 'summary', []));
         $state['summary'][$summary_key] = [
             'processed' => $next_processed_rows,
-            'total' => $current_total_rows,
+            'total' => $next_processed_rows,
             'imported' => (int)Arr::get($state, 'summary.' . $summary_key . '.imported', 0) + $imported_rows,
         ];
         $state['stage_queue'] = $queue;
@@ -441,7 +430,7 @@ readonly class UkrPoshtaSyncService
         $state['overall_progress'] = $this->resolveOverallProgress($stage, $next_processed_rows, $current_total_rows);
         $state['message'] = __('admin/modules/ukr_poshta.sync.messages.collecting_item', [
             'stage' => $stage_label,
-            'current' => $state['stage_processed_rows'],
+            'current' => $next_processed_rows,
             'total' => $current_total_rows,
         ]);
         $state['updated_at'] = now()->toIso8601String();
@@ -470,10 +459,7 @@ readonly class UkrPoshtaSyncService
         }
 
         $state['stage_queue'] = array_values(array_map('intval', ($next_queue_provider ?? $queue_provider)()));
-        $state['stage_total_rows'] = max(
-            0,
-            $next_total_provider !== null ? (int)$next_total_provider() : count($state['stage_queue']),
-        );
+        $state['stage_total_rows'] = count($state['stage_queue']);
         $state['stage_processed_rows'] = 0;
         $state['stage_initialized'] = false;
         $state['updated_at'] = now()->toIso8601String();
@@ -493,7 +479,6 @@ readonly class UkrPoshtaSyncService
      * @param string                      $next_stage
      * @param string                      $completion_message
      * @param callable(): array<int, int> $queue_provider
-     * @param callable|null               $next_total_provider
      * @param callable|null               $next_queue_provider
      *
      * @return array<string, mixed>
@@ -504,7 +489,6 @@ readonly class UkrPoshtaSyncService
         string $next_stage,
         string $completion_message,
         callable $queue_provider,
-        ?callable $next_total_provider = null,
         ?callable $next_queue_provider = null,
     ): array {
         $state['stage_initialized'] = false;
@@ -525,10 +509,7 @@ readonly class UkrPoshtaSyncService
         }
 
         $state['stage_queue'] = array_values(array_map('intval', ($next_queue_provider ?? $queue_provider)()));
-        $state['stage_total_rows'] = max(
-            0,
-            $next_total_provider !== null ? (int) $next_total_provider() : count($state['stage_queue']),
-        );
+        $state['stage_total_rows'] = count($state['stage_queue']);
         $state['stage_processed_rows'] = 0;
         $state['stage_initialized'] = false;
         $state['updated_at'] = now()->toIso8601String();
@@ -601,11 +582,6 @@ readonly class UkrPoshtaSyncService
         $state['stage_total_rows'] = count($region_ids);
         $state['stage_processed_rows'] = 0;
         $state['stage_initialized'] = false;
-        $state['summary'][self::STAGE_DISTRICTS] = [
-            'processed' => 0,
-            'total' => $this->countDistrictRows($region_ids),
-            'imported' => 0,
-        ];
         $state['overall_progress'] = 25;
         $state['message'] = __('admin/modules/ukr_poshta.sync.messages.regions_completed');
         $state['updated_at'] = now()->toIso8601String();
@@ -639,80 +615,6 @@ readonly class UkrPoshtaSyncService
             ->pluck('district_id')
             ->map(static fn (mixed $value): int => (int)$value)
             ->all();
-    }
-
-    /**
-     * @param array<int, int> $region_ids
-     *
-     * @throws Throwable
-     */
-    private function countDistrictRows(array $region_ids): int
-    {
-        $total_rows = 0;
-
-        foreach ($region_ids as $region_id) {
-            try {
-                $response = $this->api_service->getDistricts($region_id);
-                $total_rows += count($this->normalizeDistrictRows($this->extractRows($response), $region_id));
-            } catch (Throwable $throwable) {
-                Log::channel('stack')->error('Ukr Poshta district total counting failed for region.', [
-                    'region_id' => $region_id,
-                    'error' => $throwable->getMessage(),
-                    'exception' => $throwable,
-                ]);
-            }
-        }
-
-        return $total_rows;
-    }
-
-    /**
-     * @param array<int, int> $district_ids
-     * @throws Throwable
-     */
-    private function countCityRows(array $district_ids): int
-    {
-        $total_rows = 0;
-
-        foreach ($district_ids as $district_id) {
-            try {
-                $response = $this->api_service->getCities($district_id);
-                $total_rows += count($this->normalizeCityRows($this->extractRows($response), $district_id));
-            } catch (Throwable $throwable) {
-                Log::channel('stack')->error('Ukr Poshta city total counting failed for district.', [
-                    'district_id' => $district_id,
-                    'error' => $throwable->getMessage(),
-                    'exception' => $throwable,
-                ]);
-            }
-        }
-
-        return $total_rows;
-    }
-
-    /**
-     * @param array<int, int> $district_ids
-     *
-     * @throws ConnectionException
-     */
-    private function countPostOfficeRows(array $district_ids): int
-    {
-        $total_rows = 0;
-
-        foreach ($district_ids as $district_id) {
-            try {
-                $response = $this->api_service->getPostOffices($district_id);
-                $total_rows += count($this->normalizePostOfficeRows($this->extractRows($response), $district_id));
-            } catch (Throwable $throwable) {
-                Log::channel('stack')->error('Ukr Poshta post office total counting failed for district.', [
-                    'district_id' => $district_id,
-                    'error' => $throwable->getMessage(),
-                    'exception' => $throwable,
-                ]);
-            }
-        }
-
-        return $total_rows;
     }
 
     /**
@@ -1082,6 +984,15 @@ readonly class UkrPoshtaSyncService
     private function saveQueuedSyncState(array $state): void
     {
         Cache::put(self::SYNC_STATE_CACHE_KEY, $state, now()->addDay());
+    }
+
+    /**
+     * @return void
+     */
+    public function forgetQueuedSyncState(): void
+    {
+        Cache::forget(self::LAST_SYNC_SUMMARY_CACHE_KEY);
+        Cache::forget(self::SYNC_STATE_CACHE_KEY);
     }
 
     /**
