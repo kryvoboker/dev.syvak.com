@@ -69,6 +69,8 @@ readonly class NovaPoshtaApiService
         $response = Http::timeout($this->getTimeout())
             ->acceptJson()
             ->asJson()
+            ->withoutVerifying()
+            ->throw()
             ->post($this->getApiUrl(), [
                 'apiKey' => $this->getApiKey(),
                 'modelName' => $model_name,

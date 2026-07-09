@@ -257,6 +257,131 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
         $this->assertSame(1, NovaPoshtaPostOffice::query()->count());
     }
 
+    public function test_sync_all_continues_when_the_regions_stage_fails(): void
+    {
+        NovaPoshtaRegion::query()->create([
+            'ref' => 'region-1',
+            'regions_center' => 'Київ',
+            'description' => 'Київська область',
+        ]);
+
+        Http::fake(function (HttpRequest $request) {
+            $payload = $request->data();
+            $called_method = (string) data_get($payload, 'calledMethod');
+            $page = (int) data_get($payload, 'methodProperties.Page', 1);
+
+            if ($called_method === 'getSettlementAreas') {
+                return Http::response([
+                    'success' => false,
+                    'data' => [],
+                ], 500);
+            }
+
+            if ($called_method === 'getSettlements' && $page === 1) {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 501,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'city-1',
+                            'Area' => 'region-1',
+                            'AreaDescription' => 'Київська',
+                            'Description' => 'Київ',
+                            'Latitude' => '50.4501',
+                            'Longitude' => '30.5234',
+                            'CityID' => 101,
+                        ],
+                    ],
+                ]);
+            }
+
+            if ($called_method === 'getSettlements' && $page === 2) {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 501,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'city-2',
+                            'Area' => 'region-1',
+                            'AreaDescription' => 'Київська',
+                            'Description' => 'Ірпінь',
+                            'Latitude' => '50.5191',
+                            'Longitude' => '30.2405',
+                            'CityID' => 102,
+                        ],
+                    ],
+                ]);
+            }
+
+            if ($called_method === 'getWarehouses' && $page === 1) {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 501,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'office-1',
+                            'SettlementRef' => 'city-1',
+                            'Description' => 'Відділення № 12',
+                            'Latitude' => '50.4501',
+                            'Longitude' => '30.5234',
+                            'Schedule' => [
+                                'Monday' => '09:00-18:00',
+                            ],
+                            'CityDescription' => 'Київ',
+                            'SiteKey' => 12,
+                        ],
+                    ],
+                ]);
+            }
+
+            if ($called_method === 'getWarehouses' && $page === 2) {
+                return Http::response([
+                    'success' => true,
+                    'info' => [
+                        'totalCount' => 501,
+                    ],
+                    'data' => [
+                        [
+                            'Ref' => 'poshtomat-1',
+                            'SettlementRef' => 'city-2',
+                            'Description' => 'Поштомат "Нова Пошта" № 7',
+                            'Latitude' => '50.5191',
+                            'Longitude' => '30.2405',
+                            'Schedule' => [
+                                'Monday' => '00:00-23:59',
+                            ],
+                            'CityDescription' => 'Ірпінь',
+                            'SiteKey' => 7,
+                        ],
+                    ],
+                ]);
+            }
+
+            return Http::response([
+                'success' => false,
+                'data' => [],
+            ], 500);
+        });
+
+        $summary = $this->app->make(NovaPoshtaSyncService::class)->syncAll();
+
+        $this->assertSame(0, $summary['regions']['imported']);
+        $this->assertSame(2, $summary['cities']['imported']);
+        $this->assertSame(1, $summary['post_offices']['imported']);
+        $this->assertSame(1, $summary['poshtomats']['imported']);
+
+        $this->assertSame(1, NovaPoshtaRegion::query()->count());
+        $this->assertSame(2, NovaPoshtaCity::query()->count());
+        $this->assertSame(1, NovaPoshtaPostOffice::query()->count());
+        $this->assertSame(1, NovaPoshtaPoshtomat::query()->count());
+    }
+
     public function test_queued_sync_step_by_step_rebuilds_all_tables_and_persists_summary(): void
     {
         Cache::flush();
@@ -387,7 +512,8 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
 
         $this->assertFalse((bool) data_get($state, 'is_running'));
         $this->assertSame('completed', (string) data_get($state, 'stage'));
-        $this->assertSame(100, (int) data_get($state, 'overall_progress'));
+        $this->assertArrayNotHasKey('overall_progress', (array) $state);
+        $this->assertArrayNotHasKey('stage_progress', (array) $state);
         $this->assertArrayNotHasKey('buffers', (array) Cache::get('nova_poshta.sync_state', []));
         $this->assertSame(1, NovaPoshtaRegion::query()->count());
         $this->assertSame(2, NovaPoshtaCity::query()->count());
@@ -440,7 +566,7 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_queued_sync_stops_immediately_on_critical_error(): void
+    public function test_queued_sync_continues_after_critical_error(): void
     {
         Cache::flush();
 
@@ -480,9 +606,9 @@ class NovaPoshtaModuleSyncServiceTest extends TestCase
         $sync_service->processQueuedSyncStep();
         $state = $sync_service->processQueuedSyncStep();
 
-        $this->assertFalse((bool) data_get($state, 'is_running'));
-        $this->assertSame('failed', (string) data_get($state, 'stage'));
-        $this->assertSame('failed', (string) data_get($state, 'phase'));
+        $this->assertTrue((bool) data_get($state, 'is_running'));
+        $this->assertSame('post_offices', (string) data_get($state, 'stage'));
+        $this->assertSame('collect', (string) data_get($state, 'phase'));
         $this->assertNotEmpty((string) data_get($state, 'message'));
     }
 
