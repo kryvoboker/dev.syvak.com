@@ -54,6 +54,7 @@ GET /uk/category/{slug}/load-more
 | [Modules Guide](app-code/app/Modules/README.md)                | Module registration, loading, and singleton module rules |
 | [NovaPoshta Module](app-code/app/Modules/NovaPoshta/README.md) | Module-specific sync, admin, and checkout integration notes |
 | [UkrPoshta Module](app-code/app/Modules/UkrPoshta/README.md)   | Module-specific sync, admin, and checkout integration notes |
+| [OpenAPI Entry](app-code/app/docs/openapi/openapi.yaml)         | Root Swagger/OpenAPI entrypoint for module API docs |
 | [Testing](app-code/app/docs/testing.md)                        | PHPUnit, Larastan, Pint, Biome, and TypeScript workflows |
 | [Deployment](app-code/app/docs/deployment.md)                  | Docker-based deployment and production checklist |
 

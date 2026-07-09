@@ -1,0 +1,284 @@
+openapi: 3.1.0
+info:
+  title: NovaPoshta Upstream Integration
+  version: 1.0.0
+  description: |
+    Integration contract between the NovaPoshta module and the upstream Nova Poshta JSON API.
+    This document describes the external server, request payloads, and the data shape the module expects back.
+servers:
+  - url: https://api.novaposhta.ua/v2.0/json/
+    description: Nova Poshta upstream JSON API
+tags:
+  - name: AddressGeneral
+    description: Directory sync endpoints used by the module
+paths:
+  /AddressGeneral/getSettlementAreas:
+    post:
+      tags: [AddressGeneral]
+      summary: Fetch regions
+      description: |
+        Used by the module during region synchronization.
+        The module sends the Ukrainian language flag and the global API key.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseRequest'
+            examples:
+              regions:
+                summary: Region sync request
+                value:
+                  apiKey: your-api-key
+                  modelName: AddressGeneral
+                  calledMethod: getSettlementAreas
+                  methodProperties:
+                    Language: UA
+      responses:
+        '200':
+          description: Upstream response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionsResponse'
+  /AddressGeneral/getSettlements:
+    post:
+      tags: [AddressGeneral]
+      summary: Fetch cities
+      description: |
+        Used by the module during city synchronization.
+        Requests are paginated with Page and Limit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitiesRequest'
+            examples:
+              cities:
+                summary: City sync request
+                value:
+                  apiKey: your-api-key
+                  modelName: AddressGeneral
+                  calledMethod: getSettlements
+                  methodProperties:
+                    Language: UA
+                    Page: 1
+                    Limit: 500
+      responses:
+        '200':
+          description: Upstream response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitiesResponse'
+  /AddressGeneral/getWarehouses:
+    post:
+      tags: [AddressGeneral]
+      summary: Fetch post offices and poshtomats
+      description: |
+        Used by the module during warehouse synchronization.
+        The module requests the same upstream method for post offices and poshtomats and distinguishes rows by description.
+        Requests are paginated with Page and Limit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehousesRequest'
+            examples:
+              warehouses:
+                summary: Warehouse sync request
+                value:
+                  apiKey: your-api-key
+                  modelName: AddressGeneral
+                  calledMethod: getWarehouses
+                  methodProperties:
+                    Language: UA
+                    Page: 1
+                    Limit: 500
+      responses:
+        '200':
+          description: Upstream response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehousesResponse'
+components:
+  schemas:
+    BaseRequest:
+      type: object
+      additionalProperties: false
+      required: [apiKey, modelName, calledMethod, methodProperties]
+      properties:
+        apiKey:
+          type: string
+          description: Global Nova Poshta API token.
+        modelName:
+          type: string
+          enum: [AddressGeneral]
+        calledMethod:
+          type: string
+          description: Upstream method name.
+        methodProperties:
+          oneOf:
+            - $ref: '#/components/schemas/RegionMethodProperties'
+            - $ref: '#/components/schemas/CityMethodProperties'
+            - $ref: '#/components/schemas/WarehouseMethodProperties'
+    CitiesRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            calledMethod:
+              const: getSettlements
+            methodProperties:
+              $ref: '#/components/schemas/CityMethodProperties'
+    WarehousesRequest:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          properties:
+            calledMethod:
+              const: getWarehouses
+            methodProperties:
+              $ref: '#/components/schemas/WarehouseMethodProperties'
+    RegionMethodProperties:
+      type: object
+      additionalProperties: false
+      required: [Language]
+      properties:
+        Language:
+          type: string
+          enum: [UA]
+    CityMethodProperties:
+      type: object
+      additionalProperties: false
+      required: [Language, Page, Limit]
+      properties:
+        Language:
+          type: string
+          enum: [UA]
+        Page:
+          type: integer
+          minimum: 1
+        Limit:
+          type: integer
+          minimum: 1
+    WarehouseMethodProperties:
+      type: object
+      additionalProperties: false
+      required: [Language, Page, Limit]
+      properties:
+        Language:
+          type: string
+          enum: [UA]
+        Page:
+          type: integer
+          minimum: 1
+        Limit:
+          type: integer
+          minimum: 1
+    ApiResponseBase:
+      type: object
+      additionalProperties: true
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        info:
+          type: object
+          additionalProperties: true
+        warnings:
+          type: array
+          items:
+            type: string
+        errors:
+          type: array
+          items:
+            type: string
+    RegionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RegionItem'
+    CitiesResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CityItem'
+    WarehousesResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/WarehouseItem'
+    RegionItem:
+      type: object
+      additionalProperties: true
+      properties:
+        Ref:
+          type: string
+        AreasCenter:
+          type: string
+        Description:
+          type: string
+    CityItem:
+      type: object
+      additionalProperties: true
+      properties:
+        Ref:
+          type: string
+        Area:
+          type: string
+        Description:
+          type: string
+        AreaDescription:
+          type: string
+        Latitude:
+          type: string
+        Longitude:
+          type: string
+        CityID:
+          type:
+            - integer
+            - string
+    WarehouseItem:
+      type: object
+      additionalProperties: true
+      properties:
+        Ref:
+          type: string
+        SettlementRef:
+          type: string
+        Description:
+          type: string
+        Latitude:
+          type: string
+        Longitude:
+          type: string
+        Schedule:
+          type: object
+          additionalProperties: true
+        CityDescription:
+          type: string
+        SiteKey:
+          type:
+            - integer
+            - string

@@ -52,6 +52,10 @@ The response is normalized from:
 
 Warnings and errors from the upstream payload are treated as failures and are not ignored.
 
+Upstream integration documentation:
+
+- `docs/openapi-upstream.yaml`
+
 ## Important module rules
 
 1. Do not add module instances for UkrPoshta.
