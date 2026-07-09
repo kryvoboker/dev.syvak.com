@@ -23,6 +23,35 @@ It is intentionally implemented as a **singleton module**: there is one shared c
 - exposes storefront/AJAX endpoints for checkout selection
 - renders customer-facing HTML fragments for regions, districts, cities, and post offices
 
+## API and sync model
+
+The Ukr Poshta client talks to the public address-classifier service:
+
+- base URL: `https://www.ukrposhta.ua/address-classifier-ws/`
+- transport: `GET`
+- auth: bearer token in the `Authorization` header
+- request delay: the client intentionally waits before every request to avoid hammering the upstream API
+
+The sync service calls these endpoints:
+
+- `get_regions_by_region_ua`
+- `get_districts_by_region_id_and_district_ua`
+- `get_city_by_region_id_and_district_id_and_city_ua`
+- `get_postoffices_by_postindex`
+
+Request data that is actually sent:
+
+- `region_id` for district lookups
+- `district_id` for city lookups
+- `pdDistrictId` for post office lookups
+
+The response is normalized from:
+
+- `Entries.Entry`
+- fallback `data`
+
+Warnings and errors from the upstream payload are treated as failures and are not ignored.
+
 ## Important module rules
 
 1. Do not add module instances for UkrPoshta.
@@ -40,6 +69,10 @@ It is intentionally implemented as a **singleton module**: there is one shared c
    - translations live in `Modules/UkrPoshta/resources/lang/`
    - `Modules/UkrPoshta/app/Providers/UkrPoshtaServiceProvider.php` registers translations from that path
    - do not move these concerns back into the shared `app/` tree unless the module architecture changes
+7. Do not replace `delete()` with `truncate()` on synced tables.
+   - the module has foreign key relations
+   - `TRUNCATE` is unsafe here and can break the sync flow
+   - the current implementation intentionally clears data with `delete()` before inserting fresh rows
 
 ## Admin flow
 
@@ -56,6 +89,19 @@ That page:
 - shows the current database counts and last sync summary
 
 The page does not use a separate Blade layout for the admin screen. It is built through Filament schema components.
+
+The sync UI has two data sources:
+
+- the live loader block reads the current queued sync state from cache and updates via polling
+- the summary table reads the current database counts, so the displayed values are the actual rows stored in the database, not remote totals
+- the sync service also keeps a cached last-summary snapshot in `ukr_poshta.last_sync_summary`, but the admin summary table intentionally does not trust that cache for final counts
+
+During sync, the loader block shows:
+
+- current stage
+- current phase
+- processed rows in the current stage
+- a spinner/loader so the admin can see that work is still running
 
 ## Sync flow
 
@@ -87,6 +133,14 @@ Each stage can:
 - buffer rows in cache
 - finalize the table rebuild only after all pages for that stage are received
 
+Important behavior:
+
+- the sync works in chunks so the PHP process does not keep all upstream data in memory at once
+- recoverable batch errors are logged and the sync continues with the next chunk
+- the queued state lives in cache and should be cleared when the run is stopped or completes
+- the live counters in the admin loader are stage counters, not upstream total counters
+- if the sync was interrupted previously, stale cache state can survive until cleanup, so the admin page should rely on the current database counts for final numbers
+
 ## API integration
 
 The API client is:
@@ -101,6 +155,7 @@ Key points:
 - the API key is read from global configs through `UkrPoshtaConfig`
 - API warnings/errors should fail the request
 - do not silently ignore invalid payloads
+- the client makes one request per entity stage, with the stage parameters passed as query string values
 
 ## Data model
 
@@ -118,6 +173,8 @@ The sync logic rebuilds tables in full:
 - cities are replaced after all city pages are collected
 - post offices are replaced after all post office pages are collected
 
+The module intentionally uses `delete()` before re-inserting rows because the tables are related through foreign keys and `TRUNCATE` would be unsafe.
+
 ## Storefront flow
 
 Customer-facing data is handled by:
@@ -132,6 +189,22 @@ The storefront side:
 - loads already saved checkout state from session/cache
 - renders HTML fragments for AJAX responses
 - returns regions, districts, cities, and post offices as localized HTML
+
+Public storefront endpoints:
+
+- `GET /ukrposhta/state`
+- `GET /ukrposhta/regions`
+- `GET /ukrposhta/districts?region_id=...`
+- `GET /ukrposhta/cities?district_id=...`
+- `GET /ukrposhta/post-offices?district_id=...&city_id=...`
+- `POST /ukrposhta/selection`
+
+All data endpoints return JSON with:
+
+- `items`
+- `html`
+
+The selection endpoint stores the current checkout choice in the module checkout state service.
 
 ## Tests and translations
 
@@ -177,6 +250,14 @@ Before changing the module, verify:
 5. The sync service still rebuilds tables only after full stage collection.
 6. New fields or sync stages are covered by tests.
 7. Translation strings remain in the module and still resolve from the module-owned `resources/lang/` files through the module provider registration.
+
+## Pitfalls to remember
+
+- Do not add remote "total count" calls just to paint the admin progress UI. The current design uses the real loaded database counts and stage counters.
+- Do not switch the sync to a single long-running request if the stage can be processed in chunks.
+- Do not convert the queue state into an in-memory-only flow; the admin page depends on cached sync state for polling.
+- Do not treat a single failed district/city/post office request as a global stop condition unless the sync service explicitly marks it as failed.
+- Do not change the request language away from Ukrainian when reading or storing directory values.
 
 ## Related docs
 
