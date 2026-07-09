@@ -66,7 +66,7 @@ return [
             'districts_completed' => 'Райони оновлено. Переходимо до населених пунктів.',
             'cities_completed' => 'Населені пункти оновлено. Переходимо до відділень.',
             'completed' => 'Синхронізацію завершено.',
-            'collecting_item' => 'Завантаження елемента :current з :total для етапу :stage.',
+            'collecting_item' => 'Завантаження елемента :current для етапу :stage.',
         ],
     ],
     'stats' => [

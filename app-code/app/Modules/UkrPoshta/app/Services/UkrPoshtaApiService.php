@@ -80,9 +80,10 @@ readonly class UkrPoshtaApiService
 
         $response = Http::baseUrl(rtrim($this->getApiUrl(), '/') . '/')
             ->timeout($this->getTimeout())
+            ->withoutVerifying()
             ->acceptJson()
-            ->asJson()
             ->withToken($this->getApiKey())
+            ->throw()
             ->get($endpoint, $query);
 
         return $this->normalizeResponse($response, $endpoint);

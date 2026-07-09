@@ -66,7 +66,7 @@ return [
             'districts_completed' => 'Districts updated. Moving to cities.',
             'cities_completed' => 'Cities updated. Moving to post offices.',
             'completed' => 'Sync completed.',
-            'collecting_item' => 'Loading :stage item :current of :total.',
+            'collecting_item' => 'Loading :stage item :current.',
         ],
     ],
     'stats' => [

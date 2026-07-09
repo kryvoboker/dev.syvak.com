@@ -156,13 +156,13 @@ class UkrPoshtaSyncServiceTest extends TestCase
         $this->assertSame('districts', $state['stage']);
         $this->assertSame(2, (int) data_get($state, 'summary.regions.imported', 0));
         $this->assertSame(0, (int) data_get($state, 'summary.districts.processed', 0));
-        $this->assertSame(2, (int) data_get($state, 'summary.districts.total', 0));
+        $this->assertSame(0, (int) data_get($state, 'summary.districts.total', 0));
 
         $state = $sync_service->processQueuedSyncStep();
         $this->assertSame('districts', $state['stage']);
         $this->assertSame(2, (int) data_get($state, 'summary.regions.imported', 0));
         $this->assertSame(1, (int) data_get($state, 'summary.districts.processed', 0));
-        $this->assertSame(2, (int) data_get($state, 'summary.districts.total', 0));
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.total', 0));
         $this->assertSame(1, (int) data_get($state, 'summary.districts.imported', 0));
 
         $state = $sync_service->processQueuedSyncStep();
@@ -175,7 +175,7 @@ class UkrPoshtaSyncServiceTest extends TestCase
         $this->assertSame('cities', $state['stage']);
         $this->assertSame(2, (int) data_get($state, 'summary.districts.imported', 0));
         $this->assertSame(1, (int) data_get($state, 'summary.cities.processed', 0));
-        $this->assertSame(2, (int) data_get($state, 'summary.cities.total', 0));
+        $this->assertSame(1, (int) data_get($state, 'summary.cities.total', 0));
         $this->assertSame(1, (int) data_get($state, 'summary.cities.imported', 0));
     }
 
@@ -237,7 +237,7 @@ class UkrPoshtaSyncServiceTest extends TestCase
         $this->assertSame('districts', $state['stage']);
         $this->assertTrue((bool) $state['is_running']);
         $this->assertSame(2, (int) data_get($state, 'summary.regions.imported', 0));
-        $this->assertSame(1, (int) data_get($state, 'summary.districts.total', 0));
+        $this->assertSame(0, (int) data_get($state, 'summary.districts.total', 0));
 
         $state = $sync_service->processQueuedSyncStep();
 
@@ -250,6 +250,79 @@ class UkrPoshtaSyncServiceTest extends TestCase
 
         $this->assertSame('cities', $state['stage']);
         $this->assertTrue((bool) $state['is_running']);
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.processed', 0));
+
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertSame('post_offices', $state['stage']);
+        $this->assertTrue((bool) $state['is_running']);
+        $this->assertSame(1, (int) data_get($state, 'summary.post_offices.total', 0));
+        $this->assertSame(0, (int) data_get($state, 'summary.post_offices.processed', 0));
+    }
+
+    public function test_it_keeps_imported_rows_count_when_api_returns_empty_rows(): void
+    {
+        set_global_config([
+            UkrPoshtaConfig::API_KEY_GLOBAL_CONFIG_KEY => ['value' => 'up-test-key', 'is_active' => true],
+        ]);
+
+        Http::fake([
+            '*get_regions_by_region_ua*' => Http::response([
+                'Entries' => [
+                    'Entry' => [
+                        ['REGION_ID' => 1, 'REGION_UA' => 'Region 1'],
+                        ['REGION_ID' => 2, 'REGION_UA' => 'Region 2'],
+                    ],
+                ],
+            ]),
+            '*get_districts_by_region_id_and_district_ua*region_id=1*' => Http::response([
+                'Entries' => [
+                    'Entry' => [
+                        ['DISTRICT_ID' => 11, 'REGION_ID' => 1, 'REGION_UA' => 'Region 1', 'DISTRICT_UA' => 'District 11'],
+                    ],
+                ],
+            ]),
+            '*get_districts_by_region_id_and_district_ua*region_id=2*' => Http::response([
+                'Entries' => [
+                    'Entry' => [
+                        [],
+                    ],
+                ],
+            ]),
+            '*get_city_by_region_id_and_district_id_and_city_ua*district_id=11*' => Http::response([
+                'Entries' => [
+                    'Entry' => [
+                        [],
+                    ],
+                ],
+            ]),
+            '*get_postoffices_by_postindex*pdDistrictId=11*' => Http::response([
+                'Entries' => [
+                    'Entry' => [
+                        [],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $sync_service = $this->app->make(UkrPoshtaSyncService::class);
+
+        $sync_service->startQueuedSync();
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertSame('districts', $state['stage']);
+        $this->assertSame(0, (int) data_get($state, 'summary.districts.total', 0));
+        $this->assertSame(0, (int) data_get($state, 'summary.districts.processed', 0));
+
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertSame('districts', $state['stage']);
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.processed', 0));
+        $this->assertSame(1, (int) data_get($state, 'summary.districts.imported', 0));
+
+        $state = $sync_service->processQueuedSyncStep();
+
+        $this->assertSame('cities', $state['stage']);
         $this->assertSame(1, (int) data_get($state, 'summary.districts.processed', 0));
         $this->assertSame(1, (int) data_get($state, 'summary.districts.imported', 0));
     }

@@ -15,7 +15,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 use Modules\UkrPoshta\Models\UkrPoshtaCity;
 use Modules\UkrPoshta\Models\UkrPoshtaDistrict;
@@ -44,8 +43,8 @@ class UkrPoshtaSyncPage extends Page
     public function mount(UkrPoshtaConfig $ukr_poshta_config): void
     {
         $this->settings_form = [
-            'api_key' => trim((string) get_global_config(UkrPoshtaConfig::API_KEY_GLOBAL_CONFIG_KEY, '')),
-            'delivery_cost' => (string) get_global_config(UkrPoshtaConfig::DELIVERY_COST_GLOBAL_CONFIG_KEY, $ukr_poshta_config->getDeliveryCost()),
+            'api_key' => trim((string)get_global_config(UkrPoshtaConfig::API_KEY_GLOBAL_CONFIG_KEY, '')),
+            'delivery_cost' => (string)get_global_config(UkrPoshtaConfig::DELIVERY_COST_GLOBAL_CONFIG_KEY, $ukr_poshta_config->getDeliveryCost()),
             'is_delivery_cost_enabled' => $ukr_poshta_config->isDeliveryCostEnabled(),
         ];
         $this->sync_state = app(UkrPoshtaSyncService::class)->getQueuedSyncState();
@@ -110,7 +109,7 @@ class UkrPoshtaSyncPage extends Page
             Section::make(__('admin/modules/ukr_poshta.sections.sync.title'))
                 ->description(__('admin/modules/ukr_poshta.sections.sync.description'))
                 ->columnSpanFull()
-                ->visible(fn (): bool => (bool) Arr::get($this->sync_state, 'is_running', false))
+                ->visible(fn (): bool => (bool)Arr::get($this->sync_state, 'is_running', false))
                 ->schema([
                     Html::make(fn (): string => $this->renderSyncWorkspace()),
                 ]),
@@ -142,7 +141,7 @@ class UkrPoshtaSyncPage extends Page
                 ->label(__('admin/modules/ukr_poshta.actions.stop_sync'))
                 ->icon(Heroicon::XMark)
                 ->color('warning')
-                ->visible(fn (): bool => (bool) Arr::get($this->sync_state, 'is_running', false))
+                ->visible(fn (): bool => (bool)Arr::get($this->sync_state, 'is_running', false))
                 ->action(function (): void {
                     $this->stopSync();
                 }),
@@ -157,11 +156,11 @@ class UkrPoshtaSyncPage extends Page
         try {
             $this->sync_state = $sync_service->processQueuedSyncStep();
 
-            $was_running = (bool) Arr::get($previous_state, 'is_running', false);
-            $is_running = (bool) Arr::get($this->sync_state, 'is_running', false);
-            $stage = (string) Arr::get($this->sync_state, 'stage', '');
+            $was_running = (bool)Arr::get($previous_state, 'is_running', false);
+            $is_running = (bool)Arr::get($this->sync_state, 'is_running', false);
+            $stage = (string)Arr::get($this->sync_state, 'stage', '');
 
-            if ($was_running && ! $is_running) {
+            if ($was_running && !$is_running) {
                 $notification = Notification::make()
                     ->title(__('admin/default.success.title'))
                     ->body(match ($stage) {
@@ -221,6 +220,7 @@ class UkrPoshtaSyncPage extends Page
         try {
             $sync_service = app(UkrPoshtaSyncService::class);
             $this->sync_state = $sync_service->requestQueuedSyncStop();
+            $sync_service->forgetQueuedSyncState();
 
             Notification::make()
                 ->title(__('admin/default.success.title'))
@@ -241,14 +241,10 @@ class UkrPoshtaSyncPage extends Page
     private function renderSyncWorkspace(): string
     {
         $sync_state = $this->sync_state;
-        $is_running = (bool) Arr::get($sync_state, 'is_running', false);
-        $overall_progress = max(0, min(100, (int) Arr::get($sync_state, 'overall_progress', 0)));
-        $stage_progress = round(
-            max(0, min(100, (int) Arr::get($sync_state, 'stage_processed_rows', 0) * 100 / max(1, (int) Arr::get($sync_state, 'stage_total_rows', 1)))),
-        );
-        $message = (string) Arr::get($sync_state, 'message', '');
-        $stage = (string) Arr::get($sync_state, 'stage', '');
-        $phase = (string) Arr::get($sync_state, 'phase', '');
+        $is_running = (bool)Arr::get($sync_state, 'is_running', false);
+        $message = (string)Arr::get($sync_state, 'message', '');
+        $stage = (string)Arr::get($sync_state, 'stage', '');
+        $phase = (string)Arr::get($sync_state, 'phase', '');
         $status_label = match ($stage) {
             'completed' => __('admin/modules/ukr_poshta.sync.states.completed'),
             'failed' => __('admin/modules/ukr_poshta.sync.states.failed'),
@@ -257,28 +253,23 @@ class UkrPoshtaSyncPage extends Page
         };
         $stage_label = $this->getStageLabel($stage);
         $polling_attribute = $is_running ? ' wire:poll.2s="processSyncStep"' : '';
-        $sync_summary_rows = $this->getSyncSummaryRows($is_running);
-        $stage_processed_rows = (string) Arr::get($sync_state, 'stage_processed_rows', 0);
-        $stage_total_rows = (string) Arr::get($sync_state, 'stage_total_rows', 0);
+        $sync_summary_rows = $this->getDatabaseStateRows();
+        $stage_processed_rows = (string)Arr::get($sync_state, 'stage_processed_rows', 0);
         $regions_card = $this->renderStatCard(
             __('admin/modules/ukr_poshta.stats.regions'),
-            (int) data_get($sync_summary_rows, 'regions.processed', 0),
-            (int) data_get($sync_summary_rows, 'regions.total', 0),
+            (int)data_get($sync_summary_rows, 'regions.count', 0),
         );
         $districts_card = $this->renderStatCard(
             __('admin/modules/ukr_poshta.stats.districts'),
-            (int) data_get($sync_summary_rows, 'districts.processed', 0),
-            (int) data_get($sync_summary_rows, 'districts.total', 0),
+            (int)data_get($sync_summary_rows, 'districts.count', 0),
         );
         $cities_card = $this->renderStatCard(
             __('admin/modules/ukr_poshta.stats.cities'),
-            (int) data_get($sync_summary_rows, 'cities.processed', 0),
-            (int) data_get($sync_summary_rows, 'cities.total', 0),
+            (int)data_get($sync_summary_rows, 'cities.count', 0),
         );
         $post_offices_card = $this->renderStatCard(
             __('admin/modules/ukr_poshta.stats.post_offices'),
-            (int) data_get($sync_summary_rows, 'post_offices.processed', 0),
-            (int) data_get($sync_summary_rows, 'post_offices.total', 0),
+            (int)data_get($sync_summary_rows, 'post_offices.count', 0),
         );
 
         return '
@@ -294,19 +285,18 @@ class UkrPoshtaSyncPage extends Page
                             <p class="block text-sm leading-6">' . e($message !== '' ? $message : __('admin/modules/ukr_poshta.sections.sync.description')) . '</p>
                         </div>
 
-                        <div class="w-full rounded-lg border p-4">
-                            <div class="flex items-center justify-between gap-4 text-sm">
-                                <span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.overall_progress')) . '</span>
-                                <span class="font-semibold">' . e((string) $overall_progress) . '%</span>
-                            </div>
-                            <div class="mt-3 h-3 overflow-hidden rounded-full bg-black/10">
-                                <div class="h-full rounded-full bg-emerald-500 transition-all duration-300" style="width: ' . e((string) $overall_progress) . '%;"></div>
-                            </div>
-                            <div class="mt-4 grid gap-2 text-sm">
-                                <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.stage')) . ':</span> ' . e($stage_label) . '</div>
-                                <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.phase')) . ':</span> ' . e($this->getPhaseLabel($phase)) . '</div>
-                                <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.processed_rows')) . ':</span> ' . e($stage_processed_rows) . ' / ' . e($stage_total_rows) . '</div>
-                                <div><span class="font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.stage_progress')) . ':</span> ' . e((string) $stage_progress) . '%</div>
+                        <div class="w-full rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
+                            <div class="flex items-center gap-4">
+                                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center" aria-hidden="true">
+                                    <span class="absolute inset-0 rounded-full border-4 border-emerald-200 border-t-emerald-600 animate-spin"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                </div>
+                                <div class="min-w-0 flex-1 space-y-1">
+                                    <div class="text-sm font-semibold text-emerald-950">' . e(__('admin/modules/ukr_poshta.sync.states.running')) . '</div>
+                                    <div class="text-sm text-emerald-900/80">' . e(__('admin/modules/ukr_poshta.sync.labels.stage')) . ': ' . e($stage_label) . '</div>
+                                    <div class="text-sm text-emerald-900/80">' . e(__('admin/modules/ukr_poshta.sync.labels.phase')) . ': ' . e($this->getPhaseLabel($phase)) . '</div>
+                                    <div class="text-sm text-emerald-900/80">' . e(__('admin/modules/ukr_poshta.sync.labels.processed_rows')) . ': ' . e($stage_processed_rows) . '</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -323,79 +313,55 @@ class UkrPoshtaSyncPage extends Page
     }
 
     /**
-     * @return array<string, array{processed:int,total:int,imported:int}>
-     */
-    private function getSyncSummaryRows(bool $prefer_queued_summary = true): array
-    {
-        if ($prefer_queued_summary && Arr::get($this->sync_state, 'summary', []) !== []) {
-            return $this->normalizeSummaryRows((array) Arr::get($this->sync_state, 'summary', []));
-        }
-
-        $last_sync_summary = Cache::get('ukr_poshta.last_sync_summary', []);
-
-        if (! is_array($last_sync_summary) || $last_sync_summary === []) {
-            return $this->normalizeSummaryRows([]);
-        }
-
-        return $this->normalizeSummaryRows([
-            'regions' => [
-                'processed' => (int) data_get($last_sync_summary, 'regions.imported', 0),
-                'total' => (int) data_get($last_sync_summary, 'regions.imported', 0),
-                'imported' => (int) data_get($last_sync_summary, 'regions.imported', 0),
-            ],
-            'districts' => [
-                'processed' => (int) data_get($last_sync_summary, 'districts.imported', 0),
-                'total' => (int) data_get($last_sync_summary, 'districts.imported', 0),
-                'imported' => (int) data_get($last_sync_summary, 'districts.imported', 0),
-            ],
-            'cities' => [
-                'processed' => (int) data_get($last_sync_summary, 'cities.imported', 0),
-                'total' => (int) data_get($last_sync_summary, 'cities.imported', 0),
-                'imported' => (int) data_get($last_sync_summary, 'cities.imported', 0),
-            ],
-            'post_offices' => [
-                'processed' => (int) data_get($last_sync_summary, 'post_offices.imported', 0),
-                'total' => (int) data_get($last_sync_summary, 'post_offices.imported', 0),
-                'imported' => (int) data_get($last_sync_summary, 'post_offices.imported', 0),
-            ],
-        ]);
-    }
-
-    /**
      * @return string
      */
     private function renderLastSyncSummary(): string
     {
-        return $this->renderCurrentStateTable($this->getDatabaseStateRows());
+        return $this->renderCurrentStateTable(
+            $this->getDatabaseStateRows(),
+            __('admin/modules/ukr_poshta.stats.stored'),
+        );
     }
 
-    private function renderStatCard(string $label, int $processed, int $total): string
+    private function renderStatCard(string $label, int $processed): string
     {
         return '
             <div class="rounded-lg border p-4">
                 <div class="text-xs uppercase tracking-wide">' . e($label) . '</div>
-                <div class="mt-2 text-2xl font-semibold">' . e((string) $processed) . ' / ' . e((string) $total) . '</div>
+                <div class="mt-2 text-2xl font-semibold">' . e((string)$processed) . '</div>
             </div>
         ';
     }
 
     /**
-     * @return array<int, array{label:string,count:int}>
+     * @return array<string, array{label:string,count:int}>
      */
     private function getDatabaseStateRows(): array
     {
         return [
-            ['label' => __('admin/modules/ukr_poshta.stats.regions'), 'count' => UkrPoshtaRegion::query()->count()],
-            ['label' => __('admin/modules/ukr_poshta.stats.districts'), 'count' => UkrPoshtaDistrict::query()->count()],
-            ['label' => __('admin/modules/ukr_poshta.stats.cities'), 'count' => UkrPoshtaCity::query()->count()],
-            ['label' => __('admin/modules/ukr_poshta.stats.post_offices'), 'count' => UkrPoshtaPostOffice::query()->count()],
+            'regions' => [
+                'label' => __('admin/modules/ukr_poshta.stats.regions'),
+                'count' => UkrPoshtaRegion::query()->count(),
+            ],
+            'districts' => [
+                'label' => __('admin/modules/ukr_poshta.stats.districts'),
+                'count' => UkrPoshtaDistrict::query()->count(),
+            ],
+            'cities' => [
+                'label' => __('admin/modules/ukr_poshta.stats.cities'),
+                'count' => UkrPoshtaCity::query()->count(),
+            ],
+            'post_offices' => [
+                'label' => __('admin/modules/ukr_poshta.stats.post_offices'),
+                'count' => UkrPoshtaPostOffice::query()->count(),
+            ],
         ];
     }
 
     /**
-     * @param  array<int, array{label:string,count:int}>  $rows
+     * @param array<string, array{label:string,count:int}> $rows
      */
-    private function renderCurrentStateTable(array $rows): string
+    private function renderCurrentStateTable(array $rows, string $column_label): string
     {
         if ($rows === []) {
             return '<p class="text-sm text-gray-600">' . e(__('admin/modules/ukr_poshta.sections.summary.empty')) . '</p>';
@@ -405,13 +371,13 @@ class UkrPoshtaSyncPage extends Page
         $html .= '<table class="min-w-full divide-y text-sm">';
         $html .= '<thead class="border-b"><tr>';
         $html .= '<th class="px-4 py-3 text-left font-medium">' . e(__('admin/modules/ukr_poshta.sync.labels.stage')) . '</th>';
-        $html .= '<th class="px-4 py-3 text-right font-medium">' . e(__('admin/modules/ukr_poshta.stats.stored')) . '</th>';
+        $html .= '<th class="px-4 py-3 text-right font-medium">' . e($column_label) . '</th>';
         $html .= '</tr></thead><tbody class="divide-y">';
 
         foreach ($rows as $row) {
             $html .= '<tr>';
-            $html .= '<td class="px-4 py-3">' . e((string) $row['label']) . '</td>';
-            $html .= '<td class="px-4 py-3 text-right font-medium">' . e((string) $row['count']) . '</td>';
+            $html .= '<td class="px-4 py-3">' . e((string)$row['label']) . '</td>';
+            $html .= '<td class="px-4 py-3 text-right font-medium">' . e((string)$row['count']) . '</td>';
             $html .= '</tr>';
         }
 
@@ -420,26 +386,13 @@ class UkrPoshtaSyncPage extends Page
         return $html;
     }
 
-    /**
-     * @return array<string, array{processed:int,total:int,imported:int}>
-     */
-    private function normalizeSummaryRows(array $rows): array
-    {
-        return array_replace_recursive([
-            'regions' => ['processed' => 0, 'total' => 0, 'imported' => 0],
-            'districts' => ['processed' => 0, 'total' => 0, 'imported' => 0],
-            'cities' => ['processed' => 0, 'total' => 0, 'imported' => 0],
-            'post_offices' => ['processed' => 0, 'total' => 0, 'imported' => 0],
-        ], $rows);
-    }
-
     private function getStageLabel(string $stage): string
     {
         return match ($stage) {
-            'regions' => (string) __('admin/modules/ukr_poshta.sync.stages.regions'),
-            'districts' => (string) __('admin/modules/ukr_poshta.sync.stages.districts'),
-            'cities' => (string) __('admin/modules/ukr_poshta.sync.stages.cities'),
-            'post_offices' => (string) __('admin/modules/ukr_poshta.sync.stages.post_offices'),
+            'regions' => (string)__('admin/modules/ukr_poshta.sync.stages.regions'),
+            'districts' => (string)__('admin/modules/ukr_poshta.sync.stages.districts'),
+            'cities' => (string)__('admin/modules/ukr_poshta.sync.stages.cities'),
+            'post_offices' => (string)__('admin/modules/ukr_poshta.sync.stages.post_offices'),
             default => $stage !== '' ? $stage : '—',
         };
     }
@@ -447,17 +400,17 @@ class UkrPoshtaSyncPage extends Page
     private function getPhaseLabel(string $phase): string
     {
         return match ($phase) {
-            'collect' => (string) __('admin/modules/ukr_poshta.sync.phases.collect'),
-            'finalize' => (string) __('admin/modules/ukr_poshta.sync.phases.finalize'),
-            'completed' => (string) __('admin/modules/ukr_poshta.sync.states.completed'),
-            'failed' => (string) __('admin/modules/ukr_poshta.sync.states.failed'),
+            'collect' => (string)__('admin/modules/ukr_poshta.sync.phases.collect'),
+            'finalize' => (string)__('admin/modules/ukr_poshta.sync.phases.finalize'),
+            'completed' => (string)__('admin/modules/ukr_poshta.sync.states.completed'),
+            'failed' => (string)__('admin/modules/ukr_poshta.sync.states.failed'),
             default => $phase !== '' ? $phase : '—',
         };
     }
 
     public function saveSettings(): void
     {
-        $api_key = trim((string) Arr::get($this->settings_form, 'api_key', ''));
+        $api_key = trim((string)Arr::get($this->settings_form, 'api_key', ''));
 
         if ($api_key === '') {
             throw ValidationException::withMessages([
@@ -465,7 +418,7 @@ class UkrPoshtaSyncPage extends Page
             ]);
         }
 
-        $delivery_cost = trim((string) Arr::get($this->settings_form, 'delivery_cost', ''));
+        $delivery_cost = trim((string)Arr::get($this->settings_form, 'delivery_cost', ''));
 
         if ($delivery_cost === '') {
             throw ValidationException::withMessages([
@@ -479,11 +432,11 @@ class UkrPoshtaSyncPage extends Page
                 'is_active' => true,
             ],
             UkrPoshtaConfig::DELIVERY_COST_GLOBAL_CONFIG_KEY => [
-                'value' => number_format((float) $delivery_cost, 2, '.', ''),
+                'value' => number_format((float)$delivery_cost, 2, '.', ''),
                 'is_active' => true,
             ],
             UkrPoshtaConfig::IS_DELIVERY_COST_ENABLED_GLOBAL_CONFIG_KEY => [
-                'value' => (bool) Arr::get($this->settings_form, 'is_delivery_cost_enabled', false),
+                'value' => (bool)Arr::get($this->settings_form, 'is_delivery_cost_enabled', false),
                 'is_active' => true,
             ],
         ]);
