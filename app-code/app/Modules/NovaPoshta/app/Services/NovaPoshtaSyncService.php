@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\NovaPoshta\Models\NovaPoshtaCity;
 use Modules\NovaPoshta\Models\NovaPoshtaPoshtomat;
@@ -46,16 +47,12 @@ class NovaPoshtaSyncService
      */
     public function syncAll(): array
     {
-        try {
-            return [
-                'regions' => $this->syncRegions(),
-                'cities' => $this->syncCities(),
-                'post_offices' => $this->syncPostOffices(),
-                'poshtomats' => $this->syncPoshtomats(),
-            ];
-        } catch (Throwable $throwable) {
-            throw new RuntimeException('Nova Poshta sync failed.', previous: $throwable);
-        }
+        return [
+            'regions' => $this->runResilientSyncStep('regions', fn (): array => $this->syncRegions()),
+            'cities' => $this->runResilientSyncStep('cities', fn (): array => $this->syncCities()),
+            'post_offices' => $this->runResilientSyncStep('post_offices', fn (): array => $this->syncPostOffices()),
+            'poshtomats' => $this->runResilientSyncStep('poshtomats', fn (): array => $this->syncPoshtomats()),
+        ];
     }
 
     /**
@@ -116,7 +113,7 @@ class NovaPoshtaSyncService
             self::STAGE_POST_OFFICES => $this->processWarehousesStage($state, NovaPoshtaPostOffice::class, false),
             self::STAGE_POSHTOMATS => $this->processWarehousesStage($state, NovaPoshtaPoshtomat::class, true),
             'completed', 'failed' => $state,
-            default => $this->markQueuedSyncFailed($state, sprintf('Unknown Nova Poshta sync stage [%s].', $stage)),
+            default => $this->persistQueuedSyncState($state),
         };
     }
 
@@ -265,8 +262,6 @@ class NovaPoshtaSyncService
             'total_pages' => 1,
             'stage_total_rows' => 0,
             'stage_processed_rows' => 0,
-            'stage_progress' => 0,
-            'overall_progress' => 0,
             'message' => null,
             'summary' => [],
             'stop_requested' => false,
@@ -293,13 +288,18 @@ class NovaPoshtaSyncService
             $state['total_pages'] = 1;
             $state['stage_total_rows'] = 0;
             $state['stage_processed_rows'] = 0;
-            $state['stage_progress'] = 0;
-            $state['overall_progress'] = 25;
             $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.regions_completed');
 
             return $this->persistQueuedSyncState($state);
         } catch (Throwable $throwable) {
-            return $this->markQueuedSyncFailed($state, $throwable->getMessage());
+            return $this->continueQueuedSyncAfterError(
+                $state,
+                self::STAGE_CITIES,
+                self::PHASE_COLLECT,
+                __('novaposhta::admin/modules/nova_poshta.sync.messages.regions_completed'),
+                $throwable,
+                'regions',
+            );
         }
     }
 
@@ -397,11 +397,8 @@ class NovaPoshtaSyncService
 
             $stage_processed_rows = min($stage_total_rows, $stage_processed_rows + count($rows));
             $state['stage_processed_rows'] = $stage_processed_rows;
-            $state['stage_progress'] = (int) floor(($stage_processed_rows / $stage_total_rows) * 100);
 
             if ($current_page >= $total_pages) {
-                $state['stage_progress'] = 100;
-                $state['overall_progress'] = $this->getOverallProgressForCompletedStage($stage);
                 $state['message'] = $completed_message;
 
                 if ($next_stage === null) {
@@ -409,7 +406,6 @@ class NovaPoshtaSyncService
                     $state['stage'] = 'completed';
                     $state['phase'] = 'completed';
                     $state['completed_at'] = now()->toIso8601String();
-                    $state['overall_progress'] = 100;
                     $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.completed');
 
                     Cache::put(self::LAST_SYNC_SUMMARY_CACHE_KEY, $state['summary'], now()->addDay());
@@ -420,8 +416,6 @@ class NovaPoshtaSyncService
                     $state['total_pages'] = 1;
                     $state['stage_total_rows'] = 0;
                     $state['stage_processed_rows'] = 0;
-                    $state['stage_progress'] = 0;
-                    $state['overall_progress'] = $this->getOverallProgressForCompletedStage($stage);
                     $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.next_stage', [
                         'stage' => $this->getStageLabel($next_stage),
                     ]);
@@ -432,7 +426,6 @@ class NovaPoshtaSyncService
                 }
 
                 $state['current_page'] = $current_page + 1;
-                $state['overall_progress'] = $this->getOverallProgressForStage($stage, $state['stage_progress']);
                 $state['message'] = __('novaposhta::admin/modules/nova_poshta.sync.messages.collecting_page', [
                     'current' => $current_page,
                     'total' => $total_pages,
@@ -442,8 +435,24 @@ class NovaPoshtaSyncService
 
             return $this->persistQueuedSyncState($state);
         } catch (Throwable $throwable) {
-            return $this->markQueuedSyncFailed($state, $throwable->getMessage());
+            return $this->continueQueuedSyncAfterError(
+                $state,
+                $next_stage,
+                self::PHASE_COLLECT,
+                $completed_message,
+                $throwable,
+                $stage,
+            );
         }
+    }
+
+    /**
+     * @return void
+     */
+    public function forgetQueuedSyncState(): void
+    {
+        Cache::forget(self::LAST_SYNC_SUMMARY_CACHE_KEY);
+        Cache::forget(self::SYNC_STATE_CACHE_KEY);
     }
 
     /**
@@ -502,21 +511,6 @@ class NovaPoshtaSyncService
 
     /**
      * @param  array<string, mixed>  $state
-     * @param  string  $message
-     * @return array<string, mixed>
-     */
-    private function markQueuedSyncFailed(array $state, string $message): array
-    {
-        $state['is_running'] = false;
-        $state['stage'] = 'failed';
-        $state['phase'] = 'failed';
-        $state['message'] = $message;
-
-        return $this->persistQueuedSyncState($state);
-    }
-
-    /**
-     * @param  array<string, mixed>  $state
      * @return array<string, mixed>
      */
     private function markQueuedSyncStopped(array $state): array
@@ -528,6 +522,73 @@ class NovaPoshtaSyncService
         $state['stopped_at'] = now()->toIso8601String();
 
         return $this->persistQueuedSyncState($state);
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     * @param  string|null  $next_stage
+     * @param  string  $next_phase
+     * @param  string  $message
+     * @param  Throwable  $throwable
+     * @param  string  $stage_name
+     * @return array<string, mixed>
+     */
+    private function continueQueuedSyncAfterError(
+        array $state,
+        ?string $next_stage,
+        string $next_phase,
+        string $message,
+        Throwable $throwable,
+        string $stage_name,
+    ): array {
+        $current_page = max(1, (int) Arr::get($state, 'current_page', 1));
+
+        Log::channel('stack')->error('Nova Poshta queued sync stage failed, continuing.', [
+            'stage' => (string) Arr::get($state, 'stage', ''),
+            'phase' => (string) Arr::get($state, 'phase', ''),
+            'stage_name' => $stage_name,
+            'error' => $throwable->getMessage(),
+            'exception' => $throwable,
+        ]);
+
+        $state['summary'][$stage_name] = [
+            'imported' => (int) Arr::get($state, 'summary.' . $stage_name . '.imported', 0),
+        ];
+        $state['message'] = $message !== '' ? $message : $throwable->getMessage();
+
+        if ($next_stage === null) {
+            $state['current_page'] = $current_page + 1;
+            $state['total_pages'] = max((int) Arr::get($state, 'total_pages', 1), $state['current_page']);
+        } else {
+            $state['stage'] = $next_stage;
+            $state['phase'] = $next_phase;
+            $state['current_page'] = 1;
+            $state['total_pages'] = 1;
+            $state['stage_total_rows'] = 0;
+            $state['stage_processed_rows'] = 0;
+        }
+
+        return $this->persistQueuedSyncState($state);
+    }
+
+    /**
+     * @param  string  $stage_name
+     * @param  Closure(): array<string, int>  $callback
+     * @return array<string, int>
+     */
+    private function runResilientSyncStep(string $stage_name, Closure $callback): array
+    {
+        try {
+            return $callback();
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('Nova Poshta sync step failed, continuing.', [
+                'stage_name' => $stage_name,
+                'error' => $throwable->getMessage(),
+                'exception' => $throwable,
+            ]);
+
+            return ['imported' => 0];
+        }
     }
 
     /**
@@ -558,29 +619,6 @@ class NovaPoshtaSyncService
         Cache::put(self::SYNC_STATE_CACHE_KEY, $state, now()->addDay());
 
         return $state;
-    }
-
-    private function getOverallProgressForStage(string $stage, int $stage_progress): int
-    {
-        $offset = match ($stage) {
-            self::STAGE_CITIES => 25,
-            self::STAGE_POST_OFFICES => 50,
-            self::STAGE_POSHTOMATS => 75,
-            default => 0,
-        };
-
-        return min(100, $offset + (int) floor(($stage_progress / 100) * 25));
-    }
-
-    private function getOverallProgressForCompletedStage(string $stage): int
-    {
-        return match ($stage) {
-            self::STAGE_REGIONS => 25,
-            self::STAGE_CITIES => 50,
-            self::STAGE_POST_OFFICES => 75,
-            self::STAGE_POSHTOMATS => 100,
-            default => 0,
-        };
     }
 
     private function getStageLabel(string $stage): string

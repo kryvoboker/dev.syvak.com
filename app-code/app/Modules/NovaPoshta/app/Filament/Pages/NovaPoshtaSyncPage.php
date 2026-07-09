@@ -18,7 +18,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 use Modules\NovaPoshta\Models\NovaPoshtaCity;
 use Modules\NovaPoshta\Models\NovaPoshtaPoshtomat;
@@ -179,6 +178,8 @@ class NovaPoshtaSyncPage extends Page
 
                         $this->sync_state = $sync_service->requestQueuedSyncStop();
 
+                        $sync_service->forgetQueuedSyncState();
+
                         Notification::make()
                             ->title(__('admin/default.success.title'))
                             ->body(__('novaposhta::admin/modules/nova_poshta.notifications.stop_requested'))
@@ -255,8 +256,6 @@ class NovaPoshtaSyncPage extends Page
     {
         $sync_state = $this->sync_state;
         $is_running = (bool) Arr::get($sync_state, 'is_running', false);
-        $overall_progress = max(0, min(100, (int) Arr::get($sync_state, 'overall_progress', 0)));
-        $stage_progress = max(0, min(100, (int) Arr::get($sync_state, 'stage_progress', 0)));
         $stage = (string) Arr::get($sync_state, 'stage', '');
         $phase = (string) Arr::get($sync_state, 'phase', '');
         $message = (string) Arr::get($sync_state, 'message', '');
@@ -268,9 +267,6 @@ class NovaPoshtaSyncPage extends Page
             default => $is_running ? __('novaposhta::admin/modules/nova_poshta.sync.states.running') : __('novaposhta::admin/modules/nova_poshta.sync.states.idle'),
         };
 
-        $current_page = (int) Arr::get($sync_state, 'current_page', 1);
-        $total_pages = (int) Arr::get($sync_state, 'total_pages', 1);
-        $stage_total_rows = (int) Arr::get($sync_state, 'stage_total_rows', 0);
         $stage_processed_rows = (int) Arr::get($sync_state, 'stage_processed_rows', 0);
         $current_stage_label = $this->getStageLabel($stage);
         $polling_attribute = $is_running ? ' wire:poll.2s="processSyncStep"' : '';
@@ -285,28 +281,26 @@ class NovaPoshtaSyncPage extends Page
                 <div class="rounded-xl border p-6 shadow-sm">
                     <div class="flex flex-col gap-6">
                         <div class="max-w-3xl space-y-1">
-                        <div class="flex items-center gap-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.2em] ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.status')) . '</div>
-                            <div>-</div>
-                            <div class="text-2xl font-semibold bg-green-600 border-2 border-green-700 rounded-2xl px-2 py-1">' . e($status_label) . '</div>
-                        </div>
-                            <p class="block text-sm leading-6 ">' . e($message !== '' ? $message : __('novaposhta::admin/modules/nova_poshta.sections.sync.description')) . '</p>
+                            <div class="flex items-center gap-3">
+                                <div class="text-xs font-semibold uppercase tracking-[0.2em]">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.status')) . '</div>
+                                <div>-</div>
+                                <div class="rounded-2xl border-2 border-green-700 bg-green-600 px-2 py-1 text-2xl font-semibold">' . e($status_label) . '</div>
+                            </div>
+                            <p class="block text-sm leading-6">' . e($message !== '' ? $message : __('novaposhta::admin/modules/nova_poshta.sections.sync.description')) . '</p>
                         </div>
 
-                        <div class="w-full rounded-lg border p-4">
-                            <div class="flex items-center justify-between gap-4 text-sm">
-                                <span class="font-medium ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.overall_progress')) . '</span>
-                                <span class="font-semibold ">' . e((string) $overall_progress) . '%</span>
-                            </div>
-                            <div class="mt-3 h-3 overflow-hidden rounded-full ">
-                                <div class="h-full rounded-full bg-emerald-500 transition-all duration-300" style="width: ' . e((string) $overall_progress) . '%;"></div>
-                            </div>
-                            <div class="mt-4 grid gap-2 text-sm ">
-                                <div><span class="font-medium ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.stage')) . ':</span> ' . e($current_stage_label) . '</div>
-                                <div><span class="font-medium ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.phase')) . ':</span> ' . e($this->getPhaseLabel($phase)) . '</div>
-                                <div><span class="font-medium ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.page')) . ':</span> ' . e($current_page . ' / ' . $total_pages) . '</div>
-                                <div><span class="font-medium ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.processed_rows')) . ':</span> ' . e($stage_processed_rows . ' / ' . $stage_total_rows) . '</div>
-                                <div><span class="font-medium ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.stage_progress')) . ':</span> ' . e((string) $stage_progress) . '%</div>
+                        <div class="w-full rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
+                            <div class="flex items-center gap-4">
+                                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center" aria-hidden="true">
+                                    <span class="absolute inset-0 rounded-full border-4 border-emerald-200 border-t-emerald-600 animate-spin"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                </div>
+                                <div class="min-w-0 flex-1 space-y-1">
+                                    <div class="text-sm font-semibold text-emerald-950">' . e(__('novaposhta::admin/modules/nova_poshta.sync.states.running')) . '</div>
+                                    <div class="text-sm text-emerald-900/80">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.stage')) . ': ' . e($current_stage_label) . '</div>
+                                    <div class="text-sm text-emerald-900/80">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.phase')) . ': ' . e($this->getPhaseLabel($phase)) . '</div>
+                                    <div class="text-sm text-emerald-900/80">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.processed_rows')) . ': ' . e((string) $stage_processed_rows) . '</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -336,50 +330,36 @@ class NovaPoshtaSyncPage extends Page
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    private function getLastSyncSummary(): array
-    {
-        $last_sync_summary = Cache::get('nova_poshta.last_sync_summary', []);
-
-        return is_array($last_sync_summary) ? $last_sync_summary : [];
-    }
-
-    /**
      * @return string
      */
     private function renderLastSyncSummary(): string
     {
-        $last_sync_summary = $this->getLastSyncSummary();
-
-        if ($last_sync_summary === []) {
-            return '<p class="text-sm text-gray-600">' . e(__('novaposhta::admin/modules/nova_poshta.sections.summary.empty')) . '</p>';
-        }
+        $sync_stats = $this->getSyncStats();
 
         $rows = [
             [
                 'label' => __('novaposhta::admin/modules/nova_poshta.stats.regions'),
-                'value' => (int) data_get($last_sync_summary, 'regions.imported', 0),
+                'value' => (int) Arr::get($sync_stats, 'regions', 0),
             ],
             [
                 'label' => __('novaposhta::admin/modules/nova_poshta.stats.cities'),
-                'value' => (int) data_get($last_sync_summary, 'cities.imported', 0),
+                'value' => (int) Arr::get($sync_stats, 'cities', 0),
             ],
             [
                 'label' => __('novaposhta::admin/modules/nova_poshta.stats.post_offices'),
-                'value' => (int) data_get($last_sync_summary, 'post_offices.imported', 0),
+                'value' => (int) Arr::get($sync_stats, 'post_offices', 0),
             ],
             [
                 'label' => __('novaposhta::admin/modules/nova_poshta.stats.poshtomats'),
-                'value' => (int) data_get($last_sync_summary, 'poshtomats.imported', 0),
+                'value' => (int) Arr::get($sync_stats, 'poshtomats', 0),
             ],
         ];
 
         $html = '<div class="overflow-hidden rounded-xl border shadow-sm">';
-        $html .= '<table class="min-w-full divide-ytext-sm">';
+        $html .= '<table class="min-w-full divide-y text-sm">';
         $html .= '<thead class="border-b"><tr>';
-        $html .= '<th class="px-4 py-3 text-left font-medium ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.stage')) . '</th>';
-        $html .= '<th class="px-4 py-3 text-right font-medium ">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.processed_rows')) . '</th>';
+        $html .= '<th class="px-4 py-3 text-left font-medium">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.stage')) . '</th>';
+        $html .= '<th class="px-4 py-3 text-right font-medium">' . e(__('novaposhta::admin/modules/nova_poshta.sync.labels.processed_rows')) . '</th>';
         $html .= '</tr></thead><tbody class="divide-y ">';
 
         foreach ($rows as $row) {
