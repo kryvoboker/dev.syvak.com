@@ -1,0 +1,345 @@
+openapi: 3.1.0
+info:
+  title: NovaPoshta Module API
+  version: 1.0.0
+  description: |
+    Public checkout API for the NovaPoshta module.
+    These endpoints are consumed by storefront JavaScript and return JSON plus rendered HTML fragments.
+tags:
+  - name: NovaPoshta
+    description: Checkout state and delivery point selection endpoints
+paths:
+  /novaposhta/state:
+    get:
+      tags: [NovaPoshta]
+      summary: Get checkout state from session
+      description: Returns the current NovaPoshta checkout selection stored in the user session.
+      responses:
+        '200':
+          description: Checkout state payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutStateResponse'
+  /novaposhta/regions:
+    get:
+      tags: [NovaPoshta]
+      summary: Get available regions
+      description: Returns all regions stored in the local database as an HTML-ready list and a JSON array.
+      responses:
+        '200':
+          description: Regions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionsResponse'
+  /novaposhta/cities:
+    get:
+      tags: [NovaPoshta]
+      summary: Get cities for a selected region
+      parameters:
+        - in: query
+          name: region_ref
+          required: true
+          description: NovaPoshta region reference.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Cities list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitiesResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /novaposhta/post-offices:
+    get:
+      tags: [NovaPoshta]
+      summary: Get post offices for a selected city
+      parameters:
+        - in: query
+          name: city_ref
+          required: true
+          description: NovaPoshta city reference.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Post offices list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostOfficesResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /novaposhta/poshtomats:
+    get:
+      tags: [NovaPoshta]
+      summary: Get poshtomats for a selected city
+      parameters:
+        - in: query
+          name: city_ref
+          required: true
+          description: NovaPoshta city reference.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Poshtomats list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoshtomatsResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /novaposhta/selection:
+    post:
+      tags: [NovaPoshta]
+      summary: Save checkout selection state
+      description: Stores the current delivery method, region, city, and delivery point in the session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutSelectionRequest'
+      responses:
+        '200':
+          description: Stored checkout state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutStateResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+components:
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+  schemas:
+    CheckoutStateResponse:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state:
+          $ref: '#/components/schemas/NovaPoshtaCheckoutState'
+    CheckoutSelectionRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        delivery_method:
+          $ref: '#/components/schemas/DeliveryMethod'
+        region:
+          oneOf:
+            - $ref: '#/components/schemas/NovaPoshtaRegion'
+            - type: object
+              additionalProperties: true
+          nullable: true
+        city:
+          oneOf:
+            - $ref: '#/components/schemas/NovaPoshtaCity'
+            - type: object
+              additionalProperties: true
+          nullable: true
+        delivery_point:
+          oneOf:
+            - $ref: '#/components/schemas/NovaPoshtaDeliveryPoint'
+            - type: object
+              additionalProperties: true
+          nullable: true
+    NovaPoshtaCheckoutState:
+      type: object
+      additionalProperties: false
+      properties:
+        delivery_method:
+          $ref: '#/components/schemas/DeliveryMethod'
+        region:
+          oneOf:
+            - $ref: '#/components/schemas/NovaPoshtaRegion'
+            - type: array
+              maxItems: 0
+          description: Selected region, or an empty array when nothing is selected.
+        city:
+          oneOf:
+            - $ref: '#/components/schemas/NovaPoshtaCity'
+            - type: array
+              maxItems: 0
+          description: Selected city, or an empty array when nothing is selected.
+        delivery_point:
+          oneOf:
+            - $ref: '#/components/schemas/NovaPoshtaDeliveryPoint'
+            - type: array
+              maxItems: 0
+          description: Selected delivery point, or an empty array when nothing is selected.
+      required: [delivery_method, region, city, delivery_point]
+    DeliveryMethod:
+      type: string
+      description: Normalized delivery method slug stored in the session.
+      example: post_office
+      enum:
+        - post_office
+        - poshtomat
+        - courier
+        - ''
+    NovaPoshtaRegion:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: Database ID.
+        ref:
+          type: string
+          description: Upstream NovaPoshta region reference.
+        regions_center:
+          type: string
+          description: Administrative center name from upstream data.
+        description:
+          type: string
+          description: Human-readable region name.
+      required: [id, ref, regions_center, description]
+    NovaPoshtaCity:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        nova_poshta_region_id:
+          type: integer
+        ref:
+          type: string
+        region:
+          type: string
+          description: Upstream region reference.
+        description:
+          type: string
+        city_name:
+          type: string
+        latitude:
+          type: string
+        longitude:
+          type: string
+        city_id:
+          type: integer
+          nullable: true
+        region_description:
+          type: string
+        novaPoshtaRegion:
+          $ref: '#/components/schemas/NovaPoshtaRegion'
+      required:
+        - id
+        - nova_poshta_region_id
+        - ref
+        - region
+        - description
+        - city_name
+        - latitude
+        - longitude
+        - region_description
+    NovaPoshtaDeliveryPoint:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        ref:
+          type: string
+        city_ref:
+          type: string
+        description:
+          type: string
+        latitude:
+          type: string
+        longitude:
+          type: string
+        schedule:
+          type:
+            - string
+            - 'null'
+          description: JSON encoded schedule string or null.
+        number:
+          type:
+            - integer
+            - 'null'
+        city_description:
+          type: string
+        site_key:
+          type:
+            - integer
+            - 'null'
+      required: [id, ref, city_ref, description, latitude, longitude, city_description]
+    NovaPoshtaPostOffice:
+      allOf:
+        - $ref: '#/components/schemas/NovaPoshtaDeliveryPoint'
+    NovaPoshtaPoshtomat:
+      allOf:
+        - $ref: '#/components/schemas/NovaPoshtaDeliveryPoint'
+    RegionsResponse:
+      type: object
+      additionalProperties: false
+      required: [items, html]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NovaPoshtaRegion'
+        html:
+          type: string
+          description: Rendered HTML fragment for the storefront select list.
+    CitiesResponse:
+      type: object
+      additionalProperties: false
+      required: [items, html]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NovaPoshtaCity'
+        html:
+          type: string
+          description: Rendered HTML fragment for the storefront select list.
+    PostOfficesResponse:
+      type: object
+      additionalProperties: false
+      required: [items, html]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NovaPoshtaPostOffice'
+        html:
+          type: string
+          description: Rendered HTML fragment for the storefront select list.
+    PoshtomatsResponse:
+      type: object
+      additionalProperties: false
+      required: [items, html]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NovaPoshtaPoshtomat'
+        html:
+          type: string
+          description: Rendered HTML fragment for the storefront select list.
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

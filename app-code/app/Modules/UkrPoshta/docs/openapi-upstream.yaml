@@ -1,0 +1,318 @@
+openapi: 3.1.0
+info:
+  title: UkrPoshta Upstream Integration
+  version: 1.0.0
+  description: |
+    Integration contract between the UkrPoshta module and the upstream Ukr Poshta address-classifier service.
+    This document describes the external server, request parameters, and the data shape the module expects back.
+servers:
+  - url: https://www.ukrposhta.ua/address-classifier-ws/
+    description: Ukr Poshta upstream address-classifier service
+tags:
+  - name: AddressClassifier
+    description: Directory sync endpoints used by the module
+paths:
+  /get_regions_by_region_ua:
+    get:
+      tags: [AddressClassifier]
+      summary: Fetch regions
+      description: |
+        Used by the module during region synchronization.
+        The module sends a bearer token and expects a JSON payload with entries inside Entries.Entry or data.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Bearer token from the global UkrPoshta API key.
+      responses:
+        '200':
+          description: Upstream response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionsResponse'
+  /get_districts_by_region_id_and_district_ua:
+    get:
+      tags: [AddressClassifier]
+      summary: Fetch districts for a region
+      description: |
+        Used by the module during district synchronization.
+        The module passes region_id as a query parameter.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Bearer token from the global UkrPoshta API key.
+        - in: query
+          name: region_id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Upstream response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DistrictsResponse'
+  /get_city_by_region_id_and_district_id_and_city_ua:
+    get:
+      tags: [AddressClassifier]
+      summary: Fetch cities for a district
+      description: |
+        Used by the module during city synchronization.
+        The module passes district_id as a query parameter.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Bearer token from the global UkrPoshta API key.
+        - in: query
+          name: district_id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Upstream response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitiesResponse'
+  /get_postoffices_by_postindex:
+    get:
+      tags: [AddressClassifier]
+      summary: Fetch post offices for a district
+      description: |
+        Used by the module during post office synchronization.
+        The module passes pdDistrictId as a query parameter.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Bearer token from the global UkrPoshta API key.
+        - in: query
+          name: pdDistrictId
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Upstream response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostOfficesResponse'
+components:
+  schemas:
+    UpstreamResponseBase:
+      type: object
+      additionalProperties: true
+      properties:
+        Entries:
+          type: object
+          additionalProperties: true
+          properties:
+            Entry:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        errors:
+          type: array
+          items:
+            type: string
+        error:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
+        warning:
+          type: array
+          items:
+            type: string
+    RegionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/UpstreamResponseBase'
+        - type: object
+          properties:
+            Entries:
+              type: object
+              properties:
+                Entry:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RegionItem'
+    DistrictsResponse:
+      allOf:
+        - $ref: '#/components/schemas/UpstreamResponseBase'
+        - type: object
+          properties:
+            Entries:
+              type: object
+              properties:
+                Entry:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DistrictItem'
+    CitiesResponse:
+      allOf:
+        - $ref: '#/components/schemas/UpstreamResponseBase'
+        - type: object
+          properties:
+            Entries:
+              type: object
+              properties:
+                Entry:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CityItem'
+    PostOfficesResponse:
+      allOf:
+        - $ref: '#/components/schemas/UpstreamResponseBase'
+        - type: object
+          properties:
+            Entries:
+              type: object
+              properties:
+                Entry:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PostOfficeItem'
+    RegionItem:
+      type: object
+      additionalProperties: true
+      properties:
+        REGION_ID:
+          type: integer
+        region_id:
+          type: integer
+        REGION_UA:
+          type: string
+        region_ua:
+          type: string
+        NAME:
+          type: string
+        name:
+          type: string
+    DistrictItem:
+      type: object
+      additionalProperties: true
+      properties:
+        DISTRICT_ID:
+          type: integer
+        district_id:
+          type: integer
+        REGION_UA:
+          type: string
+        region_ua:
+          type: string
+        DISTRICT_UA:
+          type: string
+        district_ua:
+          type: string
+    CityItem:
+      type: object
+      additionalProperties: true
+      properties:
+        CITY_ID:
+          type: integer
+        city_id:
+          type: integer
+        REGION_ID:
+          type: integer
+        region_id:
+          type: integer
+        REGION_UA:
+          type: string
+        region_ua:
+          type: string
+        DISTRICT_UA:
+          type: string
+        district_ua:
+          type: string
+        CITY_UA:
+          type: string
+        city_ua:
+          type: string
+        LATTITUDE:
+          type: string
+        LATITUDE:
+          type: string
+        latitude:
+          type: string
+        LONGITUDE:
+          type: string
+        longitude:
+          type: string
+    PostOfficeItem:
+      type: object
+      additionalProperties: true
+      properties:
+        POSTCODE:
+          type: integer
+        postcode:
+          type: integer
+        PDCITY_ID:
+          type: integer
+        pdcity_id:
+          type: integer
+        POREGION_ID:
+          type: integer
+        poregion_id:
+          type: integer
+        DISTRICT_ID:
+          type: integer
+        district_id:
+          type: integer
+        PDCITY_UA:
+          type: string
+        pdcity_ua:
+          type: string
+        CITY_UA:
+          type: string
+        city_ua:
+          type: string
+        REGION_UA:
+          type: string
+        region_ua:
+          type: string
+        DISTRICT_UA:
+          type: string
+        district_ua:
+          type: string
+        ADDRESS:
+          type: string
+        address:
+          type: string
+        POSTREET_ID:
+          type: string
+        postreet_id:
+          type: string
+        LOCK_CODE:
+          type: integer
+        lock_code:
+          type: integer
+        PDCITYTYPE_UA:
+          type: string
+        pdcitytype_ua:
+          type: string

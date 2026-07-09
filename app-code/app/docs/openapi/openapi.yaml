@@ -1,0 +1,50 @@
+openapi: 3.1.0
+info:
+  title: Syvak OpenAPI
+  version: 1.0.0
+  description: |
+    Root OpenAPI entrypoint for Syvak.
+    This file only aggregates module-level API documentation.
+
+    Module API docs:
+    - [NovaPoshta public API](../../Modules/NovaPoshta/docs/openapi.yaml)
+    - [UkrPoshta public API](../../Modules/UkrPoshta/docs/openapi.yaml)
+
+    Upstream integration docs:
+    - [NovaPoshta upstream integration](../../Modules/NovaPoshta/docs/openapi-upstream.yaml)
+    - [UkrPoshta upstream integration](../../Modules/UkrPoshta/docs/openapi-upstream.yaml)
+servers:
+  - url: https://example.test
+    description: Local or staging environment
+tags:
+  - name: NovaPoshta
+    description: Nova Poshta checkout and sync endpoints
+  - name: UkrPoshta
+    description: Ukr Poshta checkout and sync endpoints
+paths:
+  /novaposhta/state:
+    $ref: '../../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1state'
+  /novaposhta/regions:
+    $ref: '../../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1regions'
+  /novaposhta/cities:
+    $ref: '../../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1cities'
+  /novaposhta/post-offices:
+    $ref: '../../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1post-offices'
+  /novaposhta/poshtomats:
+    $ref: '../../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1poshtomats'
+  /novaposhta/selection:
+    $ref: '../../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1selection'
+  /ukrposhta/state:
+    $ref: '../../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1state'
+  /ukrposhta/regions:
+    $ref: '../../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1regions'
+  /ukrposhta/districts:
+    $ref: '../../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1districts'
+  /ukrposhta/cities:
+    $ref: '../../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1cities'
+  /ukrposhta/post-offices:
+    $ref: '../../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1post-offices'
+  /ukrposhta/selection:
+    $ref: '../../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1selection'
+components:
+  securitySchemes: {}
