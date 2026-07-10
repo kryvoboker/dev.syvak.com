@@ -1,3 +1,4 @@
+import type { CheckoutMapPoint } from '@ts-features/pages/checkout/checkoutLeafletMap.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
 import { debounce, fetchFunc, findArrayElems, findElem, isArray, isEmpty } from '@ts-shared/lib/helpers.ts';
 import Choices, { type InputChoice, type InputGroup, type Options } from 'choices.js';
@@ -56,6 +57,26 @@ interface CheckoutBranchSearchResponse {
 }
 
 type CheckoutBranchPayload = CheckoutDeliveryPointState | CheckoutBranchSearchItem | Record<string, unknown> | null;
+
+interface CheckoutMapData {
+    selected_city?: CheckoutCitySearchItem | null;
+    selected_delivery_method?: string | null;
+    marker_icons?: {
+        nova_poshta?: string | null;
+        ukr_poshta?: string | null;
+    } | null;
+    texts?: {
+        title?: string | null;
+        search_placeholder?: string | null;
+        list_title?: string | null;
+        empty?: string | null;
+        choose_city_first?: string | null;
+        deliver_here?: string | null;
+        close?: string | null;
+        work_schedule?: string | null;
+        day_off?: string | null;
+    } | null;
+}
 
 interface ChoiceSettings {
     allowHTML: boolean;
@@ -353,6 +374,36 @@ const resolveBranchLabelText = (deliveryMethod: string): string => {
     return String(getAppParam('checkout_branch_label_text') ?? '');
 };
 
+const buildCheckoutMapPoint = (branch: CheckoutBranchSearchItem): CheckoutMapPoint | null => {
+    const lat = Number(branch.latitude ?? 0);
+    const lng = Number(branch.longitude ?? 0);
+    const title = String(branch.branch_label ?? branch.label ?? branch.description ?? '').trim();
+    const description = String(branch.description ?? branch.branch_label ?? title).trim();
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat === 0 || lng === 0 || title === '') {
+        return null;
+    }
+
+    return {
+        id: String(branch.branch_value ?? branch.id ?? branch.ref ?? '').trim(),
+        title,
+        description,
+        lat,
+        lng,
+        schedule: branch.schedule ?? null,
+        delivery_method: String(branch.delivery_method ?? '').trim(),
+        branch_value: String(branch.branch_value ?? '').trim(),
+        city_ref: branch.city_ref ?? null,
+        city_description: branch.city_description ?? null,
+    };
+};
+
+const buildCheckoutMapPoints = (branches: CheckoutBranchSearchItem[]): CheckoutMapPoint[] => {
+    return branches
+        .map((branch: CheckoutBranchSearchItem): CheckoutMapPoint | null => buildCheckoutMapPoint(branch))
+        .filter((point: CheckoutMapPoint | null): point is CheckoutMapPoint => point !== null);
+};
+
 export const handleCheckoutDeliverySelection = (): void => {
     const citySelectElement = <HTMLSelectElement | null>findElem('#checkout-city');
     const branchSelectElement = <HTMLSelectElement | null>findElem('#checkout-branch');
@@ -361,6 +412,7 @@ export const handleCheckoutDeliverySelection = (): void => {
     const deliveryAddressWrapperElement = <HTMLElement | null>findElem('[data-checkout-delivery-address-wrapper]');
     const branchWrapperElement = <HTMLElement | null>findElem('[data-checkout-branch-wrapper]');
     const branchLabelElement = <HTMLElement | null>findElem('[data-checkout-branch-label]');
+    const mapButtonElement = <HTMLButtonElement | null>findElem('#find-on-map-btn');
     const deliveryMethodOptions = <HTMLElement[] | []>findArrayElems('[data-checkout-delivery-method-option]');
     const deliveryMethodInputs = (<HTMLInputElement[] | []>(
         findArrayElems('[data-checkout-delivery-method-input]')
@@ -369,6 +421,7 @@ export const handleCheckoutDeliverySelection = (): void => {
     const branchSearchUrl = resolveCheckoutUrl('checkout_branch_search_url');
     const selectionSaveUrl = resolveCheckoutUrl('checkout_selection_save_url');
     const selectionState = resolveCheckoutSelectionState();
+    const checkoutMapData = getAppParam<CheckoutMapData>('checkout_map_data') ?? {};
 
     if (!citySelectElement || !branchSelectElement) {
         return;
@@ -454,6 +507,25 @@ export const handleCheckoutDeliverySelection = (): void => {
         if (branchLabelElement) {
             branchLabelElement.textContent = resolveBranchLabelText(currentDeliveryMethod);
         }
+
+        updateMapButtonState();
+    };
+
+    const updateMapButtonState = (): void => {
+        if (!mapButtonElement) {
+            return;
+        }
+
+        const hasMapPoints = latestBranchSearchResults.length > 0 || currentBranch !== null;
+        const isMapAvailable =
+            currentCity !== null &&
+            currentDeliveryMethod !== '' &&
+            currentDeliveryMethod !== 'nova_poshta_courier' &&
+            hasMapPoints;
+
+        mapButtonElement.toggleAttribute('disabled', !isMapAvailable);
+        mapButtonElement.classList.toggle('cursor-not-allowed', !isMapAvailable);
+        mapButtonElement.classList.toggle('opacity-60', !isMapAvailable);
     };
 
     const applyCitySearchResults = (cities: CheckoutCitySearchItem[]): void => {
@@ -478,6 +550,8 @@ export const handleCheckoutDeliverySelection = (): void => {
         if (currentCity) {
             cityChoices.setChoiceByValue(currentCity.city_description);
         }
+
+        updateMapButtonState();
     };
 
     const applyBranchSearchResults = (branches: CheckoutBranchSearchItem[]): void => {
@@ -502,6 +576,8 @@ export const handleCheckoutDeliverySelection = (): void => {
         if (currentBranch) {
             branchChoices.setChoiceByValue(currentBranch.branch_value);
         }
+
+        updateMapButtonState();
     };
 
     const resolveBranchSearchStateKey = (): string => {
@@ -591,6 +667,7 @@ export const handleCheckoutDeliverySelection = (): void => {
             currentBranch = null;
             branchChoices.removeActiveItems();
             branchChoices.clearChoices();
+            updateMapButtonState();
             return;
         }
 
@@ -599,6 +676,8 @@ export const handleCheckoutDeliverySelection = (): void => {
             branchChoices.removeActiveItems();
             branchChoices.clearChoices();
         }
+
+        updateMapButtonState();
     };
 
     const loadBranches = debounce(async (): Promise<void> => {
@@ -645,6 +724,8 @@ export const handleCheckoutDeliverySelection = (): void => {
             } else {
                 branchChoices.clearChoices();
             }
+
+            updateMapButtonState();
         }
     }, SEARCH_DEBOUNCE_MS);
 
@@ -726,6 +807,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         updateDeliveryMethodVisibility();
         updateBranchAvailability();
         loadBranches();
+        updateMapButtonState();
 
         syncSelectionToServer();
     };
@@ -754,6 +836,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         hideWarning();
         updateBranchAvailability();
         loadBranches();
+        updateMapButtonState();
 
         syncSelectionToServer();
     };
@@ -788,6 +871,63 @@ export const handleCheckoutDeliverySelection = (): void => {
         syncSelectionToServer();
     };
 
+    const handleMapBranchSelection = (mapPointId: string): void => {
+        const selectedBranch =
+            latestBranchSearchResults.find(
+                (branch: CheckoutBranchSearchItem): boolean => branch.branch_value === mapPointId,
+            ) ?? (currentBranch?.branch_value === mapPointId ? currentBranch : null);
+
+        if (!selectedBranch || !currentCity) {
+            return;
+        }
+
+        currentBranch = selectedBranch;
+        branchChoices.setChoiceByValue(selectedBranch.branch_value);
+        hideWarning();
+        syncSelectionToServer();
+        updateMapButtonState();
+    };
+
+    const openCheckoutMap = async (): Promise<void> => {
+        if (!currentCity) {
+            showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
+
+            return;
+        }
+
+        const branchCandidates =
+            latestBranchSearchResults.length > 0 ? latestBranchSearchResults : currentBranch ? [currentBranch] : [];
+        const mapPoints = buildCheckoutMapPoints(branchCandidates);
+
+        if (mapPoints.length === 0) {
+            return;
+        }
+
+        const module = await import('@ts-features/pages/checkout/checkoutLeafletMap.ts');
+
+        module.openCheckoutLeafletMap({
+            city: currentCity,
+            points: mapPoints,
+            selectedPointId: currentBranch?.branch_value ?? mapPoints[0]?.id ?? null,
+            selectedDeliveryMethod: currentDeliveryMethod,
+            markerIcons: checkoutMapData.marker_icons ?? null,
+            texts: checkoutMapData.texts ?? null,
+            callback: handleMapBranchSelection,
+        });
+    };
+
+    const bindMapButton = (): void => {
+        if (!mapButtonElement || mapButtonElement.dataset.checkoutMapBound === '1') {
+            return;
+        }
+
+        mapButtonElement.dataset.checkoutMapBound = '1';
+
+        mapButtonElement.addEventListener('click', (): void => {
+            void openCheckoutMap();
+        });
+    };
+
     citySelectElement.addEventListener('search', (event: Event): void => {
         const searchEvent = event as CustomEvent<{
             value: string;
@@ -806,6 +946,8 @@ export const handleCheckoutDeliverySelection = (): void => {
         input.addEventListener('change', handleDeliveryMethodChange);
     });
 
+    bindMapButton();
+
     if (!currentDeliveryMethod) {
         const checkedDeliveryMethod = <HTMLInputElement | null>(
             findElem('[data-checkout-delivery-method-input]:checked')
@@ -823,5 +965,6 @@ export const handleCheckoutDeliverySelection = (): void => {
         updateDeliveryMethodVisibility();
         updateBranchVisibility();
         updateCourierAddressVisibility();
+        updateMapButtonState();
     }
 };

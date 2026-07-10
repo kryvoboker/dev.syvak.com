@@ -44,6 +44,16 @@ return [
         'edit_items' => 'Edit items',
         'submit' => 'Place order',
     ],
+    'map' => [
+        'title' => 'Choose delivery point',
+        'search_placeholder' => 'Search by name or address',
+        'list_title' => 'Available delivery points',
+        'empty' => 'No delivery points available',
+        'deliver_here' => 'Deliver here',
+        'close' => 'Close',
+        'work_schedule' => 'Working hours',
+        'day_off' => 'Closed',
+    ],
     'warnings' => [
         'choose_city_first' => 'Choose a city first',
         'no_delivery_methods' => 'No delivery methods are available for the selected city',
