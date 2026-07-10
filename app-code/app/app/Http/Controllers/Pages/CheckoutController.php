@@ -18,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\NovaPoshta\Services\NovaPoshtaCheckoutDataService;
 use Modules\NovaPoshta\Support\NovaPoshtaCheckoutStateService;
@@ -186,14 +187,20 @@ class CheckoutController extends Controller
      */
     private function buildSelectionStateFromModuleData(array $nova_poshta_checkout_data, array $ukr_poshta_checkout_data): array
     {
+        $nova_state = (array) Arr::get($nova_poshta_checkout_data, 'state', []);
         $nova_selected_city = (array)Arr::get($nova_poshta_checkout_data, 'selected_city', []);
         $nova_selected_delivery_point = (array)Arr::get($nova_poshta_checkout_data, 'selected_delivery_point', []);
         $ukr_selected_city = (array)Arr::get($ukr_poshta_checkout_data, 'selected_city', []);
         $ukr_selected_delivery_point = (array)Arr::get($ukr_poshta_checkout_data, 'selected_delivery_point', []);
+        $nova_delivery_method = (string) Arr::get($nova_state, 'delivery_method', '');
+        $nova_delivery_address = (string) Arr::get($nova_state, 'delivery_address', '');
 
         if ($nova_selected_city !== [] || $nova_selected_delivery_point !== []) {
             return [
-                'delivery_method' => 'nova_poshta',
+                'delivery_method' => $this->resolveNovaPoshtaDeliveryMethod(
+                    $nova_delivery_method,
+                    $nova_selected_delivery_point,
+                ),
                 'city' => $this->normalizeCheckoutCityState(
                     city_description   : (string)Arr::get($nova_selected_city, 'description', Arr::get($nova_selected_city, 'city_name', '')),
                     nova_poshta_city_id: (string)Arr::get($nova_selected_city, 'ref', ''),
@@ -202,6 +209,7 @@ class CheckoutController extends Controller
                     city_lng           : Arr::get($nova_selected_city, 'longitude'),
                 ),
                 'delivery_point' => $nova_selected_delivery_point,
+                'delivery_address' => $nova_delivery_method === 'nova_poshta_courier' ? $nova_delivery_address : '',
             ];
         }
 
@@ -216,10 +224,45 @@ class CheckoutController extends Controller
                     city_lng           : Arr::get($ukr_selected_city, 'longitude'),
                 ),
                 'delivery_point' => $ukr_selected_delivery_point,
+                'delivery_address' => '',
             ];
         }
 
         return [];
+    }
+
+    /**
+     * @param array<string, mixed> $selected_delivery_point
+     */
+    private function resolveNovaPoshtaDeliveryMethod(string $delivery_method, array $selected_delivery_point): string
+    {
+        if ($delivery_method === 'nova_poshta_courier') {
+            return 'nova_poshta_courier';
+        }
+
+        if ($delivery_method === 'nova_poshta_poshtomat' || $this->isPoshtomatDeliveryPoint($selected_delivery_point)) {
+            return 'nova_poshta_poshtomat';
+        }
+
+        return 'nova_poshta';
+    }
+
+    /**
+     * @param array<string, mixed> $selected_delivery_point
+     */
+    private function isPoshtomatDeliveryPoint(array $selected_delivery_point): bool
+    {
+        if ($selected_delivery_point === []) {
+            return false;
+        }
+
+        $delivery_method = (string) Arr::get($selected_delivery_point, 'delivery_method', '');
+
+        return $delivery_method === 'nova_poshta_poshtomat'
+            || Str::contains(
+                Str::lower((string) Arr::get($selected_delivery_point, 'description', '')),
+                'поштомат',
+            );
     }
 
     /**
@@ -247,6 +290,9 @@ class CheckoutController extends Controller
     private function syncModuleStates(array $state): void
     {
         $city = (array)Arr::get($state, 'city', []);
+        $delivery_method = (string) Arr::get($state, 'delivery_method', '');
+        $delivery_point = (array)Arr::get($state, 'delivery_point', []);
+        $delivery_address = (string) Arr::get($state, 'delivery_address', '');
 
         if ($city === []) {
             $this->nova_poshta_checkout_state_service->clear();
@@ -257,9 +303,8 @@ class CheckoutController extends Controller
 
         $nova_poshta_city_id = (string)Arr::get($city, 'nova_poshta_city_id', '');
         $ukr_poshta_city_id = (int)Arr::get($city, 'ukr_poshta_city_id', 0);
-        $delivery_point = (array)Arr::get($state, 'delivery_point', []);
 
-        if (filled($nova_poshta_city_id)) {
+        if (filled($nova_poshta_city_id) && Str::startsWith($delivery_method, 'nova_poshta')) {
             $this->nova_poshta_checkout_state_service->setCity([
                 'ref' => $nova_poshta_city_id,
                 'description' => (string)Arr::get($city, 'city_description', ''),
@@ -267,17 +312,23 @@ class CheckoutController extends Controller
                 'latitude' => Arr::get($city, 'city_lat'),
                 'longitude' => Arr::get($city, 'city_lng'),
             ]);
+            $this->nova_poshta_checkout_state_service->setDeliveryMethod($delivery_method);
 
-            if ($delivery_point !== []) {
+            if ($delivery_method === 'nova_poshta_courier') {
+                $this->nova_poshta_checkout_state_service->setDeliveryAddress($delivery_address);
+                $this->nova_poshta_checkout_state_service->clearDeliveryPoint();
+            } elseif ($delivery_point !== []) {
                 $this->nova_poshta_checkout_state_service->setDeliveryPoint($delivery_point);
+                $this->nova_poshta_checkout_state_service->clearDeliveryAddress();
             } else {
                 $this->nova_poshta_checkout_state_service->clearDeliveryPoint();
+                $this->nova_poshta_checkout_state_service->clearDeliveryAddress();
             }
         } else {
             $this->nova_poshta_checkout_state_service->clear();
         }
 
-        if ($ukr_poshta_city_id > 0) {
+        if ($ukr_poshta_city_id > 0 && $delivery_method === 'ukr_poshta') {
             $this->ukr_poshta_checkout_state_service->setCity([
                 'city_id' => $ukr_poshta_city_id,
                 'description' => (string)Arr::get($city, 'city_description', ''),
@@ -285,6 +336,7 @@ class CheckoutController extends Controller
                 'latitude' => Arr::get($city, 'city_lat'),
                 'longitude' => Arr::get($city, 'city_lng'),
             ]);
+            $this->ukr_poshta_checkout_state_service->setDeliveryMethod('ukr_poshta');
 
             if ($delivery_point !== []) {
                 $this->ukr_poshta_checkout_state_service->setDeliveryPoint($delivery_point);

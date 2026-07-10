@@ -21,6 +21,7 @@ return [
             'email' => 'E-mail',
             'city' => 'City*',
             'delivery_method' => 'Delivery method*',
+            'delivery_address' => 'Delivery address*',
             'branch' => 'Branch*',
             'no_call' => 'Do not call to confirm the order',
             'comment' => 'Add a comment to the order',
@@ -31,12 +32,15 @@ return [
         'placeholders' => [
             'city_search' => 'Search city',
             'delivery_methods' => 'Choose delivery method',
+            'delivery_address' => 'Street, building, apartment',
             'branch_search' => 'Search branch',
             'payment_methods' => 'Choose payment method',
             'payment_placeholder' => 'No payment methods are available yet',
         ],
         'delivery_methods' => [
             'nova_poshta' => 'Nova Poshta',
+            'nova_poshta_courier' => 'Nova Poshta (Courier)',
+            'nova_poshta_poshtomat' => 'Nova Poshta (Poshtomat)',
             'ukr_poshta' => 'Ukr Poshta',
         ],
         'buttons' => [

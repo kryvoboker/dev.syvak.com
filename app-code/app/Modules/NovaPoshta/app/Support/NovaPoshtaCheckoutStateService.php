@@ -76,6 +76,18 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @param  mixed  $delivery_address
+     * @return array<string, mixed>
+     */
+    public function setDeliveryAddress(mixed $delivery_address): array
+    {
+        $state = $this->getState();
+        $state['delivery_address'] = $this->normalizeDeliveryAddress($delivery_address);
+
+        return $this->replaceState($state);
+    }
+
+    /**
      * @param  array<string, mixed>  $delivery_point
      * @return array<string, mixed>
      */
@@ -91,6 +103,14 @@ class NovaPoshtaCheckoutStateService
     {
         $state = $this->getState();
         $state['delivery_point'] = [];
+
+        return $this->replaceState($state);
+    }
+
+    public function clearDeliveryAddress(): array
+    {
+        $state = $this->getState();
+        $state['delivery_address'] = '';
 
         return $this->replaceState($state);
     }
@@ -111,7 +131,20 @@ class NovaPoshtaCheckoutStateService
             'region' => $this->normalizeRow((array) Arr::get($payload, 'region', [])),
             'city' => $this->normalizeRow((array) Arr::get($payload, 'city', [])),
             'delivery_point' => $this->normalizeRow((array) Arr::get($payload, 'delivery_point', [])),
+            'delivery_address' => $this->normalizeDeliveryAddress(Arr::get($payload, 'delivery_address', '')),
         ];
+    }
+
+    /**
+     * @param  mixed  $delivery_address
+     */
+    private function normalizeDeliveryAddress(mixed $delivery_address): string
+    {
+        if (is_array($delivery_address)) {
+            return '';
+        }
+
+        return Str::squish((string) $delivery_address);
     }
 
     /**

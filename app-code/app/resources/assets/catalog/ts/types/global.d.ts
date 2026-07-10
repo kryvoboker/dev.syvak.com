@@ -45,6 +45,7 @@ export interface WindowAppParams {
             city_lng?: number | null;
         } | null;
         delivery_point?: Record<string, unknown> | null;
+        delivery_address?: string | null;
     } | null;
 
     [key: string]: unknown;

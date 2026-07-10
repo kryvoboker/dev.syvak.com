@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Checkout;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Modules\NovaPoshta\Models\NovaPoshtaPoshtomat;
 use Modules\NovaPoshta\Models\NovaPoshtaPostOffice;
 use Modules\UkrPoshta\Models\UkrPoshtaPostOffice;
 use Throwable;
@@ -40,6 +41,7 @@ class CheckoutBranchSearchService
 
         return match ($normalized_delivery_method) {
             'nova_poshta' => $this->searchNovaPoshtaBranches($city, $normalized_keyword),
+            'nova_poshta_poshtomat' => $this->searchNovaPoshtaPoshtomats($city, $normalized_keyword),
             'ukr_poshta' => $this->searchUkrPoshtaBranches($city, $normalized_keyword),
             default => [
                 'success' => false,
@@ -93,10 +95,72 @@ class CheckoutBranchSearchService
 
             return [
                 'success' => $rows->isNotEmpty(),
-                'items' => $this->normalizeNovaPoshtaRows($rows),
+                'items' => $this->normalizeNovaPoshtaRows($rows->toArray(), 'nova_poshta'),
             ];
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[CheckoutBranchSearchService.searchNovaPoshtaBranches] query failed', [
+                'city_ref' => $city_ref,
+                'branch_keyword' => $branch_keyword,
+                'exception' => $throwable::class,
+                'message' => $throwable->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error_message' => 'Something went wrong. Please try again later.',
+                'items' => [],
+            ];
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $city
+     *
+     * @return array{
+     *     success: bool,
+     *     error_message?: string,
+     *     items: array<int, array<string, mixed>>
+     * }
+     */
+    private function searchNovaPoshtaPoshtomats(array $city, string $branch_keyword): array
+    {
+        if (is_enabled_singleton_module('NovaPoshta') === false) {
+            return [
+                'success' => false,
+                'error_message' => 'Nova Poshta module is disabled.',
+                'items' => [],
+            ];
+        }
+
+        $city_ref = Str::squish((string) Arr::get($city, 'nova_poshta_city_id', ''));
+
+        if ($city_ref === '') {
+            return [
+                'success' => false,
+                'error_message' => 'City is required for Nova Poshta poshtomat search.',
+                'items' => [],
+            ];
+        }
+
+        try {
+            $search_like = '%' . Str::lower($branch_keyword) . '%';
+
+            $rows = NovaPoshtaPoshtomat::query()
+                ->where('city_ref', $city_ref)
+                ->where(function ($query) use ($search_like): void {
+                    $query->where('description', 'like', $search_like)
+                        ->orWhereRaw('CAST(number AS CHAR) LIKE ?', [$search_like]);
+                })
+                ->orderBy('description')
+                ->limit(self::RESULT_LIMIT)
+                ->get();
+
+            return [
+                'success' => $rows->isNotEmpty(),
+                'items' => $this->normalizeNovaPoshtaRows($rows->toArray(), 'nova_poshta_poshtomat'),
+            ];
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('[CheckoutBranchSearchService.searchNovaPoshtaPoshtomats] query failed', [
                 'city_ref' => $city_ref,
                 'branch_keyword' => $branch_keyword,
                 'exception' => $throwable::class,
@@ -175,15 +239,15 @@ class CheckoutBranchSearchService
     }
 
     /**
-     * @param Collection<int, NovaPoshtaPostOffice> $rows
+     * @param  array<int, array<string, mixed>>  $rows
      *
      * @return array<int, array<string, mixed>>
      */
-    private function normalizeNovaPoshtaRows(Collection $rows): array
+    private function normalizeNovaPoshtaRows(array $rows, string $delivery_method): array
     {
         $normalized_rows = [];
 
-        foreach ($rows->toArray() as $post_office) {
+        foreach ($rows as $post_office) {
             if (! is_array($post_office)) {
                 continue;
             }
@@ -191,7 +255,7 @@ class CheckoutBranchSearchService
             $normalized_rows[] = array_filter([
                 'id' => $post_office['id'] ?? null,
                 'branch_value' => (string) ($post_office['id'] ?? ''),
-                'delivery_method' => 'nova_poshta',
+                'delivery_method' => $delivery_method,
                 'description' => $post_office['description'] ?? null,
                 'label' => trim((string) ($post_office['description'] ?? '') . (filled($post_office['number'] ?? null) ? ' #' . (string) ($post_office['number'] ?? '') : '')),
                 'ref' => $post_office['ref'] ?? null,

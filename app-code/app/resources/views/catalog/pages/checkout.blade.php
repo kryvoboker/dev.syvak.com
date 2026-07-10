@@ -21,6 +21,7 @@
         $selected_city_lng = $selected_city['city_lng'] ?? null;
         $selected_delivery_method = (string) ($checkout_selection_state['delivery_method'] ?? '');
         $selected_delivery_point = is_array($checkout_selection_state['delivery_point'] ?? null) ? $checkout_selection_state['delivery_point'] : [];
+        $selected_delivery_address = (string) ($checkout_selection_state['delivery_address'] ?? '');
         $selected_delivery_point_description = (string) ($selected_delivery_point['description'] ?? '');
         $selected_delivery_point_value = (string) (
             $selected_delivery_point['id']
@@ -177,6 +178,30 @@
                                                         </label>
 
                                                         <label class="flex items-center gap-3 border-b border-opacity-light-gray-40% py-2 text-sm text-white md:text-lg"
+                                                               data-checkout-delivery-method-option="nova_poshta_courier">
+                                                            <input class="radio radio-sm border border-white rounded-none"
+                                                                   data-checkout-delivery-method-input
+                                                                   name="delivery_method"
+                                                                   type="radio"
+                                                                   value="nova_poshta_courier"
+                                                                @checked($selected_delivery_method === 'nova_poshta_courier')>
+
+                                                            <span>{{ __('catalog/pages/category/show.checkout.delivery_methods.nova_poshta_courier') }}</span>
+                                                        </label>
+
+                                                        <label class="flex items-center gap-3 border-b border-opacity-light-gray-40% py-2 text-sm text-white md:text-lg"
+                                                               data-checkout-delivery-method-option="nova_poshta_poshtomat">
+                                                            <input class="radio radio-sm border border-white rounded-none"
+                                                                   data-checkout-delivery-method-input
+                                                                   name="delivery_method"
+                                                                   type="radio"
+                                                                   value="nova_poshta_poshtomat"
+                                                                @checked($selected_delivery_method === 'nova_poshta_poshtomat')>
+
+                                                            <span>{{ __('catalog/pages/category/show.checkout.delivery_methods.nova_poshta_poshtomat') }}</span>
+                                                        </label>
+
+                                                        <label class="flex items-center gap-3 border-b border-opacity-light-gray-40% py-2 text-sm text-white md:text-lg"
                                                                data-checkout-delivery-method-option="ukr_poshta">
                                                             <input class="radio radio-sm border border-white rounded-none"
                                                                    data-checkout-delivery-method-input
@@ -190,7 +215,30 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="flex flex-col gap-2">
+                                                <div @class([
+                                                    'flex flex-col gap-2',
+                                                    'hidden' => $selected_delivery_method !== 'nova_poshta_courier',
+                                                ])
+                                                     data-checkout-delivery-address-wrapper>
+                                                    <label class="text-sm text-white md:text-lg" for="checkout-delivery-address">
+                                                        {{ __('catalog/pages/category/show.checkout.labels.delivery_address') }}
+                                                    </label>
+
+                                                    <input class="border-0 border-b border-opacity-light-gray-40% bg-transparent px-0 py-2 text-sm text-white placeholder:text-light-gray md:text-lg"
+                                                           id="checkout-delivery-address"
+                                                           name="delivery_address"
+                                                           type="text"
+                                                           maxlength="255"
+                                                           value="{{ $selected_delivery_address }}"
+                                                           placeholder="{{ __('catalog/pages/category/show.checkout.placeholders.delivery_address') }}"
+                                                        @if($selected_delivery_method === 'nova_poshta_courier') required @endif>
+                                                </div>
+
+                                                <div @class([
+                                                    'flex flex-col gap-2',
+                                                    'hidden' => $selected_delivery_method === 'nova_poshta_courier',
+                                                ])
+                                                     data-checkout-branch-wrapper>
                                                     <label class="text-sm text-white md:text-lg" for="checkout-branch">
                                                         {{ __('catalog/pages/category/show.checkout.labels.branch') }}
                                                     </label>
