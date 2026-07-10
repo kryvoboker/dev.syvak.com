@@ -345,6 +345,14 @@ const resolveCheckoutUrl = (
     return typeof value === 'string' ? value : '';
 };
 
+const resolveBranchLabelText = (deliveryMethod: string): string => {
+    if (deliveryMethod === 'nova_poshta_poshtomat') {
+        return String(getAppParam('checkout_poshtomat_label_text') ?? '');
+    }
+
+    return String(getAppParam('checkout_branch_label_text') ?? '');
+};
+
 export const handleCheckoutDeliverySelection = (): void => {
     const citySelectElement = <HTMLSelectElement | null>findElem('#checkout-city');
     const branchSelectElement = <HTMLSelectElement | null>findElem('#checkout-branch');
@@ -352,6 +360,7 @@ export const handleCheckoutDeliverySelection = (): void => {
     const cityWarningElement = <HTMLElement | null>findElem('[data-checkout-city-warning]');
     const deliveryAddressWrapperElement = <HTMLElement | null>findElem('[data-checkout-delivery-address-wrapper]');
     const branchWrapperElement = <HTMLElement | null>findElem('[data-checkout-branch-wrapper]');
+    const branchLabelElement = <HTMLElement | null>findElem('[data-checkout-branch-label]');
     const deliveryMethodOptions = <HTMLElement[] | []>findArrayElems('[data-checkout-delivery-method-option]');
     const deliveryMethodInputs = (<HTMLInputElement[] | []>(
         findArrayElems('[data-checkout-delivery-method-input]')
@@ -438,9 +447,13 @@ export const handleCheckoutDeliverySelection = (): void => {
     };
 
     const updateBranchVisibility = (): void => {
-        const isCourierDelivery = currentDeliveryMethod === 'nova_poshta_courier';
+        const isBranchSearchAvailable = currentDeliveryMethod !== '' && currentDeliveryMethod !== 'nova_poshta_courier';
 
-        branchWrapperElement?.classList.toggle('hidden', isCourierDelivery);
+        branchWrapperElement?.classList.toggle('hidden', !isBranchSearchAvailable);
+
+        if (branchLabelElement) {
+            branchLabelElement.textContent = resolveBranchLabelText(currentDeliveryMethod);
+        }
     };
 
     const applyCitySearchResults = (cities: CheckoutCitySearchItem[]): void => {
@@ -571,12 +584,10 @@ export const handleCheckoutDeliverySelection = (): void => {
     };
 
     const updateBranchAvailability = (): void => {
-        const isCourierDelivery = currentDeliveryMethod === 'nova_poshta_courier';
-
         updateBranchVisibility();
         updateCourierAddressVisibility();
 
-        if (!currentCity || !currentDeliveryMethod || isCourierDelivery) {
+        if (!currentCity || !currentDeliveryMethod || currentDeliveryMethod === 'nova_poshta_courier') {
             currentBranch = null;
             branchChoices.removeActiveItems();
             branchChoices.clearChoices();

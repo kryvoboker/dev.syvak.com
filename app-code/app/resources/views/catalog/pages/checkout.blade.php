@@ -42,6 +42,8 @@
                     'checkout_choose_city_first_text' => __('catalog/pages/category/show.checkout.warnings.choose_city_first'),
                     'checkout_no_delivery_methods_text' => __('catalog/pages/category/show.checkout.warnings.no_delivery_methods'),
                     'checkout_no_cities_text' => __('catalog/pages/category/show.checkout.warnings.no_cities_found'),
+                    'checkout_branch_label_text' => __('catalog/pages/category/show.checkout.labels.branch'),
+                    'checkout_poshtomat_label_text' => __('catalog/pages/category/show.checkout.labels.poshtomat'),
                 ])
         };
     </script>
@@ -236,31 +238,44 @@
 
                                                 <div @class([
                                                     'flex flex-col gap-2',
-                                                    'hidden' => $selected_delivery_method === 'nova_poshta_courier',
+                                                    'hidden' => $selected_delivery_method === '' || $selected_delivery_method === 'nova_poshta_courier',
                                                 ])
                                                      data-checkout-branch-wrapper>
-                                                    <label class="text-sm text-white md:text-lg" for="checkout-branch">
-                                                        {{ __('catalog/pages/category/show.checkout.labels.branch') }}
+                                                    <label class="text-sm text-white md:text-lg" for="checkout-branch" data-checkout-branch-label>
+                                                        @if($selected_delivery_method === 'nova_poshta_poshtomat')
+                                                            {{ __('catalog/pages/category/show.checkout.labels.poshtomat') }}
+                                                        @else
+                                                            {{ __('catalog/pages/category/show.checkout.labels.branch') }}
+                                                        @endif
                                                     </label>
 
-                                                    <div class="relative flex items-center gap-2 pt-1 text-sm md:text-lg">
-                                                        <span class="absolute bottom-1 md:bottom-2 left-0 icon-[tabler--search] custom-icon"></span>
-                                                        <select class="w-full ps-7 md:ps-9 py-1 md:py-2 pe-0 border-0 border-b border-opacity-light-gray-40% bg-transparent text-sm text-white md:text-lg placeholder:text-light-gray"
-                                                                id="checkout-branch"
-                                                                name="branch"
-                                                                data-placeholder="{{ __('catalog/pages/category/show.checkout.placeholders.branch_search') }}">
-                                                            <option value="">
-                                                                {{ __('catalog/pages/category/show.checkout.placeholders.branch_search') }}
-                                                            </option>
-
-                                                            @if(filled($selected_delivery_point_description))
-                                                                <option value="{{ $selected_delivery_point_value }}"
-                                                                        selected
-                                                                        data-custom-properties="{{ e(json_encode($selected_delivery_point, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}">
-                                                                    {{ $selected_delivery_point_description }}
+                                                    <div class="flex flex-wrap items-end gap-3">
+                                                        <div class="relative flex min-w-0 flex-1 items-center gap-2 pt-1 text-sm md:text-lg">
+                                                            <span class="absolute bottom-1 left-0 icon-[tabler--search] custom-icon md:bottom-2"></span>
+                                                            <select class="w-full border-0 border-b border-opacity-light-gray-40% bg-transparent py-1 pe-0 ps-7 text-sm text-white placeholder:text-light-gray md:py-2 md:ps-9 md:text-lg"
+                                                                    id="checkout-branch"
+                                                                    name="branch"
+                                                                    data-placeholder="{{ __('catalog/pages/category/show.checkout.placeholders.branch_search') }}">
+                                                                <option value="">
+                                                                    {{ __('catalog/pages/category/show.checkout.placeholders.branch_search') }}
                                                                 </option>
-                                                            @endif
-                                                        </select>
+
+                                                                @if(filled($selected_delivery_point_description))
+                                                                    <option value="{{ $selected_delivery_point_value }}"
+                                                                            selected
+                                                                            data-custom-properties="{{ e(json_encode($selected_delivery_point, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}">
+                                                                        {{ $selected_delivery_point_description }}
+                                                                    </option>
+                                                                @endif
+                                                            </select>
+                                                        </div>
+
+                                                        <button class="dark-btn inline-flex shrink-0 items-center justify-between gap-4 border border-white px-4 py-2 text-left text-sm uppercase tracking-[0.02em] text-white md:text-base"
+                                                                id="find-on-map"
+                                                                type="button">
+                                                            <span>{{ __('catalog/pages/category/show.checkout.buttons.find_on_map') }}</span>
+                                                            <span class="icon-[tabler--map-pin] custom-icon shrink-0"></span>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -298,14 +313,7 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col gap-y-4 mt-2">
-                                    <button class="dark-btn inline-flex w-full max-w-70 items-center justify-between gap-4 border border-white px-4 py-2
-                                                   text-left text-sm uppercase tracking-[0.02em] text-white md:text-base"
-                                            type="button">
-                                        <span>{{ __('catalog/pages/category/show.checkout.buttons.find_on_map') }}</span>
-                                        <span class="icon-[tabler--map-pin] custom-icon shrink-0"></span>
-                                    </button>
-
+                                <div class="mt-2 flex flex-col gap-y-4">
                                     <div class="accordion group" data-checkout-accordion>
                                         <div class="accordion-item">
                                             <button class="accordion-toggle flex w-full items-center justify-start gap-2 text-left p-0"
