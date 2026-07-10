@@ -21,6 +21,7 @@ return [
             'email' => 'E-mail',
             'city' => 'Місто*',
             'delivery_method' => 'Спосіб доставки*',
+            'delivery_address' => 'Адреса доставки*',
             'branch' => 'Відділення*',
             'no_call' => 'Не дзвонити для підтвердження замовлення',
             'comment' => 'Додати коментар до замовлення',
@@ -31,12 +32,15 @@ return [
         'placeholders' => [
             'city_search' => 'Пошук міста',
             'delivery_methods' => 'Виберіть спосіб доставки',
+            'delivery_address' => 'Вулиця, будинок, квартира',
             'branch_search' => 'Пошук відділення',
             'payment_methods' => 'Виберіть спосіб оплати',
             'payment_placeholder' => 'Поки що немає доступних способів оплати',
         ],
         'delivery_methods' => [
             'nova_poshta' => 'Нова Пошта',
+            'nova_poshta_courier' => 'Нова Пошта (Курʼєр)',
+            'nova_poshta_poshtomat' => 'Нова Пошта (Поштомат)',
             'ukr_poshta' => 'Укрпошта',
         ],
         'buttons' => [

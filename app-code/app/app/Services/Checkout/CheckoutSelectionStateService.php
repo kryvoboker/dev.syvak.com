@@ -62,6 +62,18 @@ class CheckoutSelectionStateService
     }
 
     /**
+     * @param  mixed  $delivery_address
+     * @return array<string, mixed>
+     */
+    public function setDeliveryAddress(mixed $delivery_address): array
+    {
+        $state = $this->getState();
+        $state['delivery_address'] = $this->normalizeDeliveryAddress($delivery_address);
+
+        return $this->replaceState($state);
+    }
+
+    /**
      * @param  array<string, mixed>  $delivery_point
      * @return array<string, mixed>
      */
@@ -81,6 +93,14 @@ class CheckoutSelectionStateService
         return $this->replaceState($state);
     }
 
+    public function clearDeliveryAddress(): array
+    {
+        $state = $this->getState();
+        $state['delivery_address'] = '';
+
+        return $this->replaceState($state);
+    }
+
     public function clear(): void
     {
         $this->request->session()->forget(self::SESSION_KEY);
@@ -96,7 +116,20 @@ class CheckoutSelectionStateService
             'delivery_method' => Str::lower(Str::squish((string) Arr::get($payload, 'delivery_method', ''))),
             'city' => $this->normalizeRow((array) Arr::get($payload, 'city', [])),
             'delivery_point' => $this->normalizeRow((array) Arr::get($payload, 'delivery_point', [])),
+            'delivery_address' => $this->normalizeDeliveryAddress(Arr::get($payload, 'delivery_address', '')),
         ];
+    }
+
+    /**
+     * @param  mixed  $delivery_address
+     */
+    private function normalizeDeliveryAddress(mixed $delivery_address): string
+    {
+        if (is_array($delivery_address)) {
+            return '';
+        }
+
+        return Str::squish((string) $delivery_address);
     }
 
     /**

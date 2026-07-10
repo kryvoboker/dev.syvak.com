@@ -22,7 +22,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'delivery_method' => ['nullable', 'string', Rule::in(['nova_poshta', 'ukr_poshta'])],
+            'delivery_method' => ['nullable', 'string', Rule::in(['nova_poshta', 'nova_poshta_poshtomat', 'nova_poshta_courier', 'ukr_poshta'])],
             'city' => ['nullable', 'array'],
             'city.city_description' => ['nullable', 'string', 'max:255'],
             'city.nova_poshta_city_id' => ['nullable', 'string', 'max:255'],
@@ -30,6 +30,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
             'city.city_lat' => ['nullable', 'numeric'],
             'city.city_lng' => ['nullable', 'numeric'],
             'delivery_point' => ['nullable', 'array'],
+            'delivery_address' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -54,6 +55,13 @@ class CheckoutSelectionStoreRequest extends FormRequest
         Arr::set($normalized_data, 'city.city_lng', is_numeric($city_lng) ? (float) $city_lng : null);
 
         Arr::set($normalized_data, 'delivery_point', (array) $this->input('delivery_point', []));
+        Arr::set(
+            $normalized_data,
+            'delivery_address',
+            Str::squish((string) $this->input('delivery_address', '')) !== ''
+                ? Str::squish((string) $this->input('delivery_address', ''))
+                : null,
+        );
 
         $this->replace($normalized_data);
     }
