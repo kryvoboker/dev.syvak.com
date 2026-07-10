@@ -4,7 +4,13 @@ info:
   version: 1.0.0
   description: |
     Public checkout API for the NovaPoshta module.
-    These endpoints are consumed by storefront JavaScript and return JSON plus rendered HTML fragments.
+    The module returns raw JSON rows and server-rendered HTML fragments for storefront selectors.
+
+    Delivery point items expose the stored `schedule` payload.
+    The storefront can format that payload with `ShippingScheduleFormatter` before showing it to the user.
+servers:
+  - url: https://example.test
+    description: Local or staging environment
 tags:
   - name: NovaPoshta
     description: Checkout state and delivery point selection endpoints
@@ -13,10 +19,9 @@ paths:
     get:
       tags: [NovaPoshta]
       summary: Get checkout state from session
-      description: Returns the current NovaPoshta checkout selection stored in the user session.
       responses:
         '200':
-          description: Checkout state payload
+          description: Checkout state payload.
           content:
             application/json:
               schema:
@@ -25,10 +30,10 @@ paths:
     get:
       tags: [NovaPoshta]
       summary: Get available regions
-      description: Returns all regions stored in the local database as an HTML-ready list and a JSON array.
+      description: Returns the region directory as JSON items plus a server-rendered HTML fragment.
       responses:
         '200':
-          description: Regions list
+          description: Regions list.
           content:
             application/json:
               schema:
@@ -47,7 +52,7 @@ paths:
             minLength: 1
       responses:
         '200':
-          description: Cities list
+          description: Cities list.
           content:
             application/json:
               schema:
@@ -68,7 +73,7 @@ paths:
             minLength: 1
       responses:
         '200':
-          description: Post offices list
+          description: Post offices list.
           content:
             application/json:
               schema:
@@ -89,7 +94,7 @@ paths:
             minLength: 1
       responses:
         '200':
-          description: Poshtomats list
+          description: Poshtomats list.
           content:
             application/json:
               schema:
@@ -100,7 +105,7 @@ paths:
     post:
       tags: [NovaPoshta]
       summary: Save checkout selection state
-      description: Stores the current delivery method, region, city, and delivery point in the session.
+      description: Stores the current delivery method, region, city, delivery point, and optional courier address in the session.
       requestBody:
         required: true
         content:
@@ -109,7 +114,7 @@ paths:
               $ref: '#/components/schemas/CheckoutSelectionRequest'
       responses:
         '200':
-          description: Stored checkout state
+          description: Stored checkout state.
           content:
             application/json:
               schema:
@@ -119,12 +124,25 @@ paths:
 components:
   responses:
     ValidationError:
-      description: Validation failed
+      description: Validation failed.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ValidationErrorResponse'
   schemas:
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: true
+      required: [message]
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
     CheckoutStateResponse:
       type: object
       additionalProperties: false
@@ -137,7 +155,9 @@ components:
       additionalProperties: false
       properties:
         delivery_method:
-          $ref: '#/components/schemas/DeliveryMethod'
+          oneOf:
+            - $ref: '#/components/schemas/DeliveryMethod'
+            - type: 'null'
         region:
           oneOf:
             - $ref: '#/components/schemas/NovaPoshtaRegion'
@@ -156,6 +176,12 @@ components:
             - type: object
               additionalProperties: true
           nullable: true
+        delivery_address:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+          description: Required only for courier delivery.
     NovaPoshtaCheckoutState:
       type: object
       additionalProperties: false
@@ -180,7 +206,12 @@ components:
             - type: array
               maxItems: 0
           description: Selected delivery point, or an empty array when nothing is selected.
-      required: [delivery_method, region, city, delivery_point]
+        delivery_address:
+          type:
+            - string
+            - 'null'
+          description: Courier address saved in the session.
+      required: [delivery_method, region, city, delivery_point, delivery_address]
     DeliveryMethod:
       type: string
       description: Normalized delivery method slug stored in the session.
@@ -192,7 +223,7 @@ components:
         - ''
     NovaPoshtaRegion:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           type: integer
@@ -209,7 +240,7 @@ components:
       required: [id, ref, regions_center, description]
     NovaPoshtaCity:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           type: integer
@@ -219,7 +250,6 @@ components:
           type: string
         region:
           type: string
-          description: Upstream region reference.
         description:
           type: string
         city_name:
@@ -229,12 +259,15 @@ components:
         longitude:
           type: string
         city_id:
-          type: integer
-          nullable: true
+          type:
+            - integer
+            - 'null'
         region_description:
           type: string
-        novaPoshtaRegion:
-          $ref: '#/components/schemas/NovaPoshtaRegion'
+        schedule:
+          type:
+            - string
+            - 'null'
       required:
         - id
         - nova_poshta_region_id
@@ -247,7 +280,7 @@ components:
         - region_description
     NovaPoshtaDeliveryPoint:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           type: integer
@@ -258,31 +291,34 @@ components:
         description:
           type: string
         latitude:
-          type: string
+          type:
+            - string
+            - 'null'
         longitude:
-          type: string
+          type:
+            - string
+            - 'null'
         schedule:
           type:
             - string
             - 'null'
-          description: JSON encoded schedule string or null.
+          description: Raw schedule payload rendered in the storefront using ShippingScheduleFormatter.
         number:
           type:
             - integer
             - 'null'
         city_description:
-          type: string
+          type:
+            - string
+            - 'null'
         site_key:
           type:
             - integer
             - 'null'
-      required: [id, ref, city_ref, description, latitude, longitude, city_description]
-    NovaPoshtaPostOffice:
-      allOf:
-        - $ref: '#/components/schemas/NovaPoshtaDeliveryPoint'
-    NovaPoshtaPoshtomat:
-      allOf:
-        - $ref: '#/components/schemas/NovaPoshtaDeliveryPoint'
+        delivery_method:
+          type:
+            - string
+            - 'null'
     RegionsResponse:
       type: object
       additionalProperties: false
@@ -294,7 +330,7 @@ components:
             $ref: '#/components/schemas/NovaPoshtaRegion'
         html:
           type: string
-          description: Rendered HTML fragment for the storefront select list.
+          description: Server-rendered fragment for the storefront selector.
     CitiesResponse:
       type: object
       additionalProperties: false
@@ -306,7 +342,6 @@ components:
             $ref: '#/components/schemas/NovaPoshtaCity'
         html:
           type: string
-          description: Rendered HTML fragment for the storefront select list.
     PostOfficesResponse:
       type: object
       additionalProperties: false
@@ -315,10 +350,9 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/NovaPoshtaPostOffice'
+            $ref: '#/components/schemas/NovaPoshtaDeliveryPoint'
         html:
           type: string
-          description: Rendered HTML fragment for the storefront select list.
     PoshtomatsResponse:
       type: object
       additionalProperties: false
@@ -327,19 +361,6 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/NovaPoshtaPoshtomat'
+            $ref: '#/components/schemas/NovaPoshtaDeliveryPoint'
         html:
           type: string
-          description: Rendered HTML fragment for the storefront select list.
-    ValidationErrorResponse:
-      type: object
-      additionalProperties: true
-      properties:
-        message:
-          type: string
-        errors:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string

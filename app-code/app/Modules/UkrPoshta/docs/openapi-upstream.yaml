@@ -5,6 +5,8 @@ info:
   description: |
     Integration contract between the UkrPoshta module and the upstream Ukr Poshta address-classifier service.
     This document describes the external server, request parameters, and the data shape the module expects back.
+
+    The module prefers city-level lookup when available and falls back to district-level lookup for post office synchronization.
 servers:
   - url: https://www.ukrposhta.ua/address-classifier-ws/
     description: Ukr Poshta upstream address-classifier service
@@ -28,7 +30,7 @@ paths:
           description: Bearer token from the global UkrPoshta API key.
       responses:
         '200':
-          description: Upstream response
+          description: Upstream response.
           content:
             application/json:
               schema:
@@ -39,7 +41,7 @@ paths:
       summary: Fetch districts for a region
       description: |
         Used by the module during district synchronization.
-        The module passes region_id as a query parameter.
+        The module passes `region_id` as a query parameter.
       parameters:
         - in: header
           name: Authorization
@@ -55,7 +57,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Upstream response
+          description: Upstream response.
           content:
             application/json:
               schema:
@@ -66,7 +68,7 @@ paths:
       summary: Fetch cities for a district
       description: |
         Used by the module during city synchronization.
-        The module passes district_id as a query parameter.
+        The module passes `district_id` as a query parameter.
       parameters:
         - in: header
           name: Authorization
@@ -82,7 +84,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Upstream response
+          description: Upstream response.
           content:
             application/json:
               schema:
@@ -93,7 +95,7 @@ paths:
       summary: Fetch post offices for a district
       description: |
         Used by the module during post office synchronization.
-        The module passes pdDistrictId as a query parameter.
+        The module passes `pdDistrictId` as a query parameter and later keeps only unlocked offices in the local dataset.
       parameters:
         - in: header
           name: Authorization
@@ -109,7 +111,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Upstream response
+          description: Upstream response.
           content:
             application/json:
               schema:
@@ -269,50 +271,112 @@ components:
       additionalProperties: true
       properties:
         POSTCODE:
-          type: integer
+          type:
+            - integer
+            - string
         postcode:
-          type: integer
+          type:
+            - integer
+            - string
         PDCITY_ID:
-          type: integer
+          type:
+            - integer
+            - string
+            - 'null'
         pdcity_id:
-          type: integer
+          type:
+            - integer
+            - 'null'
         POREGION_ID:
-          type: integer
+          type:
+            - integer
+            - string
+            - 'null'
         poregion_id:
-          type: integer
+          type:
+            - integer
+            - 'null'
         DISTRICT_ID:
-          type: integer
+          type:
+            - integer
+            - string
+            - 'null'
         district_id:
-          type: integer
+          type:
+            - integer
+            - 'null'
         PDCITY_UA:
-          type: string
+          type:
+            - string
+            - 'null'
         pdcity_ua:
-          type: string
+          type:
+            - string
+            - 'null'
         CITY_UA:
-          type: string
+          type:
+            - string
+            - 'null'
         city_ua:
-          type: string
+          type:
+            - string
+            - 'null'
         REGION_UA:
-          type: string
+          type:
+            - string
+            - 'null'
         region_ua:
-          type: string
+          type:
+            - string
+            - 'null'
         DISTRICT_UA:
-          type: string
+          type:
+            - string
+            - 'null'
         district_ua:
-          type: string
+          type:
+            - string
+            - 'null'
         ADDRESS:
-          type: string
+          type:
+            - string
+            - 'null'
         address:
-          type: string
+          type:
+            - string
+            - 'null'
         POSTREET_ID:
-          type: string
+          type:
+            - string
+            - 'null'
         postreet_id:
-          type: string
+          type:
+            - string
+            - 'null'
         LOCK_CODE:
-          type: integer
+          type:
+            - integer
+            - string
+            - 'null'
         lock_code:
-          type: integer
+          type:
+            - integer
+            - 'null'
         PDCITYTYPE_UA:
-          type: string
+          type:
+            - string
+            - 'null'
         pdcitytype_ua:
+          type:
+            - string
+            - 'null'
+        description:
           type: string
+        latitude:
+          type:
+            - string
+            - 'null'
+        longitude:
+          type:
+            - string
+            - 'null'

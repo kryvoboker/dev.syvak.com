@@ -5,6 +5,8 @@ info:
   description: |
     Integration contract between the NovaPoshta module and the upstream Nova Poshta JSON API.
     This document describes the external server, request payloads, and the data shape the module expects back.
+
+    The module uses `getWarehouses` for both post offices and poshtomats and later normalizes the upstream `Schedule` field for storefront presentation.
 servers:
   - url: https://api.novaposhta.ua/v2.0/json/
     description: Nova Poshta upstream JSON API
@@ -36,7 +38,7 @@ paths:
                     Language: UA
       responses:
         '200':
-          description: Upstream response
+          description: Upstream response.
           content:
             application/json:
               schema:
@@ -67,7 +69,7 @@ paths:
                     Limit: 500
       responses:
         '200':
-          description: Upstream response
+          description: Upstream response.
           content:
             application/json:
               schema:
@@ -79,6 +81,7 @@ paths:
       description: |
         Used by the module during warehouse synchronization.
         The module requests the same upstream method for post offices and poshtomats and distinguishes rows by description.
+        The upstream `Schedule` field is preserved for later formatting in the storefront.
         Requests are paginated with Page and Limit.
       requestBody:
         required: true
@@ -99,7 +102,7 @@ paths:
                     Limit: 500
       responses:
         '200':
-          description: Upstream response
+          description: Upstream response.
           content:
             application/json:
               schema:
@@ -259,6 +262,7 @@ components:
           type:
             - integer
             - string
+            - 'null'
     WarehouseItem:
       type: object
       additionalProperties: true
@@ -269,16 +273,21 @@ components:
           type: string
         Description:
           type: string
+        Schedule:
+          type:
+            - object
+            - array
+            - 'null'
+          additionalProperties: true
+          description: Raw upstream schedule payload consumed by the module.
         Latitude:
           type: string
         Longitude:
           type: string
-        Schedule:
-          type: object
-          additionalProperties: true
         CityDescription:
           type: string
         SiteKey:
           type:
             - integer
             - string
+            - 'null'
