@@ -14,11 +14,11 @@
 
     --color-base-100: rgb(12, 18, 12);
     --color-base-200: rgb(9, 9, 11);
-    --color-base-300: rgb(9, 9, 9);
-    --color-base-content: rgb(242, 242, 242);
+    --color-base-300: rgb(12, 18, 12, .2);
+    --color-base-content: rgb(255, 251, 254);
     --color-primary: rgb(96, 93, 255);
     --color-primary-content: rgb(253, 249, 232);
-    --color-secondary: rgb(0, 150, 137);
+    --color-secondary: rgb(136, 136, 136);
     --color-secondary-content: rgb(239, 252, 249);
     --color-accent: rgb(60, 61, 252);
     --color-accent-content: rgb(255, 255, 255);
@@ -30,7 +30,7 @@
     --color-success-content: rgb(245, 252, 229);
     --color-warning: rgb(185, 75, 0);
     --color-warning-content: rgb(252, 250, 230);
-    --color-error: rgb(248, 40, 52);
+    --color-error: rgb(212, 4, 28);
     --color-error-content: rgb(254, 242, 242);
     --radius-selector: 2rem;
     --radius-field: 0.25rem;
@@ -105,11 +105,11 @@
     --text-192px: calc(192 / var(--base-font-size) * 1rem);
 
     --color-white: rgb(255, 251, 254); /* #FFFBFE */
-    --color-black: rgb(12, 18, 12); /* #0C120C */
-    --color-light-black: rgba(12, 18, 12, .2); /* #0C120C33 */
-    --color-light-gray: rgb(136, 136, 136); /* #888888 */
+    --color-black: var(--color-base-100); /* #0C120C */
+    --color-light-black: var(--color-base-300); /* #0C120C33 */
+    --color-light-gray: var(--color-secondary); /* #888888 */
     --color-opacity-light-gray-40\%: rgba(136, 136, 136, .4); /* #888888 */
-    --color-light-red: rgb(212, 4, 28); /* #D4041CFF */
+    --color-light-red: var(--color-error); /* #D4041CFF */
     --color-dark-red: rgba(212, 4, 28, .7); /* #D4041CB3 */
     --color-dark-green: rgb(0, 135, 95); /* #00875FFF */
     --spacing-0\.8em: 0.8em;
@@ -512,4 +512,36 @@
 
 .choices__inner:has(select[name=city]) + .choices__list.choices__list--dropdown {
     @apply bottom-[unset] top-full;
+}
+
+/*.leaflet-container {
+    @apply md:max-w-3/5;
+}*/
+
+.leaflet-container {
+    @apply static inset-[unset] top-[unset] left-[unset] transform-none;
+}
+
+.marker-cluster {
+    @apply flex items-center justify-center;
+
+    & > div {
+        @apply flex items-center justify-center text-black;
+    }
+}
+
+.leaflet-popup {
+    @apply max-w-82;
+}
+
+.leaflet-popup-content {
+    @apply p-2;
+}
+
+.leaflet-popup-tip-container {
+    transform: translateX(-0.75rem);
+}
+
+.leaflet-popup-tip {
+    transform: translate(.25rem, -0.5rem) rotate(135deg);
 }

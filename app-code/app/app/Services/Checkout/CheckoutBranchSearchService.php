@@ -237,7 +237,7 @@ class CheckoutBranchSearchService
                 $post_office['schedule'] = ShippingScheduleFormatter::formatSchedule(
                     $post_office['schedule'],
                     $text_day_off,
-                    $text_work_schedule
+                    $text_work_schedule,
                 );
             } else {
                 $post_office['schedule'] = null;
@@ -248,7 +248,7 @@ class CheckoutBranchSearchService
                 'branch_value'     => (string)($post_office['id'] ?? ''),
                 'delivery_method'  => $delivery_method,
                 'description'      => $post_office['description'] ?? null,
-                'label'            => trim(($post_office['description'] ?? '') . (filled($post_office['number'] ?? null) ? ' #' . ($post_office['number'] ?? '') : '')),
+                'label'            => trim($post_office['description'] ?? ''),
                 'ref'              => $post_office['ref'] ?? null,
                 'city_ref'         => $post_office['city_ref'] ?? null,
                 'city_description' => $post_office['city_description'] ?? null,
@@ -282,7 +282,7 @@ class CheckoutBranchSearchService
                 'branch_value'    => (string)($post_office['id'] ?? ''),
                 'delivery_method' => 'ukr_poshta',
                 'description'     => $post_office['description'] ?? null,
-                'label'           => trim(($post_office['description'] ?? '') . (filled($post_office['postcode'] ?? null) ? ' #' . ($post_office['postcode'] ?? '') : '')),
+                'label'           => trim($post_office['description'] ?? ''),
                 'poregion_id'     => $post_office['poregion_id'] ?? null,
                 'podistrict_id'   => $post_office['podistrict_id'] ?? null,
                 'pdcity_id'       => $post_office['pdcity_id'] ?? null,

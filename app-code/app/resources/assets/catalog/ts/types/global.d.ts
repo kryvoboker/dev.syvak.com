@@ -35,6 +35,31 @@ export interface WindowAppParams {
     checkout_choose_city_first_text?: string | null;
     checkout_no_delivery_methods_text?: string | null;
     checkout_no_cities_text?: string | null;
+    checkout_map_data?: {
+        selected_city?: {
+            city_description?: string | null;
+            nova_poshta_city_id?: string | null;
+            ukr_poshta_city_id?: number | null;
+            city_lat?: number | null;
+            city_lng?: number | null;
+        } | null;
+        selected_delivery_method?: string | null;
+        marker_icons?: {
+            nova_poshta?: string | null;
+            ukr_poshta?: string | null;
+        } | null;
+        texts?: {
+            title?: string | null;
+            search_placeholder?: string | null;
+            list_title?: string | null;
+            empty?: string | null;
+            choose_city_first?: string | null;
+            deliver_here?: string | null;
+            close?: string | null;
+            work_schedule?: string | null;
+            day_off?: string | null;
+        } | null;
+    } | null;
     checkout_selection_state?: {
         delivery_method?: string | null;
         city?: {

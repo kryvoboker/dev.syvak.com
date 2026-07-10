@@ -82,6 +82,7 @@ class CheckoutController extends Controller
                 'grand_total_formatted' => (string)($cart_data['totals']['grand_total_formatted'] ?? ''),
             ],
             'checkout_selection_state' => $checkout_selection_state,
+            'checkout_map_data' => $this->buildCheckoutMapData($checkout_selection_state),
             'checkout_city_search_url' => localized_route('localized.catalog.checkout.cities'),
             'checkout_branch_search_url' => localized_route('localized.catalog.checkout.branches'),
             'checkout_selection_save_url' => localized_route('localized.catalog.checkout.selection.store'),
@@ -221,6 +222,42 @@ class CheckoutController extends Controller
         }
 
         return [];
+    }
+
+    /**
+     * @param array<string, mixed> $checkout_selection_state
+     *
+     * @return array<string, mixed>
+     */
+    private function buildCheckoutMapData(array $checkout_selection_state): array
+    {
+        $selected_city = (array) Arr::get($checkout_selection_state, 'city', []);
+
+        return [
+            'selected_city' => [
+                'city_description' => (string) Arr::get($selected_city, 'city_description', ''),
+                'nova_poshta_city_id' => (string) Arr::get($selected_city, 'nova_poshta_city_id', ''),
+                'ukr_poshta_city_id' => (int) Arr::get($selected_city, 'ukr_poshta_city_id', 0),
+                'city_lat' => Arr::get($selected_city, 'city_lat'),
+                'city_lng' => Arr::get($selected_city, 'city_lng'),
+            ],
+            'selected_delivery_method' => (string) Arr::get($checkout_selection_state, 'delivery_method', ''),
+            'marker_icons' => [
+                'nova_poshta' => asset('storage/images/icons/nova-poshta-marker.svg'),
+                'ukr_poshta' => asset('storage/images/icons/ukr-poshta-marker.svg'),
+            ],
+            'texts' => [
+                'title' => __('catalog/pages/checkout.map.title'),
+                'search_placeholder' => __('catalog/pages/checkout.map.search_placeholder'),
+                'list_title' => __('catalog/pages/checkout.map.list_title'),
+                'empty' => __('catalog/pages/checkout.map.empty'),
+                'choose_city_first' => __('catalog/pages/checkout.warnings.choose_city_first'),
+                'deliver_here' => __('catalog/pages/checkout.map.deliver_here'),
+                'close' => __('catalog/pages/checkout.map.close'),
+                'work_schedule' => __('catalog/pages/checkout.map.work_schedule'),
+                'day_off' => __('catalog/pages/checkout.map.day_off'),
+            ],
+        ];
     }
 
     /**

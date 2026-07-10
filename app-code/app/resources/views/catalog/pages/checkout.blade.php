@@ -1,7 +1,10 @@
 @extends('catalog.layouts.main')
 
 @prepend('styles')
-    @vite(['node_modules/choices.js/src/styles/choices.scss'])
+    @vite([
+        'node_modules/choices.js/src/styles/choices.scss',
+        'resources/assets/catalog/css/libs/leaflet.css',
+    ])
 @endprepend
 
 @section('content')
@@ -39,6 +42,7 @@
                     'checkout_branch_search_url' => $checkout_branch_search_url ?? localized_route('localized.catalog.checkout.branches'),
                     'checkout_selection_save_url' => $checkout_selection_save_url ?? localized_route('localized.catalog.checkout.selection.store'),
                     'checkout_selection_state' => $checkout_selection_state,
+                    'checkout_map_data' => $checkout_map_data ?? [],
                     'checkout_choose_city_first_text' => __('catalog/pages/checkout.warnings.choose_city_first'),
                     'checkout_no_delivery_methods_text' => __('catalog/pages/checkout.warnings.no_delivery_methods'),
                     'checkout_no_cities_text' => __('catalog/pages/checkout.warnings.no_cities_found'),
@@ -233,7 +237,7 @@
                                                            maxlength="255"
                                                            value="{{ $selected_delivery_address }}"
                                                            placeholder="{{ __('catalog/pages/checkout.placeholders.delivery_address') }}"
-                                                        @if($selected_delivery_method === 'nova_poshta_courier') required @endif>
+                                                           @if($selected_delivery_method === 'nova_poshta_courier') required @endif>
                                                 </div>
 
                                                 <div @class([
@@ -271,7 +275,8 @@
                                                         </div>
 
                                                         <button class="dark-btn inline-flex shrink-0 items-center justify-between gap-4 border border-white px-4 py-2 text-left text-sm uppercase tracking-[0.02em] text-white md:text-base"
-                                                                id="find-on-map"
+                                                                id="find-on-map-btn"
+                                                                data-checkout-map-button
                                                                 type="button">
                                                             <span>{{ __('catalog/pages/checkout.buttons.find_on_map') }}</span>
                                                             <span class="icon-[tabler--map-pin] custom-icon shrink-0"></span>
