@@ -122,10 +122,9 @@ class CheckoutController extends Controller
         $locale = normalize_locale($locale);
         $validated = $request->validated();
 
-        $data = $checkout_branch_search_service->searchBranches(
+        $data = $checkout_branch_search_service->loadBranches(
             (string) ($validated['delivery_method'] ?? ''),
             (array) ($validated['city'] ?? []),
-            (string) ($validated['branch_keyword'] ?? ''),
         );
 
         return response()->json([
@@ -143,12 +142,6 @@ class CheckoutController extends Controller
         $validated = $request->validated();
         $state = $this->checkout_selection_state_service->replaceState($validated);
         $this->syncModuleStates($state);
-
-        Log::channel('daily')->info('[CheckoutController.storeSelection] checkout selection saved', [
-            'locale' => $locale,
-            'has_city' => filled(Arr::get($state, 'city.city_description', '')),
-            'delivery_method' => (string)Arr::get($state, 'delivery_method', ''),
-        ]);
 
         return response()->json([
             'success' => true,

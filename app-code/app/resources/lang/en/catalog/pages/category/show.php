@@ -38,7 +38,7 @@ return [
             'payment_placeholder' => 'No payment methods are available yet',
         ],
         'delivery_methods' => [
-            'nova_poshta' => 'Nova Poshta',
+            'nova_poshta' => 'Nova Poshta (Branch)',
             'nova_poshta_courier' => 'Nova Poshta (Courier)',
             'nova_poshta_poshtomat' => 'Nova Poshta (Poshtomat)',
             'ukr_poshta' => 'Ukr Poshta',

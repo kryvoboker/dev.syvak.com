@@ -509,3 +509,7 @@
 .choices__list[aria-expanded] {
     @apply w-full top-[unset] bottom-full;
 }
+
+.choices__inner:has(select[name=city]) + .choices__list.choices__list--dropdown {
+    @apply bottom-[unset] top-full;
+}

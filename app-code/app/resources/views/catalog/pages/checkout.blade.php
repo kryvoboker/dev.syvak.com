@@ -243,9 +243,9 @@
                                                         {{ __('catalog/pages/category/show.checkout.labels.branch') }}
                                                     </label>
 
-                                                    <div class="relative flex items-center gap-2 pt-1 text-sm text-light-gray md:text-lg">
+                                                    <div class="relative flex items-center gap-2 pt-1 text-sm md:text-lg">
                                                         <span class="absolute bottom-1 md:bottom-2 left-0 icon-[tabler--search] custom-icon"></span>
-                                                        <select class="w-full ps-7 md:ps-9 py-1 md:py-2 pe-0 border-0 border-b border-opacity-light-gray-40% bg-transparent text-sm text-white md:text-lg"
+                                                        <select class="w-full ps-7 md:ps-9 py-1 md:py-2 pe-0 border-0 border-b border-opacity-light-gray-40% bg-transparent text-sm text-white md:text-lg placeholder:text-light-gray"
                                                                 id="checkout-branch"
                                                                 name="branch"
                                                                 data-placeholder="{{ __('catalog/pages/category/show.checkout.placeholders.branch_search') }}">

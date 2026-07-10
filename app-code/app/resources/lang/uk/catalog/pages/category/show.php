@@ -38,8 +38,8 @@ return [
             'payment_placeholder' => 'Поки що немає доступних способів оплати',
         ],
         'delivery_methods' => [
-            'nova_poshta' => 'Нова Пошта',
-            'nova_poshta_courier' => 'Нова Пошта (Курʼєр)',
+            'nova_poshta' => 'Нова Пошта (Відділення)',
+            'nova_poshta_courier' => "Нова Пошта (Кур'єр)",
             'nova_poshta_poshtomat' => 'Нова Пошта (Поштомат)',
             'ukr_poshta' => 'Укрпошта',
         ],
