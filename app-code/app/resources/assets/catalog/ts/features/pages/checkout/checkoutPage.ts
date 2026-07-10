@@ -292,14 +292,9 @@ const buildSelectionPayload = (
     return payload;
 };
 
-const buildBranchSearchPayload = (
-    city: CheckoutCitySearchItem | null,
-    deliveryMethod: string,
-    branchKeyword: string,
-): FormData => {
+const buildBranchLoadPayload = (city: CheckoutCitySearchItem | null, deliveryMethod: string): FormData => {
     const payload = new FormData();
 
-    payload.append('branch_keyword', branchKeyword);
     payload.append('delivery_method', deliveryMethod);
 
     if (city) {
@@ -395,7 +390,8 @@ export const handleCheckoutDeliverySelection = (): void => {
         position: 'auto',
         renderChoiceLimit: 100,
         searchEnabled: true,
-        searchChoices: false,
+        searchChoices: true,
+        searchFields: ['label'],
         searchFloor: MIN_SEARCH_POST_OFFICE_LENGTH,
         searchPlaceholderValue: branchSelectElement.dataset.placeholder ?? '',
         searchResultLimit: 100,
@@ -414,7 +410,7 @@ export const handleCheckoutDeliverySelection = (): void => {
     ).trim();
     let latestCitySearchResults: CheckoutCitySearchItem[] = [];
     let latestBranchSearchResults: CheckoutBranchSearchItem[] = [];
-    let currentBranchSearchValue = '';
+    let currentBranchSearchStateKey = '';
 
     const hideWarning = (): void => {
         cityWarningElement?.classList.add('hidden');
@@ -493,6 +489,12 @@ export const handleCheckoutDeliverySelection = (): void => {
         if (currentBranch) {
             branchChoices.setChoiceByValue(currentBranch.branch_value);
         }
+    };
+
+    const resolveBranchSearchStateKey = (): string => {
+        const cityKey = currentCity?.nova_poshta_city_id ?? currentCity?.ukr_poshta_city_id ?? '';
+
+        return `${currentDeliveryMethod}:${String(cityKey)}`;
     };
 
     const resolveSelectedCity = (): CheckoutCitySearchItem | null => {
@@ -588,6 +590,53 @@ export const handleCheckoutDeliverySelection = (): void => {
         }
     };
 
+    const loadBranches = debounce(async (): Promise<void> => {
+        if (
+            !currentCity ||
+            currentDeliveryMethod === 'nova_poshta_courier' ||
+            !['nova_poshta', 'nova_poshta_poshtomat', 'ukr_poshta'].includes(currentDeliveryMethod) ||
+            isEmpty(branchSearchUrl)
+        ) {
+            currentBranchSearchStateKey = '';
+            latestBranchSearchResults = [];
+            branchChoices.clearChoices();
+
+            return;
+        }
+
+        const searchStateKey = resolveBranchSearchStateKey();
+
+        if (searchStateKey === currentBranchSearchStateKey && latestBranchSearchResults.length > 0) {
+            applyBranchSearchResults(latestBranchSearchResults);
+
+            return;
+        }
+
+        currentBranchSearchStateKey = searchStateKey;
+
+        try {
+            const response = await fetchFunc<CheckoutBranchSearchResponse>(
+                branchSearchUrl,
+                buildBranchLoadPayload(currentCity, currentDeliveryMethod),
+            );
+            const items = isArray(response?.items) ? response.items : [];
+
+            latestBranchSearchResults = items
+                .map((item: CheckoutBranchSearchItem): CheckoutBranchSearchItem | null => normalizeBranchPayload(item))
+                .filter((item: CheckoutBranchSearchItem | null): item is CheckoutBranchSearchItem => item !== null);
+
+            applyBranchSearchResults(latestBranchSearchResults);
+        } catch {
+            latestBranchSearchResults = [];
+
+            if (currentBranch && isBranchCompatibleWithSelection(currentBranch, currentCity, currentDeliveryMethod)) {
+                applyBranchSearchResults([currentBranch]);
+            } else {
+                branchChoices.clearChoices();
+            }
+        }
+    }, SEARCH_DEBOUNCE_MS);
+
     const saveSelection = async (): Promise<void> => {
         if (isEmpty(selectionSaveUrl)) {
             return;
@@ -646,63 +695,6 @@ export const handleCheckoutDeliverySelection = (): void => {
         }
     }, SEARCH_DEBOUNCE_MS);
 
-    const searchBranches = debounce(async (searchValue: string): Promise<void> => {
-        const normalizedValue = searchValue.trim();
-
-        if (
-            !currentCity ||
-            currentDeliveryMethod === 'nova_poshta_courier' ||
-            !['nova_poshta', 'nova_poshta_poshtomat', 'ukr_poshta'].includes(currentDeliveryMethod)
-        ) {
-            currentBranchSearchValue = '';
-            latestBranchSearchResults = [];
-            branchChoices.clearChoices();
-
-            if (!currentCity) {
-                showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
-            }
-
-            return;
-        }
-
-        if (normalizedValue.length < MIN_SEARCH_POST_OFFICE_LENGTH || isEmpty(branchSearchUrl)) {
-            currentBranchSearchValue = normalizedValue;
-            latestBranchSearchResults = [];
-
-            if (currentBranch && isBranchCompatibleWithSelection(currentBranch, currentCity, currentDeliveryMethod)) {
-                applyBranchSearchResults([currentBranch]);
-            } else {
-                branchChoices.clearChoices();
-            }
-
-            return;
-        }
-
-        currentBranchSearchValue = normalizedValue;
-
-        try {
-            const response = await fetchFunc<CheckoutBranchSearchResponse>(
-                branchSearchUrl,
-                buildBranchSearchPayload(currentCity, currentDeliveryMethod, normalizedValue),
-            );
-            const items = isArray(response?.items) ? response.items : [];
-
-            latestBranchSearchResults = items
-                .map((item: CheckoutBranchSearchItem): CheckoutBranchSearchItem | null => normalizeBranchPayload(item))
-                .filter((item: CheckoutBranchSearchItem | null): item is CheckoutBranchSearchItem => item !== null);
-
-            applyBranchSearchResults(latestBranchSearchResults);
-        } catch {
-            latestBranchSearchResults = [];
-
-            if (currentBranch && isBranchCompatibleWithSelection(currentBranch, currentCity, currentDeliveryMethod)) {
-                applyBranchSearchResults([currentBranch]);
-            } else {
-                branchChoices.clearChoices();
-            }
-        }
-    }, SEARCH_DEBOUNCE_MS);
-
     const handleCitySelectionChange = (): void => {
         currentCity = resolveSelectedCity();
 
@@ -710,7 +702,7 @@ export const handleCheckoutDeliverySelection = (): void => {
             latestCitySearchResults = [];
             latestBranchSearchResults = [];
             currentBranch = null;
-            currentBranchSearchValue = '';
+            currentBranchSearchStateKey = '';
             updateDeliveryMethodVisibility();
             branchChoices.clearChoices();
             showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
@@ -722,17 +714,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         hideWarning();
         updateDeliveryMethodVisibility();
         updateBranchAvailability();
-
-        if (currentBranchSearchValue.length >= MIN_SEARCH_POST_OFFICE_LENGTH) {
-            searchBranches(currentBranchSearchValue);
-        } else if (
-            currentBranch &&
-            isBranchCompatibleWithSelection(currentBranch, currentCity, currentDeliveryMethod)
-        ) {
-            applyBranchSearchResults([currentBranch]);
-        } else {
-            branchChoices.clearChoices();
-        }
+        loadBranches();
 
         syncSelectionToServer();
     };
@@ -760,17 +742,7 @@ export const handleCheckoutDeliverySelection = (): void => {
 
         hideWarning();
         updateBranchAvailability();
-
-        if (currentBranchSearchValue.length >= MIN_SEARCH_POST_OFFICE_LENGTH) {
-            searchBranches(currentBranchSearchValue);
-        } else if (
-            currentBranch &&
-            isBranchCompatibleWithSelection(currentBranch, currentCity, currentDeliveryMethod)
-        ) {
-            applyBranchSearchResults([currentBranch]);
-        } else {
-            branchChoices.clearChoices();
-        }
+        loadBranches();
 
         syncSelectionToServer();
     };
@@ -815,14 +787,6 @@ export const handleCheckoutDeliverySelection = (): void => {
     });
 
     citySelectElement.addEventListener('change', handleCitySelectionChange);
-    branchSelectElement.addEventListener('search', (event: Event): void => {
-        const searchEvent = event as CustomEvent<{
-            value: string;
-            resultCount: number;
-        }>;
-
-        searchBranches(searchEvent.detail?.value ?? '');
-    });
     branchSelectElement.addEventListener('change', handleBranchSelectionChange);
     deliveryAddressInputElement?.addEventListener('input', handleDeliveryAddressChange);
     deliveryAddressInputElement?.addEventListener('change', handleDeliveryAddressChange);
@@ -842,9 +806,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         updateDeliveryMethodVisibility();
         updateBranchAvailability();
         hideWarning();
-        if (currentBranch && isBranchCompatibleWithSelection(currentBranch, currentCity, currentDeliveryMethod)) {
-            applyBranchSearchResults([currentBranch]);
-        }
+        loadBranches();
         syncSelectionToServer();
     } else {
         updateDeliveryMethodVisibility();

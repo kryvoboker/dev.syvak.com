@@ -22,10 +22,9 @@ class CheckoutBranchSearchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'branch_keyword' => ['required', 'string', 'min:1', 'max:255'],
-            'delivery_method' => ['required', 'string', Rule::in(['nova_poshta', 'nova_poshta_poshtomat', 'nova_poshta_courier', 'ukr_poshta'])],
+            'delivery_method' => ['required', 'string', Rule::in(['nova_poshta', 'nova_poshta_poshtomat', 'ukr_poshta'])],
             'city' => ['required', 'array'],
-            'city.nova_poshta_city_id' => ['nullable', 'string', 'max:255', 'required_if:delivery_method,nova_poshta,nova_poshta_poshtomat,nova_poshta_courier'],
+            'city.nova_poshta_city_id' => ['nullable', 'string', 'max:255', 'required_if:delivery_method,nova_poshta,nova_poshta_poshtomat'],
             'city.ukr_poshta_city_id' => ['nullable', 'integer', 'min:1', 'required_if:delivery_method,ukr_poshta'],
         ];
     }
@@ -33,8 +32,6 @@ class CheckoutBranchSearchRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $normalized_data = $this->all();
-
-        Arr::set($normalized_data, 'branch_keyword', Str::squish((string) $this->input('branch_keyword', '')));
 
         $delivery_method = Str::lower(Str::squish((string) $this->input('delivery_method', '')));
         Arr::set($normalized_data, 'delivery_method', $delivery_method !== '' ? $delivery_method : null);

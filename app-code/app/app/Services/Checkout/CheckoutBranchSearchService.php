@@ -10,13 +10,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\NovaPoshta\Models\NovaPoshtaPoshtomat;
 use Modules\NovaPoshta\Models\NovaPoshtaPostOffice;
+use Modules\NovaPoshta\Services\ShippingScheduleFormatter;
 use Modules\UkrPoshta\Models\UkrPoshtaPostOffice;
 use Throwable;
 
 class CheckoutBranchSearchService
 {
-    private const int RESULT_LIMIT = 100;
-
     /**
      * @param array<string, mixed> $city
      *
@@ -26,27 +25,18 @@ class CheckoutBranchSearchService
      *     items: array<int, array<string, mixed>>
      * }
      */
-    public function searchBranches(string $delivery_method, array $city, string $branch_keyword): array
+    public function loadBranches(string $delivery_method, array $city): array
     {
         $normalized_delivery_method = Str::lower(Str::squish($delivery_method));
-        $normalized_keyword = Str::squish($branch_keyword);
-
-        if ($normalized_keyword === '') {
-            return [
-                'success' => false,
-                'error_message' => 'Branch search term is required.',
-                'items' => [],
-            ];
-        }
 
         return match ($normalized_delivery_method) {
-            'nova_poshta' => $this->searchNovaPoshtaBranches($city, $normalized_keyword),
-            'nova_poshta_poshtomat' => $this->searchNovaPoshtaPoshtomats($city, $normalized_keyword),
-            'ukr_poshta' => $this->searchUkrPoshtaBranches($city, $normalized_keyword),
-            default => [
-                'success' => false,
+            'nova_poshta'           => $this->loadNovaPoshtaBranches($city),
+            'nova_poshta_poshtomat' => $this->loadNovaPoshtaPoshtomats($city),
+            'ukr_poshta'            => $this->loadUkrPoshtaBranches($city),
+            default                 => [
+                'success'       => false,
                 'error_message' => 'Unsupported delivery method.',
-                'items' => [],
+                'items'         => [],
             ],
         };
     }
@@ -60,55 +50,47 @@ class CheckoutBranchSearchService
      *     items: array<int, array<string, mixed>>
      * }
      */
-    private function searchNovaPoshtaBranches(array $city, string $branch_keyword): array
+    private function loadNovaPoshtaBranches(array $city): array
     {
         if (is_enabled_singleton_module('NovaPoshta') === false) {
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'Nova Poshta module is disabled.',
-                'items' => [],
+                'items'         => [],
             ];
         }
 
-        $city_ref = Str::squish((string) Arr::get($city, 'nova_poshta_city_id', ''));
+        $city_ref = Str::squish((string)Arr::get($city, 'nova_poshta_city_id', ''));
 
         if ($city_ref === '') {
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'City is required for Nova Poshta branch search.',
-                'items' => [],
+                'items'         => [],
             ];
         }
 
         try {
-            $search_like = '%' . Str::lower($branch_keyword) . '%';
-
             $rows = NovaPoshtaPostOffice::query()
                 ->where('city_ref', $city_ref)
-                ->where(function ($query) use ($search_like): void {
-                    $query->where('description', 'like', $search_like)
-                        ->orWhereRaw('CAST(number AS CHAR) LIKE ?', [$search_like]);
-                })
                 ->orderBy('description')
-                ->limit(self::RESULT_LIMIT)
                 ->get();
 
             return [
                 'success' => $rows->isNotEmpty(),
-                'items' => $this->normalizeNovaPoshtaRows($rows->toArray(), 'nova_poshta'),
+                'items'   => $this->normalizeNovaPoshtaRows($rows->toArray(), 'nova_poshta'),
             ];
         } catch (Throwable $throwable) {
-            Log::channel('stack')->error('[CheckoutBranchSearchService.searchNovaPoshtaBranches] query failed', [
-                'city_ref' => $city_ref,
-                'branch_keyword' => $branch_keyword,
+            Log::channel('stack')->error('[CheckoutBranchSearchService.loadNovaPoshtaBranches] query failed', [
+                'city_ref'  => $city_ref,
                 'exception' => $throwable::class,
-                'message' => $throwable->getMessage(),
+                'message'   => $throwable->getMessage(),
             ]);
 
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'Something went wrong. Please try again later.',
-                'items' => [],
+                'items'         => [],
             ];
         }
     }
@@ -122,55 +104,47 @@ class CheckoutBranchSearchService
      *     items: array<int, array<string, mixed>>
      * }
      */
-    private function searchNovaPoshtaPoshtomats(array $city, string $branch_keyword): array
+    private function loadNovaPoshtaPoshtomats(array $city): array
     {
         if (is_enabled_singleton_module('NovaPoshta') === false) {
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'Nova Poshta module is disabled.',
-                'items' => [],
+                'items'         => [],
             ];
         }
 
-        $city_ref = Str::squish((string) Arr::get($city, 'nova_poshta_city_id', ''));
+        $city_ref = Str::squish((string)Arr::get($city, 'nova_poshta_city_id', ''));
 
         if ($city_ref === '') {
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'City is required for Nova Poshta poshtomat search.',
-                'items' => [],
+                'items'         => [],
             ];
         }
 
         try {
-            $search_like = '%' . Str::lower($branch_keyword) . '%';
-
             $rows = NovaPoshtaPoshtomat::query()
                 ->where('city_ref', $city_ref)
-                ->where(function ($query) use ($search_like): void {
-                    $query->where('description', 'like', $search_like)
-                        ->orWhereRaw('CAST(number AS CHAR) LIKE ?', [$search_like]);
-                })
                 ->orderBy('description')
-                ->limit(self::RESULT_LIMIT)
                 ->get();
 
             return [
                 'success' => $rows->isNotEmpty(),
-                'items' => $this->normalizeNovaPoshtaRows($rows->toArray(), 'nova_poshta_poshtomat'),
+                'items'   => $this->normalizeNovaPoshtaRows($rows->toArray(), 'nova_poshta_poshtomat'),
             ];
         } catch (Throwable $throwable) {
-            Log::channel('stack')->error('[CheckoutBranchSearchService.searchNovaPoshtaPoshtomats] query failed', [
-                'city_ref' => $city_ref,
-                'branch_keyword' => $branch_keyword,
+            Log::channel('stack')->error('[CheckoutBranchSearchService.loadNovaPoshtaPoshtomats] query failed', [
+                'city_ref'  => $city_ref,
                 'exception' => $throwable::class,
-                'message' => $throwable->getMessage(),
+                'message'   => $throwable->getMessage(),
             ]);
 
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'Something went wrong. Please try again later.',
-                'items' => [],
+                'items'         => [],
             ];
         }
     }
@@ -184,62 +158,54 @@ class CheckoutBranchSearchService
      *     items: array<int, array<string, mixed>>
      * }
      */
-    private function searchUkrPoshtaBranches(array $city, string $branch_keyword): array
+    private function loadUkrPoshtaBranches(array $city): array
     {
         if (is_enabled_singleton_module('UkrPoshta') === false) {
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'Ukr Poshta module is disabled.',
-                'items' => [],
+                'items'         => [],
             ];
         }
 
-        $city_id = (int) Arr::get($city, 'ukr_poshta_city_id', 0);
+        $city_id = (int)Arr::get($city, 'ukr_poshta_city_id', 0);
 
         if ($city_id <= 0) {
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'City is required for Ukr Poshta branch search.',
-                'items' => [],
+                'items'         => [],
             ];
         }
 
         try {
-            $search_like = '%' . Str::lower($branch_keyword) . '%';
-
             $rows = UkrPoshtaPostOffice::query()
                 ->where('pdcity_id', $city_id)
                 ->where('lock_code', 0)
-                ->where(function ($query) use ($search_like): void {
-                    $query->where('description', 'like', $search_like)
-                        ->orWhereRaw('CAST(postcode AS CHAR) LIKE ?', [$search_like]);
-                })
                 ->orderBy('postcode')
-                ->limit(self::RESULT_LIMIT)
                 ->get();
 
             return [
                 'success' => $rows->isNotEmpty(),
-                'items' => $this->normalizeUkrPoshtaRows($rows),
+                'items'   => $this->normalizeUkrPoshtaRows($rows),
             ];
         } catch (Throwable $throwable) {
-            Log::channel('stack')->error('[CheckoutBranchSearchService.searchUkrPoshtaBranches] query failed', [
-                'city_id' => $city_id,
-                'branch_keyword' => $branch_keyword,
+            Log::channel('stack')->error('[CheckoutBranchSearchService.loadUkrPoshtaBranches] query failed', [
+                'city_id'   => $city_id,
                 'exception' => $throwable::class,
-                'message' => $throwable->getMessage(),
+                'message'   => $throwable->getMessage(),
             ]);
 
             return [
-                'success' => false,
+                'success'       => false,
                 'error_message' => 'Something went wrong. Please try again later.',
-                'items' => [],
+                'items'         => [],
             ];
         }
     }
 
     /**
-     * @param  array<int, array<string, mixed>>  $rows
+     * @param array<int, array<string, mixed>> $rows
      *
      * @return array<int, array<string, mixed>>
      */
@@ -247,26 +213,51 @@ class CheckoutBranchSearchService
     {
         $normalized_rows = [];
 
+        $weekday_map = [
+            'Monday'    => __('novaposhta::storefront/checkout.texts.monday'),
+            'Tuesday'   => __('novaposhta::storefront/checkout.texts.tuesday'),
+            'Wednesday' => __('novaposhta::storefront/checkout.texts.wednesday'),
+            'Thursday'  => __('novaposhta::storefront/checkout.texts.thursday'),
+            'Friday'    => __('novaposhta::storefront/checkout.texts.friday'),
+            'Saturday'  => __('novaposhta::storefront/checkout.texts.saturday'),
+            'Sunday'    => __('novaposhta::storefront/checkout.texts.sunday'),
+        ];
+
+        $text_day_off       = __('novaposhta::storefront/checkout.texts.day_off');
+        $text_work_schedule = __('novaposhta::storefront/checkout.texts.work_schedule');
+
+        ShippingScheduleFormatter::setWeekdayMap($weekday_map);
+
         foreach ($rows as $post_office) {
-            if (! is_array($post_office)) {
+            if (!is_array($post_office)) {
                 continue;
             }
 
+            if (isset($post_office['schedule'])) {
+                $post_office['schedule'] = ShippingScheduleFormatter::formatSchedule(
+                    $post_office['schedule'],
+                    $text_day_off,
+                    $text_work_schedule
+                );
+            } else {
+                $post_office['schedule'] = null;
+            }
+
             $normalized_rows[] = array_filter([
-                'id' => $post_office['id'] ?? null,
-                'branch_value' => (string) ($post_office['id'] ?? ''),
-                'delivery_method' => $delivery_method,
-                'description' => $post_office['description'] ?? null,
-                'label' => trim((string) ($post_office['description'] ?? '') . (filled($post_office['number'] ?? null) ? ' #' . (string) ($post_office['number'] ?? '') : '')),
-                'ref' => $post_office['ref'] ?? null,
-                'city_ref' => $post_office['city_ref'] ?? null,
+                'id'               => $post_office['id'] ?? null,
+                'branch_value'     => (string)($post_office['id'] ?? ''),
+                'delivery_method'  => $delivery_method,
+                'description'      => $post_office['description'] ?? null,
+                'label'            => trim(($post_office['description'] ?? '') . (filled($post_office['number'] ?? null) ? ' #' . ($post_office['number'] ?? '') : '')),
+                'ref'              => $post_office['ref'] ?? null,
+                'city_ref'         => $post_office['city_ref'] ?? null,
                 'city_description' => $post_office['city_description'] ?? null,
-                'number' => $post_office['number'] ?? null,
-                'site_key' => $post_office['site_key'] ?? null,
-                'latitude' => $post_office['latitude'] ?? null,
-                'longitude' => $post_office['longitude'] ?? null,
-                'schedule' => $post_office['schedule'] ?? null,
-            ], static fn (mixed $value): bool => ! is_null($value) && $value !== '');
+                'number'           => $post_office['number'] ?? null,
+                'site_key'         => $post_office['site_key'] ?? null,
+                'latitude'         => $post_office['latitude'] ?? null,
+                'longitude'        => $post_office['longitude'] ?? null,
+                'schedule'         => $post_office['schedule'],
+            ], static fn(mixed $value): bool => !is_null($value) && $value !== '');
         }
 
         return $normalized_rows;
@@ -282,27 +273,27 @@ class CheckoutBranchSearchService
         $normalized_rows = [];
 
         foreach ($rows->toArray() as $post_office) {
-            if (! is_array($post_office)) {
+            if (!is_array($post_office)) {
                 continue;
             }
 
             $normalized_rows[] = array_filter([
-                'id' => $post_office['id'] ?? null,
-                'branch_value' => (string) ($post_office['id'] ?? ''),
+                'id'              => $post_office['id'] ?? null,
+                'branch_value'    => (string)($post_office['id'] ?? ''),
                 'delivery_method' => 'ukr_poshta',
-                'description' => $post_office['description'] ?? null,
-                'label' => trim((string) ($post_office['description'] ?? '') . (filled($post_office['postcode'] ?? null) ? ' #' . (string) ($post_office['postcode'] ?? '') : '')),
-                'poregion_id' => $post_office['poregion_id'] ?? null,
-                'podistrict_id' => $post_office['podistrict_id'] ?? null,
-                'pdcity_id' => $post_office['pdcity_id'] ?? null,
-                'postcode' => $post_office['postcode'] ?? null,
-                'region_ua' => $post_office['region_ua'] ?? null,
-                'district_ua' => $post_office['district_ua'] ?? null,
-                'postreet_id' => $post_office['postreet_id'] ?? null,
-                'latitude' => $post_office['latitude'] ?? null,
-                'longitude' => $post_office['longitude'] ?? null,
-                'lock_code' => $post_office['lock_code'] ?? null,
-            ], static fn (mixed $value): bool => ! is_null($value) && $value !== '');
+                'description'     => $post_office['description'] ?? null,
+                'label'           => trim(($post_office['description'] ?? '') . (filled($post_office['postcode'] ?? null) ? ' #' . ($post_office['postcode'] ?? '') : '')),
+                'poregion_id'     => $post_office['poregion_id'] ?? null,
+                'podistrict_id'   => $post_office['podistrict_id'] ?? null,
+                'pdcity_id'       => $post_office['pdcity_id'] ?? null,
+                'postcode'        => $post_office['postcode'] ?? null,
+                'region_ua'       => $post_office['region_ua'] ?? null,
+                'district_ua'     => $post_office['district_ua'] ?? null,
+                'postreet_id'     => $post_office['postreet_id'] ?? null,
+                'latitude'        => $post_office['latitude'] ?? null,
+                'longitude'       => $post_office['longitude'] ?? null,
+                'lock_code'       => $post_office['lock_code'] ?? null,
+            ], static fn(mixed $value): bool => !is_null($value) && $value !== '');
         }
 
         return $normalized_rows;
