@@ -23,6 +23,7 @@ return [
             'delivery_method' => 'Delivery method*',
             'delivery_address' => 'Delivery address*',
             'branch' => 'Branch*',
+            'poshtomat' => 'Poshtomat*',
             'no_call' => 'Do not call to confirm the order',
             'comment' => 'Add a comment to the order',
             'promo' => 'Have a promo code / certificate',
