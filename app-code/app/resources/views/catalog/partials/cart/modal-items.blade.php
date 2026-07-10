@@ -19,7 +19,7 @@
 
         @if(($cart_data['is_empty'] ?? true) === true)
             <p class="text-light-gray text-sm md:text-base">
-                {{ __('catalog/pages/category/show.texts.empty_cart') }}
+                {{ __('catalog/pages/cart.empty_cart') }}
             </p>
         @else
             <div class="mb-4 md:mb-6 flex items-center justify-between gap-3 text-sm md:text-base lg:text-base 2xl:text-lg">
