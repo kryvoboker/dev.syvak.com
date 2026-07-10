@@ -1,0 +1,365 @@
+openapi: 3.1.0
+info:
+  title: Checkout Page Contract
+  version: 1.0.0
+  description: |
+    Public checkout page contract for the storefront.
+    The page is rendered as HTML and injects `window.app_params` for the client-side checkout logic.
+
+    The checkout form currently sends selection data to:
+    - `GET /{locale}/checkout/cities`
+    - `POST /{locale}/checkout/branches`
+    - `POST /{locale}/checkout/selection`
+servers:
+  - url: https://example.test
+    description: Local or staging environment
+tags:
+  - name: Checkout
+    description: Checkout page and search endpoints
+paths:
+  /{locale}/checkout:
+    get:
+      tags: [Checkout]
+      summary: Render checkout page
+      parameters:
+        - in: path
+          name: locale
+          required: true
+          schema:
+            type: string
+          description: Active storefront locale.
+      responses:
+        '200':
+          description: Rendered checkout page.
+          content:
+            text/html:
+              schema:
+                type: string
+  /{locale}/checkout/cities:
+    get:
+      tags: [Checkout]
+      summary: Search cities by keyword
+      parameters:
+        - in: path
+          name: locale
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: city_keyword
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
+          description: Partial city name typed by the customer.
+      responses:
+        '200':
+          description: Search result list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutCitiesResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /{locale}/checkout/branches:
+    post:
+      tags: [Checkout]
+      summary: Search delivery points for the selected city and method
+      parameters:
+        - in: path
+          name: locale
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutBranchSearchRequest'
+      responses:
+        '200':
+          description: Delivery point list for the selected delivery method.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutBranchesResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /{locale}/checkout/selection:
+    post:
+      tags: [Checkout]
+      summary: Store checkout selection state
+      parameters:
+        - in: path
+          name: locale
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutSelectionStoreRequest'
+      responses:
+        '200':
+          description: Persisted checkout state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutSelectionStoreResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+components:
+  responses:
+    ValidationError:
+      description: Validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+  schemas:
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: true
+      required: [message]
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    CheckoutCitiesResponse:
+      type: object
+      additionalProperties: false
+      required: [success, locale, items]
+      properties:
+        success:
+          type: boolean
+        locale:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutCityItem'
+    CheckoutCityItem:
+      type: object
+      additionalProperties: true
+      required:
+        - city_description
+        - nova_poshta_city_id
+        - ukr_poshta_city_id
+      properties:
+        city_description:
+          type: string
+          description: Human-readable city name used by the checkout city selector.
+        nova_poshta_city_id:
+          type: string
+          description: Nova Poshta city reference.
+        ukr_poshta_city_id:
+          type: integer
+          description: Ukr Poshta city identifier.
+        city_lat:
+          type:
+            - number
+            - 'null'
+        city_lng:
+          type:
+            - number
+            - 'null'
+    CheckoutBranchSearchRequest:
+      type: object
+      additionalProperties: false
+      required: [delivery_method, city]
+      properties:
+        delivery_method:
+          type: string
+          enum:
+            - nova_poshta
+            - nova_poshta_poshtomat
+            - nova_poshta_courier
+            - ukr_poshta
+          description: Selected delivery method from the checkout page.
+        city:
+          type: object
+          additionalProperties: true
+          required: [city_description]
+          properties:
+            city_description:
+              type: string
+            nova_poshta_city_id:
+              type:
+                - string
+                - 'null'
+            ukr_poshta_city_id:
+              type:
+                - integer
+                - 'null'
+            city_lat:
+              type:
+                - number
+                - 'null'
+            city_lng:
+              type:
+                - number
+                - 'null'
+    CheckoutBranchesResponse:
+      type: object
+      additionalProperties: false
+      required: [success, locale, items]
+      properties:
+        success:
+          type: boolean
+        locale:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutDeliveryPointItem'
+    CheckoutDeliveryPointItem:
+      type: object
+      additionalProperties: true
+      required: [description]
+      properties:
+        id:
+          type:
+            - integer
+            - string
+        branch_value:
+          type:
+            - string
+            - 'null'
+          description: Value written to the select option for the branch selector.
+        label:
+          type:
+            - string
+            - 'null'
+          description: Human-readable label shown to the customer.
+        ref:
+          type:
+            - string
+            - 'null'
+        postcode:
+          type:
+            - integer
+            - string
+            - 'null'
+        description:
+          type: string
+        city_ref:
+          type:
+            - string
+            - 'null'
+        poregion_id:
+          type:
+            - integer
+            - 'null'
+        podistrict_id:
+          type:
+            - integer
+            - 'null'
+        pdcity_id:
+          type:
+            - integer
+            - 'null'
+        latitude:
+          type:
+            - string
+            - 'null'
+        longitude:
+          type:
+            - string
+            - 'null'
+        number:
+          type:
+            - integer
+            - 'null'
+        site_key:
+          type:
+            - integer
+            - 'null'
+        region_ua:
+          type:
+            - string
+            - 'null'
+        district_ua:
+          type:
+            - string
+            - 'null'
+        postreet_id:
+          type:
+            - string
+            - 'null'
+        schedule:
+          type:
+            - string
+            - 'null'
+          description: Localized schedule string for Nova Poshta points, prepared for storefront rendering by ShippingScheduleFormatter.
+        delivery_method:
+          type:
+            - string
+            - 'null'
+    CheckoutSelectionStoreRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        delivery_method:
+          oneOf:
+            - type: string
+              enum:
+                - nova_poshta
+                - nova_poshta_poshtomat
+                - nova_poshta_courier
+                - ukr_poshta
+            - type: 'null'
+        city:
+          type:
+            - object
+            - 'null'
+          additionalProperties: true
+          properties:
+            city_description:
+              type:
+                - string
+                - 'null'
+            nova_poshta_city_id:
+              type:
+                - string
+                - 'null'
+            ukr_poshta_city_id:
+              type:
+                - integer
+                - 'null'
+            city_lat:
+              type:
+                - number
+                - 'null'
+            city_lng:
+              type:
+                - number
+                - 'null'
+        delivery_point:
+          type:
+            - object
+            - 'null'
+          additionalProperties: true
+        delivery_address:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+    CheckoutSelectionStoreResponse:
+      type: object
+      additionalProperties: false
+      required: [success, state]
+      properties:
+        success:
+          type: boolean
+        state:
+          type: object
+          additionalProperties: true

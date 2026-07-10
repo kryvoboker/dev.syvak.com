@@ -4,7 +4,10 @@ info:
   version: 1.0.0
   description: |
     Public checkout API for the UkrPoshta module.
-    These endpoints are consumed by storefront JavaScript and return JSON plus rendered HTML fragments.
+    The module returns raw JSON rows and server-rendered HTML fragments for storefront selectors.
+servers:
+  - url: https://example.test
+    description: Local or staging environment
 tags:
   - name: UkrPoshta
     description: Checkout state and delivery point selection endpoints
@@ -13,10 +16,9 @@ paths:
     get:
       tags: [UkrPoshta]
       summary: Get checkout state from session
-      description: Returns the current UkrPoshta checkout selection stored in the user session.
       responses:
         '200':
-          description: Checkout state payload
+          description: Checkout state payload.
           content:
             application/json:
               schema:
@@ -25,10 +27,10 @@ paths:
     get:
       tags: [UkrPoshta]
       summary: Get available regions
-      description: Returns all regions stored in the local database as an HTML-ready list and a JSON array.
+      description: Returns the region directory as JSON items plus a server-rendered HTML fragment.
       responses:
         '200':
-          description: Regions list
+          description: Regions list.
           content:
             application/json:
               schema:
@@ -47,7 +49,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Districts list
+          description: Districts list.
           content:
             application/json:
               schema:
@@ -68,7 +70,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Cities list
+          description: Cities list.
           content:
             application/json:
               schema:
@@ -79,6 +81,9 @@ paths:
     get:
       tags: [UkrPoshta]
       summary: Get post offices for a selected district or city
+      description: |
+        The module prefers `city_id` when it is available and falls back to `district_id`.
+        Only unlocked post offices (`lock_code = 0`) are returned.
       parameters:
         - in: query
           name: district_id
@@ -96,7 +101,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Post offices list
+          description: Post offices list.
           content:
             application/json:
               schema:
@@ -116,7 +121,7 @@ paths:
               $ref: '#/components/schemas/CheckoutSelectionRequest'
       responses:
         '200':
-          description: Stored checkout state
+          description: Stored checkout state.
           content:
             application/json:
               schema:
@@ -126,12 +131,25 @@ paths:
 components:
   responses:
     ValidationError:
-      description: Validation failed
+      description: Validation failed.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ValidationErrorResponse'
   schemas:
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: true
+      required: [message]
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
     CheckoutStateResponse:
       type: object
       additionalProperties: false
@@ -144,7 +162,9 @@ components:
       additionalProperties: false
       properties:
         delivery_method:
-          $ref: '#/components/schemas/DeliveryMethod'
+          oneOf:
+            - $ref: '#/components/schemas/DeliveryMethod'
+            - type: 'null'
         region:
           oneOf:
             - $ref: '#/components/schemas/UkrPoshtaRegion'
@@ -203,14 +223,14 @@ components:
     DeliveryMethod:
       type: string
       description: Normalized delivery method slug stored in the session.
-      example: ukrposhta
+      example: post_office
       enum:
         - post_office
         - courier
         - ''
     UkrPoshtaRegion:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           type: integer
@@ -224,7 +244,7 @@ components:
       required: [id, region_id, region_ua]
     UkrPoshtaDistrict:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           type: integer
@@ -236,8 +256,6 @@ components:
           type: string
         district_ua:
           type: string
-        ukrPoshtaRegion:
-          $ref: '#/components/schemas/UkrPoshtaRegion'
       required:
         - id
         - ukr_poshta_region_id
@@ -246,7 +264,7 @@ components:
         - district_ua
     UkrPoshtaCity:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           type: integer
@@ -260,74 +278,45 @@ components:
           type: string
         city_ua:
           type: string
-        latitude:
-          type: string
-        longitude:
-          type: string
-        region_ua:
-          type: string
-        district_ua:
-          type: string
-        ukrPoshtaRegion:
-          $ref: '#/components/schemas/UkrPoshtaRegion'
-        ukrPoshtaDistrict:
-          $ref: '#/components/schemas/UkrPoshtaDistrict'
       required:
         - id
         - ukr_poshta_region_id
         - ukr_poshta_district_id
         - city_id
         - description
-        - city_ua
-        - latitude
-        - longitude
-        - region_ua
-        - district_ua
     UkrPoshtaDeliveryPoint:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           type: integer
-        poregion_id:
-          type: integer
-        podistrict_id:
-          type: integer
         pdcity_id:
-          type: integer
-        description:
-          type: string
-        latitude:
-          type: string
-        longitude:
-          type: string
-        lock_code:
-          type: integer
-        postcode:
-          type: integer
-        region_ua:
-          type: string
-        district_ua:
-          type: string
-        postreet_id:
           type:
             - integer
             - 'null'
-      required:
-        - id
-        - poregion_id
-        - podistrict_id
-        - pdcity_id
-        - description
-        - latitude
-        - longitude
-        - lock_code
-        - postcode
-        - region_ua
-        - district_ua
-    UkrPoshtaPostOffice:
-      allOf:
-        - $ref: '#/components/schemas/UkrPoshtaDeliveryPoint'
+        podistrict_id:
+          type:
+            - integer
+            - 'null'
+        description:
+          type: string
+        postcode:
+          type:
+            - integer
+            - string
+            - 'null'
+        lock_code:
+          type:
+            - integer
+            - 'null'
+        latitude:
+          type:
+            - string
+            - 'null'
+        longitude:
+          type:
+            - string
+            - 'null'
     RegionsResponse:
       type: object
       additionalProperties: false
@@ -339,7 +328,7 @@ components:
             $ref: '#/components/schemas/UkrPoshtaRegion'
         html:
           type: string
-          description: Rendered HTML fragment for the storefront select list.
+          description: Server-rendered fragment for the storefront selector.
     DistrictsResponse:
       type: object
       additionalProperties: false
@@ -351,7 +340,6 @@ components:
             $ref: '#/components/schemas/UkrPoshtaDistrict'
         html:
           type: string
-          description: Rendered HTML fragment for the storefront select list.
     CitiesResponse:
       type: object
       additionalProperties: false
@@ -363,7 +351,6 @@ components:
             $ref: '#/components/schemas/UkrPoshtaCity'
         html:
           type: string
-          description: Rendered HTML fragment for the storefront select list.
     PostOfficesResponse:
       type: object
       additionalProperties: false
@@ -372,19 +359,6 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/UkrPoshtaPostOffice'
+            $ref: '#/components/schemas/UkrPoshtaDeliveryPoint'
         html:
           type: string
-          description: Rendered HTML fragment for the storefront select list.
-    ValidationErrorResponse:
-      type: object
-      additionalProperties: true
-      properties:
-        message:
-          type: string
-        errors:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string

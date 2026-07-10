@@ -4,9 +4,12 @@ info:
   version: 1.0.0
   description: |
     Root OpenAPI entrypoint for Syvak.
-    This file only aggregates module-level API documentation.
+    This file aggregates the module-level APIs, upstream integrations, and the checkout page contract.
 
-    Module API docs:
+    Storefront and page docs:
+    - [Checkout page contract](./pages/checkout.yaml)
+
+    Module public API docs:
     - [NovaPoshta public API](../../Modules/NovaPoshta/docs/openapi.yaml)
     - [UkrPoshta public API](../../Modules/UkrPoshta/docs/openapi.yaml)
 
@@ -17,11 +20,21 @@ servers:
   - url: https://example.test
     description: Local or staging environment
 tags:
+  - name: Checkout
+    description: Checkout page and AJAX endpoints
   - name: NovaPoshta
     description: Nova Poshta checkout and sync endpoints
   - name: UkrPoshta
     description: Ukr Poshta checkout and sync endpoints
 paths:
+  /{locale}/checkout:
+    $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout'
+  /{locale}/checkout/cities:
+    $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout~1cities'
+  /{locale}/checkout/branches:
+    $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout~1branches'
+  /{locale}/checkout/selection:
+    $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout~1selection'
   /novaposhta/state:
     $ref: '../../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1state'
   /novaposhta/regions:
