@@ -172,30 +172,36 @@ const renderListItems = (
 
     listEl.innerHTML = points
         .map((point: CheckoutMapPoint): string =>
-            createListItemHtml(
-                point,
-                getText(texts.deliver_here, 'Deliver here'),
-            ),
+            createListItemHtml(point, getText(texts.deliver_here, 'Deliver here')),
         )
         .join('');
 };
 
-const bindPopupButtons = (callback: DeliveryPointClickCallback): void => {
-    findArrayElems('[data-map-delivery-point-id]').forEach((button: HTMLElement): void => {
-        button.addEventListener(
-            'click',
-            (): void => {
-                const pointId = button.dataset.mapDeliveryPointId ?? '';
+const bindDeliveryPointButtons = (modalEl: HTMLDivElement, callback: DeliveryPointClickCallback): (() => void) => {
+    const handleClick = (event: MouseEvent): void => {
+        const target = event.target as Element | null;
+        const button = target?.closest<HTMLButtonElement>('[data-map-delivery-point-id]');
 
-                if (pointId === '') {
-                    return;
-                }
+        if (!button || !modalEl.contains(button)) {
+            return;
+        }
 
-                callback(pointId);
-            },
-            { once: true },
-        );
-    });
+        const pointId = button.dataset.mapDeliveryPointId ?? '';
+
+        if (pointId === '') {
+            return;
+        }
+
+        callback(pointId);
+    };
+
+    // Leaflet can replace popup content after the popup is opened. Delegation keeps
+    // the selection handler attached to the stable modal root instead of the button.
+    modalEl.addEventListener('click', handleClick, true);
+
+    return (): void => {
+        modalEl.removeEventListener('click', handleClick, true);
+    };
 };
 
 const setActiveListItem = (pointId: string): void => {
@@ -270,20 +276,11 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
         closeModal(modalEl);
     };
 
-    const updatePopupButtonBindings = (): void => {
-        bindPopupButtons(selectPoint);
-    };
-
     params.points.forEach((point: CheckoutMapPoint): void => {
         const marker = L.marker([point.lat, point.lng], {
             title: point.title,
             icon: createMarkerIcon(point, params.markerIcons),
-        }).bindPopup(
-            buildPopupHtml(
-                point,
-                params.texts?.deliver_here ?? 'Deliver here',
-            ),
-        );
+        }).bindPopup(buildPopupHtml(point, params.texts?.deliver_here ?? 'Deliver here'));
 
         markerById.set(point.id, marker);
         clusters.addLayer(marker);
@@ -292,9 +289,9 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
             setActiveListItem(point.id);
             scrollListItemIntoView(point.id);
         });
-
-        marker.on('popupopen', updatePopupButtonBindings);
     });
+
+    bindDeliveryPointButtons(modalEl, selectPoint);
 
     map.addLayer(clusters);
 
@@ -386,8 +383,6 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
             focusPoint(point.id);
         });
     });
-
-    bindPopupButtons(selectPoint);
 
     const searchInput = <HTMLInputElement | null>findElem('[data-checkout-leaflet-search]', modalEl);
 
