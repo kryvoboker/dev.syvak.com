@@ -31,6 +31,9 @@
             ],
             "@ukr-poshta-ts/*": [
                 "./Modules/UkrPoshta/resources/assets/ts/*"
+            ],
+            "@pickup-ts/*": [
+                "./Modules/Pickup/resources/assets/ts/*"
             ]
         },
         "target": "ES2024",

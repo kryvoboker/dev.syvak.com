@@ -21,6 +21,8 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\NovaPoshta\Services\NovaPoshtaCheckoutDataService;
 use Modules\NovaPoshta\Support\NovaPoshtaCheckoutStateService;
+use Modules\Pickup\Services\PickupCheckoutDataService;
+use Modules\Pickup\Support\PickupConfig;
 use Modules\UkrPoshta\Services\UkrPoshtaCheckoutDataService;
 use Modules\UkrPoshta\Support\UkrPoshtaCheckoutStateService;
 use Throwable;
@@ -31,6 +33,7 @@ class CheckoutController extends Controller
         private readonly CheckoutSelectionStateService $checkout_selection_state_service,
         private readonly NovaPoshtaCheckoutDataService $nova_poshta_checkout_data_service,
         private readonly UkrPoshtaCheckoutDataService $ukr_poshta_checkout_data_service,
+        private readonly PickupCheckoutDataService $pickup_checkout_data_service,
         private readonly NovaPoshtaCheckoutStateService $nova_poshta_checkout_state_service,
         private readonly UkrPoshtaCheckoutStateService $ukr_poshta_checkout_state_service,
     ) {
@@ -62,6 +65,7 @@ class CheckoutController extends Controller
 
         $nova_poshta_checkout_data = $this->nova_poshta_checkout_data_service->getCheckoutData();
         $ukr_poshta_checkout_data = $this->ukr_poshta_checkout_data_service->getCheckoutData();
+        $pickup_checkout_data = $this->pickup_checkout_data_service->getCheckoutData($locale);
         $checkout_selection_state = $this->resolveCheckoutSelectionState(
             $nova_poshta_checkout_data,
             $ukr_poshta_checkout_data,
@@ -88,6 +92,7 @@ class CheckoutController extends Controller
             'checkout_selection_save_url' => localized_route('localized.catalog.checkout.selection.store'),
             'nova_poshta_checkout_data' => $nova_poshta_checkout_data,
             'ukr_poshta_checkout_data' => $ukr_poshta_checkout_data,
+            'pickup_checkout_data' => $pickup_checkout_data,
         ]);
     }
 
@@ -140,6 +145,14 @@ class CheckoutController extends Controller
     ): JsonResponse {
         $locale = normalize_locale($locale);
         $validated = $request->validated();
+
+        if (($validated['delivery_method'] ?? null) === PickupConfig::DELIVERY_METHOD) {
+            $pickup_checkout_data = $this->pickup_checkout_data_service->getCheckoutData($locale);
+            $validated['city'] = [];
+            $validated['delivery_point'] = [];
+            $validated['delivery_address'] = (string) ($pickup_checkout_data['store_address'] ?? '');
+        }
+
         $state = $this->checkout_selection_state_service->replaceState($validated);
         $this->syncModuleStates($state);
 
@@ -155,15 +168,20 @@ class CheckoutController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function resolveCheckoutSelectionState(array $nova_poshta_checkout_data, array $ukr_poshta_checkout_data): array
-    {
+    private function resolveCheckoutSelectionState(
+        array $nova_poshta_checkout_data,
+        array $ukr_poshta_checkout_data,
+    ): array {
         $current_state = $this->checkout_selection_state_service->getState();
 
         if ($current_state !== []) {
             return $current_state;
         }
 
-        $derived_state = $this->buildSelectionStateFromModuleData($nova_poshta_checkout_data, $ukr_poshta_checkout_data);
+        $derived_state = $this->buildSelectionStateFromModuleData(
+            $nova_poshta_checkout_data,
+            $ukr_poshta_checkout_data,
+        );
 
         if ($derived_state !== []) {
             $this->checkout_selection_state_service->replaceState($derived_state);
@@ -178,8 +196,10 @@ class CheckoutController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function buildSelectionStateFromModuleData(array $nova_poshta_checkout_data, array $ukr_poshta_checkout_data): array
-    {
+    private function buildSelectionStateFromModuleData(
+        array $nova_poshta_checkout_data,
+        array $ukr_poshta_checkout_data,
+    ): array {
         $nova_state = (array) Arr::get($nova_poshta_checkout_data, 'state', []);
         $nova_selected_city = (array)Arr::get($nova_poshta_checkout_data, 'selected_city', []);
         $nova_selected_delivery_point = (array)Arr::get($nova_poshta_checkout_data, 'selected_delivery_point', []);

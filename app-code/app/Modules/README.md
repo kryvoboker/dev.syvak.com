@@ -11,6 +11,16 @@ It also covers two module shapes used in the project:
 
 - [Back to project README](../../../README.md)
 
+## Module documentation
+
+Each module-specific guide is kept inside the module so that its implementation, operational rules, tests, and integration contracts stay together.
+
+| Module | Implementation guide | OpenAPI documentation |
+|---|---|---|
+| NovaPoshta | [README.md](NovaPoshta/README.md) | [openapi.yaml](NovaPoshta/docs/openapi.yaml) |
+| UkrPoshta | [README.md](UkrPoshta/README.md) | [openapi.yaml](UkrPoshta/docs/openapi.yaml) |
+| Pickup | [README.md](Pickup/README.md) | [openapi.yaml](Pickup/docs/openapi.yaml) |
+
 ## 1. Who controls module loading
 
 Main flow:

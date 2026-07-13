@@ -10,6 +10,9 @@ info:
     - `GET /{locale}/checkout/cities`
     - `POST /{locale}/checkout/branches`
     - `POST /{locale}/checkout/selection`
+
+    The singleton Pickup module can add the `pickup_store` delivery method when it is
+    enabled and configured. See [Pickup module contract](../../../Modules/Pickup/docs/openapi.yaml).
 servers:
   - url: https://example.test
     description: Local or staging environment
@@ -316,6 +319,7 @@ components:
                 - nova_poshta_poshtomat
                 - nova_poshta_courier
                 - ukr_poshta
+                - pickup_store
             - type: 'null'
         city:
           type:
@@ -353,6 +357,7 @@ components:
             - string
             - 'null'
           maxLength: 255
+          description: For pickup_store, the localized store address is submitted here; for other methods it contains the courier address or null.
     CheckoutSelectionStoreResponse:
       type: object
       additionalProperties: false

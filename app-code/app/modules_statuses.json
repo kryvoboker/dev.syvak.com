@@ -2,5 +2,6 @@
     "Carousel": true,
     "ProductsCarousel": true,
     "NovaPoshta": true,
-    "UkrPoshta": true
+    "UkrPoshta": true,
+    "Pickup": true
 }

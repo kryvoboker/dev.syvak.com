@@ -1,9 +1,22 @@
 import type { CheckoutMapPoint } from '@ts-features/pages/checkout/checkoutLeafletMap.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
-import { debounce, fetchFunc, findArrayElems, findElem, isArray, isEmpty } from '@ts-shared/lib/helpers.ts';
+import {
+    debounce,
+    fetchFunc,
+    findArrayElems,
+    findElem,
+    isArray,
+    isEmpty,
+    showErrorInConsole,
+} from '@ts-shared/lib/helpers.ts';
 import Choices, { type InputChoice, type InputGroup, type Options } from 'choices.js';
 
-type CheckoutDeliveryMethod = 'nova_poshta' | 'nova_poshta_courier' | 'nova_poshta_poshtomat' | 'ukr_poshta';
+type CheckoutDeliveryMethod =
+    | 'nova_poshta'
+    | 'nova_poshta_courier'
+    | 'nova_poshta_poshtomat'
+    | 'ukr_poshta'
+    | 'pickup_store';
 
 interface CheckoutCitySearchItem {
     city_description: string;
@@ -304,7 +317,7 @@ const buildSelectionPayload = (
         });
     }
 
-    if (deliveryMethod === 'nova_poshta_courier') {
+    if (deliveryMethod === 'nova_poshta_courier' || deliveryMethod === 'pickup_store') {
         payload.append('delivery_address', deliveryAddress);
     }
 
@@ -410,7 +423,10 @@ export const handleCheckoutDeliverySelection = (): void => {
     const deliveryAddressInputElement = <HTMLInputElement | null>findElem('#checkout-delivery-address');
     const cityWarningElement = <HTMLElement | null>findElem('[data-checkout-city-warning]');
     const deliveryAddressWrapperElement = <HTMLElement | null>findElem('[data-checkout-delivery-address-wrapper]');
+    const cityWrapperElement = <HTMLElement | null>findElem('[data-checkout-city-wrapper]');
     const branchWrapperElement = <HTMLElement | null>findElem('[data-checkout-branch-wrapper]');
+    const pickupStoreContentElement = <HTMLElement | null>findElem('[data-pickup-store-content]');
+    const pickupStoreAddressElement = <HTMLElement | null>findElem('[data-pickup-store-address]');
     const branchLabelElement = <HTMLElement | null>findElem('[data-checkout-branch-label]');
     const mapButtonElement = <HTMLButtonElement | null>findElem('#find-on-map-btn');
     const deliveryMethodOptions = <HTMLElement[] | []>findArrayElems('[data-checkout-delivery-method-option]');
@@ -422,6 +438,7 @@ export const handleCheckoutDeliverySelection = (): void => {
     const selectionSaveUrl = resolveCheckoutUrl('checkout_selection_save_url');
     const selectionState = resolveCheckoutSelectionState();
     const checkoutMapData = getAppParam<CheckoutMapData>('checkout_map_data') ?? {};
+    const initialCityRequired = citySelectElement?.required ?? false;
 
     if (!citySelectElement || !branchSelectElement) {
         return;
@@ -499,8 +516,33 @@ export const handleCheckoutDeliverySelection = (): void => {
         }
     };
 
+    const updatePickupStoreVisibility = (): void => {
+        const isPickupStoreDelivery = currentDeliveryMethod === 'pickup_store';
+
+        cityWrapperElement?.classList.toggle('hidden', isPickupStoreDelivery);
+        branchWrapperElement?.classList.toggle('hidden', isPickupStoreDelivery);
+        pickupStoreContentElement?.classList.toggle('hidden', !isPickupStoreDelivery);
+        pickupStoreContentElement?.classList.toggle('flex', isPickupStoreDelivery);
+        citySelectElement.required = isPickupStoreDelivery ? false : initialCityRequired;
+
+        if (deliveryAddressInputElement) {
+            deliveryAddressInputElement.required = currentDeliveryMethod === 'nova_poshta_courier';
+        }
+
+        if (isPickupStoreDelivery) {
+            currentDeliveryAddress = String(pickupStoreAddressElement?.textContent ?? '').trim();
+
+            if (deliveryAddressInputElement) {
+                deliveryAddressInputElement.value = currentDeliveryAddress;
+            }
+        }
+    };
+
     const updateBranchVisibility = (): void => {
-        const isBranchSearchAvailable = currentDeliveryMethod !== '' && currentDeliveryMethod !== 'nova_poshta_courier';
+        const isBranchSearchAvailable =
+            currentDeliveryMethod !== '' &&
+            currentDeliveryMethod !== 'nova_poshta_courier' &&
+            currentDeliveryMethod !== 'pickup_store';
 
         branchWrapperElement?.classList.toggle('hidden', !isBranchSearchAvailable);
 
@@ -629,7 +671,8 @@ export const handleCheckoutDeliverySelection = (): void => {
 
         deliveryMethodOptions.forEach((optionElement: HTMLElement): void => {
             const method = optionElement.dataset.checkoutDeliveryMethodOption ?? '';
-            const isVisible = !hasCity || (method === 'ukr_poshta' ? isUkrAvailable : isNovaAvailable);
+            const isVisible =
+                method === 'pickup_store' || !hasCity || (method === 'ukr_poshta' ? isUkrAvailable : isNovaAvailable);
 
             optionElement.classList.toggle('hidden', !isVisible);
 
@@ -647,6 +690,7 @@ export const handleCheckoutDeliverySelection = (): void => {
             hasCity ? (isNovaAvailable ? 'nova_poshta_courier' : null) : 'nova_poshta_courier',
             hasCity ? (isNovaAvailable ? 'nova_poshta_poshtomat' : null) : 'nova_poshta_poshtomat',
             hasCity ? (isUkrAvailable ? 'ukr_poshta' : null) : 'ukr_poshta',
+            'pickup_store',
         ].filter((method: string | null): method is CheckoutDeliveryMethod => method !== null);
 
         if (hasCity && availableMethods.length === 0) {
@@ -656,6 +700,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         }
 
         updateCourierAddressVisibility();
+        updatePickupStoreVisibility();
         updateBranchVisibility();
     };
 
@@ -663,7 +708,12 @@ export const handleCheckoutDeliverySelection = (): void => {
         updateBranchVisibility();
         updateCourierAddressVisibility();
 
-        if (!currentCity || !currentDeliveryMethod || currentDeliveryMethod === 'nova_poshta_courier') {
+        if (
+            !currentCity ||
+            !currentDeliveryMethod ||
+            currentDeliveryMethod === 'nova_poshta_courier' ||
+            currentDeliveryMethod === 'pickup_store'
+        ) {
             currentBranch = null;
             branchChoices.removeActiveItems();
             branchChoices.clearChoices();
@@ -741,6 +791,7 @@ export const handleCheckoutDeliverySelection = (): void => {
             );
         } catch {
             // Ignore transient network failures; checkout state remains usable locally.
+            showErrorInConsole('[checkout] Failed to synchronize delivery selection.');
         }
     };
 
@@ -798,7 +849,7 @@ export const handleCheckoutDeliverySelection = (): void => {
             updateDeliveryMethodVisibility();
             branchChoices.clearChoices();
             showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
-            saveSelection();
+            void saveSelection();
 
             return;
         }
@@ -819,22 +870,47 @@ export const handleCheckoutDeliverySelection = (): void => {
             return;
         }
 
+        const wasPickupStoreDelivery = currentDeliveryMethod === 'pickup_store';
         currentDeliveryMethod = target.value;
 
-        if (!currentCity) {
+        if (currentDeliveryMethod === 'pickup_store') {
+            currentCity = null;
+            currentBranch = null;
+            currentDeliveryAddress = String(pickupStoreAddressElement?.textContent ?? '').trim();
+            cityChoices.removeActiveItems();
+            cityChoices.clearChoices();
+            branchChoices.removeActiveItems();
+            branchChoices.clearChoices();
+            updateDeliveryMethodVisibility();
+            updateBranchAvailability();
+            syncSelectionToServer();
+
+            return;
+        }
+
+        if (!currentCity && !wasPickupStoreDelivery) {
             target.checked = false;
             showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
             currentDeliveryMethod = '';
             currentBranch = null;
+            currentDeliveryAddress = '';
             branchChoices.clearChoices();
             updateCourierAddressVisibility();
+            updatePickupStoreVisibility();
             updateBranchVisibility();
 
             return;
         }
 
         hideWarning();
+        currentDeliveryAddress = '';
+
+        if (deliveryAddressInputElement) {
+            deliveryAddressInputElement.value = '';
+        }
+
         updateBranchAvailability();
+        updateDeliveryMethodVisibility();
         loadBranches();
         updateMapButtonState();
 
@@ -965,6 +1041,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         updateDeliveryMethodVisibility();
         updateBranchVisibility();
         updateCourierAddressVisibility();
+        updatePickupStoreVisibility();
         updateMapButtonState();
     }
 };
