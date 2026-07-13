@@ -36,7 +36,6 @@ export interface OpenCheckoutLeafletMapParams {
     texts?: {
         title?: string | null;
         search_placeholder?: string | null;
-        list_title?: string | null;
         empty?: string | null;
         choose_city_first?: string | null;
         deliver_here?: string | null;
@@ -62,7 +61,7 @@ const MAP_ID: string = 'checkout-leaflet-map';
 const LIST_ITEM_CLASS_NAMES: string =
     'flex w-full flex-col gap-1 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition-colors hover:border-white/30 hover:bg-white/10';
 const LIST_ACTIVE_CLASS_NAMES: string[] = ['border-white/40', 'bg-white/15'];
-const DELIVERY_BUTTON_CLASS_NAMES: string = 'checkout__delivery-here-btn simple-buy-btn mt-3 w-full';
+const DELIVERY_BUTTON_CLASS_NAMES: string = 'checkout__delivery-here-btn black-btn w-full';
 
 let activeMapInstance: L.Map | null = null;
 
@@ -84,15 +83,14 @@ const getText = (value: string | null | undefined, fallback: string): string => 
 const buildModalMarkup = (params: OpenCheckoutLeafletMapParams): string => {
     const title = escapeHtml(getText(params.texts?.title, 'Choose delivery point'));
     const searchPlaceholder = escapeHtml(getText(params.texts?.search_placeholder, 'Search by name or address'));
-    const listTitle = escapeHtml(getText(params.texts?.list_title, 'Available delivery points'));
     const closeText = escapeHtml(getText(params.texts?.close, 'Close'));
 
     return [
         `<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 md:p-4" data-checkout-leaflet-modal>`,
         '<div class="absolute inset-0" data-checkout-leaflet-backdrop></div>',
-        '<div class="relative flex h-[calc(100vh-1rem)] w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0f1115] text-white shadow-2xl md:h-[calc(100vh-2rem)]">',
+        '<div class="relative flex h-[calc(100vh-1rem)] w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-base-300 text-white shadow-2xl md:h-[calc(100vh-2rem)]">',
         '<div class="flex items-start justify-between gap-4 border-b border-white/10 px-4 py-4 md:px-6">',
-        `<div class="min-w-0"><p class="text-xs uppercase tracking-[0.24em] text-white/50">${title}</p><p class="mt-1 text-sm text-white/70">${listTitle}</p></div>`,
+        `<div class="min-w-0"><p class="text-lg md:text-2xl lg:text-3xl uppercase tracking-[0.24em] text-white">${title}</p></div>`,
         `<button class="inline-flex size-10 items-center justify-center rounded-full border border-white/10 text-white transition-colors hover:bg-white/10" type="button" data-checkout-leaflet-close aria-label="${closeText}"><span class="icon-[mdi--close] size-5"></span></button>`,
         '</div>',
         '<div class="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:p-6">',
@@ -104,7 +102,6 @@ const buildModalMarkup = (params: OpenCheckoutLeafletMapParams): string => {
         '<span class="icon-[tabler--search] size-4 shrink-0"></span>',
         `<input class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-white placeholder:text-white/40 focus:outline-none" type="search" data-checkout-leaflet-search placeholder="${searchPlaceholder}">`,
         '</label>',
-        `<div class="text-sm font-medium uppercase tracking-[0.08em] text-white/70">${listTitle}</div>`,
         `<div class="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1" data-checkout-leaflet-list></div>`,
         '</div>',
         '</div>',
@@ -150,11 +147,11 @@ const createListItemHtml = (point: CheckoutMapPoint, deliverHereText: string): s
     const scheduleHtml = point.schedule ? `<div class="text-sm leading-6 text-white/75">${point.schedule}</div>` : '';
 
     return [
-        `<article class="${LIST_ITEM_CLASS_NAMES}" data-checkout-leaflet-item data-checkout-leaflet-item-id="${escapeHtml(point.id)}" data-search-text="${escapeHtml(`${point.title} ${point.description} ${point.schedule ?? ''}`.trim().toLowerCase())}">`,
-        `<button class="text-left text-xl font-semibold text-white" type="button" data-checkout-leaflet-focus>${escapeHtml(point.title)}</button>`,
+        `<div class="${LIST_ITEM_CLASS_NAMES}" data-checkout-leaflet-item data-checkout-leaflet-item-id="${escapeHtml(point.id)}" data-search-text="${escapeHtml(`${point.title} ${point.description} ${point.schedule ?? ''}`.trim().toLowerCase())}">`,
+        `<button class="text-left text-base md:text-xl font-semibold text-white" type="button" data-checkout-leaflet-focus>${escapeHtml(point.title)}</button>`,
         scheduleHtml,
         `<button class="${DELIVERY_BUTTON_CLASS_NAMES}" type="button" data-map-delivery-point-id="${escapeHtml(point.id)}">${escapeHtml(deliverHereText)}</button>`,
-        '</article>',
+        '</div>',
     ].join('');
 };
 
@@ -357,7 +354,6 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
     renderListItems(<HTMLDivElement | null>findElem('[data-checkout-leaflet-list]', modalEl), params.points, {
         title: params.texts?.title ?? 'Choose delivery point',
         search_placeholder: params.texts?.search_placeholder ?? 'Search by name or address',
-        list_title: params.texts?.list_title ?? 'Available delivery points',
         empty: params.texts?.empty ?? 'No delivery points available',
         choose_city_first: params.texts?.choose_city_first ?? 'Choose a city first',
         deliver_here: params.texts?.deliver_here ?? 'Deliver here',

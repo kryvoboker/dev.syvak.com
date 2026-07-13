@@ -253,8 +253,8 @@
                                                         @endif
                                                     </label>
 
-                                                    <div class="flex flex-wrap items-end gap-3">
-                                                        <div class="relative flex min-w-0 flex-1 items-center gap-2 pt-1 text-sm md:text-lg">
+                                                    <div class="flex flex-col lg:flex-row lg:items-end gap-3">
+                                                        <div class="relative flex min-w-0 max-lg:w-full flex-1 items-center gap-2 pt-1 text-sm md:text-lg">
                                                             <span class="absolute bottom-1 left-0 icon-[tabler--search] custom-icon md:bottom-2"></span>
                                                             <select class="w-full border-0 border-b border-opacity-light-gray-40% bg-transparent py-1 pe-0 ps-7 text-sm text-white placeholder:text-light-gray md:py-2 md:ps-9 md:text-lg"
                                                                     id="checkout-branch"
@@ -274,7 +274,7 @@
                                                             </select>
                                                         </div>
 
-                                                        <button class="dark-btn inline-flex shrink-0 items-center justify-between gap-4 border border-white px-4 py-2 text-left text-sm uppercase tracking-[0.02em] text-white md:text-base"
+                                                        <button class="dark-btn inline-flex shrink-0 items-center justify-between gap-4 max-lg:w-full border border-white px-4 py-2 text-left text-sm uppercase tracking-[0.02em] text-white md:text-base"
                                                                 id="find-on-map-btn"
                                                                 data-checkout-map-button
                                                                 type="button">

@@ -12,9 +12,9 @@
     default: true;
     color-scheme: black;
 
-    --color-base-100: rgb(12, 18, 12);
-    --color-base-200: rgb(9, 9, 11);
-    --color-base-300: rgb(12, 18, 12, .2);
+    --color-base-100: rgb(9, 9, 11);
+    --color-base-200: rgb(12, 18, 12);
+    --color-base-300: rgb(28 28 28);
     --color-base-content: rgb(255, 251, 254);
     --color-primary: rgb(96, 93, 255);
     --color-primary-content: rgb(253, 249, 232);
@@ -34,7 +34,7 @@
     --color-error-content: rgb(254, 242, 242);
     --radius-selector: 2rem;
     --radius-field: 0.25rem;
-    --radius-box: 0.5rem;
+    --radius-box: 0;
     --size-selector: 0.25rem;
     --size-field: 0.25rem;
     --border: 2px;
@@ -64,6 +64,12 @@
 
         --site-header-height: calc(76 / var(--base-font-size) * 1rem);
         --default-transition-duration: 300ms;
+
+        --choices-text-color: var(--color-base-content); /* #FFFBFE */
+        --choices-border-radius: var(--radius-box);
+        --choices-list-single-padding: 0 0.25rem; /* 0.25rem - 4px */
+        --choices-inner-padding: 0.8rem 0.5rem;
+        --choices-inner-one-padding: 0.8rem;
 
         /* 48rem - 768px */
         @media (width >= 48rem) {
@@ -104,7 +110,7 @@
     --text-150px: calc(150 / var(--base-font-size) * 1rem);
     --text-192px: calc(192 / var(--base-font-size) * 1rem);
 
-    --color-white: rgb(255, 251, 254); /* #FFFBFE */
+    --color-white: var(--color-base-content); /* #FFFBFE */
     --color-black: var(--color-base-100); /* #0C120C */
     --color-light-black: var(--color-base-300); /* #0C120C33 */
     --color-light-gray: var(--color-secondary); /* #888888 */
@@ -512,6 +518,27 @@
 
 .choices__inner:has(select[name=city]) + .choices__list.choices__list--dropdown {
     @apply bottom-[unset] top-full;
+}
+
+.choices__input,
+.choices__placeholder {
+    @apply opacity-100;
+}
+
+.choices__input::placeholder {
+    @apply text-white;
+}
+
+.search-button {
+    @apply hidden;
+}
+
+.leaflet-bar a {
+    @apply bg-base-300;
+}
+
+.leaflet-bar a.leaflet-disabled {
+    @apply bg-base-300/70;
 }
 
 /*.leaflet-container {
