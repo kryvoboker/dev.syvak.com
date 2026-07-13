@@ -12,6 +12,7 @@ info:
     Module public API docs:
     - [NovaPoshta public API](../../Modules/NovaPoshta/docs/openapi.yaml)
     - [UkrPoshta public API](../../Modules/UkrPoshta/docs/openapi.yaml)
+    - [Pickup store module contract](../../Modules/Pickup/docs/openapi.yaml)
 
     Upstream integration docs:
     - [NovaPoshta upstream integration](../../Modules/NovaPoshta/docs/openapi-upstream.yaml)
@@ -26,6 +27,8 @@ tags:
     description: Nova Poshta checkout and sync endpoints
   - name: UkrPoshta
     description: Ukr Poshta checkout and sync endpoints
+  - name: Pickup
+    description: Pickup store checkout integration
 paths:
   /{locale}/checkout:
     $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout'
@@ -59,5 +62,6 @@ paths:
     $ref: '../../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1post-offices'
   /ukrposhta/selection:
     $ref: '../../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1selection'
+  # Pickup has no standalone HTTP endpoints; its contract is embedded in checkout.
 components:
   securitySchemes: {}

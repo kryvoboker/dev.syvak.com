@@ -3,10 +3,10 @@ import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
 import { findArrayElems } from '@ts-shared/lib/helpers.ts';
 
 export const handleCheckoutPage = (): void => {
-    const accordionItems = <HTMLElement[] | []>findArrayElems('[data-checkout-page] .accordion-item');
+    const accordionElements = <HTMLElement[] | []>findArrayElems('[data-checkout-page] .accordion');
 
-    accordionItems.forEach((accordionItem: HTMLElement): void => {
-        initAccordion(accordionItem);
+    accordionElements.forEach((accordionElement: HTMLElement): void => {
+        initAccordion(accordionElement);
     });
 
     handleCheckoutDeliverySelection();

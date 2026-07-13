@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Pages;
 
+use App\Models\ApplicationSettings\Language;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Modules\Pickup\Support\PickupConfig;
 
 class CheckoutSelectionStoreRequest extends FormRequest
 {
@@ -22,7 +25,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'delivery_method' => ['nullable', 'string', Rule::in(['nova_poshta', 'nova_poshta_poshtomat', 'nova_poshta_courier', 'ukr_poshta'])],
+            'delivery_method' => ['nullable', 'string', Rule::in(['nova_poshta', 'nova_poshta_poshtomat', 'nova_poshta_courier', 'ukr_poshta', PickupConfig::DELIVERY_METHOD])],
             'city' => ['nullable', 'array'],
             'city.city_description' => ['nullable', 'string', 'max:255'],
             'city.nova_poshta_city_id' => ['nullable', 'string', 'max:255'],
@@ -64,5 +67,28 @@ class CheckoutSelectionStoreRequest extends FormRequest
         );
 
         $this->replace($normalized_data);
+    }
+
+    /**
+     * Add module-specific availability validation after the common payload rules.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator): void {
+            if ($this->input('delivery_method') !== PickupConfig::DELIVERY_METHOD) {
+                return;
+            }
+
+            $active_language_codes = (new Language())
+                ->getActiveLanguages()
+                ->pluck('code')
+                ->map(fn (mixed $code): string => strtolower((string) $code))
+                ->values()
+                ->all();
+
+            if (! is_enabled_singleton_module('Pickup') || ! app(PickupConfig::class)->isComplete($active_language_codes)) {
+                $validator->errors()->add('delivery_method', 'Pickup store delivery is not available.');
+            }
+        });
     }
 }

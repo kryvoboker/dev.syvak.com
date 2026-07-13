@@ -135,7 +135,7 @@
                                              id="checkout-delivery-collapse"
                                              role="region">
                                             <div class="flex flex-col gap-4 pb-4 md:pb-6">
-                                                <div class="flex flex-col gap-2">
+                                                <div class="flex flex-col gap-2" data-checkout-city-wrapper>
                                                     <label class="text-sm text-white md:text-lg" for="checkout-city">
                                                         {{ __('catalog/pages/checkout.labels.city') }}
                                                     </label>
@@ -218,6 +218,13 @@
 
                                                             <span>{{ __('catalog/pages/checkout.delivery_methods.ukr_poshta') }}</span>
                                                         </label>
+
+                                                        @if(($pickup_checkout_data['is_available'] ?? false) === true)
+                                                            @include('pickup::storefront.module', [
+                                                                'pickup_checkout_data' => $pickup_checkout_data,
+                                                                'selected_delivery_method' => $selected_delivery_method,
+                                                            ])
+                                                        @endif
                                                     </div>
                                                 </div>
 

@@ -1,0 +1,11 @@
+{
+    "name": "Pickup",
+    "alias": "pickup",
+    "description": "Pickup store checkout delivery module with localized address and Google Maps embed.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Pickup\\Providers\\PickupServiceProvider"
+    ],
+    "files": []
+}

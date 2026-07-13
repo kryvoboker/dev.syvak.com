@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/pickup",
+    "description": "",
+    "authors": [
+        {
+            "name": "Roman Kryvobok",
+            "email": "fast.kamaz@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Pickup\\": "app/",
+            "Modules\\Pickup\\Database\\Factories\\": "database/factories/",
+            "Modules\\Pickup\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Pickup\\Tests\\": "tests/"
+        }
+    }
+}

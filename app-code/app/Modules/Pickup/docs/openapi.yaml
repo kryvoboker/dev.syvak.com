@@ -1,0 +1,113 @@
+openapi: 3.1.0
+info:
+  title: Pickup Store Module Contract
+  version: 1.0.0
+  description: |
+    Contract for the singleton Pickup store delivery module.
+
+    Pickup does not expose standalone HTTP endpoints. It is rendered through the shared
+    checkout page contract and contributes the `pickup_store` delivery method when the
+    singleton module is enabled and every active language has a configured store address.
+
+    The module stores its settings in global configs and returns localized checkout data
+    to the application checkout controller. The optional Google Maps iframe is sanitized
+    before it is returned to the storefront.
+servers:
+  - url: https://example.test
+    description: Local or staging environment
+tags:
+  - name: Pickup
+    description: Pickup store configuration and checkout integration
+paths: {}
+x-module:
+  name: Pickup
+  alias: pickup
+  singleton: true
+  admin_page_slug: modules/pickup-store
+  checkout_page_types:
+    - checkout
+  delivery_method: pickup_store
+  global_config:
+    addresses_key: pickup_store.addresses
+    map_iframe_key: pickup_store.map_iframe
+  availability:
+    required:
+      - enabled_singleton_module
+      - at_least_one_active_language
+      - non_empty_address_for_each_active_language
+    optional:
+      - safe_google_maps_iframe
+components:
+  schemas:
+    PickupCheckoutData:
+      type: object
+      additionalProperties: false
+      required:
+        - is_available
+        - delivery_method
+        - store_address
+        - map_iframe
+      properties:
+        is_available:
+          type: boolean
+          description: Whether Pickup can be selected on checkout for the current module configuration.
+        delivery_method:
+          type: string
+          const: pickup_store
+        store_address:
+          type: string
+          description: Store address localized to the current checkout locale.
+        map_iframe:
+          type: string
+          description: Sanitized Google Maps iframe HTML, or an empty string when no map was configured.
+    PickupGlobalConfiguration:
+      type: object
+      additionalProperties: false
+      required:
+        - addresses
+      properties:
+        addresses:
+          type: object
+          minProperties: 1
+          additionalProperties:
+            type: string
+            minLength: 1
+          description: Localized store addresses keyed by active locale code.
+          examples:
+            - uk: м. Київ, вул. Хрещатик, 1
+              en: 1 Khreshchatyk Street, Kyiv
+        map_iframe:
+          type: string
+          description: Optional sanitized Google Maps embed iframe HTML.
+          default: ''
+    PickupSelectionState:
+      type: object
+      additionalProperties: false
+      required:
+        - delivery_method
+        - city
+        - delivery_point
+        - delivery_address
+      properties:
+        delivery_method:
+          type: string
+          const: pickup_store
+        city:
+          type: object
+          nullable: true
+          description: Must be null or empty for Pickup.
+        delivery_point:
+          type: object
+          nullable: true
+          description: Must be null or empty for Pickup.
+        delivery_address:
+          type: string
+          description: Localized store address copied from Pickup checkout data.
+    PickupIframeInput:
+      type: string
+      description: Optional HTML input accepted by the admin. The server persists only one safe HTTPS Google Maps embed iframe.
+      examples:
+        - <iframe src="https://www.google.com/maps/embed?pb=example"></iframe>
+  responses:
+    PickupUnavailable:
+      description: Pickup is not available because the singleton module is disabled or one or more active-language addresses are missing.
