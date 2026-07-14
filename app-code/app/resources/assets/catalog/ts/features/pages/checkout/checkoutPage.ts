@@ -50,6 +50,7 @@ interface CheckoutDeliveryPointState {
 
 interface CheckoutSelectionState {
     delivery_method?: string | null;
+    payment_method?: string | null;
     city?: CheckoutCitySearchItem | null;
     delivery_point?: CheckoutDeliveryPointState | null;
     delivery_address?: string | null;
@@ -296,6 +297,7 @@ const buildSelectionPayload = (
     deliveryMethod: string,
     deliveryPoint: CheckoutBranchSearchItem | null,
     deliveryAddress: string,
+    paymentMethod: string,
 ): FormData => {
     const payload = new FormData();
 
@@ -322,6 +324,7 @@ const buildSelectionPayload = (
     }
 
     payload.append('delivery_method', deliveryMethod);
+    payload.append('payment_method', paymentMethod);
 
     return payload;
 };
@@ -433,6 +436,9 @@ export const handleCheckoutDeliverySelection = (): void => {
     const deliveryMethodInputs = (<HTMLInputElement[] | []>(
         findArrayElems('[data-checkout-delivery-method-input]')
     )) as HTMLInputElement[];
+    const paymentMethodInputs = (<HTMLInputElement[] | []>(
+        findArrayElems('[data-checkout-payment-method-input]')
+    )) as HTMLInputElement[];
     const citySearchUrl = resolveCheckoutUrl('checkout_city_search_url');
     const branchSearchUrl = resolveCheckoutUrl('checkout_branch_search_url');
     const selectionSaveUrl = resolveCheckoutUrl('checkout_selection_save_url');
@@ -478,6 +484,7 @@ export const handleCheckoutDeliverySelection = (): void => {
     } as Partial<Options> & ChoiceSettings);
 
     let currentDeliveryMethod = String(selectionState.delivery_method ?? '').trim();
+    let currentPaymentMethod = String(selectionState.payment_method ?? '').trim();
     let currentCity = normalizeCityPayload(
         selectionState.city ?? readCityFromOption(citySelectElement.selectedOptions[0] ?? null),
     );
@@ -787,7 +794,13 @@ export const handleCheckoutDeliverySelection = (): void => {
         try {
             await fetchFunc(
                 selectionSaveUrl,
-                buildSelectionPayload(currentCity, currentDeliveryMethod, currentBranch, currentDeliveryAddress),
+                buildSelectionPayload(
+                    currentCity,
+                    currentDeliveryMethod,
+                    currentBranch,
+                    currentDeliveryAddress,
+                    currentPaymentMethod,
+                ),
             );
         } catch {
             // Ignore transient network failures; checkout state remains usable locally.
@@ -917,6 +930,17 @@ export const handleCheckoutDeliverySelection = (): void => {
         syncSelectionToServer();
     };
 
+    const handlePaymentMethodChange = (event: Event): void => {
+        const target = event.target as HTMLInputElement | null;
+
+        if (target?.type !== 'radio') {
+            return;
+        }
+
+        currentPaymentMethod = target.value.trim();
+        syncSelectionToServer();
+    };
+
     const handleDeliveryAddressChange = (): void => {
         currentDeliveryAddress = String(deliveryAddressInputElement?.value ?? '').trim();
 
@@ -1021,6 +1045,15 @@ export const handleCheckoutDeliverySelection = (): void => {
     deliveryMethodInputs.forEach((input: HTMLInputElement): void => {
         input.addEventListener('change', handleDeliveryMethodChange);
     });
+
+    paymentMethodInputs.forEach((input: HTMLInputElement): void => {
+        input.addEventListener('change', handlePaymentMethodChange);
+    });
+
+    if (!currentPaymentMethod) {
+        const checkedPaymentMethod = <HTMLInputElement | null>findElem('[data-checkout-payment-method-input]:checked');
+        currentPaymentMethod = checkedPaymentMethod?.value ?? '';
+    }
 
     bindMapButton();
 

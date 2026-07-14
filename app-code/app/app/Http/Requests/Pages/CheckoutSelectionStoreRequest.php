@@ -10,6 +10,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
 use Modules\Pickup\Support\PickupConfig;
 
 class CheckoutSelectionStoreRequest extends FormRequest
@@ -26,6 +27,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
     {
         return [
             'delivery_method' => ['nullable', 'string', Rule::in(['nova_poshta', 'nova_poshta_poshtomat', 'nova_poshta_courier', 'ukr_poshta', PickupConfig::DELIVERY_METHOD])],
+            'payment_method' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'array'],
             'city.city_description' => ['nullable', 'string', 'max:255'],
             'city.nova_poshta_city_id' => ['nullable', 'string', 'max:255'],
@@ -43,6 +45,9 @@ class CheckoutSelectionStoreRequest extends FormRequest
 
         $delivery_method = Str::lower(Str::squish((string) $this->input('delivery_method', '')));
         Arr::set($normalized_data, 'delivery_method', $delivery_method !== '' ? $delivery_method : null);
+
+        $payment_method = Str::lower(Str::squish((string) $this->input('payment_method', '')));
+        Arr::set($normalized_data, 'payment_method', $payment_method !== '' ? $payment_method : null);
 
         $city = (array) $this->input('city', []);
         Arr::set($normalized_data, 'city.city_description', Str::squish((string) Arr::get($city, 'city_description', '')));
@@ -75,6 +80,15 @@ class CheckoutSelectionStoreRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
+            $payment_method = (string) $this->input('payment_method', '');
+
+            if ($payment_method !== '' && ! $this->isAvailablePaymentMethod($payment_method)) {
+                $validator->errors()->add(
+                    'payment_method',
+                    __('paymentupondelivery::storefront/checkout.validation.payment_method_unavailable'),
+                );
+            }
+
             if ($this->input('delivery_method') !== PickupConfig::DELIVERY_METHOD) {
                 return;
             }
@@ -90,5 +104,12 @@ class CheckoutSelectionStoreRequest extends FormRequest
                 $validator->errors()->add('delivery_method', 'Pickup store delivery is not available.');
             }
         });
+    }
+
+    private function isAvailablePaymentMethod(string $payment_method): bool
+    {
+        $payment_data = app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData();
+
+        return $payment_data['is_available'] && $payment_data['payment_method'] === $payment_method;
     }
 }

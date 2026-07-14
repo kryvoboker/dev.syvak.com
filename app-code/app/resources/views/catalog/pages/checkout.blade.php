@@ -23,6 +23,7 @@
         $selected_city_lat = $selected_city['city_lat'] ?? null;
         $selected_city_lng = $selected_city['city_lng'] ?? null;
         $selected_delivery_method = (string) ($checkout_selection_state['delivery_method'] ?? '');
+        $selected_payment_method = (string) ($checkout_selection_state['payment_method'] ?? '');
         $selected_delivery_point = is_array($checkout_selection_state['delivery_point'] ?? null) ? $checkout_selection_state['delivery_point'] : [];
         $selected_delivery_address = (string) ($checkout_selection_state['delivery_address'] ?? '');
         $selected_delivery_point_description = (string) ($selected_delivery_point['description'] ?? '');
@@ -312,14 +313,30 @@
                                              id="checkout-payment-collapse"
                                              role="region">
                                             <div class="flex flex-col gap-4 pb-4 md:pb-6">
-                                                <div class="flex items-center justify-between border-b border-opacity-light-gray-40% py-2 text-sm text-light-gray md:text-lg">
-                                                    <span>{{ __('catalog/pages/checkout.placeholders.payment_methods') }}</span>
-                                                    <span class="icon-[ep--arrow-down] size-5 shrink-0"></span>
-                                                </div>
+                                                @if(($payment_upon_delivery_checkout_data['is_available'] ?? false) === true)
+                                                    <span class="text-sm text-white md:text-lg">
+                                                        {{ __('catalog/pages/checkout.placeholders.payment_methods') }}
+                                                    </span>
 
-                                                <div class="rounded-sm border border-opacity-light-gray-40% px-4 py-3 text-sm text-light-gray md:text-base">
-                                                    {{ __('catalog/pages/checkout.placeholders.payment_placeholder') }}
-                                                </div>
+                                                    <div class="flex flex-col gap-3">
+                                                        <label class="flex items-center gap-3 py-2 text-sm text-white md:text-lg"
+                                                               data-checkout-payment-method-option="{{ $payment_upon_delivery_checkout_data['payment_method'] }}">
+                                                            <input class="radio radio-sm border border-white rounded-none"
+                                                                   data-checkout-payment-method-input
+                                                                   name="payment_method"
+                                                                   type="radio"
+                                                                   value="{{ $payment_upon_delivery_checkout_data['payment_method'] }}"
+                                                                   required
+                                                                @checked($selected_payment_method === $payment_upon_delivery_checkout_data['payment_method'])>
+
+                                                            <span>{{ __($payment_upon_delivery_checkout_data['label_translation_key']) }}</span>
+                                                        </label>
+                                                    </div>
+                                                @else
+                                                    <div class="rounded-sm border border-opacity-light-gray-40% px-4 py-3 text-sm text-light-gray md:text-base">
+                                                        {{ __('catalog/pages/checkout.placeholders.payment_placeholder') }}
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

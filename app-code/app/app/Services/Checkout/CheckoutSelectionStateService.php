@@ -23,6 +23,10 @@ class CheckoutSelectionStateService
      */
     public function getState(): array
     {
+        if (! $this->request->hasSession()) {
+            return [];
+        }
+
         $state = $this->request->session()->get(self::SESSION_KEY, []);
 
         return is_array($state) ? $state : [];
@@ -36,7 +40,9 @@ class CheckoutSelectionStateService
     {
         $state = $this->normalizeState($payload);
 
-        $this->request->session()->put(self::SESSION_KEY, $state);
+        if ($this->request->hasSession()) {
+            $this->request->session()->put(self::SESSION_KEY, $state);
+        }
 
         return $state;
     }
@@ -103,7 +109,9 @@ class CheckoutSelectionStateService
 
     public function clear(): void
     {
-        $this->request->session()->forget(self::SESSION_KEY);
+        if ($this->request->hasSession()) {
+            $this->request->session()->forget(self::SESSION_KEY);
+        }
     }
 
     /**
@@ -114,6 +122,7 @@ class CheckoutSelectionStateService
     {
         return [
             'delivery_method' => Str::lower(Str::squish((string) Arr::get($payload, 'delivery_method', ''))),
+            'payment_method' => Str::lower(Str::squish((string) Arr::get($payload, 'payment_method', ''))),
             'city' => $this->normalizeRow((array) Arr::get($payload, 'city', [])),
             'delivery_point' => $this->normalizeRow((array) Arr::get($payload, 'delivery_point', [])),
             'delivery_address' => $this->normalizeDeliveryAddress(Arr::get($payload, 'delivery_address', '')),

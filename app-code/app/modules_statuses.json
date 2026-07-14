@@ -3,5 +3,6 @@
     "ProductsCarousel": true,
     "NovaPoshta": true,
     "UkrPoshta": true,
-    "Pickup": true
+    "Pickup": true,
+    "PaymentUponDelivery": true
 }

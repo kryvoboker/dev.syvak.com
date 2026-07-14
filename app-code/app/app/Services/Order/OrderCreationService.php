@@ -11,6 +11,8 @@ use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use App\Services\Order\Payment\WayForPayPaymentModule;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryPaymentModule;
+use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
 
 readonly class OrderCreationService
 {
@@ -18,6 +20,7 @@ readonly class OrderCreationService
         private CartService $cart_service,
         private WayForPayPaymentModule $way_for_pay_payment_module,
         private CashOnDeliveryPaymentModule $cash_on_delivery_payment_module,
+        private PaymentUponDeliveryPaymentModule $payment_upon_delivery_payment_module,
     ) {
     }
 
@@ -76,11 +79,14 @@ readonly class OrderCreationService
             ],
             'cart' => Arr::get($validation_result, 'cart', []),
             'locale' => $locale,
+            'payment_method' => $payment_method,
         ];
 
-        $payment_result = $payment_method === 'wayforpay'
-            ? $this->way_for_pay_payment_module->process($order_payload)
-            : $this->cash_on_delivery_payment_module->process($order_payload);
+        $payment_result = match ($payment_method) {
+            'wayforpay' => $this->way_for_pay_payment_module->process($order_payload),
+            PaymentUponDeliveryConfig::PAYMENT_METHOD => $this->payment_upon_delivery_payment_module->process($order_payload),
+            default => $this->cash_on_delivery_payment_module->process($order_payload),
+        };
 
         $is_success = (bool) Arr::get($payment_result, 'is_success', false);
 

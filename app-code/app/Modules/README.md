@@ -20,6 +20,7 @@ Each module-specific guide is kept inside the module so that its implementation,
 | NovaPoshta | [README.md](NovaPoshta/README.md) | [openapi.yaml](NovaPoshta/docs/openapi.yaml) |
 | UkrPoshta | [README.md](UkrPoshta/README.md) | [openapi.yaml](UkrPoshta/docs/openapi.yaml) |
 | Pickup | [README.md](Pickup/README.md) | [openapi.yaml](Pickup/docs/openapi.yaml) |
+| PaymentUponDelivery | [README.md](PaymentUponDelivery/README.md) |  |
 
 ## 1. Who controls module loading
 

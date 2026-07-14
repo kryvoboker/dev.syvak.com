@@ -6,11 +6,14 @@ namespace App\Http\Requests\Order;
 
 use App\Enums\CartModeEnum;
 use App\Enums\CartRequestKeyEnum;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\In;
+use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
+use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
 
 class FastOrderValidateRequest extends FormRequest
 {
@@ -29,7 +32,7 @@ class FastOrderValidateRequest extends FormRequest
             'last_name' => ['required', 'string', 'min:2', 'max:255'],
             'phone' => ['required', 'string', 'min:10', 'max:30'],
             CartRequestKeyEnum::CartMode->value => ['required', 'string', Rule::in([CartModeEnum::FastOrder->value])],
-            'payment_method' => ['nullable', 'string', 'in:cash_on_delivery,wayforpay'],
+            'payment_method' => ['nullable', 'string', 'in:cash_on_delivery,wayforpay,' . PaymentUponDeliveryConfig::PAYMENT_METHOD],
         ];
     }
 
@@ -44,5 +47,23 @@ class FastOrderValidateRequest extends FormRequest
         Arr::set($normalized_data, 'payment_method', Str::lower((string) $this->input('payment_method', 'cash_on_delivery')));
 
         $this->replace($normalized_data);
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($this->input('payment_method') !== PaymentUponDeliveryConfig::PAYMENT_METHOD) {
+                return;
+            }
+
+            $payment_data = app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData();
+
+            if (($payment_data['is_available'] ?? false) !== true) {
+                $validator->errors()->add(
+                    'payment_method',
+                    __('paymentupondelivery::storefront/checkout.validation.payment_method_unavailable'),
+                );
+            }
+        });
     }
 }
