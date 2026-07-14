@@ -10,6 +10,8 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Modules\BankTransfer\Services\BankTransferModuleDataService;
+use Modules\BankTransfer\Support\BankTransferConfig;
 use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
 use Modules\Pickup\Support\PickupConfig;
 
@@ -85,7 +87,9 @@ class CheckoutSelectionStoreRequest extends FormRequest
             if ($payment_method !== '' && ! $this->isAvailablePaymentMethod($payment_method)) {
                 $validator->errors()->add(
                     'payment_method',
-                    __('paymentupondelivery::storefront/checkout.validation.payment_method_unavailable'),
+                    $payment_method === BankTransferConfig::PAYMENT_METHOD
+                        ? __('banktransfer::storefront/checkout.validation.payment_method_unavailable')
+                        : __('paymentupondelivery::storefront/checkout.validation.payment_method_unavailable'),
                 );
             }
 
@@ -108,8 +112,11 @@ class CheckoutSelectionStoreRequest extends FormRequest
 
     private function isAvailablePaymentMethod(string $payment_method): bool
     {
-        $payment_data = app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData();
+        $payment_data = $payment_method === BankTransferConfig::PAYMENT_METHOD
+            ? app(BankTransferModuleDataService::class)->getCheckoutData(normalize_locale(null))
+            : app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData();
 
-        return $payment_data['is_available'] && $payment_data['payment_method'] === $payment_method;
+        return ($payment_data['is_available'] ?? false) === true
+            && ($payment_data['payment_method'] ?? '') === $payment_method;
     }
 }

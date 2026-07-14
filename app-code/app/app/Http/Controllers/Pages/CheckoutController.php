@@ -19,6 +19,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\BankTransfer\Services\BankTransferModuleDataService;
 use Modules\NovaPoshta\Services\NovaPoshtaCheckoutDataService;
 use Modules\NovaPoshta\Support\NovaPoshtaCheckoutStateService;
 use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
@@ -36,6 +37,7 @@ class CheckoutController extends Controller
         private readonly UkrPoshtaCheckoutDataService $ukr_poshta_checkout_data_service,
         private readonly PickupCheckoutDataService $pickup_checkout_data_service,
         private readonly PaymentUponDeliveryModuleDataService $payment_upon_delivery_module_data_service,
+        private readonly BankTransferModuleDataService $bank_transfer_module_data_service,
         private readonly NovaPoshtaCheckoutStateService $nova_poshta_checkout_state_service,
         private readonly UkrPoshtaCheckoutStateService $ukr_poshta_checkout_state_service,
     ) {
@@ -69,10 +71,14 @@ class CheckoutController extends Controller
         $ukr_poshta_checkout_data = $this->ukr_poshta_checkout_data_service->getCheckoutData();
         $pickup_checkout_data = $this->pickup_checkout_data_service->getCheckoutData($locale);
         $payment_upon_delivery_checkout_data = $this->payment_upon_delivery_module_data_service->getCheckoutData();
+        $bank_transfer_checkout_data = $this->bank_transfer_module_data_service->getCheckoutData($locale);
         $checkout_selection_state = $this->resolveCheckoutSelectionState(
             $nova_poshta_checkout_data,
             $ukr_poshta_checkout_data,
-            $payment_upon_delivery_checkout_data,
+            [
+                $payment_upon_delivery_checkout_data,
+                $bank_transfer_checkout_data,
+            ],
         );
 
         return view('catalog.pages.checkout', [
@@ -98,6 +104,7 @@ class CheckoutController extends Controller
             'ukr_poshta_checkout_data' => $ukr_poshta_checkout_data,
             'pickup_checkout_data' => $pickup_checkout_data,
             'payment_upon_delivery_checkout_data' => $payment_upon_delivery_checkout_data,
+            'bank_transfer_checkout_data' => $bank_transfer_checkout_data,
         ]);
     }
 
@@ -170,14 +177,14 @@ class CheckoutController extends Controller
     /**
      * @param array<string, mixed> $nova_poshta_checkout_data
      * @param array<string, mixed> $ukr_poshta_checkout_data
-     * @param array<string, mixed> $payment_upon_delivery_checkout_data
+     * @param array<int, array<string, mixed>> $payment_checkout_data
      *
      * @return array<string, mixed>
      */
     private function resolveCheckoutSelectionState(
         array $nova_poshta_checkout_data,
         array $ukr_poshta_checkout_data,
-        array $payment_upon_delivery_checkout_data,
+        array $payment_checkout_data,
     ): array {
         $current_state = $this->checkout_selection_state_service->getState();
 
@@ -186,7 +193,7 @@ class CheckoutController extends Controller
 
             $current_state['payment_method'] = $current_payment_method !== ''
                 ? $current_payment_method
-                : $this->resolveDefaultPaymentMethod($payment_upon_delivery_checkout_data);
+                : $this->resolveDefaultPaymentMethod($payment_checkout_data);
 
             return $current_state;
         }
@@ -196,7 +203,7 @@ class CheckoutController extends Controller
             $ukr_poshta_checkout_data,
         );
 
-        $default_payment_method = $this->resolveDefaultPaymentMethod($payment_upon_delivery_checkout_data);
+        $default_payment_method = $this->resolveDefaultPaymentMethod($payment_checkout_data);
 
         if ($derived_state === []) {
             if ($default_payment_method === '') {
@@ -214,15 +221,17 @@ class CheckoutController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $payment_upon_delivery_checkout_data
+     * @param array<int, array<string, mixed>> $payment_checkout_data
      */
-    private function resolveDefaultPaymentMethod(array $payment_upon_delivery_checkout_data): string
+    private function resolveDefaultPaymentMethod(array $payment_checkout_data): string
     {
-        if (($payment_upon_delivery_checkout_data['is_available'] ?? false) !== true) {
-            return '';
+        foreach ($payment_checkout_data as $payment_data) {
+            if (($payment_data['is_available'] ?? false) === true) {
+                return (string) ($payment_data['payment_method'] ?? '');
+            }
         }
 
-        return (string) ($payment_upon_delivery_checkout_data['payment_method'] ?? '');
+        return '';
     }
 
     /**

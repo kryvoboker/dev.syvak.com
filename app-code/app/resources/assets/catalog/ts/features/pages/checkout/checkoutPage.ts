@@ -439,6 +439,9 @@ export const handleCheckoutDeliverySelection = (): void => {
     const paymentMethodInputs = (<HTMLInputElement[] | []>(
         findArrayElems('[data-checkout-payment-method-input]')
     )) as HTMLInputElement[];
+    const paymentInformationElements = (<HTMLElement[] | []>(
+        findArrayElems('[data-checkout-payment-information]')
+    )) as HTMLElement[];
     const citySearchUrl = resolveCheckoutUrl('checkout_city_search_url');
     const branchSearchUrl = resolveCheckoutUrl('checkout_branch_search_url');
     const selectionSaveUrl = resolveCheckoutUrl('checkout_selection_save_url');
@@ -497,6 +500,15 @@ export const handleCheckoutDeliverySelection = (): void => {
     let latestCitySearchResults: CheckoutCitySearchItem[] = [];
     let latestBranchSearchResults: CheckoutBranchSearchItem[] = [];
     let currentBranchSearchStateKey = '';
+
+    const updatePaymentInformationVisibility = (): void => {
+        paymentInformationElements.forEach((element: HTMLElement): void => {
+            const isVisible = element.dataset.checkoutPaymentInformation === currentPaymentMethod;
+
+            element.classList.toggle('hidden', !isVisible);
+            element.setAttribute('aria-hidden', String(!isVisible));
+        });
+    };
 
     const hideWarning = (): void => {
         cityWarningElement?.classList.add('hidden');
@@ -938,6 +950,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         }
 
         currentPaymentMethod = target.value.trim();
+        updatePaymentInformationVisibility();
         syncSelectionToServer();
     };
 
@@ -1054,6 +1067,8 @@ export const handleCheckoutDeliverySelection = (): void => {
         const checkedPaymentMethod = <HTMLInputElement | null>findElem('[data-checkout-payment-method-input]:checked');
         currentPaymentMethod = checkedPaymentMethod?.value ?? '';
     }
+
+    updatePaymentInformationVisibility();
 
     bindMapButton();
 
