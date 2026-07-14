@@ -1,0 +1,11 @@
+{
+    "name": "WayForPay",
+    "alias": "wayforpay",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\WayForPay\\Providers\\WayForPayServiceProvider"
+    ],
+    "files": []
+}

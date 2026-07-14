@@ -15,8 +15,11 @@ use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ProductController;
 use App\Http\Controllers\Pages\SearchProductsController;
 use App\Http\Controllers\Pages\ThankYouController;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
+use Modules\WayForPay\Http\Controllers\WayForPayCallbackController;
+use Modules\WayForPay\Http\Controllers\WayForPayReturnController;
 
 Route::redirect('/', '/' . app()->getLocale());
 
@@ -64,6 +67,14 @@ Route::prefix('{' . $locale_key . '}')
 
         Route::post('/order-confirm', [OrderConfirmController::class, 'storeFastOrder'])->name('order-confirm.store');
         Route::post('/order-validate', [OrderConfirmController::class, 'validateFastOrder'])->name('order-confirm.validate');
+        Route::post('/order-confirm/simple', [OrderConfirmController::class, 'storeSimpleOrder'])->name('order-confirm.simple.store');
+        Route::post('/order-validate/simple', [OrderConfirmController::class, 'validateSimpleOrder'])->name('order-confirm.simple.validate');
+        Route::post('/wayforpay/callback', WayForPayCallbackController::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
+            ->name('wayforpay.callback');
+        Route::match(['get', 'post'], '/wayforpay/return', WayForPayReturnController::class)
+            ->withoutMiddleware(PreventRequestForgery::class)
+            ->name('wayforpay.return');
 
         Route::get('/thank-you', [ThankYouController::class, 'index'])->name('thank-you.index');
         Route::get('/failure', [FailureOrderController::class, 'index'])->name('failure-order.index');

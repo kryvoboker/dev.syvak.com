@@ -43,6 +43,11 @@
                     'checkout_branch_search_url' => $checkout_branch_search_url ?? localized_route('localized.catalog.checkout.branches'),
                     'checkout_selection_save_url' => $checkout_selection_save_url ?? localized_route('localized.catalog.checkout.selection.store'),
                     'checkout_selection_state' => $checkout_selection_state,
+                    'order_validate_url' => $order_validate_url ?? localized_route('localized.catalog.order-confirm.simple.validate'),
+                    'order_store_url' => $order_store_url ?? localized_route('localized.catalog.order-confirm.simple.store'),
+                    'wayforpay_widget_script_url' => $wayforpay_widget_script_url ?? '',
+                    'wayforpay_payment_method' => $wayforpay_payment_method ?? '',
+                    'wayforpay_redirect_method' => $wayforpay_redirect_method ?? '',
                     'checkout_map_data' => $checkout_map_data ?? [],
                     'checkout_choose_city_first_text' => __('catalog/pages/checkout.warnings.choose_city_first'),
                     'checkout_no_delivery_methods_text' => __('catalog/pages/checkout.warnings.no_delivery_methods'),
@@ -70,7 +75,7 @@
 
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1fr)_1fr] lg:grid-cols-[minmax(0,1fr)_0.8fr] xl:grid-cols-[minmax(0,1fr)_0.7fr] 2xl:gap-10">
                     <div class="flex flex-col gap-1">
-                        <form class="flex flex-col gap-1" action="#" method="post" novalidate>
+                        <form class="flex flex-col gap-1" action="#" method="post" data-checkout-form novalidate>
                             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-5">
                                 <div class="flex flex-col gap-2">
                                     <label class="text-sm md:text-lg text-white" for="checkout-first-name">
@@ -321,6 +326,9 @@
                                                         ($bank_transfer_checkout_data['is_available'] ?? false) === true
                                                             ? $bank_transfer_checkout_data
                                                             : null,
+                                                        ($wayforpay_checkout_data['is_available'] ?? false) === true
+                                                            ? $wayforpay_checkout_data
+                                                            : null,
                                                     ]));
                                                 @endphp
 
@@ -435,8 +443,11 @@
                                         {{ __('catalog/pages/checkout.texts.consent') }}
                                     </p>
 
+                                    <div class="hidden text-sm text-light-red md:text-base" data-checkout-order-error role="alert"></div>
+
                                     <button class="white-btn default-btn w-full md:max-w-sm text-sm md:text-lg"
-                                            type="button">
+                                            data-checkout-submit
+                                            type="submit">
                                         {{ __('catalog/pages/checkout.buttons.submit') }}
                                     </button>
                                 </div>

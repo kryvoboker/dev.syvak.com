@@ -26,6 +26,7 @@ All technical documentation must be written in English, including project README
 | Pickup | [README.md](Pickup/README.md) | [openapi.yaml](Pickup/docs/openapi.yaml) |
 | PaymentUponDelivery | [README.md](PaymentUponDelivery/README.md) |  |
 | BankTransfer | [README.md](BankTransfer/README.md) |  |
+| WayForPay | [README.md](WayForPay/README.md) | [openapi.yaml](WayForPay/docs/openapi.yaml) |
 
 ## 1. Who controls module loading
 
