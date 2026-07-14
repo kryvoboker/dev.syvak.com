@@ -14,6 +14,8 @@ use Modules\BankTransfer\Services\BankTransferModuleDataService;
 use Modules\BankTransfer\Support\BankTransferConfig;
 use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
 use Modules\Pickup\Support\PickupConfig;
+use Modules\WayForPay\Services\WayForPayModuleDataService;
+use Modules\WayForPay\Support\WayForPayConfig;
 
 class CheckoutSelectionStoreRequest extends FormRequest
 {
@@ -87,9 +89,11 @@ class CheckoutSelectionStoreRequest extends FormRequest
             if ($payment_method !== '' && ! $this->isAvailablePaymentMethod($payment_method)) {
                 $validator->errors()->add(
                     'payment_method',
-                    $payment_method === BankTransferConfig::PAYMENT_METHOD
-                        ? __('banktransfer::storefront/checkout.validation.payment_method_unavailable')
-                        : __('paymentupondelivery::storefront/checkout.validation.payment_method_unavailable'),
+                    match ($payment_method) {
+                        app(WayForPayConfig::class)->getPaymentMethod() => __('wayforpay::storefront/checkout.validation.payment_method_unavailable'),
+                        BankTransferConfig::PAYMENT_METHOD => __('banktransfer::storefront/checkout.validation.payment_method_unavailable'),
+                        default => __('paymentupondelivery::storefront/checkout.validation.payment_method_unavailable'),
+                    },
                 );
             }
 
@@ -112,9 +116,11 @@ class CheckoutSelectionStoreRequest extends FormRequest
 
     private function isAvailablePaymentMethod(string $payment_method): bool
     {
-        $payment_data = $payment_method === BankTransferConfig::PAYMENT_METHOD
-            ? app(BankTransferModuleDataService::class)->getCheckoutData(normalize_locale(null))
-            : app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData();
+        $payment_data = match ($payment_method) {
+            app(WayForPayConfig::class)->getPaymentMethod() => app(WayForPayModuleDataService::class)->getCheckoutData(normalize_locale(null)),
+            BankTransferConfig::PAYMENT_METHOD => app(BankTransferModuleDataService::class)->getCheckoutData(normalize_locale(null)),
+            default => app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData(),
+        };
 
         return ($payment_data['is_available'] ?? false) === true
             && ($payment_data['payment_method'] ?? '') === $payment_method;

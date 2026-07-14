@@ -37,6 +37,9 @@
             ],
             "@payment-upon-delivery-ts/*": [
                 "./Modules/PaymentUponDelivery/resources/assets/ts/*"
+            ],
+            "@wayforpay-ts/*": [
+                "./Modules/WayForPay/resources/assets/ts/*"
             ]
         },
         "target": "ES2024",

@@ -34,7 +34,7 @@ class FastOrderValidateRequest extends FormRequest
             'last_name' => ['required', 'string', 'min:2', 'max:255'],
             'phone' => ['required', 'string', 'min:10', 'max:30'],
             CartRequestKeyEnum::CartMode->value => ['required', 'string', Rule::in([CartModeEnum::FastOrder->value])],
-            'payment_method' => ['required', 'string', 'in:cash_on_delivery,wayforpay,' . PaymentUponDeliveryConfig::PAYMENT_METHOD . ',' . BankTransferConfig::PAYMENT_METHOD],
+            'payment_method' => ['required', 'string', 'in:cash_on_delivery,' . PaymentUponDeliveryConfig::PAYMENT_METHOD . ',' . BankTransferConfig::PAYMENT_METHOD],
         ];
     }
 

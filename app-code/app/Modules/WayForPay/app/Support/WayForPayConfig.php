@@ -1,0 +1,225 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\WayForPay\Support;
+
+use Illuminate\Support\Str;
+
+final class WayForPayConfig
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function getSettings(): array
+    {
+        $value = get_global_config($this->getSettingsGlobalConfigKey(), []);
+
+        if (is_array($value)) {
+            return $this->withDefaults($this->normalizeSettings($value));
+        }
+
+        $decoded_value = json_decode((string) $value, true);
+
+        return is_array($decoded_value) ? $this->withDefaults($this->normalizeSettings($decoded_value)) : $this->withDefaults([]);
+    }
+
+    public function get(string $key, string $default = ''): string
+    {
+        return trim((string) ($this->getSettings()[$key] ?? $default));
+    }
+
+    public function getDefault(string $key, string $fallback = ''): string
+    {
+        return trim((string) config("wayforpay.settings.defaults.$key", $fallback));
+    }
+
+    public function getDefaultBoolean(string $key, bool $fallback = false): bool
+    {
+        return (bool) config("wayforpay.settings.defaults.$key", $fallback);
+    }
+
+    public function getBoolean(string $key, bool $default = false): bool
+    {
+        $value = $this->getSettings()[$key] ?? null;
+
+        return $value === null ? $default : filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getAllowedLanguages(): array
+    {
+        return array_values(array_filter(
+            (array) config('wayforpay.settings.options.languages', []),
+            static fn (mixed $language): bool => is_string($language) && trim($language) !== '',
+        ));
+    }
+
+    public function getPaymentMethod(): string
+    {
+        return (string) config('wayforpay.identifiers.payment_method', 'wayforpay');
+    }
+
+    public function getTranslationKey(): string
+    {
+        return (string) config('wayforpay.identifiers.translation_key', '');
+    }
+
+    public function getPaymentEndpoint(): string
+    {
+        return (string) config('wayforpay.endpoints.payment', '');
+    }
+
+    public function getWidgetScriptUrl(): string
+    {
+        return (string) config('wayforpay.endpoints.widget_script', '');
+    }
+
+    public function getCallbackRouteName(): string
+    {
+        return (string) config('wayforpay.callback.route_name', '');
+    }
+
+    public function getCallbackHandlerMethod(): string
+    {
+        return (string) config('wayforpay.callback.handler_method', '');
+    }
+
+    public function getReturnRouteName(): string
+    {
+        return (string) config('wayforpay.return.route_name', '');
+    }
+
+    public function getSettingsGlobalConfigKey(): string
+    {
+        return (string) config('wayforpay.storage.settings_global_config_key', '');
+    }
+
+    public function getPaymentNamesGlobalConfigKey(): string
+    {
+        return (string) config('wayforpay.storage.payment_names_global_config_key', '');
+    }
+
+    public function getRedirectMethod(): string
+    {
+        return (string) config('wayforpay.request.redirect_method', 'POST');
+    }
+
+    public function getClientCountry(): string
+    {
+        return (string) config('wayforpay.request.client_country', 'Ukraine');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getOptionList(string $key): array
+    {
+        return array_values(array_filter(
+            (array) config("wayforpay.settings.options.$key", []),
+            static fn (mixed $value): bool => is_string($value) && trim($value) !== '',
+        ));
+    }
+
+    public function getPaymentName(string $locale): string
+    {
+        return trim((string) ($this->getPaymentNames()[Str::lower($locale)] ?? ''));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getPaymentNames(): array
+    {
+        $value = get_global_config($this->getPaymentNamesGlobalConfigKey(), []);
+
+        if (is_array($value)) {
+            return $this->normalizeLocalizedValues($value);
+        }
+
+        $decoded_value = json_decode((string) $value, true);
+
+        return is_array($decoded_value) ? $this->normalizeLocalizedValues($decoded_value) : [];
+    }
+
+    /**
+     * @param array<int, string> $active_language_codes
+     */
+    public function isComplete(array $active_language_codes): bool
+    {
+        if ($active_language_codes === []) {
+            return false;
+        }
+
+        foreach (['merchant_account', 'secret_key', 'merchant_domain_name'] as $required_key) {
+            if ($this->get($required_key) === '') {
+                return false;
+            }
+        }
+
+        $payment_names = $this->getPaymentNames();
+
+        foreach ($active_language_codes as $language_code) {
+            if (blank($payment_names[Str::lower($language_code)] ?? null)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     * @return array<string, string>
+     */
+    private function normalizeSettings(array $settings): array
+    {
+        return collect($settings)
+            ->mapWithKeys(fn (mixed $value, mixed $key): array => [
+                trim((string) $key) => is_bool($value) ? ($value ? '1' : '0') : trim((string) $value),
+            ])
+            ->filter(fn (string $value, string $key): bool => $key !== '')
+            ->all();
+    }
+
+    /**
+     * @param array<string, string> $settings
+     * @return array<string, mixed>
+    */
+    private function withDefaults(array $settings): array
+    {
+        $defaults = [
+            'merchant_auth_type' => $this->getDefault('merchant_auth_type'),
+            'merchant_transaction_type' => $this->getDefault('merchant_transaction_type'),
+            'merchant_transaction_secure_type' => $this->getDefault('merchant_transaction_secure_type'),
+            'api_version' => $this->getDefault('api_version'),
+            'language' => $this->getDefault('language'),
+            'checkout_widget_enabled' => $this->getDefaultBoolean('checkout_widget_enabled', true),
+        ];
+
+        $resolved_settings = array_merge($defaults, $settings);
+
+        $resolved_settings['checkout_widget_enabled'] = filter_var(
+            $resolved_settings['checkout_widget_enabled'],
+            FILTER_VALIDATE_BOOLEAN,
+        );
+
+        return $resolved_settings;
+    }
+
+    /**
+     * @param array<string, mixed> $localized_values
+     * @return array<string, string>
+     */
+    private function normalizeLocalizedValues(array $localized_values): array
+    {
+        return collect($localized_values)
+            ->mapWithKeys(fn (mixed $value, mixed $language_code): array => [
+                Str::lower(trim((string) $language_code)) => trim((string) $value),
+            ])
+            ->filter(fn (string $value, string $language_code): bool => $language_code !== '' && $value !== '')
+            ->all();
+    }
+}

@@ -29,6 +29,9 @@ export interface WindowAppParams {
     cart_delete_url_pattern?: string;
     order_validate_url?: string;
     order_store_url?: string;
+    wayforpay_widget_script_url?: string;
+    wayforpay_payment_method?: string;
+    wayforpay_redirect_method?: string;
     checkout_city_search_url?: string | null;
     checkout_branch_search_url?: string | null;
     checkout_selection_save_url?: string | null;

@@ -27,6 +27,8 @@ use Modules\Pickup\Services\PickupCheckoutDataService;
 use Modules\Pickup\Support\PickupConfig;
 use Modules\UkrPoshta\Services\UkrPoshtaCheckoutDataService;
 use Modules\UkrPoshta\Support\UkrPoshtaCheckoutStateService;
+use Modules\WayForPay\Services\WayForPayModuleDataService;
+use Modules\WayForPay\Support\WayForPayConfig;
 use Throwable;
 
 class CheckoutController extends Controller
@@ -38,6 +40,8 @@ class CheckoutController extends Controller
         private readonly PickupCheckoutDataService $pickup_checkout_data_service,
         private readonly PaymentUponDeliveryModuleDataService $payment_upon_delivery_module_data_service,
         private readonly BankTransferModuleDataService $bank_transfer_module_data_service,
+        private readonly WayForPayModuleDataService $wayforpay_module_data_service,
+        private readonly WayForPayConfig $wayforpay_config,
         private readonly NovaPoshtaCheckoutStateService $nova_poshta_checkout_state_service,
         private readonly UkrPoshtaCheckoutStateService $ukr_poshta_checkout_state_service,
     ) {
@@ -72,12 +76,14 @@ class CheckoutController extends Controller
         $pickup_checkout_data = $this->pickup_checkout_data_service->getCheckoutData($locale);
         $payment_upon_delivery_checkout_data = $this->payment_upon_delivery_module_data_service->getCheckoutData();
         $bank_transfer_checkout_data = $this->bank_transfer_module_data_service->getCheckoutData($locale);
+        $wayforpay_checkout_data = $this->wayforpay_module_data_service->getCheckoutData($locale);
         $checkout_selection_state = $this->resolveCheckoutSelectionState(
             $nova_poshta_checkout_data,
             $ukr_poshta_checkout_data,
             [
                 $payment_upon_delivery_checkout_data,
                 $bank_transfer_checkout_data,
+                $wayforpay_checkout_data,
             ],
         );
 
@@ -105,6 +111,12 @@ class CheckoutController extends Controller
             'pickup_checkout_data' => $pickup_checkout_data,
             'payment_upon_delivery_checkout_data' => $payment_upon_delivery_checkout_data,
             'bank_transfer_checkout_data' => $bank_transfer_checkout_data,
+            'wayforpay_checkout_data' => $wayforpay_checkout_data,
+            'wayforpay_widget_script_url' => $this->wayforpay_config->getWidgetScriptUrl(),
+            'wayforpay_payment_method' => $this->wayforpay_config->getPaymentMethod(),
+            'wayforpay_redirect_method' => $this->wayforpay_config->getRedirectMethod(),
+            'order_validate_url' => localized_route('localized.catalog.order-confirm.simple.validate'),
+            'order_store_url' => localized_route('localized.catalog.order-confirm.simple.store'),
         ]);
     }
 
