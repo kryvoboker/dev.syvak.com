@@ -15,6 +15,10 @@ It also covers two module shapes used in the project:
 
 Each module-specific guide is kept inside the module so that its implementation, operational rules, tests, and integration contracts stay together.
 
+### Documentation language
+
+All technical documentation must be written in English, including project READMEs, module READMEs, architecture guides, operational guides, and OpenAPI descriptions. User-facing text may remain localized through the application's translation files.
+
 | Module | Implementation guide | OpenAPI documentation |
 |---|---|---|
 | NovaPoshta | [README.md](NovaPoshta/README.md) | [openapi.yaml](NovaPoshta/docs/openapi.yaml) |

@@ -1,62 +1,62 @@
 # PaymentUponDelivery Module
 
-Модуль `PaymentUponDelivery` добавляет способ оплаты **«Оплата после получения»** в checkout.
+The `PaymentUponDelivery` module adds **Payment upon delivery** as a checkout payment method.
 
-Это минимальный singleton-модуль: он не подключается к платёжному шлюзу, не создаёт платёжные транзакции и не имеет собственных HTTP endpoints. Его задача — показать доступный способ оплаты, сохранить выбор пользователя и передать идентификатор выбранного способа в order/payment flow.
+This is a minimal singleton module. It does not connect to a payment gateway, create payment transactions, or expose its own HTTP endpoints. Its purpose is to expose an available payment option, persist the customer's selection, and pass the selected method to the order/payment flow.
 
-## Краткая карточка модуля
+## Module card
 
-| Параметр | Значение |
+| Parameter | Value |
 |---|---|
 | Nwidart name | `PaymentUponDelivery` |
 | Alias | `paymentupondelivery` |
 | Payment method key | `payment_upon_delivery` |
-| Тип | Singleton |
-| Global configuration | Не требуется |
-| Module instances | Запрещены |
-| Собственные web/api routes | Нет |
-| Собственный controller | Нет |
-| Admin page | `modules/payment-upon-delivery` |
+| Type | Singleton |
+| Global configuration | Not required |
+| Module instances | Forbidden |
+| Module-owned web/API routes | None |
+| Module-owned controller | None |
+| Admin page slug | `modules/payment-upon-delivery` |
 | Checkout accordion | `#checkout-payment-collapse` |
-| Translations | Только внутри модуля |
+| Documentation language | English |
 
-## Документация проекта
+## Project documentation
 
-- [Modules registration and loading guide](../README.md)
+- [Module registration and loading guide](../README.md)
 - [Checkout OpenAPI contract](../../docs/openapi/pages/checkout.yaml)
 - [Project architecture](../../docs/architecture.md)
 - [Admin panel guide](../../docs/admin-panel.md)
 - [Testing guide](../../docs/testing.md)
 
-## Ответственность модуля
+## Responsibilities
 
-Модуль отвечает за:
+The module is responsible for:
 
-- идентификатор способа оплаты `payment_upon_delivery`;
-- проверку того, включён ли singleton-модуль в `module_definitions`;
-- передачу payment option в checkout;
-- отображение radio input в `#checkout-payment-collapse`;
-- сохранение `payment_method` в checkout session state;
-- проверку доступности метода оплаты при выборе;
-- передачу метода в `OrderCreationService`;
-- возврат pending payment intent без обращения к внешнему провайдеру;
-- пустую, но обязательную страницу модуля в Filament admin;
-- module-owned переводы.
+- defining the canonical payment key `payment_upon_delivery`;
+- checking whether the singleton module is enabled in `module_definitions`;
+- providing the payment option to checkout;
+- rendering a radio input inside `#checkout-payment-collapse`;
+- persisting `payment_method` in checkout session state;
+- validating that the selected method is available;
+- passing the selected method to `OrderCreationService`;
+- returning a pending payment intent without contacting an external provider;
+- providing the required, intentionally empty Filament admin page;
+- owning all module-specific translations.
 
-Модуль не отвечает за:
+The module is not responsible for:
 
-- онлайн-эквайринг или оплату картой;
-- создание платёжных ссылок, invoices или транзакций;
-- расчёт стоимости заказа или доставки;
-- выбор доставки;
-- города, регионы, почтовые отделения и почтоматы;
-- хранение настроек в `global_configs`;
-- создание строк в `module_instances`;
-- собственные web/api endpoints.
+- online acquiring or card payments;
+- payment links, invoices, or gateway transactions;
+- order or delivery price calculation;
+- delivery method selection;
+- cities, regions, post offices, or parcel lockers;
+- global configuration records;
+- `module_instances` records;
+- module-owned HTTP endpoints.
 
-## Singleton-контракт
+## Singleton contract
 
-Singleton определяется через `config/config.php`:
+The singleton behavior is declared in `config/config.php`:
 
 ```php
 'admin' => [
@@ -64,26 +64,25 @@ Singleton определяется через `config/config.php`:
 ],
 ```
 
-Нельзя создавать для этого модуля `ModuleInstance`. Его доступность определяется исключительно записью `ModuleDefinition`:
+Do not create a `ModuleInstance` for this module. Runtime availability is determined by an enabled `ModuleDefinition` with:
 
 - `nwidart_name = PaymentUponDelivery`;
-- модуль установлен;
-- модуль включён;
-- `canCreateInstances()` возвращает `false`.
+- the module installed and enabled;
+- `canCreateInstances()` returning `false`.
 
-Проверка в runtime выполняется через:
+Runtime checks use the project helper:
 
 ```php
 is_enabled_singleton_module('PaymentUponDelivery')
 ```
 
-Если модуль выключен, payment radio не выводится, а попытка отправить `payment_upon_delivery` отклоняется серверной валидацией.
+When the module is disabled, the payment radio is not rendered and a submitted `payment_upon_delivery` value is rejected by server-side validation.
 
-## Module metadata и configuration
+## Module metadata and configuration
 
 ### `module.json`
 
-Файл содержит только основной provider:
+The module registers only its main provider:
 
 ```json
 {
@@ -95,46 +94,46 @@ is_enabled_singleton_module('PaymentUponDelivery')
 }
 ```
 
-В модуле намеренно отсутствуют route provider, event provider и route files.
+The module intentionally has no route provider, event provider, or route files.
 
 ### `config/config.php`
 
-Конфигурация содержит:
+The configuration contains:
 
-- имя и описание модуля;
-- ключ способа оплаты;
-- запрет создания instances;
-- класс страницы, используемой действием модуля в admin;
-- `route_matched` provider-loading strategy.
+- module name and description;
+- the payment method key;
+- the singleton restriction;
+- the admin page class used by the module list action;
+- the `route_matched` provider-loading strategy.
 
-Модуль не имеет `runtime.storefront` placement, потому что payment option выводится непосредственно в общем checkout view, а не через стандартный placement resolver.
+The module has no `runtime.storefront` placement. The payment option is rendered directly by the shared checkout view rather than through the standard storefront placement resolver.
 
 ## Service provider
 
-Файл: `app/Providers/PaymentUponDeliveryServiceProvider.php`
+File: `app/Providers/PaymentUponDeliveryServiceProvider.php`
 
-Provider:
+The provider:
 
-- наследуется от `Nwidart\Modules\Support\ModuleServiceProvider`;
-- регистрирует module translations из `resources/lang`;
-- регистрирует `PaymentUponDeliveryConfig` как singleton binding;
-- не регистрирует routes, events или дополнительные providers.
+- extends `Nwidart\Modules\Support\ModuleServiceProvider`;
+- registers module translations from `resources/lang`;
+- binds `PaymentUponDeliveryConfig` as a singleton;
+- does not register routes, events, or additional providers.
 
-Не следует добавлять в этот provider lazy-loading логику. Стратегия загрузки определяется общим `ModuleProviderResolverService` и `config/config.php`.
+Do not add custom lazy-loading logic to this provider. Loading strategy is controlled centrally by `ModuleProviderResolverService` and `config/config.php`.
 
-## Основные классы
+## Main classes
 
-| Класс | Назначение |
+| Class | Responsibility |
 |---|---|
-| `Support/PaymentUponDeliveryConfig.php` | Канонический payment key и translation key |
-| `Services/PaymentUponDeliveryModuleDataService.php` | Формирует checkout option и availability |
-| `Services/PaymentUponDeliveryPaymentModule.php` | Возвращает pending payment intent без внешнего gateway |
-| `Filament/Pages/PaymentUponDeliverySettingsPage.php` | Пустая admin page singleton-модуля |
-| `Providers/PaymentUponDeliveryServiceProvider.php` | Translations и module binding |
+| `Support/PaymentUponDeliveryConfig.php` | Canonical payment key and translation key |
+| `Services/PaymentUponDeliveryModuleDataService.php` | Checkout option and availability payload |
+| `Services/PaymentUponDeliveryPaymentModule.php` | Pending payment intent without an external gateway |
+| `Filament/Pages/PaymentUponDeliverySettingsPage.php` | Empty singleton admin page |
+| `Providers/PaymentUponDeliveryServiceProvider.php` | Translation registration and module binding |
 
 ## Payment data contract
 
-`PaymentUponDeliveryModuleDataService::getCheckoutData()` возвращает:
+`PaymentUponDeliveryModuleDataService::getCheckoutData()` returns:
 
 ```php
 [
@@ -144,98 +143,98 @@ Provider:
 ]
 ```
 
-`is_available` равен `true` только при включённом singleton-модуле.
+`is_available` is `true` only when the singleton module is enabled.
 
-Checkout controller передаёт эти данные в view под ключом:
+The checkout controller passes this payload to the view as:
 
 ```php
 payment_upon_delivery_checkout_data
 ```
 
-Если ранее в session отсутствовал `payment_method`, первый доступный payment option используется как initial selected state. Для текущего модуля это `payment_upon_delivery`.
+If the session has no `payment_method`, the first available payment option becomes the initial selected state. For the current module, that option is `payment_upon_delivery`.
 
 ## Admin page
 
-Admin page находится в:
+The admin page is located at:
 
 ```text
 app/Filament/Pages/PaymentUponDeliverySettingsPage.php
 ```
 
-Её slug:
+Its slug is:
 
 ```text
 modules/payment-upon-delivery
 ```
 
-Фактический URL формируется Filament и зависит от локали и panel prefix, например:
+The final URL is generated by Filament and depends on the locale and panel prefix, for example:
 
 ```text
 /{locale}/alyo-admin/modules/payment-upon-delivery
 ```
 
-Страница намеренно пустая. Она необходима для единого module-definition workflow: администратор может открыть страницу модуля из списка modules, но не должен видеть форму настроек, поскольку этот payment method не требует конфигурации.
+The page is intentionally empty. It is required for the unified module-definition workflow: administrators can open the module from the modules list, but there are no settings to edit for this payment method.
 
-Page discovery зарегистрирован в:
+Page discovery is registered in:
 
 ```text
 app/app/Providers/Filament/AlyoAdminPanelProvider.php
 ```
 
-При изменении namespace или slug необходимо проверить синхронизацию module definitions и разрешение admin page URL.
+When changing the namespace or slug, verify module-definition synchronization and admin page URL resolution.
 
 ## Checkout integration
 
-Интеграция выполняется через общие checkout-компоненты приложения:
+Integration uses the application's shared checkout components:
 
-| Файл | Роль |
+| File | Responsibility |
 |---|---|
-| `app/Http/Controllers/Pages/CheckoutController.php` | Передаёт payment option и initial state в view |
-| `app/Http/Requests/Pages/CheckoutSelectionStoreRequest.php` | Нормализует и проверяет выбранный payment method |
-| `app/Services/Checkout/CheckoutSelectionStateService.php` | Хранит `payment_method` в session state |
-| `resources/views/catalog/pages/checkout.blade.php` | Выводит payment radio в accordion |
-| `resources/assets/catalog/ts/features/pages/checkout/checkoutPage.ts` | Синхронизирует выбор с backend |
+| `app/Http/Controllers/Pages/CheckoutController.php` | Provides payment option data and initial state |
+| `app/Http/Requests/Pages/CheckoutSelectionStoreRequest.php` | Normalizes and validates the selected method |
+| `app/Services/Checkout/CheckoutSelectionStateService.php` | Stores `payment_method` in session state |
+| `resources/views/catalog/pages/checkout.blade.php` | Renders the payment radio inside the accordion |
+| `resources/assets/catalog/ts/features/pages/checkout/checkoutPage.ts` | Synchronizes the selection with the backend |
 
 ### Markup contract
 
-Payment options находятся внутри:
+Payment options are rendered inside:
 
 ```html
 #checkout-payment-collapse
 ```
 
-Каждый метод должен использовать:
+Each payment method must use:
 
 ```html
 input[data-checkout-payment-method-input][type="radio"][name="payment_method"]
 ```
 
-Для PaymentUponDelivery значение input:
+The PaymentUponDelivery value is:
 
 ```text
 payment_upon_delivery
 ```
 
-Radio input помечен `required`. Native radio semantics гарантирует, что пользователь может выбрать только один payment method.
+The radio input is marked `required`. Native radio semantics ensure that only one payment method can be selected.
 
-Не следует создавать отдельный accordion для PaymentUponDelivery или отдельный frontend entry point.
+Do not create a separate accordion or a separate frontend entry point for this module.
 
 ### Selection endpoint
 
-Выбор сохраняется через общий endpoint:
+The selection is persisted through the shared endpoint:
 
 ```text
 POST /{locale}/checkout/selection
 ```
 
-Пример payload:
+Example payload:
 
 ```text
 payment_method=payment_upon_delivery
 delivery_method=nova_poshta
 ```
 
-В ответе значение доступно по пути:
+The response exposes the normalized value at:
 
 ```json
 {
@@ -246,35 +245,35 @@ delivery_method=nova_poshta
 }
 ```
 
-Checkout selection request разрешает промежуточный payload без payment method, чтобы пользователь мог менять доставку до завершения заполнения формы. Если payment method передан, он обязан быть доступным.
+The checkout selection request permits an intermediate payload without a payment method so the user can change delivery before completing the form. When a payment method is supplied, it must be currently available.
 
-Обязательность выбора для пользователя обеспечивается:
+The user's required choice is enforced by:
 
-- `required` на checkout radio input;
-- серверной проверкой order/payment request boundary;
-- запретом неизвестных или выключенных payment methods.
+- the `required` attribute on the checkout radio input;
+- server-side validation at the order/payment boundary;
+- rejection of unknown or disabled payment methods.
 
-При изменении способа оплаты данные доставки не очищаются. Очистка `city`, `delivery_point` и `delivery_address` относится только к переключению способа доставки.
+Changing the payment method does not clear delivery state. Clearing `city`, `delivery_point`, and `delivery_address` belongs only to delivery-method switching.
 
 ## Order/payment integration
 
-`OrderCreationService` распознаёт `payment_upon_delivery` и вызывает:
+`OrderCreationService` recognizes `payment_upon_delivery` and calls:
 
 ```php
 Modules\PaymentUponDelivery\Services\PaymentUponDeliveryPaymentModule
 ```
 
-Payment module:
+The payment module:
 
-- добавляет `payment_method` в order payload;
-- возвращает `is_success = true`;
-- возвращает `status = pending`;
-- возвращает `provider_code = payment_upon_delivery`;
-- не отправляет запросы во внешние системы.
+- adds `payment_method` to the order payload;
+- returns `is_success = true`;
+- returns `status = pending`;
+- returns `provider_code = payment_upon_delivery`;
+- makes no external requests.
 
-Это не означает, что заказ уже оплачен. `pending` означает, что заказ ожидает оплаты после получения.
+This does not mean that the order has already been paid. `pending` means that the order is waiting for payment upon receipt.
 
-Пример результата:
+Example result:
 
 ```php
 [
@@ -287,7 +286,7 @@ Payment module:
 ]
 ```
 
-Если позже понадобится отдельная бизнес-логика COD, статусы заказа или интеграция службы доставки, её нужно добавлять в module payment service и тесты, а не в Blade или checkout controller.
+If COD-specific business rules, order statuses, or delivery-service integrations are introduced later, implement them in the payment service and its tests rather than in Blade or the checkout controller.
 
 ## Validation rules
 
@@ -295,21 +294,21 @@ Payment module:
 
 `CheckoutSelectionStoreRequest`:
 
-- нормализует payment method через lowercase и trim/squish;
-- принимает строку длиной до 100 символов;
-- отклоняет переданный method, если соответствующий payment module недоступен;
-- не принимает произвольный payment key;
-- сохраняет normalized value в checkout session state.
+- normalizes the payment method using lowercase and trim/squish;
+- accepts a string up to 100 characters;
+- rejects a supplied method when its payment module is unavailable;
+- does not accept arbitrary payment keys;
+- stores the normalized value in checkout session state.
 
 ### Order validation
 
-`FastOrderValidateRequest` признаёт `payment_upon_delivery` допустимым значением и дополнительно проверяет, включён ли singleton-модуль.
+`FastOrderValidateRequest` accepts `payment_upon_delivery` as a valid value and additionally checks that the singleton module is enabled.
 
-Не следует возвращать silent fallback на `cash_on_delivery`, если пользователь явно передал выключенный или неизвестный payment method. Такой payload должен завершаться validation error.
+Do not silently fall back to `cash_on_delivery` when a user explicitly submits a disabled or unknown payment method. Such a payload must produce a validation error.
 
 ## Translations
 
-Все строки модуля находятся внутри него:
+All module strings are stored inside the module:
 
 ```text
 resources/lang/en/admin/modules/payment_upon_delivery.php
@@ -318,13 +317,13 @@ resources/lang/en/storefront/checkout.php
 resources/lang/uk/storefront/checkout.php
 ```
 
-Namespace:
+Translation namespace:
 
 ```text
 paymentupondelivery::
 ```
 
-Основные ключи:
+Main keys:
 
 ```php
 __('paymentupondelivery::admin/modules/payment_upon_delivery.title');
@@ -332,52 +331,52 @@ __('paymentupondelivery::admin/modules/payment_upon_delivery.description');
 __('paymentupondelivery::storefront/checkout.payment_methods.payment_upon_delivery');
 ```
 
-Не переносите эти строки в `resources/lang/catalog` или общий application language tree без отдельного решения о создании shared contract.
+Do not move these strings to `resources/lang/catalog` or the shared application language tree without an explicit decision to create a shared contract.
 
 ## Routes and removed scaffold
 
-У модуля нет собственных routes. Его функциональность работает через существующие application routes:
+The module has no module-owned routes. Its functionality uses existing application routes:
 
 - checkout page: `GET /{locale}/checkout`;
 - checkout selection: `POST /{locale}/checkout/selection`;
-- order confirmation/validation routes приложения.
+- application order confirmation and validation routes.
 
-Внутри модуля намеренно отсутствуют:
+The following generated scaffold files are intentionally absent:
 
 - `app/Http/Controllers/PaymentUponDeliveryController.php`;
 - `routes/web.php`;
 - `routes/api.php`;
 - `app/Providers/RouteServiceProvider.php`;
 - `app/Providers/EventServiceProvider.php`;
-- placeholder storefront Blade view;
-- module-specific Vite/JS/Sass entry points.
+- placeholder storefront Blade views;
+- module-specific Vite, JS, and Sass entry points.
 
-Не добавляйте эти файлы только ради соответствия стандартному scaffold Nwidart.
+Do not add these files merely to match the default Nwidart scaffold.
 
 ## Tests
 
-Основной тест:
+The main test file is:
 
 ```text
 Modules/PaymentUponDelivery/tests/Feature/PaymentUponDeliveryModuleTest.php
 ```
 
-Он проверяет:
+It covers:
 
-- доступность только включённого singleton-модуля;
-- сохранение `payment_method` через checkout selection endpoint;
-- отказ при выключенном payment module;
-- наличие admin page и module translation;
-- pending payment intent.
+- availability only when the singleton module is enabled;
+- persistence through the checkout selection endpoint;
+- rejection when the payment module is disabled;
+- admin page registration and module translation;
+- the pending payment intent.
 
-Запуск:
+Run the module tests with:
 
 ```bash
 docker compose -f .docker/dev/docker-compose.yml exec -T dev-syvak-php-fpm \
     php artisan test --compact Modules/PaymentUponDelivery/tests
 ```
 
-После изменения checkout integration также запускайте связанные тесты Pickup/checkout и проверки качества:
+When changing checkout integration, also run related Pickup/checkout tests and the quality checks:
 
 ```bash
 docker compose -f .docker/dev/docker-compose.yml exec -T dev-syvak-php-fpm composer pint
@@ -388,31 +387,31 @@ npm run ts:check
 
 ## Logging and error handling
 
-Модуль не должен писать logs на каждый успешный availability check или обычный выбор radio.
+The module must not log every successful availability check or normal radio selection.
 
-Разрешены только важные ошибки:
+Only important errors may be logged, including:
 
-- невозможность зарегистрировать/разрешить module provider или admin page;
-- unexpected failure при обработке payment intent;
-- unexpected validation/persistence failure.
+- failure to register or resolve the module provider or admin page;
+- unexpected payment intent processing failures;
+- unexpected validation or persistence failures.
 
-Для PHP используйте существующие project channels:
+Use the project's existing PHP logging channels:
 
 ```php
 Log::channel('stack')->error('[PaymentUponDelivery...] message', $context);
 ```
 
-Не записывайте в logs полные customer payload, телефоны, адреса или платёжные секреты.
+Do not log complete customer payloads, phone numbers, addresses, or payment secrets.
 
 ## Rules for future changes
 
-1. Сохраняйте `payment_upon_delivery` как backward-compatible canonical key.
-2. Не превращайте модуль в instance-based модуль.
-3. Не создавайте global config, если для метода оплаты не появилась реальная настройка.
-4. Не добавляйте собственные routes/controller/provider scaffold без отдельной функциональной необходимости.
-5. Не размещайте module-specific translations в shared language directories.
-6. Не делайте payment option доступным, если module definition выключен.
-7. Не меняйте delivery state при выборе payment method.
-8. Любой новый payment method должен использовать тот же radio group и server-side validation contract.
-9. Любую интеграцию с внешним платёжным провайдером реализуйте отдельным payment service с тестами и явными статусами.
-10. После изменений обновляйте этот README, если изменились module boundaries, contracts или operational rules.
+1. Keep `payment_upon_delivery` as the backward-compatible canonical key.
+2. Keep the module singleton-based.
+3. Do not add global configuration unless the payment method gains a real setting.
+4. Do not add module-owned routes, controllers, or provider scaffold without a functional requirement.
+5. Keep module-specific translations in the module.
+6. Do not expose the payment option while the module definition is disabled.
+7. Do not change delivery state when the payment method changes.
+8. Every new payment method must use the same radio group and server-side validation contract.
+9. Implement any external payment-provider integration as a dedicated payment service with explicit statuses and tests.
+10. Update this README when module boundaries, contracts, or operational rules change.
