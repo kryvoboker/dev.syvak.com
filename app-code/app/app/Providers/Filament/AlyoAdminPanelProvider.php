@@ -113,6 +113,7 @@ class AlyoAdminPanelProvider extends PanelProvider
             ->discoverPages(in: base_path('Modules/UkrPoshta/app/Filament/Pages'), for: 'Modules\UkrPoshta\Filament\Pages')
             ->discoverPages(in: base_path('Modules/Pickup/app/Filament/Pages'), for: 'Modules\Pickup\Filament\Pages')
             ->discoverPages(in: base_path('Modules/PaymentUponDelivery/app/Filament/Pages'), for: 'Modules\PaymentUponDelivery\Filament\Pages')
+            ->discoverPages(in: base_path('Modules/BankTransfer/app/Filament/Pages'), for: 'Modules\BankTransfer\Filament\Pages')
             ->pages([
                 Dashboard::class,
             ])

@@ -4,5 +4,6 @@
     "NovaPoshta": true,
     "UkrPoshta": true,
     "Pickup": true,
-    "PaymentUponDelivery": true
+    "PaymentUponDelivery": true,
+    "BankTransfer": true
 }

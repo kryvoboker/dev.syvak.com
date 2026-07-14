@@ -1,0 +1,11 @@
+{
+    "name": "BankTransfer",
+    "alias": "banktransfer",
+    "description": "Bank transfer checkout payment method singleton.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BankTransfer\\Providers\\BankTransferServiceProvider"
+    ],
+    "files": []
+}

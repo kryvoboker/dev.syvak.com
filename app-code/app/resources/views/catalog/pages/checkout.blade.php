@@ -313,24 +313,47 @@
                                              id="checkout-payment-collapse"
                                              role="region">
                                             <div class="flex flex-col gap-4 pb-4 md:pb-6">
-                                                @if(($payment_upon_delivery_checkout_data['is_available'] ?? false) === true)
+                                                @php
+                                                    $available_payment_methods = array_values(array_filter([
+                                                        ($payment_upon_delivery_checkout_data['is_available'] ?? false) === true
+                                                            ? $payment_upon_delivery_checkout_data
+                                                            : null,
+                                                        ($bank_transfer_checkout_data['is_available'] ?? false) === true
+                                                            ? $bank_transfer_checkout_data
+                                                            : null,
+                                                    ]));
+                                                @endphp
+
+                                                @if($available_payment_methods !== [])
                                                     <span class="text-sm text-white md:text-lg">
                                                         {{ __('catalog/pages/checkout.placeholders.payment_methods') }}
                                                     </span>
 
                                                     <div class="flex flex-col gap-3">
-                                                        <label class="flex items-center gap-3 py-2 text-sm text-white md:text-lg"
-                                                               data-checkout-payment-method-option="{{ $payment_upon_delivery_checkout_data['payment_method'] }}">
-                                                            <input class="radio radio-sm border border-white rounded-none"
-                                                                   data-checkout-payment-method-input
-                                                                   name="payment_method"
-                                                                   type="radio"
-                                                                   value="{{ $payment_upon_delivery_checkout_data['payment_method'] }}"
-                                                                   required
-                                                                @checked($selected_payment_method === $payment_upon_delivery_checkout_data['payment_method'])>
+                                                        @foreach($available_payment_methods as $payment_data)
+                                                            <div class="flex flex-col gap-2">
+                                                                <label class="flex items-center gap-3 py-2 text-sm text-white md:text-lg"
+                                                                       data-checkout-payment-method-option="{{ $payment_data['payment_method'] }}">
+                                                                    <input class="radio radio-sm border border-white rounded-none"
+                                                                           data-checkout-payment-method-input
+                                                                           name="payment_method"
+                                                                           type="radio"
+                                                                           value="{{ $payment_data['payment_method'] }}"
+                                                                           required
+                                                                        @checked($selected_payment_method === $payment_data['payment_method'])>
 
-                                                            <span>{{ __($payment_upon_delivery_checkout_data['label_translation_key']) }}</span>
-                                                        </label>
+                                                                    <span>{{ $payment_data['payment_name'] ?? __($payment_data['label_translation_key']) }}</span>
+                                                                </label>
+
+                                                                @if($payment_data['payment_method'] === 'bank_transfer' && filled($payment_data['payment_information'] ?? null))
+                                                                    <div class="hidden alert rounded alert-info text-sm md:text-base"
+                                                                         data-checkout-payment-information="bank_transfer"
+                                                                         @if($selected_payment_method === 'bank_transfer') aria-hidden="false" @else aria-hidden="true" @endif>
+                                                                        {{ $payment_data['payment_information'] }}
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        @endforeach
                                                     </div>
                                                 @else
                                                     <div class="rounded-sm border border-opacity-light-gray-40% px-4 py-3 text-sm text-light-gray md:text-base">
