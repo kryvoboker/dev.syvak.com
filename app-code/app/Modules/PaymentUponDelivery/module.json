@@ -1,0 +1,11 @@
+{
+    "name": "PaymentUponDelivery",
+    "alias": "paymentupondelivery",
+    "description": "Payment upon delivery checkout payment method singleton.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\PaymentUponDelivery\\Providers\\PaymentUponDeliveryServiceProvider"
+    ],
+    "files": []
+}

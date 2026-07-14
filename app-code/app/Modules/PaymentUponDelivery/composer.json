@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/paymentupondelivery",
+    "description": "",
+    "authors": [
+        {
+            "name": "Roman Kryvobok",
+            "email": "fast.kamaz@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\PaymentUponDelivery\\": "app/",
+            "Modules\\PaymentUponDelivery\\Database\\Factories\\": "database/factories/",
+            "Modules\\PaymentUponDelivery\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\PaymentUponDelivery\\Tests\\": "tests/"
+        }
+    }
+}

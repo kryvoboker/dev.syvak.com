@@ -34,6 +34,9 @@
             ],
             "@pickup-ts/*": [
                 "./Modules/Pickup/resources/assets/ts/*"
+            ],
+            "@payment-upon-delivery-ts/*": [
+                "./Modules/PaymentUponDelivery/resources/assets/ts/*"
             ]
         },
         "target": "ES2024",
