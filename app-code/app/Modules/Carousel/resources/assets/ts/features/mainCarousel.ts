@@ -1,7 +1,7 @@
 import { initCarousel } from '@ts-shared/carousel/initCarousel.ts';
 import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
-import { findArrayElems, isEmpty } from '@ts-shared/lib/helpers.ts';
+import { findArrayElems, isEmpty, isNaNValue, parseInteger } from '@ts-shared/lib/helpers.ts';
 
 function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
     const pageType: string | null = getAppParam<string>($PAGE_TYPE_KEY);
@@ -33,9 +33,9 @@ function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
 }
 
 function hasEnoughSlidesForCarousel(carouselElement: HTMLElement): boolean {
-    const slidesCountFromData: number = Number.parseInt(carouselElement.dataset.slidesCount ?? '', 10);
+    const slidesCountFromData: number = parseInteger(carouselElement.dataset.slidesCount ?? '');
 
-    if (!Number.isNaN(slidesCountFromData)) {
+    if (!isNaNValue(slidesCountFromData)) {
         return slidesCountFromData > 1;
     }
 

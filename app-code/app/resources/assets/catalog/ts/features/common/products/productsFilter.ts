@@ -8,9 +8,11 @@ import {
     findElem,
     httpBuildQueryString,
     isEmpty,
+    isNaNValue,
     redirect,
     sprintF,
     toggleElement,
+    toNumber,
 } from '@ts-shared/lib/helpers.ts';
 import type { WindowAppParams } from '@ts-types/global';
 import type { URLParamsType } from '@ts-types/httpQueryBuild.ts';
@@ -94,7 +96,7 @@ function handleNoUiSlider(): void {
         input.addEventListener('keydown', function (e: KeyboardEvent): void {
             const values = NO_UI_SLIDER_API.get();
             // @ts-expect-error
-            const value: number = Number(values[handle]);
+            const value: number = toNumber(values[handle], Number.NaN);
 
             // [[handle0_down, handle0_up], [handle1_down, handle1_up]]
             const steps = NO_UI_SLIDER_API.steps();
@@ -164,7 +166,7 @@ const processCollectUrlParams = (): URLParamsType => {
     const priceFrom: number = normalizePrice(INPUT_PRICE_TO?.value ?? '');
     const priceTo: number = normalizePrice(INPUT_PRICE_FROM?.value ?? '');
 
-    if (!Number.isNaN(priceFrom) && !Number.isNaN(priceTo)) {
+    if (!isNaNValue(priceFrom) && !isNaNValue(priceTo)) {
         urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.from_key ?? 'price_from'] = priceFrom;
         urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.to_key ?? 'price_to'] = priceTo;
     }

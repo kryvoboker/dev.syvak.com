@@ -75,6 +75,8 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
         if (pageType === $CHECKOUT_PAGE_TYPE) {
             import('@ts-features/order/index.ts').then((module) => module.handleCheckoutPage());
+            import('@bank-transfer-ts/main.ts');
+            import('@pickup-ts/main.ts');
         }
     }
 });

@@ -1,18 +1,11 @@
 import { storeOrder, validateOrder } from '@ts-features/cart/cartCrud.ts';
-import { handleCheckoutDeliverySelection } from '@ts-features/pages/checkout/checkoutPage.ts';
+import { initializeCheckoutDeliveryLogic } from '@ts-features/pages/checkout/checkoutPage.ts';
 import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
-import { findArrayElems, findElem, showErrorInConsole } from '@ts-shared/lib/helpers.ts';
+import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
+import { findArrayElems, findElem, toTrimmedString } from '@ts-shared/lib/helpers.ts';
+import { handleCheckoutPayment } from '@ts-shared/payment/checkoutPaymentRegistry.ts';
 
-interface WayForPayWidget {
-    run: (
-        data: Record<string, unknown>,
-        approved: (response: unknown) => void,
-        declined: (response: unknown) => void,
-        pending: (response: unknown) => void,
-    ) => void;
-}
-
-interface WayForPayResponse {
+interface CheckoutOrderResponse {
     success?: boolean;
     errors?: Record<string, string[]>;
     payment?: {
@@ -27,13 +20,7 @@ interface WayForPayResponse {
     };
 }
 
-declare global {
-    interface Window {
-        Wayforpay?: new () => WayForPayWidget;
-    }
-}
-
-const getErrorMessage = (response: WayForPayResponse): string => {
+const getErrorMessage = (response: CheckoutOrderResponse): string => {
     const errors = response.errors ?? {};
 
     return (
@@ -51,148 +38,7 @@ const showCheckoutError = (message: string): void => {
     }
 
     errorElement.textContent = message;
-    errorElement.classList.toggle('hidden', message.trim() === '');
-};
-
-const loadWayForPayWidget = (): Promise<void> => {
-    if (window.Wayforpay) {
-        return Promise.resolve();
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>('script[data-wayforpay-widget]');
-
-    if (existingScript) {
-        return new Promise((resolve, reject): void => {
-            existingScript.addEventListener('load', (): void => resolve(), { once: true });
-            existingScript.addEventListener('error', (): void => reject(new Error('WayForPay widget failed to load')), {
-                once: true,
-            });
-        });
-    }
-
-    return new Promise((resolve, reject): void => {
-        const script = document.createElement('script');
-        script.async = true;
-        script.defer = true;
-        script.dataset.wayforpayWidget = '1';
-        script.src = String(window.app_params?.wayforpay_widget_script_url ?? '');
-        script.addEventListener('load', (): void => resolve(), { once: true });
-        script.addEventListener('error', (): void => reject(new Error('WayForPay widget failed to load')), {
-            once: true,
-        });
-        document.head.appendChild(script);
-    });
-};
-
-const submitPostForm = (action: string, fields: Record<string, unknown>): void => {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = action;
-    form.style.display = 'none';
-
-    Object.entries(fields).forEach(([key, value]: [string, unknown]): void => {
-        if (Array.isArray(value)) {
-            value.forEach((item: unknown): void => {
-                const input = document.createElement('input');
-                input.name = `${key}[]`;
-                input.value = String(item ?? '');
-                form.appendChild(input);
-            });
-
-            return;
-        }
-
-        const input = document.createElement('input');
-        input.name = key;
-        input.value = String(value ?? '');
-        form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
-};
-
-const submitRedirectFallback = (
-    redirectData: NonNullable<NonNullable<WayForPayResponse['payment']>['redirect_data']>,
-): void => {
-    const action = String(redirectData.action ?? '').trim();
-    const method = String(redirectData.method ?? window.app_params?.wayforpay_redirect_method ?? 'POST')
-        .trim()
-        .toUpperCase();
-
-    if (action === '' || method !== String(window.app_params?.wayforpay_redirect_method ?? 'POST').toUpperCase()) {
-        showCheckoutError('The payment redirect is unavailable.');
-
-        return;
-    }
-
-    submitPostForm(action, redirectData.fields ?? {});
-};
-
-const openWayForPayPayment = async (response: WayForPayResponse): Promise<void> => {
-    const payment = response.payment;
-    const widgetData = payment?.widget_data;
-    const redirectData = payment?.redirect_data;
-
-    if (payment?.use_widget !== true) {
-        if (redirectData) {
-            submitRedirectFallback(redirectData);
-        } else {
-            showCheckoutError('The payment redirect is unavailable.');
-        }
-
-        return;
-    }
-
-    if (!widgetData) {
-        if (redirectData) {
-            submitRedirectFallback(redirectData);
-        } else {
-            showCheckoutError('The payment window could not be opened.');
-        }
-
-        return;
-    }
-
-    try {
-        await loadWayForPayWidget();
-
-        if (!window.Wayforpay) {
-            throw new Error('WayForPay widget is unavailable');
-        }
-
-        const wayforpay = new window.Wayforpay();
-        const redirectToReturnUrl = (widgetResponse: unknown): void => {
-            const returnUrl = String(widgetData.returnUrl ?? '').trim();
-
-            if (returnUrl === '' || typeof widgetResponse !== 'object' || widgetResponse === null) {
-                showCheckoutError('The payment response is unavailable.');
-
-                return;
-            }
-
-            submitPostForm(returnUrl, widgetResponse as Record<string, unknown>);
-        };
-
-        wayforpay.run(
-            widgetData,
-            redirectToReturnUrl,
-            (): void => showCheckoutError('The payment was declined.'),
-            (): void => {
-                showCheckoutError('The payment is being processed.');
-            },
-        );
-    } catch (error) {
-        showErrorInConsole('[checkout] Failed to open WayForPay widget.');
-
-        if (redirectData) {
-            submitRedirectFallback(redirectData);
-
-            return;
-        }
-
-        showCheckoutError(error instanceof Error ? error.message : 'The payment window could not be opened.');
-    }
+    errorElement.classList.toggle($HIDDEN_CLASS_NAME, message.trim() === '');
 };
 
 const handleCheckoutSubmit = (): void => {
@@ -214,7 +60,7 @@ const handleCheckoutSubmit = (): void => {
 
         void (async (): Promise<void> => {
             try {
-                const validationResponse = <WayForPayResponse>await validateOrder(payload);
+                const validationResponse = <CheckoutOrderResponse>await validateOrder(payload);
 
                 if (validationResponse.success !== true) {
                     showCheckoutError(getErrorMessage(validationResponse) || 'Please check the checkout data.');
@@ -222,7 +68,7 @@ const handleCheckoutSubmit = (): void => {
                     return;
                 }
 
-                const orderResponse = <WayForPayResponse>await storeOrder(payload);
+                const orderResponse = <CheckoutOrderResponse>await storeOrder(payload);
 
                 if (orderResponse.success !== true) {
                     showCheckoutError(getErrorMessage(orderResponse) || 'The order could not be created.');
@@ -230,13 +76,20 @@ const handleCheckoutSubmit = (): void => {
                     return;
                 }
 
-                if (orderResponse.payment?.payment_method === window.app_params?.wayforpay_payment_method) {
-                    await openWayForPayPayment(orderResponse);
+                const paymentMethod = toTrimmedString(orderResponse.payment?.payment_method);
 
+                if (
+                    paymentMethod !== '' &&
+                    (await handleCheckoutPayment(
+                        paymentMethod,
+                        orderResponse as Record<string, unknown>,
+                        showCheckoutError,
+                    ))
+                ) {
                     return;
                 }
 
-                const redirectUrl = String((orderResponse as Record<string, unknown>).redirect_url ?? '').trim();
+                const redirectUrl = toTrimmedString((orderResponse as Record<string, unknown>).redirect_url);
 
                 if (redirectUrl !== '') {
                     window.location.assign(redirectUrl);
@@ -257,6 +110,7 @@ export const handleCheckoutPage = (): void => {
         initAccordion(accordionElement);
     });
 
-    handleCheckoutDeliverySelection();
+    initializeCheckoutDeliveryLogic();
     handleCheckoutSubmit();
+    document.dispatchEvent(new CustomEvent('checkout:initialized'));
 };

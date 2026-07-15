@@ -1,493 +1,55 @@
-import type { CheckoutMapPoint } from '@ts-features/pages/checkout/checkoutLeafletMap.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
+import { findElem, toStringValue, toTrimmedString } from '@ts-shared/lib/helpers.ts';
+import { createBranchChoices, createCityChoices } from './checkoutChoices.ts';
 import {
-    debounce,
-    fetchFunc,
-    findArrayElems,
-    findElem,
-    isArray,
-    isEmpty,
-    showErrorInConsole,
-} from '@ts-shared/lib/helpers.ts';
-import Choices, { type InputChoice, type InputGroup, type Options } from 'choices.js';
+    buildCheckoutMapPoints,
+    type CheckoutBranchSearchItem,
+    type CheckoutCitySearchItem,
+    type CheckoutMapData,
+    MIN_SEARCH_CITY_LENGTH,
+    MIN_SEARCH_POST_OFFICE_LENGTH,
+    normalizeBranchPayload,
+    normalizeCityPayload,
+    readBranchFromOption,
+    readCityFromOption,
+    resolveCheckoutSelectionState,
+    resolveCheckoutUrl,
+} from './checkoutData.ts';
+import { getCheckoutDomElements } from './checkoutDom.ts';
+import { bindCheckoutEvents } from './checkoutEvents.ts';
+import { createCheckoutSearch } from './checkoutSearch.ts';
+import { createCheckoutUi } from './checkoutUi.ts';
 
-type CheckoutDeliveryMethod =
-    | 'nova_poshta'
-    | 'nova_poshta_courier'
-    | 'nova_poshta_poshtomat'
-    | 'ukr_poshta'
-    | 'pickup_store';
-
-interface CheckoutCitySearchItem {
-    city_description: string;
-    nova_poshta_city_id: string | null;
-    ukr_poshta_city_id: number | null;
-    city_lat: number | null;
-    city_lng: number | null;
-}
-
-interface CheckoutDeliveryPointState {
-    id?: number | string | null;
-    ref?: string | null;
-    city_ref?: string | null;
-    postcode?: number | null;
-    pdcity_id?: number | null;
-    description?: string | null;
-    city_description?: string | null;
-    city_name?: string | null;
-    region_ua?: string | null;
-    district_ua?: string | null;
-    latitude?: number | null;
-    longitude?: number | null;
-    schedule?: string | null;
-    number?: number | null;
-    site_key?: number | null;
-    lock_code?: number | null;
-    delivery_method?: CheckoutDeliveryMethod | null;
-    branch_value?: string | null;
-    label?: string | null;
-}
-
-interface CheckoutSelectionState {
-    delivery_method?: string | null;
-    payment_method?: string | null;
-    city?: CheckoutCitySearchItem | null;
-    delivery_point?: CheckoutDeliveryPointState | null;
-    delivery_address?: string | null;
-}
-
-interface CheckoutCitySearchResponse {
-    items?: CheckoutCitySearchItem[];
-}
-
-interface CheckoutBranchSearchItem extends CheckoutDeliveryPointState {
-    branch_value: string;
-    branch_label: string;
-    delivery_method: CheckoutDeliveryMethod;
-}
-
-interface CheckoutBranchSearchResponse {
-    items?: CheckoutBranchSearchItem[];
-}
-
-type CheckoutBranchPayload = CheckoutDeliveryPointState | CheckoutBranchSearchItem | Record<string, unknown> | null;
-
-interface CheckoutMapData {
-    selected_city?: CheckoutCitySearchItem | null;
-    selected_delivery_method?: string | null;
-    marker_icons?: {
-        nova_poshta?: string | null;
-        ukr_poshta?: string | null;
-    } | null;
-    texts?: {
-        title?: string | null;
-        search_placeholder?: string | null;
-        list_title?: string | null;
-        empty?: string | null;
-        choose_city_first?: string | null;
-        deliver_here?: string | null;
-        close?: string | null;
-        work_schedule?: string | null;
-        day_off?: string | null;
-    } | null;
-}
-
-interface ChoiceSettings {
-    allowHTML: boolean;
-    searchFields: string[];
-    shouldSort: boolean;
-}
-
-const MIN_SEARCH_CITY_LENGTH = 3;
-const MIN_SEARCH_POST_OFFICE_LENGTH = 1;
-const SEARCH_DEBOUNCE_MS = 700;
-
-const toNumberOrNull = (value: unknown): number | null => {
-    const numericValue = Number(value);
-
-    return Number.isNaN(numericValue) ? null : numericValue;
-};
-
-const toStringOrNull = (value: unknown): string | null => {
-    if (typeof value === 'string') {
-        const normalizedValue = value.trim();
-
-        return normalizedValue === '' ? null : normalizedValue;
-    }
-
-    if (typeof value === 'number' || typeof value === 'bigint') {
-        return String(value);
-    }
-
-    return null;
-};
-
-const parseCustomProperties = (value: string | undefined): Record<string, unknown> => {
-    if (!value || value.trim() === '') {
-        return {};
-    }
-
-    try {
-        const parsedValue: unknown = JSON.parse(value);
-
-        return parsedValue !== null && typeof parsedValue === 'object' && !isArray(parsedValue)
-            ? (parsedValue as Record<string, unknown>)
-            : {};
-    } catch {
-        return {};
-    }
-};
-
-const normalizeCityPayload = (city: CheckoutCitySearchItem | null): CheckoutCitySearchItem | null => {
-    if (!city || isEmpty(city.city_description)) {
-        return null;
-    }
-
-    return {
-        city_description: String(city.city_description ?? ''),
-        nova_poshta_city_id:
-            typeof city.nova_poshta_city_id === 'string' && city.nova_poshta_city_id !== ''
-                ? city.nova_poshta_city_id
-                : null,
-        ukr_poshta_city_id:
-            typeof city.ukr_poshta_city_id === 'number' && city.ukr_poshta_city_id > 0 ? city.ukr_poshta_city_id : null,
-        city_lat: typeof city.city_lat === 'number' ? city.city_lat : null,
-        city_lng: typeof city.city_lng === 'number' ? city.city_lng : null,
-    };
-};
-
-const normalizeBranchPayload = (branch: CheckoutBranchPayload): CheckoutBranchSearchItem | null => {
-    if (!branch) {
-        return null;
-    }
-
-    const branchData = branch as Record<string, unknown>;
-    const description = String(branchData.description ?? branchData.label ?? '').trim();
-    const branchValue = String(
-        branchData.branch_value ?? branchData.id ?? branchData.ref ?? branchData.postcode ?? '',
-    ).trim();
-
-    if (description === '' || branchValue === '') {
-        return null;
-    }
-
-    const deliveryMethod = String(branchData.delivery_method ?? '').trim() as CheckoutDeliveryMethod | '';
-
-    return {
-        id: toStringOrNull(branchData.id),
-        ref: toStringOrNull(branchData.ref),
-        city_ref: toStringOrNull(branchData.city_ref),
-        postcode: toNumberOrNull(branchData.postcode),
-        pdcity_id: toNumberOrNull(branchData.pdcity_id),
-        description,
-        city_description: toStringOrNull(branchData.city_description),
-        city_name: toStringOrNull(branchData.city_name),
-        region_ua: toStringOrNull(branchData.region_ua),
-        district_ua: toStringOrNull(branchData.district_ua),
-        latitude: toNumberOrNull(branchData.latitude),
-        longitude: toNumberOrNull(branchData.longitude),
-        schedule: toStringOrNull(branchData.schedule),
-        number: toNumberOrNull(branchData.number),
-        site_key: toNumberOrNull(branchData.site_key),
-        lock_code: toNumberOrNull(branchData.lock_code),
-        delivery_method:
-            deliveryMethod === 'nova_poshta' ||
-            deliveryMethod === 'nova_poshta_poshtomat' ||
-            deliveryMethod === 'nova_poshta_courier' ||
-            deliveryMethod === 'ukr_poshta'
-                ? deliveryMethod
-                : branchData.pdcity_id === null
-                  ? 'nova_poshta'
-                  : 'ukr_poshta',
-        branch_value: branchValue,
-        branch_label: String(branchData.branch_label ?? branchData.label ?? description),
-        label: String(branchData.branch_label ?? branchData.label ?? description),
-    };
-};
-
-const readCityFromOption = (option: HTMLOptionElement | null): CheckoutCitySearchItem | null => {
-    if (!option) {
-        return null;
-    }
-
-    const cityDescription = option.value.trim();
-
-    if (cityDescription === '') {
-        return null;
-    }
-
-    const novaPoshtaCityId = option.dataset.novaPoshtaCityId?.trim() ?? '';
-    const ukrPoshtaCityId = Number(option.dataset.ukrPoshtaCityId ?? 0);
-
-    return normalizeCityPayload({
-        city_description: cityDescription,
-        nova_poshta_city_id: novaPoshtaCityId === '' ? null : novaPoshtaCityId,
-        ukr_poshta_city_id: Number.isNaN(ukrPoshtaCityId) || ukrPoshtaCityId <= 0 ? null : ukrPoshtaCityId,
-        city_lat: toNumberOrNull(option.dataset.cityLat),
-        city_lng: toNumberOrNull(option.dataset.cityLng),
-    });
-};
-
-const readBranchFromOption = (option: HTMLOptionElement | null): CheckoutBranchSearchItem | null => {
-    if (!option) {
-        return null;
-    }
-
-    const branchData = parseCustomProperties(option.dataset.customProperties);
-
-    return normalizeBranchPayload({
-        ...branchData,
-        id: branchData.id ?? option.value.trim() ?? null,
-        description: branchData.description ?? option.textContent?.trim() ?? null,
-        label: branchData.label ?? option.textContent?.trim() ?? null,
-        branch_value: branchData.branch_value ?? option.value.trim() ?? null,
-    });
-};
-
-const buildChoiceItem = (city: CheckoutCitySearchItem): InputChoice => ({
-    value: city.city_description,
-    label: city.city_description,
-    customProperties: {
-        city_description: city.city_description,
-        nova_poshta_city_id: city.nova_poshta_city_id,
-        ukr_poshta_city_id: city.ukr_poshta_city_id,
-        city_lat: city.city_lat,
-        city_lng: city.city_lng,
-    },
-});
-
-const buildBranchChoiceItem = (branch: CheckoutBranchSearchItem): InputChoice => ({
-    value: branch.branch_value,
-    label: branch.branch_label,
-    customProperties: {
-        id: branch.id,
-        ref: branch.ref,
-        city_ref: branch.city_ref,
-        postcode: branch.postcode,
-        pdcity_id: branch.pdcity_id,
-        description: branch.description,
-        city_description: branch.city_description,
-        city_name: branch.city_name,
-        region_ua: branch.region_ua,
-        district_ua: branch.district_ua,
-        latitude: branch.latitude,
-        longitude: branch.longitude,
-        schedule: branch.schedule,
-        number: branch.number,
-        site_key: branch.site_key,
-        lock_code: branch.lock_code,
-        delivery_method: branch.delivery_method,
-        branch_value: branch.branch_value,
-        branch_label: branch.branch_label,
-    },
-});
-
-const appendRecordToFormData = (payload: FormData, prefix: string, data: Record<string, unknown>): void => {
-    Object.entries(data).forEach(([key, value]: [string, unknown]): void => {
-        if (value === null || value === undefined || value === '') {
-            return;
-        }
-
-        payload.append(`${prefix}[${key}]`, String(value));
-    });
-};
-
-const buildSelectionPayload = (
-    city: CheckoutCitySearchItem | null,
-    deliveryMethod: string,
-    deliveryPoint: CheckoutBranchSearchItem | null,
-    deliveryAddress: string,
-    paymentMethod: string,
-): FormData => {
-    const payload = new FormData();
-
-    if (city) {
-        payload.append('city[city_description]', city.city_description);
-        payload.append('city[nova_poshta_city_id]', city.nova_poshta_city_id ?? '');
-        payload.append(
-            'city[ukr_poshta_city_id]',
-            city.ukr_poshta_city_id === null ? '' : String(city.ukr_poshta_city_id),
-        );
-        payload.append('city[city_lat]', city.city_lat === null ? '' : String(city.city_lat));
-        payload.append('city[city_lng]', city.city_lng === null ? '' : String(city.city_lng));
-    }
-
-    if (deliveryPoint) {
-        appendRecordToFormData(payload, 'delivery_point', {
-            ...deliveryPoint,
-            delivery_method: deliveryMethod,
-        });
-    }
-
-    if (deliveryMethod === 'nova_poshta_courier' || deliveryMethod === 'pickup_store') {
-        payload.append('delivery_address', deliveryAddress);
-    }
-
-    payload.append('delivery_method', deliveryMethod);
-    payload.append('payment_method', paymentMethod);
-
-    return payload;
-};
-
-const buildBranchLoadPayload = (city: CheckoutCitySearchItem | null, deliveryMethod: string): FormData => {
-    const payload = new FormData();
-
-    payload.append('delivery_method', deliveryMethod);
-
-    if (city) {
-        payload.append('city[city_description]', city.city_description);
-        payload.append('city[nova_poshta_city_id]', city.nova_poshta_city_id ?? '');
-        payload.append(
-            'city[ukr_poshta_city_id]',
-            city.ukr_poshta_city_id === null ? '' : String(city.ukr_poshta_city_id),
-        );
-    }
-
-    return payload;
-};
-
-const isBranchCompatibleWithSelection = (
-    branch: CheckoutBranchSearchItem | null,
-    city: CheckoutCitySearchItem | null,
-    deliveryMethod: string,
-): boolean => {
-    if (!branch || !city || !['nova_poshta', 'nova_poshta_poshtomat', 'ukr_poshta'].includes(deliveryMethod)) {
-        return false;
-    }
-
-    if (deliveryMethod === 'nova_poshta' || deliveryMethod === 'nova_poshta_poshtomat') {
-        return (
-            branch.delivery_method === deliveryMethod &&
-            String(branch.city_ref ?? '') === String(city.nova_poshta_city_id ?? '')
-        );
-    }
-
-    return (
-        branch.delivery_method === 'ukr_poshta' &&
-        Number(branch.pdcity_id ?? 0) === Number(city.ukr_poshta_city_id ?? 0)
-    );
-};
-
-const resolveCheckoutSelectionState = (): CheckoutSelectionState => {
-    const state = getAppParam<CheckoutSelectionState>('checkout_selection_state');
-
-    return state ?? {};
-};
-
-const resolveCheckoutUrl = (
-    key: 'checkout_city_search_url' | 'checkout_branch_search_url' | 'checkout_selection_save_url',
-): string => {
-    const value = getAppParam<string>(key);
-
-    return typeof value === 'string' ? value : '';
-};
-
-const resolveBranchLabelText = (deliveryMethod: string): string => {
-    if (deliveryMethod === 'nova_poshta_poshtomat') {
-        return String(getAppParam('checkout_poshtomat_label_text') ?? '');
-    }
-
-    return String(getAppParam('checkout_branch_label_text') ?? '');
-};
-
-const buildCheckoutMapPoint = (branch: CheckoutBranchSearchItem): CheckoutMapPoint | null => {
-    const lat = Number(branch.latitude ?? 0);
-    const lng = Number(branch.longitude ?? 0);
-    const title = String(branch.branch_label ?? branch.label ?? branch.description ?? '').trim();
-    const description = String(branch.description ?? branch.branch_label ?? title).trim();
-
-    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat === 0 || lng === 0 || title === '') {
-        return null;
-    }
-
-    return {
-        id: String(branch.branch_value ?? branch.id ?? branch.ref ?? '').trim(),
-        title,
-        description,
-        lat,
-        lng,
-        schedule: branch.schedule ?? null,
-        delivery_method: String(branch.delivery_method ?? '').trim(),
-        branch_value: String(branch.branch_value ?? '').trim(),
-        city_ref: branch.city_ref ?? null,
-        city_description: branch.city_description ?? null,
-    };
-};
-
-const buildCheckoutMapPoints = (branches: CheckoutBranchSearchItem[]): CheckoutMapPoint[] => {
-    return branches
-        .map((branch: CheckoutBranchSearchItem): CheckoutMapPoint | null => buildCheckoutMapPoint(branch))
-        .filter((point: CheckoutMapPoint | null): point is CheckoutMapPoint => point !== null);
-};
-
-export const handleCheckoutDeliverySelection = (): void => {
-    const citySelectElement = <HTMLSelectElement | null>findElem('#checkout-city');
-    const branchSelectElement = <HTMLSelectElement | null>findElem('#checkout-branch');
-    const deliveryAddressInputElement = <HTMLInputElement | null>findElem('#checkout-delivery-address');
-    const cityWarningElement = <HTMLElement | null>findElem('[data-checkout-city-warning]');
-    const deliveryAddressWrapperElement = <HTMLElement | null>findElem('[data-checkout-delivery-address-wrapper]');
-    const cityWrapperElement = <HTMLElement | null>findElem('[data-checkout-city-wrapper]');
-    const branchWrapperElement = <HTMLElement | null>findElem('[data-checkout-branch-wrapper]');
-    const pickupStoreContentElement = <HTMLElement | null>findElem('[data-pickup-store-content]');
-    const pickupStoreAddressElement = <HTMLElement | null>findElem('[data-pickup-store-address]');
-    const branchLabelElement = <HTMLElement | null>findElem('[data-checkout-branch-label]');
-    const mapButtonElement = <HTMLButtonElement | null>findElem('#find-on-map-btn');
-    const deliveryMethodOptions = <HTMLElement[] | []>findArrayElems('[data-checkout-delivery-method-option]');
-    const deliveryMethodInputs = (<HTMLInputElement[] | []>(
-        findArrayElems('[data-checkout-delivery-method-input]')
-    )) as HTMLInputElement[];
-    const paymentMethodInputs = (<HTMLInputElement[] | []>(
-        findArrayElems('[data-checkout-payment-method-input]')
-    )) as HTMLInputElement[];
-    const paymentInformationElements = (<HTMLElement[] | []>(
-        findArrayElems('[data-checkout-payment-information]')
-    )) as HTMLElement[];
+export const initializeCheckoutDeliveryLogic = (): void => {
+    const {
+        citySelectElement,
+        branchSelectElement,
+        deliveryAddressInputElement,
+        cityWarningElement,
+        deliveryAddressWrapperElement,
+        branchWrapperElement,
+        branchLabelElement,
+        mapButtonElement,
+        deliveryMethodOptions,
+        deliveryMethodInputs,
+        paymentMethodInputs,
+    } = getCheckoutDomElements();
     const citySearchUrl = resolveCheckoutUrl('checkout_city_search_url');
     const branchSearchUrl = resolveCheckoutUrl('checkout_branch_search_url');
     const selectionSaveUrl = resolveCheckoutUrl('checkout_selection_save_url');
     const selectionState = resolveCheckoutSelectionState();
     const checkoutMapData = getAppParam<CheckoutMapData>('checkout_map_data') ?? {};
-    const initialCityRequired = citySelectElement?.required ?? false;
 
     if (!citySelectElement || !branchSelectElement) {
         return;
     }
 
-    const cityChoices = new Choices(citySelectElement, {
-        allowHTML: false,
-        duplicateItemsAllowed: false,
-        itemSelectText: '',
-        noChoicesText: String(getAppParam('checkout_no_cities_text') ?? ''),
-        noResultsText: String(getAppParam('checkout_no_cities_text') ?? ''),
-        position: 'auto',
-        renderChoiceLimit: 100,
-        searchEnabled: true,
-        searchChoices: false,
-        searchFloor: MIN_SEARCH_CITY_LENGTH,
-        searchPlaceholderValue: citySelectElement.dataset.placeholder ?? '',
-        searchResultLimit: 100,
-        shouldSort: false,
-    } as Partial<Options> & ChoiceSettings);
+    const emptyChoicesText = toStringValue(getAppParam('checkout_no_cities_text'));
+    const cityChoices = createCityChoices(citySelectElement, emptyChoicesText, MIN_SEARCH_CITY_LENGTH);
+    const branchChoices = createBranchChoices(branchSelectElement, emptyChoicesText, MIN_SEARCH_POST_OFFICE_LENGTH);
 
-    const branchChoices = new Choices(branchSelectElement, {
-        allowHTML: false,
-        duplicateItemsAllowed: false,
-        itemSelectText: '',
-        noChoicesText: String(getAppParam('checkout_no_cities_text') ?? ''),
-        noResultsText: String(getAppParam('checkout_no_cities_text') ?? ''),
-        position: 'auto',
-        renderChoiceLimit: 100,
-        searchEnabled: true,
-        searchChoices: true,
-        searchFields: ['label'],
-        searchFloor: MIN_SEARCH_POST_OFFICE_LENGTH,
-        searchPlaceholderValue: branchSelectElement.dataset.placeholder ?? '',
-        searchResultLimit: 100,
-        shouldSort: false,
-    } as Partial<Options> & ChoiceSettings);
-
-    let currentDeliveryMethod = String(selectionState.delivery_method ?? '').trim();
-    let currentPaymentMethod = String(selectionState.payment_method ?? '').trim();
+    let currentDeliveryMethod = toTrimmedString(selectionState.delivery_method);
+    let currentPaymentMethod = toTrimmedString(selectionState.payment_method);
     let currentCity = normalizeCityPayload(
         selectionState.city ?? readCityFromOption(citySelectElement.selectedOptions[0] ?? null),
     );
@@ -501,151 +63,107 @@ export const handleCheckoutDeliverySelection = (): void => {
     let latestBranchSearchResults: CheckoutBranchSearchItem[] = [];
     let currentBranchSearchStateKey = '';
 
-    const updatePaymentInformationVisibility = (): void => {
-        paymentInformationElements.forEach((element: HTMLElement): void => {
-            const isVisible = element.dataset.checkoutPaymentInformation === currentPaymentMethod;
-
-            element.classList.toggle('hidden', !isVisible);
-            element.setAttribute('aria-hidden', String(!isVisible));
-        });
+    const checkoutState = {
+        get city(): CheckoutCitySearchItem | null {
+            return currentCity;
+        },
+        set city(value: CheckoutCitySearchItem | null) {
+            currentCity = value;
+        },
+        get branch(): CheckoutBranchSearchItem | null {
+            return currentBranch;
+        },
+        set branch(value: CheckoutBranchSearchItem | null) {
+            currentBranch = value;
+        },
+        get deliveryMethod(): string {
+            return currentDeliveryMethod;
+        },
+        set deliveryMethod(value: string) {
+            currentDeliveryMethod = value;
+        },
+        get paymentMethod(): string {
+            return currentPaymentMethod;
+        },
+        set paymentMethod(value: string) {
+            currentPaymentMethod = value;
+        },
+        get deliveryAddress(): string {
+            return currentDeliveryAddress;
+        },
+        set deliveryAddress(value: string) {
+            currentDeliveryAddress = value;
+        },
+        get branchSearchStateKey(): string {
+            return currentBranchSearchStateKey;
+        },
+        set branchSearchStateKey(value: string) {
+            currentBranchSearchStateKey = value;
+        },
+        get latestCityResults(): CheckoutCitySearchItem[] {
+            return latestCitySearchResults;
+        },
+        set latestCityResults(value: CheckoutCitySearchItem[]) {
+            latestCitySearchResults = value;
+        },
+        get latestBranchResults(): CheckoutBranchSearchItem[] {
+            return latestBranchSearchResults;
+        },
+        set latestBranchResults(value: CheckoutBranchSearchItem[]) {
+            latestBranchSearchResults = value;
+        },
     };
 
-    const hideWarning = (): void => {
-        cityWarningElement?.classList.add('hidden');
-        cityWarningElement?.setAttribute('aria-hidden', 'true');
-    };
-
-    const showWarning = (message: string): void => {
-        if (!cityWarningElement) {
-            return;
-        }
-
-        cityWarningElement.textContent = message;
-        cityWarningElement.classList.remove('hidden');
-        cityWarningElement.setAttribute('aria-hidden', 'false');
-    };
-
-    const updateCourierAddressVisibility = (): void => {
-        const isCourierDelivery = currentDeliveryMethod === 'nova_poshta_courier';
-
-        deliveryAddressWrapperElement?.classList.toggle('hidden', !isCourierDelivery);
-
-        if (deliveryAddressInputElement) {
-            deliveryAddressInputElement.required = isCourierDelivery;
-        }
-    };
-
-    const updatePickupStoreVisibility = (): void => {
-        const isPickupStoreDelivery = currentDeliveryMethod === 'pickup_store';
-
-        cityWrapperElement?.classList.toggle('hidden', isPickupStoreDelivery);
-        branchWrapperElement?.classList.toggle('hidden', isPickupStoreDelivery);
-        pickupStoreContentElement?.classList.toggle('hidden', !isPickupStoreDelivery);
-        pickupStoreContentElement?.classList.toggle('flex', isPickupStoreDelivery);
-        citySelectElement.required = isPickupStoreDelivery ? false : initialCityRequired;
-
-        if (deliveryAddressInputElement) {
-            deliveryAddressInputElement.required = currentDeliveryMethod === 'nova_poshta_courier';
-        }
-
-        if (isPickupStoreDelivery) {
-            currentDeliveryAddress = String(pickupStoreAddressElement?.textContent ?? '').trim();
-
-            if (deliveryAddressInputElement) {
-                deliveryAddressInputElement.value = currentDeliveryAddress;
-            }
-        }
-    };
-
-    const updateBranchVisibility = (): void => {
-        const isBranchSearchAvailable =
-            currentDeliveryMethod !== '' &&
-            currentDeliveryMethod !== 'nova_poshta_courier' &&
-            currentDeliveryMethod !== 'pickup_store';
-
-        branchWrapperElement?.classList.toggle('hidden', !isBranchSearchAvailable);
-
-        if (branchLabelElement) {
-            branchLabelElement.textContent = resolveBranchLabelText(currentDeliveryMethod);
-        }
-
-        updateMapButtonState();
-    };
-
-    const updateMapButtonState = (): void => {
-        if (!mapButtonElement) {
-            return;
-        }
-
-        const hasMapPoints = latestBranchSearchResults.length > 0 || currentBranch !== null;
-        const isMapAvailable =
-            currentCity !== null &&
-            currentDeliveryMethod !== '' &&
-            currentDeliveryMethod !== 'nova_poshta_courier' &&
-            hasMapPoints;
-
-        mapButtonElement.toggleAttribute('disabled', !isMapAvailable);
-        mapButtonElement.classList.toggle('cursor-not-allowed', !isMapAvailable);
-        mapButtonElement.classList.toggle('opacity-60', !isMapAvailable);
-    };
-
-    const applyCitySearchResults = (cities: CheckoutCitySearchItem[]): void => {
-        latestCitySearchResults = cities;
-
-        const choicesData: (InputChoice | InputGroup)[] = cities.map(
-            (city: CheckoutCitySearchItem): InputChoice => buildChoiceItem(city),
-        );
-
-        if (
-            currentCity &&
-            !cities.some(
-                (city: CheckoutCitySearchItem): boolean => city.city_description === currentCity?.city_description,
-            )
-        ) {
-            choicesData.unshift(buildChoiceItem(currentCity));
-        }
-
-        cityChoices.clearChoices();
-        cityChoices.setChoices(choicesData, 'value', 'label', true);
-
-        if (currentCity) {
-            cityChoices.setChoiceByValue(currentCity.city_description);
-        }
-
-        updateMapButtonState();
-    };
-
-    const applyBranchSearchResults = (branches: CheckoutBranchSearchItem[]): void => {
-        latestBranchSearchResults = branches;
-
-        const choicesData: (InputChoice | InputGroup)[] = branches.map(
-            (branch: CheckoutBranchSearchItem): InputChoice => buildBranchChoiceItem(branch),
-        );
-
-        if (
-            currentBranch &&
-            !branches.some(
-                (branch: CheckoutBranchSearchItem): boolean => branch.branch_value === currentBranch?.branch_value,
-            )
-        ) {
-            choicesData.unshift(buildBranchChoiceItem(currentBranch));
-        }
-
-        branchChoices.clearChoices();
-        branchChoices.setChoices(choicesData, 'value', 'label', true);
-
-        if (currentBranch) {
-            branchChoices.setChoiceByValue(currentBranch.branch_value);
-        }
-
-        updateMapButtonState();
-    };
-
-    const resolveBranchSearchStateKey = (): string => {
-        const cityKey = currentCity?.nova_poshta_city_id ?? currentCity?.ukr_poshta_city_id ?? '';
-
-        return `${currentDeliveryMethod}:${String(cityKey)}`;
-    };
+    const checkoutUi = createCheckoutUi(
+        {
+            cityWarningElement,
+            deliveryAddressWrapperElement,
+            deliveryAddressInputElement,
+            branchWrapperElement,
+            branchLabelElement,
+            mapButtonElement,
+            deliveryMethodOptions,
+            cityChoices,
+            branchChoices,
+        },
+        {
+            getCity: (): CheckoutCitySearchItem | null => checkoutState.city,
+            getBranch: (): CheckoutBranchSearchItem | null => checkoutState.branch,
+            getDeliveryMethod: (): string => checkoutState.deliveryMethod,
+            getLatestBranchResults: (): CheckoutBranchSearchItem[] => checkoutState.latestBranchResults,
+            setDeliveryMethod: (deliveryMethod: string): void => {
+                checkoutState.deliveryMethod = deliveryMethod;
+            },
+            setCity: (city: CheckoutCitySearchItem | null): void => {
+                checkoutState.city = city;
+            },
+            setBranch: (branch: CheckoutBranchSearchItem | null): void => {
+                checkoutState.branch = branch;
+            },
+            setDeliveryAddress: (deliveryAddress: string): void => {
+                checkoutState.deliveryAddress = deliveryAddress;
+            },
+            setLatestCityResults: (cities: CheckoutCitySearchItem[]): void => {
+                checkoutState.latestCityResults = cities;
+            },
+            setLatestBranchResults: (branches: CheckoutBranchSearchItem[]): void => {
+                checkoutState.latestBranchResults = branches;
+            },
+            getChooseCityFirstText: (): string => toStringValue(getAppParam('checkout_choose_city_first_text')),
+            getNoDeliveryMethodsText: (): string => toStringValue(getAppParam('checkout_no_delivery_methods_text')),
+        },
+    );
+    const {
+        applyBranchSearchResults,
+        applyCitySearchResults,
+        hideWarning,
+        showWarning,
+        updateBranchAvailability,
+        updateBranchVisibility,
+        updateCourierAddressVisibility,
+        updateMapButtonState,
+        updateDeliveryMethodVisibility,
+    } = checkoutUi;
 
     const resolveSelectedCity = (): CheckoutCitySearchItem | null => {
         const selectedValue = citySelectElement.value.trim();
@@ -654,15 +172,10 @@ export const handleCheckoutDeliverySelection = (): void => {
             return null;
         }
 
-        const matchedSearchCity = latestCitySearchResults.find(
-            (city: CheckoutCitySearchItem): boolean => city.city_description === selectedValue,
+        return (
+            latestCitySearchResults.find((city) => city.city_description === selectedValue) ??
+            readCityFromOption(citySelectElement.selectedOptions[0] ?? null)
         );
-
-        if (matchedSearchCity) {
-            return matchedSearchCity;
-        }
-
-        return readCityFromOption(citySelectElement.selectedOptions[0] ?? null);
     };
 
     const resolveSelectedBranch = (): CheckoutBranchSearchItem | null => {
@@ -672,196 +185,22 @@ export const handleCheckoutDeliverySelection = (): void => {
             return null;
         }
 
-        const matchedSearchBranch = latestBranchSearchResults.find(
-            (branch: CheckoutBranchSearchItem): boolean => branch.branch_value === selectedValue,
+        return (
+            latestBranchSearchResults.find((branch) => branch.branch_value === selectedValue) ??
+            readBranchFromOption(branchSelectElement.selectedOptions[0] ?? null)
         );
-
-        if (matchedSearchBranch) {
-            return matchedSearchBranch;
-        }
-
-        return readBranchFromOption(branchSelectElement.selectedOptions[0] ?? null);
     };
 
-    const updateDeliveryMethodVisibility = (): void => {
-        const hasCity = currentCity !== null;
-        const isNovaAvailable = Boolean(currentCity?.nova_poshta_city_id);
-        const isUkrAvailable = Boolean(currentCity?.ukr_poshta_city_id);
-
-        deliveryMethodOptions.forEach((optionElement: HTMLElement): void => {
-            const method = optionElement.dataset.checkoutDeliveryMethodOption ?? '';
-            const isVisible =
-                method === 'pickup_store' || !hasCity || (method === 'ukr_poshta' ? isUkrAvailable : isNovaAvailable);
-
-            optionElement.classList.toggle('hidden', !isVisible);
-
-            if (!isVisible) {
-                const input = <HTMLInputElement | null>findElem('[data-checkout-delivery-method-input]', optionElement);
-
-                if (input?.checked) {
-                    input.checked = false;
-                }
-            }
-        });
-
-        const availableMethods = [
-            hasCity ? (isNovaAvailable ? 'nova_poshta' : null) : 'nova_poshta',
-            hasCity ? (isNovaAvailable ? 'nova_poshta_courier' : null) : 'nova_poshta_courier',
-            hasCity ? (isNovaAvailable ? 'nova_poshta_poshtomat' : null) : 'nova_poshta_poshtomat',
-            hasCity ? (isUkrAvailable ? 'ukr_poshta' : null) : 'ukr_poshta',
-            'pickup_store',
-        ].filter((method: string | null): method is CheckoutDeliveryMethod => method !== null);
-
-        if (hasCity && availableMethods.length === 0) {
-            showWarning(String(getAppParam('checkout_no_delivery_methods_text') ?? ''));
-        } else if (hasCity) {
-            hideWarning();
-        }
-
-        updateCourierAddressVisibility();
-        updatePickupStoreVisibility();
-        updateBranchVisibility();
-    };
-
-    const updateBranchAvailability = (): void => {
-        updateBranchVisibility();
-        updateCourierAddressVisibility();
-
-        if (
-            !currentCity ||
-            !currentDeliveryMethod ||
-            currentDeliveryMethod === 'nova_poshta_courier' ||
-            currentDeliveryMethod === 'pickup_store'
-        ) {
-            currentBranch = null;
-            branchChoices.removeActiveItems();
-            branchChoices.clearChoices();
-            updateMapButtonState();
-            return;
-        }
-
-        if (currentBranch && !isBranchCompatibleWithSelection(currentBranch, currentCity, currentDeliveryMethod)) {
-            currentBranch = null;
-            branchChoices.removeActiveItems();
-            branchChoices.clearChoices();
-        }
-
-        updateMapButtonState();
-    };
-
-    const loadBranches = debounce(async (): Promise<void> => {
-        if (
-            !currentCity ||
-            currentDeliveryMethod === 'nova_poshta_courier' ||
-            !['nova_poshta', 'nova_poshta_poshtomat', 'ukr_poshta'].includes(currentDeliveryMethod) ||
-            isEmpty(branchSearchUrl)
-        ) {
-            currentBranchSearchStateKey = '';
-            latestBranchSearchResults = [];
-            branchChoices.clearChoices();
-
-            return;
-        }
-
-        const searchStateKey = resolveBranchSearchStateKey();
-
-        if (searchStateKey === currentBranchSearchStateKey && latestBranchSearchResults.length > 0) {
-            applyBranchSearchResults(latestBranchSearchResults);
-
-            return;
-        }
-
-        currentBranchSearchStateKey = searchStateKey;
-
-        try {
-            const response = await fetchFunc<CheckoutBranchSearchResponse>(
-                branchSearchUrl,
-                buildBranchLoadPayload(currentCity, currentDeliveryMethod),
-            );
-            const items = isArray(response?.items) ? response.items : [];
-
-            latestBranchSearchResults = items
-                .map((item: CheckoutBranchSearchItem): CheckoutBranchSearchItem | null => normalizeBranchPayload(item))
-                .filter((item: CheckoutBranchSearchItem | null): item is CheckoutBranchSearchItem => item !== null);
-
-            applyBranchSearchResults(latestBranchSearchResults);
-        } catch {
-            latestBranchSearchResults = [];
-
-            if (currentBranch && isBranchCompatibleWithSelection(currentBranch, currentCity, currentDeliveryMethod)) {
-                applyBranchSearchResults([currentBranch]);
-            } else {
-                branchChoices.clearChoices();
-            }
-
-            updateMapButtonState();
-        }
-    }, SEARCH_DEBOUNCE_MS);
-
-    const saveSelection = async (): Promise<void> => {
-        if (isEmpty(selectionSaveUrl)) {
-            return;
-        }
-
-        try {
-            await fetchFunc(
-                selectionSaveUrl,
-                buildSelectionPayload(
-                    currentCity,
-                    currentDeliveryMethod,
-                    currentBranch,
-                    currentDeliveryAddress,
-                    currentPaymentMethod,
-                ),
-            );
-        } catch {
-            // Ignore transient network failures; checkout state remains usable locally.
-            showErrorInConsole('[checkout] Failed to synchronize delivery selection.');
-        }
-    };
-
-    const syncSelectionToServer = debounce(async (): Promise<void> => {
-        await saveSelection();
-    }, 0);
-
-    const searchCities = debounce(async (searchValue: string): Promise<void> => {
-        const normalizedValue = searchValue.trim();
-
-        if (normalizedValue.length < MIN_SEARCH_CITY_LENGTH || isEmpty(citySearchUrl)) {
-            latestCitySearchResults = [];
-
-            if (currentCity) {
-                applyCitySearchResults([currentCity]);
-            } else {
-                cityChoices.clearChoices();
-            }
-
-            return;
-        }
-
-        try {
-            const response = await fetchFunc<CheckoutCitySearchResponse>(
-                `${citySearchUrl}?city_keyword=${encodeURIComponent(normalizedValue)}`,
-                {} as Record<string, string | number>,
-                'GET',
-            );
-            const items = isArray(response?.items) ? response.items : [];
-
-            latestCitySearchResults = items
-                .map((item: CheckoutCitySearchItem): CheckoutCitySearchItem | null => normalizeCityPayload(item))
-                .filter((item: CheckoutCitySearchItem | null): item is CheckoutCitySearchItem => item !== null);
-
-            applyCitySearchResults(latestCitySearchResults);
-        } catch {
-            latestCitySearchResults = [];
-
-            if (currentCity) {
-                applyCitySearchResults([currentCity]);
-            } else {
-                cityChoices.clearChoices();
-            }
-        }
-    }, SEARCH_DEBOUNCE_MS);
+    const checkoutSearch = createCheckoutSearch({
+        citySearchUrl,
+        branchSearchUrl,
+        selectionSaveUrl,
+        state: checkoutState,
+        applyCityResults: applyCitySearchResults,
+        applyBranchResults: applyBranchSearchResults,
+        updateMapButtonState,
+    });
+    const { loadBranches, saveSelection, searchCities, syncSelectionToServer } = checkoutSearch;
 
     const handleCitySelectionChange = (): void => {
         currentCity = resolveSelectedCity();
@@ -873,7 +212,7 @@ export const handleCheckoutDeliverySelection = (): void => {
             currentBranchSearchStateKey = '';
             updateDeliveryMethodVisibility();
             branchChoices.clearChoices();
-            showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
+            showWarning(toStringValue(getAppParam('checkout_choose_city_first_text')));
             void saveSelection();
 
             return;
@@ -901,7 +240,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         if (currentDeliveryMethod === 'pickup_store') {
             currentCity = null;
             currentBranch = null;
-            currentDeliveryAddress = String(pickupStoreAddressElement?.textContent ?? '').trim();
+            currentDeliveryAddress = toTrimmedString(deliveryAddressInputElement?.value);
             cityChoices.removeActiveItems();
             cityChoices.clearChoices();
             branchChoices.removeActiveItems();
@@ -915,13 +254,12 @@ export const handleCheckoutDeliverySelection = (): void => {
 
         if (!currentCity && !wasPickupStoreDelivery) {
             target.checked = false;
-            showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
+            showWarning(toStringValue(getAppParam('checkout_choose_city_first_text')));
             currentDeliveryMethod = '';
             currentBranch = null;
             currentDeliveryAddress = '';
             branchChoices.clearChoices();
             updateCourierAddressVisibility();
-            updatePickupStoreVisibility();
             updateBranchVisibility();
 
             return;
@@ -950,12 +288,11 @@ export const handleCheckoutDeliverySelection = (): void => {
         }
 
         currentPaymentMethod = target.value.trim();
-        updatePaymentInformationVisibility();
         syncSelectionToServer();
     };
 
     const handleDeliveryAddressChange = (): void => {
-        currentDeliveryAddress = String(deliveryAddressInputElement?.value ?? '').trim();
+        currentDeliveryAddress = toTrimmedString(deliveryAddressInputElement?.value);
 
         if (currentDeliveryMethod === 'nova_poshta_courier') {
             syncSelectionToServer();
@@ -968,7 +305,7 @@ export const handleCheckoutDeliverySelection = (): void => {
         if (!currentCity) {
             currentBranch = null;
             branchChoices.clearChoices();
-            showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
+            showWarning(toStringValue(getAppParam('checkout_choose_city_first_text')));
 
             return;
         }
@@ -1003,7 +340,7 @@ export const handleCheckoutDeliverySelection = (): void => {
 
     const openCheckoutMap = async (): Promise<void> => {
         if (!currentCity) {
-            showWarning(String(getAppParam('checkout_choose_city_first_text') ?? ''));
+            showWarning(toStringValue(getAppParam('checkout_choose_city_first_text')));
 
             return;
         }
@@ -1041,34 +378,24 @@ export const handleCheckoutDeliverySelection = (): void => {
         });
     };
 
-    citySelectElement.addEventListener('search', (event: Event): void => {
-        const searchEvent = event as CustomEvent<{
-            value: string;
-            resultCount: number;
-        }>;
-
-        searchCities(searchEvent.detail?.value ?? '');
-    });
-
-    citySelectElement.addEventListener('change', handleCitySelectionChange);
-    branchSelectElement.addEventListener('change', handleBranchSelectionChange);
-    deliveryAddressInputElement?.addEventListener('input', handleDeliveryAddressChange);
-    deliveryAddressInputElement?.addEventListener('change', handleDeliveryAddressChange);
-
-    deliveryMethodInputs.forEach((input: HTMLInputElement): void => {
-        input.addEventListener('change', handleDeliveryMethodChange);
-    });
-
-    paymentMethodInputs.forEach((input: HTMLInputElement): void => {
-        input.addEventListener('change', handlePaymentMethodChange);
+    bindCheckoutEvents({
+        citySelectElement,
+        branchSelectElement,
+        deliveryAddressInputElement,
+        deliveryMethodInputs,
+        paymentMethodInputs,
+        onCitySearch: (value: string): void => searchCities(value),
+        onCityChange: handleCitySelectionChange,
+        onBranchChange: handleBranchSelectionChange,
+        onDeliveryAddressChange: handleDeliveryAddressChange,
+        onDeliveryMethodChange: handleDeliveryMethodChange,
+        onPaymentMethodChange: handlePaymentMethodChange,
     });
 
     if (!currentPaymentMethod) {
         const checkedPaymentMethod = <HTMLInputElement | null>findElem('[data-checkout-payment-method-input]:checked');
         currentPaymentMethod = checkedPaymentMethod?.value ?? '';
     }
-
-    updatePaymentInformationVisibility();
 
     bindMapButton();
 
@@ -1089,7 +416,6 @@ export const handleCheckoutDeliverySelection = (): void => {
         updateDeliveryMethodVisibility();
         updateBranchVisibility();
         updateCourierAddressVisibility();
-        updatePickupStoreVisibility();
         updateMapButtonState();
     }
 };

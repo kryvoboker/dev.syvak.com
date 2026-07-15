@@ -24,12 +24,10 @@ export const moduleViteConfig: ModuleViteConfig = {
     refresh: [
         'Modules/NovaPoshta/resources/views/**',
         'Modules/NovaPoshta/resources/assets/css/**',
-        'Modules/NovaPoshta/resources/assets/ts/**',
         'Modules/NovaPoshta/app/**',
         'Modules/NovaPoshta/routes/**',
     ],
     alias: {
-        '@nova-poshta-ts': path.resolve(moduleRootPath, 'resources/assets/ts'),
         '@nova-poshta-css': path.resolve(moduleRootPath, 'resources/assets/css'),
     },
     inject: {
