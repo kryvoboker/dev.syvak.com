@@ -3,8 +3,9 @@ import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig, type UserConfig } from 'vite';
-import { appCssEntryPath, appTsEntryPath, baseEntryPoints, baseRefreshGlobs } from './vite/constants';
+import { appCssEntryPath, baseEntryPoints, baseRefreshGlobs } from './vite/constants';
 import { loadActiveModuleConfigs } from './vite/modules/loadActiveModuleConfigs';
+import { loadModuleAliases } from './vite/modules/loadModuleAliases';
 import { resolveExistingModuleAssetImports } from './vite/modules/resolveExistingModuleAssetImports';
 import { createInjectModuleImportsPlugin } from './vite/plugins/createInjectModuleImportsPlugin';
 import type { LoadedModuleViteConfig } from './vite/types';
@@ -25,19 +26,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
         modulesStatusesPath,
     });
 
-    const moduleAliases: Record<string, string> = {};
-
-    for (const loadedModuleConfig of loadedModuleConfigs) {
-        const rawAliases: Record<string, unknown> = loadedModuleConfig.config.alias ?? {};
-
-        for (const [aliasKey, aliasPath] of Object.entries(rawAliases)) {
-            if (typeof aliasPath !== 'string' || aliasPath.trim() === '') {
-                continue;
-            }
-
-            moduleAliases[aliasKey] = aliasPath;
-        }
-    }
+    const moduleAliases = await loadModuleAliases({ modulesRootPath });
 
     const baseAliases: Record<string, string> = {
         '@ts-shared': path.resolve(__dirname, './resources/assets/catalog/ts/shared'),
@@ -60,13 +49,6 @@ export default defineConfig(async (): Promise<UserConfig> => {
         moduleAssetType: 'css',
     });
 
-    const tsModuleImports: string[] = resolveExistingModuleAssetImports({
-        loadedModuleConfigs,
-        appRootPath: __dirname,
-        appEntryPath: appTsEntryPath,
-        moduleAssetType: 'ts',
-    });
-
     return {
         build: {
             outDir: path.resolve(__dirname, '../httpdocs/build'),
@@ -82,13 +64,6 @@ export default defineConfig(async (): Promise<UserConfig> => {
                 importPaths: cssModuleImports,
                 importStatementBuilder: (importPath: string): string => `@import "${importPath}";`,
                 prependImports: false,
-            }),
-            createInjectModuleImportsPlugin({
-                pluginName: 'inject-active-module-scripts',
-                targetEntryAbsolutePath: toPosixPath(path.resolve(__dirname, appTsEntryPath)),
-                importPaths: tsModuleImports,
-                importStatementBuilder: (importPath: string): string => `import "${importPath}";`,
-                prependImports: true,
             }),
             laravel({
                 publicDirectory: '../httpdocs',

@@ -7,7 +7,6 @@ export interface ModuleViteConfig {
     alias: Record<string, string>;
     inject?: {
         css?: string[];
-        ts?: string[];
     };
 }
 

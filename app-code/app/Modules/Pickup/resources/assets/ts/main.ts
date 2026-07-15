@@ -51,8 +51,4 @@ const initializePickupStoreVisibility = (): void => {
 
 document.addEventListener('checkout:initialized', handlePickupStoreVisibility);
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializePickupStoreVisibility, { once: true });
-} else {
-    initializePickupStoreVisibility();
-}
+initializePickupStoreVisibility();

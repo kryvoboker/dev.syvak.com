@@ -5,9 +5,6 @@ export interface ModuleViteConfig {
     moduleName: string;
     refresh: string[];
     alias: Record<string, string>;
-    inject?: {
-        ts?: string[];
-    };
 }
 
 const __filename: string = fileURLToPath(import.meta.url);
@@ -23,8 +20,5 @@ export const moduleViteConfig: ModuleViteConfig = {
     ],
     alias: {
         '@wayforpay-ts': path.resolve(__dirname, 'resources/assets/ts'),
-    },
-    inject: {
-        ts: ['resources/assets/ts/main.ts'],
     },
 };

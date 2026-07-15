@@ -30,8 +30,4 @@ const initializeBankTransferPaymentInformation = (): void => {
 
 document.addEventListener('checkout:initialized', updatePaymentInformationVisibility);
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeBankTransferPaymentInformation, { once: true });
-} else {
-    initializeBankTransferPaymentInformation();
-}
+initializeBankTransferPaymentInformation();
