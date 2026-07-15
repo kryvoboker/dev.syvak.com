@@ -84,26 +84,13 @@ const loadWayForPayWidget = (): Promise<void> => {
     });
 };
 
-const submitRedirectFallback = (
-    redirectData: NonNullable<NonNullable<WayForPayResponse['payment']>['redirect_data']>,
-): void => {
-    const action = String(redirectData.action ?? '').trim();
-    const method = String(redirectData.method ?? window.app_params?.wayforpay_redirect_method ?? 'POST')
-        .trim()
-        .toUpperCase();
-
-    if (action === '' || method !== String(window.app_params?.wayforpay_redirect_method ?? 'POST').toUpperCase()) {
-        showCheckoutError('The payment redirect is unavailable.');
-
-        return;
-    }
-
+const submitPostForm = (action: string, fields: Record<string, unknown>): void => {
     const form = document.createElement('form');
-    form.method = method;
+    form.method = 'POST';
     form.action = action;
     form.style.display = 'none';
 
-    Object.entries(redirectData.fields ?? {}).forEach(([key, value]: [string, unknown]): void => {
+    Object.entries(fields).forEach(([key, value]: [string, unknown]): void => {
         if (Array.isArray(value)) {
             value.forEach((item: unknown): void => {
                 const input = document.createElement('input');
@@ -123,6 +110,23 @@ const submitRedirectFallback = (
 
     document.body.appendChild(form);
     form.submit();
+};
+
+const submitRedirectFallback = (
+    redirectData: NonNullable<NonNullable<WayForPayResponse['payment']>['redirect_data']>,
+): void => {
+    const action = String(redirectData.action ?? '').trim();
+    const method = String(redirectData.method ?? window.app_params?.wayforpay_redirect_method ?? 'POST')
+        .trim()
+        .toUpperCase();
+
+    if (action === '' || method !== String(window.app_params?.wayforpay_redirect_method ?? 'POST').toUpperCase()) {
+        showCheckoutError('The payment redirect is unavailable.');
+
+        return;
+    }
+
+    submitPostForm(action, redirectData.fields ?? {});
 };
 
 const openWayForPayPayment = async (response: WayForPayResponse): Promise<void> => {
@@ -158,12 +162,16 @@ const openWayForPayPayment = async (response: WayForPayResponse): Promise<void> 
         }
 
         const wayforpay = new window.Wayforpay();
-        const redirectToReturnUrl = (): void => {
+        const redirectToReturnUrl = (widgetResponse: unknown): void => {
             const returnUrl = String(widgetData.returnUrl ?? '').trim();
 
-            if (returnUrl !== '') {
-                window.location.assign(returnUrl);
+            if (returnUrl === '' || typeof widgetResponse !== 'object' || widgetResponse === null) {
+                showCheckoutError('The payment response is unavailable.');
+
+                return;
             }
+
+            submitPostForm(returnUrl, widgetResponse as Record<string, unknown>);
         };
 
         wayforpay.run(
