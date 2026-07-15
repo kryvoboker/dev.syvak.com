@@ -10,9 +10,17 @@ info:
     - `GET /{locale}/checkout/cities`
     - `POST /{locale}/checkout/branches`
     - `POST /{locale}/checkout/selection`
+    - `POST /{locale}/order-validate/simple`
+    - `POST /{locale}/order-confirm/simple`
 
     The singleton Pickup module can add the `pickup_store` delivery method when it is
     enabled and configured. See [Pickup module contract](../../../Modules/Pickup/docs/openapi.yaml).
+
+    WayForPay is a singleton payment method rendered inside `#checkout-payment-collapse`.
+    When selected, it is processed through the `SimpleOrder` endpoints. The create response
+    contains either official widget data or a POST redirect payload; the WayForPay module's
+    frontend entry point loads the widget only after order validation and creation have
+    succeeded. See [WayForPay module contract](../../../Modules/WayForPay/docs/openapi.yaml).
 servers:
   - url: https://example.test
     description: Local or staging environment
@@ -115,7 +123,68 @@ paths:
                 $ref: '#/components/schemas/CheckoutSelectionStoreResponse'
         '422':
           $ref: '#/components/responses/ValidationError'
+  /{locale}/order-validate/simple:
+    post:
+      tags: [Checkout]
+      summary: Validate a regular checkout order
+      description: Validates customer, delivery, payment, and cart data before an order is created.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SimpleOrderRequest'
+      responses:
+        '200':
+          description: Validation result and current cart snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderValidationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /{locale}/order-confirm/simple:
+    post:
+      tags: [Checkout]
+      summary: Create a regular checkout order
+      description: |
+        Creates the regular order. For `payment_method=wayforpay`, the response remains
+        pending and includes a payment payload. The browser then opens the widget or submits
+        the fallback redirect form to `https://secure.wayforpay.com/pay`.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SimpleOrderRequest'
+      responses:
+        '200':
+          description: Order creation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleOrderResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 components:
+  parameters:
+    Locale:
+      in: path
+      name: locale
+      required: true
+      schema:
+        type: string
+      description: Active storefront locale.
   responses:
     ValidationError:
       description: Validation failed.
@@ -358,6 +427,134 @@ components:
             - 'null'
           maxLength: 255
           description: For pickup_store, the localized store address is submitted here; for other methods it contains the courier address or null.
+    SimpleOrderRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - first_name
+        - last_name
+        - phone
+        - email
+        - cart_mode
+        - delivery_method
+        - payment_method
+      properties:
+        first_name:
+          type: string
+          minLength: 2
+          maxLength: 255
+        last_name:
+          type: string
+          minLength: 2
+          maxLength: 255
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        cart_mode:
+          type: string
+          const: regular
+        delivery_method:
+          type: string
+          enum:
+            - nova_poshta
+            - nova_poshta_poshtomat
+            - nova_poshta_courier
+            - ukr_poshta
+            - pickup_store
+        payment_method:
+          type: string
+          enum:
+            - cash_on_delivery
+            - payment_upon_delivery
+            - bank_transfer
+            - wayforpay
+        delivery_address:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+        city:
+          type:
+            - object
+            - 'null'
+        delivery_point:
+          type:
+            - object
+            - 'null'
+    OrderValidationResponse:
+      type: object
+      additionalProperties: true
+      required: [success, errors]
+      properties:
+        success:
+          type: boolean
+        errors:
+          type: object
+          additionalProperties: true
+        cart:
+          type: object
+          additionalProperties: true
+    SimpleOrderResponse:
+      type: object
+      additionalProperties: true
+      required: [success, status, errors]
+      properties:
+        success:
+          type: boolean
+        order_number:
+          type:
+            - string
+            - 'null'
+        status:
+          type: string
+          enum: [pending, success, failed]
+        redirect_url:
+          type: string
+          format: uri
+        errors:
+          type: object
+          additionalProperties: true
+        payment:
+          $ref: '#/components/schemas/WayForPayPaymentResponse'
+    WayForPayPaymentResponse:
+      type: object
+      additionalProperties: false
+      required: [success, payment_method, use_widget, errors]
+      properties:
+        success:
+          type: boolean
+        payment_method:
+          type: string
+          const: wayforpay
+        use_widget:
+          type: boolean
+        widget_data:
+          type: object
+          additionalProperties: true
+          description: Signed data passed to the official WayForPay widget.
+        redirect_data:
+          type: object
+          additionalProperties: false
+          required: [action, method, fields]
+          properties:
+            action:
+              type: string
+              format: uri
+              const: https://secure.wayforpay.com/pay
+            method:
+              type: string
+              const: POST
+            fields:
+              type: object
+              additionalProperties: true
+        errors:
+          type: object
+          additionalProperties: true
     CheckoutSelectionStoreResponse:
       type: object
       additionalProperties: false
