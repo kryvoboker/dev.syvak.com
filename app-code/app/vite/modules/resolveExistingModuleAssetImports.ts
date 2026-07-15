@@ -8,7 +8,7 @@ interface ResolveExistingModuleAssetImportsParams
     loadedModuleConfigs: LoadedModuleViteConfig[];
     appRootPath: string;
     appEntryPath: string;
-    moduleAssetType: 'css' | 'ts';
+    moduleAssetType: 'css';
 }
 
 export const resolveExistingModuleAssetImports = (

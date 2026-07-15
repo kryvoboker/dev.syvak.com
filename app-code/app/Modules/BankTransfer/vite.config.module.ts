@@ -5,9 +5,6 @@ export interface ModuleViteConfig {
     moduleName: string;
     refresh: string[];
     alias: Record<string, string>;
-    inject?: {
-        ts?: string[];
-    };
 }
 
 const __filename: string = fileURLToPath(import.meta.url);

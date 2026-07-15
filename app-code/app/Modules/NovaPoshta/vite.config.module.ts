@@ -7,7 +7,6 @@ export interface ModuleViteConfig {
     alias: Record<string, string>;
     inject?: {
         css?: string[];
-        ts?: string[];
     };
 }
 
@@ -32,6 +31,5 @@ export const moduleViteConfig: ModuleViteConfig = {
     },
     inject: {
         css: ['resources/assets/css/main.css'],
-        ts: ['resources/assets/ts/main.ts'],
     },
 };

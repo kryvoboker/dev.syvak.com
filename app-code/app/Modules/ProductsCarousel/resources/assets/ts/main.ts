@@ -1,6 +1,6 @@
 import { findElem } from '@ts-shared/lib/helpers';
 
-document.addEventListener('DOMContentLoaded', (): void => {
+export const handleProductsCarousel = (): void => {
     window.$hsCarouselCollection = window.$hsCarouselCollection || [];
 
     const productsCarouselExists = findElem('[data-products-carousel]') !== null;
@@ -12,4 +12,4 @@ document.addEventListener('DOMContentLoaded', (): void => {
     import('@products-carousel-ts/features/mainProductsCarousel.ts').then((module): void => {
         module.handleProductsCarousel();
     });
-});
+};
