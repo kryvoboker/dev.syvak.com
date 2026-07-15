@@ -1,0 +1,181 @@
+openapi: 3.1.0
+info:
+  title: WayForPay Module Contract
+  version: 1.0.0
+  description: |
+    Contract for the singleton WayForPay payment module.
+
+    The module is selected on the shared checkout page. A regular checkout order is
+    validated and created through the shared `SimpleOrder` endpoints. The module then
+    returns signed WayForPay request data to the browser. The browser opens the official
+    WayForPay widget when enabled and falls back to a server-side POST redirect when the
+    widget cannot be loaded or opened.
+
+    WayForPay sends payment status notifications to the callback endpoint. The browser
+    returns to the return endpoint after the payment flow; the return endpoint validates
+    the response signature when a signed response is available and redirects the customer
+    to the localized success or failure page.
+servers:
+  - url: https://example.test
+    description: Local or staging environment
+tags:
+  - name: WayForPay
+    description: WayForPay callback and browser-return endpoints
+paths:
+  /{locale}/wayforpay/callback:
+    post:
+      tags: [WayForPay]
+      summary: Receive a WayForPay payment status callback
+      description: |
+        Public callback for WayForPay. CSRF protection is intentionally disabled for this
+        endpoint because the request originates from WayForPay. The application validates
+        the request with the configured merchant account and secret key and returns the
+        SDK-generated success response. Invalid or unsigned requests are rejected.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WayForPayCallbackRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WayForPayCallbackRequest'
+      responses:
+        '200':
+          description: Signed acknowledgement accepted by WayForPay.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WayForPayCallbackResponse'
+        '400':
+          description: Signature validation or request parsing failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WayForPayRejectResponse'
+  /{locale}/wayforpay/return:
+    get:
+      tags: [WayForPay]
+      summary: Handle a browser return from WayForPay
+      description: Browser-facing return endpoint. It redirects to the localized thank-you
+        page only for an approved, valid response; all other outcomes redirect to failure.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/WayForPayReturnQuery'
+      responses:
+        '302':
+          description: Redirect to the localized success or failure page.
+    post:
+      tags: [WayForPay]
+      summary: Handle a POST browser return from WayForPay
+      description: Same contract as the GET return endpoint, with the response fields sent
+        as a form body by the checkout widget or the WayForPay payment page.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WayForPayReturnRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WayForPayReturnRequest'
+      responses:
+        '302':
+          description: Redirect to the localized success or failure page.
+components:
+  parameters:
+    Locale:
+      in: path
+      name: locale
+      required: true
+      schema:
+        type: string
+      description: Active storefront locale.
+    WayForPayReturnQuery:
+      in: query
+      name: transactionStatus
+      required: false
+      schema:
+        type: string
+      description: WayForPay transaction status when the provider uses a GET return.
+  schemas:
+    WayForPayCallbackRequest:
+      type: object
+      additionalProperties: true
+      required:
+        - merchantAccount
+        - orderReference
+        - transactionStatus
+        - merchantSignature
+      properties:
+        merchantAccount:
+          type: string
+        orderReference:
+          type: string
+        transactionStatus:
+          type: string
+          description: Provider status, for example Approved or Declined.
+        merchantSignature:
+          type: string
+        reasonCode:
+          type: integer
+        reason:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+    WayForPayReturnRequest:
+      allOf:
+        - $ref: '#/components/schemas/WayForPayCallbackRequest'
+      description: WayForPay response fields returned to the browser after payment.
+    WayForPayCallbackResponse:
+      type: object
+      additionalProperties: true
+      required: [orderReference, transactionStatus, reasonCode, reason]
+      properties:
+        orderReference:
+          type: string
+        transactionStatus:
+          type: string
+        reasonCode:
+          type: integer
+        reason:
+          type: string
+        merchantSignature:
+          type: string
+    WayForPayRejectResponse:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: reject
+x-module:
+  name: WayForPay
+  alias: wayforpay
+  singleton: true
+  admin_page_slug: modules/wayforpay
+  checkout_page_types:
+    - checkout
+  payment_method: wayforpay
+  global_config:
+    settings_key: wayforpay.settings
+    payment_names_key: wayforpay.payment_names
+  endpoints:
+    payment: https://secure.wayforpay.com/pay
+    widget_script: https://secure.wayforpay.com/server/pay-widget.js
+  availability:
+    required:
+      - enabled_singleton_module
+      - merchant_account
+      - secret_key
+      - merchant_domain_name
+      - payment_name_for_each_active_language
+    optional:
+      - checkout_widget_enabled
