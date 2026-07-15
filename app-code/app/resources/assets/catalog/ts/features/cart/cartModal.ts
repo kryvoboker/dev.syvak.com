@@ -10,7 +10,15 @@ import type { CartMode } from '@ts-features/cart/cartTypes.ts';
 import { Cart } from '@ts-features/cart/constants.ts';
 import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
 import { initDrawer } from '@ts-shared/drawer/initDrawer.ts';
-import { findArrayElems, findElem, getClosestParentEl, sprintF } from '@ts-shared/lib/helpers.ts';
+import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
+import {
+    findArrayElems,
+    findElem,
+    getClosestParentEl,
+    isIntegerNumber,
+    sprintF,
+    toNumber,
+} from '@ts-shared/lib/helpers.ts';
 
 import $FAST_ORDER = Cart.$FAST_ORDER;
 import $REGULAR = Cart.$REGULAR;
@@ -67,7 +75,7 @@ const updateSelectedCartItemsSummary = (mode: CartMode): void => {
     }
 
     if (removeSelectedButton) {
-        removeSelectedButton.classList.toggle('hidden', selectedCount === 0);
+        removeSelectedButton.classList.toggle($HIDDEN_CLASS_NAME, selectedCount === 0);
     }
 };
 
@@ -97,9 +105,9 @@ const bindAddToCartButtons = (): void => {
         const rawVariantId: string | undefined = isFastOrder
             ? fastOrderButton?.dataset?.fastOrder
             : regularButton?.dataset?.addToCart;
-        const variantId: number = Number(rawVariantId ?? 0);
+        const variantId: number = toNumber(rawVariantId);
 
-        if (!Number.isInteger(variantId) || variantId <= 0) {
+        if (!isIntegerNumber(variantId) || variantId <= 0) {
             return;
         }
 
@@ -160,10 +168,10 @@ const bindMutationHandlers = (): void => {
         }
 
         const mode: CartMode = getCartMode();
-        const cartId: number = Number(quantityInput.dataset.cartId ?? 0);
-        const quantity: number = Number(quantityInput.value ?? 1);
+        const cartId: number = toNumber(quantityInput.dataset.cartId);
+        const quantity: number = toNumber(quantityInput.value, 1);
 
-        if (!Number.isInteger(cartId) || cartId <= 0) {
+        if (!isIntegerNumber(cartId) || cartId <= 0) {
             return;
         }
 
@@ -198,8 +206,8 @@ const bindMutationHandlers = (): void => {
                 findArrayElems('[data-cart-item-select]:checked', cartRoot)
             )) as HTMLInputElement[];
             const selectedCartIds = selectedCheckboxes
-                .map((checkbox: HTMLInputElement): number => Number(checkbox.dataset.cartId ?? 0))
-                .filter((cartId: number): boolean => Number.isInteger(cartId) && cartId > 0);
+                .map((checkbox: HTMLInputElement): number => toNumber(checkbox.dataset.cartId))
+                .filter((cartId: number): boolean => isIntegerNumber(cartId) && cartId > 0);
 
             if (selectedCartIds.length === 0) {
                 return;
@@ -233,9 +241,9 @@ const bindMutationHandlers = (): void => {
 
         const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', removeButton);
         const mode: CartMode = (cartRoot?.dataset?.cartMode as CartMode) ?? getCartMode();
-        const cartId: number = Number(removeButton.dataset.cartId ?? 0);
+        const cartId: number = toNumber(removeButton.dataset.cartId);
 
-        if (!Number.isInteger(cartId) || cartId <= 0) {
+        if (!isIntegerNumber(cartId) || cartId <= 0) {
             return;
         }
 

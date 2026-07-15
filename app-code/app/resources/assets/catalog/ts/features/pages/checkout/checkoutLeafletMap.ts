@@ -1,6 +1,18 @@
 import L, { type IconOptions, type Marker } from 'leaflet';
 import 'leaflet.markercluster';
-import { blockBody, findArrayElems, findElem, isEmpty } from '@ts-shared/lib/helpers.ts';
+import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
+import {
+    blockBody,
+    findArrayElems,
+    findElem,
+    isClosestClass,
+    isEmpty,
+    isFiniteNumber,
+    toggleClass,
+    toNumber,
+    toStringValue,
+    toTrimmedString,
+} from '@ts-shared/lib/helpers.ts';
 import SearchControl from 'leaflet-search';
 
 export interface CheckoutMapCity {
@@ -58,8 +70,7 @@ const MAX_ZOOM_LEVEL: number = 19;
 const DEFAULT_ZOOM_LEVEL: number = 13;
 const CLUSTER_DISABLE_ZOOM: number = 17;
 const MAP_ID: string = 'checkout-leaflet-map';
-const LIST_ITEM_CLASS_NAMES: string =
-    'flex w-full flex-col gap-1 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition-colors hover:border-white/30 hover:bg-white/10';
+const LIST_ITEM_CLASS_NAMES: string = `flex w-full flex-col gap-1 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition-colors hover:border-white/30 hover:bg-white/10`;
 const LIST_ACTIVE_CLASS_NAMES: string[] = ['border-white/40', 'bg-white/15'];
 const DELIVERY_BUTTON_CLASS_NAMES: string = 'checkout__delivery-here-btn black-btn w-full';
 
@@ -75,7 +86,7 @@ const escapeHtml = (value: string): string => {
 };
 
 const getText = (value: string | null | undefined, fallback: string): string => {
-    const normalizedValue = String(value ?? '').trim();
+    const normalizedValue = toTrimmedString(value);
 
     return normalizedValue === '' ? fallback : normalizedValue;
 };
@@ -88,8 +99,8 @@ const buildModalMarkup = (params: OpenCheckoutLeafletMapParams): string => {
     return [
         `<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 md:p-4" data-checkout-leaflet-modal>`,
         '<div class="absolute inset-0" data-checkout-leaflet-backdrop></div>',
-        '<div class="relative flex h-[calc(100vh-1rem)] w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-base-300 text-white shadow-2xl md:h-[calc(100vh-2rem)]">',
-        '<div class="flex items-start justify-between gap-4 border-b border-white/10 px-4 py-4 md:px-6">',
+        `<div class="relative flex h-[calc(100vh-1rem)] w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-base-300 text-white shadow-2xl md:h-[calc(100vh-2rem)]">`,
+        `<div class="flex items-start justify-between gap-4 border-b border-white/10 px-4 py-4 md:px-6">`,
         `<div class="min-w-0"><p class="text-lg md:text-2xl lg:text-3xl uppercase tracking-[0.24em] text-white">${title}</p></div>`,
         `<button class="inline-flex size-10 items-center justify-center rounded-full border border-white/10 text-white transition-colors hover:bg-white/10" type="button" data-checkout-leaflet-close aria-label="${closeText}"><span class="icon-[mdi--close] size-5"></span></button>`,
         '</div>',
@@ -97,8 +108,8 @@ const buildModalMarkup = (params: OpenCheckoutLeafletMapParams): string => {
         '<div class="min-h-96 overflow-hidden rounded-2xl border border-white/10 bg-[#151822]">',
         `<div id="${MAP_ID}" class="size-full min-h-96"></div>`,
         '</div>',
-        '<div class="flex min-h-0 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">',
-        '<label class="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white/60">',
+        `<div class="flex min-h-0 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">`,
+        `<label class="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white/60">`,
         '<span class="icon-[tabler--search] size-4 shrink-0"></span>',
         `<input class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-white placeholder:text-white/40 focus:outline-none" type="search" data-checkout-leaflet-search placeholder="${searchPlaceholder}">`,
         '</label>',
@@ -121,7 +132,7 @@ const createMarkerIcon = (
     }
 
     const iconOptions: IconOptions = {
-        iconUrl: String(iconUrl),
+        iconUrl: toStringValue(iconUrl),
         iconSize: [40, 52],
         iconAnchor: [20, 52],
         popupAnchor: [0, -46],
@@ -135,7 +146,7 @@ const buildPopupHtml = (point: CheckoutMapPoint, deliverHereText: string): strin
     const scheduleHtml = point.schedule ? `<div class="text-base leading-6 text-black/75">${point.schedule}</div>` : '';
 
     return [
-        '<div class="flex w-full flex-col gap-3">',
+        `<div class="flex w-full flex-col gap-3">`,
         `<div class="text-xl font-semibold text-black">${escapeHtml(point.title)}</div>`,
         scheduleHtml,
         `<button class="${DELIVERY_BUTTON_CLASS_NAMES}" type="button" data-map-delivery-point-id="${escapeHtml(point.id)}">${escapeHtml(deliverHereText)}</button>`,
@@ -241,11 +252,11 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
         return;
     }
 
-    const cityLat = Number(params.city.city_lat ?? 0);
-    const cityLng = Number(params.city.city_lng ?? 0);
+    const cityLat = toNumber(params.city.city_lat);
+    const cityLng = toNumber(params.city.city_lng);
     const firstPoint = params.points[0];
     const center: L.LatLngTuple =
-        Number.isFinite(cityLat) && Number.isFinite(cityLng) && cityLat !== 0 && cityLng !== 0
+        isFiniteNumber(cityLat) && isFiniteNumber(cityLng) && cityLat !== 0 && cityLng !== 0
             ? [cityLat, cityLng]
             : [firstPoint.lat, firstPoint.lng];
 
@@ -264,7 +275,9 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
     }).addTo(map);
 
     const clusters = (
-        L as unknown as { markerClusterGroup: (options: Record<string, unknown>) => MarkerClusterGroup }
+        L as unknown as {
+            markerClusterGroup: (options: Record<string, unknown>) => MarkerClusterGroup;
+        }
     ).markerClusterGroup({
         disableClusteringAtZoom: CLUSTER_DISABLE_ZOOM,
     });
@@ -307,27 +320,28 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
         },
     });
 
-    (map as unknown as L.Map & { on(event: 'search:locationfound', fn: (event: { layer: Marker }) => void): void }).on(
-        'search:locationfound',
-        (event: { layer: Marker }): void => {
-            const marker = event.layer;
+    (
+        map as unknown as L.Map & {
+            on(event: 'search:locationfound', fn: (event: { layer: Marker }) => void): void;
+        }
+    ).on('search:locationfound', (event: { layer: Marker }): void => {
+        const marker = event.layer;
 
-            for (const [pointId, currentMarker] of markerById.entries()) {
-                if (currentMarker === marker) {
-                    clusters.zoomToShowLayer(marker, (): void => {
-                        const latlng = marker.getLatLng();
+        for (const [pointId, currentMarker] of markerById.entries()) {
+            if (currentMarker === marker) {
+                clusters.zoomToShowLayer(marker, (): void => {
+                    const latlng = marker.getLatLng();
 
-                        map.setView(latlng, Math.max(map.getZoom(), MAX_ZOOM_LEVEL), { animate: true });
-                        setActiveListItem(pointId);
-                        scrollListItemIntoView(pointId);
-                        marker.openPopup();
-                    });
+                    map.setView(latlng, Math.max(map.getZoom(), MAX_ZOOM_LEVEL), { animate: true });
+                    setActiveListItem(pointId);
+                    scrollListItemIntoView(pointId);
+                    marker.openPopup();
+                });
 
-                    break;
-                }
+                break;
             }
-        },
-    );
+        }
+    });
 
     map.addControl(search);
 
@@ -376,7 +390,7 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
         listItem.addEventListener('click', (event: MouseEvent): void => {
             const target = event.target as HTMLElement | null;
 
-            if (target?.closest('[data-map-delivery-point-id]')) {
+            if (isClosestClass('[data-map-delivery-point-id]', target)) {
                 return;
             }
 
@@ -390,10 +404,10 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
         const searchValue = searchInput.value.trim().toLowerCase();
 
         listItemById.forEach((listItem: HTMLElement): void => {
-            const searchText = String(listItem.dataset.searchText ?? '');
+            const searchText = toStringValue(listItem.dataset.searchText);
             const isVisible = searchValue === '' || searchText.includes(searchValue);
 
-            listItem.classList.toggle('hidden', !isVisible);
+            toggleClass(listItem, $HIDDEN_CLASS_NAME, !isVisible);
         });
     });
 
@@ -458,7 +472,9 @@ const openModal = (params: RenderMapParams): void => {
 };
 
 export const openCheckoutLeafletMap = (
-    params: OpenCheckoutLeafletMapParams & { callback: DeliveryPointClickCallback },
+    params: OpenCheckoutLeafletMapParams & {
+        callback: DeliveryPointClickCallback;
+    },
 ): void => {
     if (params.points.length === 0) {
         return;
@@ -466,7 +482,7 @@ export const openCheckoutLeafletMap = (
 
     const normalizedPoints = params.points.filter(
         (point: CheckoutMapPoint): boolean =>
-            Number.isFinite(point.lat) && Number.isFinite(point.lng) && point.title.trim() !== '',
+            isFiniteNumber(point.lat) && isFiniteNumber(point.lng) && point.title.trim() !== '',
     );
 
     if (normalizedPoints.length === 0) {

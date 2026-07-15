@@ -1,5 +1,6 @@
 import type { CartMode, CartMutationResponse } from '@ts-features/cart/cartTypes.ts';
-import { findElem } from '@ts-shared/lib/helpers.ts';
+import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
+import { findElem, toTrimmedString } from '@ts-shared/lib/helpers.ts';
 
 const cartFormFieldNames: string[] = ['first_name', 'last_name', 'phone'];
 const errorClasses: string[] = ['border-light-red/40', 'bg-light-red/10', 'text-light-red'];
@@ -32,7 +33,7 @@ export const extractCartGeneralErrorMessage = (response: CartMutationResponse): 
         }
 
         if (Array.isArray(messages) && messages.length > 0) {
-            const message = String(messages[0] ?? '').trim();
+            const message = toTrimmedString(messages[0]);
 
             if (message !== '') {
                 return message;
@@ -51,7 +52,7 @@ export const setCartModalGeneralError = (mode: CartMode, message: string, isSucc
     }
 
     errorElement.textContent = message;
-    errorElement.classList.toggle('hidden', message === '');
+    errorElement.classList.toggle($HIDDEN_CLASS_NAME, message === '');
     errorElement.classList.remove(...errorClasses, ...successClasses);
     errorElement.classList.add(...(isSuccess ? successClasses : errorClasses));
 };

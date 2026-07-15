@@ -16,7 +16,13 @@
     <span>{{ __('pickup::storefront/checkout.delivery_method') }}</span>
 </label>
 
-<div class="hidden flex-col gap-4 pt-3" data-pickup-store-content>
+<div @class([
+    'flex-col gap-4 pt-3',
+    'hidden' => ($selected_delivery_method ?? '') !== 'pickup_store',
+    'flex' => ($selected_delivery_method ?? '') === 'pickup_store',
+])
+     @if(($selected_delivery_method ?? '') !== 'pickup_store') hidden @endif
+     data-pickup-store-content>
     <div class="flex flex-col gap-2">
         <span class="text-sm text-white md:text-lg">{{ __('pickup::storefront/checkout.store_address') }}</span>
         <p class="alert rounded alert-info text-sm md:text-base" data-pickup-store-address>{{ $pickup_store_address }}</p>

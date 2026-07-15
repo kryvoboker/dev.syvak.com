@@ -38,6 +38,9 @@
             "@payment-upon-delivery-ts/*": [
                 "./Modules/PaymentUponDelivery/resources/assets/ts/*"
             ],
+            "@bank-transfer-ts/*": [
+                "./Modules/BankTransfer/resources/assets/ts/*"
+            ],
             "@wayforpay-ts/*": [
                 "./Modules/WayForPay/resources/assets/ts/*"
             ]

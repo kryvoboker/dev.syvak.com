@@ -34,6 +34,5 @@ export const moduleViteConfig: ModuleViteConfig = {
     },
     inject: {
         css: ['resources/assets/css/main.css'],
-        ts: ['resources/assets/ts/main.ts'],
     },
 };

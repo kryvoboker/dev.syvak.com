@@ -46,8 +46,8 @@ export const removeClass = <T extends HTMLElement>(
 
     return undefined;
 };
-export const toggleClass = <T extends HTMLElement>(element: T | null, selector: string): boolean =>
-    element ? element.classList.toggle(selector) : false;
+export const toggleClass = <T extends HTMLElement>(element: T | null, selector: string, force?: boolean): boolean =>
+    element ? element.classList.toggle(selector, force) : false;
 export const toggleActive = (DOMElements: NodeListOf<HTMLElement> | HTMLElement[] = []): void =>
     arrayFrom(DOMElements).forEach((element: HTMLElement): void => {
         toggleClass(element, 'active');
@@ -119,12 +119,12 @@ export const sprintF = (str: string, ...args: (string | number)[]): string => {
 
         switch (match) {
             case '%s':
-                return String(arg);
+                return toStringValue(arg);
             case '%d':
             case '%i':
-                return parseInt(String(arg), 10).toString();
+                return parseInt(toStringValue(arg), 10).toString();
             case '%f':
-                return parseFloat(String(arg)).toString();
+                return parseFloat(toStringValue(arg)).toString();
             default:
                 return match;
         }
@@ -142,6 +142,35 @@ export const valueToString = (value: string | number | boolean | undefined | nul
 
     return value.toString();
 };
+
+export const toStringValue = (value: unknown, defaultValue: string = ''): string =>
+    value === null || value === undefined ? defaultValue : String(value);
+
+export const toTrimmedString = (value: unknown): string => toStringValue(value).trim();
+
+export const toNumber = (value: unknown, defaultValue: number = 0): number => {
+    const numericValue = Number(value);
+
+    return Number.isNaN(numericValue) ? defaultValue : numericValue;
+};
+
+export const toNumberOrNull = (value: unknown): number | null => {
+    const numericValue = Number(value);
+
+    return Number.isNaN(numericValue) ? null : numericValue;
+};
+
+export const parseInteger = (value: string, radix: number = 10, defaultValue: number = Number.NaN): number => {
+    const numericValue = Number.parseInt(value, radix);
+
+    return Number.isNaN(numericValue) ? defaultValue : numericValue;
+};
+
+export const isNaNValue = (value: number): boolean => Number.isNaN(value);
+
+export const isFiniteNumber = (value: number): boolean => Number.isFinite(value);
+
+export const isIntegerNumber = (value: number): boolean => Number.isInteger(value);
 
 export const normalizeAndEncodeUriComponent = (uriComponent: boolean | string | null | undefined): string => {
     uriComponent = valueToString(uriComponent);

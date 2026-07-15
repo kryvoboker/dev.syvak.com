@@ -4,8 +4,16 @@ import {
     setCartModalGeneralError,
 } from '@ts-features/cart/cartErrors.ts';
 import type { CartMode, CartMutationResponse } from '@ts-features/cart/cartTypes.ts';
+import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
-import { fetchFunc, findArrayElems, findElem, isEmpty, toggleElement } from '@ts-shared/lib/helpers.ts';
+import {
+    fetchFunc,
+    findArrayElems,
+    findElem,
+    isEmpty,
+    toggleElement,
+    toTrimmedString,
+} from '@ts-shared/lib/helpers.ts';
 import type { WindowAppParams } from '@ts-types/global';
 
 const resolveUrl = (key: keyof WindowAppParams): string => {
@@ -45,7 +53,7 @@ const renderMutationResponse = (response: CartMutationResponse, mode: CartMode):
     if (fastOrderFormWrapper && mode === 'fast_order') {
         const isCartEmpty = response.cart?.is_empty ?? true;
 
-        fastOrderFormWrapper.classList.toggle('hidden', isCartEmpty);
+        fastOrderFormWrapper.classList.toggle($HIDDEN_CLASS_NAME, isCartEmpty);
     }
 
     const cartPageRoot = <HTMLElement | null>findElem('#cart-page-root');
@@ -55,7 +63,7 @@ const renderMutationResponse = (response: CartMutationResponse, mode: CartMode):
     }
 
     const generalMessage =
-        response.success === true ? String(response.message ?? '').trim() : extractCartGeneralErrorMessage(response);
+        response.success === true ? toTrimmedString(response.message) : extractCartGeneralErrorMessage(response);
 
     if (generalMessage !== '') {
         setCartModalGeneralError(mode, generalMessage, response.success === true);
