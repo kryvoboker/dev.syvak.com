@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Carts;
 
+use App\Enums\CartModeEnum;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,7 @@ class Cart extends Model
     {
         return [
             'user_id' => 'integer',
+            'cart_mode' => CartModeEnum::class,
             'product_variant_id' => 'integer',
             'quantity' => 'integer',
             'chosen_attributes' => 'array',
