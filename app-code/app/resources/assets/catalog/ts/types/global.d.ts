@@ -74,6 +74,13 @@ export interface WindowAppParams {
         } | null;
         delivery_point?: Record<string, unknown> | null;
         delivery_address?: string | null;
+        first_name?: string | null;
+        last_name?: string | null;
+        phone?: string | null;
+        email?: string | null;
+        comment?: string | null;
+        promo_code?: string | null;
+        no_call?: boolean | null;
     } | null;
 
     [key: string]: unknown;

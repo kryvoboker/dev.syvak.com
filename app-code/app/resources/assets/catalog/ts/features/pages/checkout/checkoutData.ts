@@ -54,6 +54,23 @@ export interface CheckoutSelectionState {
     city?: CheckoutCitySearchItem | null;
     delivery_point?: CheckoutDeliveryPointState | null;
     delivery_address?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    comment?: string | null;
+    promo_code?: string | null;
+    no_call?: boolean | null;
+}
+
+export interface CheckoutFormState {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email: string;
+    comment: string;
+    promoCode: string;
+    noCall: boolean;
 }
 
 export interface CheckoutMapData {
@@ -242,6 +259,7 @@ export const buildSelectionPayload = (
     deliveryPoint: CheckoutBranchSearchItem | null,
     deliveryAddress: string,
     paymentMethod: string,
+    formState: CheckoutFormState,
 ): FormData => {
     const payload = new FormData();
 
@@ -270,6 +288,13 @@ export const buildSelectionPayload = (
 
     payload.append('delivery_method', deliveryMethod);
     payload.append('payment_method', paymentMethod);
+    payload.append('first_name', formState.firstName);
+    payload.append('last_name', formState.lastName);
+    payload.append('phone', formState.phone);
+    payload.append('email', formState.email);
+    payload.append('comment', formState.comment);
+    payload.append('promo_code', formState.promoCode);
+    payload.append('no_call', formState.noCall ? '1' : '0');
 
     return payload;
 };

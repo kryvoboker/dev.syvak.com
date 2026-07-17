@@ -6,9 +6,11 @@ namespace Tests\Feature\Pages;
 
 use App\Http\Controllers\Pages\CheckoutController;
 use App\Services\Cart\CartService;
+use App\Services\Checkout\CheckoutSelectionStateService;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Tests\TestCase;
 
@@ -136,5 +138,41 @@ class CheckoutControllerTest extends TestCase
         $this->assertCount(2, $view_data['checkout_data']['visible_items']);
         $this->assertCount(1, $view_data['checkout_data']['hidden_items']);
         $this->assertSame(localized_route('localized.catalog.cart.index'), $view_data['checkout_data']['edit_items_url']);
+    }
+
+    public function test_checkout_selection_persists_customer_form_data(): void
+    {
+        $request = Request::create('/en/checkout/selection', 'POST');
+        $request->setLaravelSession($this->app->make('session.store'));
+        $state_service = new CheckoutSelectionStateService($request);
+
+        $state = $state_service->replaceState([
+            'first_name' => 'Lesya',
+            'last_name' => 'Ukrainka',
+            'phone' => '+380501234567',
+            'email' => 'lesya@example.com',
+            'comment' => 'Please call before delivery.',
+            'promo_code' => 'WELCOME10',
+            'no_call' => '1',
+            'delivery_method' => 'nova_poshta',
+            'delivery_point' => [
+                'id' => 'branch-123',
+                'postcode' => '01001',
+                'description' => 'Nova Poshta branch 1',
+                'branch_value' => 'branch-123',
+            ],
+            'delivery_address' => 'Street 1, building 2',
+        ]);
+
+        $this->assertSame('Lesya', $state['first_name']);
+        $this->assertSame('Ukrainka', $state['last_name']);
+        $this->assertSame('+380501234567', $state['phone']);
+        $this->assertSame('lesya@example.com', $state['email']);
+        $this->assertSame('Please call before delivery.', $state['comment']);
+        $this->assertSame('WELCOME10', $state['promo_code']);
+        $this->assertTrue($state['no_call']);
+        $this->assertSame('branch-123', $state['delivery_point']['id']);
+        $this->assertSame('01001', $state['delivery_point']['postcode']);
+        $this->assertSame('Street 1, building 2', $state['delivery_address']);
     }
 }

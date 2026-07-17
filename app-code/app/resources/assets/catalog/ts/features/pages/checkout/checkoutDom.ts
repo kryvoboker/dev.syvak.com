@@ -12,6 +12,7 @@ export interface CheckoutDomElements {
     deliveryMethodOptions: HTMLElement[];
     deliveryMethodInputs: HTMLInputElement[];
     paymentMethodInputs: HTMLInputElement[];
+    checkoutFormElement: HTMLFormElement | null;
 }
 
 export const getCheckoutDomElements = (): CheckoutDomElements => ({
@@ -26,4 +27,5 @@ export const getCheckoutDomElements = (): CheckoutDomElements => ({
     deliveryMethodOptions: findArrayElems('[data-checkout-delivery-method-option]'),
     deliveryMethodInputs: findArrayElems('[data-checkout-delivery-method-input]') as HTMLInputElement[],
     paymentMethodInputs: findArrayElems('[data-checkout-payment-method-input]') as HTMLInputElement[],
+    checkoutFormElement: <HTMLFormElement | null>findElem('[data-checkout-form]'),
 });

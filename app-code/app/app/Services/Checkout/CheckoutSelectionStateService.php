@@ -120,13 +120,44 @@ class CheckoutSelectionStateService
      */
     private function normalizeState(array $payload): array
     {
+        $current_state = $this->getState();
+
         return [
             'delivery_method' => Str::lower(Str::squish((string) Arr::get($payload, 'delivery_method', ''))),
             'payment_method' => Str::lower(Str::squish((string) Arr::get($payload, 'payment_method', ''))),
             'city' => $this->normalizeRow((array) Arr::get($payload, 'city', [])),
             'delivery_point' => $this->normalizeRow((array) Arr::get($payload, 'delivery_point', [])),
             'delivery_address' => $this->normalizeDeliveryAddress(Arr::get($payload, 'delivery_address', '')),
+            'first_name' => $this->normalizeText($payload, $current_state, 'first_name'),
+            'last_name' => $this->normalizeText($payload, $current_state, 'last_name'),
+            'phone' => $this->normalizeText($payload, $current_state, 'phone'),
+            'email' => $this->normalizeText($payload, $current_state, 'email'),
+            'comment' => $this->normalizeText($payload, $current_state, 'comment'),
+            'promo_code' => $this->normalizeText($payload, $current_state, 'promo_code'),
+            'no_call' => $this->normalizeBoolean($payload, $current_state, 'no_call'),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $current_state
+     */
+    private function normalizeText(array $payload, array $current_state, string $key): string
+    {
+        $value = Arr::has($payload, $key) ? Arr::get($payload, $key) : Arr::get($current_state, $key, '');
+
+        return Str::squish((string) $value);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $current_state
+     */
+    private function normalizeBoolean(array $payload, array $current_state, string $key): bool
+    {
+        $value = Arr::has($payload, $key) ? Arr::get($payload, $key) : Arr::get($current_state, $key, false);
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -153,6 +184,14 @@ class CheckoutSelectionStateService
 
         return Collection::make($row)
             ->only([
+                'id',
+                'region_id',
+                'district_id',
+                'city_id',
+                'poregion_id',
+                'podistrict_id',
+                'pdcity_id',
+                'postcode',
                 'city_description',
                 'nova_poshta_city_id',
                 'ukr_poshta_city_id',
@@ -160,10 +199,25 @@ class CheckoutSelectionStateService
                 'city_lng',
                 'description',
                 'ref',
+                'city_ref',
                 'city_name',
                 'city_ua',
+                'region',
+                'region_description',
+                'region_ua',
+                'district_ua',
+                'number',
+                'site_key',
                 'latitude',
                 'longitude',
+                'schedule',
+                'delivery_method',
+                'type',
+                'branch_value',
+                'branch_label',
+                'label',
+                'lock_code',
+                'postreet_id',
             ])
             ->filter(fn (mixed $value): bool => ! is_null($value) && $value !== '')
             ->all();
