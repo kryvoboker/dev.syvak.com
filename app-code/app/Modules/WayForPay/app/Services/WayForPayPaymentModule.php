@@ -70,6 +70,7 @@ final class WayForPayPaymentModule
 
             $payment_data = $payment_form->getForm()->getData();
             $payment_data['apiVersion'] = (int) ($settings['api_version'] ?? $this->wayforpay_config->getDefault('api_version'));
+            $payment_data['merchantAuthType'] = $settings['merchant_auth_type'] ?? $this->wayforpay_config->getDefault('merchant_auth_type');
 
             foreach (['holdTimeout', 'orderTimeout', 'orderLifetime'] as $optional_timeout) {
                 if (isset($payment_data[$optional_timeout]) && (int) $payment_data[$optional_timeout] <= 0) {

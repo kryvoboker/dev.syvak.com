@@ -102,6 +102,17 @@ paths:
     post:
       tags: [Checkout]
       summary: Store checkout selection state
+      description: |
+        Stores the customer's current checkout form state in the server-side session.
+        The state is returned in the response and is also injected into the next checkout
+        page render, so the browser can restore customer fields, the selected delivery and
+        payment methods, the city, the delivery point, the courier address, the comment,
+        the promo code, and the `no_call` checkbox after a page reload or a later visit.
+
+        The payload is intentionally partial: fields may be omitted while the customer is
+        completing the form. The endpoint normalizes text values, lowercases delivery and
+        payment method identifiers, converts city coordinates to numbers, and keeps only
+        the supported delivery-point fields.
       parameters:
         - in: path
           name: locale
@@ -379,6 +390,10 @@ components:
     CheckoutSelectionStoreRequest:
       type: object
       additionalProperties: false
+      description: |
+        Partial checkout state payload. Send this payload after a customer changes a
+        delivery/payment selection or edits a form field. Customer fields are optional here
+        because the order is validated separately by `POST /{locale}/order-validate/simple`.
       properties:
         delivery_method:
           oneOf:
@@ -427,6 +442,48 @@ components:
             - 'null'
           maxLength: 255
           description: For pickup_store, the localized store address is submitted here; for other methods it contains the courier address or null.
+        first_name:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+          description: Customer first name to restore in the checkout form.
+        last_name:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+          description: Customer last name to restore in the checkout form.
+        phone:
+          type:
+            - string
+            - 'null'
+          maxLength: 30
+          description: Customer phone number to restore in the checkout form.
+        email:
+          type:
+            - string
+            - 'null'
+          format: email
+          maxLength: 255
+          description: Customer email to restore in the checkout form.
+        comment:
+          type:
+            - string
+            - 'null'
+          maxLength: 5000
+          description: Customer order comment to restore in the checkout form.
+        promo_code:
+          type:
+            - string
+            - 'null'
+          maxLength: 255
+          description: Entered promo code to restore in the checkout form.
+        no_call:
+          type:
+            - boolean
+            - 'null'
+          description: Whether the customer selected “Do not call to confirm the order”.
     SimpleOrderRequest:
       type: object
       additionalProperties: false
@@ -563,5 +620,67 @@ components:
         success:
           type: boolean
         state:
+          $ref: '#/components/schemas/CheckoutSelectionState'
+    CheckoutSelectionState:
+      type: object
+      additionalProperties: false
+      required:
+        - delivery_method
+        - payment_method
+        - city
+        - delivery_point
+        - delivery_address
+        - first_name
+        - last_name
+        - phone
+        - email
+        - comment
+        - promo_code
+        - no_call
+      description: |
+        Normalized checkout state persisted in the server-side session. This object is
+        returned by the selection endpoint and supplied to the checkout page for form
+        repopulation. Empty selections are represented by empty strings, `false`, or `{}`.
+      properties:
+        delivery_method:
+          type: string
+          description: Selected delivery method identifier, or an empty string.
+        payment_method:
+          type: string
+          description: Selected payment method identifier, or an empty string.
+        city:
           type: object
           additionalProperties: true
+          description: Normalized selected city data, or an empty object.
+          properties:
+            city_description:
+              type: string
+            nova_poshta_city_id:
+              type: string
+            ukr_poshta_city_id:
+              type: integer
+            city_lat:
+              type: number
+            city_lng:
+              type: number
+        delivery_point:
+          type: object
+          additionalProperties: true
+          description: Normalized branch, parcel locker, or post office data, or an empty object.
+        delivery_address:
+          type: string
+          description: Courier or pickup store address, or an empty string.
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        comment:
+          type: string
+        promo_code:
+          type: string
+        no_call:
+          type: boolean

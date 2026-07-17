@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('cart_items', function (Blueprint $table): void {
+        Schema::create('carts', function (Blueprint $table): void {
             $table->id();
             $table->string('session_id', 255)->nullable();
             $table->foreignId('user_id')
@@ -34,6 +34,6 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('cart_items');
+        Schema::dropIfExists('carts');
     }
 };
