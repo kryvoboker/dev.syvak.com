@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Orders;
 
 use App\Models\Payment\PaymentStatuses;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -36,6 +37,16 @@ class OrderPayments extends Model
             'paid_at' => 'datetime',
             'failed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return Attribute
+     */
+    public function providerData(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : null,
+        );
     }
 
     /**

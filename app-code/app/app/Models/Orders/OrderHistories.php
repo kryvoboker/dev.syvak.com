@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Orders;
 
 use App\Models\Users\User;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -32,6 +33,16 @@ class OrderHistories extends Model
             'order_status_id' => 'integer',
             'json' => 'array',
         ];
+    }
+
+    /**
+     * @return Attribute
+     */
+    public function json(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : null,
+        );
     }
 
     /**
