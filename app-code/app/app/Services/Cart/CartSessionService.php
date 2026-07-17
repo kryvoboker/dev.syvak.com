@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Cart;
 
 use App\Enums\CartModeEnum;
-use App\Models\Carts\CartItem;
+use App\Models\Carts\Cart;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -34,7 +34,7 @@ class CartSessionService
         $resolved_items = [];
 
         foreach ($cart_rows as $cart_row) {
-            if (!$cart_row instanceof CartItem) {
+            if (!$cart_row instanceof Cart) {
                 continue;
             }
 
@@ -80,7 +80,7 @@ class CartSessionService
         $existing_item = null;
 
         foreach ($matching_rows as $matching_row) {
-            if (!$matching_row instanceof CartItem) {
+            if (!$matching_row instanceof Cart) {
                 continue;
             }
 
@@ -93,14 +93,14 @@ class CartSessionService
             }
         }
 
-        if ($existing_item instanceof CartItem) {
+        if ($existing_item instanceof Cart) {
             $existing_item->quantity = max(1, (int)$existing_item->quantity + $normalized_quantity);
             $existing_item->save();
 
             return;
         }
 
-        CartItem::query()->create([
+        Cart::query()->create([
             'session_id'         => $owner_context['session_id'],
             'user_id'            => $owner_context['user_id'],
             'cart_mode'          => $mode,
@@ -125,7 +125,7 @@ class CartSessionService
             ->whereKey($cart_id)
             ->first();
 
-        if (!$cart_item instanceof CartItem) {
+        if (!$cart_item instanceof Cart) {
             Log::channel('stack')->warning('Cart item update rejected due to missing row in owner scope.', [
                 'cart_id' => $cart_id,
                 'mode'    => $mode,
@@ -232,7 +232,7 @@ class CartSessionService
      */
     private function resolveOwnerQuery(array $owner_context): Builder
     {
-        $query = CartItem::query();
+        $query = Cart::query();
 
         if (($owner_context['user_id'] ?? null) !== null) {
             return $query->where('user_id', (int)$owner_context['user_id']);
@@ -255,7 +255,7 @@ class CartSessionService
             return;
         }
 
-        $guest_rows = CartItem::query()
+        $guest_rows = Cart::query()
             ->whereNull('user_id')
             ->where('session_id', $session_id)
             ->where('cart_mode', $mode)
@@ -269,7 +269,7 @@ class CartSessionService
             $item_attributes = is_array($guest_row->chosen_attributes) ? $guest_row->chosen_attributes : [];
             $signature       = $this->buildAttributesSignature($item_attributes);
 
-            $user_rows = CartItem::query()
+            $user_rows = Cart::query()
                 ->where('user_id', $user_id)
                 ->where('cart_mode', $mode)
                 ->where('product_variant_id', (int)$guest_row->product_variant_id)
@@ -279,7 +279,7 @@ class CartSessionService
             $existing_user_row = null;
 
             foreach ($user_rows as $user_row) {
-                if (!$user_row instanceof CartItem) {
+                if (!$user_row instanceof Cart) {
                     continue;
                 }
 
@@ -292,7 +292,7 @@ class CartSessionService
                 }
             }
 
-            if ($existing_user_row instanceof CartItem) {
+            if ($existing_user_row instanceof Cart) {
                 $existing_user_row->quantity = max(1, (int)$existing_user_row->quantity + (int)$guest_row->quantity);
                 $existing_user_row->save();
                 $guest_row->delete();

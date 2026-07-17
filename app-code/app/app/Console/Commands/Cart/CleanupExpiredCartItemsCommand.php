@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\Cart;
 
-use App\Models\Carts\CartItem;
+use App\Models\Carts\Cart;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -22,7 +22,7 @@ class CleanupExpiredCartItemsCommand extends Command
         $deleted = 0;
 
         try {
-            CartItem::query()
+            Cart::query()
                 ->where('updated_at', '<', $threshold)
                 ->select('id')
                 ->orderBy('id')
@@ -33,7 +33,7 @@ class CleanupExpiredCartItemsCommand extends Command
                         return;
                     }
 
-                    $deleted += CartItem::query()->whereIn('id', $ids)->delete();
+                    $deleted += Cart::query()->whereIn('id', $ids)->delete();
                 });
 
             Log::channel('daily')->info('Expired cart items cleanup completed.', [

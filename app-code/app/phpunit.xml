@@ -16,6 +16,7 @@
             <directory>Modules/UkrPoshta/tests/Feature</directory>
             <directory>Modules/Carousel/tests/Feature</directory>
             <directory>Modules/ProductsCarousel/tests/Feature</directory>
+            <directory>Modules/WayForPay/tests/Feature</directory>
         </testsuite>
     </testsuites>
     <source>

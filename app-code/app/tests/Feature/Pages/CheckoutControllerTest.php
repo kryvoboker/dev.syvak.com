@@ -9,6 +9,10 @@ use App\Services\Cart\CartService;
 use App\Services\Checkout\CheckoutSelectionStateService;
 use App\Services\FooterService;
 use App\Services\HeaderService;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Modules\NovaPoshta\Services\NovaPoshtaCheckoutDataService;
+use Modules\UkrPoshta\Services\UkrPoshtaCheckoutDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,6 +20,44 @@ use Tests\TestCase;
 
 class CheckoutControllerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app['request']->setLaravelSession($this->app['session']->driver());
+
+        Schema::create('global_configs', function (Blueprint $table): void {
+            $table->id();
+            $table->string('key', 191)->unique();
+            $table->text('value')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+        Schema::create('languages', function (Blueprint $table): void {
+            $table->id();
+            $table->string('code', 10)->unique();
+            $table->string('name', 100);
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_default')->default(false);
+            $table->timestamps();
+        });
+        Schema::create('module_definitions', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->string('nwidart_name');
+            $table->text('module_path')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('is_installed')->default(true);
+            $table->boolean('is_enabled')->default(false);
+            $table->boolean('is_enabled_in_filesystem')->default(true);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->text('settings_schema')->nullable();
+            $table->text('meta')->nullable();
+            $table->timestamps();
+        });
+    }
+
     public function test_checkout_page_redirects_to_home_when_cart_is_empty(): void
     {
         $this->app->instance(CartService::class, new class () {
@@ -60,7 +102,26 @@ class CheckoutControllerTest extends TestCase
 
     public function test_checkout_page_splits_visible_and_hidden_items(): void
     {
+        $this->mock(NovaPoshtaCheckoutDataService::class)
+            ->shouldReceive('getCheckoutData')
+            ->andReturn([
+                'state' => [],
+                'selected_city' => [],
+                'selected_delivery_point' => [],
+            ]);
+        $this->mock(UkrPoshtaCheckoutDataService::class)
+            ->shouldReceive('getCheckoutData')
+            ->andReturn([
+                'state' => [],
+                'selected_city' => [],
+                'selected_delivery_point' => [],
+            ]);
         $this->app->instance(CartService::class, new class () {
+            public function getTotalProducts(): int
+            {
+                return 3;
+            }
+
             /**
              * @return array<string, mixed>
              */
