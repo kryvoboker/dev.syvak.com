@@ -37,7 +37,7 @@ class SimpleOrderValidateRequest extends FormRequest
             'first_name' => ['required', 'string', 'min:2', 'max:255'],
             'last_name' => ['required', 'string', 'min:2', 'max:255'],
             'phone' => ['required', 'string', 'min:10', 'max:30'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
             CartRequestKeyEnum::CartMode->value => ['required', 'string', Rule::in([CartModeEnum::Regular->value])],
             'delivery_method' => ['required', 'string', Rule::in([
                 'nova_poshta',
