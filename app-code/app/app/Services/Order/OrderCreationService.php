@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Order;
 
-use App\Enums\CartModeEnum;
-use App\Enums\CartRequestKeyEnum;
+use App\Enums\Cart\CartModeEnum;
+use App\Enums\Cart\CartRequestKeyEnum;
 use App\Services\Cart\CartService;
 use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use Illuminate\Support\Arr;

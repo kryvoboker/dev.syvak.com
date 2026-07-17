@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Ajax;
 
-use App\Enums\CartModeEnum;
-use App\Enums\CartRequestKeyEnum;
+use App\Enums\Cart\CartModeEnum;
+use App\Enums\Cart\CartRequestKeyEnum;
 use App\Http\Controllers\Controller;
 use App\Services\Cart\CartService;
 use App\Services\Trait\CartTrait;

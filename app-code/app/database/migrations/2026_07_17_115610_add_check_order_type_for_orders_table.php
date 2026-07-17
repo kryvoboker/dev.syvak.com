@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\CartModeEnum;
+use App\Enums\Cart\CartModeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 

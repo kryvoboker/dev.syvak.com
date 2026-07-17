@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Enums;
+namespace App\Enums\Cart;
+
+use App\Enums\EnumValuesTrait;
 
 enum CartModeEnum:string
 {

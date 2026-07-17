@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Orders;
 
-use App\Enums\CartModeEnum;
+use App\Enums\Cart\CartModeEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;

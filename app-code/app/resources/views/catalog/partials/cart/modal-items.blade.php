@@ -1,5 +1,5 @@
 @php
-    use App\Enums\CartModeEnum;
+    use App\Enums\Cart\CartModeEnum;
 
     $cart_data = is_array($cart_data ?? null) ? $cart_data : [];
     $first_item = $cart_data['first_item'] ?? null;
