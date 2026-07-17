@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models\Orders;
+
+use App\Models\ApplicationSettings\Language;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class OrderStatusDescriptions extends Model
+{
+    protected $fillable = [
+        'order_status_id',
+        'language_id',
+        'name',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'order_status_id' => 'integer',
+            'language_id' => 'integer',
+        ];
+    }
+
+    /**
+     * @return BelongsTo<OrderStatuses, $this>
+     */
+    public function orderStatus(): BelongsTo
+    {
+        return $this->belongsTo(OrderStatuses::class, 'order_status_id');
+    }
+
+    /**
+     * @return BelongsTo<Language, $this>
+     */
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class);
+    }
+}
