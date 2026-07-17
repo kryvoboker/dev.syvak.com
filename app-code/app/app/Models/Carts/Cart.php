@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Carts;
 
-use App\Enums\CartModeEnum;
+use App\Enums\Cart\CartModeEnum;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;

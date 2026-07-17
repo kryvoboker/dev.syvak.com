@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Pages;
 
-use App\Enums\CartModeEnum;
-use App\Enums\CartRequestKeyEnum;
+use App\Enums\Cart\CartModeEnum;
+use App\Enums\Cart\CartRequestKeyEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;

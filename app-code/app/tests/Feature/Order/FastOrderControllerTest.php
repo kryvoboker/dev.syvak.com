@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Order;
 
-use App\Enums\CartModeEnum;
-use App\Enums\CartRequestKeyEnum;
+use App\Enums\Cart\CartModeEnum;
+use App\Enums\Cart\CartRequestKeyEnum;
 use App\Models\ApplicationSettings\Language;
 use App\Services\Order\OrderCreationService;
 use Illuminate\Database\Eloquent\Collection;
