@@ -34,16 +34,16 @@ class CartSessionService
         $resolved_items = [];
 
         foreach ($cart_rows as $cart_row) {
-            if (! $cart_row instanceof CartItem) {
+            if (!$cart_row instanceof CartItem) {
                 continue;
             }
 
             $resolved_items[] = [
-                'cart_id' => (int) $cart_row->id,
-                'product_variant_id' => (int) $cart_row->product_variant_id,
-                'quantity' => max(1, (int) $cart_row->quantity),
-                'chosen_attributes' => is_array($cart_row->chosen_attributes) ? $cart_row->chosen_attributes : [],
-                'added_at' => $cart_row->created_at?->toDateTimeString() ?? get_now_date()->toDateTimeString(),
+                'cart_id'            => (int)$cart_row->id,
+                'product_variant_id' => (int)$cart_row->product_variant_id,
+                'quantity'           => max(1, (int)$cart_row->quantity),
+                'chosen_attributes'  => is_array($cart_row->chosen_attributes) ? $cart_row->chosen_attributes : [],
+                'added_at'           => $cart_row->created_at?->toDateTimeString() ?? get_now_date()->toDateTimeString(),
             ];
         }
 
@@ -51,13 +51,13 @@ class CartSessionService
     }
 
     /**
-     * @param  array<int|string, mixed>  $chosen_attributes
+     * @param array<int|string, mixed> $chosen_attributes
      */
     public function addItem(
-        int $product_variant_id,
-        int $quantity = 1,
+        int    $product_variant_id,
+        int    $quantity = 1,
         string $mode = CartModeEnum::Regular->value,
-        array $chosen_attributes = [],
+        array  $chosen_attributes = [],
     ): void {
         $owner_context = $this->resolveOwnerContext();
 
@@ -67,9 +67,9 @@ class CartSessionService
 
         $this->migrateGuestItemsToUserScope($owner_context, $mode);
 
-        $normalized_quantity = max(1, $quantity);
+        $normalized_quantity   = max(1, $quantity);
         $normalized_attributes = $this->normalizeAttributes($chosen_attributes);
-        $attributes_signature = $this->buildAttributesSignature($normalized_attributes);
+        $attributes_signature  = $this->buildAttributesSignature($normalized_attributes);
 
         $matching_rows = $this->resolveOwnerQuery($owner_context)
             ->where('cart_mode', $mode)
@@ -80,7 +80,7 @@ class CartSessionService
         $existing_item = null;
 
         foreach ($matching_rows as $matching_row) {
-            if (! $matching_row instanceof CartItem) {
+            if (!$matching_row instanceof CartItem) {
                 continue;
             }
 
@@ -94,19 +94,19 @@ class CartSessionService
         }
 
         if ($existing_item instanceof CartItem) {
-            $existing_item->quantity = max(1, (int) $existing_item->quantity + $normalized_quantity);
+            $existing_item->quantity = max(1, (int)$existing_item->quantity + $normalized_quantity);
             $existing_item->save();
 
             return;
         }
 
         CartItem::query()->create([
-            'session_id' => $owner_context['session_id'],
-            'user_id' => $owner_context['user_id'],
-            'cart_mode' => $mode,
+            'session_id'         => $owner_context['session_id'],
+            'user_id'            => $owner_context['user_id'],
+            'cart_mode'          => $mode,
             'product_variant_id' => $product_variant_id,
-            'quantity' => $normalized_quantity,
-            'chosen_attributes' => $normalized_attributes,
+            'quantity'           => $normalized_quantity,
+            'chosen_attributes'  => $normalized_attributes,
         ]);
     }
 
@@ -125,10 +125,10 @@ class CartSessionService
             ->whereKey($cart_id)
             ->first();
 
-        if (! $cart_item instanceof CartItem) {
+        if (!$cart_item instanceof CartItem) {
             Log::channel('stack')->warning('Cart item update rejected due to missing row in owner scope.', [
                 'cart_id' => $cart_id,
-                'mode' => $mode,
+                'mode'    => $mode,
                 'user_id' => $owner_context['user_id'],
             ]);
 
@@ -159,7 +159,7 @@ class CartSessionService
         if ($deleted_rows <= 0) {
             Log::channel('stack')->warning('Cart item delete rejected due to missing row in owner scope.', [
                 'cart_id' => $cart_id,
-                'mode' => $mode,
+                'mode'    => $mode,
                 'user_id' => $owner_context['user_id'],
             ]);
 
@@ -187,20 +187,35 @@ class CartSessionService
     }
 
     /**
+     * @return int
+     */
+    public function getTotalProducts(): int
+    {
+        $owner_context = $this->resolveOwnerContext();
+
+        if ($owner_context === null) {
+            return 0;
+        }
+
+        return (int)$this->resolveOwnerQuery($owner_context)
+            ->sum('quantity');
+    }
+
+    /**
      * @return array{session_id: ?string, user_id: ?int}|null
      */
     private function resolveOwnerContext(): ?array
     {
         $session_id = session()->getId();
 
-        if (! is_string($session_id) || $session_id === '') {
+        if (!is_string($session_id) || $session_id === '') {
             session()->start();
             $session_id = session()->getId();
         }
 
-        $user_id = Auth::check() ? (int) Auth::id() : null;
+        $user_id = Auth::check() ? (int)Auth::id() : null;
 
-        if (($user_id === null || $user_id <= 0) && (! is_string($session_id) || $session_id === '')) {
+        if (($user_id === null || $user_id <= 0) && (!is_string($session_id) || $session_id === '')) {
             Log::channel('stack')->warning('Cart owner context could not be resolved.');
 
             return null;
@@ -208,33 +223,33 @@ class CartSessionService
 
         return [
             'session_id' => is_string($session_id) && $session_id !== '' ? $session_id : null,
-            'user_id' => $user_id !== null && $user_id > 0 ? $user_id : null,
+            'user_id'    => $user_id !== null && $user_id > 0 ? $user_id : null,
         ];
     }
 
     /**
-     * @param  array{session_id: ?string, user_id: ?int}  $owner_context
+     * @param array{session_id: ?string, user_id: ?int} $owner_context
      */
     private function resolveOwnerQuery(array $owner_context): Builder
     {
         $query = CartItem::query();
 
         if (($owner_context['user_id'] ?? null) !== null) {
-            return $query->where('user_id', (int) $owner_context['user_id']);
+            return $query->where('user_id', (int)$owner_context['user_id']);
         }
 
         return $query
             ->whereNull('user_id')
-            ->where('session_id', (string) $owner_context['session_id']);
+            ->where('session_id', (string)$owner_context['session_id']);
     }
 
     /**
-     * @param  array{session_id: ?string, user_id: ?int}  $owner_context
+     * @param array{session_id: ?string, user_id: ?int} $owner_context
      */
     private function migrateGuestItemsToUserScope(array $owner_context, string $mode): void
     {
-        $user_id = (int) ($owner_context['user_id'] ?? 0);
-        $session_id = (string) ($owner_context['session_id'] ?? '');
+        $user_id    = (int)($owner_context['user_id'] ?? 0);
+        $session_id = (string)($owner_context['session_id'] ?? '');
 
         if ($user_id <= 0 || $session_id === '') {
             return;
@@ -252,19 +267,19 @@ class CartSessionService
 
         foreach ($guest_rows as $guest_row) {
             $item_attributes = is_array($guest_row->chosen_attributes) ? $guest_row->chosen_attributes : [];
-            $signature = $this->buildAttributesSignature($item_attributes);
+            $signature       = $this->buildAttributesSignature($item_attributes);
 
             $user_rows = CartItem::query()
                 ->where('user_id', $user_id)
                 ->where('cart_mode', $mode)
-                ->where('product_variant_id', (int) $guest_row->product_variant_id)
+                ->where('product_variant_id', (int)$guest_row->product_variant_id)
                 ->get()
                 ->all();
 
             $existing_user_row = null;
 
             foreach ($user_rows as $user_row) {
-                if (! $user_row instanceof CartItem) {
+                if (!$user_row instanceof CartItem) {
                     continue;
                 }
 
@@ -278,7 +293,7 @@ class CartSessionService
             }
 
             if ($existing_user_row instanceof CartItem) {
-                $existing_user_row->quantity = max(1, (int) $existing_user_row->quantity + (int) $guest_row->quantity);
+                $existing_user_row->quantity = max(1, (int)$existing_user_row->quantity + (int)$guest_row->quantity);
                 $existing_user_row->save();
                 $guest_row->delete();
 
@@ -291,7 +306,8 @@ class CartSessionService
     }
 
     /**
-     * @param  array<int|string, mixed>  $attributes
+     * @param array<int|string, mixed> $attributes
+     *
      * @return array<int|string, mixed>
      */
     private function normalizeAttributes(array $attributes): array
@@ -314,12 +330,12 @@ class CartSessionService
     }
 
     /**
-     * @param  array<int|string, mixed>  $attributes
+     * @param array<int|string, mixed> $attributes
      */
     private function buildAttributesSignature(array $attributes): string
     {
         $normalized_attributes = $this->normalizeAttributes($attributes);
 
-        return (string) json_encode($normalized_attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return (string)json_encode($normalized_attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }

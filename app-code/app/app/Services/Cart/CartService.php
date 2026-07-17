@@ -90,6 +90,14 @@ readonly class CartService
         $this->cart_session_service->clearCart($mode);
     }
 
+    /**
+     * @return int
+     */
+    public function getTotalProducts(): int
+    {
+        return $this->cart_session_service->getTotalProducts();
+    }
+
     private function isVariantAvailableForCart(int $product_variant_id): bool
     {
         return ProductVariant::query()

@@ -40,6 +40,13 @@ class CheckoutSelectionStoreRequest extends FormRequest
             'city.city_lng' => ['nullable', 'numeric'],
             'delivery_point' => ['nullable', 'array'],
             'delivery_address' => ['nullable', 'string', 'max:255'],
+            'first_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'comment' => ['nullable', 'string', 'max:5000'],
+            'promo_code' => ['nullable', 'string', 'max:255'],
+            'no_call' => ['nullable', 'boolean'],
         ];
     }
 
@@ -74,6 +81,12 @@ class CheckoutSelectionStoreRequest extends FormRequest
                 ? Str::squish((string) $this->input('delivery_address', ''))
                 : null,
         );
+
+        foreach (['first_name', 'last_name', 'phone', 'email', 'comment', 'promo_code'] as $key) {
+            Arr::set($normalized_data, $key, Str::squish((string) $this->input($key, '')));
+        }
+
+        Arr::set($normalized_data, 'no_call', $this->boolean('no_call'));
 
         $this->replace($normalized_data);
     }

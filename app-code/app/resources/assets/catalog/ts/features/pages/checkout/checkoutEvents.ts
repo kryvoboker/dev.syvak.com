@@ -4,12 +4,14 @@ interface CheckoutEventBindings {
     deliveryAddressInputElement: HTMLInputElement | null;
     deliveryMethodInputs: HTMLInputElement[];
     paymentMethodInputs: HTMLInputElement[];
+    checkoutFormElement: HTMLFormElement | null;
     onCitySearch: (value: string) => void;
     onCityChange: () => void;
     onBranchChange: () => void;
     onDeliveryAddressChange: () => void;
     onDeliveryMethodChange: (event: Event) => void;
     onPaymentMethodChange: (event: Event) => void;
+    onCheckoutFormChange: () => void;
 }
 
 export const bindCheckoutEvents = ({
@@ -24,6 +26,8 @@ export const bindCheckoutEvents = ({
     onDeliveryAddressChange,
     onDeliveryMethodChange,
     onPaymentMethodChange,
+    checkoutFormElement,
+    onCheckoutFormChange,
 }: CheckoutEventBindings): void => {
     citySelectElement.addEventListener('search', (event: Event): void => {
         const searchEvent = event as CustomEvent<{ value: string }>;
@@ -43,4 +47,13 @@ export const bindCheckoutEvents = ({
     paymentMethodInputs.forEach((input: HTMLInputElement): void => {
         input.addEventListener('change', onPaymentMethodChange);
     });
+
+    checkoutFormElement
+        ?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+            'input[name="first_name"], input[name="last_name"], input[name="phone"], input[name="email"], textarea[name="comment"], input[name="promo_code"], input[name="no_call"]',
+        )
+        .forEach((input: HTMLInputElement | HTMLTextAreaElement): void => {
+            input.addEventListener('input', onCheckoutFormChange);
+            input.addEventListener('change', onCheckoutFormChange);
+        });
 };

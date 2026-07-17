@@ -26,6 +26,13 @@
         $selected_payment_method = (string) ($checkout_selection_state['payment_method'] ?? '');
         $selected_delivery_point = is_array($checkout_selection_state['delivery_point'] ?? null) ? $checkout_selection_state['delivery_point'] : [];
         $selected_delivery_address = (string) ($checkout_selection_state['delivery_address'] ?? '');
+        $checkout_first_name = (string) ($checkout_selection_state['first_name'] ?? '');
+        $checkout_last_name = (string) ($checkout_selection_state['last_name'] ?? '');
+        $checkout_phone = (string) ($checkout_selection_state['phone'] ?? '');
+        $checkout_email = (string) ($checkout_selection_state['email'] ?? '');
+        $checkout_comment = (string) ($checkout_selection_state['comment'] ?? '');
+        $checkout_promo_code = (string) ($checkout_selection_state['promo_code'] ?? '');
+        $checkout_no_call = ($checkout_selection_state['no_call'] ?? false) === true;
         $selected_delivery_point_description = (string) ($selected_delivery_point['description'] ?? '');
         $selected_delivery_point_value = (string) (
             $selected_delivery_point['id']
@@ -85,6 +92,7 @@
                                            id="checkout-first-name"
                                            name="first_name"
                                            type="text"
+                                           value="{{ $checkout_first_name }}"
                                            placeholder="Леся"/>
                                 </div>
 
@@ -96,6 +104,7 @@
                                            id="checkout-last-name"
                                            name="last_name"
                                            type="text"
+                                           value="{{ $checkout_last_name }}"
                                            placeholder="Українка"/>
                                 </div>
 
@@ -108,6 +117,7 @@
                                            name="phone"
                                            type="tel"
                                            inputmode="tel"
+                                           value="{{ $checkout_phone }}"
                                            placeholder="+38 000 000 0000"/>
                                 </div>
 
@@ -119,6 +129,7 @@
                                            id="checkout-email"
                                            name="email"
                                            type="email"
+                                           value="{{ $checkout_email }}"
                                            placeholder="yourname@gmail.com"/>
                                 </div>
                             </div>
@@ -335,7 +346,7 @@
                                                     <textarea class="min-h-28 border border-opacity-light-gray-40% bg-transparent px-4 py-3 text-sm text-white placeholder:text-light-gray md:text-base"
                                                               id="checkout-comment"
                                                               name="comment"
-                                                              placeholder="{{ __('catalog/pages/checkout.labels.comment_field') }}"></textarea>
+                                                              placeholder="{{ __('catalog/pages/checkout.labels.comment_field') }}">{{ $checkout_comment }}</textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -363,6 +374,7 @@
                                                            id="checkout-promo-code"
                                                            name="promo_code"
                                                            type="text"
+                                                           value="{{ $checkout_promo_code }}"
                                                            placeholder="{{ __('catalog/pages/checkout.labels.promo_field') }}"/>
                                                 </div>
                                             </div>
@@ -374,7 +386,8 @@
                                                id="checkout-no-call"
                                                name="no_call"
                                                type="checkbox"
-                                               value="1"/>
+                                               value="1"
+                                               @checked($checkout_no_call)/>
 
                                         <span>{{ __('catalog/pages/checkout.labels.no_call') }}</span>
                                     </label>
@@ -457,9 +470,15 @@
                                                 </div>
                                             @endif
 
-                                            <p class="text-sm uppercase md:text-base lg:text-2xl">
-                                                {{ $checkout_item['line_total_formatted'] ?? $checkout_item['unit_price_formatted'] ?? '' }}
-                                            </p>
+                                            <div class="flex items-center justify-between gap-x-2">
+                                                <div class="text-sm uppercase md:text-base lg:text-2xl">
+                                                    {{ $checkout_item['line_total_formatted'] ?? $checkout_item['unit_price_formatted'] ?? '' }}
+                                                </div>
+
+                                                <div class="text-sm md:text-base lg:text-lg">
+                                                    {{ __('catalog/default.texts.pcs', ['pcs' => $total_products ?? 0]) }}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach
