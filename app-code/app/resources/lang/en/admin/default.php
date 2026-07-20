@@ -8,6 +8,7 @@ return [
         'item_catalog' => 'Catalog',
         'info_pages' => 'Info Pages',
         'item_users' => 'Users',
+        'item_orders' => 'Orders',
         'item_modules' => 'Modules',
         'wiki' => 'Wiki',
         'item_application_settings' => 'Application Settings',
