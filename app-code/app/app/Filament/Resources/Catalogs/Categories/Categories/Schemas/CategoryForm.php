@@ -33,7 +33,7 @@ class CategoryForm
 
         return $schema
             ->components([
-                Tabs::make('ProductTabs')
+                Tabs::make('CategoryTabs')
                     ->tabs([
                         self::createGeneralTab($active_languages),
                         self::createTranslationsFormTabs($active_languages),
@@ -95,7 +95,7 @@ class CategoryForm
                             ->searchable()
                             ->nullable()
                             ->preload(false)
-                            ->live(false)
+                            ->live()
                             ->rules(['nullable', 'numeric', Rule::exists('categories', 'id')]),
 
                         Toggle::make('is_active')
@@ -138,7 +138,7 @@ class CategoryForm
                             ->imageEditor()
                             ->imageEditorViewportWidth($preview_in_page_width)
                             ->imageEditorViewportHeight($preview_in_page_height)
-                            ->imageEditorAspectRatios([
+                            ->imageEditorAspectRatioOptions([
                                 '1:1' => '1:1',
                                 '4:3' => '4:3',
                                 '16:9' => '16:9',
@@ -156,7 +156,7 @@ class CategoryForm
                             ->imageEditor()
                             ->imageEditorViewportWidth($preview_in_page_width)
                             ->imageEditorViewportHeight($preview_in_page_height)
-                            ->imageEditorAspectRatios([
+                            ->imageEditorAspectRatioOptions([
                                 '1:1' => '1:1',
                                 '4:3' => '4:3',
                                 '16:9' => '16:9',
