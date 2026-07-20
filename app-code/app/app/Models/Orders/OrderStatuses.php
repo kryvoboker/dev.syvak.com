@@ -11,6 +11,7 @@ class OrderStatuses extends Model
 {
     protected $fillable = [
         'code',
+        'is_default',
         'is_active',
         'sort_order',
     ];
@@ -21,9 +22,34 @@ class OrderStatuses extends Model
     protected function casts(): array
     {
         return [
+            'is_default' => 'boolean',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (OrderStatuses $order_status): void {
+            if (! $order_status->is_default) {
+                return;
+            }
+
+            static::query()
+                ->whereKeyNot($order_status->getKey())
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
+
+            $order_status->is_active = true;
+        });
+    }
+
+    public function getDefaultActiveStatus(): ?self
+    {
+        return self::query()
+            ->where('is_active', true)
+            ->where('is_default', true)
+            ->first();
     }
 
     /**
