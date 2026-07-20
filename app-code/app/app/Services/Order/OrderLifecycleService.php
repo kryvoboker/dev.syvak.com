@@ -14,21 +14,24 @@ use RuntimeException;
 
 final class OrderLifecycleService
 {
-    public const PAYMENT_STATUS_PENDING = 'pending';
+    public const string PAYMENT_STATUS_PENDING = 'pending';
 
-    public const PAYMENT_STATUS_PAID = 'paid';
+    public const string PAYMENT_STATUS_PAID = 'paid';
 
-    public const PAYMENT_STATUS_FAILED = 'failed';
+    public const string PAYMENT_STATUS_FAILED = 'failed';
 
-    public const PAYMENT_STATUS_CANCELLED = 'cancelled';
+    public const string PAYMENT_STATUS_CANCELLED = 'cancelled';
 
-    public const PAYMENT_STATUS_DECLINED = 'declined';
+    public const string PAYMENT_STATUS_DECLINED = 'declined';
 
-    public const PAYMENT_STATUS_EXPIRED = 'expired';
+    public const string PAYMENT_STATUS_EXPIRED = 'expired';
 
+    /**
+     * @return OrderStatuses
+     */
     public function getDefaultOrderStatus(): OrderStatuses
     {
-        $status = (new OrderStatuses())->getDefaultActiveStatus();
+        $status = new OrderStatuses()->getDefaultActiveStatus();
 
         if ($status instanceof OrderStatuses) {
             return $status;
@@ -39,9 +42,12 @@ final class OrderLifecycleService
         throw new RuntimeException('No active default order status is configured.');
     }
 
+    /**
+     * @return PaymentStatuses
+     */
     public function getDefaultPaymentStatus(): PaymentStatuses
     {
-        $status = (new PaymentStatuses())->getDefaultActiveStatus();
+        $status = new PaymentStatuses()->getDefaultActiveStatus();
 
         if ($status instanceof PaymentStatuses) {
             return $status;
