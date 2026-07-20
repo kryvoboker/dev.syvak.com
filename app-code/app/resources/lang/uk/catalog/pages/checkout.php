@@ -38,6 +38,9 @@ return [
         'nova_poshta_poshtomat' => 'Нова Пошта (Поштомат)',
         'ukr_poshta' => 'Укрпошта',
     ],
+    'payment_methods' => [
+        'cash_on_delivery' => 'Оплата при отриманні',
+    ],
     'buttons' => [
         'show_all_items' => 'Показати всі товари (:count)',
         'find_on_map' => 'Знайти на карті',
