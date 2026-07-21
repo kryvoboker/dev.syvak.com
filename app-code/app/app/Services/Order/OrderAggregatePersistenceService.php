@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Order;
 
+use App\Enums\Order\DeliveryMethodEnum;
+use App\Enums\Order\OrderDataKeyEnum;
+use App\Enums\Order\PaymentMethodEnum;
 use App\Enums\Order\TotalTypesEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
@@ -50,6 +53,12 @@ final readonly class OrderAggregatePersistenceService
             $order_number = (string)Str::ulid();
             $totals = (array)Arr::get($cart_data, 'totals', []);
             $currency_code = $currency instanceof Currency ? $currency->code : '';
+            $exchange_rate = (float) Arr::get($totals, 'exchange_rate', 0);
+
+            if ($exchange_rate <= 0 && $currency instanceof Currency) {
+                $exchange_rate = (float) $currency->exchange_rate;
+            }
+
             $order_status_name = $order_status
                 ->getRelation('descriptions')
                 ->first()?->name;
@@ -65,7 +74,7 @@ final readonly class OrderAggregatePersistenceService
                 'language_code' => $locale,
                 'currency_id' => $currency?->getKey(),
                 'currency_code' => (string)Arr::get($totals, 'currency_code', $currency_code),
-                'exchange_rate' => (float)Arr::get($totals, 'exchange_rate', 1),
+                'exchange_rate' => $exchange_rate,
                 'accept_language' => $this->nullableString(Arr::get($request_context, 'accept_language')),
                 'ip' => (string)Arr::get($request_context, 'ip', '0.0.0.0'),
                 'forwarded_ip' => $this->nullableString(Arr::get($request_context, 'forwarded_ip')),
@@ -81,10 +90,14 @@ final readonly class OrderAggregatePersistenceService
                 'old_order_status_id' => null,
                 'order_status_id' => $order_status->getKey(),
                 'event' => 'order_created',
-                'json' => [],
+                'json' => [
+                    __('admin/orders/orders.history_data.actor') => auth()->check()
+                        ? __('admin/orders/orders.history_data.customer')
+                        : __('admin/orders/orders.history_data.guest'),
+                ],
             ]);
 
-            $payment_code = $this->nullableString(Arr::get($validated_data, 'payment_method'));
+        $payment_code = $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value));
 
             $payment = $order->payments()->create([
                 'method' => $this->resolvePaymentMethodName($payment_code, $locale),
@@ -199,17 +212,18 @@ final readonly class OrderAggregatePersistenceService
     private function createShipping(Orders $order, array $validated_data, string $locale): OrderShippings
     {
         $city = (array)Arr::get($validated_data, 'city', []);
-        $delivery_point = (array)Arr::get($validated_data, 'delivery_point', []);
+        $delivery_point = (array)Arr::get($validated_data, OrderDataKeyEnum::DeliveryPoint->value, []);
         $city_id = Arr::get($city, 'nova_poshta_city_id') ?: Arr::get($city, 'ukr_poshta_city_id');
         $delivery_point_id = Arr::get($delivery_point, 'ref') ?: Arr::get($delivery_point, 'id');
-        $code = $this->nullableString(Arr::get($validated_data, 'delivery_method'));
+        $code = $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value));
 
         return $order->shipping()->create([
             'method' => $this->resolveDeliveryMethodName($code, $locale),
             'code' => $code,
+            'is_cost_enabled' => $code !== DeliveryMethodEnum::PickupStore->value,
             'city' => $this->nullableString(Arr::get($city, 'city_description')),
             'city_id' => $this->nullableString($city_id),
-            'address' => $this->nullableString(Arr::get($validated_data, 'delivery_address')),
+            'address' => $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::DeliveryAddress->value)),
             'delivery_point' => $this->nullableString(Arr::get($delivery_point, 'description')),
             'delivery_point_id' => $this->nullableString($delivery_point_id),
             'postcode' => $this->nullableString(Arr::get($delivery_point, 'postcode')),
@@ -224,11 +238,11 @@ final readonly class OrderAggregatePersistenceService
         }
 
         $translation_key = match ($code) {
-            'nova_poshta' => 'catalog/pages/checkout.delivery_methods.nova_poshta',
-            'nova_poshta_courier' => 'catalog/pages/checkout.delivery_methods.nova_poshta_courier',
-            'nova_poshta_poshtomat' => 'catalog/pages/checkout.delivery_methods.nova_poshta_poshtomat',
-            'ukr_poshta' => 'catalog/pages/checkout.delivery_methods.ukr_poshta',
-            'pickup_store' => 'pickup::storefront/checkout.delivery_method',
+            DeliveryMethodEnum::NovaPoshta->value => 'catalog/pages/checkout.delivery_methods.nova_poshta',
+            DeliveryMethodEnum::NovaPoshtaCourier->value => 'catalog/pages/checkout.delivery_methods.nova_poshta_courier',
+            DeliveryMethodEnum::NovaPoshtaPoshtomat->value => 'catalog/pages/checkout.delivery_methods.nova_poshta_poshtomat',
+            DeliveryMethodEnum::UkrPoshta->value => 'catalog/pages/checkout.delivery_methods.ukr_poshta',
+            DeliveryMethodEnum::PickupStore->value => 'pickup::storefront/checkout.delivery_method',
             default => null,
         };
 
@@ -253,8 +267,8 @@ final readonly class OrderAggregatePersistenceService
         }
 
         $translation_key = match ($code) {
-            'payment_upon_delivery' => 'paymentupondelivery::storefront/checkout.payment_methods.payment_upon_delivery',
-            'cash_on_delivery' => 'catalog/pages/checkout.payment_methods.cash_on_delivery',
+            PaymentMethodEnum::PaymentUponDelivery->value => 'paymentupondelivery::storefront/checkout.payment_methods.payment_upon_delivery',
+            PaymentMethodEnum::CashOnDelivery->value => 'catalog/pages/checkout.payment_methods.cash_on_delivery',
             BankTransferConfig::PAYMENT_METHOD => 'banktransfer::storefront/checkout.payment_methods.bank_transfer',
             default => $code === $this->wayforpay_config->getPaymentMethod()
                 ? $this->wayforpay_config->getTranslationKey()

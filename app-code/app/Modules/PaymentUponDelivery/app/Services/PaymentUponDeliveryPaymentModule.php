@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\PaymentUponDelivery\Services;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
 
 final class PaymentUponDeliveryPaymentModule
@@ -14,12 +15,12 @@ final class PaymentUponDeliveryPaymentModule
      */
     public function process(array $order_payload): array
     {
-        $order_payload['payment_method'] = PaymentUponDeliveryConfig::PAYMENT_METHOD;
+        $order_payload[OrderDataKeyEnum::PaymentMethod->value] = PaymentUponDeliveryConfig::PAYMENT_METHOD;
 
         return [
             'is_success' => true,
             'status' => 'pending',
-            'provider_code' => 'payment_upon_delivery',
+            'provider_code' => PaymentUponDeliveryConfig::PAYMENT_METHOD,
             'payload' => $order_payload,
         ];
     }

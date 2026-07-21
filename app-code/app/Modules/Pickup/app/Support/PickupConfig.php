@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Pickup\Support;
 
+use App\Enums\Order\DeliveryMethodEnum;
 use Illuminate\Support\Str;
 use Modules\Pickup\Services\PickupIframeSanitizer;
 
@@ -13,7 +14,7 @@ final class PickupConfig
 
     public const string MAP_IFRAME_GLOBAL_CONFIG_KEY = 'pickup_store.map_iframe';
 
-    public const string DELIVERY_METHOD = 'pickup_store';
+    public const string DELIVERY_METHOD = DeliveryMethodEnum::PickupStore->value;
 
     public function __construct(
         private readonly PickupIframeSanitizer $iframe_sanitizer,

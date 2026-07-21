@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Pages;
 
+use App\Enums\Order\DeliveryMethodEnum;
+use App\Enums\Order\OrderDataKeyEnum;
 use App\Models\ApplicationSettings\Language;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,23 +32,29 @@ class CheckoutSelectionStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'delivery_method' => ['nullable', 'string', Rule::in(['nova_poshta', 'nova_poshta_poshtomat', 'nova_poshta_courier', 'ukr_poshta', PickupConfig::DELIVERY_METHOD])],
-            'payment_method' => ['nullable', 'string', 'max:100'],
-            'city' => ['nullable', 'array'],
+            OrderDataKeyEnum::DeliveryMethod->value => ['nullable', 'string', Rule::in([
+                DeliveryMethodEnum::NovaPoshta->value,
+                DeliveryMethodEnum::NovaPoshtaPoshtomat->value,
+                DeliveryMethodEnum::NovaPoshtaCourier->value,
+                DeliveryMethodEnum::UkrPoshta->value,
+                PickupConfig::DELIVERY_METHOD,
+            ])],
+            OrderDataKeyEnum::PaymentMethod->value => ['nullable', 'string', 'max:100'],
+            OrderDataKeyEnum::City->value => ['nullable', 'array'],
             'city.city_description' => ['nullable', 'string', 'max:255'],
             'city.nova_poshta_city_id' => ['nullable', 'string', 'max:255'],
             'city.ukr_poshta_city_id' => ['nullable', 'integer', 'min:1'],
             'city.city_lat' => ['nullable', 'numeric'],
             'city.city_lng' => ['nullable', 'numeric'],
-            'delivery_point' => ['nullable', 'array'],
-            'delivery_address' => ['nullable', 'string', 'max:255'],
+            OrderDataKeyEnum::DeliveryPoint->value => ['nullable', 'array'],
+            OrderDataKeyEnum::DeliveryAddress->value => ['nullable', 'string', 'max:255'],
             'first_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
-            'comment' => ['nullable', 'string', 'max:5000'],
-            'promo_code' => ['nullable', 'string', 'max:255'],
-            'no_call' => ['nullable', 'boolean'],
+            OrderDataKeyEnum::Comment->value => ['nullable', 'string', 'max:5000'],
+            OrderDataKeyEnum::PromoCode->value => ['nullable', 'string', 'max:255'],
+            OrderDataKeyEnum::NoCall->value => ['nullable', 'boolean'],
         ];
     }
 
@@ -54,11 +62,11 @@ class CheckoutSelectionStoreRequest extends FormRequest
     {
         $normalized_data = $this->all();
 
-        $delivery_method = Str::lower(Str::squish((string) $this->input('delivery_method', '')));
-        Arr::set($normalized_data, 'delivery_method', $delivery_method !== '' ? $delivery_method : null);
+        $delivery_method = Str::lower(Str::squish((string) $this->input(OrderDataKeyEnum::DeliveryMethod->value, '')));
+        Arr::set($normalized_data, OrderDataKeyEnum::DeliveryMethod->value, $delivery_method !== '' ? $delivery_method : null);
 
-        $payment_method = Str::lower(Str::squish((string) $this->input('payment_method', '')));
-        Arr::set($normalized_data, 'payment_method', $payment_method !== '' ? $payment_method : null);
+        $payment_method = Str::lower(Str::squish((string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '')));
+        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, $payment_method !== '' ? $payment_method : null);
 
         $city = (array) $this->input('city', []);
         Arr::set($normalized_data, 'city.city_description', Str::squish((string) Arr::get($city, 'city_description', '')));
@@ -73,20 +81,20 @@ class CheckoutSelectionStoreRequest extends FormRequest
         $city_lng = Arr::get($city, 'city_lng');
         Arr::set($normalized_data, 'city.city_lng', is_numeric($city_lng) ? (float) $city_lng : null);
 
-        Arr::set($normalized_data, 'delivery_point', (array) $this->input('delivery_point', []));
+        Arr::set($normalized_data, OrderDataKeyEnum::DeliveryPoint->value, (array) $this->input(OrderDataKeyEnum::DeliveryPoint->value, []));
         Arr::set(
             $normalized_data,
-            'delivery_address',
-            Str::squish((string) $this->input('delivery_address', '')) !== ''
-                ? Str::squish((string) $this->input('delivery_address', ''))
+            OrderDataKeyEnum::DeliveryAddress->value,
+            Str::squish((string) $this->input(OrderDataKeyEnum::DeliveryAddress->value, '')) !== ''
+                ? Str::squish((string) $this->input(OrderDataKeyEnum::DeliveryAddress->value, ''))
                 : null,
         );
 
-        foreach (['first_name', 'last_name', 'phone', 'email', 'comment', 'promo_code'] as $key) {
+        foreach (['first_name', 'last_name', 'phone', 'email', OrderDataKeyEnum::Comment->value, OrderDataKeyEnum::PromoCode->value] as $key) {
             Arr::set($normalized_data, $key, Str::squish((string) $this->input($key, '')));
         }
 
-        Arr::set($normalized_data, 'no_call', $this->boolean('no_call'));
+        Arr::set($normalized_data, OrderDataKeyEnum::NoCall->value, $this->boolean(OrderDataKeyEnum::NoCall->value));
 
         $this->replace($normalized_data);
     }
@@ -97,7 +105,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
-            $payment_method = (string) $this->input('payment_method', '');
+            $payment_method = (string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '');
 
             if ($payment_method !== '' && ! $this->isAvailablePaymentMethod($payment_method)) {
                 $validator->errors()->add(
@@ -110,7 +118,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
                 );
             }
 
-            if ($this->input('delivery_method') !== PickupConfig::DELIVERY_METHOD) {
+            if ($this->input(OrderDataKeyEnum::DeliveryMethod->value) !== PickupConfig::DELIVERY_METHOD) {
                 return;
             }
 
@@ -122,7 +130,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
                 ->all();
 
             if (! is_enabled_singleton_module('Pickup') || ! app(PickupConfig::class)->isComplete($active_language_codes)) {
-                $validator->errors()->add('delivery_method', 'Pickup store delivery is not available.');
+                $validator->errors()->add(OrderDataKeyEnum::DeliveryMethod->value, 'Pickup store delivery is not available.');
             }
         });
     }

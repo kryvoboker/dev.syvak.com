@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Checkout;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -54,7 +55,7 @@ class CheckoutSelectionStateService
     public function setCity(array $city): array
     {
         $state = $this->getState();
-        $state['city'] = $this->normalizeRow($city);
+        $state[OrderDataKeyEnum::City->value] = $this->normalizeRow($city);
 
         return $this->replaceState($state);
     }
@@ -62,7 +63,7 @@ class CheckoutSelectionStateService
     public function setDeliveryMethod(string $delivery_method): array
     {
         $state = $this->getState();
-        $state['delivery_method'] = Str::lower(Str::squish($delivery_method));
+        $state[OrderDataKeyEnum::DeliveryMethod->value] = Str::lower(Str::squish($delivery_method));
 
         return $this->replaceState($state);
     }
@@ -74,7 +75,7 @@ class CheckoutSelectionStateService
     public function setDeliveryAddress(mixed $delivery_address): array
     {
         $state = $this->getState();
-        $state['delivery_address'] = $this->normalizeDeliveryAddress($delivery_address);
+        $state[OrderDataKeyEnum::DeliveryAddress->value] = $this->normalizeDeliveryAddress($delivery_address);
 
         return $this->replaceState($state);
     }
@@ -86,7 +87,7 @@ class CheckoutSelectionStateService
     public function setDeliveryPoint(array $delivery_point): array
     {
         $state = $this->getState();
-        $state['delivery_point'] = $this->normalizeRow($delivery_point);
+        $state[OrderDataKeyEnum::DeliveryPoint->value] = $this->normalizeRow($delivery_point);
 
         return $this->replaceState($state);
     }
@@ -94,7 +95,7 @@ class CheckoutSelectionStateService
     public function clearDeliveryPoint(): array
     {
         $state = $this->getState();
-        $state['delivery_point'] = [];
+        $state[OrderDataKeyEnum::DeliveryPoint->value] = [];
 
         return $this->replaceState($state);
     }
@@ -102,7 +103,7 @@ class CheckoutSelectionStateService
     public function clearDeliveryAddress(): array
     {
         $state = $this->getState();
-        $state['delivery_address'] = '';
+        $state[OrderDataKeyEnum::DeliveryAddress->value] = '';
 
         return $this->replaceState($state);
     }
@@ -123,18 +124,18 @@ class CheckoutSelectionStateService
         $current_state = $this->getState();
 
         return [
-            'delivery_method' => Str::lower(Str::squish((string) Arr::get($payload, 'delivery_method', ''))),
-            'payment_method' => Str::lower(Str::squish((string) Arr::get($payload, 'payment_method', ''))),
-            'city' => $this->normalizeRow((array) Arr::get($payload, 'city', [])),
-            'delivery_point' => $this->normalizeRow((array) Arr::get($payload, 'delivery_point', [])),
-            'delivery_address' => $this->normalizeDeliveryAddress(Arr::get($payload, 'delivery_address', '')),
+            OrderDataKeyEnum::DeliveryMethod->value => Str::lower(Str::squish((string) Arr::get($payload, OrderDataKeyEnum::DeliveryMethod->value, ''))),
+            OrderDataKeyEnum::PaymentMethod->value => Str::lower(Str::squish((string) Arr::get($payload, OrderDataKeyEnum::PaymentMethod->value, ''))),
+            OrderDataKeyEnum::City->value => $this->normalizeRow((array) Arr::get($payload, OrderDataKeyEnum::City->value, [])),
+            OrderDataKeyEnum::DeliveryPoint->value => $this->normalizeRow((array) Arr::get($payload, OrderDataKeyEnum::DeliveryPoint->value, [])),
+            OrderDataKeyEnum::DeliveryAddress->value => $this->normalizeDeliveryAddress(Arr::get($payload, OrderDataKeyEnum::DeliveryAddress->value, '')),
             'first_name' => $this->normalizeText($payload, $current_state, 'first_name'),
             'last_name' => $this->normalizeText($payload, $current_state, 'last_name'),
             'phone' => $this->normalizeText($payload, $current_state, 'phone'),
             'email' => $this->normalizeText($payload, $current_state, 'email'),
-            'comment' => $this->normalizeText($payload, $current_state, 'comment'),
-            'promo_code' => $this->normalizeText($payload, $current_state, 'promo_code'),
-            'no_call' => $this->normalizeBoolean($payload, $current_state, 'no_call'),
+            OrderDataKeyEnum::Comment->value => $this->normalizeText($payload, $current_state, OrderDataKeyEnum::Comment->value),
+            OrderDataKeyEnum::PromoCode->value => $this->normalizeText($payload, $current_state, OrderDataKeyEnum::PromoCode->value),
+            OrderDataKeyEnum::NoCall->value => $this->normalizeBoolean($payload, $current_state, OrderDataKeyEnum::NoCall->value),
         ];
     }
 
