@@ -44,6 +44,27 @@ class EditOrder extends EditRecord
             return $data;
         }
 
+        $language_id = app(OrderAdminOptionsService::class)->getCurrentLanguageId();
+        $record->loadMissing([
+            'customer',
+            'shipping',
+            'payments',
+            'products',
+            'totals',
+            'histories' => function ($query): void {
+                $query
+                    ->orderByDesc('created_at')
+                    ->orderByDesc('id');
+            },
+            'status.descriptions' => function ($query) use ($language_id): void {
+                $query
+                    ->select(['id', 'order_status_id', 'language_id', 'name'])
+                    ->when($language_id !== null, function ($description_query) use ($language_id): void {
+                        $description_query->where('language_id', $language_id);
+                    });
+            },
+        ]);
+
         $data['id'] = $record->getKey();
         $data['currency_id'] = $record->currency_id;
         $data['currency_code'] = $record->currency_code;
@@ -76,11 +97,7 @@ class EditOrder extends EditRecord
             $data['shipping_cost_enabled'],
             $shipping_has_cost,
         );
-        $data['histories'] = $record->histories()
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->get()
-            ->toArray();
+        $data['histories'] = $record->histories->toArray();
 
         return $data;
     }
