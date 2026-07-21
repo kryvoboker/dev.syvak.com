@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\WayForPay\Services;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use App\Models\ApplicationSettings\Language;
 use Modules\WayForPay\Support\WayForPayConfig;
 
@@ -30,7 +31,7 @@ final class WayForPayModuleDataService
 
         return [
             'is_available' => $is_available,
-            'payment_method' => $this->wayforpay_config->getPaymentMethod(),
+            OrderDataKeyEnum::PaymentMethod->value => $this->wayforpay_config->getPaymentMethod(),
             'label_translation_key' => $this->wayforpay_config->getTranslationKey(),
             'payment_name' => $is_available ? $this->wayforpay_config->getPaymentName($locale) : '',
         ];

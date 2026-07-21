@@ -6,16 +6,23 @@ namespace App\Services\Order;
 
 use App\Enums\Cart\CartModeEnum;
 use App\Enums\Cart\CartRequestKeyEnum;
+use App\Enums\Order\OrderDataKeyEnum;
+use App\Enums\Order\PaymentMethodEnum;
+use App\Models\Orders\OrderPayments;
 use App\Services\Cart\CartService;
 use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\BankTransfer\Services\BankTransferPaymentModule;
 use Modules\BankTransfer\Support\BankTransferConfig;
 use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryPaymentModule;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
+use Modules\Pickup\Services\PickupCheckoutDataService;
+use Modules\Pickup\Support\PickupConfig;
 use Modules\WayForPay\Services\WayForPayPaymentModule;
 use Modules\WayForPay\Support\WayForPayConfig;
+use Throwable;
 
 readonly class OrderCreationService
 {
@@ -26,6 +33,9 @@ readonly class OrderCreationService
         private BankTransferPaymentModule $bank_transfer_payment_module,
         private WayForPayPaymentModule $wayforpay_payment_module,
         private WayForPayConfig $wayforpay_config,
+        private OrderAggregatePersistenceService $order_aggregate_persistence_service,
+        private OrderLifecycleService $order_lifecycle_service,
+        private PickupCheckoutDataService $pickup_checkout_data_service,
     ) {
     }
 
@@ -72,7 +82,7 @@ readonly class OrderCreationService
         }
 
         $order_number = $this->generateOrderNumber();
-        $payment_method = (string) Arr::get($validated_data, 'payment_method', 'cash_on_delivery');
+        $payment_method = (string) Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, PaymentMethodEnum::CashOnDelivery->value);
 
         // TODO: replace temporary payload with real order entity persistence.
         $order_payload = [
@@ -84,7 +94,7 @@ readonly class OrderCreationService
             ],
             'cart' => Arr::get($validation_result, 'cart', []),
             'locale' => $locale,
-            'payment_method' => $payment_method,
+            OrderDataKeyEnum::PaymentMethod->value => $payment_method,
         ];
 
         $payment_result = match ($payment_method) {
@@ -179,8 +189,42 @@ readonly class OrderCreationService
             ];
         }
 
-        $order_number = $this->generateOrderNumber('ORD');
-        $payment_method = (string) Arr::get($validated_data, 'payment_method', '');
+        $payment_method = (string) Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, '');
+
+        if (Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value) === PickupConfig::DELIVERY_METHOD) {
+            $pickup_data = $this->pickup_checkout_data_service->getCheckoutData($locale);
+            $validated_data['city'] = [];
+            $validated_data[OrderDataKeyEnum::DeliveryPoint->value] = [];
+            $validated_data[OrderDataKeyEnum::DeliveryAddress->value] = (string) Arr::get($pickup_data, 'store_address', '');
+        }
+
+        try {
+            $persisted_order = $this->order_aggregate_persistence_service->createSimpleOrder(
+                $validated_data,
+                (array) Arr::get($validation_result, 'cart', []),
+                $locale,
+                $this->resolveRequestContext(),
+            );
+            $order = $persisted_order['order'];
+            $payment = $persisted_order['payment'];
+            $order_number = (string) $order->order_number;
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('[OrderCreationService.createSimpleOrder] order persistence failed', [
+                'flow' => CartModeEnum::Regular->value,
+                'exception' => $throwable::class,
+                'message' => $throwable->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'order_number' => null,
+                'status' => 'failed',
+                'errors' => [
+                    'order' => [__('catalog/default.cart.messages.payment_failed')],
+                ],
+            ];
+        }
+
         $order_payload = [
             'order_number' => $order_number,
             'customer' => [
@@ -190,12 +234,12 @@ readonly class OrderCreationService
                 'phone' => clear_telephone((string) Arr::get($validated_data, 'phone', '')),
             ],
             'delivery' => [
-                'method' => (string) Arr::get($validated_data, 'delivery_method', ''),
-                'address' => (string) Arr::get($validated_data, 'delivery_address', ''),
+                'method' => (string) Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value, ''),
+                'address' => (string) Arr::get($validated_data, OrderDataKeyEnum::DeliveryAddress->value, ''),
             ],
             'cart' => Arr::get($validation_result, 'cart', []),
             'locale' => $locale,
-            'payment_method' => $payment_method,
+                OrderDataKeyEnum::PaymentMethod->value => $payment_method,
             'return_url' => route($this->wayforpay_config->getReturnRouteName(), ['locale' => $locale]),
             'service_url' => route($this->wayforpay_config->getCallbackRouteName(), ['locale' => $locale]),
         ];
@@ -204,6 +248,8 @@ readonly class OrderCreationService
             $payment_result = $this->wayforpay_payment_module->prepare($order_payload);
 
             if (($payment_result['success'] ?? false) !== true) {
+                $this->markPaymentFailed($payment, (array) Arr::get($payment_result, 'errors', []));
+
                 return [
                     'success' => false,
                     'order_number' => $order_number,
@@ -216,6 +262,7 @@ readonly class OrderCreationService
                 'success' => true,
                 'order_number' => $order_number,
                 'status' => 'pending',
+                'payment_id' => $payment->getKey(),
                 'payment' => $payment_result,
                 'errors' => [],
             ];
@@ -233,11 +280,14 @@ readonly class OrderCreationService
             return [
                 'success' => true,
                 'order_number' => $order_number,
+                'payment_id' => $payment->getKey(),
                 'redirect_url' => localized_route('localized.catalog.thank-you.index', ['locale' => $locale]),
                 'status' => 'success',
                 'errors' => [],
             ];
         }
+
+        $this->markPaymentFailed($payment, (array) Arr::get($payment_result, 'errors', []));
 
         return [
             'success' => false,
@@ -251,6 +301,44 @@ readonly class OrderCreationService
 
     private function generateOrderNumber(string $prefix = 'TMP'): string
     {
-        return $prefix . '-' . now(config('app.timezone'))->format('YmdHis') . '-' . Str::upper(Str::random(6));
+        unset($prefix);
+
+        return (string) Str::ulid();
+    }
+
+    /**
+     * @return array{ip: string, forwarded_ip: ?string, user_agent: ?string, accept_language: ?string}
+     */
+    private function resolveRequestContext(): array
+    {
+        $request = request();
+
+        return [
+            'ip' => $request->ip() ?: '0.0.0.0',
+            'forwarded_ip' => $request->header('X-Forwarded-For'),
+            'user_agent' => $request->userAgent(),
+            'accept_language' => $request->header('Accept-Language'),
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $errors
+     */
+    private function markPaymentFailed(OrderPayments $payment, array $errors): void
+    {
+        try {
+            $this->order_lifecycle_service->transitionPayment(
+                $payment,
+                OrderLifecycleService::PAYMENT_STATUS_FAILED,
+                ['source' => 'payment_preparation'],
+                Arr::flatten($errors)[0] ?? null,
+            );
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('[OrderCreationService] failed payment status update failed', [
+                'payment_id' => $payment->getKey(),
+                'exception' => $throwable::class,
+                'message' => $throwable->getMessage(),
+            ]);
+        }
     }
 }

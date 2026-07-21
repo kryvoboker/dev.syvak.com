@@ -10,13 +10,9 @@ import {
     toStringValue,
     toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
+import { $DELIVERY_METHOD, type CheckoutDeliveryMethod } from './checkoutConstants.ts';
 
-export type CheckoutDeliveryMethod =
-    | 'nova_poshta'
-    | 'nova_poshta_courier'
-    | 'nova_poshta_poshtomat'
-    | 'ukr_poshta'
-    | 'pickup_store';
+export type { CheckoutDeliveryMethod } from './checkoutConstants.ts';
 
 export interface CheckoutCitySearchItem {
     city_description: string;
@@ -200,14 +196,14 @@ export const normalizeBranchPayload = (branch: CheckoutBranchPayload): CheckoutB
         site_key: toNumberOrNull(branchData.site_key),
         lock_code: toNumberOrNull(branchData.lock_code),
         delivery_method:
-            deliveryMethod === 'nova_poshta' ||
-            deliveryMethod === 'nova_poshta_poshtomat' ||
-            deliveryMethod === 'nova_poshta_courier' ||
-            deliveryMethod === 'ukr_poshta'
+            deliveryMethod === $DELIVERY_METHOD.NOVA_POSHTA ||
+            deliveryMethod === $DELIVERY_METHOD.NOVA_POSHTA_POSHTOMAT ||
+            deliveryMethod === $DELIVERY_METHOD.NOVA_POSHTA_COURIER ||
+            deliveryMethod === $DELIVERY_METHOD.UKR_POSHTA
                 ? deliveryMethod
                 : branchData.pdcity_id === null
-                  ? 'nova_poshta'
-                  : 'ukr_poshta',
+                  ? $DELIVERY_METHOD.NOVA_POSHTA
+                  : $DELIVERY_METHOD.UKR_POSHTA,
         branch_value: branchValue,
         branch_label: toStringValue(branchData.branch_label ?? branchData.label ?? description),
         label: toStringValue(branchData.branch_label ?? branchData.label ?? description),
@@ -282,7 +278,7 @@ export const buildSelectionPayload = (
         });
     }
 
-    if (deliveryMethod === 'nova_poshta_courier' || deliveryMethod === 'pickup_store') {
+    if (deliveryMethod === $DELIVERY_METHOD.NOVA_POSHTA_COURIER || deliveryMethod === $DELIVERY_METHOD.PICKUP_STORE) {
         payload.append('delivery_address', deliveryAddress);
     }
 
@@ -321,18 +317,31 @@ export const isBranchCompatibleWithSelection = (
     city: CheckoutCitySearchItem | null,
     deliveryMethod: string,
 ): boolean => {
-    if (!branch || !city || !['nova_poshta', 'nova_poshta_poshtomat', 'ukr_poshta'].includes(deliveryMethod)) {
+    if (
+        !branch ||
+        !city ||
+        !(
+            [
+                $DELIVERY_METHOD.NOVA_POSHTA,
+                $DELIVERY_METHOD.NOVA_POSHTA_POSHTOMAT,
+                $DELIVERY_METHOD.UKR_POSHTA,
+            ] as readonly CheckoutDeliveryMethod[]
+        ).includes(deliveryMethod as CheckoutDeliveryMethod)
+    ) {
         return false;
     }
 
-    if (deliveryMethod === 'nova_poshta' || deliveryMethod === 'nova_poshta_poshtomat') {
+    if (deliveryMethod === $DELIVERY_METHOD.NOVA_POSHTA || deliveryMethod === $DELIVERY_METHOD.NOVA_POSHTA_POSHTOMAT) {
         return (
             branch.delivery_method === deliveryMethod &&
             toStringValue(branch.city_ref) === toStringValue(city.nova_poshta_city_id)
         );
     }
 
-    return branch.delivery_method === 'ukr_poshta' && toNumber(branch.pdcity_id) === toNumber(city.ukr_poshta_city_id);
+    return (
+        branch.delivery_method === $DELIVERY_METHOD.UKR_POSHTA &&
+        toNumber(branch.pdcity_id) === toNumber(city.ukr_poshta_city_id)
+    );
 };
 
 export const resolveCheckoutSelectionState = (): CheckoutSelectionState => {

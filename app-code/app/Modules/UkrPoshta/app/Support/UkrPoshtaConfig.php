@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\UkrPoshta\Support;
 
+use App\Enums\Order\DeliveryMethodEnum;
 use Illuminate\Support\Arr;
 use RuntimeException;
 
 class UkrPoshtaConfig
 {
+    public const DELIVERY_METHOD = DeliveryMethodEnum::UkrPoshta->value;
+
     public const string API_KEY_GLOBAL_CONFIG_KEY = 'ukrposhta.api_key';
 
     public const string DELIVERY_COST_GLOBAL_CONFIG_KEY = 'ukrposhta.delivery_cost';

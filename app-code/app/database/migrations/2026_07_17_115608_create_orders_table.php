@@ -23,6 +23,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->noActionOnDelete();
 
+            $table->string('order_status_name')->nullable(false);
+
             $table->string('order_type')
                 ->nullable(false)
                 ->comment('For check is order is FAST or REGULAR or OTHER');

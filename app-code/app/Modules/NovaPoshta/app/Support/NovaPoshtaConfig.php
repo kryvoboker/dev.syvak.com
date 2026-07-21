@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\NovaPoshta\Support;
 
+use App\Enums\Order\DeliveryMethodEnum;
 use Illuminate\Support\Arr;
 use RuntimeException;
 
@@ -12,6 +13,12 @@ use RuntimeException;
  */
 class NovaPoshtaConfig
 {
+    public const DELIVERY_METHOD = DeliveryMethodEnum::NovaPoshta->value;
+
+    public const DELIVERY_METHOD_COURIER = DeliveryMethodEnum::NovaPoshtaCourier->value;
+
+    public const DELIVERY_METHOD_POSHTOMAT = DeliveryMethodEnum::NovaPoshtaPoshtomat->value;
+
     public const API_KEY_GLOBAL_CONFIG_KEY = 'novaposhta.api_key';
 
     public const DELIVERY_COST_GLOBAL_CONFIG_KEY = 'novaposhta.delivery_cost';

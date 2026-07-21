@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\PaymentUponDelivery\Services;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
 
 final class PaymentUponDeliveryModuleDataService
@@ -23,7 +24,7 @@ final class PaymentUponDeliveryModuleDataService
 
         return [
             'is_available' => is_enabled_singleton_module('PaymentUponDelivery'),
-            'payment_method' => $payment_method,
+            OrderDataKeyEnum::PaymentMethod->value => $payment_method,
             'label_translation_key' => $translation_key,
         ];
     }

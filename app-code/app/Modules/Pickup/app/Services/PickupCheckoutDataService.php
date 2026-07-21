@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Pickup\Services;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use App\Models\ApplicationSettings\Language;
 use Illuminate\Support\Facades\Log;
 use Modules\Pickup\Support\PickupConfig;
@@ -23,7 +24,7 @@ final class PickupCheckoutDataService
         if (! is_enabled_singleton_module('Pickup')) {
             return [
                 'is_available' => false,
-                'delivery_method' => PickupConfig::DELIVERY_METHOD,
+                OrderDataKeyEnum::DeliveryMethod->value => PickupConfig::DELIVERY_METHOD,
                 'store_address' => '',
                 'map_iframe' => '',
             ];
@@ -46,7 +47,7 @@ final class PickupCheckoutDataService
 
         return [
             'is_available' => $is_complete,
-            'delivery_method' => PickupConfig::DELIVERY_METHOD,
+            OrderDataKeyEnum::DeliveryMethod->value => PickupConfig::DELIVERY_METHOD,
             'store_address' => $is_complete ? $this->pickup_config->getAddressForLocale($locale) : '',
             'map_iframe' => $is_complete ? $safe_map_iframe : '',
         ];
