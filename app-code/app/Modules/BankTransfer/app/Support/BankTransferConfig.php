@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\BankTransfer\Support;
 
+use App\Enums\Order\PaymentMethodEnum;
 use Illuminate\Support\Str;
 
 final class BankTransferConfig
@@ -12,7 +13,7 @@ final class BankTransferConfig
 
     public const string PAYMENT_INFORMATION_GLOBAL_CONFIG_KEY = 'bank_transfer.payment_information';
 
-    public const string PAYMENT_METHOD = 'bank_transfer';
+    public const string PAYMENT_METHOD = PaymentMethodEnum::BankTransfer->value;
 
     public function getPaymentMethod(): string
     {

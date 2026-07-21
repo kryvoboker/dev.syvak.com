@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Pickup\Services;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use Modules\Pickup\Support\PickupConfig;
 
 final class PickupModuleDataService
@@ -27,7 +28,7 @@ final class PickupModuleDataService
                 'placement' => $placement,
                 'page_type' => $page_type,
                 ...$this->checkout_data_service->getCheckoutData((string) app()->getLocale()),
-                'delivery_method' => PickupConfig::DELIVERY_METHOD,
+                OrderDataKeyEnum::DeliveryMethod->value => PickupConfig::DELIVERY_METHOD,
             ],
         ];
     }

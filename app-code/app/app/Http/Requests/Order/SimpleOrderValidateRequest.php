@@ -6,6 +6,9 @@ namespace App\Http\Requests\Order;
 
 use App\Enums\Cart\CartModeEnum;
 use App\Enums\Cart\CartRequestKeyEnum;
+use App\Enums\Order\DeliveryMethodEnum;
+use App\Enums\Order\OrderDataKeyEnum;
+use App\Enums\Order\PaymentMethodEnum;
 use App\Services\Checkout\CheckoutSelectionStateService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -40,15 +43,15 @@ class SimpleOrderValidateRequest extends FormRequest
             'phone' => ['required', 'string', 'min:10', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
             CartRequestKeyEnum::CartMode->value => ['required', 'string', Rule::in([CartModeEnum::Regular->value])],
-            'delivery_method' => ['required', 'string', Rule::in([
-                'nova_poshta',
-                'nova_poshta_poshtomat',
-                'nova_poshta_courier',
-                'ukr_poshta',
+            OrderDataKeyEnum::DeliveryMethod->value => ['required', 'string', Rule::in([
+                DeliveryMethodEnum::NovaPoshta->value,
+                DeliveryMethodEnum::NovaPoshtaPoshtomat->value,
+                DeliveryMethodEnum::NovaPoshtaCourier->value,
+                DeliveryMethodEnum::UkrPoshta->value,
                 PickupConfig::DELIVERY_METHOD,
             ])],
-            'payment_method' => ['required', 'string', Rule::in([
-                'cash_on_delivery',
+            OrderDataKeyEnum::PaymentMethod->value => ['required', 'string', Rule::in([
+                PaymentMethodEnum::CashOnDelivery->value,
                 $wayforpay_payment_method,
                 PaymentUponDeliveryConfig::PAYMENT_METHOD,
                 BankTransferConfig::PAYMENT_METHOD,
@@ -57,11 +60,11 @@ class SimpleOrderValidateRequest extends FormRequest
             'city.city_description' => ['nullable', 'string', 'max:255'],
             'city.nova_poshta_city_id' => ['nullable', 'string', 'max:255'],
             'city.ukr_poshta_city_id' => ['nullable', 'integer', 'min:1'],
-            'delivery_point' => ['nullable', 'array'],
-            'delivery_address' => ['nullable', 'string', 'max:255'],
-            'comment' => ['nullable', 'string', 'max:5000'],
-            'promo_code' => ['nullable', 'string', 'max:255'],
-            'no_call' => ['nullable', 'boolean'],
+            OrderDataKeyEnum::DeliveryPoint->value => ['nullable', 'array'],
+            OrderDataKeyEnum::DeliveryAddress->value => ['nullable', 'string', 'max:255'],
+            OrderDataKeyEnum::Comment->value => ['nullable', 'string', 'max:5000'],
+            OrderDataKeyEnum::PromoCode->value => ['nullable', 'string', 'max:255'],
+            OrderDataKeyEnum::NoCall->value => ['nullable', 'boolean'],
         ];
     }
 
@@ -70,7 +73,7 @@ class SimpleOrderValidateRequest extends FormRequest
         $normalized_data = $this->all();
         $selection_state = app(CheckoutSelectionStateService::class)->getState();
         $selection_city = (array) Arr::get($selection_state, 'city', []);
-        $selection_delivery_point = (array) Arr::get($selection_state, 'delivery_point', []);
+            $selection_delivery_point = (array) Arr::get($selection_state, OrderDataKeyEnum::DeliveryPoint->value, []);
 
         if ($selection_city !== []) {
             Arr::set($normalized_data, 'city', $selection_city);
@@ -81,28 +84,28 @@ class SimpleOrderValidateRequest extends FormRequest
         }
 
         if ($selection_delivery_point !== []) {
-            Arr::set($normalized_data, 'delivery_point', $selection_delivery_point);
+            Arr::set($normalized_data, OrderDataKeyEnum::DeliveryPoint->value, $selection_delivery_point);
         }
 
         if (
-            filled(Arr::get($selection_state, 'delivery_address'))
-            && blank($this->input('delivery_address'))
+            filled(Arr::get($selection_state, OrderDataKeyEnum::DeliveryAddress->value))
+            && blank($this->input(OrderDataKeyEnum::DeliveryAddress->value))
         ) {
-            Arr::set($normalized_data, 'delivery_address', Arr::get($selection_state, 'delivery_address'));
+            Arr::set($normalized_data, OrderDataKeyEnum::DeliveryAddress->value, Arr::get($selection_state, OrderDataKeyEnum::DeliveryAddress->value));
         }
 
-        foreach (['first_name', 'last_name', 'phone', 'email', 'delivery_method', 'delivery_address', 'comment', 'promo_code'] as $key) {
+        foreach (['first_name', 'last_name', 'phone', 'email', OrderDataKeyEnum::DeliveryMethod->value, OrderDataKeyEnum::DeliveryAddress->value, OrderDataKeyEnum::Comment->value, OrderDataKeyEnum::PromoCode->value] as $key) {
             Arr::set($normalized_data, $key, Str::squish((string) $this->input($key, '')));
         }
 
         Arr::set($normalized_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
-        Arr::set($normalized_data, 'payment_method', Str::lower(Str::squish((string) $this->input('payment_method', ''))));
+        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower(Str::squish((string) $this->input(OrderDataKeyEnum::PaymentMethod->value, ''))));
         Arr::set(
             $normalized_data,
-            'delivery_point',
-            (array) Arr::get($normalized_data, 'delivery_point', $this->input('delivery_point', [])),
+            OrderDataKeyEnum::DeliveryPoint->value,
+            (array) Arr::get($normalized_data, OrderDataKeyEnum::DeliveryPoint->value, $this->input(OrderDataKeyEnum::DeliveryPoint->value, [])),
         );
-        Arr::set($normalized_data, 'no_call', $this->boolean('no_call'));
+        Arr::set($normalized_data, OrderDataKeyEnum::NoCall->value, $this->boolean(OrderDataKeyEnum::NoCall->value));
 
         $this->replace($normalized_data);
     }
@@ -110,7 +113,7 @@ class SimpleOrderValidateRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            $payment_method = (string) $this->input('payment_method', '');
+            $payment_method = (string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '');
 
             if ($payment_method === '') {
                 return;
@@ -132,24 +135,28 @@ class SimpleOrderValidateRequest extends FormRequest
                 };
 
                 $validator->errors()->add(
-                    'payment_method',
+                    OrderDataKeyEnum::PaymentMethod->value,
                     $message,
                 );
             }
 
-            $delivery_method = (string) $this->input('delivery_method', '');
-            $delivery_point = (array) $this->input('delivery_point', []);
-            $delivery_address = (string) $this->input('delivery_address', '');
+            $delivery_method = (string) $this->input(OrderDataKeyEnum::DeliveryMethod->value, '');
+            $delivery_point = (array) $this->input(OrderDataKeyEnum::DeliveryPoint->value, []);
+            $delivery_address = (string) $this->input(OrderDataKeyEnum::DeliveryAddress->value, '');
 
-            if ($delivery_method === 'nova_poshta_courier' && $delivery_address === '') {
-                $validator->errors()->add('delivery_address', 'A delivery address is required.');
+            if ($delivery_method === DeliveryMethodEnum::NovaPoshtaCourier->value && $delivery_address === '') {
+                $validator->errors()->add(OrderDataKeyEnum::DeliveryAddress->value, 'A delivery address is required.');
             }
 
             if (
-                in_array($delivery_method, ['nova_poshta', 'nova_poshta_poshtomat', 'ukr_poshta'], true)
+                in_array($delivery_method, [
+                    DeliveryMethodEnum::NovaPoshta->value,
+                    DeliveryMethodEnum::NovaPoshtaPoshtomat->value,
+                    DeliveryMethodEnum::UkrPoshta->value,
+                ], true)
                 && $delivery_point === []
             ) {
-                $validator->errors()->add('delivery_point', 'A delivery point is required.');
+                $validator->errors()->add(OrderDataKeyEnum::DeliveryPoint->value, 'A delivery point is required.');
             }
         });
     }

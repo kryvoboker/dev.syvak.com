@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\BankTransfer\Services;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use Modules\BankTransfer\Support\BankTransferConfig;
 
 final class BankTransferPaymentModule
@@ -14,7 +15,7 @@ final class BankTransferPaymentModule
      */
     public function process(array $order_payload): array
     {
-        $order_payload['payment_method'] = BankTransferConfig::PAYMENT_METHOD;
+        $order_payload[OrderDataKeyEnum::PaymentMethod->value] = BankTransferConfig::PAYMENT_METHOD;
 
         return [
             'is_success' => true,

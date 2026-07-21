@@ -6,6 +6,8 @@ namespace App\Services\Order;
 
 use App\Enums\Cart\CartModeEnum;
 use App\Enums\Cart\CartRequestKeyEnum;
+use App\Enums\Order\OrderDataKeyEnum;
+use App\Enums\Order\PaymentMethodEnum;
 use App\Models\Orders\OrderPayments;
 use App\Services\Cart\CartService;
 use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
@@ -80,7 +82,7 @@ readonly class OrderCreationService
         }
 
         $order_number = $this->generateOrderNumber();
-        $payment_method = (string) Arr::get($validated_data, 'payment_method', 'cash_on_delivery');
+        $payment_method = (string) Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, PaymentMethodEnum::CashOnDelivery->value);
 
         // TODO: replace temporary payload with real order entity persistence.
         $order_payload = [
@@ -92,7 +94,7 @@ readonly class OrderCreationService
             ],
             'cart' => Arr::get($validation_result, 'cart', []),
             'locale' => $locale,
-            'payment_method' => $payment_method,
+            OrderDataKeyEnum::PaymentMethod->value => $payment_method,
         ];
 
         $payment_result = match ($payment_method) {
@@ -187,13 +189,13 @@ readonly class OrderCreationService
             ];
         }
 
-        $payment_method = (string) Arr::get($validated_data, 'payment_method', '');
+        $payment_method = (string) Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, '');
 
-        if (Arr::get($validated_data, 'delivery_method') === PickupConfig::DELIVERY_METHOD) {
+        if (Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value) === PickupConfig::DELIVERY_METHOD) {
             $pickup_data = $this->pickup_checkout_data_service->getCheckoutData($locale);
             $validated_data['city'] = [];
-            $validated_data['delivery_point'] = [];
-            $validated_data['delivery_address'] = (string) Arr::get($pickup_data, 'store_address', '');
+            $validated_data[OrderDataKeyEnum::DeliveryPoint->value] = [];
+            $validated_data[OrderDataKeyEnum::DeliveryAddress->value] = (string) Arr::get($pickup_data, 'store_address', '');
         }
 
         try {
@@ -232,12 +234,12 @@ readonly class OrderCreationService
                 'phone' => clear_telephone((string) Arr::get($validated_data, 'phone', '')),
             ],
             'delivery' => [
-                'method' => (string) Arr::get($validated_data, 'delivery_method', ''),
-                'address' => (string) Arr::get($validated_data, 'delivery_address', ''),
+                'method' => (string) Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value, ''),
+                'address' => (string) Arr::get($validated_data, OrderDataKeyEnum::DeliveryAddress->value, ''),
             ],
             'cart' => Arr::get($validation_result, 'cart', []),
             'locale' => $locale,
-            'payment_method' => $payment_method,
+                OrderDataKeyEnum::PaymentMethod->value => $payment_method,
             'return_url' => route($this->wayforpay_config->getReturnRouteName(), ['locale' => $locale]),
             'service_url' => route($this->wayforpay_config->getCallbackRouteName(), ['locale' => $locale]),
         ];
@@ -312,7 +314,7 @@ readonly class OrderCreationService
         $request = request();
 
         return [
-            'ip' => (string) ($request->ip() ?: '0.0.0.0'),
+            'ip' => $request->ip() ?: '0.0.0.0',
             'forwarded_ip' => $request->header('X-Forwarded-For'),
             'user_agent' => $request->userAgent(),
             'accept_language' => $request->header('Accept-Language'),
