@@ -14,6 +14,7 @@ class OrderShippings extends Model
         'order_id',
         'method',
         'code',
+        'is_cost_enabled',
         'city',
         'city_id',
         'address',
@@ -30,6 +31,7 @@ class OrderShippings extends Model
     {
         return [
             'order_id' => 'integer',
+            'is_cost_enabled' => 'boolean',
             'provider_data' => 'array',
         ];
     }

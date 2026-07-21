@@ -29,9 +29,7 @@ class OrdersTable
 {
     public static function configure(Table $table): Table
     {
-        $language_id = Language::query()
-            ->where('code', app()->getLocale())
-            ->value('id');
+        $language_id = app(Language::class)->getLanguageByCode(app()->getLocale())->id;
 
         return $table
             ->modifyQueryUsing(function (Builder $query): void {
@@ -46,6 +44,11 @@ class OrdersTable
                     ]);
             })
             ->columns([
+                TextColumn::make('id')
+                    ->label(__('admin/orders/orders.columns.id'))
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('order_number')
                     ->label(__('admin/orders/orders.columns.order_number'))
                     ->searchable()
@@ -58,8 +61,8 @@ class OrdersTable
                     ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
                         'customer',
                         fn (Builder $customer_query): Builder => $customer_query
-                            ->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%"),
+                            ->where('first_name', 'like', "%$search%")
+                            ->orWhere('last_name', 'like', "%$search%"),
                     ))
                     ->sortable(),
 
@@ -77,7 +80,7 @@ class OrdersTable
                     ->state(fn (Orders $record): string => $record->products->pluck('ean')->filter()->unique()->implode(', '))
                     ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
                         'products',
-                        fn (Builder $product_query): Builder => $product_query->where('ean', 'like', "%{$search}%"),
+                        fn (Builder $product_query): Builder => $product_query->where('ean', 'like', "%$search%"),
                     ))
                     ->toggleable(isToggledHiddenByDefault: true),
 
@@ -171,7 +174,7 @@ class OrdersTable
                         DatePicker::make('until')
                             ->label(__('admin/orders/orders.filters.date_until')),
                     ])
-                    ->columns(2)
+                    ->columns()
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when($data['from'] ?? null, fn (Builder $date_query, string $from): Builder => $date_query->whereDate('added_at', '>=', $from))
@@ -225,7 +228,7 @@ class OrdersTable
     {
         $value = trim((string) $value);
 
-        return $value === '' ? $query : $query->where($column, 'like', "%{$value}%");
+        return $value === '' ? $query : $query->where($column, 'like', "%$value%");
     }
 
     private static function whereCustomerLike(Builder $query, string $column, mixed $value): Builder
@@ -234,7 +237,7 @@ class OrdersTable
 
         return $value === '' ? $query : $query->whereHas(
             'customer',
-            fn (Builder $customer_query): Builder => $customer_query->where($column, 'like', "%{$value}%"),
+            fn (Builder $customer_query): Builder => $customer_query->where($column, 'like', "%$value%"),
         );
     }
 
@@ -244,12 +247,14 @@ class OrdersTable
 
         return $value === '' ? $query : $query->whereHas(
             'products',
-            fn (Builder $product_query): Builder => $product_query->where($column, 'like', "%{$value}%"),
+            fn (Builder $product_query): Builder => $product_query->where($column, 'like', "%$value%"),
         );
     }
 
     /**
-     * @param  OrderStatuses|PaymentStatuses  $model
+     * @param OrderStatuses|PaymentStatuses $model
+     * @param mixed                         $language_id
+     *
      * @return array<string, string>
      */
     private static function statusOptions(OrderStatuses|PaymentStatuses $model, mixed $language_id): array

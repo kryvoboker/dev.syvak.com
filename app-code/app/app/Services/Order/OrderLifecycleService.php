@@ -150,7 +150,10 @@ final class OrderLifecycleService
             'old_order_status_id' => $old_status?->getKey(),
             'order_status_id' => $new_status->getKey(),
             'event' => $event,
-            'json' => $this->filterContext($context),
+            'json' => [
+                ...$this->filterContext($context),
+                ...$this->getHistoryActorData(),
+            ],
         ]);
 
         Log::channel('daily')->info('[OrderLifecycleService] order status changed', [
@@ -228,5 +231,21 @@ final class OrderLifecycleService
         Log::channel('stack')->error('[OrderLifecycleService] active default status is missing', [
             'table' => $table,
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getHistoryActorData(): array
+    {
+        $user = auth()->user();
+        $roles = $user?->getRoleNames()->implode(', ');
+
+        return [
+            __('admin/orders/orders.history_data.actor') => $user !== null
+                ? __('admin/orders/orders.history_data.administrator')
+                : __('admin/orders/orders.history_data.system'),
+            __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
+        ];
     }
 }
