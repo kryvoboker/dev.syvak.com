@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\PaymentUponDelivery\Support;
 
+use App\Enums\Order\PaymentMethodEnum;
 final class PaymentUponDeliveryConfig
 {
-    public const string PAYMENT_METHOD = 'payment_upon_delivery';
+    public const string PAYMENT_METHOD = PaymentMethodEnum::PaymentUponDelivery->value;
 
     public function getPaymentMethod(): string
     {

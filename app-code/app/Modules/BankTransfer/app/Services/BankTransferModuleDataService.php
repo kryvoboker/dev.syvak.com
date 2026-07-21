@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\BankTransfer\Services;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use App\Models\ApplicationSettings\Language;
 use Modules\BankTransfer\Support\BankTransferConfig;
 
@@ -30,7 +31,7 @@ final class BankTransferModuleDataService
 
         return [
             'is_available' => $is_available,
-            'payment_method' => $this->bank_transfer_config->getPaymentMethod(),
+            OrderDataKeyEnum::PaymentMethod->value => $this->bank_transfer_config->getPaymentMethod(),
             'label_translation_key' => $this->bank_transfer_config->getTranslationKey(),
             'payment_name' => $is_available ? $this->bank_transfer_config->getPaymentName($locale) : '',
             'payment_information' => $is_available

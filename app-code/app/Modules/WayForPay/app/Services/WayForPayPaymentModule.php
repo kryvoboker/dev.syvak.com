@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\WayForPay\Services;
 
+use App\Enums\Order\OrderDataKeyEnum;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -80,7 +81,7 @@ final class WayForPayPaymentModule
 
             return [
                 'success' => true,
-                'payment_method' => $this->wayforpay_config->getPaymentMethod(),
+                OrderDataKeyEnum::PaymentMethod->value => $this->wayforpay_config->getPaymentMethod(),
                 'use_widget' => $use_widget,
                 'widget_data' => array_filter($payment_data, static fn (mixed $value): bool => $value !== null && $value !== '' && $value !== []),
                 'redirect_data' => [
@@ -99,7 +100,7 @@ final class WayForPayPaymentModule
 
             return [
                 'success' => false,
-                'payment_method' => $this->wayforpay_config->getPaymentMethod(),
+                OrderDataKeyEnum::PaymentMethod->value => $this->wayforpay_config->getPaymentMethod(),
                 'errors' => [
                     'payment' => [__('wayforpay::storefront/checkout.payment.failed')],
                 ],

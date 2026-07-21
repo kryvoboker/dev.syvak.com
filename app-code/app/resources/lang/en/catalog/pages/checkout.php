@@ -38,6 +38,9 @@ return [
         'nova_poshta_poshtomat' => 'Nova Poshta (Poshtomat)',
         'ukr_poshta' => 'Ukr Poshta',
     ],
+    'payment_methods' => [
+        'cash_on_delivery' => 'Cash on delivery',
+    ],
     'buttons' => [
         'show_all_items' => 'Show all items (:count)',
         'find_on_map' => 'Find on map',

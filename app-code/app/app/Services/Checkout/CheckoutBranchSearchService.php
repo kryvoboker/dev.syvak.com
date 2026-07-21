@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Checkout;
 
+use App\Enums\Order\DeliveryMethodEnum;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -30,9 +31,9 @@ class CheckoutBranchSearchService
         $normalized_delivery_method = Str::lower(Str::squish($delivery_method));
 
         return match ($normalized_delivery_method) {
-            'nova_poshta' => $this->loadNovaPoshtaBranches($city),
-            'nova_poshta_poshtomat' => $this->loadNovaPoshtaPoshtomats($city),
-            'ukr_poshta' => $this->loadUkrPoshtaBranches($city),
+            DeliveryMethodEnum::NovaPoshta->value => $this->loadNovaPoshtaBranches($city),
+            DeliveryMethodEnum::NovaPoshtaPoshtomat->value => $this->loadNovaPoshtaPoshtomats($city),
+            DeliveryMethodEnum::UkrPoshta->value => $this->loadUkrPoshtaBranches($city),
             default => [
                 'success' => false,
                 'error_message' => 'Unsupported delivery method.',

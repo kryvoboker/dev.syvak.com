@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Enums\Order\PaymentMethodEnum;
+
 return [
     'name' => 'PaymentUponDelivery',
     'description' => 'Payment upon delivery checkout payment method singleton.',
-    'payment_method' => 'payment_upon_delivery',
+    'payment_method' => PaymentMethodEnum::PaymentUponDelivery->value,
     'admin' => [
         'can_create_instances' => false,
         'module_list_action' => [

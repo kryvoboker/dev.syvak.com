@@ -6,6 +6,8 @@ namespace App\Http\Requests\Order;
 
 use App\Enums\Cart\CartModeEnum;
 use App\Enums\Cart\CartRequestKeyEnum;
+use App\Enums\Order\OrderDataKeyEnum;
+use App\Enums\Order\PaymentMethodEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
@@ -34,7 +36,11 @@ class FastOrderValidateRequest extends FormRequest
             'last_name' => ['required', 'string', 'min:2', 'max:255'],
             'phone' => ['required', 'string', 'min:10', 'max:30'],
             CartRequestKeyEnum::CartMode->value => ['required', 'string', Rule::in([CartModeEnum::FastOrder->value])],
-            'payment_method' => ['required', 'string', 'in:cash_on_delivery,' . PaymentUponDeliveryConfig::PAYMENT_METHOD . ',' . BankTransferConfig::PAYMENT_METHOD],
+            OrderDataKeyEnum::PaymentMethod->value => ['required', 'string', 'in:' . implode(',', [
+                PaymentMethodEnum::CashOnDelivery->value,
+                PaymentUponDeliveryConfig::PAYMENT_METHOD,
+                BankTransferConfig::PAYMENT_METHOD,
+            ])],
         ];
     }
 
@@ -46,7 +52,7 @@ class FastOrderValidateRequest extends FormRequest
         Arr::set($normalized_data, 'last_name', Str::trim((string) $this->input('last_name', '')));
         Arr::set($normalized_data, 'phone', Str::trim((string) $this->input('phone', '')));
         Arr::set($normalized_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value);
-        Arr::set($normalized_data, 'payment_method', Str::lower((string) $this->input('payment_method', '')));
+        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower((string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '')));
 
         $this->replace($normalized_data);
     }
@@ -54,7 +60,7 @@ class FastOrderValidateRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            $payment_method = (string) $this->input('payment_method', '');
+            $payment_method = (string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '');
 
             $is_supported_payment_method = in_array(
                 $payment_method,
@@ -75,7 +81,7 @@ class FastOrderValidateRequest extends FormRequest
 
             if (($payment_data['is_available'] ?? false) !== true) {
                 $validator->errors()->add(
-                    'payment_method',
+                    OrderDataKeyEnum::PaymentMethod->value,
                     $payment_method === BankTransferConfig::PAYMENT_METHOD
                         ? __('banktransfer::storefront/checkout.validation.payment_method_unavailable')
                         : __('paymentupondelivery::storefront/checkout.validation.payment_method_unavailable'),

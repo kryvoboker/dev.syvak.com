@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Enums\Order\PaymentMethodEnum;
+
 return [
     'name' => 'WayForPay',
     'identifiers' => [
-        'payment_method' => 'wayforpay',
+        'payment_method' => PaymentMethodEnum::WayForPay->value,
         'translation_key' => 'wayforpay::storefront/checkout.payment_methods.wayforpay',
     ],
     'endpoints' => [

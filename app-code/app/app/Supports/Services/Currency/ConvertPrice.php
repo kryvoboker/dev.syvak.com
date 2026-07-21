@@ -30,7 +30,7 @@ final class ConvertPrice
         }
 
         if ($this->currencies->has($currency_code) === false) {
-            $currency_model = new Currency();
+            $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode($currency_code);
 
             if ($currency !== null) {
@@ -77,7 +77,7 @@ final class ConvertPrice
         } elseif ($this->currencies->has($code_from)) {
             $code_from = $this->currencies->get($code_from)->exchange_rate;
         } else {
-            $currency_model = new Currency();
+            $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode($code_from);
 
             if ($currency !== null) {
@@ -94,7 +94,7 @@ final class ConvertPrice
         } elseif ($this->currencies->has($code_to)) {
             $code_to = $this->currencies->get($code_to)->exchange_rate;
         } else {
-            $currency_model = new Currency();
+            $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode($code_to);
 
             if ($currency !== null) {
@@ -109,6 +109,23 @@ final class ConvertPrice
         return $price * ($code_to / $code_from);
     }
 
+    public function convertUsingExchangeRates(
+        float $price,
+        float $source_exchange_rate,
+        float $target_exchange_rate,
+        int $target_decimal_places = 2,
+    ): float {
+        if ($source_exchange_rate <= 0 || $target_exchange_rate <= 0) {
+            throw new RuntimeException('Currency exchange rates must be greater than zero.');
+        }
+
+        $converted_price = $price * ($source_exchange_rate / $target_exchange_rate);
+
+        return $target_decimal_places > 0
+            ? round($converted_price, $target_decimal_places)
+            : ceil($converted_price);
+    }
+
     private function setValues(): void
     {
         if (! isset($this->locale)) {
@@ -116,7 +133,7 @@ final class ConvertPrice
         }
 
         if (! isset($this->default_currency)) {
-            $currency_model = new Currency();
+            $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode(
                 config('app.currency.current_currency_code'),
             );
