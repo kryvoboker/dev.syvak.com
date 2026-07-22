@@ -14,6 +14,7 @@ use App\Models\Orders\OrderCustomers;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
 use App\Models\Orders\OrderShippings;
+use App\Supports\Services\CacheInvalidationService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
@@ -28,6 +29,7 @@ final readonly class OrderAggregatePersistenceService
         private OrderLifecycleService $order_lifecycle_service,
         private BankTransferConfig $bank_transfer_config,
         private WayForPayConfig $wayforpay_config,
+        private CacheInvalidationService $cache_invalidation_service,
     ) {
     }
 
@@ -40,10 +42,10 @@ final readonly class OrderAggregatePersistenceService
      * @return array{order: Orders, payment: OrderPayments}
      */
     public function createSimpleOrder(
-        array  $validated_data,
-        array  $cart_data,
+        array $validated_data,
+        array $cart_data,
         string $locale,
-        array  $request_context = [],
+        array $request_context = [],
     ): array {
         return DB::transaction(function () use ($validated_data, $cart_data, $locale, $request_context): array {
             $language = resolve_language_by_locale($locale);
@@ -97,7 +99,7 @@ final readonly class OrderAggregatePersistenceService
                 ],
             ]);
 
-        $payment_code = $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value));
+            $payment_code = $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value));
 
             $payment = $order->payments()->create([
                 'method' => $this->resolvePaymentMethodName($payment_code, $locale),
@@ -108,6 +110,7 @@ final readonly class OrderAggregatePersistenceService
 
             $order->load('status');
             $payment->load('paymentStatus');
+            $this->cache_invalidation_service->flushAfterCommit('order_created');
 
             return [
                 'order' => $order,

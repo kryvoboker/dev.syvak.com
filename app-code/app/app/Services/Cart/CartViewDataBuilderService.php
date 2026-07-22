@@ -50,10 +50,27 @@ readonly class CartViewDataBuilderService
 
         /** @var Collection<int, ProductVariant> $variants */
         $variants = ProductVariant::query()
+            ->select([
+                'id',
+                'product_id',
+                'price',
+                'quantity',
+                'minimum',
+            ])
             ->with([
                 'descriptions' => fn ($query) => $query->where('language_id', $language_id),
                 'slugs' => fn ($query) => $query->where('language_id', $language_id),
                 'images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order')->orderBy('id'),
+                'product' => function ($query): void {
+                    $query->select([
+                        'id',
+                        'price',
+                        'minimum',
+                        'model',
+                        'sku',
+                        'ean',
+                    ]);
+                },
                 'product.productDescription' => fn ($query) => $query->where('language_id', $language_id),
                 'product.slugs' => fn ($query) => $query->where('language_id', $language_id),
                 'attributeValues' => function ($query) use ($language_id) {

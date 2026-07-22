@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Checkout;
 
+use App\Supports\Services\StorefrontCacheService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -13,6 +14,36 @@ use Throwable;
 class CheckoutCitySearchService
 {
     private const int RESULT_LIMIT = 100;
+
+    public function __construct(
+        private readonly StorefrontCacheService $storefront_cache_service,
+    ) {
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function searchCities(string $city_keyword): array
+    {
+        $search_term = Str::lower(Str::squish($city_keyword));
+
+        if (Str::length($search_term) < 3) {
+            return $this->searchCitiesUncached($city_keyword);
+        }
+
+        $cache_key = sprintf(
+            'checkout:cities:%s:%s:%s',
+            md5($search_term),
+            is_enabled_singleton_module('NovaPoshta') ? 'nova' : 'no-nova',
+            is_enabled_singleton_module('UkrPoshta') ? 'ukr' : 'no-ukr',
+        );
+
+        return $this->storefront_cache_service->remember(
+            $cache_key,
+            fn (): array => $this->searchCitiesUncached($city_keyword),
+            300,
+        );
+    }
 
     /**
      * @throws Throwable
@@ -28,7 +59,7 @@ class CheckoutCitySearchService
      *     }>
      * }
      */
-    public function searchCities(string $city_keyword): array
+    private function searchCitiesUncached(string $city_keyword): array
     {
         $normalized_keyword = Str::squish($city_keyword);
         $search_term = Str::lower($normalized_keyword);

@@ -6,7 +6,6 @@ use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
-use App\Models\Modules\ModuleDefinition;
 use App\Models\PageSettings\PageSetting;
 use App\Models\Slug;
 use App\Services\Modules\ModuleRuntimeResolverService;
@@ -14,6 +13,7 @@ use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\GlobalConfigService;
 use App\Supports\Services\Images\ImageUrlBuilderService;
+use App\Supports\Services\RequestLookupContext;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -466,17 +466,7 @@ if (!function_exists('is_enabled_singleton_module')) {
             return false;
         }
 
-        /** @var ModuleDefinition|null $module_definition */
-        $module_definition = ModuleDefinition::query()
-            ->where('nwidart_name', $module_name)
-            ->enabled()
-            ->first();
-
-        if ($module_definition === null) {
-            return false;
-        }
-
-        return $module_definition->canCreateInstances() === false;
+        return app(RequestLookupContext::class)->isEnabledSingletonModule($module_name);
     }
 }
 
@@ -526,11 +516,13 @@ if (!function_exists('resolve_language_by_locale')) {
     {
         if ($is_get_new_instance === true) {
             $language = new Language();
-        } else {
-            $language = app(Language::class);
+
+            return $language->getLanguageByCode($locale) ?: $language->getDefaultLanguage();
         }
 
-        return $language->getLanguageByCode($locale) ?: $language->getDefaultLanguage();
+        $lookup_context = app(RequestLookupContext::class);
+
+        return $lookup_context->getLanguageByCode($locale) ?: $lookup_context->getDefaultLanguage();
     }
 }
 
@@ -584,13 +576,9 @@ if (!function_exists('normalize_locale')) {
             return app()->getLocale();
         }
 
-        if ($is_get_new_instance === true) {
-            $language = new Language();
-        } else {
-            $language = app(Language::class);
-        }
-
-        $languages = $language->getActiveLanguages();
+        $languages = $is_get_new_instance === true
+            ? (new Language())->getActiveLanguages()
+            : app(RequestLookupContext::class)->getActiveLanguages();
 
         if (
             $languages->contains(function (mixed $language) use ($locale): bool {
@@ -621,7 +609,7 @@ if (!function_exists('get_slug_variants')) {
         }
 
         /** @var array<string, int> $language_ids_by_code */
-        $language_ids_by_code = app(Language::class)
+        $language_ids_by_code = app(RequestLookupContext::class)
             ->getActiveLanguages()
             ->pluck('id', 'code')
             ->all();
@@ -813,14 +801,9 @@ if (!function_exists('get_allowed_locales')) {
     function get_allowed_locales(bool $is_get_new_instance = false): array
     {
         try {
-            if ($is_get_new_instance === true) {
-                $language = new Language();
-            } else {
-                $language = app(Language::class);
-            }
-
-            $allowed_locales = $language
-                ->getActiveLanguages()
+            $allowed_locales = ($is_get_new_instance === true
+                ? (new Language())->getActiveLanguages()
+                : app(RequestLookupContext::class)->getActiveLanguages())
                 ->pluck('code')
                 ->toArray();
         } catch (Throwable) {

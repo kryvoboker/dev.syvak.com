@@ -6,9 +6,11 @@ namespace App\Services\Order;
 
 use App\Enums\Cart\CartModeEnum;
 use App\Enums\Order\DeliveryMethodEnum;
-use App\Models\ApplicationSettings\Language;
+use App\Models\ApplicationSettings\Currency;
 use App\Models\Orders\OrderStatuses;
 use App\Models\Payment\PaymentStatuses;
+use App\Models\Users\UserGroup;
+use App\Supports\Services\RequestLookupContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Modules\BankTransfer\Services\BankTransferModuleDataService;
@@ -20,11 +22,31 @@ use Modules\WayForPay\Support\WayForPayConfig;
 
 final class OrderAdminOptionsService
 {
+    /** @var array<string, string>|null */
+    private ?array $delivery_method_options = null;
+
+    /** @var array<string, array<string, string>> */
+    private array $payment_method_options = [];
+
+    /** @var array<string, array<string, string>> */
+    private array $status_options = [];
+
+    /** @var array<string, string>|null */
+    private ?array $currency_options = null;
+
+    /** @var array<string, string>|null */
+    private ?array $user_group_options = null;
+
+    private bool $language_id_resolved = false;
+
+    private ?int $language_id = null;
+
     public function __construct(
         private readonly BankTransferModuleDataService $bank_transfer_module_data_service,
         private readonly PaymentUponDeliveryModuleDataService $payment_upon_delivery_module_data_service,
         private readonly WayForPayModuleDataService $wayforpay_module_data_service,
         private readonly WayForPayConfig $wayforpay_config,
+        private readonly RequestLookupContext $request_lookup_context,
     ) {
     }
 
@@ -50,11 +72,12 @@ final class OrderAdminOptionsService
             return $this->translate('admin/orders/orders.statuses.unnamed', 'Unnamed status');
         }
 
-        $language_code = app()->getLocale();
-        $name = $status->descriptions()
-            ->whereHas('language', fn (Builder $language_query): Builder => $language_query
-                ->where('code', $language_code))
-            ->value('name');
+        $name = $status->relationLoaded('descriptions')
+            ? $status->descriptions->first()?->name
+            : $status->descriptions()
+                ->whereHas('language', fn (Builder $language_query): Builder => $language_query
+                    ->where('code', app()->getLocale()))
+                ->value('name');
 
         return $name
             ?: $this->translate('admin/orders/orders.statuses.unnamed', 'Unnamed status');
@@ -98,6 +121,23 @@ final class OrderAdminOptionsService
      */
     public function getDeliveryMethodOptions(?string $selected_method = null): array
     {
+        $methods = $this->delivery_method_options ??= $this->buildDeliveryMethodOptions();
+
+        if ($selected_method !== null && $selected_method !== '' && ! isset($methods[$selected_method])) {
+            $methods[$selected_method] = $this->translate(
+                'admin/orders/orders.shipping_methods.historical',
+                'Historical delivery method',
+            );
+        }
+
+        return $methods;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function buildDeliveryMethodOptions(): array
+    {
         $methods = [];
 
         if (is_enabled_singleton_module('NovaPoshta')) {
@@ -116,10 +156,21 @@ final class OrderAdminOptionsService
             $methods['pickup_store'] = $this->translate('pickup::storefront/checkout.delivery_method', 'Pickup from store');
         }
 
+        return $methods;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getPaymentMethodOptions(string $locale, ?string $selected_method = null): array
+    {
+        $locale = Str::lower(Str::trim($locale));
+        $methods = $this->payment_method_options[$locale] ??= $this->buildPaymentMethodOptions($locale);
+
         if ($selected_method !== null && $selected_method !== '' && ! isset($methods[$selected_method])) {
             $methods[$selected_method] = $this->translate(
-                'admin/orders/orders.shipping_methods.historical',
-                'Historical delivery method',
+                'admin/orders/orders.payment_methods.historical',
+                'Historical payment method',
             );
         }
 
@@ -129,7 +180,7 @@ final class OrderAdminOptionsService
     /**
      * @return array<string, string>
      */
-    public function getPaymentMethodOptions(string $locale, ?string $selected_method = null): array
+    private function buildPaymentMethodOptions(string $locale): array
     {
         $methods = [];
         $bank_transfer = $this->bank_transfer_module_data_service->getCheckoutData($locale);
@@ -153,14 +204,38 @@ final class OrderAdminOptionsService
             $methods[$this->wayforpay_config->getPaymentMethod()] = $wayforpay['payment_name'];
         }
 
-        if ($selected_method !== null && $selected_method !== '' && ! isset($methods[$selected_method])) {
-            $methods[$selected_method] = $this->translate(
-                'admin/orders/orders.payment_methods.historical',
-                'Historical payment method',
-            );
-        }
-
         return $methods;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getUserGroupOptions(): array
+    {
+        return $this->user_group_options ??= UserGroup::query()
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getCurrencyOptions(): array
+    {
+        return $this->currency_options ??= Currency::query()
+            ->where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderByDesc('name')
+            ->get(['id', 'code', 'name'])
+            ->mapWithKeys(fn (Currency $currency): array => [
+                (string) $currency->getKey() => sprintf(
+                    '%s — %s',
+                    $currency->code,
+                    $currency->name,
+                ),
+            ])
+            ->all();
     }
 
     /**
@@ -169,9 +244,13 @@ final class OrderAdminOptionsService
      */
     private function getStatusOptions(string $model, ?int $selected_status_id): array
     {
-        $language_id = Language::query()
-            ->where('code', app()->getLocale())
-            ->value('id');
+        $cache_key = $model . ':' . ($selected_status_id ?? 'active');
+
+        if (isset($this->status_options[$cache_key])) {
+            return $this->status_options[$cache_key];
+        }
+
+        $language_id = $this->getCurrentLanguageId();
 
         $query = $model::query()
             ->with([
@@ -188,7 +267,7 @@ final class OrderAdminOptionsService
             })
             ->orderBy('sort_order');
 
-        return $query->get()
+        return $this->status_options[$cache_key] = $query->get()
             ->mapWithKeys(function (OrderStatuses|PaymentStatuses $status): array {
                 $description = $status->descriptions->first();
 
@@ -198,6 +277,18 @@ final class OrderAdminOptionsService
                 ];
             })
             ->all();
+    }
+
+    public function getCurrentLanguageId(): ?int
+    {
+        if (! $this->language_id_resolved) {
+            $this->language_id = $this->request_lookup_context
+                ->getLanguageByCode(app()->getLocale())
+                ?->getKey();
+            $this->language_id_resolved = true;
+        }
+
+        return $this->language_id;
     }
 
     private function translate(string $key, string $fallback): string

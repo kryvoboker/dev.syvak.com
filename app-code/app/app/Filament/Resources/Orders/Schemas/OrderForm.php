@@ -6,13 +6,11 @@ namespace App\Filament\Resources\Orders\Schemas;
 
 use App\Enums\Cart\CartModeEnum;
 use App\Models\ApplicationSettings\Currency;
-use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Orders\OrderStatuses;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
-use App\Models\Users\UserGroup;
 use App\Services\Order\OrderAdminDeliveryService;
 use App\Services\Order\OrderAdminOptionsService;
 use App\Supports\Services\Currency\ConvertPrice;
@@ -113,10 +111,7 @@ class OrderForm
                             }),
                         Select::make('customer.user_group_id')
                             ->label(__('admin/orders/orders.labels.user_group'))
-                            ->options(fn (): array => UserGroup::query()
-                                ->orderBy('name')
-                                ->pluck('name', 'id')
-                                ->all())
+                            ->options(fn (): array => app(OrderAdminOptionsService::class)->getUserGroupOptions())
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('customer.first_name')
@@ -658,13 +653,20 @@ class OrderForm
             return [];
         }
 
-        $language_id = app(Language::class)->getLanguageByCode(app()->getLocale())->id;
+        $language_id = app(OrderAdminOptionsService::class)->getCurrentLanguageId();
+
+        if ($language_id === null) {
+            return [];
+        }
 
         return Product::query()
-            ->with(['productDescription'])
+            ->with(['productDescription' => function ($description_query) use ($language_id): void {
+                $description_query->where('language_id', $language_id);
+            }])
             ->where(function (Builder $query) use ($search, $language_id): void {
                 $query
                     ->whereHas('productDescription', fn (Builder $description_query): Builder => $description_query
+                        ->where('language_id', $language_id)
                         ->where('name', 'like', "%$search%"))
                     ->orWhere('sku', 'like', "%$search%")
                     ->orWhere('model', 'like', "%$search%")
@@ -683,11 +685,16 @@ class OrderForm
             return null;
         }
 
-        $language_id = Language::query()
-            ->where('code', app()->getLocale())
-            ->value('id');
+        $language_id = app(OrderAdminOptionsService::class)->getCurrentLanguageId();
+
+        if ($language_id === null) {
+            return null;
+        }
+
         $product = Product::query()
-            ->with(['productDescription' => fn ($query) => $query->where('language_id', $language_id)])
+            ->with(['productDescription' => function ($query) use ($language_id): void {
+                $query->where('language_id', $language_id);
+            }])
             ->find($value);
 
         return $product instanceof Product ? self::formatProductLabel($product, $language_id) : null;
@@ -743,8 +750,19 @@ class OrderForm
             return;
         }
 
+        $language_id = app(OrderAdminOptionsService::class)->getCurrentLanguageId();
+
+        if ($language_id === null) {
+            return;
+        }
+
         $product = Product::query()
-            ->with(['defaultVariant', 'productDescription' => fn ($query) => $query->where('language_id', Language::query()->where('code', app()->getLocale())->value('id'))])
+            ->with([
+                'defaultVariant',
+                'productDescription' => function ($query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+            ])
             ->find($state);
 
         if (!$product instanceof Product) {
@@ -802,16 +820,7 @@ class OrderForm
      */
     private static function currencyOptions(): array
     {
-        return new Currency()
-            ->getAllActiveCurrencies()
-            ->mapWithKeys(fn (Currency $currency): array => [
-                (string)$currency->getKey() => sprintf(
-                    '%s — %s',
-                    $currency->getAttribute('code'),
-                    $currency->getAttribute('name'),
-                ),
-            ])
-            ->all();
+        return app(OrderAdminOptionsService::class)->getCurrencyOptions();
     }
 
     private static function convertCurrencyFormState(Get $get, Set $set, int|string|null $state): void

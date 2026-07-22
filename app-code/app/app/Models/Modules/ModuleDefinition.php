@@ -14,6 +14,21 @@ use Throwable;
 
 class ModuleDefinition extends Model
 {
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            if (app()->bound(\App\Supports\Services\RequestLookupContext::class)) {
+                app(\App\Supports\Services\RequestLookupContext::class)->forgetEnabledModuleDefinitions();
+            }
+        });
+
+        static::deleted(function (): void {
+            if (app()->bound(\App\Supports\Services\RequestLookupContext::class)) {
+                app(\App\Supports\Services\RequestLookupContext::class)->forgetEnabledModuleDefinitions();
+            }
+        });
+    }
+
     /**
      * @var list<string>
      */
