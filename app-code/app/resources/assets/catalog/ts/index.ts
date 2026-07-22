@@ -4,6 +4,7 @@ import {
     $CHECKOUT_PAGE_TYPE, $HOME_PAGE_TYPE,
     $PRODUCT_PAGE_TYPE,
     $SEARCH_PAGE_TYPE,
+    $THANK_YOU_PAGE_TYPE,
 } from '@ts-shared/lib/constants.ts';
 
 document.addEventListener('DOMContentLoaded', (): void => {
@@ -93,5 +94,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
             import('@ukr-poshta-ts/main.ts');
             import('@wayforpay-ts/main.ts');
         }
+    }
+
+    if (pageType === $THANK_YOU_PAGE_TYPE) {
+        import('@ts-features/pages/thank-you/thankYouPage.ts').then((module) => module.handleThankYouPage());
     }
 });
