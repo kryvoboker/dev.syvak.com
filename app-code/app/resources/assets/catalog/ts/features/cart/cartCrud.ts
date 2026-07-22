@@ -3,6 +3,7 @@ import {
     extractCartGeneralErrorMessage,
     setCartModalGeneralError,
 } from '@ts-features/cart/cartErrors.ts';
+import { initCartPageAccordion } from '@ts-features/cart/cartPage.ts';
 import type { CartMode, CartMutationResponse } from '@ts-features/cart/cartTypes.ts';
 import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
@@ -60,6 +61,7 @@ const renderMutationResponse = (response: CartMutationResponse, mode: CartMode):
 
     if (cartPageRoot && response.rendered?.cart_page_html) {
         cartPageRoot.innerHTML = response.rendered.cart_page_html;
+        initCartPageAccordion(cartPageRoot);
     }
 
     const generalMessage =
