@@ -32,15 +32,37 @@ class OrdersTable
         $language_id = app(Language::class)->getLanguageByCode(app()->getLocale())->id;
 
         return $table
-            ->modifyQueryUsing(function (Builder $query): void {
+            ->modifyQueryUsing(function (Builder $query) use ($language_id): void {
                 $query
                     ->with([
-                        'customer',
-                        'shipping',
-                        'products',
-                        'totals',
-                        'status.descriptions',
-                        'payments.paymentStatus.descriptions',
+                        'customer' => function ($customer_query): void {
+                            $customer_query->select(['id', 'order_id', 'first_name', 'last_name']);
+                        },
+                        'shipping' => function ($shipping_query): void {
+                            $shipping_query->select(['id', 'order_id', 'method']);
+                        },
+                        'products' => function ($product_query): void {
+                            $product_query->select(['id', 'order_id', 'name', 'ean']);
+                        },
+                        'status' => function ($status_query): void {
+                            $status_query->select(['id', 'code']);
+                        },
+                        'status.descriptions' => function ($description_query) use ($language_id): void {
+                            $description_query
+                                ->select(['id', 'order_status_id', 'language_id', 'name'])
+                                ->where('language_id', $language_id);
+                        },
+                        'payments' => function ($payment_query): void {
+                            $payment_query->select(['id', 'order_id', 'payment_status_id']);
+                        },
+                        'payments.paymentStatus' => function ($status_query): void {
+                            $status_query->select(['id', 'code']);
+                        },
+                        'payments.paymentStatus.descriptions' => function ($description_query) use ($language_id): void {
+                            $description_query
+                                ->select(['id', 'payment_status_id', 'language_id', 'name'])
+                                ->where('language_id', $language_id);
+                        },
                     ]);
             })
             ->columns([
@@ -260,7 +282,9 @@ class OrdersTable
     private static function statusOptions(OrderStatuses|PaymentStatuses $model, mixed $language_id): array
     {
         return $model::query()
-            ->with('descriptions')
+            ->with(['descriptions' => function ($description_query) use ($language_id): void {
+                $description_query->where('language_id', $language_id);
+            }])
             ->orderBy('sort_order')
             ->get()
             ->mapWithKeys(function (OrderStatuses|PaymentStatuses $status) use ($language_id): array {

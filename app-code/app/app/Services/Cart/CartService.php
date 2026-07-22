@@ -6,12 +6,14 @@ namespace App\Services\Cart;
 
 use App\Enums\Cart\CartModeEnum;
 use App\Models\Catalogs\Products\ProductVariant;
+use App\Supports\Services\CacheInvalidationService;
 
 readonly class CartService
 {
     public function __construct(
         private CartSessionService $cart_session_service,
         private CartViewDataBuilderService $cart_view_data_builder_service,
+        private CacheInvalidationService $cache_invalidation_service,
     ) {
     }
 
@@ -45,6 +47,7 @@ readonly class CartService
         }
 
         $this->cart_session_service->addItem($product_variant_id, $quantity, $mode, $chosen_attributes);
+        $this->cache_invalidation_service->flushAfterCommit('cart_item_added');
 
         return [
             'success' => true,
@@ -59,6 +62,10 @@ readonly class CartService
     public function updateItem(int $cart_id, int $quantity, string $locale, string $mode = CartModeEnum::Regular->value): array
     {
         $is_updated = $this->cart_session_service->updateItem($cart_id, $quantity, $mode);
+
+        if ($is_updated) {
+            $this->cache_invalidation_service->flushAfterCommit('cart_item_updated');
+        }
 
         return [
             'success' => $is_updated,
@@ -76,6 +83,10 @@ readonly class CartService
     {
         $is_removed = $this->cart_session_service->removeItem($cart_id, $mode);
 
+        if ($is_removed) {
+            $this->cache_invalidation_service->flushAfterCommit('cart_item_removed');
+        }
+
         return [
             'success' => $is_removed,
             'message' => $is_removed
@@ -88,6 +99,7 @@ readonly class CartService
     public function clearCart(?string $mode = null): void
     {
         $this->cart_session_service->clearCart($mode);
+        $this->cache_invalidation_service->flushAfterCommit('cart_cleared');
     }
 
     /**
