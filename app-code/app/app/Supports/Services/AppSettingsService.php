@@ -6,10 +6,8 @@ namespace App\Supports\Services;
 
 use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\AppSetting;
-use App\Models\ApplicationSettings\Language;
 use App\Models\Users\UserGroup;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
@@ -17,23 +15,13 @@ final class AppSettingsService
 {
     private ?AppSettingsData $app_settings_data = null;
 
-    private const CACHE_KEY = 'app.settings';
-
-    private const TTL = 3600;
-
     public function getSettings(): ?AppSettingsData
     {
-        if ($this->app_settings_data === null) {
-            $this->app_settings_data = Cache::get(self::CACHE_KEY);
-        }
-
         return $this->app_settings_data;
     }
 
     public function setSettings(): void
     {
-        $this->removeSettings();
-
         $locale = app()->getLocale();
 
         if ($locale === null) {
@@ -66,36 +54,22 @@ final class AppSettingsService
             ['global_configs' => $global_configs],
             compact('language_id', 'user_group_id'),
         ));
-
-        Cache::remember(
-            self::CACHE_KEY,
-            self::TTL,
-            fn () => $this->app_settings_data,
-        );
     }
 
     private function resolveLanguageId(string $locale): ?int
     {
-        $language_model = new Language();
-        $language = $language_model->getLanguageByCode($locale);
+        $lookup_context = app(RequestLookupContext::class);
+        $language = $lookup_context->getLanguageByCode($locale);
 
         if ($language !== null) {
             $language_id = $language->id;
         } else {
-            $default_language = $language_model->getDefaultLanguage();
+            $default_language = $lookup_context->getDefaultLanguage();
 
             if ($default_language !== null) {
                 $language_id = $default_language->id;
             } else {
-                $language_id = Language::query()
-                    ->where('is_active', true)
-                    ->orderByDesc('is_default')
-                    ->orderBy('name')
-                    ->value('id');
-
-                if ($language_id === null) {
-                    $language_id = Language::query()->value('id');
-                }
+                $language_id = null;
             }
         }
 
@@ -111,7 +85,5 @@ final class AppSettingsService
     public function removeSettings(): void
     {
         $this->app_settings_data = null;
-
-        Cache::forget(self::CACHE_KEY);
     }
 }

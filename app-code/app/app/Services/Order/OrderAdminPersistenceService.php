@@ -12,6 +12,7 @@ use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
+use App\Supports\Services\CacheInvalidationService;
 use App\Supports\Services\Currency\ConvertPrice;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
@@ -27,6 +28,7 @@ final readonly class OrderAdminPersistenceService
         private OrderAdminDeliveryService $order_admin_delivery_service,
         private OrderAdminOptionsService $order_admin_options_service,
         private ConvertPrice $convert_price,
+        private CacheInvalidationService $cache_invalidation_service,
     ) {
     }
 
@@ -82,6 +84,7 @@ final readonly class OrderAdminPersistenceService
                     'changed_sections' => $changed_sections,
                     'order_status_id' => $order->order_status_id,
                 ]);
+                $this->cache_invalidation_service->flushAfterCommit('admin_order_updated');
             }
 
             $fresh_order = $order->fresh([

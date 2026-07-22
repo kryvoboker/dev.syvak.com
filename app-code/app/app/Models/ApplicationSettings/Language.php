@@ -78,6 +78,18 @@ class Language extends Model
                 throw new Exception(__('admin/settings/languages.errors.cant_delete_last_active_language'));
             }
         });
+
+        static::saved(function (): void {
+            if (app()->bound(\App\Supports\Services\RequestLookupContext::class)) {
+                app(\App\Supports\Services\RequestLookupContext::class)->forgetActiveLanguages();
+            }
+        });
+
+        static::deleted(function (): void {
+            if (app()->bound(\App\Supports\Services\RequestLookupContext::class)) {
+                app(\App\Supports\Services\RequestLookupContext::class)->forgetActiveLanguages();
+            }
+        });
     }
 
     /**
