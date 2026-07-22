@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 return [
     'heading' => 'Замовлення оформлене',
+    'not_found' => [
+        'heading' => 'Замовлення не знайдено',
+        'message' => 'Ми не знайшли замовлення №:number. Перевірте посилання та спробуйте ще раз.',
+    ],
     'labels' => [
         'order_number' => 'Ваше замовлення №:number',
         'quantity' => 'Кількість',
