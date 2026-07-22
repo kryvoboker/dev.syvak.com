@@ -7,10 +7,10 @@ namespace App\Services\Order;
 use App\Enums\Cart\CartModeEnum;
 use App\Enums\Order\DeliveryMethodEnum;
 use App\Models\ApplicationSettings\Currency;
-use App\Models\ApplicationSettings\Language;
 use App\Models\Orders\OrderStatuses;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\UserGroup;
+use App\Supports\Services\RequestLookupContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Modules\BankTransfer\Services\BankTransferModuleDataService;
@@ -46,6 +46,7 @@ final class OrderAdminOptionsService
         private readonly PaymentUponDeliveryModuleDataService $payment_upon_delivery_module_data_service,
         private readonly WayForPayModuleDataService $wayforpay_module_data_service,
         private readonly WayForPayConfig $wayforpay_config,
+        private readonly RequestLookupContext $request_lookup_context,
     ) {
     }
 
@@ -281,7 +282,7 @@ final class OrderAdminOptionsService
     public function getCurrentLanguageId(): ?int
     {
         if (! $this->language_id_resolved) {
-            $this->language_id = app(Language::class)
+            $this->language_id = $this->request_lookup_context
                 ->getLanguageByCode(app()->getLocale())
                 ?->getKey();
             $this->language_id_resolved = true;

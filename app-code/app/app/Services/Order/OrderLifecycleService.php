@@ -8,12 +8,18 @@ use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
 use App\Models\Orders\OrderStatuses;
 use App\Models\Payment\PaymentStatuses;
+use App\Supports\Services\CacheInvalidationService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 final class OrderLifecycleService
 {
+    public function __construct(
+        private readonly CacheInvalidationService $cache_invalidation_service,
+    ) {
+    }
+
     public const string PAYMENT_STATUS_PENDING = 'pending';
 
     public const string PAYMENT_STATUS_PAID = 'paid';
@@ -162,6 +168,7 @@ final class OrderLifecycleService
             'new_status' => $new_status->code,
             'event' => $event,
         ]);
+        $this->cache_invalidation_service->flushAfterCommit('order_status_changed');
 
         return true;
     }
@@ -208,6 +215,7 @@ final class OrderLifecycleService
             'old_status' => $old_status?->code,
             'new_status' => $new_status->code,
         ]);
+        $this->cache_invalidation_service->flushAfterCommit('payment_status_changed');
 
         return true;
     }

@@ -18,9 +18,12 @@ use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Services\Order\OrderAdminOptionsService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\AppSettingsService;
+use App\Supports\Services\CacheInvalidationService;
 use App\Supports\Services\Currency\ConvertPrice;
 use App\Supports\Services\GlobalConfigService;
 use App\Supports\Services\Images\ImageUrlBuilderService;
+use App\Supports\Services\RequestLookupContext;
+use App\Supports\Services\StorefrontCacheService;
 use Detection\Exception\MobileDetectException;
 use Detection\MobileDetect;
 use Illuminate\Support\Facades\File;
@@ -54,11 +57,14 @@ class AppServiceProvider extends ServiceProvider
             $this->app->register(TelescopeServiceProvider::class);
         }
 
-        $this->app->singleton(Language::class);
+        $this->app->scoped(Language::class);
         $this->app->singleton(HeaderService::class);
         $this->app->singleton(FooterService::class);
         $this->app->singleton(ImageUrlBuilderService::class);
-        $this->app->singleton(AppSettingsService::class);
+        $this->app->scoped(AppSettingsService::class);
+        $this->app->scoped(CacheInvalidationService::class);
+        $this->app->scoped(RequestLookupContext::class);
+        $this->app->singleton(StorefrontCacheService::class);
         $this->app->singleton(ConvertPrice::class);
         $this->app->singleton(ModuleCacheService::class);
         $this->app->scoped(OrderAdminOptionsService::class);
