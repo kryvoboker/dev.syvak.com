@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 return [
     'heading' => 'Order completed',
+    'not_found' => [
+        'heading' => 'Order not found',
+        'message' => 'We could not find order #:number. Please check the link and try again.',
+    ],
     'labels' => [
         'order_number' => 'Your order #:number',
         'quantity' => 'Quantity',
