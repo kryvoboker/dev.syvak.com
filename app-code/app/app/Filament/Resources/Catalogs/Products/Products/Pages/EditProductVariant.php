@@ -6,6 +6,8 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Pages;
 
 use App\Filament\Resources\Catalogs\Products\Products\ProductResource;
 use App\Filament\Resources\Catalogs\Products\Products\ProductVariantResource;
+use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\StorefrontProductLinkTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Slug;
@@ -15,12 +17,16 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use LogicException;
 
 class EditProductVariant extends EditRecord
 {
+    use LanguageTrait;
+    use StorefrontProductLinkTrait;
+
     protected static string $resource = ProductVariantResource::class;
 
     #[Locked]
@@ -72,6 +78,17 @@ class EditProductVariant extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('view_storefront')
+                ->label('')
+                ->icon(Heroicon::Eye)
+                ->tooltip(__('actions.view'))
+                ->url(fn (): ?string => self::getStorefrontVariantUrl($this->getVariantRecord(), self::getCurrentLanguageId()))
+                ->visible(fn (): bool => self::getStorefrontVariantUrl($this->getVariantRecord(), self::getCurrentLanguageId()) !== null)
+                ->openUrlInNewTab(),
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn() => $this->save()),
             DeleteAction::make()
                 ->successRedirectUrl(ProductVariantResource::getUrl('index', ['product' => $this->product_id])),
         ];
@@ -107,6 +124,17 @@ class EditProductVariant extends EditRecord
         }
 
         return $product;
+    }
+
+    private function getVariantRecord(): ProductVariant
+    {
+        $variant = $this->getRecord();
+
+        if (! $variant instanceof ProductVariant) {
+            throw new LogicException('Product variant record is not initialized.');
+        }
+
+        return $variant;
     }
 
     /**
