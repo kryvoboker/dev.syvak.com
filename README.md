@@ -53,6 +53,8 @@ GET /uk/category/{slug}/load-more
 | [Admin Panel](docs/admin-panel.md)                              | Filament resources and admin workflows |
 | [Modules Guide](app-code/app/Modules/README.md)                | Module registration, loading, and singleton module rules |
 | [OpenAPI Entry](app-code/app/openapi/openapi.yaml)               | Root Swagger/OpenAPI entrypoint for module API docs |
+| [Helpers Reference](docs/helpers-reference.md)                   | Global helper functions and URL contracts |
+| [Services Reference](docs/services-reference.md)                 | Application and support service methods |
 | [Testing](docs/testing.md)                                      | PHPUnit, Larastan, Pint, Biome, and TypeScript workflows |
 | [Deployment](docs/deployment.md)                                | Docker-based deployment and production checklist |
 

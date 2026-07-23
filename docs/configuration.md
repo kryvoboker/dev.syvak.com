@@ -1,4 +1,4 @@
-[← Architecture](architecture.md) · [Back to README](../../../README.md) · [Catalog Storefront →](catalog-storefront.md)
+[← Architecture](architecture.md) · [Back to README](../README.md) · [Catalog Storefront →](catalog-storefront.md)
 
 # Configuration
 
@@ -37,7 +37,7 @@
 
 ## See Also
 
-- [Project README](../../../README.md) — project landing page and navigation hub.
+- [Project README](../README.md) — project landing page and navigation hub.
 - [Getting Started](getting-started.md) — local setup commands.
 - [Deployment](deployment.md) — production runtime notes.
 - [Admin Panel](admin-panel.md) — where many settings are managed in UI.

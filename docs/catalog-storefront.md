@@ -1,4 +1,4 @@
-[← Configuration](configuration.md) · [Back to README](../../../README.md) · [Admin Panel →](admin-panel.md)
+[← Configuration](configuration.md) · [Back to README](../README.md) · [Admin Panel →](admin-panel.md)
 
 # Catalog Storefront
 
@@ -38,7 +38,7 @@ GET /{locale}/live-search
 
 ## See Also
 
-- [Project README](../../../README.md) — project landing page and navigation hub.
+- [Project README](../README.md) — project landing page and navigation hub.
 - [Admin Panel](admin-panel.md) — where filters/sort/page settings are managed.
 - [Architecture](architecture.md) — separation of storefront vs domain logic.
 - [Testing](testing.md) — how to validate storefront changes.
