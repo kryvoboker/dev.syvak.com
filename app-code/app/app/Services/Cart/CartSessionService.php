@@ -34,7 +34,7 @@ class CartSessionService
                 'chosen_attributes',
                 'created_at',
             ])
-            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
             ->get()
             ->all();
 
