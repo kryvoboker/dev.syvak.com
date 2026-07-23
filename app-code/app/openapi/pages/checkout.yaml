@@ -14,13 +14,13 @@ info:
     - `POST /{locale}/order-confirm/simple`
 
     The singleton Pickup module can add the `pickup_store` delivery method when it is
-    enabled and configured. See [Pickup module contract](../../../Modules/Pickup/docs/openapi.yaml).
+    enabled and configured. See [Pickup module contract](../../Modules/Pickup/docs/openapi.yaml).
 
     WayForPay is a singleton payment method rendered inside `#checkout-payment-collapse`.
     When selected, it is processed through the `SimpleOrder` endpoints. The create response
     contains either official widget data or a POST redirect payload; the WayForPay module's
     frontend entry point loads the widget only after order validation and creation have
-    succeeded. See [WayForPay module contract](../../../Modules/WayForPay/docs/openapi.yaml).
+    succeeded. See [WayForPay module contract](../../Modules/WayForPay/docs/openapi.yaml).
 servers:
   - url: https://example.test
     description: Local or staging environment

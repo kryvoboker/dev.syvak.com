@@ -268,7 +268,7 @@ Before changing the module, verify:
 
 ## Related docs
 
-- [Project architecture](../../docs/architecture.md)
-- [Admin panel guide](../../docs/admin-panel.md)
+- [Project architecture](../../../../docs/architecture.md)
+- [Admin panel guide](../../../../docs/admin-panel.md)
 - [Modules loading guide](../../Modules/README.md)
 - [ architecture rules](../../../..//ARCHITECTURE.md)

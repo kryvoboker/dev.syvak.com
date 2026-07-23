@@ -8,10 +8,10 @@ The module is a **singleton module**. It has one global configuration for the wh
 
 - [Modules loading guide](../README.md)
 - [Pickup OpenAPI contract](docs/openapi.yaml)
-- [Checkout OpenAPI contract](../../docs/openapi/pages/checkout.yaml)
-- [Root OpenAPI entrypoint](../../docs/openapi/openapi.yaml)
-- [Project architecture](../../docs/architecture.md)
-- [Admin panel guide](../../docs/admin-panel.md)
+- [Checkout OpenAPI contract](../../openapi/pages/checkout.yaml)
+- [Root OpenAPI entrypoint](../../openapi/openapi.yaml)
+- [Project architecture](../../../../docs/architecture.md)
+- [Admin panel guide](../../../../docs/admin-panel.md)
 
 ## Responsibilities
 

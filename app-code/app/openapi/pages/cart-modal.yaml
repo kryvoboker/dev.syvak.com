@@ -1,0 +1,527 @@
+openapi: 3.1.0
+info:
+  title: Cart Modal Contract
+  version: 1.0.0
+  description: |
+    Public contract for the storefront cart modal.
+
+    The cart is stored in the server-side session. The modal loads its snapshot from
+    `GET /{locale}/cart-modal`, while add, quantity update, and delete actions use the
+    shared `/{locale}/cart` mutation endpoints. Every mutation returns the current cart
+    snapshot and rendered HTML fragments so the storefront can update the modal without
+    a full page reload. The mutation response also contains the cart page fragment
+    because the same controls are shared by the cart page and the modal.
+servers:
+  - url: https://example.test
+    description: Local or staging environment
+tags:
+  - name: Cart Modal
+    description: Cart modal snapshot and mutation endpoints
+paths:
+  /{locale}/cart-modal:
+    get:
+      tags: [Cart Modal]
+      summary: Load the cart modal snapshot
+      description: |
+        Returns the current cart for the selected mode and the rendered items HTML
+        used by the cart modal. An empty cart is a successful response with
+        `cart.is_empty=true` and an empty `cart.items` array.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/CartModeQuery'
+      responses:
+        '200':
+          description: Current cart snapshot and modal markup.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartModalSnapshotResponse'
+    post:
+      tags: [Cart Modal]
+      summary: Add a product variant to the cart
+      description: Adds a product variant to the selected cart mode and returns updated modal and cart page markup.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartStoreRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CartStoreRequest'
+      responses:
+        '200':
+          description: Product was processed and the current cart was returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /{locale}/cart-modal/{cart_id}:
+    patch:
+      tags: [Cart Modal]
+      summary: Update a cart item quantity
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/CartId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CartUpdateRequest'
+      responses:
+        '200':
+          description: Quantity was processed and the current cart was returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Cart Modal]
+      summary: Remove a cart item
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/CartId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartDeleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CartDeleteRequest'
+      responses:
+        '200':
+          description: Item removal result and the current cart was returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /{locale}/cart:
+    post:
+      tags: [Cart Modal]
+      summary: Add a product variant to the cart
+      description: |
+        Shared cart mutation endpoint used by the cart modal and other storefront
+        add-to-cart controls. Adds a product variant to the selected cart mode and
+        returns updated modal and cart page markup.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartStoreRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CartStoreRequest'
+      responses:
+        '200':
+          description: Product was processed and the current cart was returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /{locale}/cart/{cart_id}:
+    patch:
+      tags: [Cart Modal]
+      summary: Update a cart item quantity
+      description: Shared cart mutation endpoint used by the cart modal and cart page.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/CartId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CartUpdateRequest'
+      responses:
+        '200':
+          description: Quantity was processed and the current cart was returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [Cart Modal]
+      summary: Remove a cart item
+      description: Shared cart mutation endpoint used by the cart modal and cart page.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/CartId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartDeleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CartDeleteRequest'
+      responses:
+        '200':
+          description: Item removal result and the current cart was returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartMutationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+components:
+  parameters:
+    Locale:
+      in: path
+      name: locale
+      required: true
+      schema:
+        type: string
+      description: Active storefront locale.
+    CartId:
+      in: path
+      name: cart_id
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      description: Session cart item identifier.
+    CartModeQuery:
+      in: query
+      name: cart_mode
+      required: false
+      schema:
+        $ref: '#/components/schemas/CartMode'
+      description: Cart to load. Defaults to `regular`.
+  responses:
+    ValidationError:
+      description: Request validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+  schemas:
+    CartMode:
+      type: string
+      enum: [regular, fast_order]
+    CartStoreRequest:
+      type: object
+      additionalProperties: false
+      required: [product_variant_id]
+      properties:
+        product_variant_id:
+          type: integer
+          minimum: 1
+          description: Active product variant identifier.
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 999
+          default: 1
+        chosen_attributes:
+          type: object
+          additionalProperties: true
+          description: Optional product attribute selections preserved with the cart item.
+        cart_mode:
+          $ref: '#/components/schemas/CartMode'
+        is_call_from_modal:
+          type: boolean
+          default: false
+    CartUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [cart_id, quantity]
+      properties:
+        cart_id:
+          type: integer
+          minimum: 1
+          description: Session cart item identifier. Also accepted from the path parameter.
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 999
+        cart_mode:
+          $ref: '#/components/schemas/CartMode'
+        is_call_from_modal:
+          type: boolean
+          default: false
+    CartDeleteRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        cart_id:
+          type: integer
+          minimum: 1
+          description: Session cart item identifier. Also accepted from the path parameter.
+        cart_mode:
+          $ref: '#/components/schemas/CartMode'
+        is_call_from_modal:
+          type: boolean
+          default: false
+    CartMutationResponse:
+      type: object
+      additionalProperties: false
+      required: [success, message, mode, cart, rendered]
+      properties:
+        success:
+          type: boolean
+          description: Whether the requested cart operation succeeded.
+        message:
+          type: string
+          description: Localized operation result message.
+        mode:
+          $ref: '#/components/schemas/CartMode'
+        cart:
+          $ref: '#/components/schemas/CartData'
+        rendered:
+          $ref: '#/components/schemas/CartRenderedFragments'
+    CartModalSnapshotResponse:
+      type: object
+      additionalProperties: false
+      required: [success, mode, cart, rendered]
+      properties:
+        success:
+          type: boolean
+          const: true
+        mode:
+          $ref: '#/components/schemas/CartMode'
+        cart:
+          $ref: '#/components/schemas/CartData'
+        rendered:
+          type: object
+          additionalProperties: false
+          required: [modal_items_html]
+          properties:
+            modal_items_html:
+              type: string
+              description: Rendered HTML for the modal cart items and totals.
+    CartRenderedFragments:
+      type: object
+      additionalProperties: false
+      required: [modal_items_html, cart_page_html]
+      properties:
+        modal_items_html:
+          type: string
+          description: Rendered HTML for the modal cart items and totals.
+        cart_page_html:
+          type: string
+          description: Rendered HTML for the cart page content, including the checkout link when applicable.
+    CartData:
+      type: object
+      additionalProperties: false
+      required: [mode, items, first_item, hidden_items, items_count, total_quantity, is_empty, totals, routes]
+      properties:
+        mode:
+          $ref: '#/components/schemas/CartMode'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        first_item:
+          oneOf:
+            - $ref: '#/components/schemas/CartItem'
+            - type: 'null'
+        hidden_items:
+          type: array
+          description: All items after the first one, used by the modal accordion.
+          items:
+            $ref: '#/components/schemas/CartItem'
+        items_count:
+          type: integer
+          minimum: 0
+        total_quantity:
+          type: integer
+          minimum: 0
+        is_empty:
+          type: boolean
+        totals:
+          $ref: '#/components/schemas/CartTotals'
+        routes:
+          $ref: '#/components/schemas/CartRoutes'
+    CartItem:
+      type: object
+      additionalProperties: false
+      required:
+        - cart_id
+        - variant_id
+        - product_id
+        - language_id
+        - model
+        - sku
+        - ean
+        - name
+        - url
+        - quantity
+        - minimum_quantity
+        - available_quantity
+        - is_in_stock
+        - unit_price
+        - unit_price_formatted
+        - line_total
+        - line_total_formatted
+        - attributes
+        - selected_attributes
+        - chosen_attributes_raw
+        - image_data
+      properties:
+        cart_id:
+          type: integer
+        variant_id:
+          type: integer
+        product_id:
+          type: integer
+        language_id:
+          type: integer
+        model:
+          type: string
+        sku:
+          type: string
+        ean:
+          type:
+            - string
+            - 'null'
+        name:
+          type: string
+        url:
+          type: string
+          format: uri-reference
+        quantity:
+          type: integer
+          minimum: 1
+        minimum_quantity:
+          type: integer
+          minimum: 1
+        available_quantity:
+          type: integer
+          minimum: 0
+        is_in_stock:
+          type: boolean
+        unit_price:
+          type: number
+        unit_price_formatted:
+          type: string
+        line_total:
+          type: number
+        line_total_formatted:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartAttribute'
+        selected_attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartAttribute'
+        chosen_attributes_raw:
+          type: object
+          additionalProperties: true
+        image_data:
+          $ref: '#/components/schemas/CartImageData'
+    CartAttribute:
+      type: object
+      additionalProperties: false
+      required: [label, value]
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+    CartImageData:
+      type: object
+      additionalProperties: false
+      required: [path, urls, width, height]
+      properties:
+        path:
+          type:
+            - string
+            - 'null'
+        urls:
+          type: object
+          additionalProperties:
+            type: string
+        width:
+          type: integer
+        height:
+          type: integer
+    CartTotals:
+      type: object
+      additionalProperties: false
+      required: [lines, grand_total, grand_total_formatted]
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartTotalLine'
+        grand_total:
+          type: number
+        grand_total_formatted:
+          type: string
+    CartTotalLine:
+      type: object
+      additionalProperties: false
+      required: [code, label, amount, formatted, is_visible, include_in_grand_total]
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        amount:
+          type: number
+        formatted:
+          type: string
+        is_visible:
+          type: boolean
+        include_in_grand_total:
+          type: boolean
+    CartRoutes:
+      type: object
+      additionalProperties: false
+      required: [modal_index, modal_store, cart_store, order_validate, order_store]
+      properties:
+        modal_index:
+          type: string
+          format: uri-reference
+        modal_store:
+          type: string
+          format: uri-reference
+        cart_store:
+          type: string
+          format: uri-reference
+        order_validate:
+          type: string
+          format: uri-reference
+        order_store:
+          type: string
+          format: uri-reference
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: true
+      required: [message]
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

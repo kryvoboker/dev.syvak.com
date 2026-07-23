@@ -23,10 +23,10 @@ This is a minimal singleton module. It does not connect to a payment gateway, cr
 ## Project documentation
 
 - [Module registration and loading guide](../README.md)
-- [Checkout OpenAPI contract](../../docs/openapi/pages/checkout.yaml)
-- [Project architecture](../../docs/architecture.md)
-- [Admin panel guide](../../docs/admin-panel.md)
-- [Testing guide](../../docs/testing.md)
+- [Checkout OpenAPI contract](../../openapi/pages/checkout.yaml)
+- [Project architecture](../../../../docs/architecture.md)
+- [Admin panel guide](../../../../docs/admin-panel.md)
+- [Testing guide](../../../../docs/testing.md)
 
 ## Responsibilities
 
