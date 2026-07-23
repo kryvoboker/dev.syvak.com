@@ -7,7 +7,7 @@
 @section('content')
     <x-catalog::common.breadcrumbs :breadcrumbs="$breadcrumbs" class="product-breadcrumbs"/>
 
-    <section class="product section pt-0 md:pt-0 lg:pt-0" id="product">
+    <section class="product section" id="product">
         <div class="container relative">
             <div class="product-content grid grid-cols-1 2xl:grid-cols-3 2xl:grid-rows-[repeat(20,auto)] gap-y-4 gap-x-6 z-1">
                 <div class="product-carousel w-full 2xl:col-start-2 2xl:col-end-3 2xl:row-start-1 2xl:row-end-21 {{ !empty($product_view_data['gallery_images_data']) ? 'product-carousel--init' : '' }}"
