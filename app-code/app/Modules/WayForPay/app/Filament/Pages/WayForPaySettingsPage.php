@@ -20,7 +20,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
-use Modules\WayForPay\Services\WayForPaySettingsService;
+use Modules\WayForPay\Services\Filament\WayForPaySettingsService;
 use Modules\WayForPay\Support\WayForPayConfig;
 use Throwable;
 use UnitEnum;

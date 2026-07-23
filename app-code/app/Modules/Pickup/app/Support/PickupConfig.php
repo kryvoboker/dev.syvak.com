@@ -6,7 +6,7 @@ namespace Modules\Pickup\Support;
 
 use App\Enums\Order\DeliveryMethodEnum;
 use Illuminate\Support\Str;
-use Modules\Pickup\Services\PickupIframeSanitizer;
+use Modules\Pickup\Services\Filament\PickupIframeSanitizer;
 
 final class PickupConfig
 {

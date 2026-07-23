@@ -16,7 +16,7 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
 {
     public function test_it_resolves_render_ready_items_for_a_placement(): void
     {
-        require_once base_path('tests/Fixtures/Modules/FakeModule/Services/FakeModuleModuleDataService.php');
+        require_once base_path('tests/Fixtures/Modules/FakeModule/Services/Storefront/FakeModuleStorefrontService.php');
 
         $this->mockRuntimeResolver(collect([
             $this->makeModuleDefinition(

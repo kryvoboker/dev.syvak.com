@@ -126,14 +126,14 @@ Do not add custom lazy-loading logic to this provider. Loading strategy is contr
 | Class | Responsibility |
 |---|---|
 | `Support/PaymentUponDeliveryConfig.php` | Canonical payment key and translation key |
-| `Services/PaymentUponDeliveryModuleDataService.php` | Checkout option and availability payload |
+| `Services/Storefront/PaymentUponDeliveryModuleDataService.php` | Checkout option and availability payload |
 | `Services/PaymentUponDeliveryPaymentModule.php` | Pending payment intent without an external gateway |
 | `Filament/Pages/PaymentUponDeliverySettingsPage.php` | Empty singleton admin page |
 | `Providers/PaymentUponDeliveryServiceProvider.php` | Translation registration and module binding |
 
 ## Payment data contract
 
-`PaymentUponDeliveryModuleDataService::getCheckoutData()` returns:
+`PaymentUponDeliveryModuleDataService::getCheckoutData()` in `Services/Storefront` returns:
 
 ```php
 [

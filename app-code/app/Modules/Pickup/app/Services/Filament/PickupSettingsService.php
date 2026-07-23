@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Pickup\Services;
+namespace Modules\Pickup\Services\Filament;
 
 use Illuminate\Support\Facades\Log;
 use Modules\Pickup\Support\PickupConfig;

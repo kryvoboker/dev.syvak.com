@@ -14,7 +14,7 @@ use Modules\NovaPoshta\Models\NovaPoshtaCity;
 use Modules\NovaPoshta\Models\NovaPoshtaPoshtomat;
 use Modules\NovaPoshta\Models\NovaPoshtaPostOffice;
 use Modules\NovaPoshta\Models\NovaPoshtaRegion;
-use Modules\NovaPoshta\Services\NovaPoshtaSyncService;
+use Modules\NovaPoshta\Services\Filament\NovaPoshtaSyncService;
 use RuntimeException;
 use Tests\TestCase;
 

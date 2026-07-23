@@ -14,7 +14,7 @@ return [
     'runtime' => [
         'provider_loading_strategy' => config('modules-runtime.allowed_strategies.route_matched'),
         'storefront' => [
-            'data_service' => 'Services\\NovaPoshtaModuleDataService',
+            'data_service' => 'Services\\Storefront\\NovaPoshtaStorefrontService',
             'view' => 'novaposhta::storefront.module',
             'view_data_key' => 'nova_poshta_module_data',
         ],

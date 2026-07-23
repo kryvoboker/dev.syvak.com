@@ -7,7 +7,7 @@ namespace Modules\UkrPoshta\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\UkrPoshta\Services\UkrPoshtaCheckoutDataService;
+use Modules\UkrPoshta\Services\Storefront\UkrPoshtaCheckoutDataService;
 use Modules\UkrPoshta\Support\UkrPoshtaCheckoutStateService;
 
 class UkrPoshtaController extends Controller

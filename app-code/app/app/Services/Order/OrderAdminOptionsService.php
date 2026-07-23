@@ -13,11 +13,11 @@ use App\Models\Users\UserGroup;
 use App\Supports\Services\RequestLookupContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-use Modules\BankTransfer\Services\BankTransferModuleDataService;
+use Modules\BankTransfer\Services\Storefront\BankTransferModuleDataService;
 use Modules\BankTransfer\Support\BankTransferConfig;
-use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
+use Modules\PaymentUponDelivery\Services\Storefront\PaymentUponDeliveryModuleDataService;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
-use Modules\WayForPay\Services\WayForPayModuleDataService;
+use Modules\WayForPay\Services\Storefront\WayForPayModuleDataService;
 use Modules\WayForPay\Support\WayForPayConfig;
 
 final class OrderAdminOptionsService

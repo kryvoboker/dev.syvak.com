@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Modules\UkrPoshta\Services;
+namespace Modules\UkrPoshta\Services\Storefront;
 
-class UkrPoshtaModuleDataService
+class UkrPoshtaStorefrontService
 {
     public function __construct(
         private readonly UkrPoshtaCheckoutDataService $checkout_data_service,

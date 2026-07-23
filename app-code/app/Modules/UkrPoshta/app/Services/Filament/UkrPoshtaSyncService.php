@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\UkrPoshta\Services;
+namespace Modules\UkrPoshta\Services\Filament;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -11,6 +11,7 @@ use Modules\UkrPoshta\Models\UkrPoshtaCity;
 use Modules\UkrPoshta\Models\UkrPoshtaDistrict;
 use Modules\UkrPoshta\Models\UkrPoshtaPostOffice;
 use Modules\UkrPoshta\Models\UkrPoshtaRegion;
+use Modules\UkrPoshta\Services\UkrPoshtaApiService;
 use RuntimeException;
 use Throwable;
 

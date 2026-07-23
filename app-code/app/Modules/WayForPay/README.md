@@ -52,7 +52,7 @@ The payment option is available only when all conditions are true:
 2. `merchant_account`, `secret_key`, and `merchant_domain_name` are configured;
 3. every active application language has a non-empty localized payment name.
 
-The check is implemented by `WayForPayModuleDataService` and `WayForPayConfig::isComplete()`.
+The check is implemented by `Services/Storefront/WayForPayModuleDataService` and `WayForPayConfig::isComplete()`.
 Incomplete configuration intentionally hides the payment option instead of showing a broken method.
 
 ## Configuration storage

@@ -10,12 +10,12 @@ use App\Services\Checkout\CheckoutSelectionStateService;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Modules\NovaPoshta\Services\NovaPoshtaCheckoutDataService;
-use Modules\UkrPoshta\Services\UkrPoshtaCheckoutDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Modules\NovaPoshta\Services\Storefront\NovaPoshtaCheckoutDataService;
+use Modules\UkrPoshta\Services\Storefront\UkrPoshtaCheckoutDataService;
 use Tests\TestCase;
 
 class CheckoutControllerTest extends TestCase
