@@ -105,9 +105,9 @@ readonly class CartService
     /**
      * @return int
      */
-    public function getTotalProducts(): int
+    public function getTotalProducts(?string $mode = null): int
     {
-        return $this->cart_session_service->getTotalProducts();
+        return $this->cart_session_service->getTotalProducts($mode);
     }
 
     private function isVariantAvailableForCart(int $product_variant_id): bool

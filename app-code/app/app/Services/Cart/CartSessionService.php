@@ -196,7 +196,7 @@ class CartSessionService
     /**
      * @return int
      */
-    public function getTotalProducts(): int
+    public function getTotalProducts(?string $mode = null): int
     {
         $owner_context = $this->resolveOwnerContext();
 
@@ -204,8 +204,13 @@ class CartSessionService
             return 0;
         }
 
-        return (int)$this->resolveOwnerQuery($owner_context)
-            ->sum('quantity');
+        $query = $this->resolveOwnerQuery($owner_context);
+
+        if (is_string($mode) && $mode !== '') {
+            $query->where('cart_mode', $mode);
+        }
+
+        return (int)$query->sum('quantity');
     }
 
     /**

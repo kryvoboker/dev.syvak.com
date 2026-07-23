@@ -1,3 +1,4 @@
+import { updateCartBadgeFromResponse } from '@ts-features/cart/cartBadge.ts';
 import {
     clearCartModalGeneralError,
     extractCartGeneralErrorMessage,
@@ -43,6 +44,8 @@ export const toggleCartLoader = (isShow: boolean): void => {
 };
 
 const renderMutationResponse = (response: CartMutationResponse, mode: CartMode): void => {
+    updateCartBadgeFromResponse(response, mode);
+
     const modalContent = <HTMLElement | null>findElem(`[data-cart-modal-content="${mode}"]`);
 
     if (modalContent && response.rendered?.modal_items_html) {
