@@ -8,7 +8,7 @@ return [
     'runtime' => [
         'provider_loading_strategy' => config('modules-runtime.allowed_strategies.route_matched'),
         'storefront' => [
-            'data_service' => 'Services\\CarouselModuleDataService',
+            'data_service' => 'Services\\Storefront\\CarouselStorefrontService',
             'view' => 'carousel::storefront.main-carousel',
             'view_data_key' => 'carousel_module_data',
         ],

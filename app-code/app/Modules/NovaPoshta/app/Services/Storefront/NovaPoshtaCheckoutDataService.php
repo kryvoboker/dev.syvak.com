@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\NovaPoshta\Services;
+namespace Modules\NovaPoshta\Services\Storefront;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Carousel\Services;
+namespace Modules\Carousel\Services\Storefront;
 
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 /**
  * Resolves storefront-ready Carousel payload for the requested placement/page type.
  */
-class CarouselModuleDataService
+class CarouselStorefrontService
 {
     /**
      * @return array<int, array<string, mixed>>

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\ProductsCarousel\Services;
+namespace Modules\ProductsCarousel\Services\Filament;
 
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;

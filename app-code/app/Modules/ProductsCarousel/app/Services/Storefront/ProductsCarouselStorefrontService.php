@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\ProductsCarousel\Services;
+namespace Modules\ProductsCarousel\Services\Storefront;
 
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
@@ -14,17 +14,18 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Modules\ProductsCarousel\Services\ProductsCarouselProductFilterService;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 use Random\RandomException;
 
 /**
  * Resolves storefront-ready ProductsCarousel payload for current placement/page.
  */
-readonly class ProductsCarouselModuleDataService
+readonly class ProductsCarouselStorefrontService
 {
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
-        private ProductsCarouselProductSearchService $products_carousel_product_search_service,
+        private ProductsCarouselProductFilterService $products_carousel_product_filter_service,
     ) {
     }
 
@@ -267,7 +268,7 @@ readonly class ProductsCarouselModuleDataService
 
         $use_selected_products_only = (bool) Arr::get($instance_settings, 'category_based.use_selected_products_only', false);
 
-        $selected_product_ids = $this->products_carousel_product_search_service->filterActiveProductIdsByCategories(
+        $selected_product_ids = $this->products_carousel_product_filter_service->filterActiveProductIdsByCategories(
             Arr::get($instance_settings, 'category_based.selected_product_ids', []),
             $category_ids,
         );
@@ -318,7 +319,7 @@ readonly class ProductsCarouselModuleDataService
         array $instance_settings,
         array $runtime_shared_settings,
     ): EloquentCollection {
-        $selected_product_ids = $this->products_carousel_product_search_service->filterActiveProductIds(
+        $selected_product_ids = $this->products_carousel_product_filter_service->filterActiveProductIds(
             Arr::get($instance_settings, 'manual_only.selected_product_ids', []),
         );
 

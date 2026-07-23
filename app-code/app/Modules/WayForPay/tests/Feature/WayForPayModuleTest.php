@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Modules\WayForPay\Tests\Feature;
 
 use Modules\WayForPay\Filament\Pages\WayForPaySettingsPage;
-use Modules\WayForPay\Services\WayForPayModuleDataService;
+use Modules\WayForPay\Services\Filament\WayForPaySettingsService;
+use Modules\WayForPay\Services\Storefront\WayForPayModuleDataService;
 use Modules\WayForPay\Services\WayForPayPaymentModule;
-use Modules\WayForPay\Services\WayForPaySettingsService;
-use Modules\WayForPay\Support\WayForPayConfig;
 use Modules\WayForPay\Tests\TestCase;
 
 final class WayForPayModuleTest extends TestCase

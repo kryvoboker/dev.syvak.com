@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Modules\NovaPoshta\Services;
+namespace Modules\NovaPoshta\Services\Storefront;
 
-class NovaPoshtaModuleDataService
+class NovaPoshtaStorefrontService
 {
     public function __construct(
         private readonly NovaPoshtaCheckoutDataService $checkout_data_service,

@@ -145,6 +145,34 @@ The main exception is shared code or shared resources that are intentionally reu
 
 If a file is only used by one module, it should normally stay in that module.
 
+## Module service layout
+
+Module services are separated by delivery layer:
+
+```text
+Modules/<ModuleName>/app/Services/
+├── Filament/                         # Admin-only settings, normalizers, selectors, sync workflows
+├── Storefront/                       # Public checkout/AJAX/view data and storefront entrypoints
+├── <IntegrationService>.php          # Shared API clients and domain integrations
+└── <PaymentService>.php               # Shared order/payment application services
+```
+
+Use `Services/Filament` for code called by Filament pages, module schemas, or admin-only workflows. Use
+`Services/Storefront` for code called by storefront controllers, checkout flows, public AJAX endpoints, or
+the dynamic storefront placement renderer. A placement renderer entrypoint should use the explicit
+`<ModuleName>StorefrontService` name and implement `resolveForPlacement(string $placement, ?string $page_type): array`.
+
+API clients, payment gateways, and order-processing services that are shared by both delivery layers remain
+directly under `Services/`; this is intentional and must be documented in the module README. Do not inject an
+admin service into a storefront class. If a class currently serves both layers, extract the shared domain/query
+operation into a root `Services` class and keep the delivery-specific orchestration in `Filament` or `Storefront`.
+
+When moving a service, update its namespace, every PHP import, module config string, test fixture, and README
+reference together. The two string-based discovery contracts are:
+
+- `Services\\Filament\\ModuleSettingsNormalizerService` for instance settings normalization;
+- `runtime.storefront.data_service` pointing to `Services\\Storefront\\<ModuleName>StorefrontService` for placement rendering.
+
 ## 7. Rules for adding a new module
 
 Minimum checklist:

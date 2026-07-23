@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Pickup\Tests\Feature;
 
-use Modules\Pickup\Services\PickupSettingsService;
+use Modules\Pickup\Services\Filament\PickupSettingsService;
 use Modules\Pickup\Tests\TestCase;
 
 final class PickupSelectionTest extends TestCase

@@ -9,6 +9,7 @@ use App\Filament\Resources\Modules\ModuleInstances\ModuleInstanceResource;
 use App\Filament\Resources\Modules\ModuleInstances\Schemas\ModuleInstanceForm;
 use App\Models\Modules\ModuleInstance;
 use App\Services\Modules\ModuleInstanceService;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -55,6 +56,9 @@ class EditModuleInstance extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->action(fn () => $this->save()),
             DeleteAction::make()
                 ->label(__('admin/modules/module_definitions.actions.delete_instance'))
                 ->action(function (ModuleInstance $record, ModuleInstanceService $module_instance_service): void {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\NovaPoshta\Services;
+namespace Modules\NovaPoshta\Services\Filament;
 
 use Closure;
 use Illuminate\Support\Arr;
@@ -14,6 +14,7 @@ use Modules\NovaPoshta\Models\NovaPoshtaCity;
 use Modules\NovaPoshta\Models\NovaPoshtaPoshtomat;
 use Modules\NovaPoshta\Models\NovaPoshtaPostOffice;
 use Modules\NovaPoshta\Models\NovaPoshtaRegion;
+use Modules\NovaPoshta\Services\NovaPoshtaApiService;
 use Modules\NovaPoshta\Support\NovaPoshtaConfig;
 use RuntimeException;
 use Throwable;
