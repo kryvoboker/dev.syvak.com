@@ -76,6 +76,8 @@ Route::prefix('{' . $locale_key . '}')
             ->withoutMiddleware(PreventRequestForgery::class)
             ->name('wayforpay.return');
 
-        Route::get('/thank-you', [ThankYouController::class, 'index'])->name('thank-you.index');
+        Route::get('/thank-you/{order_number}', [ThankYouController::class, 'index'])
+            ->where('order_number', '[0-9A-HJKMNP-TV-Z]{26}')
+            ->name('thank-you.index');
         Route::get('/failure', [FailureOrderController::class, 'index'])->name('failure-order.index');
     });

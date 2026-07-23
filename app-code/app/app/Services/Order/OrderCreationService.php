@@ -13,7 +13,6 @@ use App\Services\Cart\CartService;
 use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Modules\BankTransfer\Services\BankTransferPaymentModule;
 use Modules\BankTransfer\Support\BankTransferConfig;
 use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryPaymentModule;
@@ -81,10 +80,35 @@ readonly class OrderCreationService
             ];
         }
 
-        $order_number = $this->generateOrderNumber();
         $payment_method = (string) Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, PaymentMethodEnum::CashOnDelivery->value);
 
-        // TODO: replace temporary payload with real order entity persistence.
+        try {
+            $persisted_order = $this->order_aggregate_persistence_service->createSimpleOrder(
+                $validated_data,
+                (array) Arr::get($validation_result, 'cart', []),
+                $locale,
+                $this->resolveRequestContext(),
+            );
+            $order = $persisted_order['order'];
+            $payment = $persisted_order['payment'];
+            $order_number = (string) $order->order_number;
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('[OrderCreationService.createFastOrder] order persistence failed', [
+                'flow' => CartModeEnum::FastOrder->value,
+                'exception' => $throwable::class,
+                'message' => $throwable->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'order_number' => null,
+                'status' => 'failed',
+                'errors' => [
+                    'order' => [__('catalog/default.cart.messages.payment_failed')],
+                ],
+            ];
+        }
+
         $order_payload = [
             'order_number' => $order_number,
             'customer' => [
@@ -111,11 +135,16 @@ readonly class OrderCreationService
             return [
                 'success' => true,
                 'order_number' => $order_number,
-                'redirect_url' => localized_route('localized.catalog.thank-you.index', ['locale' => $locale]),
+                'redirect_url' => localized_route('localized.catalog.thank-you.index', [
+                    'locale' => $locale,
+                    'order_number' => $order_number,
+                ]),
                 'status' => 'success',
                 'errors' => [],
             ];
         }
+
+        $this->markPaymentFailed($payment, (array) Arr::get($payment_result, 'errors', []));
 
         // Keep cart untouched for failed payment flow.
         return [
@@ -281,7 +310,10 @@ readonly class OrderCreationService
                 'success' => true,
                 'order_number' => $order_number,
                 'payment_id' => $payment->getKey(),
-                'redirect_url' => localized_route('localized.catalog.thank-you.index', ['locale' => $locale]),
+                'redirect_url' => localized_route('localized.catalog.thank-you.index', [
+                    'locale' => $locale,
+                    'order_number' => $order_number,
+                ]),
                 'status' => 'success',
                 'errors' => [],
             ];
@@ -297,13 +329,6 @@ readonly class OrderCreationService
                 'payment' => [__('catalog/default.cart.messages.payment_failed')],
             ],
         ];
-    }
-
-    private function generateOrderNumber(string $prefix = 'TMP'): string
-    {
-        unset($prefix);
-
-        return (string) Str::ulid();
     }
 
     /**
