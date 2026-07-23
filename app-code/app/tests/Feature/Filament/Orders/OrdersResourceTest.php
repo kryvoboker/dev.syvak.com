@@ -142,7 +142,7 @@ class OrdersResourceTest extends TestCase
             'language_id' => $language->getKey(),
             'name' => 'Processing',
         ]);
-        $payment_status = PaymentStatuses::query()->create([
+        PaymentStatuses::query()->create([
             'code' => 'pending',
             'is_active' => true,
             'is_default' => true,

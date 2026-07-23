@@ -10,7 +10,7 @@ import {
     normalizeBranchPayload,
     normalizeCityPayload,
     SEARCH_DEBOUNCE_MS,
-}                                                                    from './checkoutData.ts';
+} from './checkoutData.ts';
 
 interface CheckoutSearchState {
     city: CheckoutCitySearchItem | null;
@@ -51,7 +51,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
             isEmpty(options.branchSearchUrl)
         ) {
             state.branchSearchStateKey = '';
-            state.latestBranchResults  = [];
+            state.latestBranchResults = [];
             options.applyBranchResults([]);
             return;
         }
@@ -70,7 +70,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
                 options.branchSearchUrl,
                 buildBranchLoadPayload(state.city, state.deliveryMethod),
             );
-            const items    = isArray(response?.items) ? response.items : [];
+            const items = isArray(response?.items) ? response.items : [];
 
             state.latestBranchResults = items
                 .map((item) => normalizeBranchPayload(item))
@@ -98,7 +98,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
                 {} as Record<string, string | number>,
                 'GET',
             );
-            const items    = isArray(response?.items) ? response.items : [];
+            const items = isArray(response?.items) ? response.items : [];
 
             state.latestCityResults = items
                 .map((item) => normalizeCityPayload(item))

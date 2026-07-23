@@ -287,6 +287,6 @@ final class WayForPaySettingsPage extends Page
      */
     private function getActiveLanguages(): Collection
     {
-        return new Language()->getActiveLanguages();
+        return (new Language())->getActiveLanguages();
     }
 }

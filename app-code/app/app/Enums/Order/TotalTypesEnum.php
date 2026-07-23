@@ -6,7 +6,7 @@ namespace App\Enums\Order;
 
 use App\Enums\EnumValuesTrait;
 
-enum TotalTypesEnum:string
+enum TotalTypesEnum: string
 {
     use EnumValuesTrait;
 

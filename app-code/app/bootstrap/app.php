@@ -19,10 +19,12 @@ if (! function_exists('string_to_array')) {
             return [];
         }
 
-        return explode($separator, $string)
-                |> (fn ($array) => array_map(static fn (string $val): string => Str::trim($val), $array))
-                |> array_filter(...)
-                |> array_values(...);
+        $values = array_map(
+            static fn (string $value): string => Str::trim($value),
+            explode($separator, $string),
+        );
+
+        return array_values(array_filter($values));
     }
 }
 

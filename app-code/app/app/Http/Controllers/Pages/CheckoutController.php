@@ -34,17 +34,18 @@ use Throwable;
 class CheckoutController extends Controller
 {
     public function __construct(
-        private readonly CheckoutSelectionStateService        $checkout_selection_state_service,
-        private readonly NovaPoshtaCheckoutDataService        $nova_poshta_checkout_data_service,
-        private readonly UkrPoshtaCheckoutDataService         $ukr_poshta_checkout_data_service,
-        private readonly PickupCheckoutDataService            $pickup_checkout_data_service,
+        private readonly CheckoutSelectionStateService $checkout_selection_state_service,
+        private readonly NovaPoshtaCheckoutDataService $nova_poshta_checkout_data_service,
+        private readonly UkrPoshtaCheckoutDataService $ukr_poshta_checkout_data_service,
+        private readonly PickupCheckoutDataService $pickup_checkout_data_service,
         private readonly PaymentUponDeliveryModuleDataService $payment_upon_delivery_module_data_service,
-        private readonly BankTransferModuleDataService        $bank_transfer_module_data_service,
-        private readonly WayForPayModuleDataService           $wayforpay_module_data_service,
-        private readonly WayForPayConfig                      $wayforpay_config,
-        private readonly NovaPoshtaCheckoutStateService       $nova_poshta_checkout_state_service,
-        private readonly UkrPoshtaCheckoutStateService        $ukr_poshta_checkout_state_service,
-    ) {}
+        private readonly BankTransferModuleDataService $bank_transfer_module_data_service,
+        private readonly WayForPayModuleDataService $wayforpay_module_data_service,
+        private readonly WayForPayConfig $wayforpay_config,
+        private readonly NovaPoshtaCheckoutStateService $nova_poshta_checkout_state_service,
+        private readonly UkrPoshtaCheckoutStateService $ukr_poshta_checkout_state_service,
+    ) {
+    }
 
     /**
      * @param string|null $locale
@@ -134,7 +135,7 @@ class CheckoutController extends Controller
     public function cities(
         CheckoutCitySearchRequest $request,
         CheckoutCitySearchService $checkout_city_search_service,
-        ?string                   $locale,
+        ?string $locale,
     ): JsonResponse {
         $locale = normalize_locale($locale);
         $data   = $checkout_city_search_service->searchCities((string)$request->validated('city_keyword'));
@@ -149,7 +150,7 @@ class CheckoutController extends Controller
     public function branches(
         CheckoutBranchSearchRequest $request,
         CheckoutBranchSearchService $checkout_branch_search_service,
-        ?string                     $locale,
+        ?string $locale,
     ): JsonResponse {
         $locale    = normalize_locale($locale);
         $validated = $request->validated();
@@ -168,7 +169,7 @@ class CheckoutController extends Controller
 
     public function storeSelection(
         CheckoutSelectionStoreRequest $request,
-        ?string                       $locale,
+        ?string $locale,
     ): JsonResponse {
         $locale    = normalize_locale($locale);
         $validated = $request->validated();
@@ -377,11 +378,11 @@ class CheckoutController extends Controller
      * @return array<string, mixed>
      */
     private function normalizeCheckoutCityState(
-        string  $city_description,
+        string $city_description,
         ?string $nova_poshta_city_id,
-        ?int    $ukr_poshta_city_id,
-        mixed   $city_lat,
-        mixed   $city_lng,
+        ?int $ukr_poshta_city_id,
+        mixed $city_lat,
+        mixed $city_lng,
     ): array {
         return array_filter([
             'city_description'    => $city_description,
@@ -425,7 +426,7 @@ class CheckoutController extends Controller
             if ($delivery_method === 'nova_poshta_courier') {
                 $this->nova_poshta_checkout_state_service->setDeliveryAddress($delivery_address);
                 $this->nova_poshta_checkout_state_service->clearDeliveryPoint();
-            } else if ($delivery_point !== []) {
+            } elseif ($delivery_point !== []) {
                 $this->nova_poshta_checkout_state_service->setDeliveryPoint($delivery_point);
                 $this->nova_poshta_checkout_state_service->clearDeliveryAddress();
             } else {

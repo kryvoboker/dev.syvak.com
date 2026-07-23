@@ -30,7 +30,7 @@ final class PickupCheckoutDataService
             ];
         }
 
-        $active_language_codes = new Language()
+        $active_language_codes = (new Language())
             ->getActiveLanguages()
             ->pluck('code')
             ->map(fn (mixed $code): string => strtolower((string) $code))
