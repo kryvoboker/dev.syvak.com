@@ -122,11 +122,11 @@ final readonly class OrderAggregatePersistenceService
     private function resolveCurrency(string $currency_code): ?Currency
     {
         if ($currency_code === '') {
-            return new Currency()->getDefaultActiveCurrency();
+            return (new Currency())->getDefaultActiveCurrency();
         }
 
-        return new Currency()->getActiveCurrencyByCode($currency_code)
-            ?? new Currency()->getDefaultActiveCurrency();
+        return (new Currency())->getActiveCurrencyByCode($currency_code)
+            ?? (new Currency())->getDefaultActiveCurrency();
     }
 
     /**

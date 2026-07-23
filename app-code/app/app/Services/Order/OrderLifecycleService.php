@@ -37,7 +37,7 @@ final class OrderLifecycleService
      */
     public function getDefaultOrderStatus(): OrderStatuses
     {
-        $status = new OrderStatuses()->getDefaultActiveStatus();
+        $status = (new OrderStatuses())->getDefaultActiveStatus();
 
         if ($status instanceof OrderStatuses) {
             return $status;
@@ -53,7 +53,7 @@ final class OrderLifecycleService
      */
     public function getDefaultPaymentStatus(): PaymentStatuses
     {
-        $status = new PaymentStatuses()->getDefaultActiveStatus();
+        $status = (new PaymentStatuses())->getDefaultActiveStatus();
 
         if ($status instanceof PaymentStatuses) {
             return $status;

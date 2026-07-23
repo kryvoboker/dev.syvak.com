@@ -13,13 +13,11 @@ return new class extends Migration
     {
         $table_prefix = DB::connection()->getTablePrefix();
         $db_pdo       = DB::getPdo();
-        $total_types  = TotalTypesEnum::values() |> (fn(array $values): string => implode(
-                ', ',
-                array_map(
-                    static fn(string $value): string => $db_pdo->quote($value),
-                    $values
-                )
-            ));
+        $quoted_total_types = array_map(
+            static fn (string $value): string => $db_pdo->quote($value),
+            TotalTypesEnum::values(),
+        );
+        $total_types = implode(', ', $quoted_total_types);
 
         $sql = "
             ALTER TABLE `{$table_prefix}order_totals`

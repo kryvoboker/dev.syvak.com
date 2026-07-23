@@ -323,9 +323,9 @@ if (!function_exists('localized_product_variant_route')) {
      */
     function localized_product_variant_route(
         string $product_slug,
-        int    $product_id,
-        array  $attribute_filters = [],
-        bool   $absolute = true,
+        int $product_id,
+        array $attribute_filters = [],
+        bool $absolute = true,
     ): string {
         $normalized_filters = prepare_product_attrs($attribute_filters);
 
@@ -619,7 +619,7 @@ if (!function_exists('get_slug_variants')) {
         ?string $sluggable_type,
         ?string $slug_value = null,
         ?string $variant_slug_value = null,
-        array   $attribute_filters = [],
+        array $attribute_filters = [],
     ): array {
         if ($sluggable_type === null || blank($slug_value)) {
             return [];
@@ -688,11 +688,11 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
      * @return array<string, array{slug: string, variant_slug: string}>
      */
     function resolve_product_variant_slug_variants(
-        string  $slug_value,
+        string $slug_value,
         ?string $variant_slug_value,
-        array   $language_ids_by_code,
-        array   $attribute_filters,
-        Slug    $slug_instance,
+        array $language_ids_by_code,
+        array $attribute_filters,
+        Slug $slug_instance,
     ): array {
         $product_slug = $slug_instance->newQuery()
             ->where('slug', $slug_value)
@@ -765,10 +765,10 @@ if (!function_exists('resolve_product_variant_id_for_slug_variants')) {
      * @param array<int|string, int|string|array<int, int|string>> $attribute_filters
      */
     function resolve_product_variant_id_for_slug_variants(
-        int     $product_id,
+        int $product_id,
         ?string $variant_slug_value,
-        array   $attribute_filters,
-        Slug    $slug_instance,
+        array $attribute_filters,
+        Slug $slug_instance,
     ): int {
         if (filled((string)$variant_slug_value)) {
             $variant_slug = $slug_instance->newQuery()

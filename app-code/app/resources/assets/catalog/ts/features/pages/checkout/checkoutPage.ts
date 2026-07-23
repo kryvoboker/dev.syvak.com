@@ -1,6 +1,6 @@
-import { getAppParam }                              from '@ts-shared/lib/getAppParam.ts';
+import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
 import { findElem, toStringValue, toTrimmedString } from '@ts-shared/lib/helpers.ts';
-import { createBranchChoices, createCityChoices }   from './checkoutChoices.ts';
+import { createBranchChoices, createCityChoices } from './checkoutChoices.ts';
 import {
     buildCheckoutMapPoints,
     type CheckoutBranchSearchItem,
@@ -15,82 +15,82 @@ import {
     readCityFromOption,
     resolveCheckoutSelectionState,
     resolveCheckoutUrl,
-}                                                   from './checkoutData.ts';
-import { getCheckoutDomElements }                   from './checkoutDom.ts';
-import { bindCheckoutEvents }                       from './checkoutEvents.ts';
-import { createCheckoutSearch }                     from './checkoutSearch.ts';
-import { createCheckoutUi }                         from './checkoutUi.ts';
+} from './checkoutData.ts';
+import { getCheckoutDomElements } from './checkoutDom.ts';
+import { bindCheckoutEvents } from './checkoutEvents.ts';
+import { createCheckoutSearch } from './checkoutSearch.ts';
+import { createCheckoutUi } from './checkoutUi.ts';
 
 export const initializeCheckoutDeliveryLogic = (): void => {
     const {
-              citySelectElement,
-              branchSelectElement,
-              deliveryAddressInputElement,
-              cityWarningElement,
-              deliveryAddressWrapperElement,
-              branchWrapperElement,
-              branchLabelElement,
-              mapButtonElement,
-              deliveryMethodOptions,
-              deliveryMethodInputs,
-              paymentMethodInputs,
-              checkoutFormElement,
-          }                = getCheckoutDomElements();
-    const citySearchUrl    = resolveCheckoutUrl('checkout_city_search_url');
-    const branchSearchUrl  = resolveCheckoutUrl('checkout_branch_search_url');
+        citySelectElement,
+        branchSelectElement,
+        deliveryAddressInputElement,
+        cityWarningElement,
+        deliveryAddressWrapperElement,
+        branchWrapperElement,
+        branchLabelElement,
+        mapButtonElement,
+        deliveryMethodOptions,
+        deliveryMethodInputs,
+        paymentMethodInputs,
+        checkoutFormElement,
+    } = getCheckoutDomElements();
+    const citySearchUrl = resolveCheckoutUrl('checkout_city_search_url');
+    const branchSearchUrl = resolveCheckoutUrl('checkout_branch_search_url');
     const selectionSaveUrl = resolveCheckoutUrl('checkout_selection_save_url');
-    const selectionState   = resolveCheckoutSelectionState();
-    const checkoutMapData  = getAppParam<CheckoutMapData>('checkout_map_data') ?? {};
+    const selectionState = resolveCheckoutSelectionState();
+    const checkoutMapData = getAppParam<CheckoutMapData>('checkout_map_data') ?? {};
 
     if (!citySelectElement || !branchSelectElement) {
         return;
     }
 
     const emptyChoicesText = toStringValue(getAppParam('checkout_no_cities_text'));
-    const cityChoices      = createCityChoices(citySelectElement, emptyChoicesText, MIN_SEARCH_CITY_LENGTH);
-    const branchChoices    = createBranchChoices(branchSelectElement, emptyChoicesText, MIN_SEARCH_POST_OFFICE_LENGTH);
+    const cityChoices = createCityChoices(citySelectElement, emptyChoicesText, MIN_SEARCH_CITY_LENGTH);
+    const branchChoices = createBranchChoices(branchSelectElement, emptyChoicesText, MIN_SEARCH_POST_OFFICE_LENGTH);
 
-    let currentDeliveryMethod                                 = toTrimmedString(selectionState.delivery_method);
-    let currentPaymentMethod                                  = toTrimmedString(selectionState.payment_method);
-    let currentCity                                           = normalizeCityPayload(
+    let currentDeliveryMethod = toTrimmedString(selectionState.delivery_method);
+    let currentPaymentMethod = toTrimmedString(selectionState.payment_method);
+    let currentCity = normalizeCityPayload(
         selectionState.city ?? readCityFromOption(citySelectElement.selectedOptions[0] ?? null),
     );
-    let currentBranch                                         = normalizeBranchPayload(
+    let currentBranch = normalizeBranchPayload(
         selectionState.delivery_point ?? readBranchFromOption(branchSelectElement.selectedOptions[0] ?? null),
     );
-    let currentDeliveryAddress                                = String(
+    let currentDeliveryAddress = String(
         selectionState.delivery_address ?? deliveryAddressInputElement?.value ?? '',
     ).trim();
-    const checkoutFormState: CheckoutFormState                = {
+    const checkoutFormState: CheckoutFormState = {
         firstName: toTrimmedString(
             selectionState.first_name ??
-            checkoutFormElement?.querySelector<HTMLInputElement>('[name="first_name"]')?.value,
+                checkoutFormElement?.querySelector<HTMLInputElement>('[name="first_name"]')?.value,
         ),
-        lastName:  toTrimmedString(
+        lastName: toTrimmedString(
             selectionState.last_name ??
-            checkoutFormElement?.querySelector<HTMLInputElement>('[name="last_name"]')?.value,
+                checkoutFormElement?.querySelector<HTMLInputElement>('[name="last_name"]')?.value,
         ),
-        phone:     toTrimmedString(
+        phone: toTrimmedString(
             selectionState.phone ?? checkoutFormElement?.querySelector<HTMLInputElement>('[name="phone"]')?.value,
         ),
-        email:     toTrimmedString(
+        email: toTrimmedString(
             selectionState.email ?? checkoutFormElement?.querySelector<HTMLInputElement>('[name="email"]')?.value,
         ),
-        comment:   toTrimmedString(
+        comment: toTrimmedString(
             selectionState.comment ??
-            checkoutFormElement?.querySelector<HTMLTextAreaElement>('[name="comment"]')?.value,
+                checkoutFormElement?.querySelector<HTMLTextAreaElement>('[name="comment"]')?.value,
         ),
         promoCode: toTrimmedString(
             selectionState.promo_code ??
-            checkoutFormElement?.querySelector<HTMLInputElement>('[name="promo_code"]')?.value,
+                checkoutFormElement?.querySelector<HTMLInputElement>('[name="promo_code"]')?.value,
         ),
         noCall:
-                   selectionState.no_call === true ||
-                   checkoutFormElement?.querySelector<HTMLInputElement>('[name="no_call"]')?.checked === true,
+            selectionState.no_call === true ||
+            checkoutFormElement?.querySelector<HTMLInputElement>('[name="no_call"]')?.checked === true,
     };
-    let latestCitySearchResults: CheckoutCitySearchItem[]     = [];
+    let latestCitySearchResults: CheckoutCitySearchItem[] = [];
     let latestBranchSearchResults: CheckoutBranchSearchItem[] = [];
-    let currentBranchSearchStateKey                           = '';
+    let currentBranchSearchStateKey = '';
 
     const checkoutState = {
         get city(): CheckoutCitySearchItem | null {
@@ -157,43 +157,43 @@ export const initializeCheckoutDeliveryLogic = (): void => {
             branchChoices,
         },
         {
-            getCity:                  (): CheckoutCitySearchItem | null => checkoutState.city,
-            getBranch:                (): CheckoutBranchSearchItem | null => checkoutState.branch,
-            getDeliveryMethod:        (): string => checkoutState.deliveryMethod,
-            getLatestBranchResults:   (): CheckoutBranchSearchItem[] => checkoutState.latestBranchResults,
-            setDeliveryMethod:        (deliveryMethod: string): void => {
+            getCity: (): CheckoutCitySearchItem | null => checkoutState.city,
+            getBranch: (): CheckoutBranchSearchItem | null => checkoutState.branch,
+            getDeliveryMethod: (): string => checkoutState.deliveryMethod,
+            getLatestBranchResults: (): CheckoutBranchSearchItem[] => checkoutState.latestBranchResults,
+            setDeliveryMethod: (deliveryMethod: string): void => {
                 checkoutState.deliveryMethod = deliveryMethod;
             },
-            setCity:                  (city: CheckoutCitySearchItem | null): void => {
+            setCity: (city: CheckoutCitySearchItem | null): void => {
                 checkoutState.city = city;
             },
-            setBranch:                (branch: CheckoutBranchSearchItem | null): void => {
+            setBranch: (branch: CheckoutBranchSearchItem | null): void => {
                 checkoutState.branch = branch;
             },
-            setDeliveryAddress:       (deliveryAddress: string): void => {
+            setDeliveryAddress: (deliveryAddress: string): void => {
                 checkoutState.deliveryAddress = deliveryAddress;
             },
-            setLatestCityResults:     (cities: CheckoutCitySearchItem[]): void => {
+            setLatestCityResults: (cities: CheckoutCitySearchItem[]): void => {
                 checkoutState.latestCityResults = cities;
             },
-            setLatestBranchResults:   (branches: CheckoutBranchSearchItem[]): void => {
+            setLatestBranchResults: (branches: CheckoutBranchSearchItem[]): void => {
                 checkoutState.latestBranchResults = branches;
             },
-            getChooseCityFirstText:   (): string => toStringValue(getAppParam('checkout_choose_city_first_text')),
+            getChooseCityFirstText: (): string => toStringValue(getAppParam('checkout_choose_city_first_text')),
             getNoDeliveryMethodsText: (): string => toStringValue(getAppParam('checkout_no_delivery_methods_text')),
         },
     );
     const {
-              applyBranchSearchResults,
-              applyCitySearchResults,
-              hideWarning,
-              showWarning,
-              updateBranchAvailability,
-              updateBranchVisibility,
-              updateCourierAddressVisibility,
-              updateMapButtonState,
-              updateDeliveryMethodVisibility,
-          }          = checkoutUi;
+        applyBranchSearchResults,
+        applyCitySearchResults,
+        hideWarning,
+        showWarning,
+        updateBranchAvailability,
+        updateBranchVisibility,
+        updateCourierAddressVisibility,
+        updateMapButtonState,
+        updateDeliveryMethodVisibility,
+    } = checkoutUi;
 
     const resolveSelectedCity = (): CheckoutCitySearchItem | null => {
         const selectedValue = citySelectElement.value.trim();
@@ -221,12 +221,12 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         );
     };
 
-    const checkoutSearch                                        = createCheckoutSearch({
+    const checkoutSearch = createCheckoutSearch({
         citySearchUrl,
         branchSearchUrl,
         selectionSaveUrl,
-        state:              checkoutState,
-        applyCityResults:   applyCitySearchResults,
+        state: checkoutState,
+        applyCityResults: applyCitySearchResults,
         applyBranchResults: applyBranchSearchResults,
         updateMapButtonState,
     });
@@ -236,9 +236,9 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         currentCity = resolveSelectedCity();
 
         if (!currentCity) {
-            latestCitySearchResults     = [];
-            latestBranchSearchResults   = [];
-            currentBranch               = null;
+            latestCitySearchResults = [];
+            latestBranchSearchResults = [];
+            currentBranch = null;
             currentBranchSearchStateKey = '';
             updateDeliveryMethodVisibility();
             branchChoices.clearChoices();
@@ -265,11 +265,11 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         }
 
         const wasPickupStoreDelivery = currentDeliveryMethod === 'pickup_store';
-        currentDeliveryMethod        = target.value;
+        currentDeliveryMethod = target.value;
 
         if (currentDeliveryMethod === 'pickup_store') {
-            currentCity            = null;
-            currentBranch          = null;
+            currentCity = null;
+            currentBranch = null;
             currentDeliveryAddress = toTrimmedString(deliveryAddressInputElement?.value);
             cityChoices.removeActiveItems();
             cityChoices.clearChoices();
@@ -285,8 +285,8 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         if (!currentCity && !wasPickupStoreDelivery) {
             target.checked = false;
             showWarning(toStringValue(getAppParam('checkout_choose_city_first_text')));
-            currentDeliveryMethod  = '';
-            currentBranch          = null;
+            currentDeliveryMethod = '';
+            currentBranch = null;
             currentDeliveryAddress = '';
             branchChoices.clearChoices();
             updateCourierAddressVisibility();
@@ -353,9 +353,9 @@ export const initializeCheckoutDeliveryLogic = (): void => {
 
     const handleMapBranchSelection = (mapPointId: string): void => {
         const selectedBranch =
-                  latestBranchSearchResults.find(
-                      (branch: CheckoutBranchSearchItem): boolean => branch.branch_value === mapPointId,
-                  ) ?? (currentBranch?.branch_value === mapPointId ? currentBranch : null);
+            latestBranchSearchResults.find(
+                (branch: CheckoutBranchSearchItem): boolean => branch.branch_value === mapPointId,
+            ) ?? (currentBranch?.branch_value === mapPointId ? currentBranch : null);
 
         if (!selectedBranch || !currentCity) {
             return;
@@ -376,8 +376,8 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         }
 
         const branchCandidates =
-                  latestBranchSearchResults.length > 0 ? latestBranchSearchResults : currentBranch ? [currentBranch] : [];
-        const mapPoints        = buildCheckoutMapPoints(branchCandidates);
+            latestBranchSearchResults.length > 0 ? latestBranchSearchResults : currentBranch ? [currentBranch] : [];
+        const mapPoints = buildCheckoutMapPoints(branchCandidates);
 
         if (mapPoints.length === 0) {
             return;
@@ -386,13 +386,13 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         const module = await import('@ts-features/pages/checkout/checkoutLeafletMap.ts');
 
         module.openCheckoutLeafletMap({
-            city:                   currentCity,
-            points:                 mapPoints,
-            selectedPointId:        currentBranch?.branch_value ?? mapPoints[0]?.id ?? null,
+            city: currentCity,
+            points: mapPoints,
+            selectedPointId: currentBranch?.branch_value ?? mapPoints[0]?.id ?? null,
             selectedDeliveryMethod: currentDeliveryMethod,
-            markerIcons:            checkoutMapData.marker_icons ?? null,
-            texts:                  checkoutMapData.texts ?? null,
-            callback:               handleMapBranchSelection,
+            markerIcons: checkoutMapData.marker_icons ?? null,
+            texts: checkoutMapData.texts ?? null,
+            callback: handleMapBranchSelection,
         });
     };
 
@@ -415,32 +415,32 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         deliveryMethodInputs,
         paymentMethodInputs,
         checkoutFormElement,
-        onCitySearch:            (value: string): void => searchCities(value),
-        onCityChange:            handleCitySelectionChange,
-        onBranchChange:          handleBranchSelectionChange,
+        onCitySearch: (value: string): void => searchCities(value),
+        onCityChange: handleCitySelectionChange,
+        onBranchChange: handleBranchSelectionChange,
         onDeliveryAddressChange: handleDeliveryAddressChange,
-        onDeliveryMethodChange:  handleDeliveryMethodChange,
-        onPaymentMethodChange:   handlePaymentMethodChange,
-        onCheckoutFormChange:    (): void => {
+        onDeliveryMethodChange: handleDeliveryMethodChange,
+        onPaymentMethodChange: handlePaymentMethodChange,
+        onCheckoutFormChange: (): void => {
             checkoutFormState.firstName = toTrimmedString(
                 checkoutFormElement?.querySelector<HTMLInputElement>('[name="first_name"]')?.value,
             );
-            checkoutFormState.lastName  = toTrimmedString(
+            checkoutFormState.lastName = toTrimmedString(
                 checkoutFormElement?.querySelector<HTMLInputElement>('[name="last_name"]')?.value,
             );
-            checkoutFormState.phone     = toTrimmedString(
+            checkoutFormState.phone = toTrimmedString(
                 checkoutFormElement?.querySelector<HTMLInputElement>('[name="phone"]')?.value,
             );
-            checkoutFormState.email     = toTrimmedString(
+            checkoutFormState.email = toTrimmedString(
                 checkoutFormElement?.querySelector<HTMLInputElement>('[name="email"]')?.value,
             );
-            checkoutFormState.comment   = toTrimmedString(
+            checkoutFormState.comment = toTrimmedString(
                 checkoutFormElement?.querySelector<HTMLTextAreaElement>('[name="comment"]')?.value,
             );
             checkoutFormState.promoCode = toTrimmedString(
                 checkoutFormElement?.querySelector<HTMLInputElement>('[name="promo_code"]')?.value,
             );
-            checkoutFormState.noCall    =
+            checkoutFormState.noCall =
                 checkoutFormElement?.querySelector<HTMLInputElement>('[name="no_call"]')?.checked === true;
             syncSelectionToServer();
         },
@@ -448,7 +448,7 @@ export const initializeCheckoutDeliveryLogic = (): void => {
 
     if (!currentPaymentMethod) {
         const checkedPaymentMethod = <HTMLInputElement | null>findElem('[data-checkout-payment-method-input]:checked');
-        currentPaymentMethod       = checkedPaymentMethod?.value ?? '';
+        currentPaymentMethod = checkedPaymentMethod?.value ?? '';
     }
 
     bindMapButton();
@@ -457,7 +457,7 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         const checkedDeliveryMethod = <HTMLInputElement | null>(
             findElem('[data-checkout-delivery-method-input]:checked')
         );
-        currentDeliveryMethod       = checkedDeliveryMethod?.value ?? '';
+        currentDeliveryMethod = checkedDeliveryMethod?.value ?? '';
     }
 
     if (currentCity) {

@@ -171,51 +171,57 @@ class SimpleOrderControllerTest extends TestCase
      */
     private function bindSimpleOrderCreationService(array $validate_result, array $create_result): void
     {
-        $simple_order_service = new readonly class ($validate_result, $create_result) extends OrderCreationService {
-            /**
-             * @param array<string, mixed> $validate_result
-             * @param array<string, mixed> $create_result
-             */
-            public function __construct(
-                private array $validate_result,
-                private array $create_result,
-            ) {
-                parent::__construct(
-                    app(CartService::class),
-                    app(CashOnDeliveryPaymentModule::class),
-                    app(PaymentUponDeliveryPaymentModule::class),
-                    app(BankTransferPaymentModule::class),
-                    app(WayForPayPaymentModule::class),
-                    app(WayForPayConfig::class),
-                    app(OrderAggregatePersistenceService::class),
-                    app(OrderLifecycleService::class),
-                    app(PickupCheckoutDataService::class),
-                );
-            }
-
-            /**
-             * @param array<string, mixed> $validated_data
-             * @return array<string, mixed>
-             */
-            public function validateSimpleOrderData(array $validated_data, string $locale): array
-            {
-                unset($validated_data, $locale);
-
-                return $this->validate_result;
-            }
-
-            /**
-             * @param array<string, mixed> $validated_data
-             * @return array<string, mixed>
-             */
-            public function createSimpleOrder(array $validated_data, string $locale): array
-            {
-                unset($validated_data, $locale);
-
-                return $this->create_result;
-            }
-        };
+        $simple_order_service = new SimpleOrderCreationServiceStub($validate_result, $create_result);
 
         $this->app->instance(OrderCreationService::class, $simple_order_service);
+    }
+}
+
+/**
+ * @internal
+ */
+final readonly class SimpleOrderCreationServiceStub extends OrderCreationService
+{
+    /**
+     * @param array<string, mixed> $validate_result
+     * @param array<string, mixed> $create_result
+     */
+    public function __construct(
+        private array $validate_result,
+        private array $create_result,
+    ) {
+        parent::__construct(
+            app(CartService::class),
+            app(CashOnDeliveryPaymentModule::class),
+            app(PaymentUponDeliveryPaymentModule::class),
+            app(BankTransferPaymentModule::class),
+            app(WayForPayPaymentModule::class),
+            app(WayForPayConfig::class),
+            app(OrderAggregatePersistenceService::class),
+            app(OrderLifecycleService::class),
+            app(PickupCheckoutDataService::class),
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $validated_data
+     * @return array<string, mixed>
+     */
+    public function validateSimpleOrderData(array $validated_data, string $locale): array
+    {
+        unset($validated_data, $locale);
+
+        return $this->validate_result;
+    }
+
+    /**
+     * @param array<string, mixed> $validated_data
+     * @return array<string, mixed>
+     */
+    public function createSimpleOrder(array $validated_data, string $locale): array
+    {
+        unset($validated_data, $locale);
+
+        return $this->create_result;
     }
 }

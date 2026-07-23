@@ -453,7 +453,7 @@ class ProductForm
                                 Select::make('user_group_id')
                                     ->label(__('admin/default.labels.user_group'))
                                     ->options(function () {
-                                        return new UserGroup()
+                                        return (new UserGroup())
                                             ->getActiveUserGroups()
                                             ->mapWithKeys(function ($user_group) {
                                                 /** @var UserGroup $user_group */
@@ -540,7 +540,7 @@ class ProductForm
                                 Select::make('attribute_id')
                                     ->label(__('admin/default.labels.attribute'))
                                     ->options(function () use ($current_language_id) {
-                                        return new Attribute()
+                                        return (new Attribute())
                                             ->getActiveAttributesWithDescriptionsByLanguageId($current_language_id)
                                             ->mapWithKeys(function ($attribute) use ($current_language_id) {
                                                 /** @var Attribute $attribute */

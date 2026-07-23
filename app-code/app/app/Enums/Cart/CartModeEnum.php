@@ -6,7 +6,7 @@ namespace App\Enums\Cart;
 
 use App\Enums\EnumValuesTrait;
 
-enum CartModeEnum:string
+enum CartModeEnum: string
 {
     use EnumValuesTrait;
 
