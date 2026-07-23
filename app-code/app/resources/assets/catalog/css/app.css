@@ -167,6 +167,82 @@
         max-width: none;
         padding-inline: 0;
     }
+
+    .carousel-nav {
+        @apply pointer-events-auto inline-flex size-14 items-center justify-center rounded-full border border-white/50
+        bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white
+        backdrop-blur-xs hover:text-black opacity-80 carousel-disabled:opacity-50;
+    }
+
+    .carousel-pagination:not(.product-carousel__pagination) {
+        @apply flex items-center justify-center gap-x-2 h-2.5;
+
+        & > * {
+            @apply carousel-dot size-1.5 bg-light-gray carousel-active:ease-in-out carousel-active:duration-200;
+        }
+
+        & > *.active {
+            @apply size-2.5;
+        }
+    }
+
+    .category-filter__clear-all-btn,
+    .category-filter__apply-btn {
+        @apply w-1/2;
+    }
+
+    .category-filter__choosen-filters-list .custom-icon {
+        @apply size-5;
+    }
+
+    .category-filter__clear-all-link,
+    .category-filter__remove-choosen-filter-link {
+        @apply flex items-center gap-x-1 border border-light-gray rounded-2xl bg-transparent hover:bg-white hover:text-black ease-in-out duration-200 px-2 py-1;
+
+        &:hover > .custom-icon {
+            @apply bg-black ease-in-out duration-200;
+        }
+    }
+
+    .category-filter__clear-all-link {
+        @apply border-light-red;
+    }
+
+    /*.product-carousel {
+        @apply relative;
+
+        &::before {
+            content: "";
+
+            background: radial-gradient(
+                circle at center,
+                rgba(139, 0, 0, 0.95) 0%,
+                rgba(90, 0, 0, 0.9) 35%,
+                rgba(30, 0, 0, 0.95) 70%,
+                rgba(0, 0, 0, 1) 100%
+            );
+
+            @apply absolute top-0 left-0 size-full;
+        }
+    }*/
+
+    .product .product-carousel .carousel-slide,
+    .product .product-carousel .carousel-body > a {
+        @apply h-108.5 md:h-165 lg:h-180 2xl:h-190;
+    }
+
+    .product .product-carousel .carousel-slide > a,
+    .product .product-carousel .carousel-body > a {
+        @apply h-full;
+    }
+
+    .product-carousel__pagination .carousel-pagination-item {
+        @apply border border-transparent transition-colors;
+
+        &.active {
+            @apply border-white;
+        }
+    }
 }
 
 @layer app {
@@ -284,82 +360,6 @@
 
     .prod-list__name {
         @apply font-inter text-base leading-1.4em font-normal uppercase tracking-0.04em md:text-lg lg:text-xl 2xl:text-2xl text-ellipsis line-clamp-3;
-    }
-
-    .carousel-nav {
-        @apply pointer-events-auto inline-flex size-14 items-center justify-center rounded-full border border-white/50
-        bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white
-        backdrop-blur-xs hover:text-black opacity-80 carousel-disabled:opacity-50;
-    }
-
-    .carousel-pagination:not(.product-carousel__pagination) {
-        @apply flex items-center justify-center gap-x-2 h-2.5;
-
-        & > * {
-            @apply carousel-dot size-1.5 bg-light-gray carousel-active:ease-in-out carousel-active:duration-200;
-        }
-
-        & > *.active {
-            @apply size-2.5;
-        }
-    }
-
-    .category-filter__clear-all-btn,
-    .category-filter__apply-btn {
-        @apply w-1/2;
-    }
-
-    .category-filter__choosen-filters-list .custom-icon {
-        @apply size-5;
-    }
-
-    .category-filter__clear-all-link,
-    .category-filter__remove-choosen-filter-link {
-        @apply flex items-center gap-x-1 border border-light-gray rounded-2xl bg-transparent hover:bg-white hover:text-black ease-in-out duration-200 px-2 py-1;
-
-        &:hover > .custom-icon {
-            @apply bg-black ease-in-out duration-200;
-        }
-    }
-
-    .category-filter__clear-all-link {
-        @apply border-light-red;
-    }
-
-    .product-carousel {
-        @apply relative;
-
-        &::before {
-            content: "";
-
-            background: radial-gradient(
-                circle at center,
-                rgba(139, 0, 0, 0.95) 0%,
-                rgba(90, 0, 0, 0.9) 35%,
-                rgba(30, 0, 0, 0.95) 70%,
-                rgba(0, 0, 0, 1) 100%
-            );
-
-            @apply absolute top-0 left-0 size-full;
-        }
-    }
-
-    .product .product-carousel .carousel-slide,
-    .product .product-carousel .carousel-body > a {
-        @apply h-108.5 md:h-165 lg:h-180 2xl:h-190;
-    }
-
-    .product .product-carousel .carousel-slide > a,
-    .product .product-carousel .carousel-body > a {
-        @apply h-full;
-    }
-
-    .product-carousel__pagination .carousel-pagination-item {
-        @apply border border-transparent transition-colors;
-
-        &.active {
-            @apply border-white;
-        }
     }
 
     h1.product-name {

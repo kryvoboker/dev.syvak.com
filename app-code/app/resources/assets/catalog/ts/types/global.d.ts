@@ -95,6 +95,7 @@ declare global {
         $hsDropdownCollection?: HSDropdown[];
         $hsOverlayCollection?: HSOverlay[];
         $hsAccordionCollection?: HSAccordion[];
+        $hsCarouselCollection?: Array<{ id: string | number; element: HSCarousel }>;
         app_params?: WindowAppParams;
     }
 }

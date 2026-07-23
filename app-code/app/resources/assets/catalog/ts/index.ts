@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsDropdownCollection  = window.$hsDropdownCollection || [];
     window.$hsOverlayCollection   = window.$hsOverlayCollection || [];
     window.$hsAccordionCollection = window.$hsAccordionCollection || [];
+    window.$hsCarouselCollection  = window.$hsCarouselCollection || [];
     const pageType: string | null = window.app_params?.page_type ?? null;
 
     if (document.querySelector('[data-main-carousel]')) {
