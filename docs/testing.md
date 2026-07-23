@@ -1,4 +1,4 @@
-[← Admin Panel](admin-panel.md) · [Back to README](../../../README.md) · [Deployment →](deployment.md)
+[← Services Reference](services-reference.md) · [Back to README](../README.md) · [Deployment →](deployment.md)
 
 # Testing
 
@@ -80,10 +80,10 @@ npm run ts:typecheck
 
 ## See Also
 
-- [Project README](../../../README.md) — project landing page and navigation hub.
+- [Project README](../README.md) — project landing page and navigation hub.
 - [Getting Started](getting-started.md) — local environment setup.
 - [Catalog Storefront](catalog-storefront.md) — storefront behavior to verify.
 - [Admin Panel](admin-panel.md) — admin scenarios to cover.
-- [Modules Guide](../Modules/README.md) — module loading and singleton-module rules to validate.
-- [NovaPoshta Module](../Modules/NovaPoshta/README.md) — module-specific sync and API-key flows to test.
-- [UkrPoshta Module](../Modules/UkrPoshta/README.md) — module-specific sync and API-key flows to test.
+- [Modules Guide](../app-code/app/Modules/README.md) — module loading and singleton-module rules to validate.
+- [NovaPoshta Module](../app-code/app/Modules/NovaPoshta/README.md) — module-specific sync and API-key flows to test.
+- [UkrPoshta Module](../app-code/app/Modules/UkrPoshta/README.md) — module-specific sync and API-key flows to test.

@@ -1,4 +1,4 @@
-[← Getting Started](getting-started.md) · [Back to README](../../../README.md) · [Configuration →](configuration.md)
+[← Getting Started](getting-started.md) · [Back to README](../README.md) · [Configuration →](configuration.md)
 
 # Architecture
 
@@ -43,6 +43,6 @@ The project follows a **Modular Monolith** architecture.
 - [Admin Panel](admin-panel.md) — Filament resource structure.
 - [Configuration](configuration.md) — runtime/env contracts.
 - [Testing](testing.md) — PHP and TypeScript quality workflows.
-- [Modules Guide](../Modules/README.md) — module registration, loading, and singleton module rules.
-- [NovaPoshta Module](../Modules/NovaPoshta/README.md) — module-specific runtime, sync, and maintenance notes.
-- [UkrPoshta Module](../Modules/UkrPoshta/README.md) — module-specific runtime, sync, and maintenance notes.
+- [Modules Guide](../app-code/app/Modules/README.md) — module registration, loading, and singleton module rules.
+- [NovaPoshta Module](../app-code/app/Modules/NovaPoshta/README.md) — module-specific runtime, sync, and maintenance notes.
+- [UkrPoshta Module](../app-code/app/Modules/UkrPoshta/README.md) — module-specific runtime, sync, and maintenance notes.

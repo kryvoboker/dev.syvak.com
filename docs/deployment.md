@@ -1,4 +1,4 @@
-[← Testing](testing.md) · [Back to README](../../../README.md)
+[← Testing](testing.md) · [Back to README](../README.md)
 
 # Deployment
 
