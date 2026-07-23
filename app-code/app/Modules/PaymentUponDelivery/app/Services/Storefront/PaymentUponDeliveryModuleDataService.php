@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\PaymentUponDelivery\Services;
+namespace Modules\PaymentUponDelivery\Services\Storefront;
 
 use App\Enums\Order\OrderDataKeyEnum;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;

@@ -79,7 +79,7 @@ Runtime checks use:
 is_enabled_singleton_module('BankTransfer')
 ```
 
-The final checkout availability is resolved by `BankTransferModuleDataService`, which combines the singleton module status with `BankTransferConfig::isComplete(...)`.
+The final checkout availability is resolved by `Modules\\BankTransfer\\Services\\Storefront\\BankTransferModuleDataService`, which combines the singleton module status with `BankTransferConfig::isComplete(...)`.
 
 If the module is disabled or any active language has no name, the payment radio is not rendered and a submitted `bank_transfer` value is rejected by server-side validation.
 
@@ -180,8 +180,8 @@ The admin page performs an additional completeness check against all currently a
 | Class | Responsibility |
 |---|---|
 | `Support/BankTransferConfig.php` | Canonical key, global-config keys, localized values, and completeness check |
-| `Services/BankTransferSettingsService.php` | Normalizes and persists both settings maps |
-| `Services/BankTransferModuleDataService.php` | Builds the localized checkout payment payload |
+| `Services/Filament/BankTransferSettingsService.php` | Normalizes and persists both settings maps for the admin page |
+| `Services/Storefront/BankTransferModuleDataService.php` | Builds the localized checkout payment payload |
 | `Services/BankTransferPaymentModule.php` | Returns the pending bank-transfer payment intent |
 | `Filament/Pages/BankTransferSettingsPage.php` | Localized singleton admin settings page |
 | `Providers/BankTransferServiceProvider.php` | Translation registration and config binding |
@@ -233,7 +233,7 @@ Payment information may remain empty and does not prevent saving or checkout ava
 
 ## Checkout data contract
 
-`BankTransferModuleDataService::getCheckoutData(string $locale)` returns:
+`BankTransferModuleDataService::getCheckoutData(string $locale)` in `Services/Storefront` returns:
 
 ```php
 [

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Modules\FakeModule\Services;
+namespace Modules\FakeModule\Services\Storefront;
 
-class FakeModuleModuleDataService
+class FakeModuleStorefrontService
 {
     /**
      * @return array<int, array<string, mixed>>

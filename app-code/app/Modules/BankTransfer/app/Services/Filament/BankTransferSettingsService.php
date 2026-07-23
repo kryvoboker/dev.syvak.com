@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\BankTransfer\Services;
+namespace Modules\BankTransfer\Services\Filament;
 
 use Illuminate\Support\Facades\Log;
 use Modules\BankTransfer\Support\BankTransferConfig;

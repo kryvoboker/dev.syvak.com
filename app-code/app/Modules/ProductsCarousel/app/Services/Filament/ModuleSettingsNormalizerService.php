@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\ProductsCarousel\Services;
+namespace Modules\ProductsCarousel\Services\Filament;
 
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;
@@ -46,7 +46,7 @@ readonly class ModuleSettingsNormalizerService
             ->filter(fn (mixed $option): bool => is_string($option) && filled($option))
             ->values()
             ->all();
-        $allowed_page_types = collect(config('page-type', []))->values()->all();
+        $allowed_page_types = collect(config('page-settings.page_type', []))->values()->all();
         $active_languages = (new Language())->getActiveLanguages();
         $shared_settings = Arr::get($settings, 'shared', []);
 

@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
-use Modules\Pickup\Services\PickupSettingsService;
+use Modules\Pickup\Services\Filament\PickupSettingsService;
 use Modules\Pickup\Support\PickupConfig;
 use Throwable;
 use UnitEnum;

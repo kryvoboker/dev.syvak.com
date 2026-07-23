@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Carousel\Services;
+namespace Modules\Carousel\Services\Filament;
 
 use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,7 +32,7 @@ class ModuleSettingsNormalizerService
     public function normalize(array $settings): array
     {
         $active_languages = (new Language())->getActiveLanguages();
-        $allowed_page_types = collect(config('page-type', []))->values()->all();
+        $allowed_page_types = collect(config('page-settings.page_type', []))->values()->all();
         $shared_settings = Arr::get($settings, 'shared', []);
         $slides = Arr::get($settings, 'slides', []);
 

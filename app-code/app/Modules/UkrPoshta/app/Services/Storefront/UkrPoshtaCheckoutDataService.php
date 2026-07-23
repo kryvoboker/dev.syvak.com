@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\UkrPoshta\Services;
+namespace Modules\UkrPoshta\Services\Storefront;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;

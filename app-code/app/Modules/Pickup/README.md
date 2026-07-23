@@ -48,7 +48,7 @@ Global config keys:
 | `pickup_store.addresses` | Associative array keyed by normalized locale, for example `{'uk': '...', 'en': '...'}` | Yes, one non-empty address per active language |
 | `pickup_store.map_iframe` | Sanitized Google Maps `<iframe>` HTML | No |
 
-The global configuration is accessed through `Modules\\Pickup\\Support\\PickupConfig` and written by `Modules\\Pickup\\Services\\PickupSettingsService`.
+The global configuration is accessed through `Modules\\Pickup\\Support\\PickupConfig` and written by `Modules\\Pickup\\Services\\Filament\\PickupSettingsService`.
 
 ## Admin settings
 
@@ -102,7 +102,7 @@ An empty string is valid and means that the map is not configured. Empty map inp
 
 The iframe is not part of the availability condition. When it is absent, `map_iframe` is an empty string and the address remains available to checkout.
 
-`PickupModuleDataService::resolveForPlacement()` returns data only for the checkout page and is the configured storefront data service.
+`PickupStorefrontService::resolveForPlacement()` returns data only for the checkout page and is the configured storefront entrypoint.
 
 ## Checkout behavior
 
@@ -149,10 +149,10 @@ Use the `pickup::` namespace for module translations. Do not move Pickup strings
 | `config/config.php` | Singleton, runtime, placement, and admin configuration |
 | `app/Providers/PickupServiceProvider.php` | Registers views, translations, config, and module services |
 | `app/Support/PickupConfig.php` | Reads and validates global Pickup configuration |
-| `app/Services/PickupSettingsService.php` | Sanitizes and persists settings |
-| `app/Services/PickupIframeSanitizer.php` | Enforces the safe iframe allowlist |
-| `app/Services/PickupCheckoutDataService.php` | Builds localized checkout data and availability |
-| `app/Services/PickupModuleDataService.php` | Resolves storefront placement data |
+| `app/Services/Filament/PickupSettingsService.php` | Sanitizes and persists settings |
+| `app/Services/Filament/PickupIframeSanitizer.php` | Enforces the safe iframe allowlist |
+| `app/Services/Storefront/PickupCheckoutDataService.php` | Builds localized checkout data and availability |
+| `app/Services/Storefront/PickupStorefrontService.php` | Resolves storefront placement data |
 | `app/Filament/Pages/PickupSettingsPage.php` | Admin settings page |
 | `resources/views/storefront/module.blade.php` | Checkout delivery option, address, and optional map accordion |
 | `resources/lang/` | Module-owned admin and storefront translations |

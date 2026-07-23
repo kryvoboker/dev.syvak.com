@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Modules\ProductsCarousel\Services;
+namespace Modules\ProductsCarousel\Services\Filament;
 
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Modules\ProductsCarousel\Services\ProductsCarouselProductFilterService;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 
 /**
@@ -17,6 +18,7 @@ readonly class ProductsCarouselProductSearchService
 {
     public function __construct(
         private ProductsCarouselConfig $products_carousel_config,
+        private ProductsCarouselProductFilterService $products_carousel_product_filter_service,
     ) {
     }
 
@@ -74,19 +76,7 @@ readonly class ProductsCarouselProductSearchService
      */
     public function filterActiveProductIds(array $product_ids): array
     {
-        $normalized_product_ids = $this->normalizeIds($product_ids);
-
-        if ($normalized_product_ids === []) {
-            return [];
-        }
-
-        return Product::query()
-            ->where('is_active', true)
-            ->whereIn('id', $normalized_product_ids)
-            ->orderBy('id')
-            ->pluck('id')
-            ->map(fn (mixed $id): int => (int) $id)
-            ->all();
+        return $this->products_carousel_product_filter_service->filterActiveProductIds($product_ids);
     }
 
     /**
@@ -96,23 +86,10 @@ readonly class ProductsCarouselProductSearchService
      */
     public function filterActiveProductIdsByCategories(array $product_ids, array $category_ids): array
     {
-        $normalized_product_ids = $this->normalizeIds($product_ids);
-        $normalized_category_ids = $this->normalizeIds($category_ids);
-
-        if ($normalized_product_ids === [] || $normalized_category_ids === []) {
-            return [];
-        }
-
-        return Product::query()
-            ->where('is_active', true)
-            ->whereIn('id', $normalized_product_ids)
-            ->whereHas('categories', function (Builder $query) use ($normalized_category_ids): void {
-                $query->whereIn('categories.id', $normalized_category_ids);
-            })
-            ->orderBy('id')
-            ->pluck('id')
-            ->map(fn (mixed $id): int => (int) $id)
-            ->all();
+        return $this->products_carousel_product_filter_service->filterActiveProductIdsByCategories(
+            $product_ids,
+            $category_ids,
+        );
     }
 
     /**

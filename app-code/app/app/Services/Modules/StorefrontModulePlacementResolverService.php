@@ -146,7 +146,7 @@ class StorefrontModulePlacementResolverService
         $service_relative_class = Arr::get($module_config, 'runtime.storefront.data_service');
 
         if (! is_string($service_relative_class) || blank($service_relative_class)) {
-            $service_relative_class = sprintf('Services\\%sModuleDataService', $definition->nwidart_name);
+            $service_relative_class = sprintf('Services\\Storefront\\%sStorefrontService', $definition->nwidart_name);
         }
 
         return $this->module_class_resolver_service->resolve($definition, $service_relative_class);

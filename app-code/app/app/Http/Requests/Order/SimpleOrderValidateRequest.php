@@ -15,12 +15,12 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Modules\BankTransfer\Services\BankTransferModuleDataService;
+use Modules\BankTransfer\Services\Storefront\BankTransferModuleDataService;
 use Modules\BankTransfer\Support\BankTransferConfig;
-use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
+use Modules\PaymentUponDelivery\Services\Storefront\PaymentUponDeliveryModuleDataService;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
 use Modules\Pickup\Support\PickupConfig;
-use Modules\WayForPay\Services\WayForPayModuleDataService;
+use Modules\WayForPay\Services\Storefront\WayForPayModuleDataService;
 use Modules\WayForPay\Support\WayForPayConfig;
 
 class SimpleOrderValidateRequest extends FormRequest
@@ -73,7 +73,7 @@ class SimpleOrderValidateRequest extends FormRequest
         $normalized_data = $this->all();
         $selection_state = app(CheckoutSelectionStateService::class)->getState();
         $selection_city = (array) Arr::get($selection_state, 'city', []);
-            $selection_delivery_point = (array) Arr::get($selection_state, OrderDataKeyEnum::DeliveryPoint->value, []);
+        $selection_delivery_point = (array) Arr::get($selection_state, OrderDataKeyEnum::DeliveryPoint->value, []);
 
         if ($selection_city !== []) {
             Arr::set($normalized_data, 'city', $selection_city);

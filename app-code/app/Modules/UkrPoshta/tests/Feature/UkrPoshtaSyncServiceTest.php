@@ -10,7 +10,7 @@ use Modules\UkrPoshta\Models\UkrPoshtaCity;
 use Modules\UkrPoshta\Models\UkrPoshtaDistrict;
 use Modules\UkrPoshta\Models\UkrPoshtaPostOffice;
 use Modules\UkrPoshta\Models\UkrPoshtaRegion;
-use Modules\UkrPoshta\Services\UkrPoshtaSyncService;
+use Modules\UkrPoshta\Services\Filament\UkrPoshtaSyncService;
 use Modules\UkrPoshta\Support\UkrPoshtaConfig;
 use Modules\UkrPoshta\Tests\TestCase;
 

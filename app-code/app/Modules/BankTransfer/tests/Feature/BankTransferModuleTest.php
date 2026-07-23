@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Modules\BankTransfer\Tests\Feature;
 
 use Modules\BankTransfer\Filament\Pages\BankTransferSettingsPage;
-use Modules\BankTransfer\Services\BankTransferModuleDataService;
 use Modules\BankTransfer\Services\BankTransferPaymentModule;
-use Modules\BankTransfer\Services\BankTransferSettingsService;
+use Modules\BankTransfer\Services\Filament\BankTransferSettingsService;
+use Modules\BankTransfer\Services\Storefront\BankTransferModuleDataService;
 use Modules\BankTransfer\Support\BankTransferConfig;
 use Modules\BankTransfer\Tests\TestCase;
 

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Modules\Pickup\Services;
+namespace Modules\Pickup\Services\Storefront;
 
 use App\Enums\Order\OrderDataKeyEnum;
 use Modules\Pickup\Support\PickupConfig;
 
-final class PickupModuleDataService
+final class PickupStorefrontService
 {
     public function __construct(
         private readonly PickupCheckoutDataService $checkout_data_service,
