@@ -6,12 +6,15 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Pages;
 
 use App\Filament\Resources\Catalogs\Products\Products\ProductResource;
 use App\Filament\Resources\Catalogs\Products\Products\ProductVariantResource;
+use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\StorefrontProductLinkTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Slug;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -19,6 +22,9 @@ use LogicException;
 
 class CreateProductVariant extends CreateRecord
 {
+    use LanguageTrait;
+    use StorefrontProductLinkTrait;
+
     protected static string $resource = ProductVariantResource::class;
 
     #[Locked]
@@ -36,6 +42,19 @@ class CreateProductVariant extends CreateRecord
     public function form(Schema $schema): Schema
     {
         return ProductVariantResource::form($schema);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('view_product_storefront')
+                ->label('')
+                ->icon(Heroicon::Eye)
+                ->tooltip(__('actions.view'))
+                ->url(fn (): ?string => self::getStorefrontProductUrl($this->getProductRecord(), self::getCurrentLanguageId()))
+                ->visible(fn (): bool => self::getStorefrontProductUrl($this->getProductRecord(), self::getCurrentLanguageId()) !== null)
+                ->openUrlInNewTab(),
+        ];
     }
 
     /**

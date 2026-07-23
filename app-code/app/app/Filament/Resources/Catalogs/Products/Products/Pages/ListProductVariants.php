@@ -6,11 +6,15 @@ namespace App\Filament\Resources\Catalogs\Products\Products\Pages;
 
 use App\Filament\Resources\Catalogs\Products\Products\ProductResource;
 use App\Filament\Resources\Catalogs\Products\Products\ProductVariantResource;
+use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\StorefrontProductLinkTrait;
 use App\Models\Catalogs\Products\Product;
+use App\Models\Catalogs\Products\ProductVariant;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +26,9 @@ use LogicException;
 
 class ListProductVariants extends ListRecords
 {
+    use LanguageTrait;
+    use StorefrontProductLinkTrait;
+
     protected static string $resource = ProductVariantResource::class;
 
     #[Locked]
@@ -38,7 +45,10 @@ class ListProductVariants extends ListRecords
 
     public function table(Table $table): Table
     {
+        $current_language_id = self::getCurrentLanguageId();
+
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['product.slugs', 'slugs']))
             ->columns([
                 TextColumn::make('id')->sortable(),
                 IconColumn::make('is_default')->boolean()->label('Default'),
@@ -56,6 +66,13 @@ class ListProductVariants extends ListRecords
                     ->url(fn (): string => ProductVariantResource::getUrl('create', ['product' => $this->product_id])),
             ])
             ->recordActions([
+                Action::make('view_storefront')
+                    ->label('')
+                    ->icon(Heroicon::Eye)
+                    ->tooltip(__('actions.view'))
+                    ->url(fn (ProductVariant $record): ?string => self::getStorefrontVariantUrl($record, $current_language_id))
+                    ->visible(fn (ProductVariant $record): bool => self::getStorefrontVariantUrl($record, $current_language_id) !== null)
+                    ->openUrlInNewTab(),
                 Action::make('edit')
                     ->label(__('admin/default.buttons.edit'))
                     ->icon('heroicon-o-pencil-square')

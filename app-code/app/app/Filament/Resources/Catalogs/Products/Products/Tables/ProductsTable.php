@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Catalogs\Products\Products\Tables;
 
 use App\Filament\Resources\Trait\LanguageTrait;
+use App\Filament\Resources\Trait\StorefrontProductLinkTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\Currency\ConvertPrice;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -26,6 +29,7 @@ use Throwable;
 class ProductsTable
 {
     use LanguageTrait;
+    use StorefrontProductLinkTrait;
 
     public static function configure(Table $table): Table
     {
@@ -384,6 +388,13 @@ class ProductsTable
                     }),
             ])
             ->recordActions([
+                Action::make('view_storefront')
+                    ->label('')
+                    ->icon(Heroicon::Eye)
+                    ->tooltip(__('actions.view'))
+                    ->url(fn (Product $record): ?string => self::getStorefrontProductUrl($record, $current_language_id))
+                    ->visible(fn (Product $record): bool => self::getStorefrontProductUrl($record, $current_language_id) !== null)
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([
