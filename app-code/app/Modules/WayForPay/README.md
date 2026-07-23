@@ -218,7 +218,7 @@ statuses without logging credentials or full payment payloads.
 ## Related documentation
 
 - [Module OpenAPI contract](docs/openapi.yaml)
-- [Checkout OpenAPI contract](../../docs/openapi/pages/checkout.yaml)
-- [Project OpenAPI entrypoint](../../docs/openapi/openapi.yaml)
-- [Project architecture](../../docs/architecture.md)
-- [Testing guide](../../docs/testing.md)
+- [Checkout OpenAPI contract](../../openapi/pages/checkout.yaml)
+- [Project OpenAPI entrypoint](../../openapi/openapi.yaml)
+- [Project architecture](../../../../docs/architecture.md)
+- [Testing guide](../../../../docs/testing.md)

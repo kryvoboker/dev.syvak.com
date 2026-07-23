@@ -46,15 +46,15 @@ GET /uk/category/{slug}/load-more
 
 | Guide                                                          | Description |
 |----------------------------------------------------------------|-------------|
-| [Getting Started](app-code/app/docs/getting-started.md)        | Installation, setup, and first run |
-| [Architecture](app-code/app/docs/architecture.md)              | Modular monolith rules and boundaries |
-| [Configuration](app-code/app/docs/configuration.md)            | Environment variables and config strategy |
-| [Catalog Storefront](app-code/app/docs/catalog-storefront.md)  | Storefront routes, filters, sorting, product pages |
-| [Admin Panel](app-code/app/docs/admin-panel.md)                | Filament resources and admin workflows |
+| [Getting Started](docs/getting-started.md)                     | Installation, setup, and first run |
+| [Architecture](docs/architecture.md)                            | Modular monolith rules and boundaries |
+| [Configuration](docs/configuration.md)                          | Environment variables and config strategy |
+| [Catalog Storefront](docs/catalog-storefront.md)               | Storefront routes, filters, sorting, product pages |
+| [Admin Panel](docs/admin-panel.md)                              | Filament resources and admin workflows |
 | [Modules Guide](app-code/app/Modules/README.md)                | Module registration, loading, and singleton module rules |
-| [OpenAPI Entry](app-code/app/docs/openapi/openapi.yaml)         | Root Swagger/OpenAPI entrypoint for module API docs |
-| [Testing](app-code/app/docs/testing.md)                        | PHPUnit, Larastan, Pint, Biome, and TypeScript workflows |
-| [Deployment](app-code/app/docs/deployment.md)                  | Docker-based deployment and production checklist |
+| [OpenAPI Entry](app-code/app/openapi/openapi.yaml)               | Root Swagger/OpenAPI entrypoint for module API docs |
+| [Testing](docs/testing.md)                                      | PHPUnit, Larastan, Pint, Biome, and TypeScript workflows |
+| [Deployment](docs/deployment.md)                                | Docker-based deployment and production checklist |
 
 ## License
 

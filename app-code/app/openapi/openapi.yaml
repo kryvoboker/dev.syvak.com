@@ -1,0 +1,84 @@
+openapi: 3.1.0
+info:
+  title: Syvak OpenAPI
+  version: 1.0.0
+  description: |
+    Root OpenAPI entrypoint for Syvak.
+    This file aggregates the module-level APIs, storefront page contracts, and upstream integrations.
+
+    Storefront and page docs:
+    - [Checkout page contract](./pages/checkout.yaml)
+    - [Cart modal contract](./pages/cart-modal.yaml)
+
+    Module public API docs:
+    - [NovaPoshta public API](../Modules/NovaPoshta/docs/openapi.yaml)
+    - [UkrPoshta public API](../Modules/UkrPoshta/docs/openapi.yaml)
+    - [Pickup store module contract](../Modules/Pickup/docs/openapi.yaml)
+    - [WayForPay module contract](../Modules/WayForPay/docs/openapi.yaml)
+
+    Upstream integration docs:
+    - [NovaPoshta upstream integration](../Modules/NovaPoshta/docs/openapi-upstream.yaml)
+    - [UkrPoshta upstream integration](../Modules/UkrPoshta/docs/openapi-upstream.yaml)
+servers:
+  - url: https://example.test
+    description: Local or staging environment
+tags:
+  - name: Checkout
+    description: Checkout page and AJAX endpoints
+  - name: Cart Modal
+    description: Cart modal snapshot and mutation endpoints
+  - name: NovaPoshta
+    description: Nova Poshta checkout and sync endpoints
+  - name: UkrPoshta
+    description: Ukr Poshta checkout and sync endpoints
+  - name: Pickup
+    description: Pickup store checkout integration
+  - name: WayForPay
+    description: WayForPay payment callback and return endpoints
+paths:
+  /{locale}/checkout:
+    $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout'
+  /{locale}/checkout/cities:
+    $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout~1cities'
+  /{locale}/checkout/branches:
+    $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout~1branches'
+  /{locale}/checkout/selection:
+    $ref: './pages/checkout.yaml#/paths/~1{locale}~1checkout~1selection'
+  /{locale}/cart-modal:
+    $ref: './pages/cart-modal.yaml#/paths/~1{locale}~1cart-modal'
+  /{locale}/cart-modal/{cart_id}:
+    $ref: './pages/cart-modal.yaml#/paths/~1{locale}~1cart-modal~1{cart_id}'
+  /{locale}/cart:
+    $ref: './pages/cart-modal.yaml#/paths/~1{locale}~1cart'
+  /{locale}/cart/{cart_id}:
+    $ref: './pages/cart-modal.yaml#/paths/~1{locale}~1cart~1{cart_id}'
+  /novaposhta/state:
+    $ref: '../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1state'
+  /novaposhta/regions:
+    $ref: '../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1regions'
+  /novaposhta/cities:
+    $ref: '../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1cities'
+  /novaposhta/post-offices:
+    $ref: '../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1post-offices'
+  /novaposhta/poshtomats:
+    $ref: '../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1poshtomats'
+  /novaposhta/selection:
+    $ref: '../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1selection'
+  /ukrposhta/state:
+    $ref: '../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1state'
+  /ukrposhta/regions:
+    $ref: '../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1regions'
+  /ukrposhta/districts:
+    $ref: '../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1districts'
+  /ukrposhta/cities:
+    $ref: '../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1cities'
+  /ukrposhta/post-offices:
+    $ref: '../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1post-offices'
+  /ukrposhta/selection:
+    $ref: '../Modules/UkrPoshta/docs/openapi.yaml#/paths/~1ukrposhta~1selection'
+  /{locale}/wayforpay/callback:
+    $ref: '../Modules/WayForPay/docs/openapi.yaml#/paths/~1{locale}~1wayforpay~1callback'
+  /{locale}/wayforpay/return:
+    $ref: '../Modules/WayForPay/docs/openapi.yaml#/paths/~1{locale}~1wayforpay~1return'
+components:
+  securitySchemes: {}
