@@ -114,7 +114,7 @@ During sync, the loader block shows:
 
 The sync service is:
 
-- `app/Services/NovaPoshtaSyncService.php`
+- `app/Services/Filament/NovaPoshtaSyncService.php`
 
 The service supports two styles of import:
 
@@ -187,9 +187,9 @@ The module intentionally uses `delete()` before re-inserting rows because the ta
 
 Customer-facing data is handled by:
 
-- `app/Services/NovaPoshtaCheckoutDataService.php`
+- `app/Services/Storefront/NovaPoshtaCheckoutDataService.php`
 - `app/Support/NovaPoshtaCheckoutStateService.php`
-- `app/Services/NovaPoshtaModuleDataService.php`
+- `app/Services/Storefront/NovaPoshtaStorefrontService.php`
 - `app/Http/Controllers/NovaPoshtaController.php`
 
 The storefront side:
@@ -237,7 +237,7 @@ Keep module-specific tests and translation files inside the module instead of mo
   - missing API key must remain a hard failure
 - `app/Filament/Pages/NovaPoshtaSyncPage.php`
   - admin sync UI and API key input
-- `app/Services/NovaPoshtaSyncService.php`
+- `app/Services/Filament/NovaPoshtaSyncService.php`
   - chunked sync state machine
 - `routes/web.php`
   - storefront/AJAX endpoints

@@ -20,8 +20,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
-use Modules\ProductsCarousel\Services\ProductsCarouselCategoryTreeService;
-use Modules\ProductsCarousel\Services\ProductsCarouselProductSearchService;
+use Modules\ProductsCarousel\Services\Filament\ProductsCarouselCategoryTreeService;
+use Modules\ProductsCarousel\Services\Filament\ProductsCarouselProductSearchService;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 
 /**
@@ -469,7 +469,7 @@ readonly class ModuleInstanceFormSchema
     private function getPageTypeOptions(): array
     {
         /** @var array<string, string> $page_types */
-        $page_types = config('page-type', []);
+        $page_types = config('page-settings.page_type', []);
 
         return collect($page_types)
             ->mapWithKeys(fn (string $value, string $key): array => [$value => ucfirst(str_replace('_', ' ', $key))])

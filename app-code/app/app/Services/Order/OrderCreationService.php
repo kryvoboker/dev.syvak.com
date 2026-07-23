@@ -17,7 +17,7 @@ use Modules\BankTransfer\Services\BankTransferPaymentModule;
 use Modules\BankTransfer\Support\BankTransferConfig;
 use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryPaymentModule;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
-use Modules\Pickup\Services\PickupCheckoutDataService;
+use Modules\Pickup\Services\Storefront\PickupCheckoutDataService;
 use Modules\Pickup\Support\PickupConfig;
 use Modules\WayForPay\Services\WayForPayPaymentModule;
 use Modules\WayForPay\Support\WayForPayConfig;

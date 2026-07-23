@@ -10,8 +10,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Modules\Carousel\Services\CarouselModuleDataService;
-use Modules\Carousel\Services\ModuleSettingsNormalizerService;
+use Modules\Carousel\Filament\ModuleInstanceFormSchema;
+use Modules\Carousel\Services\Filament\ModuleSettingsNormalizerService;
+use Modules\Carousel\Services\Storefront\CarouselStorefrontService;
 use Tests\TestCase;
 
 class CarouselModuleServicesTest extends TestCase
@@ -28,7 +29,7 @@ class CarouselModuleServicesTest extends TestCase
             'foreign_key_constraints' => true,
         ]);
         config()->set('cache.default', 'array');
-        config()->set('page-type', [
+        config()->set('page-settings.page_type', [
             'home' => 'home',
         ]);
 
@@ -87,6 +88,15 @@ class CarouselModuleServicesTest extends TestCase
         $this->assertSame('First slide en', $normalized_settings['slides'][0]['translations']['en']['title']);
     }
 
+    public function test_page_type_options_are_loaded_from_page_settings_configuration(): void
+    {
+        $schema = app(ModuleInstanceFormSchema::class);
+        $reflection_method = new \ReflectionMethod($schema, 'getPageTypeOptions');
+        $reflection_method->setAccessible(true);
+
+        $this->assertSame(['home' => 'Home'], $reflection_method->invoke($schema));
+    }
+
     public function test_carousel_module_data_service_returns_only_instances_for_requested_page_type(): void
     {
         $definition = ModuleDefinition::query()->create([
@@ -123,7 +133,7 @@ class CarouselModuleServicesTest extends TestCase
             'meta' => [],
         ]);
 
-        $resolved_modules = $this->app->make(CarouselModuleDataService::class)->resolveForPlacement('hero', 'home');
+        $resolved_modules = $this->app->make(CarouselStorefrontService::class)->resolveForPlacement('hero', 'home');
 
         $this->assertCount(1, $resolved_modules);
         $this->assertSame('Homepage Carousel', $resolved_modules[0]['name']);
@@ -303,7 +313,7 @@ class CarouselModuleServicesTest extends TestCase
             'meta' => [],
         ]);
 
-        $resolved_modules = $this->app->make(CarouselModuleDataService::class)->resolveForPlacement('hero', 'home');
+        $resolved_modules = $this->app->make(CarouselStorefrontService::class)->resolveForPlacement('hero', 'home');
 
         $this->assertCount(1, $resolved_modules);
         $this->assertSame('Main slide uk', $resolved_modules[0]['slides'][0]['title']);
@@ -342,7 +352,7 @@ class CarouselModuleServicesTest extends TestCase
             'meta' => [],
         ]);
 
-        $resolved_modules = $this->app->make(CarouselModuleDataService::class)->resolveForPlacement('hero', 'home');
+        $resolved_modules = $this->app->make(CarouselStorefrontService::class)->resolveForPlacement('hero', 'home');
 
         $this->assertCount(1, $resolved_modules);
         $this->assertCount(1, $resolved_modules[0]['slides']);

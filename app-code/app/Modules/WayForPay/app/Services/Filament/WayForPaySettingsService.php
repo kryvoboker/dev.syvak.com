@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\WayForPay\Services;
+namespace Modules\WayForPay\Services\Filament;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;

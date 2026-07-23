@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Modules\PaymentUponDelivery\Tests\Feature;
 
 use Modules\PaymentUponDelivery\Filament\Pages\PaymentUponDeliverySettingsPage;
-use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
 use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryPaymentModule;
+use Modules\PaymentUponDelivery\Services\Storefront\PaymentUponDeliveryModuleDataService;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
 use Modules\PaymentUponDelivery\Tests\TestCase;
 

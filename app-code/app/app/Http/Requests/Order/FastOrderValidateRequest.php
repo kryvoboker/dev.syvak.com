@@ -14,9 +14,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\In;
-use Modules\BankTransfer\Services\BankTransferModuleDataService;
+use Modules\BankTransfer\Services\Storefront\BankTransferModuleDataService;
 use Modules\BankTransfer\Support\BankTransferConfig;
-use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryModuleDataService;
+use Modules\PaymentUponDelivery\Services\Storefront\PaymentUponDeliveryModuleDataService;
 use Modules\PaymentUponDelivery\Support\PaymentUponDeliveryConfig;
 
 class FastOrderValidateRequest extends FormRequest

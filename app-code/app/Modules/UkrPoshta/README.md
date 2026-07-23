@@ -111,7 +111,7 @@ During sync, the loader block shows:
 
 The sync service is:
 
-- `app/Services/UkrPoshtaSyncService.php`
+- `app/Services/Filament/UkrPoshtaSyncService.php`
 
 The service supports two styles of import:
 
@@ -183,9 +183,9 @@ The module intentionally uses `delete()` before re-inserting rows because the ta
 
 Customer-facing data is handled by:
 
-- `app/Services/UkrPoshtaCheckoutDataService.php`
+- `app/Services/Storefront/UkrPoshtaCheckoutDataService.php`
 - `app/Support/UkrPoshtaCheckoutStateService.php`
-- `app/Services/UkrPoshtaModuleDataService.php`
+- `app/Services/Storefront/UkrPoshtaStorefrontService.php`
 - `app/Http/Controllers/UkrPoshtaController.php`
 
 The storefront side:
@@ -234,7 +234,7 @@ When changing module behavior, update the module tests and module translations i
   - missing API key must remain a hard failure
 - `app/Filament/Pages/UkrPoshtaSyncPage.php`
   - admin sync UI and API key input
-- `app/Services/UkrPoshtaSyncService.php`
+- `app/Services/Filament/UkrPoshtaSyncService.php`
   - chunked sync state machine
 - `routes/web.php`
   - storefront/AJAX endpoints

@@ -6,7 +6,7 @@ namespace Modules\Pickup\Tests\Feature;
 
 use InvalidArgumentException;
 use Modules\Pickup\Filament\Pages\PickupSettingsPage;
-use Modules\Pickup\Services\PickupSettingsService;
+use Modules\Pickup\Services\Filament\PickupSettingsService;
 use Modules\Pickup\Support\PickupConfig;
 use Modules\Pickup\Tests\TestCase;
 

@@ -26,7 +26,7 @@ Now, module output is resolved dynamically at runtime.
    - `resolve_modules_for_context($placement)`
    - module runtime config metadata (`runtime.storefront.*`)
 5. For each resolved module, the resolver:
-   - resolves data service class,
+   - resolves the `Services\\Storefront\\<ModuleName>StorefrontService` class,
    - calls `resolveForPlacement($placement, $page_type)`,
    - resolves module storefront view,
    - builds include-ready payload.
@@ -40,7 +40,7 @@ Each module should provide these keys in `Modules/<Module>/config/config.php`:
 'runtime' => [
     'provider_loading_strategy' => 'route_matched',
     'storefront' => [
-        'data_service'  => 'Services\\<ModuleName>ModuleDataService',
+        'data_service'  => 'Services\\Storefront\\<ModuleName>StorefrontService',
         'view'          => '<modulealias>::storefront.<view-name>',
         'view_data_key' => '<module_payload_key>',
     ],
@@ -49,11 +49,11 @@ Each module should provide these keys in `Modules/<Module>/config/config.php`:
 
 Example:
 - Carousel:
-  - `data_service`: `Services\\CarouselModuleDataService`
+  - `data_service`: `Services\\Storefront\\CarouselStorefrontService`
   - `view`: `carousel::storefront.main-carousel`
   - `view_data_key`: `carousel_module_data`
 - ProductsCarousel:
-  - `data_service`: `Services\\ProductsCarouselModuleDataService`
+  - `data_service`: `Services\\Storefront\\ProductsCarouselStorefrontService`
   - `view`: `productscarousel::storefront.products-carousel`
   - `view_data_key`: `products_carousel_module_data`
 
@@ -80,13 +80,25 @@ This lifecycle controls provider registration. Storefront rendering is an additi
 
 ## Onboarding a new module into dynamic storefront rendering
 
-1. Implement module data resolver method:
+1. Implement the module storefront entry class under `app/Services/Storefront/`:
+   - name it `<ModuleName>StorefrontService`;
    - `resolveForPlacement(string $placement, ?string $page_type = null): array`
 2. Add `runtime.storefront` metadata in module config.
 3. Ensure module view exists and accepts payload key from `view_data_key`.
 4. Ensure module instances have proper `placement` and `settings.shared.page_types`.
 5. Clear cache if needed:
    - `php artisan optimize:clear`
+
+## Service ownership rules
+
+- `Services/Storefront` contains checkout payload builders, public AJAX data services, and the placement
+  entrypoint used to prepare view data.
+- `Services/Filament` contains settings persistence, module setting normalizers, admin selectors, and sync
+  workflows used by Filament pages or schemas.
+- API clients and order/payment application services remain in the module `Services` root when they are shared
+  integration/domain services rather than presentation-layer services.
+- Storefront classes must not depend on Filament classes. Shared filtering or domain operations should be
+  extracted into a root service and injected into both layers.
 
 ## Fail-soft behavior
 

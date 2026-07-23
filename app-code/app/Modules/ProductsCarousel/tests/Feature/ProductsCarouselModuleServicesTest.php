@@ -10,9 +10,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
-use Modules\ProductsCarousel\Services\ModuleSettingsNormalizerService;
-use Modules\ProductsCarousel\Services\ProductsCarouselModuleDataService;
-use Modules\ProductsCarousel\Services\ProductsCarouselProductSearchService;
+use Modules\ProductsCarousel\Filament\ModuleInstanceFormSchema;
+use Modules\ProductsCarousel\Services\Filament\ModuleSettingsNormalizerService;
+use Modules\ProductsCarousel\Services\Filament\ProductsCarouselProductSearchService;
+use Modules\ProductsCarousel\Services\Storefront\ProductsCarouselStorefrontService;
 use Tests\TestCase;
 
 class ProductsCarouselModuleServicesTest extends TestCase
@@ -28,7 +29,7 @@ class ProductsCarouselModuleServicesTest extends TestCase
             'prefix' => '',
             'foreign_key_constraints' => true,
         ]);
-        config()->set('page-type', [
+        config()->set('page-settings.page_type', [
             'home' => 'home',
         ]);
 
@@ -102,6 +103,15 @@ class ProductsCarouselModuleServicesTest extends TestCase
         $this->assertSame([1], $normalized_settings['category_based']['category_ids']);
         $this->assertSame([10], $normalized_settings['category_based']['selected_product_ids']);
         $this->assertSame([10, 12], $normalized_settings['manual_only']['selected_product_ids']);
+    }
+
+    public function test_page_type_options_are_loaded_from_page_settings_configuration(): void
+    {
+        $schema = app(ModuleInstanceFormSchema::class);
+        $reflection_method = new \ReflectionMethod($schema, 'getPageTypeOptions');
+        $reflection_method->setAccessible(true);
+
+        $this->assertSame(['home' => 'Home'], $reflection_method->invoke($schema));
     }
 
     public function test_normalizer_applies_products_filter_and_sort_defaults(): void
@@ -362,7 +372,7 @@ class ProductsCarouselModuleServicesTest extends TestCase
             ['product_id' => 30, 'language_id' => 1, 'name' => 'Product 30', 'description' => null, 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
         ]);
 
-        $module_data_service = app(ProductsCarouselModuleDataService::class);
+        $module_data_service = app(ProductsCarouselStorefrontService::class);
 
         $reflection_method = new \ReflectionMethod($module_data_service, 'resolveManualOnlyProducts');
         $reflection_method->setAccessible(true);
@@ -395,7 +405,7 @@ class ProductsCarouselModuleServicesTest extends TestCase
             'is_default' => false,
         ]);
 
-        $module_data_service = app(ProductsCarouselModuleDataService::class);
+        $module_data_service = app(ProductsCarouselStorefrontService::class);
         $reflection_method = new \ReflectionMethod($module_data_service, 'resolveLocalizedSharedContent');
         $reflection_method->setAccessible(true);
 

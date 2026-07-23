@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\WayForPay\Services;
+namespace Modules\WayForPay\Services\Storefront;
 
 use App\Enums\Order\OrderDataKeyEnum;
 use App\Models\ApplicationSettings\Language;

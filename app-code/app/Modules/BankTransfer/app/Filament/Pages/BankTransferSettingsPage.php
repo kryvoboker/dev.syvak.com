@@ -19,7 +19,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
-use Modules\BankTransfer\Services\BankTransferSettingsService;
+use Modules\BankTransfer\Services\Filament\BankTransferSettingsService;
 use Modules\BankTransfer\Support\BankTransferConfig;
 use Throwable;
 use UnitEnum;

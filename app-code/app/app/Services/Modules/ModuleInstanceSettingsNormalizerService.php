@@ -22,7 +22,7 @@ readonly class ModuleInstanceSettingsNormalizerService
      */
     public function normalizeForDefinition(ModuleDefinition $definition, array $attributes): array
     {
-        $normalizer_class = $this->module_class_resolver_service->resolve($definition, 'Services\\ModuleSettingsNormalizerService');
+        $normalizer_class = $this->module_class_resolver_service->resolve($definition, 'Services\\Filament\\ModuleSettingsNormalizerService');
 
         if ($normalizer_class === null) {
             return $attributes;

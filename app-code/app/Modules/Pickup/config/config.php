@@ -14,7 +14,7 @@ return [
     'runtime' => [
         'provider_loading_strategy' => config('modules-runtime.allowed_strategies.route_matched'),
         'storefront' => [
-            'data_service' => 'Services\\PickupModuleDataService',
+            'data_service' => 'Services\\Storefront\\PickupStorefrontService',
             'view' => 'pickup::storefront.module',
             'view_data_key' => 'pickup_module_data',
         ],

@@ -7,7 +7,7 @@ namespace Modules\NovaPoshta\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\NovaPoshta\Services\NovaPoshtaCheckoutDataService;
+use Modules\NovaPoshta\Services\Storefront\NovaPoshtaCheckoutDataService;
 use Modules\NovaPoshta\Support\NovaPoshtaCheckoutStateService;
 
 class NovaPoshtaController extends Controller
