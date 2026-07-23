@@ -44,7 +44,7 @@ if (!function_exists('parse_telephone')) {
     {
         $telephone = clear_telephone($telephone, true);
 
-        $mask = '+38 (___) ___-__-__';
+        $mask         = '+38 (___) ___-__-__';
         $phone_length = Str::length($telephone);
 
         for ($index_number = 0; $index_number < $phone_length; $index_number++) {
@@ -70,7 +70,13 @@ if (!function_exists('trim_strs_in_arr')) {
 
 if (!function_exists('convert_img_and_get_url')) {
     /**
-     * @param string $bg_color HEX or transparent color
+     * @param string|null $path
+     * @param int         $width
+     * @param int|null    $height
+     * @param bool        $is_square
+     * @param string      $bg_color HEX or transparent color
+     *
+     * @return string
      */
     function convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): string
     {
@@ -80,7 +86,18 @@ if (!function_exists('convert_img_and_get_url')) {
 
 if (!function_exists('multiple_convert_img_and_get_url')) {
     /**
-     * @param string $bg_color HEX or transparent color
+     * @param string|null $path
+     * @param int         $width
+     * @param int|null    $height
+     * @param bool        $is_square
+     * @param string      $bg_color HEX or transparent color
+     *
+     * @return array{
+     *      thumb_1x: string,
+     *      thumb_2x: string,
+     *      thumb_3x: string,
+     *      thumb_4x?: string
+     *  }
      */
     function multiple_convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
     {
@@ -104,7 +121,7 @@ if (!function_exists('get_global_config')) {
 
 if (!function_exists('set_global_config')) {
     /**
-     * @param  array<string, mixed>|string  $key
+     * @param array<string, mixed>|string $key
      */
     function set_global_config(array|string $key, mixed $value = null, bool $is_active = true): mixed
     {
@@ -127,7 +144,7 @@ if (!function_exists('get_global_configs')) {
 
 if (!function_exists('delete_global_config')) {
     /**
-     * @param  array<string, mixed>|string  $key
+     * @param array<string, mixed>|string $key
      */
     function delete_global_config(array|string $key): int
     {
@@ -137,7 +154,7 @@ if (!function_exists('delete_global_config')) {
 
 if (!function_exists('disable_global_config')) {
     /**
-     * @param  array<string, mixed>|string  $key
+     * @param array<string, mixed>|string $key
      */
     function disable_global_config(array|string $key): int
     {
@@ -163,7 +180,7 @@ if (!function_exists('breadcrumb')) {
     {
         return [
             'title' => sanitaze_str($title),
-            'url' => $url,
+            'url'   => $url,
         ];
     }
 }
@@ -183,33 +200,33 @@ if (!function_exists('try_detect_page_type')) {
 
         if (is_string($route_name) && filled($route_name)) {
             return match (true) {
-                Str::endsWith($route_name, '.home') => (string)config('page-settings.page_type.home'),
+                Str::endsWith($route_name, '.home')                   => (string)config('page-settings.page_type.home'),
                 Str::endsWith($route_name, '.product'),
                 Str::endsWith($route_name, '.product.variant.show'),
-                Str::endsWith($route_name, '.product.show') => (string)config('page-settings.page_type.product'),
+                Str::endsWith($route_name, '.product.show')           => (string)config('page-settings.page_type.product'),
                 Str::endsWith($route_name, '.category'),
-                Str::endsWith($route_name, '.category.show') => (string)config('page-settings.page_type.category'),
+                Str::endsWith($route_name, '.category.show')          => (string)config('page-settings.page_type.category'),
                 Str::endsWith($route_name, '.search'),
-                Str::endsWith($route_name, '.search-products.index') => (string)config('page-settings.page_type.search'),
+                Str::endsWith($route_name, '.search-products.index')  => (string)config('page-settings.page_type.search'),
                 Str::endsWith($route_name, '.cart'),
                 Str::endsWith($route_name, '.cart.store'),
                 Str::endsWith($route_name, '.cart.update'),
                 Str::endsWith($route_name, '.cart.delete'),
-                Str::endsWith($route_name, '.cart.index') => (string)config('page-settings.page_type.cart'),
+                Str::endsWith($route_name, '.cart.index')             => (string)config('page-settings.page_type.cart'),
                 Str::endsWith($route_name, '.order'),
                 Str::endsWith($route_name, '.order-confirm'),
                 Str::endsWith($route_name, '.order-confirm.store'),
                 Str::endsWith($route_name, '.order-confirm.validate') => (string)config('page-settings.page_type.order'),
                 Str::endsWith($route_name, '.thank-you'),
-                Str::endsWith($route_name, '.thank-you.index') => (string)config('page-settings.page_type.thankyou'),
+                Str::endsWith($route_name, '.thank-you.index')        => (string)config('page-settings.page_type.thankyou'),
                 Str::endsWith($route_name, '.failure-order'),
-                Str::endsWith($route_name, '.failure-order.index') => (string)config('page-settings.page_type.failure'),
-                default => null,
+                Str::endsWith($route_name, '.failure-order.index')    => (string)config('page-settings.page_type.failure'),
+                default                                               => null,
             };
         }
 
         $segments = collect(explode('/', Str::trim($request->path(), '/')))
-            ->filter(fn (string $segment): bool => filled($segment))
+            ->filter(fn(string $segment): bool => filled($segment))
             ->values();
 
         if ($segments->count() === 1) {
@@ -217,15 +234,15 @@ if (!function_exists('try_detect_page_type')) {
         }
 
         return match ($segments->get(1)) {
-            'product' => (string)config('page-settings.page_type.product'),
-            'category' => (string)config('page-settings.page_type.category'),
-            'search' => (string)config('page-settings.page_type.search'),
-            'cart' => (string)config('page-settings.page_type.cart'),
-            'checkout' => (string)config('page-settings.page_type.checkout'),
-            'order' => (string)config('page-settings.page_type.order'),
+            'product'   => (string)config('page-settings.page_type.product'),
+            'category'  => (string)config('page-settings.page_type.category'),
+            'search'    => (string)config('page-settings.page_type.search'),
+            'cart'      => (string)config('page-settings.page_type.cart'),
+            'checkout'  => (string)config('page-settings.page_type.checkout'),
+            'order'     => (string)config('page-settings.page_type.order'),
             'thank-you' => (string)config('page-settings.page_type.thankyou'),
-            'failure' => (string)config('page-settings.page_type.failure'),
-            default => null,
+            'failure'   => (string)config('page-settings.page_type.failure'),
+            default     => null,
         };
     }
 }
@@ -285,7 +302,7 @@ if (!function_exists('prepare_product_attrs')) {
 
                         return 0;
                     })
-                    ->filter(fn (int $value_id): bool => $value_id > 0)
+                    ->filter(fn(int $value_id): bool => $value_id > 0)
                     ->unique()
                     ->values()
                     ->all();
@@ -306,14 +323,14 @@ if (!function_exists('localized_product_variant_route')) {
      */
     function localized_product_variant_route(
         string $product_slug,
-        int $product_id,
-        array $attribute_filters = [],
-        bool $absolute = true,
+        int    $product_id,
+        array  $attribute_filters = [],
+        bool   $absolute = true,
     ): string {
         $normalized_filters = prepare_product_attrs($attribute_filters);
 
-        $language = resolve_language_by_locale(app()->getLocale());
-        $language_id = (int)($language->id ?? 0);
+        $language     = resolve_language_by_locale(app()->getLocale());
+        $language_id  = (int)($language->id ?? 0);
         $variant_slug = '';
 
         if ($language_id > 0) {
@@ -345,15 +362,15 @@ if (!function_exists('localized_product_variant_route')) {
 
         if (filled($variant_slug)) {
             return localized_route('localized.catalog.product.variant.show', [
-                'slug' => $product_slug,
+                'slug'         => $product_slug,
                 'variant_slug' => $variant_slug,
             ], $absolute);
         }
 
         $query_parameters = collect($normalized_filters)
-            ->mapWithKeys(fn (array $value_ids, int $attribute_id): array => [
+            ->mapWithKeys(fn(array $value_ids, int $attribute_id): array => [
                 'attribute_' . $attribute_id => collect($value_ids)
-                    ->map(fn (int $value_id): string => (string)$value_id)
+                    ->map(fn(int $value_id): string => (string)$value_id)
                     ->implode(','),
             ])
             ->all();
@@ -501,7 +518,7 @@ if (!function_exists('resolve_upload_path_placeholders')) {
     function resolve_upload_path_placeholders(?string $path): string
     {
         $normalized_path = (string)$path;
-        $now_date = get_now_date();
+        $now_date        = get_now_date();
 
         return Str::replace(
             ['{year}', '{month}'],
@@ -540,7 +557,7 @@ if (!function_exists('get_sorting_items')) {
     function get_sorting_items(PageSetting $page_setting): Collection
     {
         return collect($page_setting->getSortingItemsFromSettings())
-            ->filter(fn (array $sorting_item): bool => (bool)Arr::get($sorting_item, 'is_enabled', true))
+            ->filter(fn(array $sorting_item): bool => (bool)Arr::get($sorting_item, 'is_enabled', true))
             ->sortBy('sort_order')
             ->values();
     }
@@ -553,11 +570,11 @@ if (!function_exists('resolve_sort_code')) {
             return 'default';
         }
 
-        $sorting_items = get_sorting_items($page_setting);
+        $sorting_items          = get_sorting_items($page_setting);
         $sorting_values_to_code = [];
 
         foreach ($sorting_items as $sorting_item) {
-            $item_get = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
+            $item_get   = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
             $item_value = (string)Arr::get($item_get, 'value', '');
 
             if (filled($item_value)) {
@@ -602,7 +619,7 @@ if (!function_exists('get_slug_variants')) {
         ?string $sluggable_type,
         ?string $slug_value = null,
         ?string $variant_slug_value = null,
-        array $attribute_filters = [],
+        array   $attribute_filters = [],
     ): array {
         if ($sluggable_type === null || blank($slug_value)) {
             return [];
@@ -671,11 +688,11 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
      * @return array<string, array{slug: string, variant_slug: string}>
      */
     function resolve_product_variant_slug_variants(
-        string $slug_value,
+        string  $slug_value,
         ?string $variant_slug_value,
-        array $language_ids_by_code,
-        array $attribute_filters,
-        Slug $slug_instance,
+        array   $language_ids_by_code,
+        array   $attribute_filters,
+        Slug    $slug_instance,
     ): array {
         $product_slug = $slug_instance->newQuery()
             ->where('slug', $slug_value)
@@ -720,12 +737,12 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
         foreach ($language_ids_by_code as $language_code => $language_id) {
             $localized_product_slug = (string)optional(
                 $related_slugs
-                    ->first(fn (Slug $slug): bool => (int)$slug->language_id === $language_id
+                    ->first(fn(Slug $slug): bool => (int)$slug->language_id === $language_id
                         && (string)$slug->sluggable_type === Product::class),
             )->slug;
             $localized_variant_slug = (string)optional(
                 $related_slugs
-                    ->first(fn (Slug $slug): bool => (int)$slug->language_id === $language_id
+                    ->first(fn(Slug $slug): bool => (int)$slug->language_id === $language_id
                         && (string)$slug->sluggable_type === ProductVariant::class),
             )->slug;
 
@@ -734,7 +751,7 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
             }
 
             $result[$language_code] = [
-                'slug' => $localized_product_slug,
+                'slug'         => $localized_product_slug,
                 'variant_slug' => $localized_variant_slug,
             ];
         }
@@ -748,10 +765,10 @@ if (!function_exists('resolve_product_variant_id_for_slug_variants')) {
      * @param array<int|string, int|string|array<int, int|string>> $attribute_filters
      */
     function resolve_product_variant_id_for_slug_variants(
-        int $product_id,
+        int     $product_id,
         ?string $variant_slug_value,
-        array $attribute_filters,
-        Slug $slug_instance,
+        array   $attribute_filters,
+        Slug    $slug_instance,
     ): int {
         if (filled((string)$variant_slug_value)) {
             $variant_slug = $slug_instance->newQuery()
@@ -773,7 +790,7 @@ if (!function_exists('resolve_product_variant_id_for_slug_variants')) {
         }
 
         $normalized_filters = prepare_product_attrs($attribute_filters);
-        $variant_query = ProductVariant::query()
+        $variant_query      = ProductVariant::query()
             ->where('product_id', $product_id);
 
         if ($normalized_filters !== []) {
