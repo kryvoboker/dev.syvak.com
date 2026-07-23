@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Enums\Cart\CartModeEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
+use App\Services\Cart\CartService;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\Modules\ModuleCacheService;
@@ -188,6 +190,13 @@ class AppServiceProvider extends ServiceProvider
          */
         View::composer('*', function (LaravelView $view): void {
             $view->with('current_locale', app()->getLocale());
+        });
+
+        View::composer('catalog.layouts.partials.header', function (LaravelView $view): void {
+            $view->with(
+                'cart_total_products',
+                app(CartService::class)->getTotalProducts(CartModeEnum::Regular->value),
+            );
         });
     }
 }

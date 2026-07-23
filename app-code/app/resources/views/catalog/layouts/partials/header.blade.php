@@ -76,8 +76,15 @@
                         <span class="icon-[si--search-line] custom-icon"></span>
                     </button>
 
-                    <button class="open-cart-modal-btn" id="open-cart-modal-btn" type="button">
+                    <button class="open-cart-modal-btn relative" id="open-cart-modal-btn" type="button">
                         <span class="custom-icon icon-[material-symbols-light--shopping-bag-outline]"></span>
+                        <span class="badge badge-xs absolute -end-2 -top-2 min-w-5 border border-white/20 bg-white/15 px-1 text-xs text-white"
+                              data-cart-badge
+                              aria-live="polite"
+                              aria-atomic="true"
+                              @class(['hidden' => (int) ($cart_total_products ?? 0) <= 0])>
+                            {{ (int) ($cart_total_products ?? 0) }}
+                        </span>
                     </button>
                 </div>
             </div>
