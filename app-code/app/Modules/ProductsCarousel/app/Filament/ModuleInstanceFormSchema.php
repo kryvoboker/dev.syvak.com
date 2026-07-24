@@ -259,7 +259,7 @@ readonly class ModuleInstanceFormSchema
                                             }
 
                                             $set('settings.category_based.category_ids', []);
-                                            $set('settings.category_based.selected_product_ids', []);
+                                            $set('settings.category_based.selected_variant_ids', []);
                                             $set('settings.category_based.clear_all_categories', false);
                                             $set('settings.category_based.select_all_categories', false);
                                         }),
@@ -272,12 +272,12 @@ readonly class ModuleInstanceFormSchema
                                 ->gridDirection('row')
                                 ->live()
                                 ->afterStateUpdated(function ($state, callable $set, callable $get): void {
-                                    $filtered_product_ids = $this->products_carousel_product_search_service->filterActiveProductIdsByCategories(
-                                        (array) $get('settings.category_based.selected_product_ids'),
+                                    $filtered_variant_ids = $this->products_carousel_product_search_service->filterActiveVariantIdsByCategories(
+                                        (array) $get('settings.category_based.selected_variant_ids'),
                                         (array) $state,
                                     );
 
-                                    $set('settings.category_based.selected_product_ids', $filtered_product_ids);
+                                    $set('settings.category_based.selected_variant_ids', $filtered_variant_ids);
                                 }),
 
                             Toggle::make('settings.category_based.use_selected_products_only')
@@ -301,7 +301,7 @@ readonly class ModuleInstanceFormSchema
                                             return $this->products_carousel_product_search_service->searchActiveByCategories(
                                                 $search,
                                                 (array) $get('settings.category_based.category_ids'),
-                                                (array) $get('settings.category_based.selected_product_ids'),
+                                                (array) $get('settings.category_based.selected_variant_ids'),
                                             );
                                         })
                                         ->getOptionLabelUsing(function ($value): ?string {
@@ -316,7 +316,7 @@ readonly class ModuleInstanceFormSchema
                                                 return;
                                             }
 
-                                            $selected_product_ids = collect((array) $get('settings.category_based.selected_product_ids'))
+                                            $selected_variant_ids = collect((array) $get('settings.category_based.selected_variant_ids'))
                                                 ->map(fn (mixed $id): int => (int) $id)
                                                 ->push((int) $state)
                                                 ->filter(fn (int $id): bool => $id > 0)
@@ -324,21 +324,21 @@ readonly class ModuleInstanceFormSchema
                                                 ->values()
                                                 ->all();
 
-                                            $selected_product_ids = $this->products_carousel_product_search_service->filterActiveProductIdsByCategories(
-                                                $selected_product_ids,
+                                            $selected_variant_ids = $this->products_carousel_product_search_service->filterActiveVariantIdsByCategories(
+                                                $selected_variant_ids,
                                                 (array) $get('settings.category_based.category_ids'),
                                             );
 
-                                            $set('settings.category_based.selected_product_ids', $selected_product_ids);
+                                            $set('settings.category_based.selected_variant_ids', $selected_variant_ids);
                                             $set('settings.category_based.search_product_id', null);
                                         }),
 
-                                    CheckboxList::make('settings.category_based.selected_product_ids')
+                                    CheckboxList::make('settings.category_based.selected_variant_ids')
                                         ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.selected_products'))
                                         ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.selected_products'))
                                         ->options(function (callable $get): array {
                                             return $this->products_carousel_product_search_service->getLabelsByIds(
-                                                (array) $get('settings.category_based.selected_product_ids'),
+                                                (array) $get('settings.category_based.selected_variant_ids'),
                                             );
                                         })
                                         ->columns(1)
@@ -363,7 +363,7 @@ readonly class ModuleInstanceFormSchema
                                 ->getSearchResultsUsing(function (string $search, callable $get): array {
                                     return $this->products_carousel_product_search_service->searchAllActive(
                                         $search,
-                                        (array) $get('settings.manual_only.selected_product_ids'),
+                                        (array) $get('settings.manual_only.selected_variant_ids'),
                                     );
                                 })
                                 ->getOptionLabelUsing(function ($value): ?string {
@@ -378,7 +378,7 @@ readonly class ModuleInstanceFormSchema
                                         return;
                                     }
 
-                                    $selected_product_ids = collect((array) $get('settings.manual_only.selected_product_ids'))
+                                    $selected_variant_ids = collect((array) $get('settings.manual_only.selected_variant_ids'))
                                         ->map(fn (mixed $id): int => (int) $id)
                                         ->push((int) $state)
                                         ->filter(fn (int $id): bool => $id > 0)
@@ -386,18 +386,18 @@ readonly class ModuleInstanceFormSchema
                                         ->values()
                                         ->all();
 
-                                    $selected_product_ids = $this->products_carousel_product_search_service->filterActiveProductIds($selected_product_ids);
+                                    $selected_variant_ids = $this->products_carousel_product_search_service->filterActiveVariantIds($selected_variant_ids);
 
-                                    $set('settings.manual_only.selected_product_ids', $selected_product_ids);
+                                    $set('settings.manual_only.selected_variant_ids', $selected_variant_ids);
                                     $set('settings.manual_only.search_product_id', null);
                                 }),
 
-                            CheckboxList::make('settings.manual_only.selected_product_ids')
+                            CheckboxList::make('settings.manual_only.selected_variant_ids')
                                 ->label(__('productscarousel::admin/modules/module_instances.products_carousel.labels.selected_products'))
                                 ->helperText(__('productscarousel::admin/modules/module_instances.products_carousel.helpers.selected_products'))
                                 ->options(function (callable $get): array {
                                     return $this->products_carousel_product_search_service->getLabelsByIds(
-                                        (array) $get('settings.manual_only.selected_product_ids'),
+                                        (array) $get('settings.manual_only.selected_variant_ids'),
                                     );
                                 })
                                 ->columns(1)

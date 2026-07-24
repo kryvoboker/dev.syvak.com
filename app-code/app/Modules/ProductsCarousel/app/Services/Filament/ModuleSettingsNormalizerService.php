@@ -94,9 +94,30 @@ readonly class ModuleSettingsNormalizerService
             $active_category_ids,
         );
 
+        $category_based_selected_variant_ids = $this->products_carousel_product_search_service->filterActiveVariantIdsByCategories(
+            Arr::get($category_based_settings, 'selected_variant_ids', []),
+            $active_category_ids,
+        );
+
+        if (! Arr::has($category_based_settings, 'selected_variant_ids')) {
+            $category_based_selected_variant_ids = $this->products_carousel_product_search_service->getActiveDefaultVariantIdsByProductIds(
+                $category_based_selected_product_ids,
+            );
+        }
+
         $manual_only_selected_product_ids = $this->products_carousel_product_search_service->filterActiveProductIds(
             Arr::get($manual_only_settings, 'selected_product_ids', []),
         );
+
+        $manual_only_selected_variant_ids = $this->products_carousel_product_search_service->filterActiveVariantIds(
+            Arr::get($manual_only_settings, 'selected_variant_ids', []),
+        );
+
+        if (! Arr::has($manual_only_settings, 'selected_variant_ids')) {
+            $manual_only_selected_variant_ids = $this->products_carousel_product_search_service->getActiveDefaultVariantIdsByProductIds(
+                $manual_only_selected_product_ids,
+            );
+        }
 
         $normalized_shared_settings = $this->normalizeSharedSettings(
             $shared_settings,
@@ -136,9 +157,11 @@ readonly class ModuleSettingsNormalizerService
                 'category_ids' => $active_category_ids,
                 'use_selected_products_only' => $use_selected_products_only,
                 'selected_product_ids' => $category_based_selected_product_ids,
+                'selected_variant_ids' => $category_based_selected_variant_ids,
             ],
             'manual_only' => [
                 'selected_product_ids' => $manual_only_selected_product_ids,
+                'selected_variant_ids' => $manual_only_selected_variant_ids,
             ],
         ];
     }

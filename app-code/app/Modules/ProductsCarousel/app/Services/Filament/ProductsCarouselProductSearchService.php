@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Modules\ProductsCarousel\Services\Filament;
 
 use App\Models\ApplicationSettings\Language;
-use App\Models\Catalogs\Products\Product;
+use App\Models\Catalogs\Products\ProductVariant;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Modules\ProductsCarousel\Services\ProductsCarouselProductFilterService;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 
 /**
- * Provides active product search and filtering logic for ProductsCarousel admin selectors.
+ * Provides active product-variant search and filtering logic for ProductsCarousel admin selectors.
  */
 readonly class ProductsCarouselProductSearchService
 {
@@ -24,50 +26,62 @@ readonly class ProductsCarouselProductSearchService
 
     /**
      * @param  array<int|string, mixed>  $category_ids
-     * @param  array<int|string, mixed>  $excluded_product_ids
+     * @param  array<int|string, mixed>  $excluded_variant_ids
      * @return array<int, string>
      */
     public function searchActiveByCategories(
         string $search_query,
         array $category_ids,
-        array $excluded_product_ids = [],
+        array $excluded_variant_ids = [],
     ): array {
         $normalized_category_ids = $this->normalizeIds($category_ids);
-        $excluded_product_ids = $this->normalizeIds($excluded_product_ids);
+        $excluded_variant_ids = $this->normalizeIds($excluded_variant_ids);
 
         if ($normalized_category_ids === []) {
             return [];
         }
 
-        $results = $this->buildBaseProductQuery(trim($search_query))
-            ->whereHas('categories', function (Builder $query) use ($normalized_category_ids): void {
+        [$search_term, $search_price] = $this->parseSearchQuery($search_query);
+
+        $results = $this->buildBaseVariantQuery($search_term, $search_price)
+            ->whereHas('product.categories', function (Builder $query) use ($normalized_category_ids): void {
                 $query->whereIn('categories.id', $normalized_category_ids);
             })
-            ->when($excluded_product_ids !== [], function (Builder $query) use ($excluded_product_ids): void {
-                $query->whereNotIn('id', $excluded_product_ids);
+            ->when($excluded_variant_ids !== [], function (Builder $query) use ($excluded_variant_ids): void {
+                $query->whereNotIn('product_variants.id', $excluded_variant_ids);
             })
             ->limit((int) $this->products_carousel_config->get('search.result_limit', 30))
             ->get();
 
-        return $this->mapProductsToOptions($results);
+        return $this->mapVariantsToOptions($results);
     }
 
     /**
-     * @param  array<int|string, mixed>  $excluded_product_ids
+     * @param  array<int|string, mixed>  $excluded_variant_ids
      * @return array<int, string>
      */
-    public function searchAllActive(string $search_query, array $excluded_product_ids = []): array
+    public function searchAllActive(string $search_query, array $excluded_variant_ids = []): array
     {
-        $excluded_product_ids = $this->normalizeIds($excluded_product_ids);
+        $excluded_variant_ids = $this->normalizeIds($excluded_variant_ids);
+        [$search_term, $search_price] = $this->parseSearchQuery($search_query);
 
-        $results = $this->buildBaseProductQuery(trim($search_query))
-            ->when($excluded_product_ids !== [], function (Builder $query) use ($excluded_product_ids): void {
-                $query->whereNotIn('id', $excluded_product_ids);
+        $results = $this->buildBaseVariantQuery($search_term, $search_price)
+            ->when($excluded_variant_ids !== [], function (Builder $query) use ($excluded_variant_ids): void {
+                $query->whereNotIn('product_variants.id', $excluded_variant_ids);
             })
             ->limit((int) $this->products_carousel_config->get('search.result_limit', 30))
             ->get();
 
-        return $this->mapProductsToOptions($results);
+        return $this->mapVariantsToOptions($results);
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $variant_ids
+     * @return array<int>
+     */
+    public function filterActiveVariantIds(array $variant_ids): array
+    {
+        return $this->products_carousel_product_filter_service->filterActiveVariantIds($variant_ids);
     }
 
     /**
@@ -93,84 +107,201 @@ readonly class ProductsCarouselProductSearchService
     }
 
     /**
-     * @param  array<int|string, mixed>  $product_ids
-     * @return array<int, string>
+     * @param  array<int|string, mixed>  $variant_ids
+     * @param  array<int|string, mixed>  $category_ids
+     * @return array<int>
      */
-    public function getLabelsByIds(array $product_ids): array
+    public function filterActiveVariantIdsByCategories(array $variant_ids, array $category_ids): array
     {
-        $normalized_product_ids = $this->normalizeIds($product_ids);
-
-        if ($normalized_product_ids === []) {
-            return [];
-        }
-
-        $products = Product::query()
-            ->where('is_active', true)
-            ->whereIn('id', $normalized_product_ids)
-            ->with([
-                'productDescription' => function ($query): void {
-                    $query->where('language_id', $this->resolveLanguageId());
-                },
-            ])
-            ->orderByRaw('FIELD(id, ' . implode(',', $normalized_product_ids) . ')')
-            ->get();
-
-        return $this->mapProductsToOptions($products);
-    }
-
-    public function getLabelById(?int $product_id): ?string
-    {
-        if (! is_int($product_id) || $product_id < 1) {
-            return null;
-        }
-
-        return Arr::get($this->getLabelsByIds([$product_id]), $product_id);
-    }
-
-    private function buildBaseProductQuery(string $search_query): Builder
-    {
-        return Product::query()
-            ->select(['id', 'model', 'sku'])
-            ->where('is_active', true)
-            ->with(['productDescription'])
-            ->when(filled($search_query), function (Builder $query) use ($search_query): void {
-                $query->where(function (Builder $query) use ($search_query): void {
-                    $query->whereLike('model', "%$search_query%")
-                        ->orWhereLike('sku', "%$search_query%")
-                        ->orWhereHas('productDescription', function (Builder $query) use ($search_query): void {
-                            $query
-                                ->whereLike('name', "%$search_query%");
-                        });
-                });
-            })
-            ->orderBy('model')
-            ->orderBy('id');
+        return $this->products_carousel_product_filter_service->filterActiveVariantIdsByCategories(
+            $variant_ids,
+            $category_ids,
+        );
     }
 
     /**
-     * @param  array  $products
+     * @param  array<int|string, mixed>  $product_ids
+     * @return array<int>
+     */
+    public function getActiveDefaultVariantIdsByProductIds(array $product_ids): array
+    {
+        return $this->products_carousel_product_filter_service->getActiveDefaultVariantIdsByProductIds($product_ids);
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $variant_ids
      * @return array<int, string>
      */
-    private function mapProductsToOptions(iterable $products): array
+    public function getLabelsByIds(array $variant_ids): array
     {
-        return collect($products)
-            ->filter(fn ($product): bool => $product instanceof Product)
-            ->mapWithKeys(function (Product $product): array {
-                $localized_name = $product->productDescription->first()?->name;
+        $normalized_variant_ids = $this->normalizeIds($variant_ids);
 
-                $label_parts = array_filter([
-                    is_string($localized_name) && filled($localized_name) ? $localized_name : null,
-                    filled($product->model) ? '[' . $product->model . ']' : null,
-                    filled($product->sku) ? '(' . $product->sku . ')' : null,
+        if ($normalized_variant_ids === []) {
+            return [];
+        }
+
+        $variants = $this->buildBaseVariantQuery('', null)
+            ->whereIn('product_variants.id', $normalized_variant_ids)
+            ->orderByRaw('FIELD(product_variants.id, ' . implode(',', $normalized_variant_ids) . ')')
+            ->get();
+
+        return $this->mapVariantsToOptions($variants);
+    }
+
+    public function getLabelById(?int $variant_id): ?string
+    {
+        if (! is_int($variant_id) || $variant_id < 1) {
+            return null;
+        }
+
+        return Arr::get($this->getLabelsByIds([$variant_id]), $variant_id);
+    }
+
+    /**
+     * @return array{0: string, 1: float|null}
+     */
+    private function parseSearchQuery(string $search_query): array
+    {
+        $search_query = Str::trim($search_query);
+
+        if (preg_match('/^(.*?)\\s*==\\s*([0-9]+(?:[.,][0-9]+)?)\\s*$/u', $search_query, $matches) !== 1) {
+            return [$search_query, null];
+        }
+
+        $search_term = Str::trim((string) $matches[1]);
+        $price = (float) Str::replace(',', '.', (string) $matches[2]);
+
+        return [$search_term, $price];
+    }
+
+    private function buildBaseVariantQuery(string $search_term, ?float $search_price): Builder
+    {
+        $language_id = $this->resolveLanguageId();
+
+        return ProductVariant::query()
+            ->select('product_variants.*')
+            ->where('product_variants.is_active', true)
+            ->whereHas('product', function (Builder $query): void {
+                $query->where('is_active', true);
+            })
+            ->with([
+                'product' => function ($query) use ($language_id): void {
+                    $query->with([
+                        'productDescription' => function ($description_query) use ($language_id): void {
+                            $description_query->where('language_id', $language_id);
+                        },
+                        'variants' => function ($variant_query): void {
+                            $variant_query->orderBy('sort_order')->orderBy('id');
+                        },
+                    ]);
+                },
+                'descriptions' => function ($query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'discounts' => function ($query): void {
+                    $this->applyCurrentDiscountScope($query);
+                    $query->orderBy('priority')->orderByDesc('updated_at');
+                },
+            ])
+            ->when(filled($search_term), function (Builder $query) use ($search_term): void {
+                $query->where(function (Builder $query) use ($search_term): void {
+                    $query
+                        ->whereHas('product', function (Builder $product_query) use ($search_term): void {
+                            $product_query
+                                ->whereLike('model', "%$search_term%")
+                                ->orWhereLike('sku', "%$search_term%")
+                                ->orWhereLike('ean', "%$search_term%");
+                        })
+                        ->orWhereHas('product.productDescription', function (Builder $description_query) use ($search_term): void {
+                            $description_query->whereLike('name', "%$search_term%");
+                        })
+                        ->orWhereHas('descriptions', function (Builder $description_query) use ($search_term): void {
+                            $description_query->whereLike('name', "%$search_term%");
+                        });
+                });
+            })
+            ->when($search_price !== null, function (Builder $query) use ($search_price): void {
+                $query->where(function (Builder $query) use ($search_price): void {
+                    $query
+                        ->where('product_variants.price', $search_price)
+                        ->orWhereHas('discounts', function (Builder $discount_query) use ($search_price): void {
+                            $this->applyCurrentDiscountScope($discount_query);
+                            $discount_query->where('price', $search_price);
+                        });
+                });
+            })
+            ->orderBy('product_variants.product_id')
+            ->orderBy('product_variants.sort_order')
+            ->orderBy('product_variants.id');
+    }
+
+    private function applyCurrentDiscountScope(Builder|Relation $query): void
+    {
+        $current_date_time = now(config('app.timezone'));
+        $user_group_id = get_app_settings()?->user_group_id;
+
+        $query
+            ->where('date_start', '<=', $current_date_time)
+            ->where('date_end', '>=', $current_date_time);
+
+        if ($user_group_id === null) {
+            $query->whereNull('user_group_id');
+
+            return;
+        }
+
+        $query->where('user_group_id', $user_group_id);
+    }
+
+    /**
+     * @param  iterable<int, mixed>  $variants
+     * @return array<int, string>
+     */
+    private function mapVariantsToOptions(iterable $variants): array
+    {
+        return collect($variants)
+            ->filter(fn (mixed $variant): bool => $variant instanceof ProductVariant)
+            ->mapWithKeys(function (ProductVariant $variant): array {
+                $product = $variant->product;
+                $product_name = $product?->productDescription?->first()?->name;
+                $variant_number = $product?->variants?->search(
+                    fn (ProductVariant $product_variant): bool => $product_variant->id === $variant->id,
+                );
+                $variant_number = is_int($variant_number) ? $variant_number + 1 : 1;
+                $variant_name = __('productscarousel::admin/modules/module_instances.products_carousel.labels.variant', [
+                    'number' => $variant_number,
                 ]);
 
-                $label = implode(' ', $label_parts);
-
-                if (blank($label)) {
-                    $label = 'Product #' . $product->id;
+                if ($variant->is_default) {
+                    $variant_name .= ' ' . __('productscarousel::admin/modules/module_instances.products_carousel.labels.default_variant');
                 }
+                $price = format_price(
+                    (float) $variant->price,
+                    config('app.currency.current_currency_code'),
+                    (float) config('app.currency.default_exchange_rate'),
+                );
+                $discount = $variant->discounts->first();
+                $discount_label = $discount === null
+                    ? null
+                    : __('productscarousel::admin/modules/module_instances.products_carousel.labels.discount_price', [
+                        'price' => format_price(
+                            (float) $discount->price,
+                            config('app.currency.current_currency_code'),
+                            (float) config('app.currency.default_exchange_rate'),
+                        ),
+                    ]);
 
-                return [$product->id => $label];
+                $label_parts = array_filter([
+                    is_string($product_name) && filled($product_name) ? $product_name : null,
+                    filled($product?->model) ? '[' . $product->model . ']' : null,
+                    filled($product?->sku) ? '(' . $product->sku . ')' : null,
+                    filled($product?->ean) ? '{EAN: ' . $product->ean . '}' : null,
+                    $variant_name,
+                    $price,
+                    $discount_label,
+                ]);
+
+                return [(int) $variant->id => implode(' ', $label_parts) ?: 'Variant #' . $variant->id];
             })
             ->all();
     }
