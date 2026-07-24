@@ -6,6 +6,8 @@ namespace Modules\ProductsCarousel\Services\Storefront;
 
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
+use App\Models\Catalogs\Products\ProductVariant;
+use App\Models\Catalogs\Products\ProductVariantDescription;
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +19,7 @@ use Illuminate\Support\Str;
 use Modules\ProductsCarousel\Services\ProductsCarouselProductFilterService;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
 use Random\RandomException;
+use Throwable;
 
 /**
  * Resolves storefront-ready ProductsCarousel payload for current placement/page.
@@ -51,9 +54,16 @@ readonly class ProductsCarouselStorefrontService
      */
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
+        try {
+            $definitions = resolve_modules_for_context($placement)
+                ->filter(fn (ModuleDefinition $definition): bool => $definition->nwidart_name === 'ProductsCarousel');
+        } catch (Throwable $e) {
+            Log::channel('stack')->error($e->getMessage(), $e->getTrace());
+
+            return [];
+        }
+
         /** @var Collection<int, ModuleDefinition> $definitions */
-        $definitions = resolve_modules_for_context($placement)
-            ->filter(fn (ModuleDefinition $definition): bool => $definition->nwidart_name === 'ProductsCarousel');
 
         $products_carousel_modules = $definitions
             ->map(fn (ModuleDefinition $definition): array => $this->mapDefinitionInstances($definition, $page_type))
@@ -352,6 +362,17 @@ readonly class ProductsCarouselStorefrontService
                 'slugs' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
+                'defaultVariant' => function ($query) use ($language_id): void {
+                    $query->where('is_active', true)
+                        ->with([
+                            'descriptions' => function ($description_query) use ($language_id): void {
+                                $description_query->where('language_id', $language_id);
+                            },
+                            'slugs' => function ($slug_query) use ($language_id): void {
+                                $slug_query->where('language_id', $language_id);
+                            },
+                        ]);
+                },
             ]);
     }
 
@@ -596,22 +617,34 @@ readonly class ProductsCarouselStorefrontService
      */
     private function mapProductCard(Product $product, int $product_image_width, int $product_image_height): array
     {
+        $product_variant = $product->defaultVariant;
+        $product_variant_description = $product_variant instanceof ProductVariant
+            ? $product_variant->descriptions->first()
+            : null;
         $product_description = $product->productDescription->first();
         $slug = $product->slugs->first()?->slug;
+        $variant_slug = $product_variant instanceof ProductVariant
+            ? $product_variant->slugs->first()?->slug
+            : null;
+        $image = $product_variant instanceof ProductVariant && filled($product_variant->image)
+            ? $product_variant->image
+            : $product->image;
 
         return [
             'id' => (int) $product->id,
-            'name' => escape_special_html((string) $product_description?->name),
+            'name' => escape_special_html((string) ($product_variant_description instanceof ProductVariantDescription
+                ? $product_variant_description->name
+                : $product_description?->name)),
             'model' => escape_special_html((string) $product->model),
             'sku' => escape_special_html((string) $product->sku),
             'price' => format_price(
-                (float) $product->price,
+                (float) ($product_variant instanceof ProductVariant ? $product_variant->price : $product->price),
                 config('app.currency.current_currency_code'),
                 (float) config('app.currency.default_exchange_rate'),
             ),
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
-                    (string) $product->image,
+                    (string) $image,
                     $product_image_width,
                     $product_image_height,
                     is_square: false,
@@ -619,9 +652,14 @@ readonly class ProductsCarouselStorefrontService
                 'width' => $product_image_width,
                 'height' => $product_image_height,
             ],
-            'url' => filled($slug)
-                ? localized_route('localized.catalog.product.show', ['slug' => $slug])
-                : null,
+            'url' => filled($slug) && filled($variant_slug)
+                ? localized_route('localized.catalog.product.variant.show', [
+                    'slug' => $slug,
+                    'variant_slug' => $variant_slug,
+                ])
+                : (filled($slug)
+                    ? localized_route('localized.catalog.product.show', ['slug' => $slug])
+                    : null),
         ];
     }
 
