@@ -32,6 +32,9 @@ class ProductsCarouselModuleServicesTest extends TestCase
         config()->set('page-settings.page_type', [
             'home' => 'home',
         ]);
+        config()->set('app.currency.current_currency_code', 'UAH');
+        config()->set('app.currency.default_exchange_rate', 1);
+        config()->set('app.currency.current_exchange_rate', 1);
 
         DB::purge('sqlite');
         DB::setDefaultConnection('sqlite');
@@ -48,10 +51,14 @@ class ProductsCarouselModuleServicesTest extends TestCase
         }, -1);
 
         $this->createLanguagesTable();
+        $this->createCurrenciesTable();
         $this->createCategoriesTable();
         $this->createCategoryDescriptionsTable();
         $this->createProductsTable();
         $this->createProductDescriptionsTable();
+        $this->createProductVariantsTable();
+        $this->createProductVariantDescriptionsTable();
+        $this->createProductVariantDiscountsTable();
         $this->createCategoryProductTable();
         $this->createSlugsTable();
 
@@ -59,6 +66,19 @@ class ProductsCarouselModuleServicesTest extends TestCase
             'id' => 1,
             'code' => 'en',
             'name' => 'English',
+            'is_active' => true,
+            'is_default' => true,
+        ]);
+
+        DB::table('currencies')->insert([
+            'id' => 1,
+            'code' => 'UAH',
+            'name' => 'Hryvnia',
+            'format_locale' => 'uk_UA',
+            'symbol_left' => '',
+            'symbol_right' => '₴',
+            'decimal_places' => 2,
+            'exchange_rate' => 1,
             'is_active' => true,
             'is_default' => true,
         ]);
@@ -291,6 +311,12 @@ class ProductsCarouselModuleServicesTest extends TestCase
             ['product_id' => 30, 'language_id' => 1, 'name' => 'Flow Product Three', 'description' => 'd', 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
         ]);
 
+        DB::table('product_variants')->insert([
+            ['id' => 1010, 'product_id' => 10, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+            ['id' => 1020, 'product_id' => 20, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+            ['id' => 1030, 'product_id' => 30, 'is_default' => false, 'is_active' => false, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+        ]);
+
         DB::table('category_product')->insert([
             ['category_id' => 1, 'product_id' => 10],
             ['category_id' => 2, 'product_id' => 20],
@@ -301,9 +327,9 @@ class ProductsCarouselModuleServicesTest extends TestCase
 
         $results = $search_service->searchActiveByCategories('flow', [1]);
 
-        $this->assertArrayHasKey(10, $results);
-        $this->assertArrayNotHasKey(20, $results);
-        $this->assertArrayNotHasKey(30, $results);
+        $this->assertArrayHasKey(1010, $results);
+        $this->assertArrayNotHasKey(1020, $results);
+        $this->assertArrayNotHasKey(1030, $results);
     }
 
     public function test_category_scoped_search_excludes_already_selected_products(): void
@@ -315,6 +341,11 @@ class ProductsCarouselModuleServicesTest extends TestCase
         DB::table('products')->insert([
             ['id' => 110, 'model' => 'FLOW-110', 'sku' => 'SKU-110', 'ean' => 110, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => true, 'date_available' => now(), 'date_added' => now()],
             ['id' => 120, 'model' => 'FLOW-120', 'sku' => 'SKU-120', 'ean' => 120, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => true, 'date_available' => now(), 'date_added' => now()],
+        ]);
+
+        DB::table('product_variants')->insert([
+            ['id' => 1110, 'product_id' => 110, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+            ['id' => 1120, 'product_id' => 120, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
         ]);
 
         DB::table('product_descriptions')->insert([
@@ -329,10 +360,10 @@ class ProductsCarouselModuleServicesTest extends TestCase
 
         $search_service = app(ProductsCarouselProductSearchService::class);
 
-        $results = $search_service->searchActiveByCategories('flow', [1], [120]);
+        $results = $search_service->searchActiveByCategories('flow', [1], [1120]);
 
-        $this->assertArrayHasKey(110, $results);
-        $this->assertArrayNotHasKey(120, $results);
+        $this->assertArrayHasKey(1110, $results);
+        $this->assertArrayNotHasKey(1120, $results);
     }
 
     public function test_global_search_excludes_already_selected_products(): void
@@ -343,6 +374,12 @@ class ProductsCarouselModuleServicesTest extends TestCase
             ['id' => 230, 'model' => 'GLOBAL-230', 'sku' => 'SKU-230', 'ean' => 230, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => false, 'date_available' => now(), 'date_added' => now()],
         ]);
 
+        DB::table('product_variants')->insert([
+            ['id' => 1210, 'product_id' => 210, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+            ['id' => 1220, 'product_id' => 220, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+            ['id' => 1230, 'product_id' => 230, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+        ]);
+
         DB::table('product_descriptions')->insert([
             ['product_id' => 210, 'language_id' => 1, 'name' => 'Global Included', 'description' => 'd', 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
             ['product_id' => 220, 'language_id' => 1, 'name' => 'Global Excluded', 'description' => 'd', 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
@@ -351,11 +388,48 @@ class ProductsCarouselModuleServicesTest extends TestCase
 
         $search_service = app(ProductsCarouselProductSearchService::class);
 
-        $results = $search_service->searchAllActive('global', [220]);
+        $results = $search_service->searchAllActive('global', [1220]);
 
-        $this->assertArrayHasKey(210, $results);
-        $this->assertArrayNotHasKey(220, $results);
-        $this->assertArrayNotHasKey(230, $results);
+        $this->assertArrayHasKey(1210, $results);
+        $this->assertArrayNotHasKey(1220, $results);
+        $this->assertArrayNotHasKey(1230, $results);
+    }
+
+    public function test_variant_search_matches_product_fields_and_regular_or_discount_price(): void
+    {
+        DB::table('products')->insert([
+            ['id' => 300, 'model' => 'VARIANT-MODEL', 'sku' => 'VARIANT-SKU', 'ean' => 987654, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => true, 'date_available' => now(), 'date_added' => now()],
+        ]);
+
+        DB::table('product_descriptions')->insert([
+            ['product_id' => 300, 'language_id' => 1, 'name' => 'Variant Search Product', 'description' => null, 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
+        ]);
+
+        DB::table('product_variants')->insert([
+            ['id' => 301, 'product_id' => 300, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+            ['id' => 302, 'product_id' => 300, 'is_default' => false, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 200, 'sort_order' => 2],
+            ['id' => 303, 'product_id' => 300, 'is_default' => false, 'is_active' => false, 'quantity' => 5, 'minimum' => 1, 'price' => 300, 'sort_order' => 3],
+        ]);
+
+        DB::table('product_variant_discounts')->insert([
+            ['id' => 1, 'product_variant_id' => 302, 'user_group_id' => null, 'quantity' => 1, 'priority' => 1, 'price' => 150, 'date_start' => now()->subDay(), 'date_end' => now()->addDay()],
+        ]);
+
+        $search_service = app(ProductsCarouselProductSearchService::class);
+
+        $by_ean = $search_service->searchAllActive('987654');
+        $by_regular_price = $search_service->searchAllActive('VARIANT-SKU == 200');
+        $by_discount_price = $search_service->searchAllActive('Variant Search == 150');
+        $inactive_variant = $search_service->searchAllActive('Variant Search == 300');
+
+        $this->assertArrayHasKey(301, $by_ean);
+        $this->assertArrayHasKey(302, $by_ean);
+        $this->assertArrayHasKey(302, $by_regular_price);
+        $this->assertArrayHasKey(302, $by_discount_price);
+        $this->assertArrayNotHasKey(303, $inactive_variant);
+        $this->assertStringContainsString('Variant 1 (default)', $by_ean[301]);
+        $this->assertStringContainsString('Variant 2', $by_ean[302]);
+        $this->assertStringContainsString('discount:', $by_ean[302]);
     }
 
     public function test_runtime_resolver_applies_min_quantity_and_products_limit_for_manual_mode(): void
@@ -476,6 +550,23 @@ class ProductsCarouselModuleServicesTest extends TestCase
         });
     }
 
+    private function createCurrenciesTable(): void
+    {
+        Schema::create('currencies', function (Blueprint $table): void {
+            $table->id();
+            $table->string('code', 10);
+            $table->string('name');
+            $table->string('format_locale')->nullable();
+            $table->string('symbol_left')->nullable();
+            $table->string('symbol_right')->nullable();
+            $table->unsignedTinyInteger('decimal_places')->default(2);
+            $table->decimal('exchange_rate', 15, 6)->default(1);
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_default')->default(false);
+            $table->timestamps();
+        });
+    }
+
     private function createCategoriesTable(): void
     {
         Schema::create('categories', function (Blueprint $table): void {
@@ -530,6 +621,54 @@ class ProductsCarouselModuleServicesTest extends TestCase
             $table->string('meta_title')->nullable();
             $table->text('meta_description')->nullable();
             $table->text('meta_keywords')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    private function createProductVariantsTable(): void
+    {
+        Schema::create('product_variants', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('product_id');
+            $table->boolean('is_default')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('quantity')->default(0);
+            $table->unsignedInteger('minimum')->default(1);
+            $table->decimal('price', 15, 4)->default(0);
+            $table->string('image')->nullable();
+            $table->dateTime('date_available')->nullable();
+            $table->smallInteger('sort_order')->default(0);
+            $table->timestamps();
+        });
+    }
+
+    private function createProductVariantDescriptionsTable(): void
+    {
+        Schema::create('product_variant_descriptions', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('product_variant_id');
+            $table->unsignedBigInteger('language_id');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->string('h1_title')->nullable();
+            $table->string('meta_title')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->text('meta_keywords')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    private function createProductVariantDiscountsTable(): void
+    {
+        Schema::create('product_variant_discounts', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('product_variant_id');
+            $table->unsignedBigInteger('user_group_id')->nullable();
+            $table->unsignedInteger('quantity')->nullable();
+            $table->unsignedInteger('priority')->default(1);
+            $table->decimal('price', 15, 4)->default(0);
+            $table->dateTime('date_start');
+            $table->dateTime('date_end');
             $table->timestamps();
         });
     }

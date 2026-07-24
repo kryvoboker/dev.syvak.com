@@ -91,18 +91,22 @@ readonly class ProductsCarouselStorefrontService
                 $source_mode = (string) Arr::get($instance_settings, 'source_mode', 'category_based');
                 $runtime_shared_settings = $this->resolveRuntimeSharedSettings($instance_settings);
                 $localized_shared_content = $this->resolveLocalizedSharedContent($instance_settings);
+                $selected_variant_ids = $this->resolveSelectedVariantIdsForInstance($source_mode, $instance_settings);
                 $products = $this->resolveProductsForInstance(
                     $source_mode,
                     $instance_settings,
                     $runtime_shared_settings,
+                    $selected_variant_ids,
                 );
 
                 $products_payload = $products
-                    ->map(fn (Product $product): array => $this->mapProductCard(
+                    ->flatMap(fn (Product $product): array => $this->mapProductCards(
                         $product,
                         $runtime_shared_settings['product_image_width'],
                         $runtime_shared_settings['product_image_height'],
+                        $selected_variant_ids,
                     ))
+                    ->take($runtime_shared_settings['products_limit'])
                     ->values()
                     ->all();
 
@@ -247,10 +251,11 @@ readonly class ProductsCarouselStorefrontService
         string $source_mode,
         array $instance_settings,
         array $runtime_shared_settings,
+        array $selected_variant_ids,
     ): EloquentCollection {
         return match ($source_mode) {
-            'manual_only' => $this->resolveManualOnlyProducts($instance_settings, $runtime_shared_settings),
-            default => $this->resolveCategoryBasedProducts($instance_settings, $runtime_shared_settings),
+            'manual_only' => $this->resolveManualOnlyProducts($instance_settings, $runtime_shared_settings, $selected_variant_ids),
+            default => $this->resolveCategoryBasedProducts($instance_settings, $runtime_shared_settings, $selected_variant_ids),
         };
     }
 
@@ -269,6 +274,7 @@ readonly class ProductsCarouselStorefrontService
     private function resolveCategoryBasedProducts(
         array $instance_settings,
         array $runtime_shared_settings,
+        array $selected_variant_ids,
     ): EloquentCollection {
         $category_ids = $this->normalizeIds(Arr::get($instance_settings, 'category_based.category_ids', []));
 
@@ -278,20 +284,30 @@ readonly class ProductsCarouselStorefrontService
 
         $use_selected_products_only = (bool) Arr::get($instance_settings, 'category_based.use_selected_products_only', false);
 
-        $selected_product_ids = $this->products_carousel_product_filter_service->filterActiveProductIdsByCategories(
-            Arr::get($instance_settings, 'category_based.selected_product_ids', []),
+        $selected_variant_ids = $this->products_carousel_product_filter_service->filterActiveVariantIdsByCategories(
+            $selected_variant_ids,
             $category_ids,
         );
 
-        $products_query = $this->buildBaseProductsQuery($runtime_shared_settings['min_quantity'])
+        $products_query = $this->buildBaseProductsQuery(
+            $runtime_shared_settings['min_quantity'],
+            $selected_variant_ids,
+        )
             ->whereHas('categories', function (Builder $query) use ($category_ids): void {
                 $query->whereIn('categories.id', $category_ids);
             });
 
         if ($use_selected_products_only) {
-            if ($selected_product_ids === []) {
+            if ($selected_variant_ids === []) {
                 return new EloquentCollection();
             }
+
+            $selected_product_ids = ProductVariant::query()
+                ->whereIn('id', $selected_variant_ids)
+                ->orderByRaw('FIELD(id, ' . implode(',', $selected_variant_ids) . ')')
+                ->pluck('product_id')
+                ->map(fn (mixed $id): int => (int) $id)
+                ->all();
 
             $products_query
                 ->whereIn('id', $selected_product_ids)
@@ -328,16 +344,37 @@ readonly class ProductsCarouselStorefrontService
     private function resolveManualOnlyProducts(
         array $instance_settings,
         array $runtime_shared_settings,
+        array $selected_variant_ids = [],
     ): EloquentCollection {
-        $selected_product_ids = $this->products_carousel_product_filter_service->filterActiveProductIds(
-            Arr::get($instance_settings, 'manual_only.selected_product_ids', []),
-        );
+        if ($selected_variant_ids === []) {
+            $selected_product_ids = $this->products_carousel_product_filter_service->filterActiveProductIds(
+                Arr::get($instance_settings, 'manual_only.selected_product_ids', []),
+            );
 
-        if ($selected_product_ids === []) {
-            return new EloquentCollection();
+            if ($selected_product_ids === []) {
+                return new EloquentCollection();
+            }
+
+            return $this->buildBaseProductsQuery($runtime_shared_settings['min_quantity'])
+                ->whereIn('id', $selected_product_ids)
+                ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')')
+                ->limit($runtime_shared_settings['products_limit'])
+                ->get()
+                ->filter(fn (mixed $product): bool => $product instanceof Product)
+                ->values();
         }
 
-        $products = $this->buildBaseProductsQuery($runtime_shared_settings['min_quantity'])
+        $selected_product_ids = ProductVariant::query()
+            ->whereIn('id', $selected_variant_ids)
+            ->orderByRaw('FIELD(id, ' . implode(',', $selected_variant_ids) . ')')
+            ->pluck('product_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        $products = $this->buildBaseProductsQuery(
+            $runtime_shared_settings['min_quantity'],
+            $selected_variant_ids,
+        )
             ->whereIn('id', $selected_product_ids)
             ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')')
             ->limit($runtime_shared_settings['products_limit'])
@@ -348,32 +385,51 @@ readonly class ProductsCarouselStorefrontService
         return new EloquentCollection($products->all());
     }
 
-    private function buildBaseProductsQuery(int $min_quantity): Builder
+    private function buildBaseProductsQuery(int $min_quantity, array $selected_variant_ids = []): Builder
     {
         $language_id = $this->resolveLanguageId();
+        $relations = [
+            'productDescription' => function ($query) use ($language_id): void {
+                $query->where('language_id', $language_id);
+            },
+            'slugs' => function ($query) use ($language_id): void {
+                $query->where('language_id', $language_id);
+            },
+            'defaultVariant' => function ($query) use ($language_id): void {
+                $query->where('is_active', true)
+                    ->with([
+                        'descriptions' => function ($description_query) use ($language_id): void {
+                            $description_query->where('language_id', $language_id);
+                        },
+                        'slugs' => function ($slug_query) use ($language_id): void {
+                            $slug_query->where('language_id', $language_id);
+                        },
+                    ]);
+            },
+        ];
+
+        if ($selected_variant_ids !== []) {
+            $relations['variants'] = function ($query) use ($language_id, $selected_variant_ids): void {
+                $query
+                    ->where('is_active', true)
+                    ->whereIn('id', $selected_variant_ids)
+                    ->with([
+                        'descriptions' => function ($description_query) use ($language_id): void {
+                            $description_query->where('language_id', $language_id);
+                        },
+                        'slugs' => function ($slug_query) use ($language_id): void {
+                            $slug_query->where('language_id', $language_id);
+                        },
+                    ])
+                    ->orderBy('sort_order')
+                    ->orderBy('id');
+            };
+        }
 
         return Product::query()
             ->where('is_active', true)
             ->where('quantity', '>=', $min_quantity)
-            ->with([
-                'productDescription' => function ($query) use ($language_id): void {
-                    $query->where('language_id', $language_id);
-                },
-                'slugs' => function ($query) use ($language_id): void {
-                    $query->where('language_id', $language_id);
-                },
-                'defaultVariant' => function ($query) use ($language_id): void {
-                    $query->where('is_active', true)
-                        ->with([
-                            'descriptions' => function ($description_query) use ($language_id): void {
-                                $description_query->where('language_id', $language_id);
-                            },
-                            'slugs' => function ($slug_query) use ($language_id): void {
-                                $slug_query->where('language_id', $language_id);
-                            },
-                        ]);
-                },
-            ]);
+            ->with($relations);
     }
 
     /**
@@ -605,6 +661,79 @@ readonly class ProductsCarouselStorefrontService
     }
 
     /**
+     * @param  array<string, mixed>  $instance_settings
+     * @return array<int>
+     */
+    private function resolveSelectedVariantIdsForInstance(string $source_mode, array $instance_settings): array
+    {
+        $settings_path = $source_mode === 'manual_only'
+            ? 'manual_only'
+            : 'category_based';
+        $use_selected_products_only = $source_mode !== 'manual_only'
+            && (bool) Arr::get($instance_settings, 'category_based.use_selected_products_only', false);
+
+        if ($source_mode !== 'manual_only' && $use_selected_products_only === false) {
+            return [];
+        }
+
+        $selected_variant_ids = $this->normalizeIds(
+            Arr::get($instance_settings, $settings_path . '.selected_variant_ids', []),
+        );
+
+        if ($selected_variant_ids !== [] || Arr::has($instance_settings, $settings_path . '.selected_variant_ids')) {
+            return $this->products_carousel_product_filter_service->filterActiveVariantIds($selected_variant_ids);
+        }
+
+        $legacy_product_ids = $this->normalizeIds(
+            Arr::get($instance_settings, $settings_path . '.selected_product_ids', []),
+        );
+
+        if ($legacy_product_ids === []) {
+            return [];
+        }
+
+        return ProductVariant::query()
+            ->where('is_active', true)
+            ->where('is_default', true)
+            ->whereIn('product_id', $legacy_product_ids)
+            ->whereHas('product', function (Builder $query): void {
+                $query->where('is_active', true);
+            })
+            ->orderBy('id')
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+    }
+
+    /**
+     * @param  array<int>  $selected_variant_ids
+     */
+    private function mapProductCards(
+        Product $product,
+        int $product_image_width,
+        int $product_image_height,
+        array $selected_variant_ids,
+    ): array {
+        if ($selected_variant_ids === [] || ! $product->relationLoaded('variants')) {
+            return [$this->mapProductCard($product, $product_image_width, $product_image_height)];
+        }
+
+        $selected_variants = $product->variants
+            ->filter(fn (ProductVariant $variant): bool => in_array((int) $variant->id, $selected_variant_ids, true))
+            ->sortBy(fn (ProductVariant $variant): int => (int) array_search((int) $variant->id, $selected_variant_ids, true))
+            ->values();
+
+        return $selected_variants
+            ->map(fn (ProductVariant $variant): array => $this->mapProductCard(
+                $product,
+                $product_image_width,
+                $product_image_height,
+                $variant,
+            ))
+            ->all();
+    }
+
+    /**
      * @return array{
      *     id: int,
      *     name: string,
@@ -615,9 +744,13 @@ readonly class ProductsCarouselStorefrontService
      *     url: string|null
      * }
      */
-    private function mapProductCard(Product $product, int $product_image_width, int $product_image_height): array
-    {
-        $product_variant = $product->defaultVariant;
+    private function mapProductCard(
+        Product $product,
+        int $product_image_width,
+        int $product_image_height,
+        ?ProductVariant $selected_variant = null,
+    ): array {
+        $product_variant = $selected_variant ?? $product->defaultVariant;
         $product_variant_description = $product_variant instanceof ProductVariant
             ? $product_variant->descriptions->first()
             : null;

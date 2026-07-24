@@ -60,21 +60,24 @@ This is the default source mode.
 2. Products must be active and belong to at least one selected category.
 3. Products must have `quantity >= settings.shared.min_quantity`.
 4. Optionally enable **Show only specific products**.
-5. When that option is enabled, only selected active products from the selected categories are returned, preserving the selected-product order.
-6. When it is disabled, all matching products are sorted according to the sorting settings.
+5. When that option is enabled, select active product variants from the selected categories. Every selected variant is a separate carousel card, so several variants of one product can be displayed.
+6. When it is disabled, all matching products are sorted according to the sorting settings and use their default variant in the card.
 
 The category and product selectors remove inactive records while settings are normalized. Clearing all categories also clears the category-scoped selected products.
 
 ### Only selected products: `manual_only`
 
-This mode searches the complete active catalog and lets the administrator select products explicitly.
+This mode searches the complete active catalog and lets the administrator select product variants explicitly.
 
-- Each selected product must be active.
+- Only active variants of active products are searchable and selectable.
+- Search results identify the product, variant number, default status, regular price, and active discount price when available.
 - The minimum quantity filter still applies at storefront resolution time.
-- The final list preserves the selected product ID order.
+- The final list preserves the selected variant ID order.
 - The result is limited by `settings.shared.products_limit`.
 
-Search supports parts of a product name, model, or SKU. The category-based search is restricted to the selected categories; manual mode searches all active products.
+Search supports parts of a product name, SKU, model, or EAN. Append `== price` to match an exact regular or currently active discount price, for example `Garden Guardian == 1499.00`. The category-based search is restricted to the selected categories; manual mode searches all active variants.
+
+The normalized settings use `selected_variant_ids`. Existing instances that still contain `selected_product_ids` are converted to their active default variants during normalization; an explicitly empty `selected_variant_ids` remains empty.
 
 ## Sorting
 
@@ -97,7 +100,7 @@ Random mode generates a runtime sort sequence from the four supported fields and
 
 ## Default variant data
 
-The module eager-loads the active default variant and its current-locale description and slug. Product cards use the default variant for:
+The module eager-loads the active default variant and its current-locale description and slug. Product cards use the selected active variant when the instance is configured with explicit variants; otherwise they use the default variant for:
 
 - localized product name;
 - price;
