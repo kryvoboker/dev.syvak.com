@@ -52,8 +52,8 @@ class EditPaymentStatus extends EditRecord
      * @param Model $record
      * @param array $data
      *
-     * @return Model
      * @throws Halt
+     * @return Model
      */
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
