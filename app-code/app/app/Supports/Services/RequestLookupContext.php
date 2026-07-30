@@ -18,8 +18,11 @@ final class RequestLookupContext
 
     /** @var Collection<int, ModuleDefinition>|null */
     private ?Collection $enabled_module_definitions = null;
-    private ?Language   $language_by_code           = null;
-    private ?Language   $default_language           = null;
+    /**
+     * @var array<string, Language|null>
+     */
+    private array $languages_by_code = [];
+    private ?Language $default_language = null;
 
     /**
      * @return Collection<int, Language>
@@ -37,7 +40,11 @@ final class RequestLookupContext
      */
     public function getLanguageByCode(string $code): ?Language
     {
-        return $this->language_by_code ??= app(Language::class)
+        if (array_key_exists($code, $this->languages_by_code)) {
+            return $this->languages_by_code[$code];
+        }
+
+        return $this->languages_by_code[$code] = app(Language::class)
             ->getLanguageByCode($code);
     }
 
@@ -46,7 +53,7 @@ final class RequestLookupContext
      */
     public function forgetLanguageByCode(): void
     {
-        $this->language_by_code = null;
+        $this->languages_by_code = [];
     }
 
     /**
