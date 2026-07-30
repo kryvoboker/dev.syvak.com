@@ -43,21 +43,19 @@
                 @endif
 
                 <div class="hidden lg:flex lg:items-center lg:justify-between lg:gap-x-8 uppercase">
-                    <button class=""
+                    <button class="uppercase"
                             type="button"
                             aria-haspopup="dialog"
                             aria-expanded="false"
-                            aria-controls="{{ __('catalog/default.labels.toggle_catalog_menu') }}">
+                            aria-controls="{{ __('catalog/default.aria_labels.toggle_catalog_menu') }}">
                         {{ __('catalog/default.buttons.catalog') }}
                     </button>
 
-                    <a href="{{ localized_route('localized.catalog.category.show', ['slug' => $header_data['hoodie_category']['slug']]) }}">
-                        {{ $header_data['hoodie_category']['descriptions']['name'] }}
-                    </a>
-
-                    <a href="{{ localized_route('localized.catalog.category.show', ['slug' => $header_data['exclusive_gifts_category']['slug']]) }}">
-                        {{ $header_data['exclusive_gifts_category']['descriptions']['name'] }}
-                    </a>
+                    @foreach($header_data['header_categories'] ?? [] as $header_category)
+                        <a href="{{ localized_route('localized.catalog.category.show', ['slug' => $header_category['slug']]) }}">
+                            {{ $header_category['descriptions']['name'] }}
+                        </a>
+                    @endforeach
                 </div>
 
                 <div class="flex items-center justify-between gap-x-7">

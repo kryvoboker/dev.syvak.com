@@ -257,10 +257,6 @@ return [
             'image_path' => env('AVATARS_PATH') . '/' . date('Y/m'),
         ],
     ],
-    'categories' => [
-        'hoodie_id' => (int) env('CATEGORY_HOODIE_ID'),
-        'exclusive_gifts_id' => (int) env('CATEGORY_EXCLUSIVE_GIFTS_ID'),
-    ],
     'products' => [
         'minimum_stock_quantity' => (int) env('PRODUCT_MINIMUM_STOCK_QUANTITY'),
         'search_products_per_page' => (int) env('SEARCH_PRODUCTS_PER_PAGE'),

@@ -12,6 +12,10 @@ return [
         'localized_content' => 'Локалізований контент',
     ],
 
+    'sections' => [
+        'header_categories' => 'Категорії в хедері',
+    ],
+
     'labels' => [
         'products_per_page_limit' => 'Ліміт товарів на сторінці',
         'is_ajax_products_loading_enabled' => 'Увімкнути AJAX підгрузку товарів',
@@ -39,14 +43,22 @@ return [
         'sorting_description' => 'Опис блоку сортування',
         'option_labels' => 'Підписи опцій',
         'option_label_value' => 'Підпис опції',
+        'header_categories' => 'Категорії, які відображаються в хедері',
+        'header_category' => 'Категорія',
     ],
 
     'actions' => [
         'open_wiki' => 'Відкрити wiki налаштувань',
+        'add_header_category' => 'Додати категорію в хедер',
+    ],
+
+    'placeholders' => [
+        'header_category' => 'Пошук активних категорій',
     ],
 
     'helpers' => [
         'category_no_image_path' => 'Зображення, яке використовується, якщо у категорії немає власного.',
         'category_image_upload_directory' => 'Використовуйте плейсхолдери {year} і {month} (наприклад: images/categories/{year}/{month}).',
+        'header_categories' => 'Пошук виконується за всіма активними мовами. Перетягуйте категорії, щоб змінити їх порядок у хедері сайту.',
     ],
 ];

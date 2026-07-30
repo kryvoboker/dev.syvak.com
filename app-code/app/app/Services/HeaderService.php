@@ -6,7 +6,12 @@ namespace App\Services;
 
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;
+use App\Services\PageSettings\HeaderCategoryService;
+use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class HeaderService
 {
@@ -33,6 +38,7 @@ class HeaderService
                     'slug' => $category->slugs->first()->slug,
                 ];
             });
+        $header_categories = $this->resolveHeaderCategories((int) $app_settings->language_id);
         $languages = (new Language())->getActiveLanguages();
         $logo_width = (int) ($logo_sizes['width'] ?? config('app.images.logo_width'));
         $logo_height = (int) ($logo_sizes['height'] ?? config('app.images.logo_height'));
@@ -57,8 +63,7 @@ class HeaderService
             ],
             'breadcrumbs' => $params['breadcrumbs'] ?? [],
             'categories' => $categories,
-            'hoodie_category' => $categories->firstWhere('id', (int) config('app.categories.hoodie_id')),
-            'exclusive_gifts_category' => $categories->firstWhere('id', (int) config('app.categories.exclusive_gifts_id')),
+            'header_categories' => $header_categories,
             'languages' => $languages,
             'menu_data' => $this->processCreateMainMenu($categories, $languages),
             'socials' => $socials,
@@ -67,6 +72,46 @@ class HeaderService
             'variant_slug' => $params['variant_slug'] ?? null,
             'attribute_filters' => is_array($params['attribute_filters'] ?? null) ? $params['attribute_filters'] : [],
         ];
+    }
+
+    /**
+     * @return array<int, array{id:int, descriptions:array<string, mixed>, slug:string}>
+     */
+    private function resolveHeaderCategories(int $language_id): array
+    {
+        try {
+            $settings = app(PageSettingsBootstrapService::class)->getCategorySettings();
+            $category_ids = app(HeaderCategoryService::class)->normalizeCategoryIds(
+                Arr::get($settings, 'header.categories', []),
+            );
+
+            return app(HeaderCategoryService::class)
+                ->getActiveCategories($category_ids, $language_id)
+                ->map(function (Category $category): ?array {
+                    $description = $category->categoryDescription->first();
+                    $slug = $category->slugs->first()?->slug;
+
+                    if ($description === null || blank($description->name) || blank($slug)) {
+                        return null;
+                    }
+
+                    return [
+                        'id' => (int) $category->id,
+                        'descriptions' => $description->toArray(),
+                        'slug' => (string) $slug,
+                    ];
+                })
+                ->filter()
+                ->values()
+                ->all();
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->warning('Header categories payload resolution failed.', [
+                'language_id' => $language_id,
+                'exception' => $throwable,
+            ]);
+
+            return [];
+        }
     }
 
     /**
