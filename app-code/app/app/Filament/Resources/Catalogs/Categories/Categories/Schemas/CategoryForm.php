@@ -9,6 +9,7 @@ use App\Filament\Resources\Trait\Forms\SlugFormTrait;
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;
+use App\Services\PageSettings\HeaderCategoryService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -101,6 +102,17 @@ class CategoryForm
                         Toggle::make('is_active')
                             ->label(__('admin/default.labels.is_active'))
                             ->default(true)
+                            ->required(),
+
+                        Toggle::make('show_in_header')
+                            ->label(__('admin/default.labels.show_in_header'))
+                            ->helperText(__('admin/default.helpers.show_in_header'))
+                            ->default(fn (?Category $record): bool => $record instanceof Category
+                                && in_array(
+                                    (int) $record->id,
+                                    app(HeaderCategoryService::class)->getSelectedCategoryIds(),
+                                    true,
+                                ))
                             ->required(),
 
                         TextInput::make('sort_order')

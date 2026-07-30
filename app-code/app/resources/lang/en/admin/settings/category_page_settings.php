@@ -12,6 +12,10 @@ return [
         'localized_content' => 'Localized content',
     ],
 
+    'sections' => [
+        'header_categories' => 'Header categories',
+    ],
+
     'labels' => [
         'products_per_page_limit' => 'Products per page limit',
         'is_ajax_products_loading_enabled' => 'Enable AJAX products loading',
@@ -39,14 +43,22 @@ return [
         'sorting_description' => 'Sorting block description',
         'option_labels' => 'Option labels',
         'option_label_value' => 'Option label',
+        'header_categories' => 'Categories displayed in the header',
+        'header_category' => 'Category',
     ],
 
     'actions' => [
         'open_wiki' => 'Open settings wiki',
+        'add_header_category' => 'Add header category',
+    ],
+
+    'placeholders' => [
+        'header_category' => 'Search active categories',
     ],
 
     'helpers' => [
         'category_no_image_path' => 'Image used when category has no own image.',
         'category_image_upload_directory' => 'Use placeholders {year} and {month} (for example: images/categories/{year}/{month}).',
+        'header_categories' => 'Search works across all active languages. Drag categories to change their order in the storefront header.',
     ],
 ];

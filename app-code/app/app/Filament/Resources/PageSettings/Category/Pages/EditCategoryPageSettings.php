@@ -8,6 +8,7 @@ use App\Filament\Pages\Wiki\CategoryPageSettingsWikiPage;
 use App\Filament\Resources\PageSettings\Category\CategoryPageSettingResource;
 use App\Models\ApplicationSettings\Language;
 use App\Models\PageSettings\PageSetting;
+use App\Services\PageSettings\HeaderCategoryService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
@@ -69,6 +70,7 @@ class EditCategoryPageSettings extends EditRecord
         $data['is_sorting_enabled'] = (bool) Arr::get($record_settings, 'ui.sorting.enabled', true);
         $data['localized_content'] = $this->mapLocalizedContentForForm($record_settings);
         $data['sorting_items'] = $this->mapSortingItemsForForm($record_settings);
+        $data['header_categories'] = $this->mapHeaderCategoriesForForm($record_settings);
         $data['products_per_page_limit'] = (int) Arr::get(
             $record_settings,
             'pagination.products_per_page_limit',
@@ -224,6 +226,16 @@ class EditCategoryPageSettings extends EditRecord
         );
 
         Arr::set($settings, 'meta.contract_version', 2);
+        Arr::set(
+            $settings,
+            'header.categories',
+            app(HeaderCategoryService::class)->normalizeActiveCategoryIds(
+                collect((array) Arr::get($data, 'header_categories', []))
+                    ->filter(fn (mixed $item): bool => is_array($item))
+                    ->map(fn (array $item): mixed => $item['category_id'] ?? null)
+                    ->all(),
+            ),
+        );
         Arr::set($settings, 'ui.sorting.enabled', (bool) Arr::get($data, 'is_sorting_enabled', true));
         Arr::set($settings, 'ui.filtering.enabled', (bool) Arr::get($settings, 'ui.filtering.enabled', false));
         Arr::set($settings, 'pagination.products_per_page_limit', max(1, (int) Arr::get($data, 'products_per_page_limit', 20)));
@@ -313,6 +325,22 @@ class EditCategoryPageSettings extends EditRecord
             ->sortBy('sort_order')
             ->values()
             ->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $settings
+     * @return array<int, array{category_id:int}>
+     */
+    private function mapHeaderCategoriesForForm(array $settings): array
+    {
+        $category_ids = app(HeaderCategoryService::class)->normalizeActiveCategoryIds(
+            Arr::get($settings, 'header.categories', []),
+        );
+
+        return array_map(
+            fn (int $category_id): array => ['category_id' => $category_id],
+            $category_ids,
+        );
     }
 
     /**

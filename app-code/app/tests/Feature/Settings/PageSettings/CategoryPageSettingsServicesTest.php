@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Settings\PageSettings;
 
+use App\Filament\Resources\PageSettings\Category\Pages\EditCategoryPageSettings;
 use App\Models\PageSettings\PageSetting;
 use App\Services\PageSettings\CategoryPageFilterSyncService;
+use App\Services\PageSettings\HeaderCategoryService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use ReflectionMethod;
 use Tests\TestCase;
 
 class CategoryPageSettingsServicesTest extends TestCase
@@ -61,6 +64,79 @@ class CategoryPageSettingsServicesTest extends TestCase
         $this->assertArrayHasKey('1', $localized);
         $this->assertArrayHasKey('2', $localized);
         $this->assertArrayNotHasKey('option_labels', (array) Arr::get($localized, '1', []));
+        $this->assertSame([], data_get($page_setting->settings, 'header.categories'));
+
+        $page_setting->refresh();
+
+        $this->assertSame([], data_get($page_setting->settings, 'header.categories'));
+    }
+
+    public function test_header_category_search_matches_all_active_languages_and_returns_current_locale_label(): void
+    {
+        app()->setLocale('en');
+
+        DB::table('categories')->insert([
+            ['id' => 101, 'parent_id' => null, 'sort_order' => 1, 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 102, 'parent_id' => null, 'sort_order' => 2, 'is_active' => false, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        DB::table('category_descriptions')->insert([
+            ['category_id' => 101, 'language_id' => 1, 'name' => 'Gift boxes', 'created_at' => now(), 'updated_at' => now()],
+            ['category_id' => 101, 'language_id' => 2, 'name' => 'Подарункові набори', 'created_at' => now(), 'updated_at' => now()],
+            ['category_id' => 102, 'language_id' => 2, 'name' => 'Подарунки inactive', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        $options = app(HeaderCategoryService::class)->searchOptions('Подарункові');
+
+        $this->assertSame(['101' => 'Gift boxes'], $options);
+        $this->assertSame([101], app(HeaderCategoryService::class)->normalizeCategoryIds([101, '101', 0, -2]));
+        $this->assertSame([101], app(HeaderCategoryService::class)->normalizeActiveCategoryIds([101, 102]));
+    }
+
+    public function test_category_page_settings_normalize_header_categories_preserves_order_and_filters_inactive_ids(): void
+    {
+        DB::table('categories')->insert([
+            ['id' => 101, 'parent_id' => null, 'sort_order' => 1, 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 102, 'parent_id' => null, 'sort_order' => 2, 'is_active' => false, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        $page_setting = app(PageSettingsBootstrapService::class)->bootstrapCategoryPageSetting();
+        $page = app(EditCategoryPageSettings::class);
+        $method = new ReflectionMethod(EditCategoryPageSettings::class, 'normalizeSettingsContract');
+        $method->setAccessible(true);
+
+        /** @var array<string, mixed> $settings */
+        $settings = $method->invoke($page, $page_setting, [
+            'header_categories' => [
+                ['category_id' => 101],
+                ['category_id' => '101'],
+                ['category_id' => 102],
+            ],
+        ]);
+
+        $this->assertSame([101], data_get($settings, 'header.categories'));
+    }
+
+    public function test_header_category_visibility_updates_the_shared_settings_selection(): void
+    {
+        DB::table('categories')->insert([
+            ['id' => 101, 'parent_id' => null, 'sort_order' => 1, 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 102, 'parent_id' => null, 'sort_order' => 2, 'is_active' => false, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        $service = app(HeaderCategoryService::class);
+        $service->setCategoryVisibility(101, true);
+
+        $page_setting = PageSetting::query()->where('page_type', PageSetting::PAGE_TYPE_CATEGORY)->firstOrFail();
+
+        $this->assertSame([101], data_get($page_setting->settings, 'header.categories'));
+        $this->assertSame([101], $service->getSelectedCategoryIds());
+
+        $service->setCategoryVisibility(102, true);
+        $this->assertSame([101], data_get($page_setting->fresh()->settings, 'header.categories'));
+
+        $service->setCategoryVisibility(101, false);
+        $this->assertSame([], data_get($page_setting->fresh()->settings, 'header.categories'));
     }
 
     public function test_filter_sync_is_idempotent_and_generates_expected_get_contracts(): void
