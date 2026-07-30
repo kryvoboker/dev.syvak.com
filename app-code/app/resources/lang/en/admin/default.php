@@ -44,6 +44,7 @@ return [
         'viewed' => 'Viewed',
         'image' => 'Image',
         'is_active' => 'Is Active',
+        'show_in_header' => 'Shown in header',
         'is_default' => 'Is Default',
         'is_noindex' => 'Is Noindex Page',
         'created_at' => 'Created At',
@@ -71,6 +72,7 @@ return [
         'date_available' => 'Date Available',
         'date_added' => 'Date Added',
         'is_active' => 'Is Active',
+        'show_in_header' => 'Show in header',
         'is_default' => 'Is Default',
         'name' => 'Name',
         'format_locale' => 'Format Locale',
@@ -129,6 +131,7 @@ return [
     'helpers' => [
         'categories' => 'Select the categories',
         'parent_category' => 'Select the parent category under which this category will be nested. Leave empty to make it a top-level category.',
+        'show_in_header' => 'Controls whether this category is displayed among the storefront header links.',
         'svg_icon' => 'You can paste an SVG icon code here. Make sure the SVG code does not contain any <code>&lt;script&gt;</code> tags for security reasons.',
         'max_upload_size_mb' => 'Maximum file size: :size MB.',
     ],
@@ -224,5 +227,6 @@ return [
         'something_went_wrong' => 'Something went wrong. Please try again later.',
         'category_path_not_found' => 'Category path <b>:id</b> not found!',
         'create_or_update_slugs_failed' => 'Creating or updating slugs (SEO URLs) failed for some languages. Please check the slugs and try again. Perhaps one of the slugs (SEO URLs) already exists.',
+        'min_search_length' => 'Minimal characters for search is :length!'
     ],
 ];

@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Catalogs\Categories\Categories\Pages;
 use App\Filament\Resources\Catalogs\Categories\Categories\CategoryResource;
 use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Categories\Category;
+use App\Services\PageSettings\HeaderCategoryService;
 use Exception;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,8 @@ class CreateCategory extends CreateRecord
 
     protected ?string $icon = null;
 
+    protected bool $show_in_header = false;
+
     public ?Model $record = null;
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -36,8 +39,9 @@ class CreateCategory extends CreateRecord
         $this->preview_image = $data['preview_image'] ?? null;
         $this->icon = $data['icon'] ?? null;
         $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->show_in_header = (bool) ($data['show_in_header'] ?? false);
 
-        unset($data['descriptions'], $data['preview_image'], $data['icon'], $data['slugs']);
+        unset($data['descriptions'], $data['preview_image'], $data['icon'], $data['slugs'], $data['show_in_header']);
 
         return $data;
     }
@@ -55,6 +59,7 @@ class CreateCategory extends CreateRecord
 
             $this->createDescriptions();
             $this->getCategoryRecord()->rebuildPaths();
+            app(HeaderCategoryService::class)->setCategoryVisibility((int) $this->getCategoryRecord()->id, $this->show_in_header);
 
             return $this->record;
         });

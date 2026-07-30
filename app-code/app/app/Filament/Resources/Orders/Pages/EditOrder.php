@@ -219,8 +219,6 @@ class EditOrder extends EditRecord
                 ->send();
 
             $this->halt();
-
-            throw new LogicException('Order update was halted.');
         }
     }
 

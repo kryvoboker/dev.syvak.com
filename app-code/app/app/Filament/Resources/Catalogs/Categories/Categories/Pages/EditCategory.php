@@ -8,6 +8,7 @@ use App\Filament\Resources\Catalogs\Categories\Categories\CategoryResource;
 use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryDescription;
+use App\Services\PageSettings\HeaderCategoryService;
 use Exception;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -29,6 +30,8 @@ class EditCategory extends EditRecord
     protected ?string $preview_image = null;
 
     protected ?string $icon = null;
+
+    protected bool $show_in_header = false;
 
     #[Locked]
     public int|string|Model|null $record = null;
@@ -66,6 +69,11 @@ class EditCategory extends EditRecord
             ->toArray();
 
         $data['descriptions'] = $descriptions;
+        $data['show_in_header'] = in_array(
+            (int) $record->id,
+            app(HeaderCategoryService::class)->getSelectedCategoryIds(),
+            true,
+        );
 
         $this->getSlugs($data);
 
@@ -78,8 +86,9 @@ class EditCategory extends EditRecord
         $this->preview_image = $data['preview_image'] ?? null;
         $this->icon = $data['icon'] ?? null;
         $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->show_in_header = (bool) ($data['show_in_header'] ?? false);
 
-        unset($data['descriptions'], $data['preview_image'], $data['icon'], $data['slugs']);
+        unset($data['descriptions'], $data['preview_image'], $data['icon'], $data['slugs'], $data['show_in_header']);
 
         return $data;
     }
@@ -102,6 +111,7 @@ class EditCategory extends EditRecord
             $this->updateDescriptions();
             $record->rebuildPaths();
             $this->rebuildChildrenPaths($record->id);
+            app(HeaderCategoryService::class)->setCategoryVisibility($record->id, $this->show_in_header);
 
             return $record;
         });
