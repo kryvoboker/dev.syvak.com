@@ -5,6 +5,7 @@ import type HSOverlay from 'flyonui/src/js/plugins/overlay';
 
 export interface WindowAppParams {
     page_type?: string | null;
+    current_device_type?: string | null;
     catalog_filter_ajax_url?: string | null;
     catalog_filter_price_data?: {
         get_extra?: {

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Users\Users\Pages;
 
 use App\Filament\Resources\Users\Users\UserResource;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 
 class EditUser extends EditRecord
 {
@@ -15,7 +17,12 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 

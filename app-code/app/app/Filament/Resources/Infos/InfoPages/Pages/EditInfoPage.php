@@ -9,9 +9,11 @@ use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\Infos\InfoPage;
 use App\Models\Infos\InfoPageDescription;
 use Exception;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -130,7 +132,12 @@ class EditInfoPage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 

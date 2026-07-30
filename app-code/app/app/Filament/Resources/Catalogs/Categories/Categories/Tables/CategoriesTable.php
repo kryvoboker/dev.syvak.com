@@ -87,7 +87,7 @@ class CategoriesTable
                     }),
 
                 ImageColumn::make('icon')
-                    ->label(__('admin/default.columns.image'))
+                    ->label(__('admin/default.columns.icon'))
                     ->imageSize($preview_list_width)
                     ->checkFileExistence()
                     ->defaultImageUrl(Storage::url($no_image_path))
@@ -101,6 +101,25 @@ class CategoriesTable
 
                         return $category_image?->icon
                             ? Storage::url($category_image->icon)
+                            : null;
+                    }),
+
+                ImageColumn::make('image')
+                    ->label(__('admin/default.columns.image'))
+                    ->imageSize($preview_list_width)
+                    ->checkFileExistence()
+                    ->defaultImageUrl(Storage::url($no_image_path))
+                    ->extraImgAttributes([
+                        'decoding' => 'async',
+                        'loading' => 'lazy',
+                        'style' => 'object-fit: contain; background-color: #f9f9f9;',
+                    ])
+                    ->toggleable()
+                    ->getStateUsing(function (Category $category): ?string {
+                        $category_image = $category->categoryImage()->first();
+
+                        return $category_image?->preview_image
+                            ? Storage::url($category_image->preview_image)
                             : null;
                     }),
 

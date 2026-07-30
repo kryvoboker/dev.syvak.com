@@ -1,4 +1,5 @@
 @include('catalog.pages.partials.common.main-mob-menu')
+@include('catalog.pages.partials.common.main-pc-menu')
 @include('catalog.pages.partials.search.mob-search')
 @include('catalog.pages.partials.search.pc-search')
 
@@ -7,10 +8,11 @@
         <div class="container">
             <div class="flex items-center justify-between gap-x-1">
                 <button class="burger-menu open-main-mob-menu-btn lg:hidden"
+                        id="open-main-mob-menu-btn"
                         type="button"
                         aria-haspopup="dialog"
                         aria-expanded="false"
-                        aria-controls="{{ __('catalog/default.labels.toggle_main_menu') }}">
+                        aria-controls="{{ __('catalog/default.aria_labels.toggle_main_menu') }}">
                     <span class="icon-[qlementine-icons--menu-burger-16] custom-icon"></span>
                 </button>
 
@@ -43,11 +45,12 @@
                 @endif
 
                 <div class="hidden lg:flex lg:items-center lg:justify-between lg:gap-x-8 uppercase">
-                    <button class="uppercase"
+                    <button class="open-main-pc-menu-btn uppercase"
+                            id="open-main-pc-menu-btn"
                             type="button"
                             aria-haspopup="dialog"
                             aria-expanded="false"
-                            aria-controls="{{ __('catalog/default.aria_labels.toggle_catalog_menu') }}">
+                            aria-controls="main-pc-menu">
                         {{ __('catalog/default.buttons.catalog') }}
                     </button>
 

@@ -53,20 +53,21 @@ class EditProduct extends EditRecord
                 ->label('')
                 ->icon(Heroicon::Eye)
                 ->tooltip(__('actions.view'))
-                ->url(fn(): ?string => self::getStorefrontProductUrl($this->getProductRecord(), self::getCurrentLanguageId()))
-                ->visible(fn(): bool => self::getStorefrontProductUrl($this->getProductRecord(), self::getCurrentLanguageId()) !== null)
+                ->url(fn (): ?string => self::getStorefrontProductUrl($this->getProductRecord(), self::getCurrentLanguageId()))
+                ->visible(fn (): bool => self::getStorefrontProductUrl($this->getProductRecord(), self::getCurrentLanguageId()) !== null)
                 ->openUrlInNewTab(),
             Action::make('save')
                 ->label(__('admin/default.buttons.save'))
                 ->icon(Heroicon::CheckCircle)
-                ->action(fn() => $this->save()),
+                ->action(fn () => $this->save()),
             Action::make('manage_variants')
                 ->label(__('admin/catalogs/products/products.actions.manage_variants'))
                 ->icon(Heroicon::RectangleStack)
-                ->url(fn(): string => ProductVariantResource::getUrl('index', [
+                ->url(fn (): string => ProductVariantResource::getUrl('index', [
                     'product' => (int)data_get($this->getProductRecord(), 'id'),
                 ])),
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 
@@ -77,26 +78,26 @@ class EditProduct extends EditRecord
         $descriptions = $record->productDescription()
             ->get()
             ->keyBy('language_id')
-            ->map(fn(ProductDescription $desc) => [
-                'language_id'      => $desc->language_id,
-                'name'             => $desc->name,
-                'description'      => $desc->description,
-                'meta_title'       => $desc->meta_title,
+            ->map(fn (ProductDescription $desc) => [
+                'language_id' => $desc->language_id,
+                'name' => $desc->name,
+                'description' => $desc->description,
+                'meta_title' => $desc->meta_title,
                 'meta_description' => $desc->meta_description,
-                'meta_keywords'    => $desc->meta_keywords,
+                'meta_keywords' => $desc->meta_keywords,
             ])
             ->toArray();
 
         $data['descriptions'] = $descriptions;
-        $data['categories']   = $record->categories()
+        $data['categories'] = $record->categories()
             ->pluck('categories.id')
-            ->map(fn(mixed $category_id): int => (int)$category_id)
+            ->map(fn (mixed $category_id): int => (int)$category_id)
             ->all();
-        $data['images']       = $record->defaultVariant?->images()
+        $data['images'] = $record->defaultVariant?->images()
             ->orderBy('sort_order')
             ->get()
-            ->map(fn($image): array => [
-                'image'      => $image->image,
+            ->map(fn ($image): array => [
+                'image' => $image->image,
                 'sort_order' => (int)$image->sort_order,
             ])
             ->values()
@@ -114,8 +115,8 @@ class EditProduct extends EditRecord
     {
         $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
         $this->category_ids = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
-        $this->slugs        = trim_strs_in_arr($data['slugs'] ?? []);
-        $this->images       = trim_strs_in_arr($data['images'] ?? []);
+        $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->images = trim_strs_in_arr($data['images'] ?? []);
         $this->validateProductSlugsUniqueness();
 
         unset($data['descriptions'], $data['categories'], $data['slugs'], $data['images']);
@@ -158,20 +159,20 @@ class EditProduct extends EditRecord
                 $this->getProductRecord()->productDescription()->updateOrCreate(
                     ['language_id' => (int)$language_id],
                     [
-                        'name'             => $description['name'],
-                        'description'      => $description['description'] ?? null,
-                        'meta_title'       => $description['meta_title'] ?? null,
+                        'name' => $description['name'],
+                        'description' => $description['description'] ?? null,
+                        'meta_title' => $description['meta_title'] ?? null,
                         'meta_description' => $description['meta_description'] ?? null,
-                        'meta_keywords'    => $description['meta_keywords'] ?? null,
+                        'meta_keywords' => $description['meta_keywords'] ?? null,
                     ],
                 );
             }
         }
 
         $filled_language_ids = collect($this->descriptions)
-            ->filter(fn($desc) => !empty($desc['name']))
+            ->filter(fn ($desc) => !empty($desc['name']))
             ->keys()
-            ->map(fn($id) => (int)$id)
+            ->map(fn ($id) => (int)$id)
             ->toArray();
 
         if (!empty($filled_language_ids)) {
@@ -186,14 +187,14 @@ class EditProduct extends EditRecord
         $default_variant = $this->resolveDefaultVariant();
 
         $prepared_images = collect($this->images)
-            ->filter(fn(mixed $image): bool => is_array($image))
+            ->filter(fn (mixed $image): bool => is_array($image))
             ->map(function (array $image_data): array {
                 return [
-                    'image'      => (string)($image_data['image'] ?? ''),
+                    'image' => (string)($image_data['image'] ?? ''),
                     'sort_order' => max(0, (int)($image_data['sort_order'] ?? 0)),
                 ];
             })
-            ->filter(fn(array $image_data): bool => filled($image_data['image']))
+            ->filter(fn (array $image_data): bool => filled($image_data['image']))
             ->values()
             ->all();
 
@@ -205,8 +206,8 @@ class EditProduct extends EditRecord
 
         $default_variant->images()->createMany(
             collect($prepared_images)
-                ->map(fn(array $image_data): array => [
-                    'image'      => $image_data['image'],
+                ->map(fn (array $image_data): array => [
+                    'image' => $image_data['image'],
                     'sort_order' => $image_data['sort_order'],
                     'is_primary' => false,
                 ])
@@ -223,16 +224,16 @@ class EditProduct extends EditRecord
         }
 
         $default_variant = ProductVariant::query()->create([
-            'product_id'                => (int)$product->id,
-            'is_default'                => true,
-            'is_active'                 => (bool)$product->is_active,
-            'quantity'                  => (int)$product->quantity,
-            'minimum'                   => max(1, (int)$product->minimum),
-            'price'                     => (float)$product->price,
-            'image'                     => $product->image,
-            'date_available'            => $product->date_available,
-            'sort_order'                => 0,
-            'size_guide_data'           => null,
+            'product_id' => (int)$product->id,
+            'is_default' => true,
+            'is_active' => (bool)$product->is_active,
+            'quantity' => (int)$product->quantity,
+            'minimum' => max(1, (int)$product->minimum),
+            'price' => (float)$product->price,
+            'image' => $product->image,
+            'date_available' => $product->date_available,
+            'sort_order' => 0,
+            'size_guide_data' => null,
             'composition_and_care_data' => null,
         ]);
 

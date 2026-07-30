@@ -59,7 +59,7 @@ class AppServiceProvider extends ServiceProvider
             $this->app->register(TelescopeServiceProvider::class);
         }
 
-        $this->app->scoped(Language::class);
+        $this->app->singleton(Language::class);
         $this->app->singleton(HeaderService::class);
         $this->app->singleton(FooterService::class);
         $this->app->singleton(ImageUrlBuilderService::class);
