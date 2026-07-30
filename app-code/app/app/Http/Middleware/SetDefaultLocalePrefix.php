@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,18 +21,19 @@ class SetDefaultLocalePrefix
      */
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
-        $allowed_locales           = get_allowed_locales();
-        $path_info                 = Str::ltrim($request->getPathInfo(), '/');
-        $is_livewire_request       = Str::startsWith($path_info, ['livewire-', 'livewire/']);
-        $locale_key                = config('localization.locale_parameter');
-        $fallback_locale           = $this->resolveFallbackLocale($allowed_locales);
-        $session_locale            = session($locale_key);
+        $allowed_locales = get_allowed_locales();
+        $path_info = Str::ltrim($request->getPathInfo(), '/');
+        $is_livewire_request = Str::startsWith($path_info, ['livewire-', 'livewire/']);
+        $locale_key = config('localization.locale_parameter');
+        $fallback_locale = $this->resolveFallbackLocale($allowed_locales);
+        $session_locale = session($locale_key);
         $normalized_session_locale = in_array($session_locale, $allowed_locales, true)
             ? $session_locale
             : $fallback_locale;
-        $language_id               = resolve_language_by_locale($normalized_session_locale)?->id;
 
         if ($is_livewire_request) {
+            $language_id = resolve_language_by_locale($normalized_session_locale)?->id;
+
             session()->put($locale_key, $normalized_session_locale);
             app()->setLocale($normalized_session_locale);
             url()->defaults([$locale_key => $normalized_session_locale]);
@@ -41,10 +43,10 @@ class SetDefaultLocalePrefix
             return $next($request);
         }
 
-        $route                  = $request->route();
-        $route_name             = $route?->getName();
-        $route_locale           = $route?->parameter($locale_key);
-        $has_locale_parameter   = in_array($locale_key, $route?->parameterNames() ?? [], true);
+        $route = $request->route();
+        $route_name = $route?->getName();
+        $route_locale = $route?->parameter($locale_key);
+        $has_locale_parameter = in_array($locale_key, $route?->parameterNames() ?? [], true);
         $has_valid_route_locale = in_array($route_locale, $allowed_locales, true);
 
         if ($has_locale_parameter && !$has_valid_route_locale && filled($route_name)) {
@@ -60,13 +62,20 @@ class SetDefaultLocalePrefix
         }
 
         $resolved_locale = $has_valid_route_locale ? $route_locale : $normalized_session_locale;
-        $language_id     = resolve_language_by_locale($resolved_locale)?->id;
+        $language = resolve_language_by_locale($resolved_locale);
+
+        if ($language === null) {
+            Log::channel('stack')->warning('[FIX:locale-switch] Unable to resolve route locale language.', [
+                'locale' => $resolved_locale,
+                'path' => $request->path(),
+            ]);
+        }
 
         session()->put($locale_key, $resolved_locale);
         app()->setLocale($resolved_locale);
         url()->defaults([$locale_key => $resolved_locale]);
         config(['app.locale' => $resolved_locale]);
-        set_app_setting('language_id', $language_id);
+        set_app_setting('language_id', $language?->id);
 
         return $next($request);
     }
