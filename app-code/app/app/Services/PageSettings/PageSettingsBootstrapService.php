@@ -609,6 +609,9 @@ class PageSettingsBootstrapService
                     'height' => max(1, $product_image_height),
                 ],
             ],
+            'header' => [
+                'categories' => [],
+            ],
             'admin' => [
                 'upload' => [
                     'max_size_kb' => max(1, $category_upload_max_size_kb),
@@ -670,6 +673,17 @@ class PageSettingsBootstrapService
         Arr::set($settings, 'pagination.ajax_products_loading_enabled', (bool) Arr::get($settings, 'pagination.ajax_products_loading_enabled', $defaults['ajax_products_loading_enabled']));
         Arr::set($settings, 'images.products.width', max(1, (int) Arr::get($settings, 'images.products.width', $defaults['product_image_width'])));
         Arr::set($settings, 'images.products.height', max(1, (int) Arr::get($settings, 'images.products.height', $defaults['product_image_height'])));
+        Arr::set(
+            $settings,
+            'header.categories',
+            collect((array) Arr::get($settings, 'header.categories', []))
+                ->filter(fn (mixed $category_id): bool => is_int($category_id) || (is_string($category_id) && is_numeric($category_id)))
+                ->map(fn (int|string $category_id): int => (int) $category_id)
+                ->filter(fn (int $category_id): bool => $category_id > 0)
+                ->unique()
+                ->values()
+                ->all(),
+        );
         Arr::set($settings, 'admin.upload.max_size_kb', max(1, (int) Arr::get($settings, 'admin.upload.max_size_kb', $defaults['category_upload_max_size_kb'])));
         Arr::set($settings, 'admin.upload.directory', (string) Arr::get($settings, 'admin.upload.directory', $defaults['category_upload_directory']));
         Arr::set($settings, 'admin.images.no_image.path', (string) Arr::get($settings, 'admin.images.no_image.path', $defaults['category_no_image_path']));

@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PageSettings\Category\Schemas;
 
 use App\Models\ApplicationSettings\Language;
+use App\Services\PageSettings\HeaderCategoryService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class CategoryPageSettingsForm
 {
@@ -78,6 +83,49 @@ class CategoryPageSettingsForm
                                             ->columns(1),
                                     ])
                                     ->columns(),
+
+                                Section::make(__('admin/settings/category_page_settings.sections.header_categories'))
+                                    ->schema([
+                                        Repeater::make('header_categories')
+                                            ->label(__('admin/settings/category_page_settings.labels.header_categories'))
+                                            ->helperText(__('admin/settings/category_page_settings.helpers.header_categories'))
+                                            ->schema([
+                                                Select::make('category_id')
+                                                    ->label(__('admin/settings/category_page_settings.labels.header_category'))
+                                                    ->placeholder(__('admin/settings/category_page_settings.placeholders.header_category'))
+                                                    ->searchable()
+                                                    ->searchDebounce(1000)
+                                                    ->getSearchResultsUsing(function (Get $get, string $search): array {
+                                                        if (Str::length($search) < 3) {
+                                                            Notification::make()
+                                                                ->title(__('admin/default.errors.title'))
+                                                                ->body(__('admin/default.errors.min_search_length', [
+                                                                    'length' => 3,
+                                                                ]))
+                                                                ->danger()
+                                                                ->send();
+
+                                                            return [];
+                                                        }
+
+                                                        return app(HeaderCategoryService::class)->searchOptions(
+                                                            $search,
+                                                            self::resolveSelectedHeaderCategoryIds($get),
+                                                        );
+                                                    })
+                                                    ->getOptionLabelUsing(fn (int|string|null $value): ?string => app(HeaderCategoryService::class)->getOptionLabel($value))
+                                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                                                    ->required()
+                                                    ->rules(['integer', 'distinct'])
+                                                    ->native(false),
+                                            ])
+                                            ->defaultItems(0)
+                                            ->addActionLabel(__('admin/settings/category_page_settings.actions.add_header_category'))
+                                            ->reorderable()
+                                            ->deletable()
+                                            ->columns(1),
+                                    ])
+                                    ->columns(1),
                             ])
                             ->columns(1),
 
@@ -228,8 +276,14 @@ class CategoryPageSettingsForm
             ]);
     }
 
+    /**
+     * @param Collection<int, Language> $active_languages
+     * @param string     $tabs_name
+     *
+     * @return Tabs
+     */
     private static function buildOptionLabelTabs(
-        $active_languages,
+        Collection $active_languages,
         string $tabs_name,
     ): Tabs {
         $tabs = [];
@@ -314,6 +368,25 @@ class CategoryPageSettingsForm
             })
             ->filter(fn (mixed $label, mixed $value): bool => filled((string) $value) && filled((string) $label))
             ->all();
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private static function resolveSelectedHeaderCategoryIds(Get $get): array
+    {
+        $header_categories = $get('../../header_categories');
+
+        if (! is_array($header_categories)) {
+            return [];
+        }
+
+        return app(HeaderCategoryService::class)->normalizeCategoryIds(
+            collect($header_categories)
+                ->filter(fn (mixed $item): bool => is_array($item))
+                ->map(fn (array $item): mixed => $item['category_id'] ?? null)
+                ->all(),
+        );
     }
 
     /**

@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Catalogs\Categories\Categories\Tables;
 
 use App\Filament\Resources\Trait\LanguageTrait;
 use App\Models\Catalogs\Categories\Category;
+use App\Services\PageSettings\HeaderCategoryService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -28,6 +29,7 @@ class CategoriesTable
     public static function configure(Table $table): Table
     {
         $current_language_id = self::getCurrentLanguageId();
+        $selected_header_category_ids = app(HeaderCategoryService::class)->getSelectedCategoryIds();
         $admin_image_settings = [
             'images' => [
                 'no_image' => [
@@ -111,6 +113,16 @@ class CategoriesTable
                     ->label(__('admin/default.labels.is_active'))
                     ->boolean()
                     ->sortable(),
+
+                IconColumn::make('show_in_header')
+                    ->label(__('admin/default.columns.show_in_header'))
+                    ->boolean()
+                    ->state(fn (Category $category): bool => in_array(
+                        (int) $category->id,
+                        $selected_header_category_ids,
+                        true,
+                    ))
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('slugs.slug')
                     ->label(__('admin/default.columns.slug'))
