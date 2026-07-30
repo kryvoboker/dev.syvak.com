@@ -1,18 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\Cart\CartModeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        $table_prefix      = DB::connection()->getTablePrefix();
-        $db_pdo            = DB::getPdo();
+        $table_prefix = DB::connection()->getTablePrefix();
+        $db_pdo = DB::getPdo();
         $quoted_cart_types = array_map(
             static fn (string $value): string => $db_pdo->quote($value),
             CartModeEnum::values(),

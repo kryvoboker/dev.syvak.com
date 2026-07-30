@@ -8,9 +8,11 @@ use App\Exceptions\OrderStatusInvariantException;
 use App\Filament\Resources\ApplicationSettings\OrderStatuses\OrderStatusResource;
 use App\Models\Orders\OrderStatuses;
 use App\Services\Order\OrderStatusManagementService;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
@@ -73,7 +75,12 @@ class EditOrderStatus extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
             DeleteAction::make()
+                ->icon(Heroicon::Trash)
                 ->before(function (DeleteAction $action, OrderStatuses $record): void {
                     if ($record->is_default) {
                         $this->sendInvariantNotification('cannot_delete_default');

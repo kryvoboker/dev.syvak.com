@@ -2,6 +2,7 @@ import {
     $CART_PAGE_TYPE,
     $CATEGORY_PAGE_TYPE,
     $CHECKOUT_PAGE_TYPE,
+    $DESKTOP_DEVICE_TYPE,
     $HOME_PAGE_TYPE,
     $PRODUCT_PAGE_TYPE,
     $SEARCH_PAGE_TYPE,
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsAccordionCollection = window.$hsAccordionCollection || [];
     window.$hsCarouselCollection = window.$hsCarouselCollection || [];
     const pageType: string | null = window.app_params?.page_type ?? null;
+    const deviceType: string | null = window.app_params?.current_device_type ?? null;
 
     if (document.querySelector('[data-main-carousel]')) {
         import('@carousel-ts/main.ts');
@@ -35,24 +37,30 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
     import('@ts-features/menu/language.ts').then((module) => module.handleLanguageMenu());
 
-    import('@ts-features/menu/mainMobMenu.ts').then((module) => module.handleMainMobMenu());
+    if (deviceType === $DESKTOP_DEVICE_TYPE) {
+        import('@ts-features/menu/mainPcMenu.ts').then((module) => module.handleMainPcMenu());
+    } else {
+        import('@ts-features/menu/mainMobMenu.ts').then((module) => module.handleMainMobMenu());
+    }
 
     import('@ts-features/search/mobSearch.ts').then((module) => {
-        module.handleMobSearch({
-            openSearchBtn: '.open-mob-search-btn',
-            searchContainer: '.mob-search-container',
-            searchInput: '.mob-search-input',
-            searchResults: '.mob-search-results',
-            searchForm: '.mob-search-form',
-        });
-
-        module.handleMobSearch({
-            openSearchBtn: '.open-pc-search-btn',
-            searchContainer: '.pc-search-container',
-            searchInput: '.pc-search-input',
-            searchResults: '.pc-search-results',
-            searchForm: '.pc-search-form',
-        });
+        if (deviceType === $DESKTOP_DEVICE_TYPE) {
+            module.handleMobSearch({
+                openSearchBtn: '.open-pc-search-btn',
+                searchContainer: '.pc-search-container',
+                searchInput: '.pc-search-input',
+                searchResults: '.pc-search-results',
+                searchForm: '.pc-search-form',
+            });
+        } else {
+            module.handleMobSearch({
+                openSearchBtn: '.open-mob-search-btn',
+                searchContainer: '.mob-search-container',
+                searchInput: '.mob-search-input',
+                searchResults: '.mob-search-results',
+                searchForm: '.mob-search-form',
+            });
+        }
     });
 
     if (pageType === $HOME_PAGE_TYPE) {

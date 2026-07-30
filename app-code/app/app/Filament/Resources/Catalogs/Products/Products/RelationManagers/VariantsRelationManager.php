@@ -66,7 +66,8 @@ class VariantsRelationManager extends RelationManager
                         'record' => $record,
                         'product' => (int) data_get($this->getOwnerRecord(), 'id'),
                     ])),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->icon(Heroicon::Trash),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

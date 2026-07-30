@@ -57,7 +57,7 @@ class AlyoAdminPanelProvider extends PanelProvider
                     $languages = (new Language())->getActiveLanguages();
 
                     return view('filament.hooks.language-switcher', [
-                        'languages'      => $languages,
+                        'languages' => $languages,
                         'current_locale' => app()->getLocale(),
                     ]);
                 },
@@ -82,30 +82,30 @@ class AlyoAdminPanelProvider extends PanelProvider
                 AdminNavigationGroupEnum::ApplicationSettings->getLabel(),
             ])
             ->navigationItems([
-                NavigationItem::make(fn(): string => AdminNavigationGroupEnum::Catalog->getLabel())
+                NavigationItem::make(fn (): string => AdminNavigationGroupEnum::Catalog->getLabel())
                     ->group(AdminNavigationGroupEnum::Wiki)
                     ->icon(Heroicon::Squares2x2)
-                    ->url(fn(): string => CatalogProductsWikiPage::getUrl()),
-                NavigationItem::make(fn(): string => AdminNavigationGroupEnum::InfoPages->getLabel())
+                    ->url(fn (): string => CatalogProductsWikiPage::getUrl()),
+                NavigationItem::make(fn (): string => AdminNavigationGroupEnum::InfoPages->getLabel())
                     ->group(AdminNavigationGroupEnum::Wiki)
                     ->icon(Heroicon::DocumentText)
-                    ->url(fn(): string => InfoPagesWikiPage::getUrl()),
-                NavigationItem::make(fn(): string => AdminNavigationGroupEnum::Users->getLabel())
+                    ->url(fn (): string => InfoPagesWikiPage::getUrl()),
+                NavigationItem::make(fn (): string => AdminNavigationGroupEnum::Users->getLabel())
                     ->group(AdminNavigationGroupEnum::Wiki)
                     ->icon(Heroicon::Users)
-                    ->url(fn(): string => UsersWikiPage::getUrl()),
-                NavigationItem::make(fn(): string => AdminNavigationGroupEnum::Modules->getLabel())
+                    ->url(fn (): string => UsersWikiPage::getUrl()),
+                NavigationItem::make(fn (): string => AdminNavigationGroupEnum::Modules->getLabel())
                     ->group(AdminNavigationGroupEnum::Wiki)
                     ->icon(Heroicon::SquaresPlus)
-                    ->url(fn(): string => ModulesWikiPage::getUrl()),
-                NavigationItem::make(fn(): string => AdminNavigationGroupEnum::PageSettings->getLabel())
+                    ->url(fn (): string => ModulesWikiPage::getUrl()),
+                NavigationItem::make(fn (): string => AdminNavigationGroupEnum::PageSettings->getLabel())
                     ->group(AdminNavigationGroupEnum::Wiki)
                     ->icon(Heroicon::AdjustmentsHorizontal)
-                    ->url(fn(): string => CategoryPageSettingsWikiPage::getUrl()),
-                NavigationItem::make(fn(): string => AdminNavigationGroupEnum::ApplicationSettings->getLabel())
+                    ->url(fn (): string => CategoryPageSettingsWikiPage::getUrl()),
+                NavigationItem::make(fn (): string => AdminNavigationGroupEnum::ApplicationSettings->getLabel())
                     ->group(AdminNavigationGroupEnum::Wiki)
                     ->icon(Heroicon::Cog6Tooth)
-                    ->url(fn(): string => ApplicationCurrenciesWikiPage::getUrl()),
+                    ->url(fn (): string => ApplicationCurrenciesWikiPage::getUrl()),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

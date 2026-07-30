@@ -88,8 +88,9 @@ class EditProductVariant extends EditRecord
             Action::make('save')
                 ->label(__('admin/default.buttons.save'))
                 ->icon(Heroicon::CheckCircle)
-                ->action(fn() => $this->save()),
+                ->action(fn () => $this->save()),
             DeleteAction::make()
+                ->icon(Heroicon::Trash)
                 ->successRedirectUrl(ProductVariantResource::getUrl('index', ['product' => $this->product_id])),
         ];
     }

@@ -14,6 +14,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 /**
  * Edit page for one saved module settings copy.
@@ -58,9 +59,11 @@ class EditModuleInstance extends EditRecord
         return [
             Action::make('save')
                 ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
                 ->action(fn () => $this->save()),
             DeleteAction::make()
                 ->label(__('admin/modules/module_definitions.actions.delete_instance'))
+                ->icon(Heroicon::Trash)
                 ->action(function (ModuleInstance $record, ModuleInstanceService $module_instance_service): void {
                     $module_instance_service->delete($record);
 

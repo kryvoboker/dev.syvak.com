@@ -12,6 +12,8 @@ class CategoryImage extends Model
     protected $fillable = [
         'category_id',
         'preview_image',
+        'preview_image_width',
+        'preview_image_height',
         'icon',
         'sort_order',
     ];
@@ -22,8 +24,10 @@ class CategoryImage extends Model
     protected function casts(): array
     {
         return [
-            'category_id' => 'integer',
-            'sort_order' => 'integer',
+            'category_id'          => 'integer',
+            'preview_image_width'  => 'integer',
+            'preview_image_height' => 'integer',
+            'sort_order'           => 'integer',
         ];
     }
 
