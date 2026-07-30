@@ -30,8 +30,8 @@ class EditCategory extends EditRecord
 
     protected array $slugs = [];
 
-    protected ?string $preview_image        = null;
-    protected ?int    $preview_image_width  = null;
+    protected ?string $preview_image = null;
+    protected ?int    $preview_image_width = null;
     protected ?int    $preview_image_height = null;
 
     protected ?string $icon = null;
@@ -47,7 +47,7 @@ class EditCategory extends EditRecord
             Action::make('save')
                 ->label(__('admin/default.buttons.save'))
                 ->icon(Heroicon::CheckCircle)
-                ->action(fn() => $this->save()),
+                ->action(fn () => $this->save()),
             DeleteAction::make()
                 ->icon(Heroicon::Trash),
         ];
@@ -55,34 +55,34 @@ class EditCategory extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $record               = $this->getCategoryRecord();
-        $category_image       = $record->categoryImage()->first();
-        $preview_image        = $category_image->preview_image ?? null;
-        $preview_image_width  = $category_image->preview_image_width ?? null;
+        $record = $this->getCategoryRecord();
+        $category_image = $record->categoryImage()->first();
+        $preview_image = $category_image->preview_image ?? null;
+        $preview_image_width = $category_image->preview_image_width ?? null;
         $preview_image_height = $category_image->preview_image_height ?? null;
-        $icon                 = $category_image->icon ?? null;
+        $icon = $category_image->icon ?? null;
 
-        $data['preview_image']        = $preview_image;
-        $data['preview_image_width']  = $preview_image_width;
+        $data['preview_image'] = $preview_image;
+        $data['preview_image_width'] = $preview_image_width;
         $data['preview_image_height'] = $preview_image_height;
-        $data['icon']                 = $icon;
+        $data['icon'] = $icon;
 
         // Load descriptions for each language
         $descriptions = $record->categoryDescription()
             ->get()
             ->keyBy('language_id')
-            ->map(fn(CategoryDescription $desc) => [
-                'language_id'      => $desc->language_id,
-                'name'             => $desc->name,
-                'description'      => $desc->description,
-                'h1_title'         => $desc->h1_title,
-                'meta_title'       => $desc->meta_title,
+            ->map(fn (CategoryDescription $desc) => [
+                'language_id' => $desc->language_id,
+                'name' => $desc->name,
+                'description' => $desc->description,
+                'h1_title' => $desc->h1_title,
+                'meta_title' => $desc->meta_title,
                 'meta_description' => $desc->meta_description,
-                'meta_keywords'    => $desc->meta_keywords,
+                'meta_keywords' => $desc->meta_keywords,
             ])
             ->toArray();
 
-        $data['descriptions']   = $descriptions;
+        $data['descriptions'] = $descriptions;
         $data['show_in_header'] = in_array(
             (int)$record->id,
             app(HeaderCategoryService::class)->getSelectedCategoryIds(),
@@ -96,13 +96,13 @@ class EditCategory extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $this->descriptions         = trim_strs_in_arr($data['descriptions'] ?? []);
-        $this->preview_image        = $data['preview_image'] ?? null;
-        $this->preview_image_width  = isset($data['preview_image_width']) ? (int)$data['preview_image_width'] : null;
+        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->preview_image = $data['preview_image'] ?? null;
+        $this->preview_image_width = isset($data['preview_image_width']) ? (int)$data['preview_image_width'] : null;
         $this->preview_image_height = isset($data['preview_image_height']) ? (int)$data['preview_image_height'] : null;
-        $this->icon                 = $data['icon'] ?? null;
-        $this->slugs                = trim_strs_in_arr($data['slugs'] ?? []);
-        $this->show_in_header       = (bool)($data['show_in_header'] ?? false);
+        $this->icon = $data['icon'] ?? null;
+        $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
+        $this->show_in_header = (bool)($data['show_in_header'] ?? false);
 
         unset($data['descriptions'], $data['preview_image'], $data['preview_image_width'], $data['preview_image_height'], $data['icon'], $data['slugs'], $data['show_in_header']);
 
@@ -113,8 +113,8 @@ class EditCategory extends EditRecord
      * @param Model|Category $record
      * @param array          $data
      *
-     * @return Model
      * @throws Throwable
+     * @return Model
      */
     protected function handleRecordUpdate(Model|Category $record, array $data): Model
     {
@@ -151,13 +151,13 @@ class EditCategory extends EditRecord
             $category_images->updateOrCreate(
                 [], // Empty array means "find the first related record"
                 [
-                    'icon'                 => $this->icon,
-                    'preview_image'        => $this->preview_image,
-                    'preview_image_width'  => $this->preview_image_width,
+                    'icon' => $this->icon,
+                    'preview_image' => $this->preview_image,
+                    'preview_image_width' => $this->preview_image_width,
                     'preview_image_height' => $this->preview_image_height,
                 ],
             );
-        } else if ($category_images->exists()) {
+        } elseif ($category_images->exists()) {
             // If both images are empty, delete the record if it exists
             $category_images->delete();
         }
@@ -177,12 +177,12 @@ class EditCategory extends EditRecord
                 $language_ids_to_keep[] = (int)$language_id;
 
                 $descriptions_to_sync[(int)$language_id] = [
-                    'name'             => $description['name'],
-                    'description'      => $description['description'] ?? null,
-                    'h1_title'         => $description['h1_title'] ?? null,
-                    'meta_title'       => $description['meta_title'] ?? null,
+                    'name' => $description['name'],
+                    'description' => $description['description'] ?? null,
+                    'h1_title' => $description['h1_title'] ?? null,
+                    'meta_title' => $description['meta_title'] ?? null,
                     'meta_description' => $description['meta_description'] ?? null,
-                    'meta_keywords'    => $description['meta_keywords'] ?? null,
+                    'meta_keywords' => $description['meta_keywords'] ?? null,
                 ];
             }
         }

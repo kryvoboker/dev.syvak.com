@@ -24,10 +24,10 @@ class CategoryImage extends Model
     protected function casts(): array
     {
         return [
-            'category_id'          => 'integer',
-            'preview_image_width'  => 'integer',
+            'category_id' => 'integer',
+            'preview_image_width' => 'integer',
             'preview_image_height' => 'integer',
-            'sort_order'           => 'integer',
+            'sort_order' => 'integer',
         ];
     }
 
