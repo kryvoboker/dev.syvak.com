@@ -42,6 +42,45 @@ export const initializeCheckoutDeliveryLogic = (): void => {
     const selectionState = resolveCheckoutSelectionState();
     const checkoutMapData = getAppParam<CheckoutMapData>('checkout_map_data') ?? {};
 
+    const updateCheckoutTotals = (cart: Record<string, unknown>): void => {
+        const totals = (cart.totals ?? {}) as Record<string, unknown>;
+        const formattedValue = (key: string): string => String(totals[`${key}_formatted`] ?? '');
+
+        const summaryTotalElement = document.querySelector<HTMLElement>('[data-checkout-total="summary"]');
+        const subtotalElement = document.querySelector<HTMLElement>('[data-checkout-total="subtotal"]');
+        const grandTotalElement = document.querySelector<HTMLElement>('[data-checkout-total="grand_total"]');
+
+        if (summaryTotalElement) {
+            summaryTotalElement.textContent = formattedValue('grand_total');
+        }
+
+        if (subtotalElement) {
+            subtotalElement.textContent = formattedValue('items_subtotal');
+        }
+
+        if (grandTotalElement) {
+            grandTotalElement.textContent = formattedValue('grand_total');
+        }
+
+        const promoTotalElement = document.querySelector<HTMLElement>('[data-checkout-total="promo_code"]');
+        const promoWrapperElement = document.querySelector<HTMLElement>('[data-checkout-promo-total]');
+        const promoErrorElement = document.querySelector<HTMLElement>('[data-checkout-promo-error]');
+        const promoData = (totals.promo_code ?? {}) as Record<string, unknown>;
+        const promoAmount = String(promoData.discount_amount_formatted ?? '');
+        const promoError = String(promoData.message ?? '');
+
+        if (promoTotalElement && promoWrapperElement) {
+            promoTotalElement.textContent = promoAmount;
+            promoWrapperElement.classList.toggle('hidden', promoAmount === '');
+            promoWrapperElement.classList.toggle('flex', promoAmount !== '');
+        }
+
+        if (promoErrorElement) {
+            promoErrorElement.textContent = promoError;
+            promoErrorElement.classList.toggle('hidden', promoError === '');
+        }
+    };
+
     if (!citySelectElement || !branchSelectElement) {
         return;
     }
@@ -229,6 +268,7 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         applyCityResults: applyCitySearchResults,
         applyBranchResults: applyBranchSearchResults,
         updateMapButtonState,
+        onCartUpdated: updateCheckoutTotals,
     });
     const { loadBranches, searchCities, syncSelectionToServer } = checkoutSearch;
 

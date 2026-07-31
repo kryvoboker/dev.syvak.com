@@ -32,6 +32,7 @@ interface CheckoutSearchOptions {
     applyCityResults: (cities: CheckoutCitySearchItem[]) => void;
     applyBranchResults: (branches: CheckoutBranchSearchItem[]) => void;
     updateMapButtonState: () => void;
+    onCartUpdated?: (cart: Record<string, unknown>) => void;
 }
 
 export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
@@ -116,7 +117,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
         }
 
         try {
-            await fetchFunc(
+            const response = await fetchFunc<{ cart?: Record<string, unknown> }>(
                 options.selectionSaveUrl,
                 buildSelectionPayload(
                     state.city,
@@ -127,6 +128,10 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
                     state.form,
                 ),
             );
+
+            if (response?.cart && options.onCartUpdated) {
+                options.onCartUpdated(response.cart);
+            }
         } catch {
             showErrorInConsole('[checkout] Failed to synchronize delivery selection.');
         }
