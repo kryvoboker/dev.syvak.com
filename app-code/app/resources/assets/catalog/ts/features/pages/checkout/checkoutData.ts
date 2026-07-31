@@ -111,7 +111,6 @@ interface CheckoutBranchSearchResponse {
 
 export const MIN_SEARCH_CITY_LENGTH = 3;
 export const MIN_SEARCH_POST_OFFICE_LENGTH = 1;
-export const SEARCH_DEBOUNCE_MS = 700;
 
 export const toStringOrNull = (value: unknown): string | null => {
     if (typeof value === 'string') {
