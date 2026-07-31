@@ -17,8 +17,10 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Throwable;
 
@@ -118,7 +120,7 @@ class CategoryForm
                         TextInput::make('sort_order')
                             ->label(__('admin/default.labels.sort_order'))
                             ->numeric()
-                            ->rules(['numeric', 'min:0'])
+                            ->rules(['numeric', 'min:1'])
                             ->default(1)
                             ->required(),
                     ])
@@ -176,6 +178,30 @@ class CategoryForm
                             ->nullable(),
                     ])
                     ->columns(),
+
+                Section::make(__('admin/catalogs/categories/categories.labels.preview_images_sizes'))
+                    ->schema([
+                        TextInput::make('preview_image_width')
+                            ->label(__('admin/default.labels.width'))
+                            ->helperText(__('admin/catalogs/categories/categories.helpers.preview_image_width'))
+                            ->numeric()
+                            ->rules(['numeric', 'min:1'])
+                            ->minValue(1)
+                            ->required(function (Get $get) {
+                                return !empty(Str::trim((string)$get('preview_image')));
+                            }),
+
+                        TextInput::make('preview_image_height')
+                            ->label(__('admin/default.labels.height'))
+                            ->helperText(__('admin/catalogs/categories/categories.helpers.preview_image_height'))
+                            ->numeric()
+                            ->rules(['numeric', 'min:1'])
+                            ->minValue(1)
+                            ->required(function (Get $get) {
+                                return !empty(Str::trim((string)$get('preview_image')));
+                            }),
+                    ])
+                ->columns(),
             ]);
     }
 

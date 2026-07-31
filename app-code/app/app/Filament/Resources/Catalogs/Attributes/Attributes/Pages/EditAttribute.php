@@ -7,8 +7,10 @@ namespace App\Filament\Resources\Catalogs\Attributes\Attributes\Pages;
 use App\Filament\Resources\Catalogs\Attributes\Attributes\AttributeResource;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\Attributes\AttributeDescription;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 use LogicException;
@@ -25,7 +27,12 @@ class EditAttribute extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 

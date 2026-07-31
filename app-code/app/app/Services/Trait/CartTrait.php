@@ -90,7 +90,7 @@ trait CartTrait
                     CartRequestKeyEnum::CartMode->value => $mode,
                 ])->render(),
                 'cart_page_html' => view('catalog.partials.cart.page-content', [
-                    'cart_data'            => $cart_data,
+                    'cart_data' => $cart_data,
                     'show_checkout_button' => true,
                 ])->render(),
             ],

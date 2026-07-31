@@ -6,9 +6,11 @@ namespace App\Filament\Resources\ApplicationSettings\Languages\Pages;
 
 use App\Filament\Resources\ApplicationSettings\Languages\LanguageResource;
 use App\Models\ApplicationSettings\Language;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 
 class EditLanguage extends EditRecord
 {
@@ -33,7 +35,12 @@ class EditLanguage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
             DeleteAction::make()
+                ->icon(Heroicon::Trash)
                 ->before(function (DeleteAction $action, Language $record) {
                     if ($record->is_default) {
                         Notification::make()

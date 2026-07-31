@@ -43,6 +43,7 @@ return [
         'price' => 'Price',
         'viewed' => 'Viewed',
         'image' => 'Image',
+        'icon' => 'Icon',
         'is_active' => 'Is Active',
         'show_in_header' => 'Shown in header',
         'is_default' => 'Is Default',
@@ -227,6 +228,6 @@ return [
         'something_went_wrong' => 'Something went wrong. Please try again later.',
         'category_path_not_found' => 'Category path <b>:id</b> not found!',
         'create_or_update_slugs_failed' => 'Creating or updating slugs (SEO URLs) failed for some languages. Please check the slugs and try again. Perhaps one of the slugs (SEO URLs) already exists.',
-        'min_search_length' => 'Minimal characters for search is :length!'
+        'min_search_length' => 'Minimal characters for search is :length!',
     ],
 ];

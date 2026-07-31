@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\ApplicationSettings;
 
 use App\Models\Slug;
+use App\Supports\Services\RequestLookupContext;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -80,14 +81,14 @@ class Language extends Model
         });
 
         static::saved(function (): void {
-            if (app()->bound(\App\Supports\Services\RequestLookupContext::class)) {
-                app(\App\Supports\Services\RequestLookupContext::class)->forgetActiveLanguages();
+            if (app()->bound(RequestLookupContext::class)) {
+                app(RequestLookupContext::class)->forgetActiveLanguages();
             }
         });
 
         static::deleted(function (): void {
-            if (app()->bound(\App\Supports\Services\RequestLookupContext::class)) {
-                app(\App\Supports\Services\RequestLookupContext::class)->forgetActiveLanguages();
+            if (app()->bound(RequestLookupContext::class)) {
+                app(RequestLookupContext::class)->forgetActiveLanguages();
             }
         });
     }

@@ -21,6 +21,8 @@ return new class () extends Migration {
                 ->cascadeOnDelete();
 
             $table->string('preview_image', 1000)->nullable();
+            $table->unsignedInteger('preview_image_width')->nullable();
+            $table->unsignedInteger('preview_image_height')->nullable();
             $table->string('icon', 1000)->nullable();
             $table->unsignedInteger('sort_order')->default(1);
 

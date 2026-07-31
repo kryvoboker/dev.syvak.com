@@ -10,12 +10,15 @@ use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Categories\CategoryDescription;
 use App\Services\PageSettings\HeaderCategoryService;
 use Exception;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use LogicException;
+use Throwable;
 
 class EditCategory extends EditRecord
 {
@@ -28,6 +31,8 @@ class EditCategory extends EditRecord
     protected array $slugs = [];
 
     protected ?string $preview_image = null;
+    protected ?int    $preview_image_width = null;
+    protected ?int    $preview_image_height = null;
 
     protected ?string $icon = null;
 
@@ -39,7 +44,12 @@ class EditCategory extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
         ];
     }
 
@@ -48,9 +58,13 @@ class EditCategory extends EditRecord
         $record = $this->getCategoryRecord();
         $category_image = $record->categoryImage()->first();
         $preview_image = $category_image->preview_image ?? null;
+        $preview_image_width = $category_image->preview_image_width ?? null;
+        $preview_image_height = $category_image->preview_image_height ?? null;
         $icon = $category_image->icon ?? null;
 
         $data['preview_image'] = $preview_image;
+        $data['preview_image_width'] = $preview_image_width;
+        $data['preview_image_height'] = $preview_image_height;
         $data['icon'] = $icon;
 
         // Load descriptions for each language
@@ -70,7 +84,7 @@ class EditCategory extends EditRecord
 
         $data['descriptions'] = $descriptions;
         $data['show_in_header'] = in_array(
-            (int) $record->id,
+            (int)$record->id,
             app(HeaderCategoryService::class)->getSelectedCategoryIds(),
             true,
         );
@@ -84,18 +98,27 @@ class EditCategory extends EditRecord
     {
         $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
         $this->preview_image = $data['preview_image'] ?? null;
+        $this->preview_image_width = isset($data['preview_image_width']) ? (int)$data['preview_image_width'] : null;
+        $this->preview_image_height = isset($data['preview_image_height']) ? (int)$data['preview_image_height'] : null;
         $this->icon = $data['icon'] ?? null;
         $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
-        $this->show_in_header = (bool) ($data['show_in_header'] ?? false);
+        $this->show_in_header = (bool)($data['show_in_header'] ?? false);
 
-        unset($data['descriptions'], $data['preview_image'], $data['icon'], $data['slugs'], $data['show_in_header']);
+        unset($data['descriptions'], $data['preview_image'], $data['preview_image_width'], $data['preview_image_height'], $data['icon'], $data['slugs'], $data['show_in_header']);
 
         return $data;
     }
 
+    /**
+     * @param Model|Category $record
+     * @param array          $data
+     *
+     * @throws Throwable
+     * @return Model
+     */
     protected function handleRecordUpdate(Model|Category $record, array $data): Model
     {
-        if (! $record instanceof Category) {
+        if (!$record instanceof Category) {
             throw new LogicException('Category record has invalid type.');
         }
 
@@ -124,12 +147,14 @@ class EditCategory extends EditRecord
     {
         $category_images = $this->getCategoryRecord()->categoryImage();
 
-        if (! empty($this->preview_image) || ! empty($this->icon)) {
+        if (!empty($this->preview_image) || !empty($this->icon)) {
             $category_images->updateOrCreate(
                 [], // Empty array means "find the first related record"
                 [
                     'icon' => $this->icon,
                     'preview_image' => $this->preview_image,
+                    'preview_image_width' => $this->preview_image_width,
+                    'preview_image_height' => $this->preview_image_height,
                 ],
             );
         } elseif ($category_images->exists()) {
@@ -148,10 +173,10 @@ class EditCategory extends EditRecord
         $descriptions_to_sync = [];
 
         foreach ($this->descriptions as $language_id => $description) {
-            if (! empty($description['name'])) {
-                $language_ids_to_keep[] = (int) $language_id;
+            if (!empty($description['name'])) {
+                $language_ids_to_keep[] = (int)$language_id;
 
-                $descriptions_to_sync[(int) $language_id] = [
+                $descriptions_to_sync[(int)$language_id] = [
                     'name' => $description['name'],
                     'description' => $description['description'] ?? null,
                     'h1_title' => $description['h1_title'] ?? null,
@@ -163,7 +188,7 @@ class EditCategory extends EditRecord
         }
 
         // Delete descriptions for languages that are not in the list or have empty names
-        if (! empty($language_ids_to_keep)) {
+        if (!empty($language_ids_to_keep)) {
             $this->getCategoryRecord()->categoryDescription()
                 ->whereNotIn('language_id', $language_ids_to_keep)
                 ->delete();
@@ -174,7 +199,7 @@ class EditCategory extends EditRecord
         // Update or create descriptions
         foreach ($descriptions_to_sync as $language_id => $description_data) {
             $this->getCategoryRecord()->categoryDescription()->updateOrCreate(
-                ['language_id' => (int) $language_id],
+                ['language_id' => (int)$language_id],
                 $description_data,
             );
         }
@@ -212,7 +237,7 @@ class EditCategory extends EditRecord
 
     private function getCategoryRecord(): Category
     {
-        if (! $this->record instanceof Category) {
+        if (!$this->record instanceof Category) {
             throw new LogicException('Category record is not initialized.');
         }
 

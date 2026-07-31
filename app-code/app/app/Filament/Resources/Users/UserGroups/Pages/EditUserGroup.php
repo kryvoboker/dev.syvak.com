@@ -6,9 +6,11 @@ namespace App\Filament\Resources\Users\UserGroups\Pages;
 
 use App\Filament\Resources\Users\UserGroups\UserGroupResource;
 use App\Models\Users\UserGroup;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 
 class EditUserGroup extends EditRecord
 {
@@ -17,7 +19,12 @@ class EditUserGroup extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
             DeleteAction::make()
+                ->icon(Heroicon::Trash)
                 ->before(function (DeleteAction $action, UserGroup $record) {
                     if ($record->is_default) {
                         Notification::make()

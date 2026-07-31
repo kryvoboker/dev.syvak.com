@@ -86,6 +86,64 @@ class HeaderServiceTest extends TestCase
         $this->assertCount(2, $header_data['categories']);
     }
 
+    public function test_header_service_adds_desktop_category_preview_with_fallback_image(): void
+    {
+        config()->set('devices.current_device_type', config('devices.types.desktop'));
+
+        DB::table('categories')->insert([
+            ['id' => 10, 'parent_id' => null, 'sort_order' => 1, 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        DB::table('category_descriptions')->insert([
+            ['category_id' => 10, 'language_id' => 1, 'name' => 'Catalog', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        DB::table('slugs')->insert([
+            'sluggable_id' => 10,
+            'sluggable_type' => Category::class,
+            'language_id' => 1,
+            'slug' => 'catalog',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('category_images')->insert([
+            'category_id' => 10,
+            'preview_image' => 'images/categories/missing-preview.png',
+            'icon' => null,
+            'sort_order' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $header_data = app(HeaderService::class)();
+        $preview_image = $header_data['categories'][0]['preview_image'];
+
+        $this->assertSame('Catalog', $preview_image['alt']);
+        $this->assertStringContainsString('images/no-image.png', $preview_image['urls']['original_thumb']);
+    }
+
+    public function test_header_service_does_not_prepare_category_preview_for_mobile(): void
+    {
+        config()->set('devices.current_device_type', config('devices.types.mobile'));
+
+        DB::table('categories')->insert([
+            ['id' => 11, 'parent_id' => null, 'sort_order' => 1, 'is_active' => true, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        DB::table('category_descriptions')->insert([
+            ['category_id' => 11, 'language_id' => 1, 'name' => 'Mobile catalog', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        DB::table('slugs')->insert([
+            'sluggable_id' => 11,
+            'sluggable_type' => Category::class,
+            'language_id' => 1,
+            'slug' => 'mobile-catalog',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $header_data = app(HeaderService::class)();
+
+        $this->assertArrayNotHasKey('preview_image', $header_data['categories'][0]);
+    }
+
     private function bindAppSettings(): void
     {
         $app_settings_service = new AppSettingsService();
@@ -139,6 +197,15 @@ class HeaderServiceTest extends TestCase
             $table->string('sluggable_type');
             $table->unsignedBigInteger('language_id');
             $table->string('slug');
+            $table->timestamps();
+        });
+
+        Schema::create('category_images', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('category_id');
+            $table->string('preview_image')->nullable();
+            $table->string('icon')->nullable();
+            $table->unsignedSmallInteger('sort_order')->default(0);
             $table->timestamps();
         });
     }

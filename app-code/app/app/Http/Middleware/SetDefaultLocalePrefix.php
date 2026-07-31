@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,7 +17,7 @@ class SetDefaultLocalePrefix
     /**
      * Handle an incoming request.
      *
-     * @param  Closure(Request): (Response)  $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next): Response|RedirectResponse
     {
@@ -31,10 +32,13 @@ class SetDefaultLocalePrefix
             : $fallback_locale;
 
         if ($is_livewire_request) {
+            $language_id = resolve_language_by_locale($normalized_session_locale)?->id;
+
             session()->put($locale_key, $normalized_session_locale);
             app()->setLocale($normalized_session_locale);
             url()->defaults([$locale_key => $normalized_session_locale]);
             config(['app.locale' => $normalized_session_locale]);
+            set_app_setting('language_id', $language_id);
 
             return $next($request);
         }
@@ -45,7 +49,7 @@ class SetDefaultLocalePrefix
         $has_locale_parameter = in_array($locale_key, $route?->parameterNames() ?? [], true);
         $has_valid_route_locale = in_array($route_locale, $allowed_locales, true);
 
-        if ($has_locale_parameter && ! $has_valid_route_locale && filled($route_name)) {
+        if ($has_locale_parameter && !$has_valid_route_locale && filled($route_name)) {
             $route_parameters = array_merge($route->parameters(), [
                 $locale_key => $normalized_session_locale,
             ]);
@@ -58,21 +62,30 @@ class SetDefaultLocalePrefix
         }
 
         $resolved_locale = $has_valid_route_locale ? $route_locale : $normalized_session_locale;
+        $language = resolve_language_by_locale($resolved_locale);
+
+        if ($language === null) {
+            Log::channel('stack')->warning('[FIX:locale-switch] Unable to resolve route locale language.', [
+                'locale' => $resolved_locale,
+                'path' => $request->path(),
+            ]);
+        }
 
         session()->put($locale_key, $resolved_locale);
         app()->setLocale($resolved_locale);
         url()->defaults([$locale_key => $resolved_locale]);
         config(['app.locale' => $resolved_locale]);
+        set_app_setting('language_id', $language?->id);
 
         return $next($request);
     }
 
     /**
-     * @param  array<int, string>  $allowed_locales
+     * @param array<int, string> $allowed_locales
      */
     private function resolveFallbackLocale(array $allowed_locales): string
     {
-        $configured_locale = (string) config('app.locale', 'en');
+        $configured_locale = (string)config('app.locale', 'en');
 
         if (in_array($configured_locale, $allowed_locales, true)) {
             return $configured_locale;
