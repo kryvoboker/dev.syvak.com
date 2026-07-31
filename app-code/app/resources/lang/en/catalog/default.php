@@ -116,6 +116,14 @@ return [
         'totals' => [
             'items_subtotal' => 'Items subtotal',
             'grand_total' => 'Grand total',
+            'promo_code' => 'Promo code discount',
+        ],
+        'errors' => [
+            'promo_invalid' => 'This promo code is invalid.',
+            'promo_not_eligible' => 'This promo code is not available for you.',
+            'promo_expired' => 'This promo code has expired or is not active yet.',
+            'promo_minimum_order' => 'The order total is too low for this promo code.',
+            'promo_usage_limit' => 'This promo code has reached its usage limit.',
         ],
         'validation' => [
             'first_name_required' => 'First name is required.',

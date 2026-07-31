@@ -1,0 +1,117 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models\Marketing;
+
+use App\Enums\Marketing\PromoCodeDiscountBaseModeEnum;
+use App\Enums\Marketing\PromoCodeDiscountTypeEnum;
+use App\Enums\Marketing\PromoCodeLimitModeEnum;
+use App\Enums\Marketing\PromoCodeTypeEnum;
+use App\Models\Catalogs\Categories\Category;
+use App\Models\Catalogs\Products\Product;
+use App\Models\Orders\Orders;
+use App\Models\Users\User;
+use App\Models\Users\UserGroup;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+
+class PromoCode extends Model
+{
+    protected $fillable = [
+        'name',
+        'code',
+        'normalized_code',
+        'promo_type',
+        'discount_type',
+        'discount_base_mode',
+        'global_usage_limit',
+        'all_users_usage_limit',
+        'user_limit_mode',
+        'user_usage_limit',
+        'all_groups_usage_limit',
+        'group_limit_mode',
+        'group_usage_limit',
+        'minimum_order_amount',
+        'starts_at',
+        'ends_at',
+        'is_active',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'promo_type' => PromoCodeTypeEnum::class,
+            'discount_type' => PromoCodeDiscountTypeEnum::class,
+            'discount_base_mode' => PromoCodeDiscountBaseModeEnum::class,
+            'user_limit_mode' => PromoCodeLimitModeEnum::class,
+            'group_limit_mode' => PromoCodeLimitModeEnum::class,
+            'global_usage_limit' => 'integer',
+            'all_users_usage_limit' => 'integer',
+            'user_usage_limit' => 'integer',
+            'all_groups_usage_limit' => 'integer',
+            'group_usage_limit' => 'integer',
+            'minimum_order_amount' => 'decimal:4',
+            'starts_at' => 'datetime',
+            'ends_at' => 'datetime',
+            'is_active' => 'boolean',
+        ];
+    }
+
+    public function discounts(): HasMany
+    {
+        return $this->hasMany(PromoCodeDiscount::class);
+    }
+
+    public function errorTranslations(): HasMany
+    {
+        return $this->hasMany(PromoCodeErrorTranslation::class);
+    }
+
+    public function usages(): HasMany
+    {
+        return $this->hasMany(PromoCodeUsage::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'promo_code_user');
+    }
+
+    public function userGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(UserGroup::class, 'promo_code_user_group');
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'promo_code_product');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'promo_code_category');
+    }
+
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Orders::class, 'promo_code_usages')
+            ->withPivot(['user_id', 'user_group_id', 'used_at']);
+    }
+
+    public static function normalizeCode(string $code): string
+    {
+        return Str::lower(Str::squish($code));
+    }
+
+    public function isWithinActivePeriod(?\DateTimeInterface $now = null): bool
+    {
+        $now = $now ?? now();
+
+        return $this->is_active
+            && ($this->starts_at === null || $this->starts_at <= $now)
+            && ($this->ends_at === null || $this->ends_at >= $now);
+    }
+}

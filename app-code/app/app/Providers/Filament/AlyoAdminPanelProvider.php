@@ -75,6 +75,7 @@ class AlyoAdminPanelProvider extends PanelProvider
                 AdminNavigationGroupEnum::Catalog->getLabel(),
                 AdminNavigationGroupEnum::InfoPages->getLabel(),
                 AdminNavigationGroupEnum::Users->getLabel(),
+                AdminNavigationGroupEnum::Marketing->getLabel(),
                 AdminNavigationGroupEnum::Orders->getLabel(),
                 AdminNavigationGroupEnum::Modules->getLabel(),
                 AdminNavigationGroupEnum::Wiki->getLabel(),

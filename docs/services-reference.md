@@ -10,6 +10,7 @@ This page is the service catalog for `app/Services` and `app/Supports/Services`.
 |------|------------|
 | Cart persistence and rendered cart payload | `CartService`, `CartSessionService`, `CartViewDataBuilderService` |
 | Cart totals and discount/delivery adjustments | `CartTotalsPipelineService` and cart module callbacks |
+| Promo-code configuration and checkout discounts | `PromoCodeAdminOptionsService`, `PromoCodePersistenceService`, `PromoCodeService` |
 | Catalog filter setup/indexing | `CatalogFilterBootstrapService`, `CatalogFilterIndexRebuildService`, generator services |
 | Checkout city/branch UI state | `CheckoutCitySearchService`, `CheckoutBranchSearchService`, `CheckoutSelectionStateService` |
 | Module discovery/runtime/admin settings | `ModuleDiscoveryService`, `ModuleRuntimeResolverService`, `ModuleInstanceService` |
@@ -97,6 +98,18 @@ Transforms stored cart items into view/AJAX data. `build()` is the main entry po
 ### `App\Services\Cart\CartTotalsPipelineService` and cart modules
 
 `calculate()` applies the configured totals callbacks and returns normalized totals. Delivery modules (`NovaPoshtaDeliveryModule`, `UkrPoshtaDeliveryModule`) and discount modules (`GiftCertificateModule`, `PromoCodeModule`) expose `resolveCallback()` and provide pipeline callbacks.
+
+### `App\Services\Marketing\PromoCodeService`
+
+`resolve()` loads a promo code by its normalized Unicode-safe code. `applyToTotals()` validates the active period, identity/usage limits, minimum order, product/category scope, discount mode, and currency fallback, then adds the discount line and metadata to cart totals. `validateAndCalculate()` exposes the calculation contract for server-side revalidation. `consume()` records one successful order usage after payment confirmation.
+
+### `App\Services\Marketing\PromoCodePersistenceService`
+
+`prepareForSave()` normalizes codes, validates uniqueness and the required default-currency discount, and separates Filament relationship data. `hydrateFormData()` maps relationships back into form state. `syncRelations()` persists selected users, groups, products, categories, currency discounts, and per-language error messages.
+
+### `App\Services\Marketing\PromoCodeAdminOptionsService`
+
+`currencyOptions()`, `userOptions()`, `userLabelById()`, and `userGroupOptions()` provide localized admin choices. `productSearchOptions()` and `categorySearchOptions()` search active catalog records across descriptions and return labels in the current admin language; the corresponding `*LabelById()` methods hydrate selected repeater values.
 
 ## Catalog and checkout services
 
