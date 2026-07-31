@@ -35,6 +35,25 @@
 - `config/*.php` — application configuration contracts
 - `composer.json` scripts include setup/dev/test commands
 
+## AI Factory Patch Files
+
+Self-improvement patches are stored in `/patches/` and must use this
+filename pattern:
+
+```text
+YYYY-MM-DD-patch-name.md
+```
+
+For example:
+
+```text
+/patches/2026-07-31-promo-code-validation.md
+```
+
+The `patch-name` should be short, descriptive, and written in lowercase
+kebab-case. The time of day must not be included. The configured source of
+truth is `paths.patches` in `/config.yaml`.
+
 ## See Also
 
 - [Project README](../README.md) — project landing page and navigation hub.
