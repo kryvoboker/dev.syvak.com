@@ -7,7 +7,11 @@ namespace App\Filament\Resources\Marketing\PromoCodes\Pages;
 use App\Filament\Resources\Marketing\PromoCodes\PromoCodeResource;
 use App\Models\Marketing\PromoCode;
 use App\Services\Marketing\PromoCodePersistenceService;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 
 class EditPromoCode extends EditRecord
 {
@@ -38,5 +42,20 @@ class EditPromoCode extends EditRecord
         /** @var PromoCode $record */
         $record = $this->record;
         app(PromoCodePersistenceService::class)->syncRelations($record, $this->relationship_data);
+    }
+
+    /**
+     * @return array|Action[]|ActionGroup[]
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
+            DeleteAction::make()
+                ->icon(Heroicon::Trash),
+        ];
     }
 }

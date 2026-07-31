@@ -9,15 +9,18 @@ use App\Enums\Marketing\PromoCodeDiscountTypeEnum;
 use App\Enums\Marketing\PromoCodeLimitModeEnum;
 use App\Enums\Marketing\PromoCodeTypeEnum;
 use App\Models\ApplicationSettings\Currency;
+use App\Models\Catalogs\Products\Product;
 use App\Models\Marketing\PromoCode;
 use App\Models\Marketing\PromoCodeDiscount;
 use App\Models\Marketing\PromoCodeErrorTranslation;
 use App\Models\Marketing\PromoCodeUsage;
 use App\Models\Orders\Orders;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 final class PromoCodeService
 {
@@ -180,6 +183,15 @@ final class PromoCodeService
         ];
     }
 
+    /**
+     * @param PromoCode $promo_code
+     * @param Orders    $order
+     * @param int|null  $user_id
+     * @param int|null  $user_group_id
+     *
+     * @return PromoCodeUsage
+     * @throws Throwable
+     */
     public function consume(PromoCode $promo_code, Orders $order, ?int $user_id = null, ?int $user_group_id = null): PromoCodeUsage
     {
         $consumer_key = $this->resolveConsumerKey($user_id);
@@ -260,7 +272,7 @@ final class PromoCodeService
 
         $product_ids = collect($cart_items)->pluck('product_id')->filter()->unique()->values();
 
-        return \App\Models\Catalogs\Products\Product::query()
+        return Product::query()
             ->with('categories:id')
             ->whereIn('id', $product_ids)
             ->get()
@@ -354,7 +366,7 @@ final class PromoCodeService
             return 'user:' . $user_id;
         }
 
-        return 'session:' . (string) session()->getId();
+        return 'session:' . session()->getId();
     }
 
     private function resolveDiscountValue(PromoCode $promo_code, string $currency_code): float
@@ -362,7 +374,7 @@ final class PromoCodeService
         $target_currency = Currency::query()->where('code', $currency_code)->where('is_active', true)->first()
             ?? (new Currency())->getDefaultActiveCurrency();
         $default_currency = (new Currency())->getDefaultActiveCurrency();
-        /** @var \Illuminate\Database\Eloquent\Collection<int, PromoCodeDiscount> $discounts */
+        /** @var Collection<int, PromoCodeDiscount> $discounts */
         $discounts = $promo_code->discounts;
         /** @var PromoCodeDiscount|null $discount */
         $discount = $discounts->first(fn (PromoCodeDiscount $item): bool => (int) $item->currency_id === (int) $target_currency?->getKey());
@@ -416,10 +428,6 @@ final class PromoCodeService
             'error_type' => $error_type,
             'message' => $message !== '' ? $message : __('catalog/default.cart.errors.promo_invalid'),
         ];
-
-        Log::channel('stack')->warning('[PromoCodeService] promo code application rejected', [
-            'error_type' => $error_type,
-        ]);
 
         return $totals_data;
     }

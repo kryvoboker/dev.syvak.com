@@ -7,7 +7,10 @@ namespace App\Filament\Resources\Marketing\PromoCodes\Pages;
 use App\Filament\Resources\Marketing\PromoCodes\PromoCodeResource;
 use App\Models\Marketing\PromoCode;
 use App\Services\Marketing\PromoCodePersistenceService;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Support\Icons\Heroicon;
 
 class CreatePromoCode extends CreateRecord
 {
@@ -17,7 +20,7 @@ class CreatePromoCode extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $prepared_data = app(PromoCodePersistenceService::class)->prepareForSave($data);
+        $prepared_data           = app(PromoCodePersistenceService::class)->prepareForSave($data);
         $this->relationship_data = $prepared_data['relationships'];
 
         return $prepared_data['attributes'];
@@ -28,5 +31,18 @@ class CreatePromoCode extends CreateRecord
         /** @var PromoCode $record */
         $record = $this->record;
         app(PromoCodePersistenceService::class)->syncRelations($record, $this->relationship_data);
+    }
+
+    /**
+     * @return array|Action[]|ActionGroup[]
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.create'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn() => $this->create()),
+        ];
     }
 }
