@@ -6,6 +6,6 @@ namespace App\Enums\Cart;
 
 enum CartRequestKeyEnum: string
 {
-    case CartMode        = 'cart_mode';
+    case CartMode = 'cart_mode';
     case IsCallFromModal = 'is_call_from_modal';
 }

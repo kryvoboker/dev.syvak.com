@@ -1,4 +1,7 @@
 export const $DEBOUNCE_DELAY: number = 1000;
+export const $DESKTOP_DEVICE_TYPE = 'desktop';
+export const $TABLET_DEVICE_TYPE = 'tablet';
+export const $MOBILE_DEVICE_TYPE = 'mobile';
 export const $HOME_PAGE_TYPE: string = 'home';
 export const $PRODUCT_PAGE_TYPE: string = 'product';
 export const $CATEGORY_PAGE_TYPE: string = 'category';

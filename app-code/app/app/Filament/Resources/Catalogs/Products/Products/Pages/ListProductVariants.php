@@ -80,7 +80,8 @@ class ListProductVariants extends ListRecords
                         'record' => $record,
                         'product' => $this->product_id,
                     ])),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->icon(Heroicon::Trash),
             ]);
     }
 

@@ -6,9 +6,11 @@ namespace App\Filament\Resources\ApplicationSettings\Currencies\Pages;
 
 use App\Filament\Resources\ApplicationSettings\Currencies\CurrencyResource;
 use App\Models\ApplicationSettings\Currency;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 
 class EditCurrency extends EditRecord
 {
@@ -33,7 +35,12 @@ class EditCurrency extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
             DeleteAction::make()
+                ->icon(Heroicon::Trash)
                 ->before(function (DeleteAction $action, Currency $record) {
                     if ($record->is_default) {
                         Notification::make()

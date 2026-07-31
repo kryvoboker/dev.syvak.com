@@ -224,6 +224,10 @@ return [
                 'width' => (int) env('CATEGORY_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_WIDTH', 500),
                 'height' => (int) env('CATEGORY_IMAGE_PREVIEW_IN_PAGE_IN_ADMIN_HEIGHT', 500),
             ],
+            'preview_in_page_in_catalog_menu' => [
+                'width' => (int) env('CATEGORY_IMAGE_PREVIEW_IN_PAGE_IN_CATALOG_WIDTH', 720),
+                'height' => (int) env('CATEGORY_IMAGE_PREVIEW_IN_PAGE_IN_CATALOG_HEIGHT', 720),
+            ],
             'image_path' => env('CATEGORIES_IMAGES_PATH', 'images/categories') . '/' . date('Y/m'),
         ],
         'product' => [

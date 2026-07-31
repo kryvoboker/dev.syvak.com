@@ -10,6 +10,6 @@ enum CartModeEnum: string
 {
     use EnumValuesTrait;
 
-    case Regular   = 'regular';
+    case Regular = 'regular';
     case FastOrder = 'fast_order';
 }

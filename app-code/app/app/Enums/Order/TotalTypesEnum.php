@@ -10,9 +10,9 @@ enum TotalTypesEnum: string
 {
     use EnumValuesTrait;
 
-    case Total     = 'total';
-    case Subtotal  = 'sub_total';
-    case Shipping  = 'shipping';
-    case Discount  = 'discount';
+    case Total = 'total';
+    case Subtotal = 'sub_total';
+    case Shipping = 'shipping';
+    case Discount = 'discount';
     case PromoCode = 'promo_code';
 }

@@ -18,34 +18,59 @@ final class RequestLookupContext
 
     /** @var Collection<int, ModuleDefinition>|null */
     private ?Collection $enabled_module_definitions = null;
+    /**
+     * @var array<string, Language|null>
+     */
+    private array $languages_by_code = [];
+    private ?Language $default_language = null;
 
     /**
      * @return Collection<int, Language>
      */
     public function getActiveLanguages(): Collection
     {
-        return $this->active_languages ??= Language::query()
-            ->select(['id', 'code', 'name', 'is_active', 'is_default'])
-            ->where('is_active', true)
-            ->orderByDesc('is_default')
-            ->orderBy('name')
-            ->get();
+        return $this->active_languages ??= app(Language::class)
+            ->getActiveLanguages();
     }
 
+    /**
+     * @param string $code
+     *
+     * @return Language|null
+     */
     public function getLanguageByCode(string $code): ?Language
     {
-        return $this->getActiveLanguages()->firstWhere('code', $code);
+        if (array_key_exists($code, $this->languages_by_code)) {
+            return $this->languages_by_code[$code];
+        }
+
+        return $this->languages_by_code[$code] = app(Language::class)
+            ->getLanguageByCode($code);
     }
 
+    /**
+     * @return void
+     */
+    public function forgetLanguageByCode(): void
+    {
+        $this->languages_by_code = [];
+    }
+
+    /**
+     * @return void
+     */
     public function forgetActiveLanguages(): void
     {
         $this->active_languages = null;
     }
 
+    /**
+     * @return Language|null
+     */
     public function getDefaultLanguage(): ?Language
     {
-        return $this->getActiveLanguages()->firstWhere('is_default', true)
-            ?? $this->getActiveLanguages()->first();
+        return $this->default_language ??= app(Language::class)
+            ->getDefaultLanguage();
     }
 
     /**
@@ -70,6 +95,11 @@ final class RequestLookupContext
             ->get();
     }
 
+    /**
+     * @param string $module_name
+     *
+     * @return bool
+     */
     public function isEnabledSingletonModule(string $module_name): bool
     {
         $module_definition = $this->getEnabledModuleDefinitions()
@@ -79,6 +109,9 @@ final class RequestLookupContext
             && $module_definition->canCreateInstances() === false;
     }
 
+    /**
+     * @return void
+     */
     public function forgetEnabledModuleDefinitions(): void
     {
         $this->enabled_module_definitions = null;

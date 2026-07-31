@@ -41,7 +41,8 @@
             'cart_update_url_pattern' => localized_route('localized.catalog.cart.update', ['cart_id' => '__cart_id__']),
             'cart_delete_url_pattern' => localized_route('localized.catalog.cart.delete', ['cart_id' => '__cart_id__']),
             'order_validate_url' => localized_route('localized.catalog.order-confirm.validate'),
-            'order_store_url' => localized_route('localized.catalog.order-confirm.store')
+            'order_store_url' => localized_route('localized.catalog.order-confirm.store'),
+            'current_device_type' => $current_device_type ?? null,
         ])
     };
 </script>
