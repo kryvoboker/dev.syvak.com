@@ -69,7 +69,7 @@ readonly class CartViewDataBuilderService
                         'model',
                         'sku',
                         'ean',
-                    ]);
+                    ])->with('categories:id');
                 },
                 'product.productDescription' => fn ($query) => $query->where('language_id', $language_id),
                 'product.slugs' => fn ($query) => $query->where('language_id', $language_id),
@@ -86,6 +86,14 @@ readonly class CartViewDataBuilderService
                         ])
                         ->where('language_id', $language_id);
                 },
+                'discounts' => function ($query): void {
+                    $query
+                        ->where('user_group_id', (int) (get_app_settings()->user_group_id ?? 0))
+                        ->where('date_start', '<=', now())
+                        ->where('date_end', '>=', now())
+                        ->orderBy('priority')
+                        ->orderByDesc('updated_at');
+                },
             ])
             ->whereIn('id', $variant_ids)
             ->get()
@@ -101,7 +109,10 @@ readonly class CartViewDataBuilderService
                 }
 
                 $quantity = max(1, (int)Arr::get($item_data, 'quantity', 1));
-                $price = max(0, (float)($variant->price ?? $variant->product->price ?? 0));
+                $rrc_price = max(0, (float) ($variant->price ?? $variant->product->price ?? 0));
+                $active_discount = $variant->discounts->first();
+                $price = max(0, (float) ($active_discount->price ?? $rrc_price));
+                $is_discounted = $active_discount !== null && $price < $rrc_price;
 
                 $variant_name = Str::trim((string)$variant->descriptions->first()?->name);
                 $product_name = Str::trim((string)$variant->product->productDescription->first()?->name);
@@ -159,6 +170,11 @@ readonly class CartViewDataBuilderService
                         (float)config('app.currency.current_exchange_rate'),
                     )),
                     'line_total' => $line_total,
+                    'rrc_unit_price' => $rrc_price,
+                    'rrc_line_total' => $rrc_price * $quantity,
+                    'is_discounted' => $is_discounted,
+                    'active_discount_id' => $active_discount?->getKey(),
+                    'category_ids' => $variant->product->categories->modelKeys(),
                     'line_total_formatted' => replace_currency_symbol_to_code(format_price(
                         $line_total,
                         config('app.currency.current_currency_code'),
@@ -173,7 +189,7 @@ readonly class CartViewDataBuilderService
             ->filter(fn (?array $item_data): bool => is_array($item_data))
             ->values();
 
-        return $this->collectCartData($resolved_items, $mode);
+        return $this->collectCartData($resolved_items, $mode, $locale);
     }
 
     /**
@@ -305,12 +321,21 @@ readonly class CartViewDataBuilderService
     /**
      * @return array<int, callable(array<string, mixed>): array<string, mixed>>
      */
-    private function resolveTotalsCallbacks(): array
+    private function resolveTotalsCallbacks(Collection $resolved_items, string $locale): array
     {
+        $checkout_state = (array) session()->get('checkout.selection_state', []);
+        $app_settings = get_app_settings();
+
         return [
             app(UkrPoshtaDeliveryModule::class)->resolveCallback(),
             app(NovaPoshtaDeliveryModule::class)->resolveCallback(),
-            app(PromoCodeModule::class)->resolveCallback(),
+            app(PromoCodeModule::class)->resolveCallback([
+                'cart_items' => $resolved_items->all(),
+                'code' => $checkout_state['promo_code'] ?? null,
+                'locale' => $locale,
+                'user_id' => auth()->id(),
+                'user_group_id' => $app_settings?->user_group_id,
+            ]),
             app(GiftCertificateModule::class)->resolveCallback(),
         ];
     }
@@ -347,11 +372,11 @@ readonly class CartViewDataBuilderService
      *
      * @return array
      */
-    protected function collectCartData(Collection $resolved_items, string $mode): array
+    protected function collectCartData(Collection $resolved_items, string $mode, string $locale): array
     {
         $totals = $this->cart_totals_pipeline_service->calculate(
             cart_items: $resolved_items->all(),
-            callbacks : $this->resolveTotalsCallbacks(),
+            callbacks : $this->resolveTotalsCallbacks($resolved_items, $locale),
         );
 
         $total_quantity = (int)$resolved_items->sum(fn (array $item_data): int => (int)$item_data['quantity']);

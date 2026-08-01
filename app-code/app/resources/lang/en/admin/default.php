@@ -8,6 +8,7 @@ return [
         'item_catalog' => 'Catalog',
         'info_pages' => 'Info Pages',
         'item_users' => 'Users',
+        'item_marketing' => 'Marketing',
         'item_orders' => 'Orders',
         'item_modules' => 'Modules',
         'wiki' => 'Wiki',
@@ -126,6 +127,10 @@ return [
         'update' => 'Update',
         'delete' => 'Delete',
         'cancel' => 'Cancel',
+    ],
+
+    'actions' => [
+        'add' => 'Add',
     ],
 
     // Helpers

@@ -99,7 +99,7 @@ class CheckoutController extends Controller
                 'items_count' => count($cart_items),
                 'visible_items' => $visible_cart_items,
                 'hidden_items' => $hidden_cart_items,
-                'subtotal_formatted' => (string)($cart_data['totals']['grand_total_formatted'] ?? ''),
+                'subtotal_formatted' => (string)($cart_data['totals']['items_subtotal_formatted'] ?? ''),
                 'delivery_formatted' => '—',
                 'grand_total_formatted' => (string)($cart_data['totals']['grand_total_formatted'] ?? ''),
             ],
@@ -183,10 +183,12 @@ class CheckoutController extends Controller
 
         $state = $this->checkout_selection_state_service->replaceState($validated);
         $this->syncModuleStates($state);
+        $cart_data = app(CartService::class)->getSnapshot($locale);
 
         return response()->json([
             'success' => true,
             'state' => $state,
+            'cart' => $cart_data,
         ]);
     }
 

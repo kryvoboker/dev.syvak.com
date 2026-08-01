@@ -415,7 +415,7 @@
                                     {{ __('catalog/pages/checkout.summary_title') }}
                                 </h2>
 
-                                <p class="font-bold text-white">
+                                <p class="font-bold text-white" data-checkout-total="summary">
                                     {{ $checkout_data['subtotal_formatted'] ?? '' }}
                                 </p>
                             </div>
@@ -569,17 +569,24 @@
                             <div class="flex flex-col gap-3 border-t border-opacity-light-gray-40% pt-4">
                                 <div class="flex items-center justify-between gap-4 text-sm md:text-base">
                                     <span>{{ __('catalog/pages/checkout.texts.subtotal') }}</span>
-                                    <span>{{ $checkout_data['subtotal_formatted'] ?? '' }}</span>
+                                    <span data-checkout-total="subtotal">{{ $checkout_data['subtotal_formatted'] ?? '' }}</span>
                                 </div>
 
                                 <div class="flex items-center justify-between gap-4 text-sm md:text-base">
                                     <span>{{ __('catalog/pages/checkout.texts.delivery') }}</span>
-                                    <span>{{ $checkout_data['delivery_formatted'] ?? '—' }}</span>
+                                    <span data-checkout-total="delivery">{{ $checkout_data['delivery_formatted'] ?? '—' }}</span>
                                 </div>
+
+                                <div class="hidden items-center justify-between gap-4 text-sm text-light-green md:text-base" data-checkout-promo-total>
+                                    <span>{{ __('catalog/pages/checkout.texts.promo_code') }}</span>
+                                    <span data-checkout-total="promo_code"></span>
+                                </div>
+
+                                <p class="hidden text-sm text-light-red md:text-base" data-checkout-promo-error role="alert"></p>
 
                                 <div class="flex items-center justify-between gap-4 text-base font-bold uppercase md:text-lg">
                                     <span>{{ __('catalog/pages/checkout.texts.total') }}</span>
-                                    <span>{{ $checkout_data['grand_total_formatted'] ?? '' }}</span>
+                                    <span data-checkout-total="grand_total">{{ $checkout_data['grand_total_formatted'] ?? '' }}</span>
                                 </div>
                             </div>
                         </div>

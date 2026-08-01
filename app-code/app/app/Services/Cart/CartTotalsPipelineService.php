@@ -87,14 +87,27 @@ class CartTotalsPipelineService
             })
             ->all();
 
-        return [
+        $result_data = [
             'lines' => $normalized_lines,
             'items_subtotal' => (float) Arr::get($totals_data, 'items_subtotal', 0),
+            'items_subtotal_formatted' => $this->formatMoney(
+                (float) Arr::get($totals_data, 'items_subtotal', 0),
+                $currency_code,
+                $exchange_rate,
+            ),
             'grand_total' => $grand_total,
             'grand_total_formatted' => $this->formatMoney($grand_total, $currency_code, $exchange_rate),
             'currency_code' => $currency_code,
             'exchange_rate' => $exchange_rate,
         ];
+
+        foreach (['promo_code'] as $metadata_key) {
+            if (array_key_exists($metadata_key, $totals_data)) {
+                $result_data[$metadata_key] = $totals_data[$metadata_key];
+            }
+        }
+
+        return $result_data;
     }
 
     private function formatMoney(float $amount, string $currency_code, float $exchange_rate): string

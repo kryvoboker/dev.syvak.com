@@ -1,3 +1,4 @@
+import { $DEBOUNCE_DELAY } from '@ts-shared/lib/constants.ts';
 import { debounce, fetchFunc, isArray, isEmpty, showErrorInConsole } from '@ts-shared/lib/helpers.ts';
 import {
     buildBranchLoadPayload,
@@ -9,7 +10,6 @@ import {
     type CheckoutFormState,
     normalizeBranchPayload,
     normalizeCityPayload,
-    SEARCH_DEBOUNCE_MS,
 } from './checkoutData.ts';
 
 interface CheckoutSearchState {
@@ -32,6 +32,7 @@ interface CheckoutSearchOptions {
     applyCityResults: (cities: CheckoutCitySearchItem[]) => void;
     applyBranchResults: (branches: CheckoutBranchSearchItem[]) => void;
     updateMapButtonState: () => void;
+    onCartUpdated?: (cart: Record<string, unknown>) => void;
 }
 
 export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
@@ -81,7 +82,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
             options.applyBranchResults(state.branch ? [state.branch] : []);
             options.updateMapButtonState();
         }
-    }, SEARCH_DEBOUNCE_MS);
+    }, $DEBOUNCE_DELAY);
 
     const searchCities = debounce(async (searchValue: string): Promise<void> => {
         const normalizedValue = searchValue.trim();
@@ -108,7 +109,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
             state.latestCityResults = [];
             options.applyCityResults(state.city ? [state.city] : []);
         }
-    }, SEARCH_DEBOUNCE_MS);
+    }, $DEBOUNCE_DELAY);
 
     const saveSelection = async (): Promise<void> => {
         if (isEmpty(options.selectionSaveUrl)) {
@@ -116,7 +117,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
         }
 
         try {
-            await fetchFunc(
+            const response = await fetchFunc<{ cart?: Record<string, unknown> }>(
                 options.selectionSaveUrl,
                 buildSelectionPayload(
                     state.city,
@@ -127,6 +128,10 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
                     state.form,
                 ),
             );
+
+            if (response?.cart && options.onCartUpdated) {
+                options.onCartUpdated(response.cart);
+            }
         } catch {
             showErrorInConsole('[checkout] Failed to synchronize delivery selection.');
         }
@@ -136,6 +141,6 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
         loadBranches,
         saveSelection,
         searchCities,
-        syncSelectionToServer: debounce(async (): Promise<void> => saveSelection(), 1000),
+        syncSelectionToServer: debounce(async (): Promise<void> => saveSelection(), $DEBOUNCE_DELAY),
     };
 };
