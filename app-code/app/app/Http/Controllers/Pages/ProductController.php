@@ -10,6 +10,7 @@ use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Catalogs\Products\ProductVariantAttributeValue;
+use App\Models\Catalogs\Products\ProductVariantDiscount;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
@@ -295,10 +296,17 @@ class ProductController extends Controller
         $product_meta_data = $this->resolveProductMetaData($product, $variant, $language_id);
         $product_title = (string) Arr::get($product_meta_data, 'name', '');
         $product_sku = (string) $product->sku;
-        $product_price = $this->resolveProductPrice($product, $variant);
+        $product_price_data = $this->resolveProductPriceData($product, $variant);
         $formatted_price = replace_currency_symbol_to_code(
             format_price(
-                $product_price,
+                $product_price_data['price'],
+                config('app.currency.current_currency_code'),
+                (float) config('app.currency.current_exchange_rate'),
+            ),
+        );
+        $formatted_rrc_price = replace_currency_symbol_to_code(
+            format_price(
+                $product_price_data['rrc_price'],
                 config('app.currency.current_currency_code'),
                 (float) config('app.currency.current_exchange_rate'),
             ),
@@ -332,6 +340,8 @@ class ProductController extends Controller
             'meta_keywords' => Str::trim(strip_tags((string) Arr::get($product_meta_data, 'meta_keywords', ''))),
             'sku' => $product_sku,
             'price_formatted' => $formatted_price,
+            'rrc_price_formatted' => $formatted_rrc_price,
+            'is_discounted' => $product_price_data['is_discounted'],
             'is_in_stock' => $is_in_stock,
             'minimum_stock_quantity' => $minimum_stock_qty,
             'main_image' => $main_image_data,
@@ -551,13 +561,26 @@ class ProductController extends Controller
         return $meta_data;
     }
 
-    private function resolveProductPrice(Product $product, ?ProductVariant $variant): float
+    /**
+     * @return array{price: float, rrc_price: float, is_discounted: bool}
+     */
+    private function resolveProductPriceData(Product $product, ?ProductVariant $variant): array
     {
-        if ($variant instanceof ProductVariant && is_numeric($variant->price)) {
-            return (float) $variant->price;
-        }
+        $rrc_price = $variant instanceof ProductVariant && is_numeric($variant->price)
+            ? (float) $variant->price
+            : (is_numeric($product->price) ? (float) $product->price : 0.0);
+        $discount = $variant?->getLastActualAndLastModifiedDiscountForUserGroup(
+            get_app_settings()?->user_group_id,
+        );
+        $discount_price = $discount instanceof ProductVariantDiscount
+            ? (float) $discount->price
+            : null;
 
-        return is_numeric($product->price) ? (float) $product->price : 0.0;
+        return [
+            'price' => $discount_price ?? $rrc_price,
+            'rrc_price' => $rrc_price,
+            'is_discounted' => $discount_price !== null && $discount_price < $rrc_price,
+        ];
     }
 
     private function resolveInStockState(?ProductVariant $variant, int $minimum_stock_quantity): bool
