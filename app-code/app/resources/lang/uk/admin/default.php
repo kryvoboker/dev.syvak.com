@@ -8,6 +8,7 @@ return [
         'item_catalog' => 'Каталог',
         'info_pages' => 'Інформаційні сторінки',
         'item_users' => 'Користувачі',
+        'item_marketing' => 'Маркетинг',
         'item_orders' => 'Замовлення',
         'item_modules' => 'Модулі',
         'wiki' => 'Wiki',
@@ -125,6 +126,10 @@ return [
         'update' => 'Оновити',
         'delete' => 'Видалити',
         'cancel' => 'Ахрана атмєна ;)',
+    ],
+
+    'actions' => [
+        'add' => 'Додати',
     ],
 
     // Helpers

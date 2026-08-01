@@ -9,7 +9,9 @@ use App\Enums\Cart\CartRequestKeyEnum;
 use App\Enums\Order\OrderDataKeyEnum;
 use App\Enums\Order\PaymentMethodEnum;
 use App\Models\Orders\OrderPayments;
+use App\Models\Orders\Orders;
 use App\Services\Cart\CartService;
+use App\Services\Marketing\PromoCodeService;
 use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -35,6 +37,7 @@ readonly class OrderCreationService
         private OrderAggregatePersistenceService $order_aggregate_persistence_service,
         private OrderLifecycleService $order_lifecycle_service,
         private PickupCheckoutDataService $pickup_checkout_data_service,
+        private ?PromoCodeService $promo_code_service = null,
     ) {
     }
 
@@ -131,6 +134,7 @@ readonly class OrderCreationService
 
         if ($is_success === true) {
             $this->cart_service->clearCart((string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value));
+            $this->consumePromoCode((array) Arr::get($validation_result, 'cart', []), $order);
 
             return [
                 'success' => true,
@@ -305,6 +309,7 @@ readonly class OrderCreationService
 
         if ((bool) Arr::get($payment_result, 'is_success', false) === true) {
             $this->cart_service->clearCart(CartModeEnum::Regular->value);
+            $this->consumePromoCode((array) Arr::get($validation_result, 'cart', []), $order);
 
             return [
                 'success' => true,
@@ -361,6 +366,48 @@ readonly class OrderCreationService
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[OrderCreationService] failed payment status update failed', [
                 'payment_id' => $payment->getKey(),
+                'exception' => $throwable::class,
+                'message' => $throwable->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Consume a promo code only after the payment module confirms the order.
+     *
+     * @param array<string, mixed> $cart_data
+     */
+    private function consumePromoCode(array $cart_data, Orders $order): void
+    {
+        $promo_code_id = Arr::get($cart_data, 'totals.promo_code.promo_code_id');
+
+        if (! is_numeric($promo_code_id)) {
+            return;
+        }
+
+        if ($this->promo_code_service === null) {
+            return;
+        }
+
+        $promo_code = $this->promo_code_service->resolve((string) Arr::get($cart_data, 'totals.promo_code.code', ''));
+
+        if ($promo_code === null || (int) $promo_code->getKey() !== (int) $promo_code_id) {
+            return;
+        }
+
+        $app_settings = get_app_settings();
+
+        try {
+            $this->promo_code_service->consume(
+                $promo_code,
+                $order,
+                auth()->id(),
+                is_numeric($app_settings?->user_group_id) ? (int) $app_settings->user_group_id : null,
+            );
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('[OrderCreationService] promo code consumption failed', [
+                'promo_code_id' => $promo_code->getKey(),
+                'order_id' => $order->getKey(),
                 'exception' => $throwable::class,
                 'message' => $throwable->getMessage(),
             ]);

@@ -1,5 +1,5 @@
 import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
-import { findElem } from '@ts-shared/lib/helpers.ts';
+import { findElem, toggleClass } from '@ts-shared/lib/helpers.ts';
 import type Choices from 'choices.js';
 import type { InputChoice, InputGroup } from 'choices.js';
 import { buildBranchChoiceItem, buildChoiceItem } from './checkoutChoices.ts';
@@ -52,8 +52,9 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
             hasMapPoints;
 
         elements.mapButtonElement.toggleAttribute('disabled', !isMapAvailable);
-        elements.mapButtonElement.classList.toggle('cursor-not-allowed', !isMapAvailable);
-        elements.mapButtonElement.classList.toggle('opacity-60', !isMapAvailable);
+
+        toggleClass(elements.mapButtonElement, 'cursor-not-allowed', !isMapAvailable);
+        toggleClass(elements.mapButtonElement, 'opacity-60', !isMapAvailable);
     };
 
     const hideWarning = (): void => {
@@ -74,7 +75,7 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
     const updateCourierAddressVisibility = (): void => {
         const isCourierDelivery = state.getDeliveryMethod() === 'nova_poshta_courier';
 
-        elements.deliveryAddressWrapperElement?.classList.toggle($HIDDEN_CLASS_NAME, !isCourierDelivery);
+        toggleClass(elements.deliveryAddressWrapperElement, $HIDDEN_CLASS_NAME, !isCourierDelivery);
 
         if (elements.deliveryAddressInputElement) {
             elements.deliveryAddressInputElement.required = isCourierDelivery;
@@ -86,7 +87,7 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
         const isBranchSearchAvailable =
             deliveryMethod !== '' && deliveryMethod !== 'nova_poshta_courier' && deliveryMethod !== 'pickup_store';
 
-        elements.branchWrapperElement?.classList.toggle($HIDDEN_CLASS_NAME, !isBranchSearchAvailable);
+        toggleClass(elements.branchWrapperElement, $HIDDEN_CLASS_NAME, !isBranchSearchAvailable);
 
         if (elements.branchLabelElement) {
             elements.branchLabelElement.textContent = resolveBranchLabelText(deliveryMethod);
@@ -146,7 +147,7 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
             const isVisible =
                 method === 'pickup_store' || !hasCity || (method === 'ukr_poshta' ? isUkrAvailable : isNovaAvailable);
 
-            optionElement.classList.toggle($HIDDEN_CLASS_NAME, !isVisible);
+            toggleClass(optionElement, $HIDDEN_CLASS_NAME, !isVisible);
 
             if (!isVisible) {
                 const input = <HTMLInputElement | null>findElem('[data-checkout-delivery-method-input]', optionElement);
