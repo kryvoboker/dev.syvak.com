@@ -103,16 +103,21 @@ class ProductVariant extends Model
         });
     }
 
-    public function getLastActualAndLastModifiedDiscountForUserGroup(int $user_group_id): ?ProductVariantDiscount
+    public function getLastActualAndLastModifiedDiscountForUserGroup(?int $user_group_id): ?ProductVariantDiscount
     {
         $current_date_time = now(config('app.timezone'));
 
         /** @var ProductVariantDiscount|null $discount */
         $discount = $this->discounts()
-            ->where('user_group_id', $user_group_id)
             ->where('date_start', '<=', $current_date_time)
             ->where('date_end', '>=', $current_date_time)
+            ->orderBy('priority')
             ->orderByDesc('updated_at')
+            ->when(
+                $user_group_id === null,
+                fn ($query) => $query->whereNull('user_group_id'),
+                fn ($query) => $query->where('user_group_id', $user_group_id),
+            )
             ->first();
 
         return $discount;

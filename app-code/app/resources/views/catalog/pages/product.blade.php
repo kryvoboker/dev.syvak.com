@@ -106,6 +106,11 @@
 
                     <div class="text-xl md:text-32px leading-1.4em">
                         {{ $product_view_data['price_formatted'] }}
+                        @if($product_view_data['is_discounted'] ?? false)
+                            <del class="ml-2 text-light-gray/80">
+                                {{ $product_view_data['rrc_price_formatted'] }}
+                            </del>
+                        @endif
                     </div>
                 </div>
 

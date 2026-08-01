@@ -469,6 +469,54 @@ class ProductsCarouselModuleServicesTest extends TestCase
         $this->assertSame(20, (int) $products->first()->id);
     }
 
+    public function test_storefront_card_uses_discount_from_selected_variant(): void
+    {
+        DB::table('products')->insert([
+            ['id' => 400, 'model' => 'M-400', 'sku' => 'SKU-400', 'ean' => 400, 'quantity' => 5, 'minimum' => 1, 'image' => null, 'price' => 100, 'viewed' => 0, 'is_active' => true, 'date_available' => now(), 'date_added' => now()],
+        ]);
+        DB::table('product_descriptions')->insert([
+            ['product_id' => 400, 'language_id' => 1, 'name' => 'Selected variant product', 'description' => null, 'h1_title' => null, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => null],
+        ]);
+        DB::table('product_variants')->insert([
+            ['id' => 401, 'product_id' => 400, 'is_default' => true, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 100, 'sort_order' => 1],
+            ['id' => 402, 'product_id' => 400, 'is_default' => false, 'is_active' => true, 'quantity' => 5, 'minimum' => 1, 'price' => 200, 'sort_order' => 2],
+        ]);
+        DB::table('product_variant_discounts')->insert([
+            ['id' => 10, 'product_variant_id' => 402, 'user_group_id' => null, 'quantity' => 1, 'priority' => 1, 'price' => 150, 'date_start' => now()->subDay(), 'date_end' => now()->addDay()],
+        ]);
+
+        $product = Product::query()
+            ->with([
+                'productDescription' => fn ($query) => $query->where('language_id', 1),
+                'slugs' => fn ($query) => $query->where('language_id', 1),
+                'variants' => function ($query): void {
+                    $query
+                        ->where('is_active', true)
+                        ->with([
+                            'descriptions' => fn ($description_query) => $description_query->where('language_id', 1),
+                            'slugs' => fn ($slug_query) => $slug_query->where('language_id', 1),
+                            'discounts' => fn ($discount_query) => $discount_query
+                                ->whereNull('user_group_id')
+                                ->where('date_start', '<=', now())
+                                ->where('date_end', '>=', now()),
+                        ]);
+                },
+            ])
+            ->findOrFail(400);
+
+        $selected_variant = $product->variants->firstWhere('id', 402);
+        $service = app(ProductsCarouselStorefrontService::class);
+        $reflection_method = new \ReflectionMethod($service, 'mapProductCard');
+        $reflection_method->setAccessible(true);
+
+        /** @var array<string, mixed> $card */
+        $card = $reflection_method->invoke($service, $product, 300, 300, $selected_variant);
+
+        $this->assertSame(format_price(150, 'UAH', 1), $card['price']);
+        $this->assertSame(format_price(200, 'UAH', 1), $card['rrc_price']);
+        $this->assertTrue($card['is_discounted']);
+    }
+
     public function test_runtime_resolver_uses_current_locale_shared_translation_with_fallback(): void
     {
         DB::table('languages')->insert([
