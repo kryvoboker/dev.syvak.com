@@ -189,8 +189,8 @@ final class PromoCodeService
      * @param int|null  $user_id
      * @param int|null  $user_group_id
      *
-     * @return PromoCodeUsage
      * @throws Throwable
+     * @return PromoCodeUsage
      */
     public function consume(PromoCode $promo_code, Orders $order, ?int $user_id = null, ?int $user_group_id = null): PromoCodeUsage
     {
