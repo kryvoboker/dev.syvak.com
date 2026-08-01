@@ -122,15 +122,18 @@ class Language extends Model
     }
 
     /**
-     * @return Collection<Language>
-     */
+     * @return Collection<int, Language>
+    */
     public function getActiveLanguages(): Collection
     {
-        return self::query()
+        /** @var Collection<int, Language> $languages */
+        $languages = self::query()
             ->where('is_active', true)
             ->orderByDesc('is_default')
             ->orderBy('name')
             ->get();
+
+        return $languages;
     }
 
     public function getLanguageByCode(string $code): ?self

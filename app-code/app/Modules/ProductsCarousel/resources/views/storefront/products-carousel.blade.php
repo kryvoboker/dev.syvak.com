@@ -38,6 +38,7 @@
                         @php
                             $name = (string) ($product['name'] ?? 'Product name');
                             $price = (string) ($product['price'] ?? '0 UAH');
+                            $rrc_price = (string) ($product['rrc_price'] ?? '');
                             $url = (string) ($product['url'] ?? '#');
                             $image_urls_data = $product['image_data']['urls'] ?? [];
                             $image_width = (int) ($product['image_data']['width'] ?? 420);
@@ -78,6 +79,9 @@
                                     <div class="flex items-center justify-between gap-x-3">
                                         <div class="products-carousel-card-price text-sm uppercase tracking-0.04em text-light-gray md:text-base 2xl:text-lg">
                                             {{ $price }}
+                                            @if($product['is_discounted'] ?? false)
+                                                <del class="ml-2 text-light-gray/80">{{ $rrc_price }}</del>
+                                            @endif
                                         </div>
 
                                         <button class="add-to-cart"

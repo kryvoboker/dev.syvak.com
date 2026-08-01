@@ -1,0 +1,20 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - Modules
+        - routes
+        - config
+    excludePaths:
+        analyse:
+            - database
+            - tests
+            - Modules/*/tests
+    level: 7
+    treatPhpDocTypesAsCertain: true
+    ignoreErrors:
+        -
+            message: "#Called 'env' outside of the config directory which returns null when the config is cached, use 'config'.#"
+            path: Modules/*/config/*.php

@@ -171,7 +171,7 @@ class HeaderCategoryService
 
                 return $normalized_id > 0 ? $normalized_id : null;
             })
-            ->filter()
+            ->filter(fn (?int $category_id): bool => $category_id !== null)
             ->unique()
             ->values()
             ->all();
@@ -240,7 +240,10 @@ class HeaderCategoryService
                 ->values()
                 ->all();
 
-            return new Collection($ordered_categories);
+            /** @var Collection<int, Category> $result */
+            $result = new Collection($ordered_categories);
+
+            return $result;
         } catch (Throwable $throwable) {
             Log::channel('stack')->warning('Header categories resolution failed.', [
                 'category_ids' => $normalized_ids,

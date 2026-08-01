@@ -47,6 +47,8 @@ readonly class ProductsCarouselStorefrontService
      *         model: string,
      *         sku: string,
      *         price: string|float,
+     *         rrc_price: string|float,
+     *         is_discounted: bool,
      *         image_data: array{urls: array<string, string>, width: int, height: int},
      *         url: string|null
      *     }>
@@ -100,6 +102,7 @@ readonly class ProductsCarouselStorefrontService
                 );
 
                 $products_payload = $products
+                    ->toBase()
                     ->flatMap(fn (Product $product): array => $this->mapProductCards(
                         $product,
                         $runtime_shared_settings['product_image_width'],
@@ -388,6 +391,23 @@ readonly class ProductsCarouselStorefrontService
     private function buildBaseProductsQuery(int $min_quantity, array $selected_variant_ids = []): Builder
     {
         $language_id = $this->resolveLanguageId();
+        $discount_scope = function ($query): void {
+            $query
+                ->where('date_start', '<=', now(config('app.timezone')))
+                ->where('date_end', '>=', now(config('app.timezone')))
+                ->orderBy('priority')
+                ->orderByDesc('updated_at');
+
+            $user_group_id = get_app_settings()?->user_group_id;
+
+            if ($user_group_id === null) {
+                $query->whereNull('user_group_id');
+
+                return;
+            }
+
+            $query->where('user_group_id', (int) $user_group_id);
+        };
         $relations = [
             'productDescription' => function ($query) use ($language_id): void {
                 $query->where('language_id', $language_id);
@@ -395,7 +415,7 @@ readonly class ProductsCarouselStorefrontService
             'slugs' => function ($query) use ($language_id): void {
                 $query->where('language_id', $language_id);
             },
-            'defaultVariant' => function ($query) use ($language_id): void {
+            'defaultVariant' => function ($query) use ($language_id, $discount_scope): void {
                 $query->where('is_active', true)
                     ->with([
                         'descriptions' => function ($description_query) use ($language_id): void {
@@ -404,12 +424,13 @@ readonly class ProductsCarouselStorefrontService
                         'slugs' => function ($slug_query) use ($language_id): void {
                             $slug_query->where('language_id', $language_id);
                         },
+                        'discounts' => $discount_scope,
                     ]);
             },
         ];
 
         if ($selected_variant_ids !== []) {
-            $relations['variants'] = function ($query) use ($language_id, $selected_variant_ids): void {
+            $relations['variants'] = function ($query) use ($language_id, $selected_variant_ids, $discount_scope): void {
                 $query
                     ->where('is_active', true)
                     ->whereIn('id', $selected_variant_ids)
@@ -420,6 +441,7 @@ readonly class ProductsCarouselStorefrontService
                         'slugs' => function ($slug_query) use ($language_id): void {
                             $slug_query->where('language_id', $language_id);
                         },
+                        'discounts' => $discount_scope,
                     ])
                     ->orderBy('sort_order')
                     ->orderBy('id');
@@ -740,6 +762,8 @@ readonly class ProductsCarouselStorefrontService
      *     model: string,
      *     sku: string,
      *     price: string|float,
+     *     rrc_price: string|float,
+     *     is_discounted: bool,
      *     image_data: array{urls: array<string, string>, width: int, height: int},
      *     url: string|null
      * }
@@ -762,6 +786,10 @@ readonly class ProductsCarouselStorefrontService
         $image = $product_variant instanceof ProductVariant && filled($product_variant->image)
             ? $product_variant->image
             : $product->image;
+        $rrc_price = (float) ($product_variant instanceof ProductVariant ? $product_variant->price : $product->price);
+        $discount_price = $product_variant?->discounts->first()?->price;
+        $discount_price = is_numeric($discount_price) ? (float) $discount_price : null;
+        $price = $discount_price ?? $rrc_price;
 
         return [
             'id' => (int) $product->id,
@@ -771,10 +799,16 @@ readonly class ProductsCarouselStorefrontService
             'model' => escape_special_html((string) $product->model),
             'sku' => escape_special_html((string) $product->sku),
             'price' => format_price(
-                (float) ($product_variant instanceof ProductVariant ? $product_variant->price : $product->price),
+                $price,
                 config('app.currency.current_currency_code'),
-                (float) config('app.currency.default_exchange_rate'),
+                (float) config('app.currency.current_exchange_rate'),
             ),
+            'rrc_price' => format_price(
+                $rrc_price,
+                config('app.currency.current_currency_code'),
+                (float) config('app.currency.current_exchange_rate'),
+            ),
+            'is_discounted' => $discount_price !== null && $discount_price < $rrc_price,
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
                     (string) $image,
