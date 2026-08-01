@@ -263,6 +263,7 @@ readonly class ModuleSettingsNormalizerService
         }
 
         return $active_languages
+            ->toBase()
             ->mapWithKeys(function (Language $language) use ($shared_translations, $shared_settings): array {
                 $language_code = (string) $language->code;
                 $language_translation = Arr::get($shared_translations, $language_code, []);
@@ -414,7 +415,8 @@ readonly class ModuleSettingsNormalizerService
      */
     private function buildSortOptionsFromMap(array $custom_sort): array
     {
-        return collect(['price', 'name', 'date_added', 'quantity'])
+        /** @var array<int, string> $sort_options */
+        $sort_options = collect(['price', 'name', 'date_added', 'quantity'])
             ->map(function (string $field) use ($custom_sort): ?string {
                 $direction = $custom_sort[$field] ?? 'none';
 
@@ -427,6 +429,8 @@ readonly class ModuleSettingsNormalizerService
             ->filter(fn (mixed $sort_option): bool => is_string($sort_option))
             ->values()
             ->all();
+
+        return $sort_options;
     }
 
     /**

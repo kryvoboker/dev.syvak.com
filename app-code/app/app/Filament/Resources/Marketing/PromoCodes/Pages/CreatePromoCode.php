@@ -20,7 +20,7 @@ class CreatePromoCode extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $prepared_data           = app(PromoCodePersistenceService::class)->prepareForSave($data);
+        $prepared_data = app(PromoCodePersistenceService::class)->prepareForSave($data);
         $this->relationship_data = $prepared_data['relationships'];
 
         return $prepared_data['attributes'];
@@ -42,7 +42,7 @@ class CreatePromoCode extends CreateRecord
             Action::make('save')
                 ->label(__('admin/default.buttons.create'))
                 ->icon(Heroicon::CheckCircle)
-                ->action(fn() => $this->create()),
+                ->action(fn () => $this->create()),
         ];
     }
 }

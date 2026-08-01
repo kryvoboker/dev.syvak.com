@@ -99,6 +99,7 @@ class ModuleSettingsNormalizerService
         }
 
         $normalized_translations = $active_languages
+            ->toBase()
             ->mapWithKeys(function (Language $language) use ($translations, $index): array {
                 $language_code = (string) $language->code;
                 $translation = Arr::get($translations, $language_code, []);

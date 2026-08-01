@@ -32,7 +32,7 @@ final class WayForPayPaymentModule
      *     use_widget?: bool,
      *     widget_data?: array<string, mixed>,
      *     redirect_data?: array{action: string, method: string, fields: array<string, mixed>},
-     *     errors: array<string, array<int, string>>
+     *     errors: array<string, array<int, mixed>>
      * }
      */
     public function prepare(array $order_payload): array
@@ -114,7 +114,8 @@ final class WayForPayPaymentModule
      */
     private function buildProducts(array $items): array
     {
-        return collect($items)
+        /** @var array<int, Product> $products */
+        $products = collect($items)
             ->map(function (mixed $item): ?Product {
                 $item = (array) $item;
                 $name = trim((string) Arr::get($item, 'name', ''));
@@ -123,9 +124,11 @@ final class WayForPayPaymentModule
 
                 return $name !== '' && $price >= 0 ? new Product($name, $price, $quantity) : null;
             })
-            ->filter()
+            ->filter(fn (mixed $product): bool => $product instanceof Product)
             ->values()
             ->all();
+
+        return $products;
     }
 
     /**

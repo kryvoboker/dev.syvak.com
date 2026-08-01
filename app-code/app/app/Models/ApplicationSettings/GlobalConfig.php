@@ -61,9 +61,12 @@ class GlobalConfig extends Model
      */
     public function getActiveGlobalConfigs(): Collection
     {
-        return self::query()
+        /** @var Collection<int, self> $configs */
+        $configs = self::query()
             ->where('is_active', true)
             ->orderBy('key')
             ->get();
+
+        return $configs;
     }
 }
