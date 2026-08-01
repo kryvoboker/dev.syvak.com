@@ -18,20 +18,20 @@ class UpdateRatesService
         $default_active_currency = $currency->getDefaultActiveCurrency();
 
         if (! $default_active_currency) {
-            return __('admin/settings/currencies.error_absent_default_currency');
+            return (string) __('admin/settings/currencies.error_absent_default_currency');
         }
 
         $json_url = config('app.currency.json_url');
 
         try {
-            $response = Http::timeout(10)->get($json_url);
+            $response = Http::timeout(10)->get((string) $json_url);
 
             if ($response->failed()) {
                 Log::channel('stack')->error(__('admin/settings/currencies.error_failed_to_update_rates'), [
                     'status' => $response->status(),
                 ]);
 
-                return __('admin/settings/currencies.error_failed_to_update_rates');
+                return (string) __('admin/settings/currencies.error_failed_to_update_rates');
             }
 
             $json = $response->json();
@@ -44,7 +44,7 @@ class UpdateRatesService
                 'message' => $e->getMessage(),
             ]);
 
-            return __('admin/settings/currencies.error_failed_to_update_rates');
+            return (string) __('admin/settings/currencies.error_failed_to_update_rates');
         }
 
         $currencies = $currency->getAllCurrencies();

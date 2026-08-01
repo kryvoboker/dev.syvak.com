@@ -7,6 +7,7 @@ namespace Modules\ProductsCarousel\Services\Filament;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -23,8 +24,9 @@ class ProductsCarouselCategoryTreeService
 
         $active_categories = $this->getActiveCategories();
 
-        /** @var array<int, Collection<int, Category>> $categories_by_parent */
+        /** @var array<int, SupportCollection<int, Category>> $categories_by_parent */
         $categories_by_parent = $active_categories
+            ->toBase()
             ->sortBy(['sort_order', 'id'])
             ->groupBy(fn (Category $category): int => (int) ($category->parent_id ?? 0))
             ->all();

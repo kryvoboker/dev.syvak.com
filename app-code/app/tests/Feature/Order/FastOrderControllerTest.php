@@ -7,8 +7,17 @@ namespace Tests\Feature\Order;
 use App\Enums\Cart\CartModeEnum;
 use App\Enums\Cart\CartRequestKeyEnum;
 use App\Models\ApplicationSettings\Language;
+use App\Services\Cart\CartService;
+use App\Services\Order\OrderAggregatePersistenceService;
 use App\Services\Order\OrderCreationService;
+use App\Services\Order\OrderLifecycleService;
+use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\BankTransfer\Services\BankTransferPaymentModule;
+use Modules\PaymentUponDelivery\Services\PaymentUponDeliveryPaymentModule;
+use Modules\Pickup\Services\Storefront\PickupCheckoutDataService;
+use Modules\WayForPay\Services\WayForPayPaymentModule;
+use Modules\WayForPay\Support\WayForPayConfig;
 use Tests\TestCase;
 
 class FastOrderControllerTest extends TestCase
@@ -28,6 +37,10 @@ class FastOrderControllerTest extends TestCase
             [
                 'success' => false,
                 'errors' => [],
+                'redirect_url' => localized_route('localized.catalog.thank-you.index', [
+                    'locale' => $locale,
+                    'order_number' => 'TMP-20260101010101-ABCDEF',
+                ]),
             ],
         );
 
@@ -58,7 +71,10 @@ class FastOrderControllerTest extends TestCase
             [
                 'success' => true,
                 'order_number' => 'TMP-20260101010101-ABCDEF',
-                'redirect_url' => localized_route('localized.catalog.thank-you.index', ['locale' => $locale]),
+                'redirect_url' => localized_route('localized.catalog.thank-you.index', [
+                    'locale' => $locale,
+                    'order_number' => 'TMP-20260101010101-ABCDEF',
+                ]),
                 'status' => 'success',
                 'errors' => [],
             ],
@@ -72,7 +88,10 @@ class FastOrderControllerTest extends TestCase
             'payment_method' => 'cash_on_delivery',
         ]);
 
-        $response->assertRedirect(localized_route('localized.catalog.thank-you.index', ['locale' => $locale]));
+        $response->assertRedirect(localized_route('localized.catalog.thank-you.index', [
+            'locale' => $locale,
+            'order_number' => 'TMP-20260101010101-ABCDEF',
+        ]));
     }
 
     public function testStoreFastOrderRequiresFirstName(): void
@@ -90,7 +109,10 @@ class FastOrderControllerTest extends TestCase
             [
                 'success' => true,
                 'order_number' => 'TMP-20260101010101-ABCDEF',
-                'redirect_url' => localized_route('localized.catalog.thank-you.index', ['locale' => $locale]),
+                'redirect_url' => localized_route('localized.catalog.thank-you.index', [
+                    'locale' => $locale,
+                    'order_number' => 'TMP-20260101010101-ABCDEF',
+                ]),
                 'status' => 'success',
                 'errors' => [],
             ],
@@ -110,6 +132,14 @@ class FastOrderControllerTest extends TestCase
     private function bindFastOrderCreationService(array $validateResult, array $createResult): void
     {
         $this->app->instance(Language::class, new class () extends Language {
+            public function getLanguageByCode(string $code): Language
+            {
+                $language = new Language();
+                $language->setAttribute('code', $code);
+
+                return $language;
+            }
+
             public function getActiveLanguages(): Collection
             {
                 $language = new Language();
@@ -119,40 +149,57 @@ class FastOrderControllerTest extends TestCase
             }
         });
 
-        $fastOrderService = new class ($validateResult, $createResult) {
-            /**
-             * @param  array<string, mixed>  $validateResult
-             * @param  array<string, mixed>  $createResult
-             */
-            public function __construct(
-                private array $validateResult,
-                private array $createResult,
-            ) {
-            }
-
-            /**
-             * @param  array<string, mixed>  $validatedData
-             * @return array<string, mixed>
-             */
-            public function validateFastOrderData(array $validatedData, string $locale): array
-            {
-                unset($validatedData, $locale);
-
-                return $this->validateResult;
-            }
-
-            /**
-             * @param  array<string, mixed>  $validatedData
-             * @return array<string, mixed>
-             */
-            public function createFastOrder(array $validatedData, string $locale): array
-            {
-                unset($validatedData, $locale);
-
-                return $this->createResult;
-            }
-        };
+        $fastOrderService = new FastOrderCreationServiceStub($validateResult, $createResult);
 
         $this->app->instance(OrderCreationService::class, $fastOrderService);
+    }
+}
+
+/**
+ * @internal
+ */
+final readonly class FastOrderCreationServiceStub extends OrderCreationService
+{
+    /**
+     * @param array<string, mixed> $validate_result
+     * @param array<string, mixed> $create_result
+     */
+    public function __construct(
+        private array $validate_result,
+        private array $create_result,
+    ) {
+        parent::__construct(
+            app(CartService::class),
+            app(CashOnDeliveryPaymentModule::class),
+            app(PaymentUponDeliveryPaymentModule::class),
+            app(BankTransferPaymentModule::class),
+            app(WayForPayPaymentModule::class),
+            app(WayForPayConfig::class),
+            app(OrderAggregatePersistenceService::class),
+            app(OrderLifecycleService::class),
+            app(PickupCheckoutDataService::class),
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $validated_data
+     * @return array<string, mixed>
+     */
+    public function validateFastOrderData(array $validated_data, string $locale): array
+    {
+        unset($validated_data, $locale);
+
+        return $this->validate_result;
+    }
+
+    /**
+     * @param array<string, mixed> $validated_data
+     * @return array<string, mixed>
+     */
+    public function createFastOrder(array $validated_data, string $locale): array
+    {
+        unset($validated_data, $locale);
+
+        return $this->create_result;
     }
 }

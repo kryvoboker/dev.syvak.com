@@ -23,11 +23,14 @@ final class PickupStorefrontService
             return [];
         }
 
+        $checkout_data = $this->checkout_data_service->getCheckoutData((string) app()->getLocale());
+        unset($checkout_data[OrderDataKeyEnum::DeliveryMethod->value]);
+
         return [
             [
                 'placement' => $placement,
                 'page_type' => $page_type,
-                ...$this->checkout_data_service->getCheckoutData((string) app()->getLocale()),
+                ...$checkout_data,
                 OrderDataKeyEnum::DeliveryMethod->value => PickupConfig::DELIVERY_METHOD,
             ],
         ];

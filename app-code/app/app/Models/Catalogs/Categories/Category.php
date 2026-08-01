@@ -87,11 +87,12 @@ class Category extends Model
     }
 
     /**
-     * @return Collection<Category>
+     * @return Collection<int, Category>
      */
     public function getActiveCategoriesWithDescriptionsByLanguageId(int $language_id): Collection
     {
-        return self::query()
+        /** @var Collection<int, Category> $categories */
+        $categories = self::query()
             ->with([
                 'categoryDescription' => function ($query) use ($language_id) {
                     $query->where('language_id', $language_id);
@@ -100,14 +101,17 @@ class Category extends Model
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
+
+        return $categories;
     }
 
     /**
-     * @return Collection<Category>
+     * @return Collection<int, Category>
      */
     public function getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(int $language_id): Collection
     {
-        return self::query()
+        /** @var Collection<int, Category> $categories */
+        $categories = self::query()
             ->with([
                 'categoryDescription' => function ($query) use ($language_id) {
                     $query->where('language_id', $language_id);
@@ -119,6 +123,8 @@ class Category extends Model
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
+
+        return $categories;
     }
 
     public function getActiveCategoryWithDescriptionByCategoryIdAndLanguageId(int $category_id, int $language_id): ?self
@@ -173,13 +179,16 @@ class Category extends Model
     }
 
     /**
-     * @return Collection<Category>
+     * @return Collection<int, Category>
      */
     public function getCategoryByParentId(int $parent_id): Collection
     {
-        return self::query()
+        /** @var Collection<int, Category> $categories */
+        $categories = self::query()
             ->where('parent_id', $parent_id)
             ->get();
+
+        return $categories;
     }
 
     public function getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds(int $language_id, array $path_ids): Collection
@@ -195,11 +204,12 @@ class Category extends Model
     }
 
     /**
-     * @return Collection<Category>
+     * @return Collection<int, Category>
      */
     public function getActiveCategoriesWithDescriptionsAndPathByLanguageId(int $language_id): Collection
     {
-        return self::query()
+        /** @var Collection<int, Category> $categories */
+        $categories = self::query()
             ->with([
                 'categoryDescription' => function ($query) use ($language_id) {
                     $query->where('language_id', $language_id);
@@ -211,5 +221,7 @@ class Category extends Model
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
+
+        return $categories;
     }
 }
