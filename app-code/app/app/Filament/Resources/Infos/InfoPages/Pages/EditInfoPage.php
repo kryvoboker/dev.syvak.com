@@ -103,6 +103,7 @@ class EditInfoPage extends EditRecord
             ]);
 
             $this->halt();
+            throw $e;
         }
     }
 

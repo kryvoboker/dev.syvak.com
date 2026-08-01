@@ -242,18 +242,16 @@ class CheckoutCitySearchService
      */
     private function normalizeResults(array $results): array
     {
-        return array_map(function (stdClass $result) {
-            $data = [
-                'city_name' => $result->city_name,
-                'region_name' => $result->region_name,
-                'nova_poshta_city_id' => $result->nova_poshta_city_id ?? null,
-                'ukr_poshta_city_id' => $result->ukr_poshta_city_id ?? null,
-                'latitude' => $result->latitude,
-                'longitude' => $result->longitude,
-                'city_description' => $result->city_description,
+        return array_map(function (stdClass $result): array {
+            return [
+                'city_name' => (string) $result->city_name,
+                'region_name' => (string) $result->region_name,
+                'nova_poshta_city_id' => isset($result->nova_poshta_city_id) ? (int) $result->nova_poshta_city_id : null,
+                'ukr_poshta_city_id' => isset($result->ukr_poshta_city_id) ? (int) $result->ukr_poshta_city_id : null,
+                'latitude' => isset($result->latitude) ? (float) $result->latitude : null,
+                'longitude' => isset($result->longitude) ? (float) $result->longitude : null,
+                'city_description' => (string) $result->city_description,
             ];
-
-            return array_filter($data);
         }, $results);
     }
 

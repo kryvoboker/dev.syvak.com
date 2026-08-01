@@ -102,6 +102,7 @@ readonly class ProductsCarouselStorefrontService
                 );
 
                 $products_payload = $products
+                    ->toBase()
                     ->flatMap(fn (Product $product): array => $this->mapProductCards(
                         $product,
                         $runtime_shared_settings['product_image_width'],

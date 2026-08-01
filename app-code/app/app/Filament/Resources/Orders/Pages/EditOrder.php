@@ -222,6 +222,7 @@ class EditOrder extends EditRecord
                 ->send();
 
             $this->halt();
+            throw $throwable;
         }
     }
 

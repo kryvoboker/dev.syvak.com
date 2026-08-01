@@ -60,7 +60,7 @@ final class AppSettingsService
      */
     public function setSetting(string $key, mixed $value): void
     {
-        if (property_exists($this->app_settings_data, $key)) {
+        if ($this->app_settings_data instanceof AppSettingsData && property_exists($this->app_settings_data, $key)) {
             $this->app_settings_data->$key = $value;
         }
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\WayForPay\Tests;
 
+use App\Models\ApplicationSettings\Currency;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Cache;
@@ -16,12 +17,25 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         Cache::flush();
+        config()->set('app.currency.current_currency_code', 'UAH');
         $this->createTables();
+        Currency::query()->create([
+            'code' => 'UAH',
+            'name' => 'Ukrainian Hryvnia',
+            'format_locale' => 'uk_UA',
+            'symbol_right' => '₴',
+            'decimal_places' => 2,
+            'exchange_rate' => 1,
+            'is_active' => true,
+            'is_default' => true,
+        ]);
         $this->app['request']->setLaravelSession($this->app['session']->driver());
     }
 
     protected function tearDown(): void
     {
+        Schema::dropIfExists('carts');
+        Schema::dropIfExists('currencies');
         Schema::dropIfExists('module_definitions');
         Schema::dropIfExists('languages');
         Schema::dropIfExists('global_configs');
@@ -31,6 +45,8 @@ abstract class TestCase extends BaseTestCase
 
     protected function createTables(): void
     {
+        Schema::dropIfExists('carts');
+        Schema::dropIfExists('currencies');
         Schema::dropIfExists('module_definitions');
         Schema::dropIfExists('languages');
         Schema::dropIfExists('global_configs');
@@ -40,6 +56,31 @@ abstract class TestCase extends BaseTestCase
             $table->string('key', 191)->unique();
             $table->text('value')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('carts', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('session_id')->nullable();
+            $table->string('cart_mode')->default('regular');
+            $table->unsignedBigInteger('product_variant_id');
+            $table->unsignedInteger('quantity');
+            $table->text('chosen_attributes')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('currencies', function (Blueprint $table): void {
+            $table->id();
+            $table->string('code');
+            $table->string('name');
+            $table->string('format_locale')->nullable();
+            $table->string('symbol_left')->nullable();
+            $table->string('symbol_right')->nullable();
+            $table->unsignedInteger('decimal_places')->default(2);
+            $table->decimal('exchange_rate', 15, 8)->default(1);
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
 

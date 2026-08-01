@@ -301,6 +301,7 @@ readonly class ProductsCarouselProductSearchService
                     $discount_label,
                 ]);
 
+                /** @var array<int, string> $label_parts */
                 return [(int) $variant->id => implode(' ', $label_parts) ?: 'Variant #' . $variant->id];
             })
             ->all();

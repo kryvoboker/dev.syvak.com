@@ -335,7 +335,8 @@ final class GlobalConfigService
      */
     private function normalizeGlobalConfigs(array $global_configs): array
     {
-        return collect($global_configs)
+        /** @var array<int, array{key: string, value: ?string, is_active: bool, selected: bool}> $normalized_configs */
+        $normalized_configs = collect($global_configs)
             ->map(function (mixed $global_config): ?array {
                 if (! is_array($global_config)) {
                     return null;
@@ -356,9 +357,11 @@ final class GlobalConfigService
                     'selected' => (bool) ($global_config['selected'] ?? false),
                 ];
             })
-            ->filter()
+            ->filter(fn (?array $global_config): bool => $global_config !== null)
             ->values()
             ->all();
+
+        return $normalized_configs;
     }
 
     /**
