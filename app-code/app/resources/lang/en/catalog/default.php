@@ -116,7 +116,7 @@ return [
         'totals' => [
             'items_subtotal' => 'Items subtotal',
             'grand_total' => 'Grand total',
-            'promo_code' => 'Promo code discount',
+            'promo_code' => 'Promo code discount (:promo_code)',
         ],
         'errors' => [
             'promo_invalid' => 'This promo code is invalid.',

@@ -116,7 +116,7 @@ return [
         'totals' => [
             'items_subtotal' => 'Сума товарів',
             'grand_total' => 'Разом до сплати',
-            'promo_code' => 'Знижка за промокодом',
+            'promo_code' => 'Знижка за промокодом (:promo_code)',
         ],
         'errors' => [
             'promo_invalid' => 'Промокод недійсний.',
