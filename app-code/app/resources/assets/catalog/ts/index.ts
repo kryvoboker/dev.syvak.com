@@ -7,15 +7,15 @@ import {
     $PRODUCT_PAGE_TYPE,
     $SEARCH_PAGE_TYPE,
     $THANK_YOU_PAGE_TYPE,
-}                           from '@ts-shared/lib/constants.ts';
-import { findElem, goBack } from "@ts-shared/lib/helpers.ts";
+} from '@ts-shared/lib/constants.ts';
+import { findElem, goBack } from '@ts-shared/lib/helpers.ts';
 
 document.addEventListener('DOMContentLoaded', (): void => {
-    window.$hsDropdownCollection    = window.$hsDropdownCollection || [];
-    window.$hsOverlayCollection     = window.$hsOverlayCollection || [];
-    window.$hsAccordionCollection   = window.$hsAccordionCollection || [];
-    window.$hsCarouselCollection    = window.$hsCarouselCollection || [];
-    const pageType: string | null   = window.app_params?.page_type ?? null;
+    window.$hsDropdownCollection = window.$hsDropdownCollection || [];
+    window.$hsOverlayCollection = window.$hsOverlayCollection || [];
+    window.$hsAccordionCollection = window.$hsAccordionCollection || [];
+    window.$hsCarouselCollection = window.$hsCarouselCollection || [];
+    const pageType: string | null = window.app_params?.page_type ?? null;
     const deviceType: string | null = window.app_params?.current_device_type ?? null;
 
     if (findElem('[data-main-carousel]')) {
@@ -45,19 +45,19 @@ document.addEventListener('DOMContentLoaded', (): void => {
     import('@ts-features/search/mobSearch.ts').then((module) => {
         if (deviceType === $DESKTOP_DEVICE_TYPE) {
             module.handleMobSearch({
-                openSearchBtn:   '.open-pc-search-btn',
+                openSearchBtn: '.open-pc-search-btn',
                 searchContainer: '.pc-search-container',
-                searchInput:     '.pc-search-input',
-                searchResults:   '.pc-search-results',
-                searchForm:      '.pc-search-form',
+                searchInput: '.pc-search-input',
+                searchResults: '.pc-search-results',
+                searchForm: '.pc-search-form',
             });
         } else {
             module.handleMobSearch({
-                openSearchBtn:   '.open-mob-search-btn',
+                openSearchBtn: '.open-mob-search-btn',
                 searchContainer: '.mob-search-container',
-                searchInput:     '.mob-search-input',
-                searchResults:   '.mob-search-results',
-                searchForm:      '.mob-search-form',
+                searchInput: '.mob-search-input',
+                searchResults: '.mob-search-results',
+                searchForm: '.mob-search-form',
             });
         }
     });
