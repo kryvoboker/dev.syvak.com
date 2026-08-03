@@ -224,7 +224,6 @@ class EditProduct extends EditRecord
                 ->map(fn (array $image_data): array => [
                     'image' => $image_data['image'],
                     'sort_order' => $image_data['sort_order'],
-                    'is_primary' => false,
                 ])
                 ->all(),
         );
