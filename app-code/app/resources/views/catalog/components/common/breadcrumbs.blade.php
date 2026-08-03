@@ -4,7 +4,7 @@
 
 @if(!empty($breadcrumbs))
     <div class="container border-b border-b-opacity-light-gray-40%">
-        <nav aria-label="Breadcrumb" {{ $attributes->merge(['class' => 'breadcrumbs flex items-center']) }}>
+        <nav aria-label="Breadcrumb" {{ $attributes->merge(['class' => 'relative breadcrumbs flex items-center z-1']) }}>
             <ol class="breadcrumbs__list flex items-center gap-x-6 px-0 py-4">
                 @foreach($breadcrumbs as $index => $breadcrumb_data)
                     @if($loop->first)
