@@ -44,6 +44,8 @@ return [
     // Tabs
     'tabs' => [
         'size_guide' => 'Size guide',
+        'composition' => 'Composition',
+        'care' => 'Care',
         'composition_and_care' => 'Composition and care',
     ],
 

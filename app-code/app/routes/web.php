@@ -46,6 +46,9 @@ Route::prefix('{' . $locale_key . '}')
 
         Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
         Route::get('/product/{slug}/{variant_slug}', [ProductController::class, 'show'])->name('product.variant.show');
+        Route::get('/product/static/{product_id}/{variant_id}', [ProductController::class, 'showStatic'])
+            ->whereNumber(['product_id', 'variant_id'])
+            ->name('product.static.show');
 
         Route::get('/live-search', [LiveSearchProductsAjaxController::class, 'index'])->name('live-search-product-ajax.index');
         Route::get('/search', [SearchProductsController::class, 'index'])->name('search-products.index');

@@ -1,6 +1,5 @@
 import { Plugin } from 'vite';
 import { toPosixPath } from '../utils/toPosixPath';
-import { isEmpty } from "@ts-shared/lib/helpers.ts";
 
 interface CreateInjectModuleImportsPluginParams
 {
@@ -21,7 +20,7 @@ export const createInjectModuleImportsPlugin = (
             code: string;
             map: null
         } | null {
-            if (isEmpty(params.importPaths)) {
+            if (params.importPaths.length === 0) {
                 return null;
             }
 

@@ -578,7 +578,7 @@
                                 </div>
 
                                 <div class="hidden items-center justify-between gap-4 text-sm text-light-green md:text-base" data-checkout-promo-total>
-                                    <span>{{ __('catalog/pages/checkout.texts.promo_code') }}</span>
+                                    <span>{{ __('catalog/pages/checkout.texts.promo_code', ['promo_code' => $checkout_promo_code]) }}</span>
                                     <span data-checkout-total="promo_code"></span>
                                 </div>
 

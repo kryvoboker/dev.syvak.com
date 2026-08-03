@@ -36,7 +36,7 @@ final readonly class ImageUrlBuilderService
      *     thumb_4x?: string
      * }
      */
-    public function multipleUrl(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
+    public function multipleUrl(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): array
     {
         $total_sizes_for_generate = max(
             1,
@@ -70,7 +70,7 @@ final readonly class ImageUrlBuilderService
      * @param  int|null  $height  Required height (defaults to width)
      * @param  string  $bg_color  HEX or transparent color
      */
-    public function url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): string
+    public function url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): string
     {
         $path = (string) $path;
         $height ??= $width;

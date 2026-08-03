@@ -12,7 +12,6 @@ class ProductVariantImage extends Model
     protected $fillable = [
         'product_variant_id',
         'image',
-        'is_primary',
         'sort_order',
     ];
 
@@ -23,7 +22,6 @@ class ProductVariantImage extends Model
     {
         return [
             'product_variant_id' => 'integer',
-            'is_primary' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
