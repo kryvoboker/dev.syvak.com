@@ -6,13 +6,16 @@ import {
     fetchFunc,
     findArrayElems,
     findElem,
+    getDataset,
     httpBuildQueryString,
     isEmpty,
     isNaNValue,
     redirect,
+    setTextContent,
     sprintF,
     toggleElement,
     toNumber,
+    toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
 import type { WindowAppParams } from '@ts-types/global';
 import type { URLParamsType } from '@ts-types/httpQueryBuild.ts';
@@ -66,7 +69,7 @@ function handleNoUiSlider(): void {
         },
         format: wNumb({
             decimals: 0,
-            prefix: `${stepsSlider?.dataset.currencySign ?? ''} `,
+            prefix: `${getDataset(stepsSlider, 'currencySign') ?? ''} `,
         }),
     });
 
@@ -150,7 +153,7 @@ const processCollectUrlParams = (): URLParamsType => {
     const urlParams: URLParamsType = {};
 
     for (const filterGroupEl of FILTER_GROUPS_ELS) {
-        const filterGroupKey: string = filterGroupEl.dataset.filterGroupGetKey ?? '';
+        const filterGroupKey: string = getDataset(filterGroupEl, 'filterGroupGetKey') ?? '';
 
         const checkedInputsEls = <HTMLInputElement[] | []>findArrayElems(CHECKED_INPUTS_SELECTOR, filterGroupEl);
 
@@ -159,8 +162,8 @@ const processCollectUrlParams = (): URLParamsType => {
         }
 
         urlParams[filterGroupKey] = checkedInputsEls
-            .map((inputEl: HTMLInputElement): string => inputEl.dataset.filterItemCode ?? '')
-            .filter((code: string): boolean => code.trim() !== '');
+            .map((inputEl: HTMLInputElement): string => getDataset(inputEl, 'filterItemCode') ?? '')
+            .filter((code: string): boolean => toTrimmedString(code) !== '');
     }
 
     const priceFrom: number = normalizePrice(INPUT_PRICE_TO?.value ?? '');
@@ -198,7 +201,10 @@ const fireSearchProductsEvent = (): void => {
                 const totalResults: number = json.total_products;
 
                 if (RESULTS_EL) {
-                    RESULTS_EL.textContent = sprintF(RESULTS_EL.dataset.template ?? '%d products found', totalResults);
+                    setTextContent(
+                        RESULTS_EL,
+                        sprintF(getDataset(RESULTS_EL, 'template', '%d products found') ?? '', totalResults),
+                    );
 
                     if (json.total_products > 0) {
                         APPLY_BTN_EL?.addEventListener('click', (): void => {
@@ -218,7 +224,7 @@ const fireSearchProductsEvent = (): void => {
                 console.error('Error: ', json.message);
 
                 if (RESULTS_EL) {
-                    RESULTS_EL.textContent = json.message;
+                    setTextContent(RESULTS_EL, json.message);
 
                     addClass(RESULTS_EL, $_ERROR_CLASS_NAME);
                     toggleElement(RESULTS_EL, true);
@@ -234,7 +240,7 @@ const fireSearchProductsEventDebounce = debounce(fireSearchProductsEvent, $DEBOU
 function handleFilters(): void {
     for (const filterGroupEl of FILTER_GROUPS_ELS) {
         const filterInputsEls = <HTMLInputElement[] | []>findArrayElems('[data-filter-item-code]', filterGroupEl);
-        const filterGroupKey: string = filterGroupEl.dataset.filterGroupGetKey ?? '';
+        const filterGroupKey: string = getDataset(filterGroupEl, 'filterGroupGetKey') ?? '';
 
         if (isEmpty(filterGroupKey)) {
             filterGroupEl.remove();

@@ -7,7 +7,20 @@ import {
 import { setCartMode } from '@ts-features/cart/cartModeStorage.ts';
 import type { CartMutationResponse } from '@ts-features/cart/cartTypes.ts';
 import { Cart } from '@ts-features/cart/constants.ts';
-import { findElem, getClosestParentEl, isEmpty, redirect } from '@ts-shared/lib/helpers.ts';
+import {
+    addClass,
+    findElem,
+    getClosestParentEl,
+    getDataset,
+    isContainsClass,
+    isEmpty,
+    redirect,
+    setAttribute,
+    setDataset,
+    setTextContent,
+    toggleClass,
+    toTrimmedString,
+} from '@ts-shared/lib/helpers.ts';
 import { handleParsePhone } from '@ts-shared/lib/parsePhone.ts';
 
 type FastOrderFieldName = 'first_name' | 'last_name' | 'phone';
@@ -30,7 +43,7 @@ const getFastOrderErrorElement = (form: HTMLFormElement, fieldName: FastOrderFie
 };
 
 const getFieldValue = (field: HTMLInputElement): string => {
-    return field.value.trim();
+    return toTrimmedString(field.value);
 };
 
 const getPhoneDigits = (field: HTMLInputElement): string => {
@@ -41,10 +54,10 @@ const setFieldFeedback = (form: HTMLFormElement, field: HTMLInputElement, messag
     const errorElement = getFastOrderErrorElement(form, field.name as FastOrderFieldName);
 
     field.setCustomValidity(message);
-    field.toggleAttribute('aria-invalid', message !== '');
+    setAttribute(field, 'aria-invalid', message !== '' ? 'true' : null);
 
     if (errorElement) {
-        errorElement.textContent = message;
+        setTextContent(errorElement, message);
     }
 };
 
@@ -53,8 +66,8 @@ const clearFieldFeedback = (form: HTMLFormElement, field: HTMLInputElement): voi
 };
 
 const validateField = (form: HTMLFormElement, field: HTMLInputElement, fieldName: FastOrderFieldName): boolean => {
-    const requiredMessage = field.dataset.errorRequired ?? '';
-    const minMessage = field.dataset.errorMin ?? '';
+    const requiredMessage = getDataset(field, 'errorRequired') ?? '';
+    const minMessage = getDataset(field, 'errorMin') ?? '';
 
     let errorMessage = '';
 
@@ -100,7 +113,7 @@ const validateFastOrderForm = (form: HTMLFormElement): boolean => {
 
     const isFormValid = isFirstNameValid && isLastNameValid && isPhoneValid;
 
-    form.classList.toggle('_was-validated', !isFormValid);
+    toggleClass(form, '_was-validated', !isFormValid);
 
     return isFormValid;
 };
@@ -128,15 +141,15 @@ const applyServerValidationErrors = (form: HTMLFormElement, response: CartMutati
         setCartModalGeneralError($FAST_ORDER, generalErrorMessage);
     }
 
-    form.classList.add('_was-validated');
+    addClass(form, '_was-validated');
 };
 
 const bindFastOrderFieldValidation = (): void => {
-    if (document.body.dataset.fastOrderFieldValidationBound === '1') {
+    if (getDataset(document.body, 'fastOrderFieldValidationBound') === '1') {
         return;
     }
 
-    document.body.dataset.fastOrderFieldValidationBound = '1';
+    setDataset(document.body, 'fastOrderFieldValidationBound', '1');
 
     document.addEventListener('input', (event: Event): void => {
         const target = event.target as HTMLElement;
@@ -159,7 +172,7 @@ const bindFastOrderFieldValidation = (): void => {
         clearCartModalGeneralError($FAST_ORDER);
         clearFieldFeedback(formEl, field);
 
-        if (formEl.classList.contains('_was-validated')) {
+        if (isContainsClass(formEl, '_was-validated')) {
             validateField(formEl, field, field.name as FastOrderFieldName);
         }
     });
@@ -175,11 +188,11 @@ const buildOrderPayload = (form: HTMLFormElement): FormData => {
 };
 
 const bindFastOrderSubmit = (): void => {
-    if (document.body.dataset.fastOrderBound === '1') {
+    if (getDataset(document.body, 'fastOrderBound') === '1') {
         return;
     }
 
-    document.body.dataset.fastOrderBound = '1';
+    setDataset(document.body, 'fastOrderBound', '1');
 
     document.addEventListener('submit', async (event: Event): Promise<void> => {
         const target = event.target as HTMLElement;

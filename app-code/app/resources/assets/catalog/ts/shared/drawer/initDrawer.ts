@@ -1,10 +1,16 @@
-import { findArrayElems, findElem, isContainsClass } from '@ts-shared/lib/helpers.ts';
+import { addClass, findArrayElems, findElem, isContainsClass } from '@ts-shared/lib/helpers.ts';
 import HSOverlay from 'flyonui/src/js/plugins/overlay/index';
 
 interface InitDrawerOptions {
     drawerSelector: string;
-    triggerSelector: string;
+    triggerSelector?: string;
     initializedClassName?: string;
+    onOpen?: (trigger: HTMLElement) => void;
+}
+
+export interface DrawerController {
+    open: (trigger?: HTMLElement) => void;
+    close: () => void;
 }
 
 /**
@@ -13,27 +19,43 @@ interface InitDrawerOptions {
  */
 export const initDrawer = ({
     drawerSelector,
-    triggerSelector,
+    triggerSelector = '',
     initializedClassName = 'is-drawer-trigger-initialized',
-}: InitDrawerOptions): void => {
+    onOpen,
+}: InitDrawerOptions): DrawerController | null => {
     const drawerElement = <HTMLElement | null>findElem(drawerSelector);
 
     if (!drawerElement) {
-        return;
+        return null;
     }
 
     const drawerInstance = new HSOverlay(drawerElement);
-    const triggerButtons = <HTMLElement[] | []>findArrayElems(triggerSelector);
+    const drawerController: DrawerController = {
+        open: (trigger?: HTMLElement): void => {
+            if (trigger) {
+                onOpen?.(trigger);
+            }
+
+            drawerInstance.open();
+        },
+        close: (): void => {
+            drawerInstance.close();
+        },
+    };
+
+    const triggerButtons = triggerSelector ? <HTMLElement[] | []>findArrayElems(triggerSelector) : [];
 
     triggerButtons.forEach((triggerButton: HTMLElement): void => {
         if (isContainsClass(triggerButton, initializedClassName)) {
             return;
         }
 
-        triggerButton.classList.add(initializedClassName);
+        addClass(triggerButton, initializedClassName);
 
         triggerButton.addEventListener('click', (): void => {
-            drawerInstance.open();
+            drawerController.open(triggerButton);
         });
     });
+
+    return drawerController;
 };

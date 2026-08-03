@@ -1,3 +1,5 @@
+import { findArrayElems } from '@ts-shared/lib/helpers.ts';
+
 interface CheckoutEventBindings {
     citySelectElement: HTMLSelectElement;
     branchSelectElement: HTMLSelectElement;
@@ -48,12 +50,13 @@ export const bindCheckoutEvents = ({
         input.addEventListener('change', onPaymentMethodChange);
     });
 
-    checkoutFormElement
-        ?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+    (<(HTMLInputElement | HTMLTextAreaElement)[] | []>(
+        findArrayElems(
             'input[name="first_name"], input[name="last_name"], input[name="phone"], input[name="email"], textarea[name="comment"], input[name="promo_code"], input[name="no_call"]',
+            checkoutFormElement,
         )
-        .forEach((input: HTMLInputElement | HTMLTextAreaElement): void => {
-            input.addEventListener('input', onCheckoutFormChange);
-            input.addEventListener('change', onCheckoutFormChange);
-        });
+    )).forEach((input: HTMLInputElement | HTMLTextAreaElement): void => {
+        input.addEventListener('input', onCheckoutFormChange);
+        input.addEventListener('change', onCheckoutFormChange);
+    });
 };

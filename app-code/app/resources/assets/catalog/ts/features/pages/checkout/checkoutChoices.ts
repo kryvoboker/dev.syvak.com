@@ -1,3 +1,4 @@
+import { getDataset } from '@ts-shared/lib/helpers.ts';
 import type { InputChoice } from 'choices.js';
 import Choices, { type Options } from 'choices.js';
 import type { CheckoutBranchSearchItem, CheckoutCitySearchItem } from './checkoutData.ts';
@@ -58,7 +59,7 @@ export const createCityChoices = (element: HTMLSelectElement, emptyText: string,
         searchEnabled: true,
         searchChoices: false,
         searchFloor,
-        searchPlaceholderValue: element.dataset.placeholder ?? '',
+        searchPlaceholderValue: getDataset(element, 'placeholder') ?? '',
         searchResultLimit: 100,
         shouldSort: false,
     } as Partial<Options> & ChoiceSettings);
@@ -77,7 +78,7 @@ export const createBranchChoices = (element: HTMLSelectElement, emptyText: strin
         searchChoices: true,
         searchFields: ['label'],
         searchFloor,
-        searchPlaceholderValue: element.dataset.placeholder ?? '',
+        searchPlaceholderValue: getDataset(element, 'placeholder') ?? '',
         searchResultLimit: 100,
         shouldSort: false,
     } as Partial<Options> & ChoiceSettings);

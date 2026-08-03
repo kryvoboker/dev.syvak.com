@@ -1,5 +1,5 @@
 import { $FLEX_CLASS_NAME, $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
-import { findElem, toggleClass, toTrimmedString } from '@ts-shared/lib/helpers.ts';
+import { findElem, getTextContent, toggleClass, toTrimmedString } from '@ts-shared/lib/helpers.ts';
 
 const handlePickupStoreVisibility = (): void => {
     const cityWrapper = <HTMLElement | null>findElem('[data-checkout-city-wrapper]');
@@ -30,7 +30,7 @@ const handlePickupStoreVisibility = (): void => {
         deliveryAddressInput.required = false;
 
         if (isPickupSelected) {
-            deliveryAddressInput.value = toTrimmedString(pickupAddress?.textContent);
+            deliveryAddressInput.value = toTrimmedString(getTextContent(pickupAddress));
         } else {
             deliveryAddressInput.value = '';
         }

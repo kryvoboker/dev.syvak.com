@@ -1,5 +1,5 @@
 import { $DEBOUNCE_DELAY } from '@ts-shared/lib/constants.ts';
-import { debounce, fetchFunc, isArray, isEmpty, showErrorInConsole } from '@ts-shared/lib/helpers.ts';
+import { debounce, fetchFunc, isArray, isEmpty, showErrorInConsole, toTrimmedString } from '@ts-shared/lib/helpers.ts';
 import {
     buildBranchLoadPayload,
     buildSelectionPayload,
@@ -59,7 +59,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
 
         const searchStateKey = resolveBranchSearchStateKey();
 
-        if (searchStateKey === state.branchSearchStateKey && state.latestBranchResults.length > 0) {
+        if (searchStateKey === state.branchSearchStateKey && !isEmpty(state.latestBranchResults)) {
             options.applyBranchResults(state.latestBranchResults);
             return;
         }
@@ -85,7 +85,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
     }, $DEBOUNCE_DELAY);
 
     const searchCities = debounce(async (searchValue: string): Promise<void> => {
-        const normalizedValue = searchValue.trim();
+        const normalizedValue = toTrimmedString(searchValue);
 
         if (normalizedValue.length < 3 || isEmpty(options.citySearchUrl)) {
             state.latestCityResults = [];

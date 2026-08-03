@@ -1,9 +1,10 @@
+import { findElem } from '@ts-shared/lib/helpers.ts';
 import HSAccordion from 'flyonui/src/js/plugins/accordion';
 
 export const initAccordion = (accordionEl: HTMLElement): HSAccordion => {
     const accordionItem = accordionEl.matches('.accordion-item')
         ? accordionEl
-        : accordionEl.querySelector<HTMLElement>('.accordion-item');
+        : <HTMLElement | null>findElem('.accordion-item', accordionEl);
 
     if (!accordionItem) {
         return new HSAccordion(accordionEl);

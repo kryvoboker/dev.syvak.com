@@ -2,7 +2,16 @@ import { storeOrder, validateOrder } from '@ts-features/cart/cartCrud.ts';
 import { initializeCheckoutDeliveryLogic } from '@ts-features/pages/checkout/checkoutPage.ts';
 import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
 import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
-import { findArrayElems, findElem, toTrimmedString } from '@ts-shared/lib/helpers.ts';
+import {
+    findArrayElems,
+    findElem,
+    getDataset,
+    redirect,
+    setDataset,
+    setTextContent,
+    toggleClass,
+    toTrimmedString,
+} from '@ts-shared/lib/helpers.ts';
 import { handleCheckoutPayment } from '@ts-shared/payment/checkoutPaymentRegistry.ts';
 
 interface CheckoutOrderResponse {
@@ -26,7 +35,7 @@ const getErrorMessage = (response: CheckoutOrderResponse): string => {
     return (
         Object.values(errors)
             .flat()
-            .find((message: string): boolean => message.trim() !== '') ?? ''
+            .find((message: string): boolean => toTrimmedString(message) !== '') ?? ''
     );
 };
 
@@ -37,19 +46,19 @@ const showCheckoutError = (message: string): void => {
         return;
     }
 
-    errorElement.textContent = message;
-    errorElement.classList.toggle($HIDDEN_CLASS_NAME, message.trim() === '');
+    setTextContent(errorElement, message);
+    toggleClass(errorElement, $HIDDEN_CLASS_NAME, toTrimmedString(message) === '');
 };
 
 const handleCheckoutSubmit = (): void => {
     const formElement = <HTMLFormElement | null>findElem('[data-checkout-form]');
     const submitElement = <HTMLButtonElement | null>findElem('[data-checkout-submit]');
 
-    if (!formElement || !submitElement || formElement.dataset.orderSubmitBound === '1') {
+    if (!formElement || !submitElement || getDataset(formElement, 'orderSubmitBound') === '1') {
         return;
     }
 
-    formElement.dataset.orderSubmitBound = '1';
+    setDataset(formElement, 'orderSubmitBound', '1');
     formElement.addEventListener('submit', (event: SubmitEvent): void => {
         event.preventDefault();
         showCheckoutError('');
@@ -92,7 +101,7 @@ const handleCheckoutSubmit = (): void => {
                 const redirectUrl = toTrimmedString((orderResponse as Record<string, unknown>).redirect_url);
 
                 if (redirectUrl !== '') {
-                    window.location.assign(redirectUrl);
+                    redirect(redirectUrl);
                 }
             } catch {
                 showCheckoutError('The order could not be created. Please try again.');

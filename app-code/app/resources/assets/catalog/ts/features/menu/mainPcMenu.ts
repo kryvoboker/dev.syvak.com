@@ -1,5 +1,13 @@
 import { initDrawer } from '@ts-shared/drawer/initDrawer.ts';
-import { findArrayElems, findElem, isContainsClass } from '@ts-shared/lib/helpers.ts';
+import {
+    addClass,
+    findArrayElems,
+    findElem,
+    getDataset,
+    isContainsClass,
+    setAttribute,
+    toggleClass,
+} from '@ts-shared/lib/helpers.ts';
 
 const pcMenuItemInitializedClassName = 'is-pc-menu-item-initialized';
 
@@ -19,7 +27,7 @@ export const handleMainPcMenu = (): void => {
     const menuPreviews = <HTMLElement[]>findArrayElems<HTMLElement>('[data-pc-menu-preview]', menuElement);
 
     const showPreview = (menuItem: HTMLElement): void => {
-        const previewTargetId = menuItem.dataset.previewTarget;
+        const previewTargetId = getDataset(menuItem, 'previewTarget');
 
         if (!previewTargetId) {
             return;
@@ -28,8 +36,8 @@ export const handleMainPcMenu = (): void => {
         menuPreviews.forEach((menuPreview: HTMLElement): void => {
             const isActive = menuPreview.id === previewTargetId;
 
-            menuPreview.classList.toggle('hidden', !isActive);
-            menuPreview.setAttribute('aria-hidden', String(!isActive));
+            toggleClass(menuPreview, 'hidden', !isActive);
+            setAttribute(menuPreview, 'aria-hidden', !isActive);
         });
     };
 
@@ -38,7 +46,7 @@ export const handleMainPcMenu = (): void => {
             return;
         }
 
-        menuItem.classList.add(pcMenuItemInitializedClassName);
+        addClass(menuItem, pcMenuItemInitializedClassName);
         menuItem.addEventListener('mouseenter', (): void => showPreview(menuItem));
         menuItem.addEventListener('focus', (): void => showPreview(menuItem));
     });

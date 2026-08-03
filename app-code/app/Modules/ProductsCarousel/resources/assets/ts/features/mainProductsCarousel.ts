@@ -1,7 +1,7 @@
 import { initCarousel } from '@ts-shared/carousel/initCarousel.ts';
 import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
-import { arrayFrom, findArrayElems, isEmpty, toRem } from '@ts-shared/lib/helpers.ts';
+import { arrayFrom, findArrayElems, fromJson, getDataset, isArray, isEmpty, toRem } from '@ts-shared/lib/helpers.ts';
 
 function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
     const pageType: string | null = getAppParam<string>($PAGE_TYPE_KEY);
@@ -10,16 +10,16 @@ function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
         return true;
     }
 
-    const allowedPageTypesRaw: string | undefined = carouselElement.dataset.pageTypes;
+    const allowedPageTypesRaw: string | null = getDataset(carouselElement, 'pageTypes');
 
     if (typeof allowedPageTypesRaw !== 'string' || isEmpty(allowedPageTypesRaw)) {
         return true;
     }
 
     try {
-        const allowedPageTypes = JSON.parse(allowedPageTypesRaw);
+        const allowedPageTypes = fromJson(allowedPageTypesRaw);
 
-        if (!Array.isArray(allowedPageTypes)) {
+        if (!isArray(allowedPageTypes)) {
             return true;
         }
 

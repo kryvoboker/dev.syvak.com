@@ -1,4 +1,4 @@
-import { findArrayElems, getClosestParentEl } from '@ts-shared/lib/helpers.ts';
+import { findArrayElems, getClosestParentEl, getDataset } from '@ts-shared/lib/helpers.ts';
 
 document.addEventListener('DOMContentLoaded', (): void => {
     (<HTMLElement[] | []>findArrayElems('[data-ukr-poshta-module]')).forEach((moduleElement: HTMLElement): void => {
@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', (): void => {
                 return;
             }
 
-            const field = button.dataset.ukrPoshtaField ?? '';
-            const value = button.dataset.ukrPoshtaValue ?? '';
+            const field = getDataset(button, 'ukrPoshtaField') ?? '';
+            const value = getDataset(button, 'ukrPoshtaValue') ?? '';
 
             moduleElement.dispatchEvent(
                 new CustomEvent('ukr-poshta:selection-changed', {

@@ -13,6 +13,7 @@ import {
     findArrayElems,
     findElem,
     isEmpty,
+    toggleClass,
     toggleElement,
     toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
@@ -57,7 +58,7 @@ const renderMutationResponse = (response: CartMutationResponse, mode: CartMode):
     if (fastOrderFormWrapper && mode === 'fast_order') {
         const isCartEmpty = response.cart?.is_empty ?? true;
 
-        fastOrderFormWrapper.classList.toggle($HIDDEN_CLASS_NAME, isCartEmpty);
+        toggleClass(fastOrderFormWrapper, $HIDDEN_CLASS_NAME, isCartEmpty);
     }
 
     const cartPageRoot = <HTMLElement | null>findElem('#cart-page-root');
@@ -67,11 +68,12 @@ const renderMutationResponse = (response: CartMutationResponse, mode: CartMode):
         initCartPageAccordion(cartPageRoot);
     }
 
-    const generalMessage =
-        response.success === true ? toTrimmedString(response.message) : extractCartGeneralErrorMessage(response);
+    const generalMessage = response.success
+        ? toTrimmedString(response.message)
+        : extractCartGeneralErrorMessage(response);
 
     if (generalMessage !== '') {
-        setCartModalGeneralError(mode, generalMessage, response.success === true);
+        setCartModalGeneralError(mode, generalMessage, response.success);
     } else {
         clearCartModalGeneralError(mode);
     }

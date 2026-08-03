@@ -6,7 +6,7 @@ import { findElem } from '@ts-shared/lib/helpers.ts';
 import $REGULAR = Cart.$REGULAR;
 
 export const initCartPageAccordion = (cartPageRoot: HTMLElement): void => {
-    const accordionElement = cartPageRoot.querySelector<HTMLElement>('[data-cart-extra-items-accordion]');
+    const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]', cartPageRoot);
 
     if (accordionElement) {
         initAccordion(accordionElement);

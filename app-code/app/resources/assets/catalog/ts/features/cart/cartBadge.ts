@@ -1,7 +1,7 @@
 import type { CartMode, CartMutationResponse } from '@ts-features/cart/cartTypes.ts';
 import { Cart } from '@ts-features/cart/constants.ts';
 import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
-import { findElem } from '@ts-shared/lib/helpers.ts';
+import { findElem, setTextContent, toggleClass } from '@ts-shared/lib/helpers.ts';
 
 import $REGULAR = Cart.$REGULAR;
 
@@ -16,8 +16,8 @@ export const updateCartBadge = (count: number): void => {
 
     const normalizedCount = Math.max(0, Math.floor(count));
 
-    badge.textContent = `${normalizedCount}`;
-    badge.classList.toggle($HIDDEN_CLASS_NAME, normalizedCount === 0);
+    setTextContent(badge, normalizedCount);
+    toggleClass(badge, $HIDDEN_CLASS_NAME, normalizedCount === 0);
 };
 
 export const updateCartBadgeFromResponse = (response: CartMutationResponse, mode: CartMode): void => {

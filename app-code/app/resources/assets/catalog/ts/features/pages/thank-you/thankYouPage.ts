@@ -1,8 +1,9 @@
 import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
+import { findElem } from '@ts-shared/lib/helpers.ts';
 
 export const handleThankYouPage = (): void => {
-    const pageRoot = document.querySelector<HTMLElement>('[data-thank-you-page]');
-    const accordion = pageRoot?.querySelector<HTMLElement>('[data-thank-you-products-accordion]');
+    const pageRoot = <HTMLElement | null>findElem('[data-thank-you-page]');
+    const accordion = <HTMLElement | null>findElem('[data-thank-you-products-accordion]', pageRoot);
 
     if (accordion) {
         initAccordion(accordion);

@@ -6,7 +6,15 @@ import {
     $HIDDEN_CLASS_NAME,
     $LOADER_CLASS_NAME,
 } from '@ts-shared/lib/constants.ts';
-import { addClass, debounce, fetchFunc, findElem, removeClass } from '@ts-shared/lib/helpers.ts';
+import {
+    addClass,
+    debounce,
+    fetchFunc,
+    findElem,
+    getDataset,
+    removeClass,
+    toTrimmedString,
+} from '@ts-shared/lib/helpers.ts';
 import HSOverlay from 'flyonui/src/js/plugins/overlay/index';
 
 interface HandleMobSearch {
@@ -67,11 +75,11 @@ const fireSearch = async (params: FireSearch): Promise<void> => {
     const processSearchProdsDebounce = debounce(processSearchProds, $DEBOUNCE_DELAY);
 
     inputEl?.addEventListener('input', function (this: HTMLInputElement): void {
-        if (this.value.trim().length >= this.minLength) {
+        if (toTrimmedString(this.value).length >= this.minLength) {
             processSearchProdsDebounce(
                 resultContainerEl,
                 loaderEl,
-                mobSearchFormEl.dataset.ajaxSearchUrl ?? '',
+                getDataset(mobSearchFormEl, 'ajaxSearchUrl') ?? '',
                 inputEl?.value ?? '',
             );
         }
