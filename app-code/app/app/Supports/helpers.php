@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 if (!function_exists('clear_telephone')) {
@@ -628,7 +629,7 @@ if (!function_exists('get_slug_variants')) {
     /**
      * @param array<int|string, int|string|array<int, int|string>> $attribute_filters
      *
-     * @return array<string, string|array<string, string>>
+     * @return array<string, string|array{slug?: string, variant_slug?: string, route?: string, product_id?: int, variant_id?: int}>
      */
     function get_slug_variants(
         ?string $sluggable_type,
@@ -700,7 +701,7 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
      * @param array<string, int>                                   $language_ids_by_code
      * @param array<int|string, int|string|array<int, int|string>> $attribute_filters
      *
-     * @return array<string, array{slug: string, variant_slug: string}>
+     * @return array<string, array{slug?: string, variant_slug?: string, route?: string, product_id?: int, variant_id?: int}>
      */
     function resolve_product_variant_slug_variants(
         string $slug_value,
@@ -727,6 +728,13 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
         );
 
         if ($variant_id < 1) {
+            return [];
+        }
+
+        /** @var ProductVariant|null $variant */
+        $variant = ProductVariant::query()->find($variant_id);
+
+        if (!$variant instanceof ProductVariant) {
             return [];
         }
 
@@ -761,13 +769,34 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
                         && (string)$slug->sluggable_type === ProductVariant::class),
             )->slug;
 
-            if (blank($localized_product_slug) || blank($localized_variant_slug)) {
+            if (filled($localized_product_slug) && filled($localized_variant_slug)) {
+                $result[$language_code] = [
+                    'slug' => $localized_product_slug,
+                    'variant_slug' => $localized_variant_slug,
+                ];
+
                 continue;
             }
 
+            if ($variant->is_default && filled($localized_product_slug)) {
+                $result[$language_code] = [
+                    'slug' => $localized_product_slug,
+                ];
+
+                continue;
+            }
+
+            Log::channel('daily')->warning('[FIX:localized-product-slug] Falling back to static product variant URL.', [
+                'language_code' => $language_code,
+                'product_id' => $product_id,
+                'variant_id' => $variant_id,
+                'is_default' => (bool)$variant->is_default,
+            ]);
+
             $result[$language_code] = [
-                'slug' => $localized_product_slug,
-                'variant_slug' => $localized_variant_slug,
+                'route' => 'localized.catalog.product.static.show',
+                'product_id' => $product_id,
+                'variant_id' => $variant_id,
             ];
         }
 

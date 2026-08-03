@@ -11,6 +11,7 @@ GET /{locale}/category/{slug}/filters
 GET /{locale}/category/{slug}/load-more
 GET /{locale}/product/{slug}
 GET /{locale}/product/{slug}/{variant_slug}
+GET /{locale}/product/static/{product_id}/{variant_id}
 GET /{locale}/search
 GET /{locale}/live-search
 ```
@@ -27,6 +28,8 @@ GET /{locale}/live-search
 - Variant can be resolved by:
   - `variant_slug`, or
   - GET attribute params (for variant selection behavior).
+- The language switcher uses the localized parent product slug for a default variant when the variant has no own slug.
+- If a localized SEO URL cannot identify the requested variant, it uses the validated static product-variant route.
 - Breadcrumbs can include category chain before product title.
 
 ## Filtering and Sorting
