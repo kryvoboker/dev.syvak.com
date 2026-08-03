@@ -575,6 +575,7 @@ readonly class FilterProductsAction
 
                 return [
                     'id' => (int) $product->id,
+                    'variant_id' => (int) $product->getAttribute('default_variant_id_selected'),
                     'name' => (string) ($variant_description->name ?? $fallback_description->name ?? ''),
                     'sku' => (string) $product->sku,
                     'quantity' => (int) $variant_stock,

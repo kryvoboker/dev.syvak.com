@@ -102,7 +102,7 @@ if (!function_exists('multiple_convert_img_and_get_url')) {
      *
      * @note Use this function with 'x-catalog::common.img' blade component
      */
-    function multiple_convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = 'ffffff'): array
+    function multiple_convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): array
     {
         return app(ImageUrlBuilderService::class)->multipleUrl($path, $width, $height, $is_square, $bg_color);
     }

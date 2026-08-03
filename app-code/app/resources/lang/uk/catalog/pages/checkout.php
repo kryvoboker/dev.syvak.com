@@ -67,6 +67,6 @@ return [
         'subtotal' => 'Загальна сума',
         'delivery' => 'Доставка',
         'total' => 'Підсумок',
-        'promo_code' => 'Промокод',
+        'promo_code' => 'Промокод (:promo_code)',
     ],
 ];
