@@ -49,13 +49,55 @@ class ProductController extends Controller
             throw new NotFoundHttpException();
         }
 
+        $variant           = $this->resolveRequestedVariant($request, $product, (int)$language->id, $variant_slug);
+        return $this->renderProductPage($request, $locale, $product, $variant, $slug, $variant_slug, (int)$language->id);
+    }
+
+    public function showStatic(Request $request, string $locale, int $product_id, int $variant_id): View
+    {
+        $locale = normalize_locale($locale);
+        $language = resolve_language_by_locale($locale);
+
+        if (!$language instanceof Language) {
+            throw new NotFoundHttpException();
+        }
+
+        $product = Product::query()->find($product_id);
+        $variant = ProductVariant::query()
+            ->whereKey($variant_id)
+            ->where('product_id', $product_id)
+            ->first();
+
+        if (!$product instanceof Product || !$variant instanceof ProductVariant) {
+            throw new NotFoundHttpException();
+        }
+
+        return $this->renderProductPage(
+            request: $request,
+            locale: $locale,
+            product: $product,
+            variant: $variant,
+            slug: null,
+            variant_slug: null,
+            language_id: (int)$language->id,
+        );
+    }
+
+    private function renderProductPage(
+        Request $request,
+        string $locale,
+        Product $product,
+        ?ProductVariant $variant,
+        ?string $slug,
+        ?string $variant_slug,
+        int $language_id,
+    ): View {
         $page_setting      = app(PageSettingsBootstrapService::class)->bootstrapProductPageSetting();
         $page_settings_arr = get_page_settings($page_setting);
-        $variant           = $this->resolveRequestedVariant($request, $product, (int)$language->id, $variant_slug);
         $attribute_filters = prepare_product_attrs((array)$request->query());
         $header_data       = app(HeaderService::class)([
             'sluggable_type'    => ProductVariant::class,
-            'slug'              => $slug,
+            'slug'              => $slug ?? '',
             'variant_slug'      => $variant_slug,
             'attribute_filters' => $attribute_filters,
         ]);
@@ -72,8 +114,8 @@ class ProductController extends Controller
                 'categories' => $header_data['categories'],
             ]),
             'page_type'         => $page_type,
-            'breadcrumbs'       => $this->resolveBreadcrumbs($product, $variant, (int)$language->id),
-            'product_view_data' => $this->buildProductViewData($product, $variant, (int)$language->id, $page_settings_arr),
+            'breadcrumbs'       => $this->resolveBreadcrumbs($product, $variant, $language_id),
+            'product_view_data' => $this->buildProductViewData($product, $variant, $language_id, $page_settings_arr),
             'product'           => $product,
             'variant'           => $variant,
             'telegram_data'     => [
