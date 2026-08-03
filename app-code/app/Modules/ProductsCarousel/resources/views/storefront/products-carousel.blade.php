@@ -54,7 +54,7 @@
                                 @endif
                             </div>
 
-                            <div class="products-carousel-card flex h-full flex-col gap-3 md:gap-4 lg:gap-5">
+                            <div class="products-carousel-card card">
                                 <a class="products-carousel-img-container flex items-center justify-center overflow-hidden"
                                    href="{{ $url }}"
                                    aria-label="{{ $name }}">
@@ -70,8 +70,8 @@
                                     />
                                 </a>
 
-                                <div class="products-carousel-info flex min-h-20 flex-col gap-2">
-                                    <a class="products-carousel-card-title prod-list__name"
+                                <div class="products-carousel-info card-body">
+                                    <a class="products-carousel-card-title card-title"
                                        href="{{ $url }}"
                                        aria-label="{{ $name }}">
                                         {{ $name }}
@@ -97,14 +97,14 @@
             </div>
 
             @if(count($products_carousel_module_data['products'] ?? []) > 1)
-                <button class="carousel-prev start-0 carousel-nav"
+                <button class="carousel-prev inset-s-0 carousel-nav"
                         @style("top: calc(($image_height / 2) / var(--base-font-size) * 1rem * -1); transform: translateY(calc(($image_height * 0.1) / var(--base-font-size) * 1rem));")
                         type="button"
                         aria-label="Previous product">
                     <span class="icon-[mynaui--arrow-left] size-6"></span>
                 </button>
 
-                <button class="carousel-next end-0 carousel-nav"
+                <button class="carousel-next inset-e-0 carousel-nav"
                         @style("top: calc(($image_height / 2) / var(--base-font-size) * 1rem * -1); transform: translateY(calc(($image_height * 0.1) / var(--base-font-size) * 1rem));")
                         type="button"
                         aria-label="Next product">

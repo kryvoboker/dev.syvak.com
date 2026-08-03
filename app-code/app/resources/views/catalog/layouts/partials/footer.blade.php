@@ -11,7 +11,7 @@
     $social_items = collect($footer_data['social_items']);
 @endphp
 
-<footer class="footer border-t border-opacity-light-gray-40% max-md:overflow-hidden pt-4 pb-4 md:pt-7 md:pb-0 lg:pt-15 2xl:pt-20 2xl:mb-52px">
+<footer class="footer border-t border-opacity-light-gray-40% max-md:overflow-hidden pt-4 pb-4 md:pt-7 md:pb-0 lg:pt-15 2xl:pt-20 2xl:mb-52px z-1">
     <div class="container">
         <div class="footer-main-grid grid grid-cols-1 gap-y-6 md:grid-cols-2 md:gap-x-12 md:gap-y-8 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-0 2xl:grid-cols-4 2xl:gap-x-12">
             <section class="footer-subscribe flex flex-col gap-4" aria-label="{{ $subscription_data['title'] }}">

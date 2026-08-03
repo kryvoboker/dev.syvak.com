@@ -9,8 +9,8 @@
 
     <section class="product section" id="product">
         <div class="container relative">
-            <div class="product-content grid grid-cols-1 2xl:grid-cols-3 2xl:grid-rows-[repeat(20,auto)] gap-y-4 gap-x-6 z-1">
-                <div class="product-carousel w-full 2xl:col-start-2 2xl:col-end-3 2xl:row-start-1 2xl:row-end-21 {{ !empty($product_view_data['gallery_images_data']) ? 'product-carousel--init' : '' }}"
+            <div class="product-content grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[repeat(20,auto)] gap-y-4 gap-x-6 z-1">
+                <div class="product-carousel w-full lg:col-start-2 lg:col-end-3 lg:row-start-1 lg:row-end-21 {{ !empty($product_view_data['gallery_images_data']) ? 'product-carousel--init' : '' }}"
                      id="vertical-thumbnails"
                      @if(!empty($product_view_data['gallery_images_data']))
                          data-carousel='{ "loadingClasses": "opacity-0", "isDraggable": true, "isInfiniteLoop":true }'
@@ -74,7 +74,7 @@
                 </div>
 
                 @if(!empty($product_view_data['gallery_images_data']))
-                    <div class="2xl:col-start-3 2xl:col-end-4 2xl:row-start-1 2xl:row-end-10 product-carousel__pagination carousel-pagination
+                    <div class="lg:col-start-3 lg:col-end-4 lg:row-start-1 lg:row-end-10 product-carousel__pagination carousel-pagination
                                 hidden md:flex gap-x-3 lg:gap-x-4 size-full max-h-42 overflow-x-auto">
                         @foreach($product_view_data['gallery_images_data'] as $gallery_image_data)
                             <button class="shrink-0 carousel-pagination-item relative max-w-31 w-full {{ $loop->first ? 'active' : '' }}"
@@ -95,11 +95,11 @@
                     </div>
                 @endif
 
-                <h1 class="product-name 2xl:col-start-1 2xl:col-end-2 2xl:row-start-1 2xl:row-end-10">
+                <h1 class="product-name lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-10">
                     {{ $product_view_data['title'] }}
                 </h1>
 
-                <div class="2xl:col-start-1 2xl:col-end-2 2xl:row-start-10 2xl:row-end-12 flex flex-col 2xl:flex-col lg:flex-row justify-between gap-4">
+                <div class="lg:col-start-1 lg:col-end-2 lg:row-start-10 lg:row-end-12 flex flex-col lg:flex-col xl:flex-row justify-between gap-4">
                     <div class="text-light-gray">
                         {{ __('catalog/default.texts.sku', ['sku' => $product_view_data['sku']]) }}
                     </div>
@@ -115,7 +115,7 @@
                 </div>
 
                 @if(filled($product_view_data['option_groups']))
-                    <div class="2xl:col-start-3 2xl:col-end-4 2xl:row-start-10 2xl:row-end-18 flex flex-col gap-y-2 mt-1 md:mt-3">
+                    <div class="lg:col-start-3 lg:col-end-4 lg:row-start-10 lg:row-end-18 flex flex-col gap-y-2 mt-1 md:mt-3">
                         @foreach($product_view_data['option_groups'] as $option_group)
                             <div class="border-b border-opacity-light-gray-40% pb-2">
                                 <div class="flex items-center justify-between gap-x-2">
@@ -147,7 +147,7 @@
                     </div>
                 @endif
 
-                <button class="product-size-guide__open-btn 2xl:col-start-3 2xl:col-end-4 2xl:row-start-18 2xl:row-end-19 flex items-center gap-x-2 ms-auto">
+                <button class="product-size-guide__open-btn lg:col-start-3 lg:col-end-4 lg:row-start-18 lg:row-end-19 flex items-center gap-x-2 ms-auto">
                     @if(filled($product_view_data['size_guide']))
                         <span class="custom-icon icon-[mingcute--tag-2-line]"></span>
 
@@ -157,7 +157,7 @@
                     @endif
                 </button>
 
-                <div class="2xl:col-start-3 2xl:col-end-4 2xl:row-start-19 2xl:row-end-21 flex flex-col gap-y-2 mt-2 md:mt-4">
+                <div class="lg:col-start-3 lg:col-end-4 lg:row-start-19 lg:row-end-21 flex flex-col gap-y-2 mt-2 md:mt-4">
                     @if(isset($product_view_data['is_in_stock']) && $product_view_data['is_in_stock'] === true)
                                 <button class="white-btn default-btn w-full"
                                         type="button"
@@ -180,7 +180,7 @@
                 </div>
 
                 @if(filled($product_view_data['details_sections']))
-                    <div class="2xl:col-start-1 2xl:col-end-2 2xl:row-start-12 2xl:row-end-21 flex flex-col md:flex-row 2xl:flex-col gap-y-6 md:gap-x-6 md:gap-y-0 2xl:gap-y-6">
+                    <div class="lg:col-start-1 lg:col-end-2 lg:row-start-12 lg:row-end-21 flex flex-col md:flex-row lg:flex-col gap-y-6 md:gap-x-6 md:gap-y-0 lg:gap-y-6">
                         @foreach($product_view_data['details_sections'] as $details_section)
                             <div class="flex flex-col gap-y-2">
                                 <h6 class="font-bold">
