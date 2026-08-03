@@ -3,11 +3,11 @@
          id="fullscreen-modal"
          role="dialog"
          tabindex="-1">
-        <div class="modal-dialog max-w-full md:max-w-158 lg:max-w-180 2xl:max-w-300 md:overflow-hidden p-0">
-            <div class="modal-shadow modal-content h-full max-h-none md:max-h-190 lg:max-h-200 2xl:max-h-11/12 justify-between px-3.5 py-5.5 md:p-7.5 2xl:px-20 2xl:py-15">
+        <div class="modal-dialog max-w-full lg:max-w-180 bp1440px:max-w-300 md:overflow-hidden p-0">
+            <div class="modal-shadow modal-content h-full max-h-none md:max-h-190 lg:max-h-200 bp1440px:max-h-11/12 justify-between px-3.5 py-5.5 md:p-7.5 bp1440px:px-20 bp1440px:py-15">
                 <div class="modal-body grow max-md:overflow-y-hidden p-0">
-                    <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] grid-rows-[repeat(5,auto)] md:grid-rows-[repeat(4,auto)] gap-y-4 md:gap-y-5 md:gap-x-6 2xl:gap-x-5">
-                        <div class="md:col-start-1 md:col-end-3 xl:col-start-2 xl:col-end-3 flex items-center xl:items-start justify-between gap-x-2 md:mb-2 2xl:mb-3">
+                    <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] grid-rows-[repeat(5,auto)] md:grid-rows-[repeat(4,auto)] gap-y-4 md:gap-y-5 md:gap-x-6 bp1440px:gap-x-5">
+                        <div class="md:col-start-1 md:col-end-3 xl:col-start-2 xl:col-end-3 flex items-center xl:items-start justify-between gap-x-2 md:mb-2 bp1440px:mb-3">
                             <h3 class="modal-title">
                                 {{ $product_view_data['size_guide']['title'] }}
                             </h3>
@@ -56,7 +56,7 @@
                         </div>
 
                         <x-catalog::common.img
-                            class="md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4 xl:row-start-1 xl:row-end-4 size-full lg:max-w-70 2xl:max-w-120 grow object-contain"
+                            class="md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4 lg:row-end-5 xl:row-start-1 size-full lg:max-w-70 bp1440px:max-w-120 grow object-contain"
                             :urls_data="$product_view_data['size_guide']['image']['urls']"
                             :size="$product_view_data['size_guide']['image']['width']"
                             :max-density="3"
