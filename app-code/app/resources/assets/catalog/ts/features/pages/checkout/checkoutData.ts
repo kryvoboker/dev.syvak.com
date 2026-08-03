@@ -1,6 +1,9 @@
 import type { CheckoutMapPoint } from '@ts-features/pages/checkout/checkoutLeafletMap.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
 import {
+    fromJson,
+    getDataset,
+    getTextContent,
     isArray,
     isEmpty,
     isFiniteNumber,
@@ -114,7 +117,7 @@ export const MIN_SEARCH_POST_OFFICE_LENGTH = 1;
 
 export const toStringOrNull = (value: unknown): string | null => {
     if (typeof value === 'string') {
-        const normalizedValue = value.trim();
+        const normalizedValue = toTrimmedString(value);
 
         return normalizedValue === '' ? null : normalizedValue;
     }
@@ -127,12 +130,12 @@ export const toStringOrNull = (value: unknown): string | null => {
 };
 
 export const parseCustomProperties = (value: string | undefined): Record<string, unknown> => {
-    if (!value || value.trim() === '') {
+    if (!value || toTrimmedString(value) === '') {
         return {};
     }
 
     try {
-        const parsedValue: unknown = JSON.parse(value);
+        const parsedValue: unknown = fromJson(value);
 
         return parsedValue !== null && typeof parsedValue === 'object' && !isArray(parsedValue)
             ? (parsedValue as Record<string, unknown>)
@@ -214,21 +217,21 @@ export const readCityFromOption = (option: HTMLOptionElement | null): CheckoutCi
         return null;
     }
 
-    const cityDescription = option.value.trim();
+    const cityDescription = toTrimmedString(option.value);
 
     if (cityDescription === '') {
         return null;
     }
 
-    const novaPoshtaCityId = option.dataset.novaPoshtaCityId?.trim() ?? '';
-    const ukrPoshtaCityId = toNumber(option.dataset.ukrPoshtaCityId);
+    const novaPoshtaCityId = toTrimmedString(getDataset(option, 'novaPoshtaCityId'));
+    const ukrPoshtaCityId = toNumber(getDataset(option, 'ukrPoshtaCityId'));
 
     return normalizeCityPayload({
         city_description: cityDescription,
         nova_poshta_city_id: novaPoshtaCityId === '' ? null : novaPoshtaCityId,
         ukr_poshta_city_id: isNaNValue(ukrPoshtaCityId) || ukrPoshtaCityId <= 0 ? null : ukrPoshtaCityId,
-        city_lat: toNumberOrNull(option.dataset.cityLat),
-        city_lng: toNumberOrNull(option.dataset.cityLng),
+        city_lat: toNumberOrNull(getDataset(option, 'cityLat')),
+        city_lng: toNumberOrNull(getDataset(option, 'cityLng')),
     });
 };
 
@@ -237,14 +240,14 @@ export const readBranchFromOption = (option: HTMLOptionElement | null): Checkout
         return null;
     }
 
-    const branchData = parseCustomProperties(option.dataset.customProperties);
+    const branchData = parseCustomProperties(getDataset(option, 'customProperties') ?? undefined);
 
     return normalizeBranchPayload({
         ...branchData,
-        id: branchData.id ?? option.value.trim() ?? null,
-        description: branchData.description ?? option.textContent?.trim() ?? null,
-        label: branchData.label ?? option.textContent?.trim() ?? null,
-        branch_value: branchData.branch_value ?? option.value.trim() ?? null,
+        id: branchData.id ?? toTrimmedString(option.value, null),
+        description: branchData.description ?? toTrimmedString(getTextContent(option), null),
+        label: branchData.label ?? toTrimmedString(getTextContent(option), null),
+        branch_value: branchData.branch_value ?? toTrimmedString(option.value, null),
     });
 };
 

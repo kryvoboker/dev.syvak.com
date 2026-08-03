@@ -17,15 +17,15 @@ document.addEventListener('DOMContentLoaded', (): void => {
     const pageType: string | null = window.app_params?.page_type ?? null;
     const deviceType: string | null = window.app_params?.current_device_type ?? null;
 
-    if (document.querySelector('[data-main-carousel]')) {
-        import('@carousel-ts/main.ts');
-    }
-
-    if (document.querySelector('[data-products-carousel]')) {
-        import('@products-carousel-ts/main.ts');
-    }
-
     import('@ts-shared/lib/helpers.ts').then((module) => {
+        if (module.findElem('[data-main-carousel]')) {
+            import('@carousel-ts/main.ts');
+        }
+
+        if (module.findElem('[data-products-carousel]')) {
+            import('@products-carousel-ts/main.ts');
+        }
+
         const goToPreviousPageBtnEl = <HTMLButtonElement | null>module.findElem('.go-to-previous-page__btn');
 
         goToPreviousPageBtnEl?.addEventListener('click', (): void => {
@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
         import('@carousel-ts/main.ts').then((module) => module.handleCarousel());
         import('@products-carousel-ts/main.ts').then((module) => module.handleProductsCarousel());
     } else if (pageType === $CATEGORY_PAGE_TYPE) {
-        import('@ts-features/common/products/productsList.ts').then((module) => module.handleCategoryProductsList());
+        import('@ts-features/products/productsList.ts').then((module) => module.handleCategoryProductsList());
 
-        import('@ts-features/common/products/productsFilter.ts').then((module) => module.handleProductsFilter());
+        import('@ts-features/products/productsFilter.ts').then((module) => module.handleProductsFilter());
     } else if (pageType === $PRODUCT_PAGE_TYPE) {
         import('@ts-features/pages/product/productCarousel.ts').then((module) => module.handleProductCarousel());
 
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
     }
 
     if (pageType === $CATEGORY_PAGE_TYPE || pageType === $SEARCH_PAGE_TYPE) {
-        import('@ts-features/common/products/loadMoreProducts.ts').then((module) => module.handleLoadMoreProducts());
+        import('@ts-features/products/loadMoreProducts.ts').then((module) => module.handleLoadMoreProducts());
     }
 
     if (pageType === $CART_PAGE_TYPE) {

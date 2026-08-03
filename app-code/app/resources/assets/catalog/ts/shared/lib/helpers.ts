@@ -70,7 +70,7 @@ export const goBack = (fallbackUrl: string = '/'): void => {
         return;
     }
 
-    const referrer: string = document.referrer?.trim() ?? '';
+    const referrer: string = toTrimmedString(document.referrer);
 
     if (!isEmpty(referrer)) {
         try {
@@ -146,7 +146,12 @@ export const valueToString = (value: string | number | boolean | undefined | nul
 export const toStringValue = (value: unknown, defaultValue: string = ''): string =>
     value === null || value === undefined ? defaultValue : String(value);
 
-export const toTrimmedString = (value: unknown): string => toStringValue(value).trim();
+export function toTrimmedString(value: unknown): string;
+export function toTrimmedString(value: unknown, defaultValue: string): string;
+export function toTrimmedString(value: unknown, defaultValue: null): string | null;
+export function toTrimmedString(value: unknown, defaultValue: string | null = ''): string | null {
+    return value === null || value === undefined ? defaultValue : toStringValue(value).trim();
+}
 
 export const toNumber = (value: unknown, defaultValue: number = 0): number => {
     const numericValue = Number(value);
@@ -179,7 +184,7 @@ export const normalizeAndEncodeUriComponent = (uriComponent: boolean | string | 
         return '';
     }
 
-    return encodeURIComponent(decodeURIComponent(<string>uriComponent).trim());
+    return encodeURIComponent(toTrimmedString(decodeURIComponent(<string>uriComponent)));
 };
 
 export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams: boolean = false): string => {
@@ -191,7 +196,7 @@ export const httpBuildQueryString = (queries: URLParamsType, isWidthSearchParams
             continue;
         }
 
-        const key: string = queriesKey.trim();
+        const key: string = toTrimmedString(queriesKey);
         const value: QueryValueType | QueryValueType[] = queryValue;
 
         if (isArray(value)) {
@@ -246,7 +251,7 @@ export const isEmpty = (value: string | number | boolean | null | undefined | un
         return false;
     } else if (isArray(value) || typeof value === 'string') {
         if (typeof value === 'string') {
-            value = value.trim();
+            value = toTrimmedString(value);
         }
 
         if (value === '0') {
@@ -373,7 +378,7 @@ const getSupportedImageFormats = async (): Promise<string[]> => {
     const cachedData: string | null = getLocalStorage(CACHE_KEY);
 
     if (cachedData) {
-        return JSON.parse(cachedData);
+        return fromJson(cachedData);
     }
 
     // Run checks if no valid cache
@@ -387,7 +392,7 @@ const getSupportedImageFormats = async (): Promise<string[]> => {
         formats.push('webp');
     }
 
-    setLocalStorage(CACHE_KEY, JSON.stringify(formats));
+    setLocalStorage(CACHE_KEY, toJson(formats));
 
     return formats;
 };
@@ -442,7 +447,7 @@ export const fetchFunc = async <T = unknown>(
         options = { headers };
     } else if (!(data instanceof FormData)) {
         options.headers.contentType = contentType;
-        options.body = JSON.stringify(data);
+        options.body = toJson(data);
     } else if (data instanceof FormData) {
         options.body = data;
     }
@@ -534,4 +539,105 @@ export const normalizeNumber = (value: string | number): number => {
 export const togglePage = <T extends HTMLElement>(loaderClassName: T | null, isBlockingPage: boolean): void => {
     blockBody(isBlockingPage);
     toggleElement(loaderClassName, isBlockingPage);
+};
+
+type JsonReplacer = (this: object, key: string, value: unknown) => unknown | (number | string)[] | null;
+
+export const toJson = (value: unknown, replacer?: JsonReplacer, space?: string | number): string => {
+    return JSON.stringify(value, replacer as never, space);
+};
+
+type JsonReviver = (this: unknown, key: string, value: unknown) => unknown;
+
+export const fromJson = <T = unknown>(text: string, reviver?: JsonReviver): T => {
+    return JSON.parse(text, reviver as never) as T;
+};
+
+export const getDataset = <T extends HTMLElement>(
+    element: T | null,
+    key: string,
+    defaultValue: string | number | null = null,
+): string | null => {
+    if (element === null) {
+        return defaultValue !== null ? toStringValue(defaultValue) : defaultValue;
+    }
+
+    if (typeof element.dataset[key] === 'undefined') {
+        return defaultValue !== null ? toStringValue(defaultValue) : defaultValue;
+    }
+
+    return element.dataset[key];
+};
+
+export const setDataset = <T extends HTMLElement>(
+    element: T | null,
+    key: string,
+    value: string | number | null | undefined | object,
+): void => {
+    if (element === null) {
+        return;
+    }
+
+    if (typeof value !== 'string' && typeof value !== 'object') {
+        value = toStringValue(value);
+    } else if (typeof value !== 'string') {
+        value = toJson(value);
+    }
+
+    element.dataset[key] = value;
+};
+
+export const getAttribute = <T extends Element>(
+    element: T | null,
+    key: string,
+    defaultValue: string | number | null = null,
+): string | null => {
+    if (element === null) {
+        return defaultValue !== null ? toStringValue(defaultValue) : defaultValue;
+    }
+
+    const value = element.getAttribute(key);
+
+    return value ?? (defaultValue !== null ? toStringValue(defaultValue) : defaultValue);
+};
+
+export const setAttribute = <T extends Element>(
+    element: T | null,
+    key: string,
+    value: string | number | boolean | null | undefined,
+): void => {
+    if (element === null) {
+        return;
+    }
+
+    if (value === null || value === undefined) {
+        element.removeAttribute(key);
+
+        return;
+    }
+
+    element.setAttribute(key, toStringValue(value));
+};
+
+export const getTextContent = <T extends Node>(
+    element: T | null,
+    defaultValue: string | number | null = null,
+): string | null => {
+    if (element === null) {
+        return defaultValue !== null ? toStringValue(defaultValue) : defaultValue;
+    }
+
+    return element.textContent ?? (defaultValue !== null ? toStringValue(defaultValue) : defaultValue);
+};
+
+export const setTextContent = <T extends Node>(element: T | null, value: string | number | null | undefined): void => {
+    if (element === null) {
+        return;
+    }
+
+    element.textContent = value === null || value === undefined ? null : toStringValue(value);
+};
+
+export const createHtmlElement = (tagName: string, options?: ElementCreationOptions): HTMLElement => {
+    return document.createElement(tagName, options);
 };

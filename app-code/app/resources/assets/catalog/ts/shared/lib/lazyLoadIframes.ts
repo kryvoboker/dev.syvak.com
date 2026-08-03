@@ -1,5 +1,12 @@
 import { $LAZY_LOAD_CLASS_NAME } from '@ts-shared/lib/constants.ts';
-import { addClass, findArrayElems, findElem, removeClass } from '@ts-shared/lib/helpers.ts';
+import {
+    addClass,
+    createHtmlElement,
+    findArrayElems,
+    findElem,
+    getDataset,
+    removeClass,
+} from '@ts-shared/lib/helpers.ts';
 
 const processLoad = (input: HTMLElement): void => {
     const parentBlock: HTMLElement | null = input.parentElement as HTMLElement | null;
@@ -8,8 +15,8 @@ const processLoad = (input: HTMLElement): void => {
         return;
     }
 
-    const divEl: HTMLDivElement = document.createElement('div');
-    const iframeEl: HTMLIFrameElement = document.createElement('iframe');
+    const divEl: HTMLDivElement = <HTMLDivElement>createHtmlElement('div');
+    const iframeEl: HTMLIFrameElement = <HTMLIFrameElement>createHtmlElement('iframe');
     const commonFullPageLoaderEl: HTMLElement | null = findElem('.common-full-page-loader');
 
     if (commonFullPageLoaderEl) {
@@ -22,7 +29,7 @@ const processLoad = (input: HTMLElement): void => {
     divEl.style.paddingTop = '55%';
 
     iframeEl.className = 'absolute inset-0 w-full h-full rounded-3xl';
-    iframeEl.src = input.dataset.ajaxIframe ?? '';
+    iframeEl.src = getDataset(input, 'ajaxIframe') ?? '';
     iframeEl.width = '560';
     iframeEl.height = '314';
     iframeEl.allowFullscreen = true;

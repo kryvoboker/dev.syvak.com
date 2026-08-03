@@ -1,5 +1,14 @@
 import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
-import { findElem, toggleClass } from '@ts-shared/lib/helpers.ts';
+import {
+    addClass,
+    findElem,
+    getDataset,
+    isEmpty,
+    removeClass,
+    setAttribute,
+    setTextContent,
+    toggleClass,
+} from '@ts-shared/lib/helpers.ts';
 import type Choices from 'choices.js';
 import type { InputChoice, InputGroup } from 'choices.js';
 import { buildBranchChoiceItem, buildChoiceItem } from './checkoutChoices.ts';
@@ -44,22 +53,22 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
             return;
         }
 
-        const hasMapPoints = state.getLatestBranchResults().length > 0 || state.getBranch() !== null;
+        const hasMapPoints = !isEmpty(state.getLatestBranchResults()) || state.getBranch() !== null;
         const isMapAvailable =
             state.getCity() !== null &&
             state.getDeliveryMethod() !== '' &&
             state.getDeliveryMethod() !== 'nova_poshta_courier' &&
             hasMapPoints;
 
-        elements.mapButtonElement.toggleAttribute('disabled', !isMapAvailable);
+        setAttribute(elements.mapButtonElement, 'disabled', isMapAvailable ? null : 'disabled');
 
         toggleClass(elements.mapButtonElement, 'cursor-not-allowed', !isMapAvailable);
         toggleClass(elements.mapButtonElement, 'opacity-60', !isMapAvailable);
     };
 
     const hideWarning = (): void => {
-        elements.cityWarningElement?.classList.add($HIDDEN_CLASS_NAME);
-        elements.cityWarningElement?.setAttribute('aria-hidden', 'true');
+        addClass(elements.cityWarningElement, $HIDDEN_CLASS_NAME);
+        setAttribute(elements.cityWarningElement, 'aria-hidden', 'true');
     };
 
     const showWarning = (message: string): void => {
@@ -67,9 +76,9 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
             return;
         }
 
-        elements.cityWarningElement.textContent = message;
-        elements.cityWarningElement.classList.remove($HIDDEN_CLASS_NAME);
-        elements.cityWarningElement.setAttribute('aria-hidden', 'false');
+        setTextContent(elements.cityWarningElement, message);
+        removeClass(elements.cityWarningElement, $HIDDEN_CLASS_NAME);
+        setAttribute(elements.cityWarningElement, 'aria-hidden', 'false');
     };
 
     const updateCourierAddressVisibility = (): void => {
@@ -90,7 +99,7 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
         toggleClass(elements.branchWrapperElement, $HIDDEN_CLASS_NAME, !isBranchSearchAvailable);
 
         if (elements.branchLabelElement) {
-            elements.branchLabelElement.textContent = resolveBranchLabelText(deliveryMethod);
+            setTextContent(elements.branchLabelElement, resolveBranchLabelText(deliveryMethod));
         }
 
         updateMapButtonState();
@@ -143,7 +152,7 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
         const isUkrAvailable = Boolean(city?.ukr_poshta_city_id);
 
         elements.deliveryMethodOptions.forEach((optionElement): void => {
-            const method = optionElement.dataset.checkoutDeliveryMethodOption ?? '';
+            const method = getDataset(optionElement, 'checkoutDeliveryMethodOption') ?? '';
             const isVisible =
                 method === 'pickup_store' || !hasCity || (method === 'ukr_poshta' ? isUkrAvailable : isNovaAvailable);
 
@@ -183,7 +192,7 @@ export const createCheckoutUi = (elements: CheckoutUiElements, state: CheckoutUi
 
         if (currentDeliveryMethod === 'pickup_store') {
             hideWarning();
-        } else if (hasCity && availableMethods.length === 0) {
+        } else if (hasCity && isEmpty(availableMethods)) {
             showWarning(state.getNoDeliveryMethodsText());
         } else if (hasCity) {
             hideWarning();

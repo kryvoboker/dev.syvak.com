@@ -3,11 +3,14 @@ import 'leaflet.markercluster';
 import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
 import {
     blockBody,
+    createHtmlElement,
     findArrayElems,
     findElem,
+    getDataset,
     isClosestClass,
     isEmpty,
     isFiniteNumber,
+    setDataset,
     toggleClass,
     toNumber,
     toStringValue,
@@ -158,7 +161,7 @@ const createListItemHtml = (point: CheckoutMapPoint, deliverHereText: string): s
     const scheduleHtml = point.schedule ? `<div class="text-sm leading-6 text-white/75">${point.schedule}</div>` : '';
 
     return [
-        `<div class="${LIST_ITEM_CLASS_NAMES}" data-checkout-leaflet-item data-checkout-leaflet-item-id="${escapeHtml(point.id)}" data-search-text="${escapeHtml(`${point.title} ${point.description} ${point.schedule ?? ''}`.trim().toLowerCase())}">`,
+        `<div class="${LIST_ITEM_CLASS_NAMES}" data-checkout-leaflet-item data-checkout-leaflet-item-id="${escapeHtml(point.id)}" data-search-text="${escapeHtml(toTrimmedString(`${point.title} ${point.description} ${point.schedule ?? ''}`).toLowerCase())}">`,
         `<button class="text-left text-base md:text-xl font-semibold text-white" type="button" data-checkout-leaflet-focus>${escapeHtml(point.title)}</button>`,
         scheduleHtml,
         `<button class="${DELIVERY_BUTTON_CLASS_NAMES}" type="button" data-map-delivery-point-id="${escapeHtml(point.id)}">${escapeHtml(deliverHereText)}</button>`,
@@ -175,7 +178,7 @@ const renderListItems = (
         return;
     }
 
-    if (points.length === 0) {
+    if (isEmpty(points)) {
         listEl.innerHTML = `<div class="rounded-xl border border-dashed border-white/15 px-4 py-6 text-sm text-white/60">${escapeHtml(getText(texts.empty, 'No delivery points available'))}</div>`;
 
         return;
@@ -197,7 +200,7 @@ const bindDeliveryPointButtons = (modalEl: HTMLDivElement, callback: DeliveryPoi
             return;
         }
 
-        const pointId = button.dataset.mapDeliveryPointId ?? '';
+        const pointId = getDataset(button, 'mapDeliveryPointId') ?? '';
 
         if (pointId === '') {
             return;
@@ -218,7 +221,7 @@ const bindDeliveryPointButtons = (modalEl: HTMLDivElement, callback: DeliveryPoi
 const setActiveListItem = (pointId: string): void => {
     findArrayElems('[data-checkout-leaflet-item]').forEach((item: HTMLElement): void => {
         LIST_ACTIVE_CLASS_NAMES.forEach((className: string): void => {
-            item.classList.toggle(className, item.dataset.checkoutLeafletItemId === pointId);
+            toggleClass(item, className, getDataset(item, 'checkoutLeafletItemId') === pointId);
         });
     });
 };
@@ -248,7 +251,7 @@ const closeModal = (modalEl: HTMLDivElement): void => {
 const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void => {
     const mapContainer = <HTMLDivElement | null>findElem(`#${MAP_ID}`, modalEl);
 
-    if (!mapContainer || params.points.length === 0) {
+    if (!mapContainer || isEmpty(params.points)) {
         return;
     }
 
@@ -401,10 +404,10 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
     const searchInput = <HTMLInputElement | null>findElem('[data-checkout-leaflet-search]', modalEl);
 
     searchInput?.addEventListener('input', (): void => {
-        const searchValue = searchInput.value.trim().toLowerCase();
+        const searchValue = toTrimmedString(searchInput.value).toLowerCase();
 
         listItemById.forEach((listItem: HTMLElement): void => {
-            const searchText = toStringValue(listItem.dataset.searchText);
+            const searchText = toStringValue(getDataset(listItem, 'searchText'));
             const isVisible = searchValue === '' || searchText.includes(searchValue);
 
             toggleClass(listItem, $HIDDEN_CLASS_NAME, !isVisible);
@@ -422,7 +425,7 @@ const initializeMap = (params: RenderMapParams, modalEl: HTMLDivElement): void =
 };
 
 const openModal = (params: RenderMapParams): void => {
-    const modalEl = document.createElement('div');
+    const modalEl = <HTMLDivElement>createHtmlElement('div');
     modalEl.innerHTML = buildModalMarkup(params);
 
     const modalRoot = <HTMLDivElement | null>findElem('[data-checkout-leaflet-modal]', modalEl);
@@ -433,7 +436,7 @@ const openModal = (params: RenderMapParams): void => {
 
     document.body.append(modalRoot);
     blockBody(true);
-    modalRoot.dataset.deliveryMethod = params.selectedDeliveryMethod ?? '';
+    setDataset(modalRoot, 'deliveryMethod', params.selectedDeliveryMethod ?? '');
 
     const closeButtons = <HTMLButtonElement[] | []>findArrayElems('[data-checkout-leaflet-close]', modalRoot);
     const backdrop = <HTMLDivElement | null>findElem('[data-checkout-leaflet-backdrop]', modalRoot);
@@ -476,16 +479,16 @@ export const openCheckoutLeafletMap = (
         callback: DeliveryPointClickCallback;
     },
 ): void => {
-    if (params.points.length === 0) {
+    if (isEmpty(params.points)) {
         return;
     }
 
     const normalizedPoints = params.points.filter(
         (point: CheckoutMapPoint): boolean =>
-            isFiniteNumber(point.lat) && isFiniteNumber(point.lng) && point.title.trim() !== '',
+            isFiniteNumber(point.lat) && isFiniteNumber(point.lng) && toTrimmedString(point.title) !== '',
     );
 
-    if (normalizedPoints.length === 0) {
+    if (isEmpty(normalizedPoints)) {
         return;
     }
 

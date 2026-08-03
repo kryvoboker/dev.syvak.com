@@ -1,5 +1,5 @@
 import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
-import { findArrayElems, findElem, toggleClass, toStringValue } from '@ts-shared/lib/helpers.ts';
+import { findArrayElems, findElem, getDataset, setAttribute, toggleClass } from '@ts-shared/lib/helpers.ts';
 
 const updatePaymentInformationVisibility = (): void => {
     const selectedPaymentMethod = (<HTMLInputElement | null>findElem('[data-checkout-payment-method-input]:checked'))
@@ -7,11 +7,11 @@ const updatePaymentInformationVisibility = (): void => {
 
     (<HTMLElement[] | []>findArrayElems('[data-checkout-payment-information]')).forEach(
         (element: HTMLElement): void => {
-            const isVisible = element.dataset.checkoutPaymentInformation === selectedPaymentMethod;
+            const isVisible = getDataset(element, 'checkoutPaymentInformation') === selectedPaymentMethod;
 
             toggleClass(element, $HIDDEN_CLASS_NAME, !isVisible);
             element.hidden = !isVisible;
-            element.setAttribute('aria-hidden', toStringValue(!isVisible));
+            setAttribute(element, 'aria-hidden', !isVisible);
         },
     );
 };

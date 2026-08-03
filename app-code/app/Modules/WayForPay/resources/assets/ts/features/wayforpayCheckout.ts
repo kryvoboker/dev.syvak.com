@@ -1,4 +1,12 @@
-import { findElem, showErrorInConsole, toStringValue, toTrimmedString } from '@ts-shared/lib/helpers.ts';
+import {
+    createHtmlElement,
+    findElem,
+    isArray,
+    setDataset,
+    showErrorInConsole,
+    toStringValue,
+    toTrimmedString,
+} from '@ts-shared/lib/helpers.ts';
 import { registerCheckoutPaymentHandler } from '@ts-shared/payment/checkoutPaymentRegistry.ts';
 
 interface WayForPayWidget {
@@ -46,10 +54,10 @@ const loadWidget = (): Promise<void> => {
     }
 
     return new Promise((resolve, reject): void => {
-        const script = document.createElement('script');
+        const script = <HTMLScriptElement>createHtmlElement('script');
         script.async = true;
         script.defer = true;
-        script.dataset.wayforpayWidget = '1';
+        setDataset(script, 'wayforpayWidget', '1');
         script.src = toStringValue(window.app_params?.wayforpay_widget_script_url);
         script.addEventListener('load', (): void => resolve(), { once: true });
         script.addEventListener('error', (): void => reject(new Error('WayForPay widget failed to load')), {
@@ -60,15 +68,15 @@ const loadWidget = (): Promise<void> => {
 };
 
 const submitPostForm = (action: string, fields: Record<string, unknown>): void => {
-    const form = document.createElement('form');
+    const form = <HTMLFormElement>createHtmlElement('form');
     form.method = 'POST';
     form.action = action;
     form.style.display = 'none';
 
     Object.entries(fields).forEach(([key, value]: [string, unknown]): void => {
-        if (Array.isArray(value)) {
+        if (isArray(value)) {
             value.forEach((item: unknown): void => {
-                const input = document.createElement('input');
+                const input = <HTMLInputElement>createHtmlElement('input');
                 input.name = `${key}[]`;
                 input.value = toStringValue(item);
                 form.appendChild(input);
@@ -77,7 +85,7 @@ const submitPostForm = (action: string, fields: Record<string, unknown>): void =
             return;
         }
 
-        const input = document.createElement('input');
+        const input = <HTMLInputElement>createHtmlElement('input');
         input.name = key;
         input.value = toStringValue(value);
         form.appendChild(input);

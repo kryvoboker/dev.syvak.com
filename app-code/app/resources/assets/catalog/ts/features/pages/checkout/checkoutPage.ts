@@ -1,5 +1,14 @@
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
-import { findElem, toStringValue, toTrimmedString } from '@ts-shared/lib/helpers.ts';
+import {
+    findElem,
+    getDataset,
+    isEmpty,
+    setDataset,
+    setTextContent,
+    toggleClass,
+    toStringValue,
+    toTrimmedString,
+} from '@ts-shared/lib/helpers.ts';
 import { createBranchChoices, createCityChoices } from './checkoutChoices.ts';
 import {
     buildCheckoutMapPoints,
@@ -51,15 +60,15 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         const grandTotalElement = <HTMLElement>findElem('[data-checkout-total="grand_total"]');
 
         if (summaryTotalElement) {
-            summaryTotalElement.textContent = formattedValue('grand_total');
+            setTextContent(summaryTotalElement, formattedValue('grand_total'));
         }
 
         if (subtotalElement) {
-            subtotalElement.textContent = formattedValue('items_subtotal');
+            setTextContent(subtotalElement, formattedValue('items_subtotal'));
         }
 
         if (grandTotalElement) {
-            grandTotalElement.textContent = formattedValue('grand_total');
+            setTextContent(grandTotalElement, formattedValue('grand_total'));
         }
 
         const promoTotalElement = <HTMLElement>findElem('[data-checkout-total="promo_code"]');
@@ -70,14 +79,14 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         const promoError = String(promoData.message ?? '');
 
         if (promoTotalElement && promoWrapperElement) {
-            promoTotalElement.textContent = promoAmount;
-            promoWrapperElement.classList.toggle('hidden', promoAmount === '');
-            promoWrapperElement.classList.toggle('flex', promoAmount !== '');
+            setTextContent(promoTotalElement, promoAmount);
+            toggleClass(promoWrapperElement, 'hidden', promoAmount === '');
+            toggleClass(promoWrapperElement, 'flex', promoAmount !== '');
         }
 
         if (promoErrorElement) {
-            promoErrorElement.textContent = promoError;
-            promoErrorElement.classList.toggle('hidden', promoError === '');
+            setTextContent(promoErrorElement, promoError);
+            toggleClass(promoErrorElement, 'hidden', promoError === '');
         }
     };
 
@@ -97,9 +106,9 @@ export const initializeCheckoutDeliveryLogic = (): void => {
     let currentBranch = normalizeBranchPayload(
         selectionState.delivery_point ?? readBranchFromOption(branchSelectElement.selectedOptions[0] ?? null),
     );
-    let currentDeliveryAddress = String(
+    let currentDeliveryAddress = toTrimmedString(
         selectionState.delivery_address ?? deliveryAddressInputElement?.value ?? '',
-    ).trim();
+    );
     const checkoutFormState: CheckoutFormState = {
         firstName: toTrimmedString(
             selectionState.first_name ??
@@ -235,7 +244,7 @@ export const initializeCheckoutDeliveryLogic = (): void => {
     } = checkoutUi;
 
     const resolveSelectedCity = (): CheckoutCitySearchItem | null => {
-        const selectedValue = citySelectElement.value.trim();
+        const selectedValue = toTrimmedString(citySelectElement.value);
 
         if (selectedValue === '') {
             return null;
@@ -248,7 +257,7 @@ export const initializeCheckoutDeliveryLogic = (): void => {
     };
 
     const resolveSelectedBranch = (): CheckoutBranchSearchItem | null => {
-        const selectedValue = branchSelectElement.value.trim();
+        const selectedValue = toTrimmedString(branchSelectElement.value);
 
         if (selectedValue === '') {
             return null;
@@ -357,7 +366,7 @@ export const initializeCheckoutDeliveryLogic = (): void => {
             return;
         }
 
-        currentPaymentMethod = target.value.trim();
+        currentPaymentMethod = toTrimmedString(target.value);
         syncSelectionToServer();
     };
 
@@ -415,11 +424,14 @@ export const initializeCheckoutDeliveryLogic = (): void => {
             return;
         }
 
-        const branchCandidates =
-            latestBranchSearchResults.length > 0 ? latestBranchSearchResults : currentBranch ? [currentBranch] : [];
+        const branchCandidates = !isEmpty(latestBranchSearchResults)
+            ? latestBranchSearchResults
+            : currentBranch
+              ? [currentBranch]
+              : [];
         const mapPoints = buildCheckoutMapPoints(branchCandidates);
 
-        if (mapPoints.length === 0) {
+        if (isEmpty(mapPoints)) {
             return;
         }
 
@@ -437,11 +449,11 @@ export const initializeCheckoutDeliveryLogic = (): void => {
     };
 
     const bindMapButton = (): void => {
-        if (!mapButtonElement || mapButtonElement.dataset.checkoutMapBound === '1') {
+        if (!mapButtonElement || getDataset(mapButtonElement, 'checkoutMapBound') === '1') {
             return;
         }
 
-        mapButtonElement.dataset.checkoutMapBound = '1';
+        setDataset(mapButtonElement, 'checkoutMapBound', '1');
 
         mapButtonElement.addEventListener('click', (): void => {
             void openCheckoutMap();

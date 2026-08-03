@@ -15,8 +15,13 @@ import {
     findArrayElems,
     findElem,
     getClosestParentEl,
+    getDataset,
+    isEmpty,
     isIntegerNumber,
+    setDataset,
+    setTextContent,
     sprintF,
+    toggleClass,
     toNumber,
 } from '@ts-shared/lib/helpers.ts';
 
@@ -69,22 +74,22 @@ const updateSelectedCartItemsSummary = (mode: CartMode): void => {
     }
 
     if (summaryElement) {
-        const template: string = summaryElement.dataset.template ?? 'Вибрано %d з %d';
+        const template: string = getDataset(summaryElement, 'template', 'Вибрано %d з %d') ?? '';
 
-        summaryElement.textContent = sprintF(template, selectedCount, totalCount);
+        setTextContent(summaryElement, sprintF(template, selectedCount, totalCount));
     }
 
     if (removeSelectedButton) {
-        removeSelectedButton.classList.toggle($HIDDEN_CLASS_NAME, selectedCount === 0);
+        toggleClass(removeSelectedButton, $HIDDEN_CLASS_NAME, selectedCount === 0);
     }
 };
 
 const bindAddToCartButtons = (): void => {
-    if (document.body.dataset.cartAddBound === '1') {
+    if (getDataset(document.body, 'cartAddBound') === '1') {
         return;
     }
 
-    document.body.dataset.cartAddBound = '1';
+    setDataset(document.body, 'cartAddBound', '1');
 
     document.addEventListener('click', async (event: Event): Promise<void> => {
         const target = event.target as HTMLElement;
@@ -103,8 +108,8 @@ const bindAddToCartButtons = (): void => {
         }
 
         const rawVariantId: string | undefined = isFastOrder
-            ? fastOrderButton?.dataset?.fastOrder
-            : regularButton?.dataset?.addToCart;
+            ? (getDataset(fastOrderButton, 'fastOrder') ?? undefined)
+            : (getDataset(regularButton, 'addToCart') ?? undefined);
         const variantId: number = toNumber(rawVariantId);
 
         if (!isIntegerNumber(variantId) || variantId <= 0) {
@@ -123,11 +128,11 @@ const bindAddToCartButtons = (): void => {
 };
 
 const bindMutationHandlers = (): void => {
-    if (document.body.dataset.cartMutationBound === '1') {
+    if (getDataset(document.body, 'cartMutationBound') === '1') {
         return;
     }
 
-    document.body.dataset.cartMutationBound = '1';
+    setDataset(document.body, 'cartMutationBound', '1');
 
     document.addEventListener('change', async (event: Event): Promise<void> => {
         const target = event.target as HTMLElement;
@@ -138,7 +143,7 @@ const bindMutationHandlers = (): void => {
             const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', itemSelectCheckbox);
 
             if (cartRoot) {
-                updateSelectedCartItemsSummary((cartRoot.dataset.cartMode as CartMode) ?? $REGULAR);
+                updateSelectedCartItemsSummary((getDataset(cartRoot, 'cartMode') as CartMode) ?? $REGULAR);
             }
 
             return;
@@ -156,7 +161,7 @@ const bindMutationHandlers = (): void => {
                     checkbox.checked = selectAllCheckbox.checked;
                 });
 
-                updateSelectedCartItemsSummary((cartRoot.dataset.cartMode as CartMode) ?? $REGULAR);
+                updateSelectedCartItemsSummary((getDataset(cartRoot, 'cartMode') as CartMode) ?? $REGULAR);
             }
             return;
         }
@@ -168,7 +173,7 @@ const bindMutationHandlers = (): void => {
         }
 
         const mode: CartMode = getCartMode();
-        const cartId: number = toNumber(quantityInput.dataset.cartId);
+        const cartId: number = toNumber(getDataset(quantityInput, 'cartId'));
         const quantity: number = toNumber(quantityInput.value, 1);
 
         if (!isIntegerNumber(cartId) || cartId <= 0) {
@@ -201,15 +206,15 @@ const bindMutationHandlers = (): void => {
                 return;
             }
 
-            const mode: CartMode = (cartRoot.dataset.cartMode as CartMode) ?? getCartMode();
+            const mode: CartMode = (getDataset(cartRoot, 'cartMode') as CartMode) ?? getCartMode();
             const selectedCheckboxes = (<HTMLInputElement[] | []>(
                 findArrayElems('[data-cart-item-select]:checked', cartRoot)
             )) as HTMLInputElement[];
             const selectedCartIds = selectedCheckboxes
-                .map((checkbox: HTMLInputElement): number => toNumber(checkbox.dataset.cartId))
+                .map((checkbox: HTMLInputElement): number => toNumber(getDataset(checkbox, 'cartId')))
                 .filter((cartId: number): boolean => isIntegerNumber(cartId) && cartId > 0);
 
-            if (selectedCartIds.length === 0) {
+            if (isEmpty(selectedCartIds)) {
                 return;
             }
 
@@ -240,8 +245,8 @@ const bindMutationHandlers = (): void => {
         }
 
         const cartRoot = <HTMLElement | null>getClosestParentEl('[data-cart-root]', removeButton);
-        const mode: CartMode = (cartRoot?.dataset?.cartMode as CartMode) ?? getCartMode();
-        const cartId: number = toNumber(removeButton.dataset.cartId);
+        const mode: CartMode = (getDataset(cartRoot, 'cartMode') as CartMode) ?? getCartMode();
+        const cartId: number = toNumber(getDataset(removeButton, 'cartId'));
 
         if (!isIntegerNumber(cartId) || cartId <= 0) {
             return;
@@ -264,11 +269,11 @@ const bindMutationHandlers = (): void => {
 const bindOpenCartButton = (): void => {
     const openButton = <HTMLButtonElement | null>findElem('#open-cart-modal-btn');
 
-    if (!openButton || openButton.dataset.cartOpenBound === '1') {
+    if (!openButton || getDataset(openButton, 'cartOpenBound') === '1') {
         return;
     }
 
-    openButton.dataset.cartOpenBound = '1';
+    setDataset(openButton, 'cartOpenBound', '1');
 
     openButton.addEventListener('click', async (): Promise<void> => {
         const mode: CartMode = getCartMode();
