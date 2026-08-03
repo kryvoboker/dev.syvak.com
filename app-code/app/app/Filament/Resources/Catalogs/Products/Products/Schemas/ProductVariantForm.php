@@ -110,8 +110,6 @@ class ProductVariantForm
                                                     ->image()
                                                     ->directory(resolve_upload_path_placeholders((string) config('app.images.product.image_path')))
                                                     ->required(),
-                                                Toggle::make('is_primary')
-                                                    ->default(false),
                                                 TextInput::make('sort_order')
                                                     ->numeric()
                                                     ->default(0)

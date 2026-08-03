@@ -123,8 +123,12 @@ final readonly class ThankYouOrderDataService
         $variant_images = data_get($variant, 'images');
         $product_images = data_get($order_product->product, 'productImage');
         $variant_image = $variant_images instanceof Collection
-            ? data_get($variant_images->sortByDesc('is_primary')->sortBy('sort_order')->first(), 'image')
+            ? data_get($variant_images->sortBy([
+                ['sort_order', 'asc'],
+                ['id', 'asc'],
+            ])->first(), 'image')
             : null;
+        $variant_image = data_get($variant, 'image') ?: $variant_image;
         $product_image = $product_images instanceof Collection
             ? data_get($product_images->sortBy('sort_order')->first(), 'image')
             : null;
