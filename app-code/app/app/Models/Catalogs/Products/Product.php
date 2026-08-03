@@ -42,8 +42,6 @@ class Product extends Model
         'is_active',
         'date_available',
         'date_added',
-        'size_guide_data',
-        'composition_and_care_data',
     ];
 
     /**
@@ -61,8 +59,6 @@ class Product extends Model
             'date_available' => 'datetime',
             'date_added' => 'datetime',
             'is_active' => 'boolean',
-            'size_guide_data' => 'array',
-            'composition_and_care_data' => 'array',
         ];
     }
 
@@ -192,6 +188,24 @@ class Product extends Model
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    /** @return HasMany<ProductSizeGuide, $this> */
+    public function sizeGuides(): HasMany
+    {
+        return $this->hasMany(ProductSizeGuide::class);
+    }
+
+    /** @return HasMany<ProductComposition, $this> */
+    public function compositions(): HasMany
+    {
+        return $this->hasMany(ProductComposition::class);
+    }
+
+    /** @return HasMany<ProductCare, $this> */
+    public function cares(): HasMany
+    {
+        return $this->hasMany(ProductCare::class);
     }
 
     /**

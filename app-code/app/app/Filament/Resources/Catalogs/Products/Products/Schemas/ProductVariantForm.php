@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\Products\Products\Schemas;
 
-use App\Filament\Resources\Catalogs\Products\Products\Schemas\Components\CompositionAndCareTabSchema;
+use App\Filament\Resources\Catalogs\Products\Products\Schemas\Components\CareTabSchema;
+use App\Filament\Resources\Catalogs\Products\Products\Schemas\Components\CompositionTabSchema;
 use App\Filament\Resources\Catalogs\Products\Products\Schemas\Components\SizeGuideTabSchema;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Attributes\Attribute;
@@ -95,7 +96,8 @@ class ProductVariantForm
                             ]),
 
                         SizeGuideTabSchema::make($active_languages),
-                        CompositionAndCareTabSchema::make($active_languages),
+                        CompositionTabSchema::make($active_languages),
+                        CareTabSchema::make($active_languages),
 
                         Tab::make(__('admin/default.tabs.images'))
                             ->schema([

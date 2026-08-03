@@ -11,6 +11,7 @@ use App\Filament\Resources\Trait\StorefrontProductLinkTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Slug;
+use App\Services\Catalogs\Products\ProductVariantContentPersistenceService;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
@@ -29,6 +30,8 @@ class CreateProductVariant extends CreateRecord
 
     #[Locked]
     public ?int $product_id = null;
+
+    private array $relationship_data = [];
 
     public function mount(): void
     {
@@ -68,6 +71,10 @@ class CreateProductVariant extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $prepared_data = app(ProductVariantContentPersistenceService::class)->prepareForSave($data);
+        $this->relationship_data = $prepared_data['relationships'];
+
+        $data = $prepared_data['attributes'];
         $data['product_id'] = $this->product_id;
 
         if ((bool) ($data['is_default'] ?? false)) {
@@ -78,6 +85,14 @@ class CreateProductVariant extends CreateRecord
         }
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        app(ProductVariantContentPersistenceService::class)->syncRelations(
+            $this->getVariantRecord(),
+            $this->relationship_data,
+        );
     }
 
     protected function getRedirectUrl(): string
@@ -110,6 +125,17 @@ class CreateProductVariant extends CreateRecord
         }
 
         return $product;
+    }
+
+    private function getVariantRecord(): ProductVariant
+    {
+        $variant = $this->getRecord();
+
+        if (! $variant instanceof ProductVariant) {
+            throw new LogicException('Product variant record is not initialized.');
+        }
+
+        return $variant;
     }
 
     /**

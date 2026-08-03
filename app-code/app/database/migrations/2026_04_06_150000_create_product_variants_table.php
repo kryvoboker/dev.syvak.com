@@ -24,9 +24,7 @@ return new class () extends Migration {
             $table->decimal('price', 15, 4)->default(0);
             $table->string('image', 3000)->nullable();
             $table->dateTime('date_available')->nullable();
-            $table->smallInteger('sort_order')->default(0);
-            $table->json('size_guide_data')->nullable();
-            $table->json('composition_and_care_data')->nullable();
+            $table->smallInteger('sort_order')->default(1);
 
             $table->timestamps();
 

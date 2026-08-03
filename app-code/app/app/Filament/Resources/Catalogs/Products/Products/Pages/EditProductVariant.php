@@ -11,6 +11,7 @@ use App\Filament\Resources\Trait\StorefrontProductLinkTrait;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Slug;
+use App\Services\Catalogs\Products\ProductVariantContentPersistenceService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -32,6 +33,8 @@ class EditProductVariant extends EditRecord
     #[Locked]
     public ?int $product_id = null;
 
+    private array $relationship_data = [];
+
     public function mount(int|string $record): void
     {
         parent::mount($record);
@@ -51,6 +54,14 @@ class EditProductVariant extends EditRecord
         return ProductVariantResource::form($schema);
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        return array_merge(
+            $data,
+            app(ProductVariantContentPersistenceService::class)->hydrateFormData($this->getVariantRecord()),
+        );
+    }
+
     /**
      * @throws Halt
      */
@@ -62,6 +73,10 @@ class EditProductVariant extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $prepared_data = app(ProductVariantContentPersistenceService::class)->prepareForSave($data);
+        $this->relationship_data = $prepared_data['relationships'];
+
+        $data = $prepared_data['attributes'];
         $data['product_id'] = $this->product_id;
 
         if ($data['is_default'] ?? false) {
@@ -73,6 +88,14 @@ class EditProductVariant extends EditRecord
         }
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        app(ProductVariantContentPersistenceService::class)->syncRelations(
+            $this->getVariantRecord(),
+            $this->relationship_data,
+        );
     }
 
     protected function getHeaderActions(): array
