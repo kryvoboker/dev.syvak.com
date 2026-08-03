@@ -10,6 +10,7 @@ use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Slug;
 use App\Services\Catalogs\Products\ProductCategorySyncService;
+use App\Services\Catalogs\Products\ProductVariantContentPersistenceService;
 use Exception;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Exceptions\Halt;
@@ -33,6 +34,8 @@ class CreateProduct extends CreateRecord
 
     protected array $images = [];
 
+    protected array $variant_relationship_data = [];
+
     public ?Model $record = null;
 
     /**
@@ -44,8 +47,11 @@ class CreateProduct extends CreateRecord
         $this->category_ids = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
         $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
         $this->images = trim_strs_in_arr($data['images'] ?? []);
+        $prepared_variant_data = app(ProductVariantContentPersistenceService::class)->prepareForSave($data);
+        $this->variant_relationship_data = $prepared_variant_data['relationships'];
         $this->validateProductSlugsUniqueness();
 
+        $data = $prepared_variant_data['attributes'];
         unset($data['descriptions'], $data['categories'], $data['slugs'], $data['images']);
 
         return $data;
@@ -61,6 +67,10 @@ class CreateProduct extends CreateRecord
 
             $this->createDescriptions();
             $this->syncImagesToDefaultVariant();
+            app(ProductVariantContentPersistenceService::class)->syncRelations(
+                $this->getProductRecord(),
+                $this->variant_relationship_data,
+            );
 
             if ($this->updateOrCreateSlugs() === false) {
                 throw new Exception('Failed to create slugs');
@@ -147,9 +157,7 @@ class CreateProduct extends CreateRecord
             'price' => (float) $product->price,
             'image' => $product->image,
             'date_available' => $product->date_available,
-            'sort_order' => 0,
-            'size_guide_data' => null,
-            'composition_and_care_data' => null,
+            'sort_order' => 1,
         ]);
 
         $product->default_variant_id = (int) $default_variant->id;

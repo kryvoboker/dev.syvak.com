@@ -44,6 +44,8 @@ return [
     // Tabs
     'tabs' => [
         'size_guide' => 'Довідник розмірів',
+        'composition' => 'Склад',
+        'care' => 'Догляд',
         'composition_and_care' => 'Склад і догляд',
     ],
 

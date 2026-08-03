@@ -14,6 +14,7 @@ use App\Models\Catalogs\Products\ProductDescription;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Slug;
 use App\Services\Catalogs\Products\ProductCategorySyncService;
+use App\Services\Catalogs\Products\ProductVariantContentPersistenceService;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -42,6 +43,8 @@ class EditProduct extends EditRecord
     protected array $slugs = [];
 
     protected array $images = [];
+
+    protected array $variant_relationship_data = [];
 
     #[Locked]
     public int|string|Model|null $record = null;
@@ -103,6 +106,11 @@ class EditProduct extends EditRecord
             ->values()
             ->all() ?? [];
 
+        $data = array_merge(
+            $data,
+            app(ProductVariantContentPersistenceService::class)->hydrateFormData($record),
+        );
+
         $this->getSlugs($data);
 
         return $data;
@@ -117,8 +125,11 @@ class EditProduct extends EditRecord
         $this->category_ids = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
         $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
         $this->images = trim_strs_in_arr($data['images'] ?? []);
+        $prepared_variant_data = app(ProductVariantContentPersistenceService::class)->prepareForSave($data);
+        $this->variant_relationship_data = $prepared_variant_data['relationships'];
         $this->validateProductSlugsUniqueness();
 
+        $data = $prepared_variant_data['attributes'];
         unset($data['descriptions'], $data['categories'], $data['slugs'], $data['images']);
 
         return $data;
@@ -138,6 +149,10 @@ class EditProduct extends EditRecord
 
             $this->updateDescriptions();
             $this->syncImagesToDefaultVariant();
+            app(ProductVariantContentPersistenceService::class)->syncRelations(
+                $this->getProductRecord(),
+                $this->variant_relationship_data,
+            );
 
             if ($this->updateOrCreateSlugs() === false) {
                 throw new Exception('Failed to update slugs');
@@ -232,9 +247,7 @@ class EditProduct extends EditRecord
             'price' => (float)$product->price,
             'image' => $product->image,
             'date_available' => $product->date_available,
-            'sort_order' => 0,
-            'size_guide_data' => null,
-            'composition_and_care_data' => null,
+            'sort_order' => 1,
         ]);
 
         $product->default_variant_id = (int)$default_variant->id;
