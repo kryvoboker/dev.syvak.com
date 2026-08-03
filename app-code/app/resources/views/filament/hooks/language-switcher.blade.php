@@ -12,7 +12,7 @@
         <x-slot name="trigger">
             <button
                 type="button"
-                class="fi-topbar-item inline-flex items-center gap-x-2 text-sm"
+                class="fi-topbar-item fi-btn"
             >
                 <x-filament::icon
                     icon="heroicon-m-language"
