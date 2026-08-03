@@ -62,6 +62,10 @@ class AlyoAdminPanelProvider extends PanelProvider
                     ]);
                 },
             )
+            ->renderHook(
+                PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+                fn (): View => view('filament.hooks.storefront-home-link'),
+            )
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->navigationSort(99)
