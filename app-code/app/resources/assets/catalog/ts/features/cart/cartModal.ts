@@ -28,6 +28,24 @@ import {
 import $FAST_ORDER = Cart.$FAST_ORDER;
 import $REGULAR = Cart.$REGULAR;
 
+const initCartModalAccordion = (mode: CartMode): void => {
+    const modalContent = <HTMLElement | null>findElem(`[data-cart-modal-content="${mode}"]`);
+    const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]', modalContent);
+
+    if (!accordionElement) {
+        return;
+    }
+
+    try {
+        initAccordion(accordionElement);
+    } catch (error) {
+        console.error('[FIX:fast-order-cart-accordion] Failed to initialize cart modal accordion.', {
+            mode,
+            error,
+        });
+    }
+};
+
 const openSelectedCartDrawer = async (mode: CartMode): Promise<void> => {
     const selector = mode === $FAST_ORDER ? '.open-cart-modal-fast-order-trigger' : '.open-cart-modal-regular-trigger';
     const trigger = <HTMLButtonElement | null>findElem(selector);
@@ -42,11 +60,7 @@ const openSelectedCartDrawer = async (mode: CartMode): Promise<void> => {
 
     await loadCartSnapshot(mode).finally((): void => toggleCartLoader(false));
 
-    const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
-
-    if (accordionElement) {
-        initAccordion(accordionElement);
-    }
+    initCartModalAccordion(mode);
 
     updateSelectedCartItemsSummary(mode);
 };
@@ -184,11 +198,7 @@ const bindMutationHandlers = (): void => {
 
         await updateCartItemQuantity(cartId, Math.max(1, quantity), mode).finally((): void => toggleCartLoader(false));
 
-        const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
-
-        if (accordionElement) {
-            initAccordion(accordionElement);
-        }
+        initCartModalAccordion(mode);
 
         updateSelectedCartItemsSummary(mode);
     });
@@ -228,11 +238,7 @@ const bindMutationHandlers = (): void => {
                 toggleCartLoader(false);
             }
 
-            const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
-
-            if (accordionElement) {
-                initAccordion(accordionElement);
-            }
+            initCartModalAccordion(mode);
 
             updateSelectedCartItemsSummary(mode);
             return;
@@ -256,11 +262,7 @@ const bindMutationHandlers = (): void => {
 
         await removeCartItem(cartId, mode).finally((): void => toggleCartLoader(false));
 
-        const accordionElement = <HTMLElement | null>findElem('[data-cart-extra-items-accordion]');
-
-        if (accordionElement) {
-            initAccordion(accordionElement);
-        }
+        initCartModalAccordion(mode);
 
         updateSelectedCartItemsSummary(mode);
     });

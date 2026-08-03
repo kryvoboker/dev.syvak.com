@@ -11,6 +11,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -110,19 +111,20 @@ class SizeGuideTabSchema
                             ->imageEditor()
                             ->columnSpanFull(),
 
-                        TextInput::make("$language_path.image_width")
-                            ->label(__('admin/default.labels.width'))
-                            ->numeric()
-                            ->minValue(1)
-                            ->required(fn (Get $get): bool => filled((string) $get($image_path)))
-                            ->columnSpanFull(),
+                        Group::make([
+                            TextInput::make("$language_path.image_width")
+                                ->label(__('admin/default.labels.width'))
+                                ->numeric()
+                                ->minValue(1)
+                                ->required(fn (Get $get): bool => filled((string) $get($image_path))),
 
-                        TextInput::make("$language_path.image_height")
-                            ->label(__('admin/default.labels.height'))
-                            ->numeric()
-                            ->minValue(1)
-                            ->required(fn (Get $get): bool => filled((string) $get($image_path)))
-                            ->columnSpanFull(),
+                            TextInput::make("$language_path.image_height")
+                                ->label(__('admin/default.labels.height'))
+                                ->numeric()
+                                ->minValue(1)
+                                ->required(fn (Get $get): bool => filled((string) $get($image_path))),
+                        ])
+                        ->columns(),
 
                         TextInput::make("$language_path.full_description_title")
                             ->label(__('admin/catalogs/products/products.labels.size_guide_full_description_title'))

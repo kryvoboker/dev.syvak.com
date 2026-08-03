@@ -53,7 +53,7 @@
                     <div class="accordion group" data-cart-extra-items-accordion>
                         <div class="accordion-item">
                             <div class="accordion-content hidden overflow-hidden transition-[height]"
-                                 id="cart-extra-items-collapse"
+                                 id="cart-extra-items-collapse-{{ $cart_mode }}"
                                  role="region">
                                 <div class="flex flex-col gap-0 pb-3">
                                     @foreach($hidden_items as $cart_item)
@@ -67,7 +67,7 @@
 
                             <button class="accordion-toggle inline-flex items-center justify-start gap-2 w-full p-0"
                                     aria-expanded="false"
-                                    aria-controls="cart-extra-items-collapse">
+                                    aria-controls="cart-extra-items-collapse-{{ $cart_mode }}">
                                 <span class="text-sm md:text-base group-[.active]:hidden">
                                     {{ __('catalog/default.cart.buttons.show_more_items', ['count' => count($hidden_items)]) }}
                                 </span>

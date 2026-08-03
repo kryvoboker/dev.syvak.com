@@ -177,6 +177,111 @@ class LocalizedProductVariantRouteTest extends TestCase
         $this->assertStringContainsString('/en/product/bereginya-sadu/garden-guardian', $generated_url);
     }
 
+    public function test_it_uses_the_localized_product_slug_for_a_default_variant_without_its_own_slug(): void
+    {
+        $this->seedLanguages();
+
+        $product = Product::query()->create([
+            'model' => 'MODEL-842',
+            'sku' => 'SKU-842',
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+            'is_active' => true,
+        ]);
+
+        $variant = ProductVariant::query()->create([
+            'product_id' => (int)$product->id,
+            'is_default' => true,
+            'is_active' => true,
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+        ]);
+
+        Slug::query()->insert([
+            [
+                'sluggable_type' => Product::class,
+                'sluggable_id' => (int)$product->id,
+                'language_id' => 1,
+                'slug' => 'product-uk',
+            ],
+            [
+                'sluggable_type' => Product::class,
+                'sluggable_id' => (int)$product->id,
+                'language_id' => 2,
+                'slug' => 'product-en',
+            ],
+        ]);
+
+        app()->setLocale('uk');
+
+        $slug_variants = get_slug_variants(
+            sluggable_type: ProductVariant::class,
+            slug_value: 'product-uk',
+        );
+
+        $this->assertSame(['slug' => 'product-en'], $slug_variants['en']);
+    }
+
+    public function test_it_uses_a_static_variant_url_when_variant_seo_slug_is_missing(): void
+    {
+        $this->seedLanguages();
+
+        $product = Product::query()->create([
+            'model' => 'MODEL-843',
+            'sku' => 'SKU-843',
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+            'is_active' => true,
+        ]);
+
+        $variant = ProductVariant::query()->create([
+            'product_id' => (int)$product->id,
+            'is_default' => false,
+            'is_active' => true,
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+        ]);
+
+        Slug::query()->insert([
+            [
+                'sluggable_type' => Product::class,
+                'sluggable_id' => (int)$product->id,
+                'language_id' => 1,
+                'slug' => 'product-uk',
+            ],
+            [
+                'sluggable_type' => Product::class,
+                'sluggable_id' => (int)$product->id,
+                'language_id' => 2,
+                'slug' => 'product-en',
+            ],
+            [
+                'sluggable_type' => ProductVariant::class,
+                'sluggable_id' => (int)$variant->id,
+                'language_id' => 1,
+                'slug' => 'variant-uk',
+            ],
+        ]);
+
+        app()->setLocale('uk');
+
+        $slug_variants = get_slug_variants(
+            sluggable_type: ProductVariant::class,
+            slug_value: 'product-uk',
+            variant_slug_value: 'variant-uk',
+        );
+
+        $this->assertSame([
+            'route' => 'localized.catalog.product.static.show',
+            'product_id' => (int)$product->id,
+            'variant_id' => (int)$variant->id,
+        ], $slug_variants['en']);
+    }
+
     private function seedLanguages(): void
     {
         DB::table('languages')->insert([

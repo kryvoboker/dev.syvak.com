@@ -23,8 +23,6 @@ class ProductVariant extends Model
         'image',
         'date_available',
         'sort_order',
-        'size_guide_data',
-        'composition_and_care_data',
     ];
 
     /**
@@ -41,8 +39,6 @@ class ProductVariant extends Model
             'price' => 'float',
             'date_available' => 'datetime',
             'sort_order' => 'integer',
-            'size_guide_data' => 'array',
-            'composition_and_care_data' => 'array',
         ];
     }
 
@@ -84,6 +80,30 @@ class ProductVariant extends Model
     public function attributeValues(): HasMany
     {
         return $this->hasMany(ProductVariantAttributeValue::class);
+    }
+
+    /**
+     * @return HasMany<ProductVariantSizeGuide, $this>
+     */
+    public function sizeGuides(): HasMany
+    {
+        return $this->hasMany(ProductVariantSizeGuide::class);
+    }
+
+    /**
+     * @return HasMany<ProductVariantComposition, $this>
+     */
+    public function compositions(): HasMany
+    {
+        return $this->hasMany(ProductVariantComposition::class);
+    }
+
+    /**
+     * @return HasMany<ProductVariantCare, $this>
+     */
+    public function cares(): HasMany
+    {
+        return $this->hasMany(ProductVariantCare::class);
     }
 
     protected static function booted(): void

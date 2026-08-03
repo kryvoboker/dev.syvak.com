@@ -67,6 +67,6 @@ return [
         'subtotal' => 'Subtotal',
         'delivery' => 'Delivery',
         'total' => 'Total',
-        'promo_code' => 'Promo code',
+        'promo_code' => 'Promo code (:promo_code)',
     ],
 ];

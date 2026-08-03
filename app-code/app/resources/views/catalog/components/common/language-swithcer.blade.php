@@ -60,7 +60,18 @@
                         $localized_slug_data = $slug_variants[$language->code] ?? null;
 
                         if (is_array($localized_slug_data)) {
-                            $next_route_params = array_merge($next_route_params, $localized_slug_data);
+                            $static_route = $localized_slug_data['route'] ?? null;
+
+                            if (is_string($static_route) && filled($static_route)) {
+                                $next_route_name = $static_route;
+                                $next_route_params = [
+                                    $locale_key => $language->code,
+                                    'product_id' => $localized_slug_data['product_id'],
+                                    'variant_id' => $localized_slug_data['variant_id'],
+                                ];
+                            } else {
+                                $next_route_params = array_merge($next_route_params, $localized_slug_data);
+                            }
 
                             if (filled((string) ($localized_slug_data['variant_slug'] ?? ''))) {
                                 $next_route_name = 'localized.catalog.product.variant.show';

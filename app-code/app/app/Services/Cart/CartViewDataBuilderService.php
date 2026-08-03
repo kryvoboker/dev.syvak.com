@@ -54,13 +54,14 @@ readonly class CartViewDataBuilderService
                 'id',
                 'product_id',
                 'price',
+                'image',
                 'quantity',
                 'minimum',
             ])
             ->with([
                 'descriptions' => fn ($query) => $query->where('language_id', $language_id),
                 'slugs' => fn ($query) => $query->where('language_id', $language_id),
-                'images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order')->orderBy('id'),
+                'images' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
                 'product' => function ($query): void {
                     $query->select([
                         'id',
@@ -301,16 +302,16 @@ readonly class CartViewDataBuilderService
 
     private function resolveVariantImagePath(ProductVariant $variant): ?string
     {
-        $image_from_images = Str::trim((string)optional($variant->images->first())->image);
-
-        if (filled($image_from_images)) {
-            return $image_from_images;
-        }
-
         $variant_image = Str::trim((string)$variant->image);
 
         if (filled($variant_image)) {
             return $variant_image;
+        }
+
+        $image_from_images = Str::trim((string)optional($variant->images->first())->image);
+
+        if (filled($image_from_images)) {
+            return $image_from_images;
         }
 
         $product_image = Str::trim((string)optional($variant->product)->image);

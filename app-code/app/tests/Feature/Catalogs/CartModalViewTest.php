@@ -63,6 +63,26 @@ class CartModalViewTest extends TestCase
         }
     }
 
+    public function test_cart_modal_accordion_ids_are_unique_for_each_cart_mode(): void
+    {
+        $cart_data = $this->makeCartData();
+        $cart_data['hidden_items'] = [$cart_data['first_item']];
+
+        $regular_html = view('catalog.partials.cart.modal-items', [
+            'cart_data' => $cart_data,
+            'cart_mode' => 'regular',
+        ])->render();
+        $fast_order_html = view('catalog.partials.cart.modal-items', [
+            'cart_data' => $cart_data,
+            'cart_mode' => 'fast_order',
+        ])->render();
+
+        $this->assertStringContainsString('id="cart-extra-items-collapse-regular"', $regular_html);
+        $this->assertStringContainsString('aria-controls="cart-extra-items-collapse-regular"', $regular_html);
+        $this->assertStringContainsString('id="cart-extra-items-collapse-fast_order"', $fast_order_html);
+        $this->assertStringContainsString('aria-controls="cart-extra-items-collapse-fast_order"', $fast_order_html);
+    }
+
     public function test_cart_modal_component_keeps_modal_action_buttons_for_empty_cart(): void
     {
         app()->setLocale('uk');

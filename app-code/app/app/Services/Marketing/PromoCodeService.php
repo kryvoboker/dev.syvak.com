@@ -71,7 +71,7 @@ final class PromoCodeService
         $lines = (array) Arr::get($totals_data, 'lines', []);
         $lines[] = [
             'code' => 'promo_code',
-            'label' => __('catalog/default.cart.totals.promo_code'),
+            'label' => __('catalog/default.cart.totals.promo_code', ['promo_code' => $promo_code->code]),
             'amount' => -$discount_amount,
             'is_visible' => true,
             'include_in_grand_total' => true,
