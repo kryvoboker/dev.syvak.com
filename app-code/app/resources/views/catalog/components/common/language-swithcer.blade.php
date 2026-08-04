@@ -8,8 +8,8 @@
 ])
 
 @php
-    $current_route = request()->route()->getName();
-    $route_params = request()->route()->parameters();
+    $current_route = request()->route()?->getName() ?? 'localized.catalog.home';
+    $route_params = request()->route()?->parameters() ?? [];
     $slug_variants = get_slug_variants(
         $sluggable_type ?? null,
         $slug ?? null,

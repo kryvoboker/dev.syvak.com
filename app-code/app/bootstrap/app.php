@@ -5,12 +5,14 @@ declare(strict_types=1);
 use App\Http\Middleware\CheckForbiddenIpMiddleware;
 use App\Http\Middleware\Modules\RegisterModuleProvidersAfterSession;
 use App\Http\Middleware\SetDefaultLocalePrefix;
+use App\Services\PageSettings\NotFoundPageService;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 if (! function_exists('string_to_array')) {
     function string_to_array(?string $string, string $separator = ','): array
@@ -49,6 +51,36 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (NotFoundHttpException $exception, Request $request) {
+            $path_segments = collect(explode('/', Str::trim($request->path(), '/')))
+                ->filter()
+                ->values();
+
+            if (
+                $request->expectsJson() ||
+                ! $request->acceptsHtml() ||
+                $request->is('api/*') ||
+                $path_segments->contains('alyo-admin')
+            ) {
+                return null;
+            }
+
+            try {
+                return response()->view(
+                    'catalog.pages.not-found',
+                    app(NotFoundPageService::class)->getViewData(),
+                    Response::HTTP_NOT_FOUND,
+                );
+            } catch (Throwable $throwable) {
+                Log::channel('stack')->error('Public 404 page rendering failed.', [
+                    'path' => $request->path(),
+                    'exception' => $throwable,
+                ]);
+
+                return null;
+            }
+        });
+
         $exceptions->render(function (Throwable $e, Request $request) {
             // Only handle 500 errors in production
             if (config('app.debug') === false && $request->expectsJson() === false && method_exists($e, 'getStatusCode')) {
