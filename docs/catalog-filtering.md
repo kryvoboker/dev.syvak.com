@@ -1,6 +1,6 @@
 [← Catalog Storefront](catalog-storefront.md) · [Back to README](../README.md) · [Filter Administration →](catalog-filter-admin.md)
 
-# Catalog Product Filtering
+# Catalog Product Filtering (Storefront)
 
 This document describes how category product filters are configured in Filament, normalized from the request, applied to the Eloquent query, and exposed to the storefront.
 
@@ -94,11 +94,15 @@ The base query selects products whose:
 - product belongs to the requested category;
 - discount conditions match the configured price policy.
 
-Attribute filtering uses the default variant's attribute values:
+The default variant remains the source of product-level availability and effective-price conditions. Attribute filtering is different: it checks every active variant belonging to an eligible product. Therefore, a product can match an attribute filter through a non-default active variant, as long as the product's default variant still satisfies the base active/stock rules.
+
+Attribute filtering uses active variants' attribute values:
 
 - selected values within one attribute group use `OR`;
 - different attribute groups use `AND`;
 - unknown filter codes produce no matching products for that group.
+
+Filter values are matched by their canonical value and all localized translation labels. This keeps a stable URL code usable when the stored variant value and the currently selected storefront language use different labels.
 
 The price range is applied to the effective price expression selected by `price_source_mode` and `discount_only_policy`. Active discounts are resolved for the current application's `user_group_id` and the current date/time.
 
@@ -118,7 +122,9 @@ The Blade partial renders the filter drawer from `filters_data`. The TypeScript 
 
 The AJAX count path uses `FilterProductsAction::count()` and the same shared query-context builder as category rendering. It counts matching products without constructing a full paginator or mapping product cards.
 
-When a filter state changes, the storefront starts from the first page. The current `sort` parameter and supported unrelated query parameters remain preserved, while an old `page` value is not allowed to keep the user on a page that no longer exists for the new result set.
+Facet totals are normally read from `CatalogFilterProductIndex`. If the active index has no rows for a value, the action performs a live Eloquent fallback against active variant attributes. This protects the storefront from false zero counts while generated values or the index are temporarily out of sync; it does not replace the normal index rebuild workflow.
+
+When a filter state changes, the storefront starts from the first page by adding `page=1` to the pending query. The current sort and filter values are sent to the AJAX count endpoint and then applied to the category URL together. Clearing filters uses the category URL without filter parameters. A stale page value is never retained for a newly applied filter state, so a previously selected late page cannot produce an empty result solely because filtering reduced the number of pages.
 
 ## Extension rules
 
