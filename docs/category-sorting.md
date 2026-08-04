@@ -2,7 +2,7 @@
 
 # Category Product Sorting
 
-This document describes how category sorting options are configured, localized, converted into links, validated, and applied to the product query.
+This document describes how category sorting options are configured in the admin panel, localized, converted into storefront links, validated, and applied to the product query.
 
 ## Source of truth
 
@@ -32,7 +32,7 @@ The category page settings resource contains a `Sorting` tab with:
 
 The form restricts fixed fields to the values allowed by `config/page-settings.php`. The persistence page keeps the default sorting contract synchronized while retaining administrator changes such as order, enabled state, GET payload, and labels.
 
-The `is_sorting_enabled` value is persisted in the category settings contract and is enforced by `get_sorting_items()`. When it is disabled, no sorting options are built and the category view does not render the sort control. When it is enabled, only sorting items with `is_enabled` set to `true` are shown.
+The `is_sorting_enabled` value is persisted in the category settings contract and is enforced by `get_sorting_items()`. When it is disabled, no sorting options are built and the category view does not render the sort control. When it is enabled, only sorting items with `is_enabled` set to `true` are shown. The administrator controls the order and localized labels of the options; the actual ordering rules remain in `FilterProductsAction::applySorting()`.
 
 ## Supported sort codes
 
@@ -60,7 +60,7 @@ The configured GET value is mapped to the internal code. Unknown or empty values
 4. `FilterProductsAction::handle()` resolves the same sort value and applies it to the product query.
 5. The category view renders the resulting options through `sort.blade.php`.
 
-Sorting is therefore applied server-side. The sort menu only creates links; it does not reorder products in the browser.
+Sorting is therefore applied server-side. The sort menu only creates links; it does not reorder products in the browser. `default` and `newest` intentionally produce the same newest-first order: the application always needs a deterministic ordering, and the default policy is newest products first.
 
 ## Localized labels
 
@@ -80,7 +80,7 @@ The sort link builder:
 - starts with the current request URL and query string;
 - removes all configured sorting keys;
 - writes the selected key/value pair;
-- preserves unrelated filters, pagination, and query parameters;
+- preserves active filter parameters and unrelated query parameters;
 - supports both flat keys (`sort`) and nested keys (`filter[sort]`).
 
 Example:
@@ -91,11 +91,11 @@ Example:
 
 When another sorting option is selected, the previous sort value is replaced while the attribute filters remain intact.
 
-Changing sorting also resets pagination to the first page. This prevents a late page from producing an empty result after the new ordering changes the available page count.
+Changing sorting resets pagination to the first page by removing the old `page` parameter before adding the selected sort value. This prevents a late page from producing an empty result after the new ordering changes the available page count. Applying a new filter state follows the same first-page rule in `productsFilter.ts`.
 
 ## Price sorting
 
-`price-asc` and `price-desc` use the same effective price expression as price filtering. Depending on the active catalog filter set, this can mean:
+`price-asc` and `price-desc` use the same effective price expression as price filtering and the same default-variant price source. Depending on the active catalog filter set, this can mean:
 
 - regular price only;
 - active discount price only;

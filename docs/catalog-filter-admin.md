@@ -2,7 +2,7 @@
 
 # Catalog Filter Administration
 
-This document describes how the catalog filter configuration is created, edited, synchronized, and indexed from the Filament admin panel.
+This document describes how the catalog filter configuration is created, edited, synchronized, and indexed from the Filament admin panel. The resulting contract is consumed by the storefront flow documented in [Catalog Product Filtering](catalog-filtering.md).
 
 ## Architecture
 
@@ -139,9 +139,10 @@ The rebuild service:
 - creates a new index version;
 - indexes enabled price and attribute groups;
 - uses only enabled filter values;
-- indexes active products and their default active variants;
+- indexes active products whose default variant is active;
+- indexes attribute values from every active variant of those products, not only the default variant;
 - calculates base, discount, and effective prices;
-- applies the minimum stock rule;
+- applies the minimum stock rule using the default variant quantity;
 - removes rows from old index versions;
 - switches the metadata to the new active version;
 - records status, timestamps, progress, and row totals.
@@ -165,7 +166,7 @@ sync groups → sync values → rebuild product index
 | `failed` | The last rebuild failed; inspect the stored error and logs. |
 | `locked` | A rebuild could not acquire the configured rebuild lock. |
 
-The storefront continues using the last active index version while a new version is stale, queued, or running.
+The storefront continues using the last active index version while a new version is stale, queued, or running. For a facet value with no rows in the active index, the storefront also has a live fallback count over active variants, which prevents a temporarily missing index row from being shown as zero.
 
 ## Save and synchronization behavior
 
@@ -187,6 +188,19 @@ When product attributes or filter settings change:
 4. Run `Sync all`.
 5. Confirm the index status is `ok` and the active index version changed.
 6. Verify a category page and its AJAX filter count.
+
+## Variant indexing rules
+
+The index has product-level and variant-level parts:
+
+| Part | Source | Effect |
+|---|---|---|
+| Product eligibility | Active product + active default variant | Determines whether the product can enter the category result set. |
+| Stock threshold | Default variant quantity | Applies `min_stock_quantity` to the product result. |
+| Effective price | Default variant price and its active discount | Supplies price filtering and price sorting for the product. |
+| Attribute facets | All active variants' attribute values | Allows a product to match a color, size, or other attribute on any active variant. |
+
+Changing an attribute on a non-default active variant requires `Sync values` and `Rebuild Index` (or `Sync all`) to make the precomputed facet rows current. The storefront live-count fallback helps with missing rows, but it is not a substitute for synchronizing the admin configuration.
 
 ## See Also
 
