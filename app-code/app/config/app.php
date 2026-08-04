@@ -180,6 +180,11 @@ return [
                 ],
             ],
         ],
+        'not_found' => [
+            'for_admin' => [
+                'upload_max_size_kb' => (int) env('MAX_UPLOAD_404_PAGE_IMAGE_SIZE_KB', 5120),
+            ],
+        ],
     ],
     'socials_list' => string_to_array(env('SOCIALS_LIST')),
     'regex_validate_conditions' => [

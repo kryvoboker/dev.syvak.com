@@ -109,6 +109,7 @@ class NotFoundForm
     protected static function createImagesTab(): Tabs\Tab
     {
         $image_sections = [];
+        $max_upload_image_size = (int)config('app.page_settings.not_found.for_admin.upload_max_size_kb');
 
         foreach (['slot_1', 'slot_2'] as $slot) {
             $image_sections[] = Section::make(__('admin/settings/not_found_page_settings.sections.' . $slot))
@@ -118,11 +119,11 @@ class NotFoundForm
                         ->helperText(__('admin/settings/not_found_page_settings.helpers.image'))
                         ->image()
                         ->directory('images/not-found')
-                        ->maxSize(5120)
+                        ->maxSize($max_upload_image_size)
                         ->rules([
                             'nullable',
                             Rule::file()::types(['image/jpeg', 'image/png', 'image/svg+xml']),
-                            'max:5120',
+                            "max:$max_upload_image_size",
                         ])
                         ->preserveFilenames()
                         ->imageEditor()
@@ -173,7 +174,7 @@ class NotFoundForm
                                 ->minValue(0)
                                 ->required(),
                         ])
-                        ->columns(2),
+                        ->columns(),
                 ])
                 ->columns(1);
         }

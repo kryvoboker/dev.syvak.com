@@ -12,6 +12,7 @@ use App\Services\PageSettings\HeaderCategoryService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Throwable;
@@ -51,8 +52,13 @@ class EditCategoryPageSettings extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
             Action::make('open_wiki')
                 ->label(__('admin/settings/category_page_settings.actions.open_wiki'))
+                ->icon(Heroicon::Document)
                 ->url(fn (): string => CategoryPageSettingsWikiPage::getUrl(), shouldOpenInNewTab: true),
         ];
     }
