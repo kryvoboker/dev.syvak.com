@@ -26,17 +26,45 @@ class FilterGroupGeneratorService
         try {
             $created_count = 0;
             $updated_count = 0;
+            $canonical_group_codes = [];
 
-            [$created_count, $updated_count] = $this->syncSystemGroups($filter_set, $created_count, $updated_count);
-            [$created_count, $updated_count] = $this->syncAttributeGroups($filter_set, $created_count, $updated_count);
+            [$created_count, $updated_count, $canonical_group_codes] = $this->syncSystemGroups(
+                $filter_set,
+                $created_count,
+                $updated_count,
+            );
+            [$created_count, $updated_count, $canonical_group_codes] = $this->syncAttributeGroups(
+                $filter_set,
+                $created_count,
+                $updated_count,
+                $canonical_group_codes,
+            );
+
+            $disabled_count = $this->disableObsoleteAttributeGroups(
+                $filter_set,
+                $canonical_group_codes,
+            );
+
+            app(CatalogFilterIndexFreshnessService::class)->markStale($filter_set);
 
             $total_groups = CatalogFilterGroup::query()
                 ->where('catalog_filter_set_id', (int) $filter_set->id)
                 ->count();
 
+            if ($disabled_count > 0) {
+                Log::channel('daily')->info(
+                    'Obsolete catalog filter groups were disabled.',
+                    [
+                        'catalog_filter_set_id' => (int) $filter_set->id,
+                        'disabled_count' => $disabled_count,
+                    ],
+                );
+            }
+
             return [
                 'created_count' => $created_count,
                 'updated_count' => $updated_count,
+                'disabled_count' => $disabled_count,
                 'total_groups' => $total_groups,
             ];
         } catch (Throwable $throwable) {
@@ -53,7 +81,7 @@ class FilterGroupGeneratorService
     }
 
     /**
-     * @return array{0: int, 1: int}
+     * @return array{0: int, 1: int, 2: array<int, string>}
      */
     private function syncSystemGroups(CatalogFilterSet $filter_set, int $created_count, int $updated_count): array
     {
@@ -104,14 +132,19 @@ class FilterGroupGeneratorService
             }
         }
 
-        return [$created_count, $updated_count];
+        return [$created_count, $updated_count, array_column($system_groups, 'code')];
     }
 
     /**
-     * @return array{0: int, 1: int}
+     * @param  array<int, string>  $canonical_group_codes
+     * @return array{0: int, 1: int, 2: array<int, string>}
      */
-    private function syncAttributeGroups(CatalogFilterSet $filter_set, int $created_count, int $updated_count): array
-    {
+    private function syncAttributeGroups(
+        CatalogFilterSet $filter_set,
+        int $created_count,
+        int $updated_count,
+        array $canonical_group_codes,
+    ): array {
         /** @var Collection<Attribute> $active_attributes */
         $active_attributes = Attribute::query()
             ->where('is_active', true)
@@ -126,9 +159,12 @@ class FilterGroupGeneratorService
         $sort_order = 100;
 
         foreach ($active_attributes as $attribute) {
+            $group_code = CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id;
+            $canonical_group_codes[] = $group_code;
+
             $group = CatalogFilterGroup::query()->firstOrNew([
                 'catalog_filter_set_id' => (int) $filter_set->id,
-                'code' => CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id,
+                'code' => $group_code,
             ]);
 
             $was_existing_group = $group->exists;
@@ -164,7 +200,22 @@ class FilterGroupGeneratorService
             $sort_order += 10;
         }
 
-        return [$created_count, $updated_count];
+        return [$created_count, $updated_count, array_values(array_unique($canonical_group_codes))];
+    }
+
+    /**
+     * @param  array<int, string>  $canonical_group_codes
+     */
+    private function disableObsoleteAttributeGroups(
+        CatalogFilterSet $filter_set,
+        array $canonical_group_codes,
+    ): int {
+        return CatalogFilterGroup::query()
+            ->where('catalog_filter_set_id', (int) $filter_set->id)
+            ->where('source_type', CatalogFilterGroupSourceTypeEnum::Attribute->value)
+            ->where('is_enabled', true)
+            ->whereNotIn('code', $canonical_group_codes)
+            ->update(['is_enabled' => false]);
     }
 
     private function syncSystemGroupTranslations(CatalogFilterGroup $group): void

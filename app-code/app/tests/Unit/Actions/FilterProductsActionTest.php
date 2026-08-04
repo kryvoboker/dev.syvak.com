@@ -6,8 +6,11 @@ namespace Tests\Unit\Actions;
 
 use App\Actions\FilterProductsAction;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
+use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValue;
+use App\Models\Catalogs\Products\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use ReflectionMethod;
 use Tests\TestCase;
 
@@ -52,6 +55,39 @@ class FilterProductsActionTest extends TestCase
             'http://localhost/en/category/t-shirts?sort=price-asc',
             $cancel_link,
         );
+    }
+
+    public function test_attribute_filter_matches_active_non_default_variants(): void
+    {
+        $filter_set = new CatalogFilterSet([
+            'is_attribute_filtering_enabled' => true,
+        ]);
+        $filter_group = new CatalogFilterGroup();
+        $filter_group->setRawAttributes([
+            'source_type' => 'attribute',
+            'source_id' => 7,
+        ]);
+        $filter_group->syncOriginal();
+        $filter_group->setRelation('values', new Collection([
+            new CatalogFilterValue([
+                'code' => 'yellow',
+                'value_string' => 'Yellow',
+            ]),
+        ]));
+
+        $query = Product::query();
+        $this->invokePrivateMethod(
+            'applyAttributeFilters',
+            $query,
+            $filter_set,
+            new Collection([$filter_group]),
+            ['attributes' => [7 => ['yellow']]],
+        );
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('product_variants', $sql);
+        $this->assertStringContainsString('is_active', $sql);
     }
 
     private function setCurrentRequest(string $url): void

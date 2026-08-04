@@ -176,6 +176,26 @@ class FilterValueGeneratorServiceTest extends TestCase
             $table->timestamps();
             $table->unique(['catalog_filter_value_id', 'language_id']);
         });
+
+        Schema::create('catalog_filter_index_meta', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('catalog_filter_set_id')->unique();
+            $table->unsignedBigInteger('index_version')->default(1);
+            $table->unsignedBigInteger('active_index_version')->default(1);
+            $table->unsignedBigInteger('building_index_version')->nullable();
+            $table->string('rebuild_lock_key')->nullable();
+            $table->timestamp('rebuild_lock_acquired_at')->nullable();
+            $table->timestamp('last_full_rebuild_at')->nullable();
+            $table->timestamp('last_incremental_sync_at')->nullable();
+            $table->string('last_status')->default('ok');
+            $table->text('last_error')->nullable();
+            $table->unsignedTinyInteger('last_progress_percent')->nullable();
+            $table->string('last_run_mode')->nullable();
+            $table->unsignedInteger('items_total')->default(0);
+            $table->unsignedInteger('values_total')->default(0);
+            $table->unsignedBigInteger('index_rows_total')->default(0);
+            $table->timestamps();
+        });
     }
 
     private function createCatalogSourceTables(): void

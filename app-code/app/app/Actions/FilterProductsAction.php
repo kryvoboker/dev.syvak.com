@@ -419,10 +419,14 @@ readonly class FilterProductsAction
                 return $query;
             }
 
-            $query->whereHas('defaultVariant.attributeValues', function ($attribute_query) use ($attribute_id, $attribute_values): void {
-                $attribute_query
-                    ->where('attribute_id', $attribute_id)
-                    ->whereIn('value_string', $attribute_values->all());
+            $query->whereHas('variants', function ($variant_query) use ($attribute_id, $attribute_values): void {
+                $variant_query
+                    ->where('is_active', true)
+                    ->whereHas('attributeValues', function ($attribute_query) use ($attribute_id, $attribute_values): void {
+                        $attribute_query
+                            ->where('attribute_id', $attribute_id)
+                            ->whereIn('value_string', $attribute_values->all());
+                    });
             });
         }
 
@@ -751,6 +755,10 @@ readonly class FilterProductsAction
                         value_id              : (int) $value->id,
                         minimum_stock_quantity: $minimum_stock_quantity,
                         fallback_count        : (int) $value->products_count_cached,
+                        group                 : $group,
+                        value                 : $value,
+                        language_id           : $language_id,
+                        filter_set            : $filter_set,
                     ),
                     'is_checked' => $is_checked,
                     'cancel_link' => $is_checked
@@ -1021,9 +1029,21 @@ readonly class FilterProductsAction
         int $value_id,
         int $minimum_stock_quantity,
         int $fallback_count,
+        CatalogFilterGroup $group,
+        CatalogFilterValue $value,
+        int $language_id,
+        CatalogFilterSet $filter_set,
     ): int {
         if ($active_index_version <= 0) {
-            return max(0, $fallback_count);
+            return $this->resolveLiveValueProductsTotal(
+                category_id           : $category_id,
+                minimum_stock_quantity: $minimum_stock_quantity,
+                group                 : $group,
+                value                 : $value,
+                language_id           : $language_id,
+                filter_set            : $filter_set,
+                fallback_count        : $fallback_count,
+            );
         }
 
         $total_products = CatalogFilterProductIndex::query()
@@ -1037,7 +1057,56 @@ readonly class FilterProductsAction
             ->distinct('product_id')
             ->count('product_id');
 
-        return max(0, $total_products);
+        if ($total_products > 0) {
+            return $total_products;
+        }
+
+        return $this->resolveLiveValueProductsTotal(
+            category_id           : $category_id,
+            minimum_stock_quantity: $minimum_stock_quantity,
+            group                 : $group,
+            value                 : $value,
+            language_id           : $language_id,
+            filter_set            : $filter_set,
+            fallback_count        : $fallback_count,
+        );
+    }
+
+    private function resolveLiveValueProductsTotal(
+        int $category_id,
+        int $minimum_stock_quantity,
+        CatalogFilterGroup $group,
+        CatalogFilterValue $value,
+        int $language_id,
+        CatalogFilterSet $filter_set,
+        int $fallback_count,
+    ): int {
+        $attribute_id = (int) $group->source_id;
+        $value_candidates = collect([(string) $value->value_string])
+            ->merge($value->translations->pluck('label'))
+            ->map(fn (mixed $candidate): string => $this->normalizeAttributeValue((string) $candidate))
+            ->filter(fn (string $candidate): bool => filled($candidate))
+            ->unique()
+            ->values();
+
+        if ($attribute_id <= 0 || $value_candidates->isEmpty()) {
+            return max(0, $fallback_count);
+        }
+
+        return max(0, (int) $this->buildBaseProductsQuery(
+            filter_set: $filter_set,
+            category_id: $category_id,
+            language_id: $language_id,
+            minimum_stock_quantity: $minimum_stock_quantity,
+        )->whereHas('variants', function ($variant_query) use ($attribute_id, $value_candidates): void {
+            $variant_query
+                ->where('is_active', true)
+                ->whereHas('attributeValues', function ($attribute_query) use ($attribute_id, $value_candidates): void {
+                    $attribute_query
+                        ->where('attribute_id', $attribute_id)
+                        ->whereIn('value_string', $value_candidates->all());
+                });
+        })->count());
     }
 
     /**

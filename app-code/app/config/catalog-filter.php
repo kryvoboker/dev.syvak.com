@@ -42,6 +42,8 @@ return [
     ],
     'index_statuses' => [
         'ok' => 'Ok',
+        'stale' => 'Rebuild required',
+        'queued' => 'Queued',
         'warning' => 'Warning',
         'failed' => 'Failed',
         'running' => 'Running',
@@ -50,6 +52,9 @@ return [
         'full' => 'Full',
         'incremental' => 'Incremental',
         'dry_run' => 'Dry run',
+    ],
+    'rebuild' => [
+        'queue_enabled' => false,
     ],
     'defaults' => [
         'context' => 'category',

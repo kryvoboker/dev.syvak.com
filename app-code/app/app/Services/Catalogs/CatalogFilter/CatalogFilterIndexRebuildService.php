@@ -239,51 +239,57 @@ readonly class CatalogFilterIndexRebuildService
                 $is_in_stock = $stock_quantity >= $minimum_stock_quantity;
 
                 foreach ($category_ids as $category_id) {
-                    foreach (collect(optional($product->defaultVariant)->attributeValues) as $attribute_value) {
-                        if (! $attribute_value instanceof ProductVariantAttributeValue) {
+                    foreach (collect($product->variants) as $variant) {
+                        if (! $variant->is_active) {
                             continue;
                         }
 
-                        $attribute_id = (int) $attribute_value->attribute_id;
+                        foreach (collect($variant->attributeValues) as $attribute_value) {
+                            if (! $attribute_value instanceof ProductVariantAttributeValue) {
+                                continue;
+                            }
 
-                        if ($attribute_id <= 0 || ! in_array($attribute_id, $attribute_ids, true)) {
-                            continue;
+                            $attribute_id = (int) $attribute_value->attribute_id;
+
+                            if ($attribute_id <= 0 || ! in_array($attribute_id, $attribute_ids, true)) {
+                                continue;
+                            }
+
+                            $normalized_value = $this->normalizeAttributeValue((string) $attribute_value->value_string);
+
+                            if (blank($normalized_value)) {
+                                continue;
+                            }
+
+                            $group_value_map = $value_lookup_by_attribute[$attribute_id] ?? null;
+
+                            if (! is_array($group_value_map)) {
+                                continue;
+                            }
+
+                            $value_data = $group_value_map[$normalized_value] ?? null;
+
+                            if (! is_array($value_data)) {
+                                continue;
+                            }
+
+                            $rows_to_insert[] = $this->buildIndexRowPayload(
+                                filter_set_id: (int) $filter_set->id,
+                                index_version: $index_version,
+                                category_id: $category_id,
+                                product_id: $product_id,
+                                group_id: (int) $value_data['group_id'],
+                                value_id: (int) $value_data['value_id'],
+                                attribute_id: $attribute_id,
+                                base_price: $base_price,
+                                discount_price: $discount_price,
+                                effective_price: $effective_price,
+                                stock_quantity: $stock_quantity,
+                                is_in_stock: $is_in_stock,
+                                is_active_product: (bool) $product->is_active,
+                                indexed_at: $indexed_at,
+                            );
                         }
-
-                        $normalized_value = $this->normalizeAttributeValue((string) $attribute_value->value_string);
-
-                        if (blank($normalized_value)) {
-                            continue;
-                        }
-
-                        $group_value_map = $value_lookup_by_attribute[$attribute_id] ?? null;
-
-                        if (! is_array($group_value_map)) {
-                            continue;
-                        }
-
-                        $value_data = $group_value_map[$normalized_value] ?? null;
-
-                        if (! is_array($value_data)) {
-                            continue;
-                        }
-
-                        $rows_to_insert[] = $this->buildIndexRowPayload(
-                            filter_set_id: (int) $filter_set->id,
-                            index_version: $index_version,
-                            category_id: $category_id,
-                            product_id: $product_id,
-                            group_id: (int) $value_data['group_id'],
-                            value_id: (int) $value_data['value_id'],
-                            attribute_id: $attribute_id,
-                            base_price: $base_price,
-                            discount_price: $discount_price,
-                            effective_price: $effective_price,
-                            stock_quantity: $stock_quantity,
-                            is_in_stock: $is_in_stock,
-                            is_active_product: (bool) $product->is_active,
-                            indexed_at: $indexed_at,
-                        );
                     }
                 }
             }
@@ -368,8 +374,12 @@ readonly class CatalogFilterIndexRebuildService
             ->where('default_product_variant.is_active', true)
             ->with([
                 'categories:id',
-                'defaultVariant.attributeValues' => fn ($query) => $query
-                    ->select('id', 'product_variant_id', 'attribute_id', 'value_string'),
+                'variants' => fn ($query) => $query
+                    ->where('is_active', true)
+                    ->with([
+                        'attributeValues' => fn ($attribute_query) => $attribute_query
+                            ->select('id', 'product_variant_id', 'attribute_id', 'value_string'),
+                    ]),
             ])
             ->orderBy('products.id');
     }

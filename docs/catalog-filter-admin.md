@@ -36,9 +36,12 @@ The admin page is a settings page for the `default_category` set. It is not a CR
 | Admin edit page | `app/Filament/Resources/Catalogs/CatalogFilter/Pages/EditCatalogFilterSet.php` |
 | Admin form schema | `app/Filament/Resources/Catalogs/CatalogFilter/Schemas/CatalogFilterSetForm.php` |
 | Canonical set bootstrap | `app/Services/Catalogs/CatalogFilter/CatalogFilterBootstrapService.php` |
+| Configuration persistence | `app/Services/Catalogs/CatalogFilter/CatalogFilterSetConfigurationService.php` |
 | Group synchronization | `app/Services/Catalogs/CatalogFilter/FilterGroupGeneratorService.php` |
 | Value synchronization | `app/Services/Catalogs/CatalogFilter/FilterValueGeneratorService.php` |
+| Index freshness state | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexFreshnessService.php` |
 | Product index rebuild | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexRebuildService.php` |
+| Rebuild dispatch | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexRebuildDispatcherService.php` |
 | Configuration defaults | `config/catalog-filter.php` |
 
 ## Canonical filter set creation
@@ -96,7 +99,7 @@ For each submitted group, the page:
 
 Translations use the language code in the form and the corresponding `language_id` in the database.
 
-Groups missing from the submitted repeater are not deleted or automatically disabled. In normal operation the repeater contains all groups except the technical stock group, but stale groups can remain after the source attribute disappears.
+Groups missing from the submitted repeater are not deleted by the form save. The generator separately disables obsolete generated attribute groups during `Sync groups`, preserving their settings and translations.
 
 ## Generating filter groups
 
@@ -128,7 +131,7 @@ Values are generated from product data and are not manually added in the Filamen
 
 ## Rebuilding the product index
 
-The `Refresh index status` action calls `CatalogFilterIndexRebuildService::rebuild()`. Despite its label, it performs a full rebuild.
+The `Rebuild Index` action calls `CatalogFilterIndexRebuildDispatcherService::dispatch()`. It performs a synchronous full rebuild with the current configuration unless queue mode is enabled. The separate `Refresh Index Status` action only reloads the metadata and does not rebuild data.
 
 The rebuild service:
 
@@ -149,11 +152,30 @@ The `Sync all` action runs the complete sequence:
 sync groups → sync values → rebuild product index
 ```
 
+### Index statuses
+
+`CatalogFilterIndexMeta.last_status` uses the following lifecycle:
+
+| Status | Meaning |
+|---|---|
+| `ok` | The active index matches the current configuration. |
+| `stale` | Configuration, groups, or values changed and a rebuild is required. |
+| `queued` | A rebuild job was dispatched and is waiting for a worker. |
+| `running` | A rebuild is currently building a new index version. |
+| `failed` | The last rebuild failed; inspect the stored error and logs. |
+| `locked` | A rebuild could not acquire the configured rebuild lock. |
+
+The storefront continues using the last active index version while a new version is stale, queued, or running.
+
 ## Save and synchronization behavior
 
 Saving the form updates the filter set and group configuration, but it does not automatically regenerate values or rebuild the product index. After changing a group or a setting that affects indexed results, use `Sync all` to make the storefront index consistent with the admin configuration.
 
-The current save flow does not wrap the filter-set save, group updates, and translation updates in one database transaction. If a later operation fails, partially persisted configuration is possible and should be checked through the index metadata and application logs.
+Configuration persistence is handled by `CatalogFilterSetConfigurationService` inside a database transaction. The parent filter set, group changes, and active-language translations either commit together or roll back together.
+
+The `Rebuild Index` action uses `CatalogFilterIndexRebuildDispatcherService`. The current project configuration keeps `catalog-filter.rebuild.queue_enabled` disabled, so rebuilds run synchronously. If queue mode is enabled, `RebuildCatalogFilterIndexJob` marks the index as queued and performs one unique rebuild per filter set. The existing metadata lock and index-version swap remain the source of truth.
+
+The configuration transaction does not include a full index rebuild. The index is intentionally marked `stale` first and rebuilt separately, so a failed rebuild leaves the previous active index available while the failure is recorded in index metadata and logs.
 
 ## Operational checklist
 

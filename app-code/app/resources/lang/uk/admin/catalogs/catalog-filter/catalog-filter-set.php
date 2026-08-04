@@ -61,6 +61,13 @@ return [
         'get_value_usage' => 'Використовується в URL/GET-контракті як fallback-прапорець (наприклад, attribute=1 -> light). Це не колонка БД. Дивись "Wiki".',
     ],
 
+    'errors' => [
+        'invalid_context_type' => 'Обраний контекст не підтримується.',
+        'invalid_source_id' => 'ID джерела фільтра не відповідає типу джерела.',
+        'min_price_greater_than_max' => 'Мінімальна ціна не може бути більшою за максимальну.',
+        'max_price_less_than_min' => 'Максимальна ціна не може бути меншою за мінімальну.',
+    ],
+
     'sections' => [
         'general' => 'Загальні налаштування',
         'strategy_by_price' => 'Стратегія фільтрації по цінам',
@@ -72,14 +79,17 @@ return [
 
     'actions' => [
         'refresh_index_status' => 'Оновити статус індексу',
+        'rebuild_index' => 'Перебудувати індекс',
         'sync_groups' => 'Синхронізувати групи',
         'sync_values' => 'Синхронізувати значення',
         'sync_all' => 'Синхронізувати групи та значення',
     ],
 
     'notifications' => [
-        'index_status_refreshed' => 'Індекс оновлено. Рядків: :rows_total, Версія: :index_version, Статус: :status.',
-        'groups_synced' => 'Групи синхронізовано. Створено: :created, Оновлено: :updated, Всього: :total.',
+        'index_status_refreshed' => 'Статус індексу оновлено. Статус: :status.',
+        'index_rebuilt' => 'Індекс перебудовано. Рядків: :rows_total, Версія: :index_version, Статус: :status.',
+        'index_rebuild_queued' => 'Перебудову індексу поставлено в чергу. Активна версія: :index_version, Статус: :status.',
+        'groups_synced' => 'Групи синхронізовано. Створено: :created, Оновлено: :updated, Вимкнено: :disabled, Всього: :total.',
         'values_synced' => 'Значення синхронізовано. Створено: :created, Оновлено: :updated, Видалено: :removed, Всього: :total.',
         'all_synced' => 'Фільтр товарів синхронізовано. Груп: :groups_total, Значень: :values_total.',
     ],
