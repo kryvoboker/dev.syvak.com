@@ -32,7 +32,7 @@ The category page settings resource contains a `Sorting` tab with:
 
 The form restricts fixed fields to the values allowed by `config/page-settings.php`. The persistence page keeps the default sorting contract synchronized while retaining administrator changes such as order, enabled state, GET payload, and labels.
 
-The `is_sorting_enabled` value is persisted in the category settings contract. The current category view always includes the sort partial and `CategoryController` builds options from enabled sorting items; therefore the option-level `is_enabled` flags affect the visible list, while the global switch is not currently checked by the view/controller before rendering. Treat this as the current implementation behavior when changing the feature.
+The `is_sorting_enabled` value is persisted in the category settings contract and is enforced by `get_sorting_items()`. When it is disabled, no sorting options are built and the category view does not render the sort control. When it is enabled, only sorting items with `is_enabled` set to `true` are shown.
 
 ## Supported sort codes
 
@@ -41,7 +41,7 @@ The current query implementation recognizes these codes:
 | Code | Behavior |
 |---|---|
 | `default` | Newest products: `date_added DESC`, then `id DESC` |
-| `newest` | Uses the fallback/default branch unless custom query behavior is added |
+| `newest` | Explicit alias for the same newest-first behavior |
 | `bestsellers` | `products.viewed DESC`, then `id DESC` |
 | `price-asc` | Effective price ascending, then `id DESC` |
 | `price-desc` | Effective price descending, then `id DESC` |
@@ -90,6 +90,8 @@ Example:
 ```
 
 When another sorting option is selected, the previous sort value is replaced while the attribute filters remain intact.
+
+Changing sorting also resets pagination to the first page. This prevents a late page from producing an empty result after the new ordering changes the available page count.
 
 ## Price sorting
 

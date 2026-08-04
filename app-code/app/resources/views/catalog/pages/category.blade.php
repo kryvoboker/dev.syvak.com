@@ -15,7 +15,9 @@
             <div class="grid grid-cols-2 items-center gap-x-4 md:gap-x-0 max-w-500px ms-auto">
                 @include('catalog.pages.partials.category.filter-btn')
 
-                @include('catalog.pages.partials.category.sort')
+                @if($sort_options !== [])
+                    @include('catalog.pages.partials.category.sort')
+                @endif
             </div>
 
             @include('catalog.pages.partials.category.category-content-container')

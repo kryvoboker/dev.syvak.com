@@ -258,6 +258,8 @@ class CategoryController extends Controller
             }
         }
 
+        $this->forgetByGetKey($next_query, 'page');
+
         $this->setByGetKey($next_query, $sort_key, $sort_value);
 
         $query_string = Arr::query($next_query);

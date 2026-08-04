@@ -130,7 +130,7 @@ class ProductController extends Controller
     private function resolveRequestedVariant(
         Request $request,
         Product $product,
-        int     $language_id,
+        int $language_id,
         ?string $variant_slug,
     ): ?ProductVariant {
         if (filled((string)$variant_slug)) {
@@ -333,10 +333,10 @@ class ProductController extends Controller
      * @return array<string, mixed>
      */
     private function buildProductViewData(
-        Product         $product,
+        Product $product,
         ?ProductVariant $variant,
-        int             $language_id,
-        array           $page_settings_arr,
+        int $language_id,
+        array $page_settings_arr,
     ): array {
         $product_meta_data = $this->resolveProductMetaData($product, $variant, $language_id);
         $product_title = (string)Arr::get($product_meta_data, 'name', '');
@@ -839,7 +839,7 @@ class ProductController extends Controller
             ->sortKeys()
             ->map(function (
                 array $group_data,
-                int   $attribute_id,
+                int $attribute_id,
             ) use (
                 $selected_attributes,
                 $variant_data,
@@ -863,7 +863,7 @@ class ProductController extends Controller
                         ->all(),
                     'value_links' => collect($values_data)
                         ->map(function (
-                            array  $value_data,
+                            array $value_data,
                             string $value_normalized,
                         ) use (
                             $attribute_id,
@@ -999,11 +999,11 @@ class ProductController extends Controller
      * @return array{variant_id:int,attributes:array<int, array{value_id:int,value:string,value_normalized:string}>}|null
      */
     private function resolveTargetVariantDataForOption(
-        array  $variant_data,
-        int    $attribute_id,
+        array $variant_data,
+        int $attribute_id,
         string $candidate_value_normalized,
-        array  $selected_attributes,
-        array  $variant_id_order,
+        array $selected_attributes,
+        array $variant_id_order,
     ): ?array {
         $candidates = collect($variant_data)
             ->filter(function (array $item) use ($attribute_id, $candidate_value_normalized): bool {
@@ -1205,5 +1205,4 @@ class ProductController extends Controller
             'items' => $items,
         ];
     }
-
 }

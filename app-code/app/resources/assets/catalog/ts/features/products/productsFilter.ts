@@ -41,6 +41,7 @@ let CATEGORY_FILTER_CONTROLS_EL: HTMLElement | null;
 let CLEAR_ALL_BTN_EL: HTMLButtonElement | null;
 let APPLY_BTN_EL: HTMLButtonElement | null;
 let LOADER_EL: HTMLElement | null;
+let FILTER_REQUEST_CONTROLLER: AbortController | null = null;
 
 const normalizePrice = (price: string): number => {
     return parseInt(price.replace(/\D/g, ''), 10);
@@ -174,8 +175,10 @@ const processCollectUrlParams = (): URLParamsType => {
         urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.to_key ?? 'price_to'] = priceTo;
     }
 
-    // Applying a new filter state starts a new result set from the first page.
-    urlParams.page = 1;
+    if (!isEmpty(urlParams)) {
+        // Applying a new filter state starts a new result set from the first page.
+        urlParams.page = 1;
+    }
 
     return urlParams;
 };
@@ -191,6 +194,9 @@ const fireSearchProductsEvent = (): void => {
     }
 
     const urlQueries: string = httpBuildQueryString(urlParams, true);
+    FILTER_REQUEST_CONTROLLER?.abort();
+    const requestController = new AbortController();
+    FILTER_REQUEST_CONTROLLER = requestController;
 
     toggleElement(LOADER_EL, true);
 
@@ -198,6 +204,7 @@ const fireSearchProductsEvent = (): void => {
         `${WINDOW_APP_PARAMS?.catalog_filter_ajax_url}?${urlQueries}`,
         {},
         'GET',
+        requestController.signal,
     )
         .then((json: FireSearchProductsEventResponseType): void => {
             if (json.success && json.total_products !== undefined) {
@@ -210,12 +217,18 @@ const fireSearchProductsEvent = (): void => {
                     );
 
                     if (json.total_products > 0) {
-                        APPLY_BTN_EL?.addEventListener('click', (): void => {
-                            redirect(`${location.origin}${location.pathname}?${urlQueries}`);
-                        });
+                        if (APPLY_BTN_EL) {
+                            APPLY_BTN_EL.onclick = (): void => {
+                                redirect(`${location.origin}${location.pathname}?${urlQueries}`);
+                            };
+                        }
 
                         toggleElement(APPLY_BTN_EL, true);
                     } else {
+                        if (APPLY_BTN_EL) {
+                            APPLY_BTN_EL.onclick = null;
+                        }
+
                         toggleElement(APPLY_BTN_EL, false);
                     }
 
@@ -234,8 +247,19 @@ const fireSearchProductsEvent = (): void => {
                 }
             }
         })
-        .catch((err) => console.error('err: ', err))
-        .finally((): void => toggleElement(LOADER_EL, false));
+        .catch((err) => {
+            if (err instanceof DOMException && err.name === 'AbortError') {
+                return;
+            }
+
+            console.error('err: ', err);
+        })
+        .finally((): void => {
+            if (FILTER_REQUEST_CONTROLLER === requestController) {
+                toggleElement(LOADER_EL, false);
+                FILTER_REQUEST_CONTROLLER = null;
+            }
+        });
 };
 
 const fireSearchProductsEventDebounce = debounce(fireSearchProductsEvent, $DEBOUNCE_DELAY);
