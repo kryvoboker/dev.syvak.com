@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace App\Models\PageSettings;
 
+use App\Models\Trait\HasSlugsTrait;
+use App\Models\Trait\SlugTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class PageSetting extends Model
 {
+    use HasSlugsTrait;
+    use SlugTrait;
+
     public const PAGE_TYPE_CATEGORY = 'category';
 
     public const PAGE_TYPE_PRODUCT = 'product';
 
     public const PAGE_TYPE_SEARCH = 'search';
+
+    public const PAGE_TYPE_NOT_FOUND = 'not_found';
 
     protected $fillable = [
         'page_type',

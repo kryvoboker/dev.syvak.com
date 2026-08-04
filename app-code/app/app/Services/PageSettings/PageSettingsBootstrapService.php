@@ -9,6 +9,7 @@ use App\Models\ApplicationSettings\Language;
 use App\Models\PageSettings\PageSetting;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 class PageSettingsBootstrapService
@@ -434,6 +435,48 @@ class PageSettingsBootstrapService
     }
 
     /**
+     * @throws Throwable
+     *
+     * @return array<string, mixed>
+     */
+    public function getNotFoundSettings(): array
+    {
+        $page_setting = $this->bootstrapNotFoundPageSetting();
+
+        return is_array($page_setting->settings) ? $page_setting->settings : [];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function bootstrapNotFoundPageSetting(): PageSetting
+    {
+        try {
+            $defaults = $this->resolveNotFoundDefaults();
+
+            $page_setting = PageSetting::query()->firstOrCreate(
+                [
+                    'page_type' => PageSetting::PAGE_TYPE_NOT_FOUND,
+                ],
+                [
+                    'settings' => $this->buildNotFoundSettingsContract($defaults),
+                ],
+            );
+
+            $this->syncNotFoundSettingsContract($page_setting, $defaults);
+
+            return $page_setting->fresh() ?? $page_setting;
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('Not found page setting bootstrap failed.', [
+                'page_type' => PageSetting::PAGE_TYPE_NOT_FOUND,
+                'exception' => $throwable,
+            ]);
+
+            throw $throwable;
+        }
+    }
+
+    /**
      * @return array{
      *     products_per_page_limit:int,
      *     ajax_products_loading_enabled:bool,
@@ -567,6 +610,153 @@ class PageSettingsBootstrapService
                 (int) Arr::get((array) $legacy_search_not_found_size, 'height', (int) config('app.page_settings.search.images.search_not_found.height', 600)),
             ),
         ];
+    }
+
+    /**
+     * @return array{localized:array<string, array<string, mixed>>,images:array<string, array<string, mixed>>}
+     */
+    private function resolveNotFoundDefaults(): array
+    {
+        /** @var array<string, array<string, mixed>> $localized */
+        $localized = [];
+
+        foreach ((new Language())->getActiveLanguages() as $language) {
+            $language_id = (string) $language->id;
+            $language_code = (string) $language->code;
+
+            $localized[$language_id] = [
+                'title' => (string) __(
+                    'http-statuses.404',
+                    [],
+                    $language_code,
+                ),
+                'description' => null,
+                'link' => [
+                    'label' => (string) __('admin/settings/not_found_page_settings.defaults.home_link_label', [], $language_code),
+                    'url' => '/' . $language_code,
+                ],
+            ];
+        }
+
+        return [
+            'localized' => $localized,
+            'images' => [
+                'slot_1' => [
+                    'path' => '',
+                    'width' => 600,
+                    'height' => 600,
+                    'is_square' => true,
+                    'background' => 'transparent',
+                    'sort_order' => 10,
+                ],
+                'slot_2' => [
+                    'path' => '',
+                    'width' => 600,
+                    'height' => 600,
+                    'is_square' => true,
+                    'background' => 'transparent',
+                    'sort_order' => 20,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param  array{localized:array<string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
+     * @return array<string, mixed>
+     */
+    private function buildNotFoundSettingsContract(array $defaults): array
+    {
+        return [
+            'meta' => [
+                'contract_version' => 1,
+            ],
+            'localized' => $defaults['localized'],
+            'images' => $defaults['images'],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $settings
+     * @return array<string, mixed>
+     */
+    public function normalizeNotFoundSettings(array $settings): array
+    {
+        return $this->normalizeNotFoundSettingsContract($settings, $this->resolveNotFoundDefaults());
+    }
+
+    /**
+     * @param  array{localized:array<string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
+     */
+    private function syncNotFoundSettingsContract(PageSetting $page_setting, array $defaults): void
+    {
+        $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
+        $page_setting->forceFill([
+            'settings' => $this->normalizeNotFoundSettingsContract($settings, $defaults),
+        ])->save();
+    }
+
+    /**
+     * @param  array<string, mixed>  $settings
+     * @param  array{localized:array<string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
+     * @return array<string, mixed>
+     */
+    private function normalizeNotFoundSettingsContract(array $settings, array $defaults): array
+    {
+        $normalized_localized = [];
+
+        foreach ($defaults['localized'] as $language_id => $default_content) {
+            $content = Arr::get($settings, "localized.$language_id", []);
+            $content = is_array($content) ? $content : [];
+
+            $normalized_localized[$language_id] = [
+                'title' => Str::trim((string) Arr::get($content, 'title', $default_content['title'])),
+                'description' => filled(Arr::get($content, 'description'))
+                    ? Str::trim((string) Arr::get($content, 'description'))
+                    : null,
+                'link' => [
+                    'label' => filled(Arr::get($content, 'link.label'))
+                        ? Str::trim((string) Arr::get($content, 'link.label'))
+                        : null,
+                    'url' => Str::trim((string) Arr::get($content, 'link.url', $default_content['link']['url'])),
+                ],
+            ];
+        }
+
+        $normalized_images = [];
+
+        foreach ($defaults['images'] as $slot => $default_image) {
+            $image = Arr::get($settings, "images.$slot", []);
+            $image = is_array($image) ? $image : [];
+            $background = (string) Arr::get($image, 'background', $default_image['background']);
+
+            if ($background !== 'transparent' && preg_match('/^#[0-9a-fA-F]{6}$/', $background) !== 1) {
+                $background = $default_image['background'];
+            }
+
+            $normalized_images[$slot] = [
+                'path' => Str::trim((string) Arr::get($image, 'path', $default_image['path'])),
+                'width' => max(1, (int) Arr::get($image, 'width', $default_image['width'])),
+                'height' => max(1, (int) Arr::get($image, 'height', $default_image['height'])),
+                'is_square' => (bool) Arr::get($image, 'is_square', $default_image['is_square']),
+                'background' => $background,
+                'sort_order' => max(0, (int) Arr::get($image, 'sort_order', $default_image['sort_order'])),
+            ];
+        }
+
+        $normalized_settings = array_replace_recursive(
+            $this->buildNotFoundSettingsContract($defaults),
+            $settings,
+            [
+                'meta' => [
+                    'contract_version' => 1,
+                ],
+                'localized' => $normalized_localized,
+                'images' => $normalized_images,
+            ],
+        );
+
+        return $normalized_settings;
     }
 
     /**
