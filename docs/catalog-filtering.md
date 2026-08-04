@@ -19,7 +19,7 @@ This document describes how category product filters are configured in Filament,
 
 `FilterProductsAction` is the shared application entry point. The category page and the AJAX controller must use the same action so that the displayed product list and the previewed result count follow the same rules.
 
-The action selects the first enabled filter set for the category context, ordered by filter-set ID. If no such set exists, filtering is disabled and the category query still returns products using the base catalog rules.
+The canonical category filter configuration is bootstrapped by `CatalogFilterBootstrapService::bootstrapDefaultCategorySet()`. The admin resource exposes this configuration as a single settings page: it is not a user-facing collection of alternative filter sets. If the canonical set is disabled or does not contain the `category` context, filtering is disabled and the category query still returns products using the base catalog rules.
 
 ## Admin configuration
 
@@ -115,6 +115,10 @@ The price range is applied to the effective price expression selected by `price_
 The Blade partial renders the filter drawer from `filters_data`. The TypeScript module collects checked item codes and the price range, then calls the AJAX endpoint to show the number of matching products. The user is redirected to the category URL with the selected GET parameters after pressing Apply.
 
 `CatalogFilterAjaxController::index()` calls the same action with `is_get_filters_data: false` and returns only the matching product total. Exceptions are reported and converted to the localized filtering error response.
+
+The AJAX count path uses `FilterProductsAction::count()` and the same shared query-context builder as category rendering. It counts matching products without constructing a full paginator or mapping product cards.
+
+When a filter state changes, the storefront starts from the first page. The current `sort` parameter and supported unrelated query parameters remain preserved, while an old `page` value is not allowed to keep the user on a page that no longer exists for the new result set.
 
 ## Extension rules
 

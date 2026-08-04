@@ -572,6 +572,12 @@ if (!function_exists('get_sorting_items')) {
      */
     function get_sorting_items(PageSetting $page_setting): Collection
     {
+        $page_settings = get_page_settings($page_setting);
+
+        if (Arr::get($page_settings, 'ui.sorting.enabled', true) !== true) {
+            return collect();
+        }
+
         return collect($page_setting->getSortingItemsFromSettings())
             ->filter(fn (array $sorting_item): bool => (bool)Arr::get($sorting_item, 'is_enabled', true))
             ->sortBy('sort_order')

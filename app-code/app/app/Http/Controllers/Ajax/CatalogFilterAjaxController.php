@@ -8,8 +8,6 @@ use App\Actions\FilterProductsAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ajax\CatalogFilterAjaxIndexRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Arr;
 use Throwable;
 
 class CatalogFilterAjaxController extends Controller
@@ -26,19 +24,11 @@ class CatalogFilterAjaxController extends Controller
         $locale = normalize_locale($locale);
 
         try {
-            $response_data = $filter_products_action->handle(
-                [
-                'validated_data' => $request->validated(),
-                'category_slug' => $slug,
-                'is_get_filters_data' => false,
-                'page_path' => localized_route('localized.catalog.category.show', ['slug' => $slug], absolute: false),
-                ],
-                locale: $locale,
+            $total_products = $filter_products_action->count(
+                validated_data: $request->validated(),
+                category_slug : (string) $slug,
+                locale        : $locale,
             );
-
-            /** @var LengthAwarePaginator|null $paginator */
-            $paginator = Arr::get($response_data, 'paginator');
-            $total_products = (int) $paginator?->total();
 
             return response()->json([
                 'success' => true,

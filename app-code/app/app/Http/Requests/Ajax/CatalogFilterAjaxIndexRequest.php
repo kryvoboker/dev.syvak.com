@@ -7,6 +7,7 @@ namespace App\Http\Requests\Ajax;
 use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
+use App\Services\Catalogs\CatalogFilter\CatalogFilterBootstrapService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
@@ -224,15 +225,18 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
 
     private function resolveActiveCategoryFilterSet(): ?CatalogFilterSet
     {
-        return CatalogFilterSet::query()
-            ->where('is_enabled', true)
-            ->where(function ($query): void {
-                $query
-                    ->where('context_type', 'category')
-                    ->orWhereJsonContains('context_types', 'category');
-            })
-            ->with('groups')
-            ->orderBy('id')
-            ->first();
+        $filter_set = app(CatalogFilterBootstrapService::class)->bootstrapDefaultCategorySet();
+
+        if (
+            ! $filter_set->is_enabled
+            || (
+                (string) $filter_set->getRawOriginal('context_type') !== 'category'
+                && ! in_array('category', (array) $filter_set->context_types, true)
+            )
+        ) {
+            return null;
+        }
+
+        return $filter_set;
     }
 }

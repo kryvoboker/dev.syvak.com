@@ -417,6 +417,7 @@ export const fetchFunc = async <T = unknown>(
     url: string,
     data: FetchFuncOptions | FormData = {},
     method: string = 'POST',
+    signal?: AbortSignal,
 ): Promise<T> => {
     type TypeHeaders = {
         'X-Requested-With': string;
@@ -429,6 +430,7 @@ export const fetchFunc = async <T = unknown>(
         method?: string;
         headers: TypeHeaders;
         body?: FormData | string;
+        signal?: AbortSignal;
     };
 
     const supportedFormats: string[] = await getCachedSupportedFormats();
@@ -441,10 +443,11 @@ export const fetchFunc = async <T = unknown>(
     let options: TypeOptions = {
         method,
         headers,
+        signal,
     };
 
     if (method.toUpperCase() === 'GET') {
-        options = { headers };
+        options = { headers, signal };
     } else if (!(data instanceof FormData)) {
         options.headers.contentType = contentType;
         options.body = toJson(data);
