@@ -174,6 +174,9 @@ const processCollectUrlParams = (): URLParamsType => {
         urlParams[WINDOW_APP_PARAMS?.catalog_filter_price_data?.get_extra?.to_key ?? 'price_to'] = priceTo;
     }
 
+    // Applying a new filter state starts a new result set from the first page.
+    urlParams.page = 1;
+
     return urlParams;
 };
 

@@ -804,6 +804,7 @@ readonly class FilterProductsAction
             get_key         : $get_key,
             next_value      : $next_value,
         );
+        Arr::forget($next_query_parameters, 'page');
 
         $next_query_string = Arr::query($next_query_parameters);
 
@@ -834,6 +835,7 @@ readonly class FilterProductsAction
             get_key         : $price_to_get_key,
             next_value      : null,
         );
+        Arr::forget($next_query_parameters, 'page');
 
         $next_query_string = Arr::query($next_query_parameters);
 
