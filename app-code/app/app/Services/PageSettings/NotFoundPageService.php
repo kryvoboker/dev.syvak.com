@@ -1,0 +1,214 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\PageSettings;
+
+use App\Models\ApplicationSettings\Language;
+use App\Services\FooterService;
+use App\Services\HeaderService;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Throwable;
+
+final readonly class NotFoundPageService
+{
+    public function __construct(
+        private PageSettingsBootstrapService $page_settings_bootstrap_service,
+        private HeaderService                $header_service,
+        private FooterService                $footer_service,
+    ) {}
+
+    /**
+     *
+     * @return array<string, mixed>
+     * @throws Throwable
+     */
+    public function getViewData(): array
+    {
+        $not_found_data = $this->getNotFoundData();
+        $header_data    = ($this->header_service)([
+            'breadcrumbs' => [],
+        ]);
+
+        return [
+            'page_type'      => (string)config('page-settings.page_type.not_found', 'not_found'),
+            'page_title'     => $not_found_data['title'],
+            'not_found_data' => $not_found_data,
+            'header_data'    => $header_data,
+            'footer_data'    => ($this->footer_service)([
+                'categories' => $header_data['categories'],
+            ]),
+        ];
+    }
+
+    /**
+     *
+     * @return array{
+     *     title:string,
+     *     description?:string,
+     *          link:array{
+     *              label:string,
+     *              url:string
+     *          },
+     *      images:array<int,array<string,mixed>>
+     * }
+     * @throws Throwable
+     */
+    public function getNotFoundData(): array
+    {
+        $settings           = $this->page_settings_bootstrap_service->getNotFoundSettings();
+        $localized_settings = $this->resolveLocalizedSettings($settings);
+
+        return [
+            'title'       => $this->resolveTitle($localized_settings),
+            'description' => $this->resolveDescription($localized_settings),
+            'link'        => [
+                'label' => $this->resolveLinkLabel($localized_settings),
+                'url'   => $this->resolveLinkUrl($localized_settings),
+            ],
+            'images'      => $this->resolveImages($settings),
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     *
+     * @return array<string, mixed>
+     */
+    private function resolveLocalizedSettings(array $settings): array
+    {
+        $localized_settings = Arr::get($settings, 'localized', []);
+
+        if (!is_array($localized_settings)) {
+            return [];
+        }
+
+        $app_settings = get_app_settings();
+        $language_id  = Language::query()
+            ->where('code', app()->getLocale())
+            ->where('is_active', true)
+            ->value('id');
+
+        if ($language_id === null && $app_settings !== null) {
+            $language_id = $app_settings->language_id;
+        }
+
+        $language_id = (string)($language_id ?? '');
+
+        $localized_content = Arr::get($localized_settings, $language_id, []);
+
+        if (is_array($localized_content)) {
+            return $localized_content;
+        }
+
+        $first_content = Arr::first($localized_settings);
+
+        return is_array($first_content) ? $first_content : [];
+    }
+
+    /**
+     * @param array<string, mixed> $localized_settings
+     */
+    private function resolveTitle(array $localized_settings): string
+    {
+        $title = Str::trim((string)Arr::get($localized_settings, 'title', ''));
+
+        return filled($title) ? $title : (string)__('http-statuses.404');
+    }
+
+    /**
+     * @param array<string, mixed> $localized_settings
+     */
+    private function resolveDescription(array $localized_settings): ?string
+    {
+        $description = Str::trim((string)Arr::get($localized_settings, 'description', ''));
+
+        return filled($description) ? $description : null;
+    }
+
+    /**
+     * @param array<string, mixed> $localized_settings
+     */
+    private function resolveLinkLabel(array $localized_settings): string
+    {
+        $label = Str::trim((string)Arr::get($localized_settings, 'link.label', ''));
+
+        return filled($label)
+            ? $label
+            : (string)__('catalog/pages/not-found.buttons.go_home');
+    }
+
+    /**
+     * @param array<string, mixed> $localized_settings
+     */
+    private function resolveLinkUrl(array $localized_settings): string
+    {
+        $url = Str::trim((string)Arr::get($localized_settings, 'link.url', ''));
+
+        if (
+            Str::startsWith($url, ['http://', 'https://']) ||
+            (Str::startsWith($url, '/') && !Str::startsWith($url, '//'))
+        ) {
+            return $url;
+        }
+
+        return localized_route('catalog.home');
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     *
+     * @return array<int, array{urls:array<string,string>,width:int,height:int,is_square:bool,sort_order:int}>
+     */
+    private function resolveImages(array $settings): array
+    {
+        $images = Arr::get($settings, 'images', []);
+
+        if (!is_array($images)) {
+            return [];
+        }
+
+        return collect($images)
+            ->filter(fn(mixed $image): bool => is_array($image) && filled(Arr::get($image, 'path')))
+            ->sortBy(fn(array $image): int => (int)Arr::get($image, 'sort_order', 0))
+            ->values()
+            ->map(function (array $image): ?array {
+                $path = Str::ltrim((string)Arr::get($image, 'path'), '/');
+
+                if (blank($path) || Storage::fileExists($path) === false) {
+                    return null;
+                }
+
+                try {
+                    $width  = max(1, (int)Arr::get($image, 'width', 600));
+                    $height = max(1, (int)Arr::get($image, 'height', $width));
+
+                    return [
+                        'urls'       => multiple_convert_img_and_get_url(
+                            $path,
+                            $width,
+                            $height,
+                            (bool)Arr::get($image, 'is_square', true),
+                            (string)Arr::get($image, 'background', 'transparent'),
+                        ),
+                        'width'      => $width,
+                        'height'     => $height,
+                        'is_square'  => (bool)Arr::get($image, 'is_square', true),
+                        'sort_order' => (int)Arr::get($image, 'sort_order', 0),
+                    ];
+                } catch (Throwable $throwable) {
+                    Log::channel('stack')->warning('Public 404 image resolution failed.', [
+                        'image_path' => $path,
+                        'exception'  => $throwable,
+                    ]);
+
+                    return null;
+                }
+            })
+            ->filter()
+            ->all();
+    }
+}
