@@ -14,6 +14,7 @@ use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValue;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Products\Product;
+use App\Services\Catalogs\CatalogFilter\CatalogFilterBootstrapService;
 use App\Services\Catalogs\CatalogFilter\PriceSourceResolverService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\Products\ProductsLimitService;
@@ -30,6 +31,7 @@ readonly class FilterProductsAction
     public function __construct(
         private PageSettingsBootstrapService $page_settings_bootstrap_service,
         private PriceSourceResolverService $price_source_resolver_service,
+        private CatalogFilterBootstrapService $catalog_filter_bootstrap_service,
     ) {
     }
 
@@ -51,67 +53,20 @@ readonly class FilterProductsAction
             $validated_data = [];
         }
 
-        $locale = normalize_locale($locale);
-        $language = resolve_language_by_locale($locale);
+        $query_context = $this->buildProductsQueryContext(
+            validated_data: $validated_data,
+            category_slug : $category_slug,
+            locale        : $locale,
+        );
 
-        if (! $language instanceof Language || blank($category_slug)) {
+        if ($query_context === null) {
             return $this->buildEmptyResponse(
                 validated_data: $validated_data,
                 sort_code     : 'default',
             );
         }
 
-        $category = Category::findBySlug($category_slug, (int) $language->id);
-
-        if (! $category instanceof Category) {
-            return $this->buildEmptyResponse(
-                validated_data: $validated_data,
-                sort_code     : 'default',
-            );
-        }
-
-        $filter_set = $this->resolveActiveCategoryFilterSet();
-        $is_filter_mechanism_enabled = $filter_set instanceof CatalogFilterSet && $filter_set->is_enabled;
-        $minimum_stock_quantity = $this->resolveMinimumStockQuantity($filter_set);
-        $filter_groups = $is_filter_mechanism_enabled
-            ? $this->resolveEnabledFilterGroups($filter_set)
-            : collect();
-
-        $requested_sort_value = $this->normalizeRequestedSortValue(Arr::get($validated_data, 'sort', ''));
-        $resolved_sort_code = $this->resolveSortCodeFromRequestedValue($requested_sort_value);
-        $effective_price_expression = $this->resolveEffectivePriceSqlExpression($filter_set);
-
-        $products_query = $this->buildBaseProductsQuery(
-            filter_set            : $filter_set,
-            category_id           : (int) $category->id,
-            language_id           : (int) $language->id,
-            minimum_stock_quantity: $minimum_stock_quantity,
-        );
-
-        if ($is_filter_mechanism_enabled) {
-            $products_query = $this->applyAttributeFilters(
-                query         : $products_query,
-                filter_set    : $filter_set,
-                filter_groups : $filter_groups,
-                validated_data: $validated_data,
-            );
-
-            $products_query = $this->applyPriceRangeFilter(
-                query                     : $products_query,
-                filter_set                : $filter_set,
-                filter_groups             : $filter_groups,
-                validated_data            : $validated_data,
-                effective_price_expression: $effective_price_expression,
-            );
-        }
-
-        $this->applySorting(
-            query                     : $products_query,
-            resolved_sort_code        : $resolved_sort_code,
-            effective_price_expression: $effective_price_expression,
-        );
-
-        $products = $products_query
+        $products = $query_context['query']
             ->paginate($this->resolveCategoryProductsPerPage())
             ->withQueryString();
         $products->setPath($this->resolvePaginatorPath($page_path));
@@ -126,27 +81,27 @@ readonly class FilterProductsAction
         return [
             'products' => $this->mapProductsForResponse(
                 products              : $products,
-                language_id           : (int) $language->id,
-                filter_set            : $filter_set,
-                minimum_stock_quantity: $minimum_stock_quantity,
+                language_id           : $query_context['language_id'],
+                filter_set            : $query_context['filter_set'],
+                minimum_stock_quantity: $query_context['minimum_stock_quantity'],
             ),
             'paginator' => $products,
             'applied_filters' => [
-                'sort' => $requested_sort_value,
+                'sort' => $query_context['requested_sort_value'],
                 'price_from' => Arr::get($validated_data, 'price_from'),
                 'price_to' => Arr::get($validated_data, 'price_to'),
                 'attributes' => (array) Arr::get($validated_data, 'attributes', []),
             ],
-            'active_sort_code' => $resolved_sort_code,
-            'selected_sort_value' => $requested_sort_value,
-            'is_filter_enabled' => $is_filter_mechanism_enabled,
+            'active_sort_code' => $query_context['resolved_sort_code'],
+            'selected_sort_value' => $query_context['requested_sort_value'],
+            'is_filter_enabled' => $query_context['is_filter_mechanism_enabled'],
             'filters_data' => $is_get_filters_data
                 ? $this->buildFiltersData(
-                    filter_set            : $filter_set,
-                    filter_groups         : $filter_groups,
-                    language_id           : (int) $language->id,
-                    category_id           : (int) $category->id,
-                    minimum_stock_quantity: $minimum_stock_quantity,
+                    filter_set            : $query_context['filter_set'],
+                    filter_groups         : $query_context['filter_groups'],
+                    language_id           : $query_context['language_id'],
+                    category_id           : $query_context['category_id'],
+                    minimum_stock_quantity: $query_context['minimum_stock_quantity'],
                     validated_data        : $validated_data,
                 )
                 : [],
@@ -164,16 +119,98 @@ readonly class FilterProductsAction
      */
     public function count(array $validated_data, string $category_slug, ?string $locale = null): int
     {
-        $response_data = $this->handle([
-            'validated_data' => $validated_data,
-            'category_slug' => $category_slug,
-            'is_get_filters_data' => false,
-        ], locale: $locale);
+        $query_context = $this->buildProductsQueryContext(
+            validated_data: $validated_data,
+            category_slug : $category_slug,
+            locale        : $locale,
+        );
 
-        /** @var LengthAwarePaginator|null $paginator */
-        $paginator = Arr::get($response_data, 'paginator');
+        return $query_context === null ? 0 : (int) $query_context['query']->count();
+    }
 
-        return (int) $paginator?->total();
+    /**
+     * @param  array<string, mixed>  $validated_data
+     *
+     * @throws Throwable
+     * @return array{
+     *     query: Builder,
+     *     category_id: int,
+     *     language_id: int,
+     *     filter_set: ?CatalogFilterSet,
+     *     filter_groups: Collection<int, CatalogFilterGroup>,
+     *     minimum_stock_quantity: int,
+     *     requested_sort_value: string,
+     *     resolved_sort_code: string,
+     *     is_filter_mechanism_enabled: bool
+     * }|null
+     */
+    private function buildProductsQueryContext(
+        array $validated_data,
+        string $category_slug,
+        ?string $locale,
+    ): ?array {
+        $locale = normalize_locale($locale);
+        $language = resolve_language_by_locale($locale);
+
+        if (! $language instanceof Language || blank($category_slug)) {
+            return null;
+        }
+
+        $category = Category::findBySlug($category_slug, (int) $language->id);
+
+        if (! $category instanceof Category) {
+            return null;
+        }
+
+        $filter_set = $this->resolveActiveCategoryFilterSet();
+        $is_filter_mechanism_enabled = $filter_set instanceof CatalogFilterSet && $filter_set->is_enabled;
+        $minimum_stock_quantity = $this->resolveMinimumStockQuantity($filter_set);
+        $filter_groups = $is_filter_mechanism_enabled
+            ? $this->resolveEnabledFilterGroups($filter_set)
+            : collect();
+        $requested_sort_value = $this->normalizeRequestedSortValue(Arr::get($validated_data, 'sort', ''));
+        $resolved_sort_code = $this->resolveSortCodeFromRequestedValue($requested_sort_value);
+        $effective_price_expression = $this->resolveEffectivePriceSqlExpression($filter_set);
+        $products_query = $this->buildBaseProductsQuery(
+            filter_set            : $filter_set,
+            category_id           : (int) $category->id,
+            language_id           : (int) $language->id,
+            minimum_stock_quantity: $minimum_stock_quantity,
+        );
+
+        if ($is_filter_mechanism_enabled) {
+            $products_query = $this->applyAttributeFilters(
+                query         : $products_query,
+                filter_set    : $filter_set,
+                filter_groups : $filter_groups,
+                validated_data: $validated_data,
+            );
+            $products_query = $this->applyPriceRangeFilter(
+                query                     : $products_query,
+                filter_set                : $filter_set,
+                filter_groups             : $filter_groups,
+                validated_data            : $validated_data,
+                effective_price_expression: $effective_price_expression,
+            );
+        }
+
+        $this->applySorting(
+            query                     : $products_query,
+            resolved_sort_code        : $resolved_sort_code,
+            effective_price_expression: $effective_price_expression,
+        );
+
+        return [
+            'query' => $products_query,
+            'category_id' => (int) $category->id,
+            'language_id' => (int) $language->id,
+            'filter_set' => $filter_set,
+            'filter_groups' => $filter_groups,
+            'minimum_stock_quantity' => $minimum_stock_quantity,
+            'requested_sort_value' => $requested_sort_value,
+            'resolved_sort_code' => $resolved_sort_code,
+            'is_filter_mechanism_enabled' => $is_filter_mechanism_enabled,
+        ];
     }
 
     /**
@@ -189,18 +226,15 @@ readonly class FilterProductsAction
 
     private function resolveActiveCategoryFilterSet(): ?CatalogFilterSet
     {
-        /** @var CatalogFilterSet|null $filter_set */
-        $filter_set = CatalogFilterSet::query()
-            ->where('is_enabled', true)
-            ->where(function (Builder $query): void {
-                $query
-                    ->where('context_type', 'category')
-                    ->orWhereJsonContains('context_types', 'category');
-            })
-            ->orderBy('id')
-            ->first();
+        $filter_set = $this->catalog_filter_bootstrap_service->bootstrapDefaultCategorySet();
 
-        if (! $filter_set instanceof CatalogFilterSet) {
+        if (
+            ! $filter_set->is_enabled
+            || (
+                (string) $filter_set->getRawOriginal('context_type') !== 'category'
+                && ! in_array('category', (array) $filter_set->context_types, true)
+            )
+        ) {
             return null;
         }
 
@@ -385,10 +419,14 @@ readonly class FilterProductsAction
                 return $query;
             }
 
-            $query->whereHas('defaultVariant.attributeValues', function ($attribute_query) use ($attribute_id, $attribute_values): void {
-                $attribute_query
-                    ->where('attribute_id', $attribute_id)
-                    ->whereIn('value_string', $attribute_values->all());
+            $query->whereHas('variants', function ($variant_query) use ($attribute_id, $attribute_values): void {
+                $variant_query
+                    ->where('is_active', true)
+                    ->whereHas('attributeValues', function ($attribute_query) use ($attribute_id, $attribute_values): void {
+                        $attribute_query
+                            ->where('attribute_id', $attribute_id)
+                            ->whereIn('value_string', $attribute_values->all());
+                    });
             });
         }
 
@@ -717,6 +755,10 @@ readonly class FilterProductsAction
                         value_id              : (int) $value->id,
                         minimum_stock_quantity: $minimum_stock_quantity,
                         fallback_count        : (int) $value->products_count_cached,
+                        group                 : $group,
+                        value                 : $value,
+                        language_id           : $language_id,
+                        filter_set            : $filter_set,
                     ),
                     'is_checked' => $is_checked,
                     'cancel_link' => $is_checked
@@ -804,6 +846,7 @@ readonly class FilterProductsAction
             get_key         : $get_key,
             next_value      : $next_value,
         );
+        Arr::forget($next_query_parameters, 'page');
 
         $next_query_string = Arr::query($next_query_parameters);
 
@@ -834,6 +877,7 @@ readonly class FilterProductsAction
             get_key         : $price_to_get_key,
             next_value      : null,
         );
+        Arr::forget($next_query_parameters, 'page');
 
         $next_query_string = Arr::query($next_query_parameters);
 
@@ -985,9 +1029,21 @@ readonly class FilterProductsAction
         int $value_id,
         int $minimum_stock_quantity,
         int $fallback_count,
+        CatalogFilterGroup $group,
+        CatalogFilterValue $value,
+        int $language_id,
+        CatalogFilterSet $filter_set,
     ): int {
         if ($active_index_version <= 0) {
-            return max(0, $fallback_count);
+            return $this->resolveLiveValueProductsTotal(
+                category_id           : $category_id,
+                minimum_stock_quantity: $minimum_stock_quantity,
+                group                 : $group,
+                value                 : $value,
+                language_id           : $language_id,
+                filter_set            : $filter_set,
+                fallback_count        : $fallback_count,
+            );
         }
 
         $total_products = CatalogFilterProductIndex::query()
@@ -1001,7 +1057,56 @@ readonly class FilterProductsAction
             ->distinct('product_id')
             ->count('product_id');
 
-        return max(0, $total_products);
+        if ($total_products > 0) {
+            return $total_products;
+        }
+
+        return $this->resolveLiveValueProductsTotal(
+            category_id           : $category_id,
+            minimum_stock_quantity: $minimum_stock_quantity,
+            group                 : $group,
+            value                 : $value,
+            language_id           : $language_id,
+            filter_set            : $filter_set,
+            fallback_count        : $fallback_count,
+        );
+    }
+
+    private function resolveLiveValueProductsTotal(
+        int $category_id,
+        int $minimum_stock_quantity,
+        CatalogFilterGroup $group,
+        CatalogFilterValue $value,
+        int $language_id,
+        CatalogFilterSet $filter_set,
+        int $fallback_count,
+    ): int {
+        $attribute_id = (int) $group->source_id;
+        $value_candidates = collect([(string) $value->value_string])
+            ->merge($value->translations->pluck('label'))
+            ->map(fn (mixed $candidate): string => $this->normalizeAttributeValue((string) $candidate))
+            ->filter(fn (string $candidate): bool => filled($candidate))
+            ->unique()
+            ->values();
+
+        if ($attribute_id <= 0 || $value_candidates->isEmpty()) {
+            return max(0, $fallback_count);
+        }
+
+        return max(0, (int) $this->buildBaseProductsQuery(
+            filter_set: $filter_set,
+            category_id: $category_id,
+            language_id: $language_id,
+            minimum_stock_quantity: $minimum_stock_quantity,
+        )->whereHas('variants', function ($variant_query) use ($attribute_id, $value_candidates): void {
+            $variant_query
+                ->where('is_active', true)
+                ->whereHas('attributeValues', function ($attribute_query) use ($attribute_id, $value_candidates): void {
+                    $attribute_query
+                        ->where('attribute_id', $attribute_id)
+                        ->whereIn('value_string', $value_candidates->all());
+                });
+        })->count());
     }
 
     /**

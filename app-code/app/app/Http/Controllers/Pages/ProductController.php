@@ -8,11 +8,11 @@ use App\Http\Controllers\Controller;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Products\Product;
-use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Catalogs\Products\ProductSizeGuide as ProductSizeGuideModel;
-use App\Models\Catalogs\Products\ProductVariantSizeGuide;
+use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Catalogs\Products\ProductVariantAttributeValue;
 use App\Models\Catalogs\Products\ProductVariantDiscount;
+use App\Models\Catalogs\Products\ProductVariantSizeGuide;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
@@ -36,7 +36,7 @@ class ProductController extends Controller
      */
     public function show(Request $request, string $locale, string $slug, ?string $variant_slug = null): View
     {
-        $locale   = normalize_locale($locale);
+        $locale = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
 
         if (!$language instanceof Language) {
@@ -49,7 +49,7 @@ class ProductController extends Controller
             throw new NotFoundHttpException();
         }
 
-        $variant           = $this->resolveRequestedVariant($request, $product, (int)$language->id, $variant_slug);
+        $variant = $this->resolveRequestedVariant($request, $product, (int)$language->id, $variant_slug);
         return $this->renderProductPage($request, $locale, $product, $variant, $slug, $variant_slug, (int)$language->id);
     }
 
@@ -92,34 +92,34 @@ class ProductController extends Controller
         ?string $variant_slug,
         int $language_id,
     ): View {
-        $page_setting      = app(PageSettingsBootstrapService::class)->bootstrapProductPageSetting();
+        $page_setting = app(PageSettingsBootstrapService::class)->bootstrapProductPageSetting();
         $page_settings_arr = get_page_settings($page_setting);
         $attribute_filters = prepare_product_attrs((array)$request->query());
-        $header_data       = app(HeaderService::class)([
-            'sluggable_type'    => ProductVariant::class,
-            'slug'              => $slug ?? '',
-            'variant_slug'      => $variant_slug,
+        $header_data = app(HeaderService::class)([
+            'sluggable_type' => ProductVariant::class,
+            'slug' => $slug ?? '',
+            'variant_slug' => $variant_slug,
             'attribute_filters' => $attribute_filters,
         ]);
-        $page_type         = try_detect_page_type();
-        $app_settings      = get_app_settings();
-        $telegram_row      = collect($app_settings?->socials[$locale] ?? [])
-            ->first(fn(mixed $social_item): bool => (string)data_get($social_item, 'social_type') === 'telegram');
-        $telegram_link     = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
+        $page_type = try_detect_page_type();
+        $app_settings = get_app_settings();
+        $telegram_row = collect($app_settings?->socials[$locale] ?? [])
+            ->first(fn (mixed $social_item): bool => (string)data_get($social_item, 'social_type') === 'telegram');
+        $telegram_link = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
         $data = [
-            'header_data'       => $header_data,
-            'footer_data'       => app(FooterService::class)([
+            'header_data' => $header_data,
+            'footer_data' => app(FooterService::class)([
                 // Footer uses category links too; pass already loaded categories from header.
                 'categories' => $header_data['categories'],
             ]),
-            'page_type'         => $page_type,
-            'breadcrumbs'       => $this->resolveBreadcrumbs($product, $variant, $language_id),
+            'page_type' => $page_type,
+            'breadcrumbs' => $this->resolveBreadcrumbs($product, $variant, $language_id),
             'product_view_data' => $this->buildProductViewData($product, $variant, $language_id, $page_settings_arr),
-            'product'           => $product,
-            'variant'           => $variant,
-            'telegram_data'     => [
-                'url'  => $telegram_link,
+            'product' => $product,
+            'variant' => $variant,
+            'telegram_data' => [
+                'url' => $telegram_link,
                 'text' => __('catalog/default.product.labels.telegram'),
             ],
         ];
@@ -130,7 +130,7 @@ class ProductController extends Controller
     private function resolveRequestedVariant(
         Request $request,
         Product $product,
-        int     $language_id,
+        int $language_id,
         ?string $variant_slug,
     ): ?ProductVariant {
         if (filled((string)$variant_slug)) {
@@ -186,7 +186,7 @@ class ProductController extends Controller
     private function resolveBreadcrumbs(Product $product, ?ProductVariant $variant, int $language_id): array
     {
         $product_title = $this->resolveProductTitle($product, $variant, $language_id);
-        $breadcrumbs   = [
+        $breadcrumbs = [
             breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
         ];
 
@@ -207,7 +207,7 @@ class ProductController extends Controller
         /** @var \Illuminate\Database\Eloquent\Collection<int, Category> $product_categories */
         $product_categories = $product->categories()
             ->with([
-                'categoryPaths' => fn($query) => $query->orderBy('level'),
+                'categoryPaths' => fn ($query) => $query->orderBy('level'),
             ])
             ->get();
 
@@ -243,7 +243,7 @@ class ProductController extends Controller
             }
 
             $selected_depth = $target_category->categoryPaths->count();
-            $current_depth  = $current_category->categoryPaths->count();
+            $current_depth = $current_category->categoryPaths->count();
 
             if ($current_depth > $selected_depth) {
                 $target_category = $current_category;
@@ -273,7 +273,7 @@ class ProductController extends Controller
         $path_ids = $target_category->categoryPaths
             ->sortBy('level')
             ->pluck('path_id')
-            ->map(fn(mixed $path_id): int => (int)$path_id)
+            ->map(fn (mixed $path_id): int => (int)$path_id)
             ->unique()
             ->values()
             ->all();
@@ -288,7 +288,7 @@ class ProductController extends Controller
                 'categoryDescription' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'slugs'               => function ($query) use ($language_id): void {
+                'slugs' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -306,7 +306,7 @@ class ProductController extends Controller
                 }
 
                 $category_title = Str::trim((string)optional($category->categoryDescription->first())->name);
-                $category_slug  = Str::trim((string)optional($category->slugs->first())->slug);
+                $category_slug = Str::trim((string)optional($category->slugs->first())->slug);
 
                 if (blank($category_title)) {
                     return null;
@@ -320,7 +320,7 @@ class ProductController extends Controller
 
                 return breadcrumb($category_title);
             })
-            ->filter(fn(?array $breadcrumb): bool => $breadcrumb !== null)
+            ->filter(fn (?array $breadcrumb): bool => $breadcrumb !== null)
             ->values()
             ->all();
     }
@@ -333,16 +333,16 @@ class ProductController extends Controller
      * @return array<string, mixed>
      */
     private function buildProductViewData(
-        Product         $product,
+        Product $product,
         ?ProductVariant $variant,
-        int             $language_id,
-        array           $page_settings_arr,
+        int $language_id,
+        array $page_settings_arr,
     ): array {
-        $product_meta_data   = $this->resolveProductMetaData($product, $variant, $language_id);
-        $product_title       = (string)Arr::get($product_meta_data, 'name', '');
-        $product_sku         = (string)$product->sku;
-        $product_price_data  = $this->resolveProductPriceData($product, $variant);
-        $formatted_price     = replace_currency_symbol_to_code(
+        $product_meta_data = $this->resolveProductMetaData($product, $variant, $language_id);
+        $product_title = (string)Arr::get($product_meta_data, 'name', '');
+        $product_sku = (string)$product->sku;
+        $product_price_data = $this->resolveProductPriceData($product, $variant);
+        $formatted_price = replace_currency_symbol_to_code(
             format_price(
                 $product_price_data['price'],
                 config('app.currency.current_currency_code'),
@@ -357,48 +357,48 @@ class ProductController extends Controller
             ),
         );
 
-        $image_size          = $this->resolveProductCustomerImageSize($page_settings_arr);
-        $minimum_stock_qty   = $this->resolveProductMinimumStockQuantity($page_settings_arr);
-        $is_in_stock         = $this->resolveInStockState($variant, $minimum_stock_qty);
-        $gallery_images      = $this->resolveGalleryImages($product, $variant);
-        $main_image_path     = (string)($gallery_images->first() ?? '');
-        $main_image_data     = $this->buildImageData($main_image_path, $image_size);
-        $option_groups       = $this->resolveOptionGroups($product, $variant, $language_id);
-        $details_sections    = $this->resolveDetailsSections($product, $variant, $language_id);
-        $size_guide_data     = $this->resolveSizeGuideData($product, $variant, $language_id);
+        $image_size = $this->resolveProductCustomerImageSize($page_settings_arr);
+        $minimum_stock_qty = $this->resolveProductMinimumStockQuantity($page_settings_arr);
+        $is_in_stock = $this->resolveInStockState($variant, $minimum_stock_qty);
+        $gallery_images = $this->resolveGalleryImages($product, $variant);
+        $main_image_path = (string)($gallery_images->first() ?? '');
+        $main_image_data = $this->buildImageData($main_image_path, $image_size);
+        $option_groups = $this->resolveOptionGroups($product, $variant, $language_id);
+        $details_sections = $this->resolveDetailsSections($product, $variant, $language_id);
+        $size_guide_data = $this->resolveSizeGuideData($product, $variant, $language_id);
         $gallery_images_data = [];
 
         // Galler images contains main image as first item, so only build gallery data if there's more than one image to avoid redundant processing
         if ($gallery_images->count() > 1) {
             $gallery_images_data = $gallery_images
-                ->map(fn(string $image_path): array => $this->buildImageData($image_path, $image_size))
+                ->map(fn (string $image_path): array => $this->buildImageData($image_path, $image_size))
                 ->values()
                 ->all();
         }
 
         return [
-            'title'                  => $product_title,
-            'description'            => escape_special_html((string)Arr::get($product_meta_data, 'description', '')),
+            'title' => $product_title,
+            'description' => escape_special_html((string)Arr::get($product_meta_data, 'description', '')),
             // In HTML the short_description is not decoded!
-            'meta_title'             => Str::trim(strip_tags((string)Arr::get($product_meta_data, 'meta_title', ''))),
-            'meta_description'       => Str::trim(strip_tags((string)Arr::get($product_meta_data, 'meta_description', ''))),
-            'meta_keywords'          => Str::trim(strip_tags((string)Arr::get($product_meta_data, 'meta_keywords', ''))),
-            'sku'                    => $product_sku,
-            'price_formatted'        => $formatted_price,
-            'rrc_price_formatted'    => $formatted_rrc_price,
-            'is_discounted'          => $product_price_data['is_discounted'],
-            'is_in_stock'            => $is_in_stock,
+            'meta_title' => Str::trim(strip_tags((string)Arr::get($product_meta_data, 'meta_title', ''))),
+            'meta_description' => Str::trim(strip_tags((string)Arr::get($product_meta_data, 'meta_description', ''))),
+            'meta_keywords' => Str::trim(strip_tags((string)Arr::get($product_meta_data, 'meta_keywords', ''))),
+            'sku' => $product_sku,
+            'price_formatted' => $formatted_price,
+            'rrc_price_formatted' => $formatted_rrc_price,
+            'is_discounted' => $product_price_data['is_discounted'],
+            'is_in_stock' => $is_in_stock,
             'minimum_stock_quantity' => $minimum_stock_qty,
-            'main_image'             => $main_image_data,
-            'gallery_images_data'    => $gallery_images_data,
-            'main_image_path'        => $main_image_path,
-            'gallery_images'         => $gallery_images,
-            'option_groups'          => $option_groups,
-            'details_sections'       => $details_sections,
-            'composition_and_care'   => [
+            'main_image' => $main_image_data,
+            'gallery_images_data' => $gallery_images_data,
+            'main_image_path' => $main_image_path,
+            'gallery_images' => $gallery_images,
+            'option_groups' => $option_groups,
+            'details_sections' => $details_sections,
+            'composition_and_care' => [
                 'sections' => $details_sections,
             ],
-            'size_guide'             => $size_guide_data,
+            'size_guide' => $size_guide_data,
         ];
     }
 
@@ -438,14 +438,14 @@ class ProductController extends Controller
         }
 
         return [
-            'title'                  => $size_guide->short_title,
-            'short_description'      => $size_guide->short_description,
-            'table_rows'             => $size_guide->table_rows,
-            'image'                  => $size_guide->image,
-            'image_width'            => $size_guide->image_width,
-            'image_height'           => $size_guide->image_height,
+            'title' => $size_guide->short_title,
+            'short_description' => $size_guide->short_description,
+            'table_rows' => $size_guide->table_rows,
+            'image' => $size_guide->image,
+            'image_width' => $size_guide->image_width,
+            'image_height' => $size_guide->image_height,
             'full_description_title' => $size_guide->full_description_title,
-            'full_description'       => $size_guide->full_description,
+            'full_description' => $size_guide->full_description,
         ];
     }
 
@@ -465,7 +465,7 @@ class ProductController extends Controller
             Str::trim((string)Arr::get($translation_data, 'full_description', '')),
         ];
 
-        if (collect($text_fields)->contains(fn(string $value): bool => $value !== '')) {
+        if (collect($text_fields)->contains(fn (string $value): bool => $value !== '')) {
             return true;
         }
 
@@ -492,21 +492,21 @@ class ProductController extends Controller
     {
         $image_path = Str::trim((string)Arr::get($translation_data, 'image', ''));
         $image_size = [
-            'width'  => max(1, (int)Arr::get($translation_data, 'image_width', 1)),
+            'width' => max(1, (int)Arr::get($translation_data, 'image_width', 1)),
             'height' => max(1, (int)Arr::get($translation_data, 'image_height', 1)),
         ];
 
         return [
-            'title'                  => Str::trim((string)Arr::get($translation_data, 'title', '')),
+            'title' => Str::trim((string)Arr::get($translation_data, 'title', '')),
             // In HTML the short_description is not decoded!
-            'short_description'      => escape_special_html(
+            'short_description' => escape_special_html(
                 Str::trim((string)Arr::get($translation_data, 'short_description', '')),
             ),
-            'table_rows'             => $this->normalizeSizeGuideTableRows(Arr::get($translation_data, 'table_rows')),
-            'image'                  => $this->buildImageData($image_path, $image_size),
+            'table_rows' => $this->normalizeSizeGuideTableRows(Arr::get($translation_data, 'table_rows')),
+            'image' => $this->buildImageData($image_path, $image_size),
             'full_description_title' => Str::trim((string)Arr::get($translation_data, 'full_description_title', '')),
             // In HTML the short_description is not decoded!
-            'full_description'       => escape_special_html(
+            'full_description' => escape_special_html(
                 Str::trim((string)Arr::get($translation_data, 'full_description', '')),
             ),
         ];
@@ -534,12 +534,12 @@ class ProductController extends Controller
                 }
 
                 return collect($cells)
-                    ->map(fn(mixed $cell): string => Str::trim((string)Arr::get($cell, 'value', '')))
-                    ->filter(fn(string $value): bool => $value !== '')
+                    ->map(fn (mixed $cell): string => Str::trim((string)Arr::get($cell, 'value', '')))
+                    ->filter(fn (string $value): bool => $value !== '')
                     ->values()
                     ->all();
             })
-            ->filter(fn(array $cells): bool => $cells !== [])
+            ->filter(fn (array $cells): bool => $cells !== [])
             ->values()
             ->all();
     }
@@ -556,11 +556,11 @@ class ProductController extends Controller
     {
         /** @var array{name: string, description: string, meta_title: string, meta_description: string, meta_keywords: string} $meta_data */
         $meta_data = [
-            'name'             => '',
-            'description'      => '',
-            'meta_title'       => '',
+            'name' => '',
+            'description' => '',
+            'meta_title' => '',
             'meta_description' => '',
-            'meta_keywords'    => '',
+            'meta_keywords' => '',
         ];
 
         if ($variant instanceof ProductVariant) {
@@ -569,11 +569,11 @@ class ProductController extends Controller
                 ->first();
 
             if ($variant_description !== null) {
-                $meta_data['name']             = Str::trim((string)data_get($variant_description, 'name', ''));
-                $meta_data['description']      = Str::trim((string)data_get($variant_description, 'description', ''));
-                $meta_data['meta_title']       = Str::trim((string)data_get($variant_description, 'meta_title', ''));
+                $meta_data['name'] = Str::trim((string)data_get($variant_description, 'name', ''));
+                $meta_data['description'] = Str::trim((string)data_get($variant_description, 'description', ''));
+                $meta_data['meta_title'] = Str::trim((string)data_get($variant_description, 'meta_title', ''));
                 $meta_data['meta_description'] = Str::trim((string)data_get($variant_description, 'meta_description', ''));
-                $meta_data['meta_keywords']    = Str::trim((string)data_get($variant_description, 'meta_keywords', ''));
+                $meta_data['meta_keywords'] = Str::trim((string)data_get($variant_description, 'meta_keywords', ''));
             }
         }
 
@@ -582,12 +582,12 @@ class ProductController extends Controller
             ->first();
 
         if ($product_description !== null) {
-            $meta_data['description']      = filled($meta_data['description']) ? $meta_data['description'] : Str::trim((string)data_get($product_description, 'description', ''));
-            $meta_data['meta_title']       = filled($meta_data['meta_title']) ? $meta_data['meta_title'] : Str::trim((string)data_get($product_description, 'meta_title', ''));
+            $meta_data['description'] = filled($meta_data['description']) ? $meta_data['description'] : Str::trim((string)data_get($product_description, 'description', ''));
+            $meta_data['meta_title'] = filled($meta_data['meta_title']) ? $meta_data['meta_title'] : Str::trim((string)data_get($product_description, 'meta_title', ''));
             $meta_data['meta_description'] = filled($meta_data['meta_description']) ? $meta_data['meta_description'] : Str::trim((string)data_get($product_description, 'meta_description', ''));
-            $meta_data['meta_keywords']    = filled($meta_data['meta_keywords']) ? $meta_data['meta_keywords'] : Str::trim((string)data_get($product_description, 'meta_keywords', ''));
+            $meta_data['meta_keywords'] = filled($meta_data['meta_keywords']) ? $meta_data['meta_keywords'] : Str::trim((string)data_get($product_description, 'meta_keywords', ''));
 
-            $product_name      = Str::trim((string)data_get($product_description, 'name', ''));
+            $product_name = Str::trim((string)data_get($product_description, 'name', ''));
             $meta_data['name'] = filled($meta_data['name']) ? $meta_data['name'] : $product_name;
         }
 
@@ -605,10 +605,10 @@ class ProductController extends Controller
      */
     private function resolveProductPriceData(Product $product, ?ProductVariant $variant): array
     {
-        $rrc_price      = $variant instanceof ProductVariant && is_numeric($variant->price)
+        $rrc_price = $variant instanceof ProductVariant && is_numeric($variant->price)
             ? (float)$variant->price
             : (is_numeric($product->price) ? (float)$product->price : 0.0);
-        $discount       = $variant?->getLastActualAndLastModifiedDiscountForUserGroup(
+        $discount = $variant?->getLastActualAndLastModifiedDiscountForUserGroup(
             get_app_settings()?->user_group_id,
         );
         $discount_price = $discount instanceof ProductVariantDiscount
@@ -616,8 +616,8 @@ class ProductController extends Controller
             : null;
 
         return [
-            'price'         => $discount_price ?? $rrc_price,
-            'rrc_price'     => $rrc_price,
+            'price' => $discount_price ?? $rrc_price,
+            'rrc_price' => $rrc_price,
             'is_discounted' => $discount_price !== null && $discount_price < $rrc_price,
         ];
     }
@@ -641,18 +641,18 @@ class ProductController extends Controller
     private function resolveGalleryImages(Product $product, ?ProductVariant $variant): Collection
     {
         if ($variant instanceof ProductVariant) {
-            $variant_image  = $variant->image;
+            $variant_image = $variant->image;
             $variant_images = $variant->images()
                 ->orderBy('sort_order')
                 ->pluck('image');
         } else {
-            $variant_image  = null;
+            $variant_image = null;
             $variant_images = collect();
         }
 
         $variant_images = collect($variant_images)
-            ->map(fn(mixed $image): string => $this->normalizeImagePath($image))
-            ->filter(fn(string $image): bool => filled($image))
+            ->map(fn (mixed $image): string => $this->normalizeImagePath($image))
+            ->filter(fn (string $image): bool => filled($image))
             ->values();
 
         if ($variant_images->isNotEmpty()) {
@@ -687,7 +687,7 @@ class ProductController extends Controller
     private function resolveProductCustomerImageSize(array $page_settings_arr): array
     {
         return [
-            'width'  => max(
+            'width' => max(
                 1,
                 (int)Arr::get(
                     $page_settings_arr,
@@ -743,8 +743,8 @@ class ProductController extends Controller
         $normalized_path = Str::trim($image_path);
 
         return [
-            'path'   => $normalized_path,
-            'urls'   => filled($normalized_path)
+            'path' => $normalized_path,
+            'urls' => filled($normalized_path)
                 ? multiple_convert_img_and_get_url(
                     $normalized_path,
                     (int)$image_size['width'],
@@ -753,7 +753,7 @@ class ProductController extends Controller
                     bg_color : 'transparent',
                 )
                 : [],
-            'width'  => (int)$image_size['width'],
+            'width' => (int)$image_size['width'],
             'height' => (int)$image_size['height'],
         ];
     }
@@ -778,7 +778,7 @@ class ProductController extends Controller
         $variants = ProductVariant::query()
             ->where('product_id', (int)$product->id)
             ->with([
-                'attributeValues'                                => function ($query) use ($language_id): void {
+                'attributeValues' => function ($query) use ($language_id): void {
                     $query->where('language_id', $language_id)
                         ->orderBy('attribute_id');
                 },
@@ -802,10 +802,10 @@ class ProductController extends Controller
         }
 
         $attribute_name_map = $variants
-            ->flatMap(fn(ProductVariant $item): Collection => $item->attributeValues)
+            ->flatMap(fn (ProductVariant $item): Collection => $item->attributeValues)
             ->mapWithKeys(function (ProductVariantAttributeValue $attribute_value): array {
                 $attribute_id = (int)$attribute_value->attribute_id;
-                $name         = Str::trim((string)$attribute_value->attribute?->attributeDescription->first()?->name);
+                $name = Str::trim((string)$attribute_value->attribute?->attributeDescription->first()?->name);
 
                 if ($attribute_id < 1 || $name === '') {
                     return [];
@@ -816,7 +816,7 @@ class ProductController extends Controller
             ->all();
 
         $selected_variant_data = collect($variant_data)
-            ->first(fn(array $item): bool => (int)$item['variant_id'] === (int)$variant->id);
+            ->first(fn (array $item): bool => (int)$item['variant_id'] === (int)$variant->id);
 
         if (!is_array($selected_variant_data)) {
             $selected_variant_data = collect($variant_data)->first();
@@ -828,18 +828,18 @@ class ProductController extends Controller
 
         /** @var array<int, array{value_id:int,value:string,value_normalized:string}> $selected_attributes */
         $selected_attributes = $selected_variant_data['attributes'];
-        $variant_id_order    = collect($variant_data)
+        $variant_id_order = collect($variant_data)
             ->pluck('variant_id')
-            ->map(fn(mixed $variant_id): int => (int)$variant_id)
+            ->map(fn (mixed $variant_id): int => (int)$variant_id)
             ->values()
             ->all();
-        $group_data_map      = $this->buildGroupValuesData($variant_data, $attribute_name_map);
+        $group_data_map = $this->buildGroupValuesData($variant_data, $attribute_name_map);
 
         return collect($group_data_map)
             ->sortKeys()
             ->map(function (
                 array $group_data,
-                int   $attribute_id,
+                int $attribute_id,
             ) use (
                 $selected_attributes,
                 $variant_data,
@@ -848,22 +848,22 @@ class ProductController extends Controller
                 $product
             ): array {
                 $selected_value_normalized = (string)data_get($selected_attributes, "$attribute_id.value_normalized", '');
-                $attribute_name            = (string)$group_data['name'];
-                $values_data               = collect((array)$group_data['values'])
+                $attribute_name = (string)$group_data['name'];
+                $values_data = collect((array)$group_data['values'])
                     ->sortKeys()
                     ->all();
 
                 return [
-                    'key'         => 'attribute_' . $attribute_id,
-                    'name'        => filled($attribute_name) ? $attribute_name : __('catalog/default.product.option_groups.attribute_fallback'),
-                    'values'      => collect($values_data)
+                    'key' => 'attribute_' . $attribute_id,
+                    'name' => filled($attribute_name) ? $attribute_name : __('catalog/default.product.option_groups.attribute_fallback'),
+                    'values' => collect($values_data)
                         ->pluck('value')
-                        ->filter(fn(mixed $value): bool => filled((string)$value))
+                        ->filter(fn (mixed $value): bool => filled((string)$value))
                         ->values()
                         ->all(),
                     'value_links' => collect($values_data)
                         ->map(function (
-                            array  $value_data,
+                            array $value_data,
                             string $value_normalized,
                         ) use (
                             $attribute_id,
@@ -885,9 +885,9 @@ class ProductController extends Controller
                             $target_filters = $this->buildAttributeFiltersFromVariantData($target_variant_data);
 
                             return [
-                                'value_id'    => (int)$value_data['value_id'],
-                                'value'       => (string)$value_data['value'],
-                                'url'         => filled($product_slug) && $target_filters !== []
+                                'value_id' => (int)$value_data['value_id'],
+                                'value' => (string)$value_data['value'],
+                                'url' => filled($product_slug) && $target_filters !== []
                                     ? localized_product_variant_route(
                                         product_slug     : $product_slug,
                                         product_id       : (int)$product->id,
@@ -897,12 +897,12 @@ class ProductController extends Controller
                                 'is_selected' => $selected_value_normalized !== '' && $selected_value_normalized === $value_normalized,
                             ];
                         })
-                        ->filter(fn(array $link): bool => filled((string)$link['value']))
+                        ->filter(fn (array $link): bool => filled((string)$link['value']))
                         ->values()
                         ->all(),
                 ];
             })
-            ->filter(fn(array $group): bool => $group['value_links'] !== [])
+            ->filter(fn (array $group): bool => $group['value_links'] !== [])
             ->values()
             ->all();
     }
@@ -921,9 +921,9 @@ class ProductController extends Controller
             ->map(function (ProductVariant $item): array {
                 $attributes = $item->attributeValues
                     ->mapWithKeys(function (ProductVariantAttributeValue $attribute_value): array {
-                        $attribute_id       = (int)$attribute_value->attribute_id;
-                        $value              = Str::trim((string)$attribute_value->value_string);
-                        $value_normalized   = Str::of($value)->lower()->toString();
+                        $attribute_id = (int)$attribute_value->attribute_id;
+                        $value = Str::trim((string)$attribute_value->value_string);
+                        $value_normalized = Str::of($value)->lower()->toString();
                         $attribute_value_id = (int)$attribute_value->id;
 
                         if ($attribute_id < 1 || $attribute_value_id < 1 || $value_normalized === '') {
@@ -932,8 +932,8 @@ class ProductController extends Controller
 
                         return [
                             $attribute_id => [
-                                'value_id'         => $attribute_value_id,
-                                'value'            => $value,
+                                'value_id' => $attribute_value_id,
+                                'value' => $value,
                                 'value_normalized' => $value_normalized,
                             ],
                         ];
@@ -945,7 +945,7 @@ class ProductController extends Controller
                     'attributes' => $attributes,
                 ];
             })
-            ->filter(fn(array $item): bool => $item['attributes'] !== [])
+            ->filter(fn (array $item): bool => $item['attributes'] !== [])
             ->values()
             ->all();
     }
@@ -966,7 +966,7 @@ class ProductController extends Controller
 
                 if (!isset($groups[$attribute_id])) {
                     $groups[$attribute_id] = [
-                        'name'   => $attribute_name,
+                        'name' => $attribute_name,
                         'values' => [],
                     ];
                 }
@@ -983,7 +983,7 @@ class ProductController extends Controller
 
                 $groups[$attribute_id]['values'][$value_key] = [
                     'value_id' => (int)$attribute_data['value_id'],
-                    'value'    => (string)$attribute_data['value'],
+                    'value' => (string)$attribute_data['value'],
                 ];
             }
         }
@@ -999,11 +999,11 @@ class ProductController extends Controller
      * @return array{variant_id:int,attributes:array<int, array{value_id:int,value:string,value_normalized:string}>}|null
      */
     private function resolveTargetVariantDataForOption(
-        array  $variant_data,
-        int    $attribute_id,
+        array $variant_data,
+        int $attribute_id,
         string $candidate_value_normalized,
-        array  $selected_attributes,
-        array  $variant_id_order,
+        array $selected_attributes,
+        array $variant_id_order,
     ): ?array {
         $candidates = collect($variant_data)
             ->filter(function (array $item) use ($attribute_id, $candidate_value_normalized): bool {
@@ -1027,9 +1027,9 @@ class ProductController extends Controller
         $scored = $candidates
             ->map(function (array $item) use ($selected_attributes, $attribute_id, $variant_id_order): array {
                 $score = collect($selected_attributes)
-                    ->reject(fn(array $selected_data): bool => (int)data_get($selected_data, 'value_id', 0) === $attribute_id)
+                    ->reject(fn (array $selected_data): bool => (int)data_get($selected_data, 'value_id', 0) === $attribute_id)
                     ->reduce(function (int $carry, array $selected_data, int $selected_attribute_id) use ($item): int {
-                        $selected_value  = (string)$selected_data['value_normalized'];
+                        $selected_value = (string)$selected_data['value_normalized'];
                         $candidate_value = (string)data_get($item, "attributes.$selected_attribute_id.value_normalized", '');
 
                         if ($selected_value !== '' && $candidate_value !== '' && $selected_value === $candidate_value) {
@@ -1044,8 +1044,8 @@ class ProductController extends Controller
                 return [
                     'variant_id' => (int)$item['variant_id'],
                     'attributes' => (array)$item['attributes'],
-                    'score'      => $score,
-                    'order'      => $order === false ? PHP_INT_MAX : (int)$order,
+                    'score' => $score,
+                    'order' => $order === false ? PHP_INT_MAX : (int)$order,
                 ];
             })
             ->sortBy([
@@ -1104,7 +1104,7 @@ class ProductController extends Controller
             $composition = $variant->compositions()
                 ->where('language_id', $language_id)
                 ->first();
-            $care        = $variant->cares()
+            $care = $variant->cares()
                 ->where('language_id', $language_id)
                 ->first();
 
@@ -1113,7 +1113,7 @@ class ProductController extends Controller
                     'title' => $composition->title,
                     'items' => $composition->items ?? [],
                 ],
-                'care'        => $care === null ? null : [
+                'care' => $care === null ? null : [
                     'title' => $care->title,
                     'items' => $care->items ?? [],
                 ],
@@ -1123,7 +1123,7 @@ class ProductController extends Controller
         $product_composition = $product->compositions()
             ->where('language_id', $language_id)
             ->first();
-        $product_care        = $product->cares()
+        $product_care = $product->cares()
             ->where('language_id', $language_id)
             ->first();
         $product_translation = [
@@ -1131,7 +1131,7 @@ class ProductController extends Controller
                 'title' => $product_composition->title,
                 'items' => $product_composition->items ?? [],
             ],
-            'care'        => $product_care === null ? null : [
+            'care' => $product_care === null ? null : [
                 'title' => $product_care->title,
                 'items' => $product_care->items ?? [],
             ],
@@ -1139,16 +1139,16 @@ class ProductController extends Controller
 
         $section_defaults = [
             'composition' => __('catalog/default.product.details.composition'),
-            'care'        => __('catalog/default.product.details.care'),
+            'care' => __('catalog/default.product.details.care'),
         ];
 
         return collect($section_defaults)
             ->map(function (string $default_label, string $section_key) use ($variant_translation, $product_translation): array {
-                $variant_section  = $this->normalizeDetailsSection(
+                $variant_section = $this->normalizeDetailsSection(
                     section_data : Arr::get($variant_translation, $section_key),
                     default_label: $default_label,
                 );
-                $product_section  = $this->normalizeDetailsSection(
+                $product_section = $this->normalizeDetailsSection(
                     section_data : Arr::get($product_translation, $section_key),
                     default_label: $default_label,
                 );
@@ -1157,12 +1157,12 @@ class ProductController extends Controller
                     : $product_section;
 
                 return [
-                    'key'   => $section_key,
+                    'key' => $section_key,
                     'label' => (string)$resolved_section['label'],
                     'items' => (array)$resolved_section['items'],
                 ];
             })
-            ->filter(fn(array $section): bool => $section['items'] !== [])
+            ->filter(fn (array $section): bool => $section['items'] !== [])
             ->values()
             ->all();
     }
@@ -1196,7 +1196,7 @@ class ProductController extends Controller
 
                 return Str::trim((string)$item);
             })
-            ->filter(fn(string $value): bool => $value !== '')
+            ->filter(fn (string $value): bool => $value !== '')
             ->values()
             ->all();
 
@@ -1205,5 +1205,4 @@ class ProductController extends Controller
             'items' => $items,
         ];
     }
-
 }

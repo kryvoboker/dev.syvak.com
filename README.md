@@ -49,7 +49,10 @@ GET /uk/category/{slug}/load-more
 | [Getting Started](docs/getting-started.md)                     | Installation, setup, and first run |
 | [Architecture](docs/architecture.md)                            | Modular monolith rules and boundaries |
 | [Configuration](docs/configuration.md)                          | Environment variables and config strategy |
-| [Catalog Storefront](docs/catalog-storefront.md)               | Storefront routes, filters, sorting, product pages |
+| [Catalog Storefront](docs/catalog-storefront.md)               | Storefront routes and product pages |
+| [Catalog Filtering](docs/catalog-filtering.md)                 | Category filter configuration and request flow |
+| [Filter Administration](docs/catalog-filter-admin.md)           | Creating, updating, synchronizing, and indexing filters |
+| [Category Sorting](docs/category-sorting.md)                    | Category sorting settings and query contract |
 | [Admin Panel](docs/admin-panel.md)                              | Filament resources and admin workflows |
 | [Modules Guide](app-code/app/Modules/README.md)                | Module registration, loading, and singleton module rules |
 | [OpenAPI Entry](app-code/app/openapi/openapi.yaml)               | Root Swagger/OpenAPI entrypoint for module API docs |

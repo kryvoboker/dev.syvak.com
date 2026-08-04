@@ -11,7 +11,7 @@ This page is the service catalog for `app/Services` and `app/Supports/Services`.
 | Cart persistence and rendered cart payload | `CartService`, `CartSessionService`, `CartViewDataBuilderService` |
 | Cart totals and discount/delivery adjustments | `CartTotalsPipelineService` and cart module callbacks |
 | Promo-code configuration and checkout discounts | `PromoCodeAdminOptionsService`, `PromoCodePersistenceService`, `PromoCodeService` |
-| Catalog filter setup/indexing | `CatalogFilterBootstrapService`, `CatalogFilterIndexRebuildService`, generator services |
+| Catalog filter setup/indexing | `CatalogFilterBootstrapService`, `CatalogFilterSetConfigurationService`, generator services, `CatalogFilterIndexRebuildDispatcherService` |
 | Checkout city/branch UI state | `CheckoutCitySearchService`, `CheckoutBranchSearchService`, `CheckoutSelectionStateService` |
 | Module discovery/runtime/admin settings | `ModuleDiscoveryService`, `ModuleRuntimeResolverService`, `ModuleInstanceService` |
 | Order creation/editing/thank-you data | `OrderCreationService`, `OrderAdminPersistenceService`, `ThankYouOrderDataService` |
@@ -118,7 +118,10 @@ Transforms stored cart items into view/AJAX data. `build()` is the main entry po
 | Service | Method | Responsibility |
 |---------|--------|----------------|
 | `CatalogFilterBootstrapService` | `bootstrapDefaultCategorySet()` | Loads or creates the default category filter set. |
+| `CatalogFilterSetConfigurationService` | `update()` | Atomically normalizes and persists the canonical filter set, groups, and active-language translations. |
+| `CatalogFilterIndexFreshnessService` | `markStale()` | Marks the active index as requiring a rebuild after an index-affecting mutation. |
 | `CatalogFilterIndexRebuildService` | `rebuild()` | Rebuilds the filter index under a lock using configured price/discount policies. |
+| `CatalogFilterIndexRebuildDispatcherService` | `dispatch()` | Runs a synchronous rebuild or dispatches the unique rebuild job according to configuration. |
 | `FilterGroupGeneratorService` | `sync()` | Synchronizes system and attribute filter groups and translations. |
 | `FilterValueGeneratorService` | `sync()` | Synchronizes attribute filter values, labels, and stable codes. |
 | `PriceSourceResolverService` | `resolveEffectivePrice()` | Resolves effective product price according to the filter-set pricing mode. |

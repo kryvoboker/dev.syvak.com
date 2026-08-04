@@ -178,7 +178,6 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
         app(FilterGroupGeneratorService::class)->sync($filter_set);
 
         $attribute_group = CatalogFilterGroup::query()
@@ -200,6 +199,80 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
             'catalog_filter_group_id' => (int) $attribute_group->id,
             'language_id' => 2,
             'label' => 'Вік',
+        ]);
+    }
+
+    public function test_sync_disables_attribute_group_that_is_no_longer_active(): void
+    {
+        $filter_set = CatalogFilterSet::query()->create([
+            'code' => 'default_category',
+            'context_type' => 'category',
+            'context_types' => ['category'],
+            'is_enabled' => true,
+            'is_price_filter_enabled' => true,
+            'is_attribute_filtering_enabled' => true,
+            'price_source_mode' => 'both',
+            'facet_strategy' => 'self_excluding',
+            'discount_only_policy' => 'exclude_without_discount',
+            'min_stock_quantity' => 1,
+            'settings' => [],
+        ]);
+
+        DB::table('attributes')->insert([
+            'id' => 25,
+            'sort_order' => 1,
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('products')->insert([
+            'id' => 35,
+            'model' => 'P-35',
+            'sku' => 'SKU-35',
+            'ean' => 35,
+            'quantity' => 5,
+            'minimum' => 1,
+            'price' => 100,
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('product_variants')->insert([
+            'id' => 45,
+            'product_id' => 35,
+            'is_default' => true,
+            'is_active' => true,
+            'quantity' => 5,
+            'minimum' => 1,
+            'price' => 100,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('product_variant_attribute_values')->insert([
+            'product_variant_id' => 45,
+            'attribute_id' => 25,
+            'language_id' => 1,
+            'value_string' => 'M',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        app(FilterGroupGeneratorService::class)->sync($filter_set);
+        $this->assertDatabaseHas('catalog_filter_groups', [
+            'catalog_filter_set_id' => (int) $filter_set->id,
+            'code' => 'attribute_25',
+            'is_enabled' => true,
+        ]);
+
+        DB::table('attributes')->where('id', 25)->update(['is_active' => false]);
+
+        $summary = app(FilterGroupGeneratorService::class)->sync($filter_set);
+
+        $this->assertSame(1, $summary['disabled_count']);
+        $this->assertDatabaseHas('catalog_filter_groups', [
+            'catalog_filter_set_id' => (int) $filter_set->id,
+            'code' => 'attribute_25',
+            'is_enabled' => false,
         ]);
     }
 
@@ -255,6 +328,26 @@ class CatalogFilterGroupGeneratorServiceTest extends TestCase
             $table->text('description')->nullable();
             $table->timestamps();
             $table->unique(['catalog_filter_group_id', 'language_id']);
+        });
+
+        Schema::create('catalog_filter_index_meta', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('catalog_filter_set_id')->unique();
+            $table->unsignedBigInteger('index_version')->default(1);
+            $table->unsignedBigInteger('active_index_version')->default(1);
+            $table->unsignedBigInteger('building_index_version')->nullable();
+            $table->string('rebuild_lock_key')->nullable();
+            $table->timestamp('rebuild_lock_acquired_at')->nullable();
+            $table->timestamp('last_full_rebuild_at')->nullable();
+            $table->timestamp('last_incremental_sync_at')->nullable();
+            $table->string('last_status')->default('ok');
+            $table->text('last_error')->nullable();
+            $table->unsignedTinyInteger('last_progress_percent')->nullable();
+            $table->string('last_run_mode')->nullable();
+            $table->unsignedInteger('items_total')->default(0);
+            $table->unsignedInteger('values_total')->default(0);
+            $table->unsignedBigInteger('index_rows_total')->default(0);
+            $table->timestamps();
         });
     }
 

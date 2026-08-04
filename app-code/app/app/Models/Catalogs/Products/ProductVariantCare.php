@@ -30,7 +30,7 @@ class ProductVariantCare extends Model
     public function items(): Attribute
     {
         return new Attribute(
-            set: fn(mixed $items) => is_array($items) && $items !== [] ? json_encode($items, JSON_UNESCAPED_UNICODE) : null,
+            set: fn (mixed $items) => is_array($items) && $items !== [] ? json_encode($items, JSON_UNESCAPED_UNICODE) : null,
         );
     }
 
