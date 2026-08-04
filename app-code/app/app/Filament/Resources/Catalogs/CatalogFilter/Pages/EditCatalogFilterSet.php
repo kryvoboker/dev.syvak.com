@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Catalogs\CatalogFilter\Pages;
 
-use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Filament\Pages\Wiki\CatalogFilterWikiPage;
 use App\Filament\Resources\Catalogs\CatalogFilter\CatalogFilterSetResource;
-use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroupTranslation;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Services\Catalogs\CatalogFilter\CatalogFilterBootstrapService;
-use App\Services\Catalogs\CatalogFilter\CatalogFilterIndexRebuildService;
+use App\Services\Catalogs\CatalogFilter\CatalogFilterIndexRebuildDispatcherService;
+use App\Services\Catalogs\CatalogFilter\CatalogFilterSetConfigurationService;
 use App\Services\Catalogs\CatalogFilter\FilterGroupGeneratorService;
 use App\Services\Catalogs\CatalogFilter\FilterValueGeneratorService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use LogicException;
 use Throwable;
 
 class EditCatalogFilterSet extends EditRecord
@@ -52,22 +53,47 @@ class EditCatalogFilterSet extends EditRecord
                 ->label(__('admin/wiki/wiki.actions.open_wiki'))
                 ->url(fn (): string => CatalogFilterWikiPage::getUrl(), shouldOpenInNewTab: true),
 
-            Action::make('refresh_index_status')
-                ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.refresh_index_status'))
+            Action::make('rebuild_index')
+                ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.rebuild_index'))
                 ->action(function (): void {
                     /** @var CatalogFilterSet $record */
                     $record = $this->getRecord();
-                    $summary = app(CatalogFilterIndexRebuildService::class)->rebuild($record);
+                    $summary = app(CatalogFilterIndexRebuildDispatcherService::class)->dispatch($record);
 
                     $this->refreshRecord();
 
                     Notification::make()
                         ->title(__('admin/default.success.title'))
                         ->body(
-                            __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_status_refreshed', [
+                            __(
+                                $summary['status'] === 'queued'
+                                    ? 'admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_rebuild_queued'
+                                    : 'admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_rebuilt',
+                                [
                                 'rows_total' => (int) ($summary['rows_total'] ?? 0),
                                 'index_version' => (int) ($summary['index_version'] ?? 0),
                                 'status' => (string) ($summary['status'] ?? 'ok'),
+                                ],
+                            ),
+                        )
+                        ->success()
+                        ->send();
+                }),
+
+            Action::make('refresh_index_status')
+                ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.actions.refresh_index_status'))
+                ->action(function (): void {
+                    $this->refreshRecord();
+
+                    /** @var CatalogFilterSet $record */
+                    $record = $this->getRecord();
+                    $status = $record->indexMeta?->getRawOriginal('last_status') ?? 'unknown';
+
+                    Notification::make()
+                        ->title(__('admin/default.success.title'))
+                        ->body(
+                            __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_status_refreshed', [
+                                'status' => (string) $status,
                             ]),
                         )
                         ->success()
@@ -87,6 +113,7 @@ class EditCatalogFilterSet extends EditRecord
                             __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.groups_synced', [
                                 'created' => (int) $summary['created_count'],
                                 'updated' => (int) $summary['updated_count'],
+                                'disabled' => (int) ($summary['disabled_count'] ?? 0),
                                 'total' => (int) $summary['total_groups'],
                             ]),
                         )
@@ -127,7 +154,7 @@ class EditCatalogFilterSet extends EditRecord
 
                     $group_summary = app(FilterGroupGeneratorService::class)->sync($record);
                     $value_summary = app(FilterValueGeneratorService::class)->sync($record);
-                    $index_summary = app(CatalogFilterIndexRebuildService::class)->rebuild($record);
+                    $index_summary = app(CatalogFilterIndexRebuildDispatcherService::class)->dispatch($record);
 
                     Notification::make()
                         ->title(__('admin/default.success.title'))
@@ -135,11 +162,16 @@ class EditCatalogFilterSet extends EditRecord
                             __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.all_synced', [
                                 'groups_total' => (int) $group_summary['total_groups'],
                                 'values_total' => (int) $value_summary['total_values'],
-                            ]) . ' ' . __('admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_status_refreshed', [
-                                'rows_total' => (int) ($index_summary['rows_total'] ?? 0),
-                                'index_version' => (int) ($index_summary['index_version'] ?? 0),
-                                'status' => (string) ($index_summary['status'] ?? 'ok'),
-                            ]),
+                            ]) . ' ' . __(
+                                $index_summary['status'] === 'queued'
+                                    ? 'admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_rebuild_queued'
+                                    : 'admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_rebuilt',
+                                [
+                                    'rows_total' => (int) ($index_summary['rows_total'] ?? 0),
+                                    'index_version' => (int) ($index_summary['index_version'] ?? 0),
+                                    'status' => (string) ($index_summary['status'] ?? 'ok'),
+                                ],
+                            ),
                         )
                         ->success()
                         ->send();
@@ -213,7 +245,7 @@ class EditCatalogFilterSet extends EditRecord
                         'extra' => is_array($get_data['extra'] ?? null) ? (array) $get_data['extra'] : [],
                     ],
                     'config' => [
-                        'mode' => (string) ($config_data['mode'] ?? $this->getDefaultFilterMode()),
+                        'mode' => (string) ($config_data['mode'] ?? app(CatalogFilterSetConfigurationService::class)->getDefaultFilterMode()),
                         'min_price' => $config_data['min_price'] ?? null,
                         'max_price' => $config_data['max_price'] ?? null,
                         'step' => $config_data['step'] ?? null,
@@ -231,158 +263,17 @@ class EditCatalogFilterSet extends EditRecord
 
     /**
      * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
+     * @return Model
      */
-    protected function mutateFormDataBeforeSave(array $data): array
+    protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        $selected_context_types = collect((array) Arr::get($data, 'context_types', []))
-            ->map(fn (mixed $context_type): string => (string) $context_type)
-            ->filter(fn (string $context_type): bool => filled($context_type))
-            ->unique()
-            ->values()
-            ->all();
-
-        if ($selected_context_types === []) {
-            $selected_context_types = ['category'];
+        if (! $record instanceof CatalogFilterSet) {
+            throw new LogicException('Catalog filter set record has invalid type.');
         }
 
-        Arr::set($data, 'context_types', $selected_context_types);
-        Arr::set($data, 'context_type', $selected_context_types[0]);
+        $result = app(CatalogFilterSetConfigurationService::class)->update($record, $data);
 
-        $filter_items = (array) Arr::pull($data, 'filter_items', []);
-        $this->syncFilterItems($filter_items);
-
-        return $data;
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $filter_items
-     */
-    private function syncFilterItems(array $filter_items): void
-    {
-        /** @var CatalogFilterSet $record */
-        $record = $this->getRecord();
-
-        $existing_groups_by_code = CatalogFilterGroup::query()
-            ->where('catalog_filter_set_id', (int) $record->id)
-            ->with('translations.language')
-            ->get()
-            ->keyBy('code');
-
-        /** @var array<string, Language> $languages_by_code */
-        $languages_by_code = [];
-
-        foreach ((new Language())->getActiveLanguages() as $language) {
-            $languages_by_code[(string) $language->code] = $language;
-        }
-
-        $price_filter_group_name = CatalogFilterGroupSourceTypeEnum::Price->value;
-
-        foreach ($filter_items as $filter_item) {
-            $group_code = (string) Arr::get($filter_item, 'code', '');
-
-            if (blank($group_code)) {
-                continue;
-            }
-
-            /** @var CatalogFilterGroup|null $group */
-            $group = $existing_groups_by_code->get($group_code);
-
-            $is_new_group = ! $group instanceof CatalogFilterGroup;
-
-            if ($is_new_group) {
-                $group = new CatalogFilterGroup();
-                $group->catalog_filter_set_id = (int) $record->id;
-                $group->code = $group_code;
-            }
-
-            $config_data = (array) Arr::get($filter_item, 'config', []);
-            $get_data = [
-                'value' => (string) Arr::get($filter_item, 'get.value', ''),
-                'extra' => is_array(Arr::get($filter_item, 'get.extra', []))
-                    ? (array) Arr::get($filter_item, 'get.extra', [])
-                    : [],
-            ];
-
-            $next_config = array_merge(
-                (array) ($group->config ?? []),
-                [
-                    'mode' => (string) Arr::get($config_data, 'mode', $this->getDefaultFilterMode()),
-                    'get' => $get_data,
-                    'min_price' => $group_code === $price_filter_group_name ? Arr::get($config_data, 'min_price') : null,
-                    'max_price' => $group_code === $price_filter_group_name ? Arr::get($config_data, 'max_price') : null,
-                    'step' => $group_code === $price_filter_group_name ? Arr::get($config_data, 'step') : null,
-                ],
-            );
-
-            $next_get_key = trim((string) Arr::get($filter_item, 'get.key', ''));
-
-            if (blank($next_get_key)) {
-                $next_get_key = filled((string) $group->get_key)
-                    ? (string) $group->get_key
-                    : $this->resolveDefaultGetKey(
-                        source_type: (string) Arr::get($filter_item, 'source_type', $group->getRawOriginal('source_type') ?? 'system'),
-                        source_id: filled(Arr::get($filter_item, 'source_id'))
-                            ? (int) Arr::get($filter_item, 'source_id')
-                            : null,
-                        group_code: $group_code,
-                    );
-            }
-
-            $group->fill([
-                'source_type' => (string) Arr::get($filter_item, 'source_type', $group->getRawOriginal('source_type') ?? 'system'),
-                'source_id' => filled(Arr::get($filter_item, 'source_id'))
-                    ? (int) Arr::get($filter_item, 'source_id')
-                    : null,
-                'is_enabled' => (bool) Arr::get($filter_item, 'is_enabled', true),
-                'sort_order' => (int) Arr::get($filter_item, 'sort_order', 0),
-                'get_key' => $next_get_key,
-                'config' => $next_config,
-            ]);
-            $group->save();
-
-            $labels = (array) Arr::get($config_data, 'labels', []);
-
-            foreach ($languages_by_code as $language_code => $language) {
-                CatalogFilterGroupTranslation::query()->updateOrCreate(
-                    [
-                        'catalog_filter_group_id' => (int) $group->id,
-                        'language_id' => (int) $language->id,
-                    ],
-                    [
-                        'label' => (string) ($labels[$language_code] ?? ''),
-                        'description' => null,
-                    ],
-                );
-            }
-        }
-    }
-
-    private function getDefaultFilterMode(): string
-    {
-        $filter_modes = (array) config('catalog-filter.filter_modes', []);
-        $default_mode = array_key_first($filter_modes);
-
-        return is_string($default_mode) && filled($default_mode) ? $default_mode : 'multiple';
-    }
-
-    private function resolveDefaultGetKey(string $source_type, ?int $source_id, string $group_code): string
-    {
-        $price_filter_group_name = CatalogFilterGroupSourceTypeEnum::Price->value;
-
-        if ($source_type === $price_filter_group_name) {
-            return $price_filter_group_name;
-        }
-
-        if ($source_type === 'attribute' && $source_id !== null && $source_id > 0) {
-            return 'filters[' . $source_id . ']';
-        }
-
-        if (filled($group_code)) {
-            return $group_code;
-        }
-
-        return 'filters';
+        return $result['filter_set'];
     }
 
     private function refreshRecord(): void

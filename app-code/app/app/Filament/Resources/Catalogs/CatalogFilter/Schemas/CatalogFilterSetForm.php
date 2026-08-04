@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Catalogs\CatalogFilter\Schemas;
 
 use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\ApplicationSettings\Language;
+use Closure;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -15,6 +16,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rule;
 
@@ -47,6 +49,21 @@ class CatalogFilterSetForm
                                             ->searchable()
                                             ->preload()
                                             ->rules(['required', 'array'])
+                                            ->rule(function (): Closure {
+                                                return function (string $attribute, mixed $value, Closure $fail): void {
+                                                    if (! is_array($value)) {
+                                                        return;
+                                                    }
+
+                                                    $invalid_contexts = collect($value)
+                                                        ->map(fn (mixed $context): string => (string) $context)
+                                                        ->diff(array_keys(self::getContextOptions()));
+
+                                                    if ($invalid_contexts->isNotEmpty()) {
+                                                        $fail(__('admin/catalogs/catalog-filter/catalog-filter-set.errors.invalid_context_type'));
+                                                    }
+                                                };
+                                            })
                                             ->required(),
 
                                         Toggle::make('is_enabled')
@@ -206,7 +223,21 @@ class CatalogFilterSetForm
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.source_type'))
                                                     ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
                                                     ->disabled()
-                                                    ->dehydrated(),
+                                                    ->dehydrated()
+                                                    ->rule(function (Get $get): Closure {
+                                                        return function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                                                            $source_type = (string) $value;
+                                                            $source_id = $get('source_id');
+
+                                                            if ($source_type === 'attribute' && (int) $source_id <= 0) {
+                                                                $fail(__('admin/catalogs/catalog-filter/catalog-filter-set.errors.invalid_source_id'));
+                                                            }
+
+                                                            if ($source_type === 'price' && filled($source_id)) {
+                                                                $fail(__('admin/catalogs/catalog-filter/catalog-filter-set.errors.invalid_source_id'));
+                                                            }
+                                                        };
+                                                    }),
 
                                                 TextInput::make('source_id')
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.source_id'))
@@ -223,6 +254,7 @@ class CatalogFilterSetForm
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.sort_order'))
                                                     ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
                                                     ->numeric()
+                                                    ->minValue(0)
                                                     ->required(),
 
                                                 TextInput::make('get.key')
@@ -270,6 +302,16 @@ class CatalogFilterSetForm
                                                     ->numeric()
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.min_price'))
                                                     ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
+                                                    ->minValue(0)
+                                                    ->rule(function (Get $get): Closure {
+                                                        return function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                                                            $max_price = $get('config.max_price');
+
+                                                            if (is_numeric($value) && is_numeric($max_price) && (float) $value > (float) $max_price) {
+                                                                $fail(__('admin/catalogs/catalog-filter/catalog-filter-set.errors.min_price_greater_than_max'));
+                                                            }
+                                                        };
+                                                    })
                                                     ->visible(fn (callable $get): bool => (string) $get('code') === $price_filter_group_name)
                                                     ->dehydrated(fn (callable $get): bool => (string) $get('code') === $price_filter_group_name),
 
@@ -277,6 +319,16 @@ class CatalogFilterSetForm
                                                     ->numeric()
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.max_price'))
                                                     ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
+                                                    ->minValue(0)
+                                                    ->rule(function (Get $get): Closure {
+                                                        return function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                                                            $min_price = $get('config.min_price');
+
+                                                            if (is_numeric($value) && is_numeric($min_price) && (float) $value < (float) $min_price) {
+                                                                $fail(__('admin/catalogs/catalog-filter/catalog-filter-set.errors.max_price_less_than_min'));
+                                                            }
+                                                        };
+                                                    })
                                                     ->visible(fn (callable $get): bool => (string) $get('code') === $price_filter_group_name)
                                                     ->dehydrated(fn (callable $get): bool => (string) $get('code') === $price_filter_group_name),
 
@@ -284,6 +336,7 @@ class CatalogFilterSetForm
                                                     ->numeric()
                                                     ->label(__('admin/catalogs/catalog-filter/catalog-filter-set.labels.step'))
                                                     ->helperText(__('admin/catalogs/catalog-filter/catalog-filter-set.helpers.see_wiki'))
+                                                    ->minValue(0.0001)
                                                     ->visible(fn (callable $get): bool => (string) $get('code') === $price_filter_group_name)
                                                     ->dehydrated(fn (callable $get): bool => (string) $get('code') === $price_filter_group_name),
                                             ])

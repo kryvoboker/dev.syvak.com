@@ -54,9 +54,24 @@ class FilterValueGeneratorService
                 $removed_count += $summary['removed_count'];
             }
 
+            $disabled_groups_removed_count = $this->removeValuesFromDisabledGroups($filter_set);
+            $removed_count += $disabled_groups_removed_count;
+
+            app(CatalogFilterIndexFreshnessService::class)->markStale($filter_set);
+
             $total_values = CatalogFilterValue::query()
                 ->whereIn('catalog_filter_group_id', $groups->pluck('id')->all())
                 ->count();
+
+            if ($removed_count > 0) {
+                Log::channel('daily')->info(
+                    'Stale catalog filter values were removed.',
+                    [
+                        'catalog_filter_set_id' => (int) $filter_set->id,
+                        'removed_count' => $removed_count,
+                    ],
+                );
+            }
 
             return [
                 'created_count' => $created_count,
@@ -151,6 +166,35 @@ class FilterValueGeneratorService
             'updated_count' => $updated_count,
             'removed_count' => $removed_count,
         ];
+    }
+
+    private function removeValuesFromDisabledGroups(CatalogFilterSet $filter_set): int
+    {
+        $disabled_group_ids = CatalogFilterGroup::query()
+            ->where('catalog_filter_set_id', (int) $filter_set->id)
+            ->where('source_type', CatalogFilterGroupSourceTypeEnum::Attribute->value)
+            ->where('is_enabled', false)
+            ->pluck('id');
+
+        if ($disabled_group_ids->isEmpty()) {
+            return 0;
+        }
+
+        $value_ids = CatalogFilterValue::query()
+            ->whereIn('catalog_filter_group_id', $disabled_group_ids)
+            ->pluck('id');
+
+        if ($value_ids->isEmpty()) {
+            return 0;
+        }
+
+        CatalogFilterValueTranslation::query()
+            ->whereIn('catalog_filter_value_id', $value_ids)
+            ->delete();
+
+        return CatalogFilterValue::query()
+            ->whereIn('id', $value_ids)
+            ->delete();
     }
 
     private function syncAttributeValueTranslations(
