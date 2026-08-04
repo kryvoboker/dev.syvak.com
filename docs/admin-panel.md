@@ -1,4 +1,4 @@
-[← Catalog Storefront](catalog-storefront.md) · [Back to README](../README.md) · [Helpers Reference →](helpers-reference.md)
+[← Category Sorting](category-sorting.md) · [Back to README](../README.md) · [Helpers Reference →](helpers-reference.md)
 
 # Admin Panel
 

@@ -1,4 +1,4 @@
-[← Configuration](configuration.md) · [Back to README](../README.md) · [Admin Panel →](admin-panel.md)
+[← Configuration](configuration.md) · [Back to README](../README.md) · [Catalog Filtering →](catalog-filtering.md)
 
 # Catalog Storefront
 
