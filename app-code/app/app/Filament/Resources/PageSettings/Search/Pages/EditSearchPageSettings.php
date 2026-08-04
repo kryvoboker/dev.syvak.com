@@ -7,7 +7,10 @@ namespace App\Filament\Resources\PageSettings\Search\Pages;
 use App\Filament\Resources\PageSettings\Search\SearchPageSettingResource;
 use App\Models\PageSettings\PageSetting;
 use App\Services\PageSettings\PageSettingsBootstrapService;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Throwable;
@@ -24,6 +27,19 @@ class EditSearchPageSettings extends EditRecord
     public function getHeading(): ?string
     {
         return __('admin/settings/search_page_settings.navigation_label');
+    }
+
+    /**
+     * @return array|Action[]|ActionGroup[]
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
+        ];
     }
 
     /**

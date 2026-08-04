@@ -9,13 +9,18 @@ use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\PageSettings\PageSetting;
 use App\Models\Slug;
 use App\Services\PageSettings\PageSettingsBootstrapService;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use LogicException;
+use RuntimeException;
 use Throwable;
 
 class EditNotFound extends EditRecord
@@ -40,6 +45,19 @@ class EditNotFound extends EditRecord
     public function getHeading(): ?string
     {
         return __('admin/settings/not_found_page_settings.navigation_label');
+    }
+
+    /**
+     * @return array|Action[]|ActionGroup[]
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label(__('admin/default.buttons.save'))
+                ->icon(Heroicon::CheckCircle)
+                ->action(fn () => $this->save()),
+        ];
     }
 
     /**
@@ -87,12 +105,14 @@ class EditNotFound extends EditRecord
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
+     *
+     * @throws Throwable
      */
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         if (! $record instanceof PageSetting) {
-            throw new \LogicException('Not found page setting record has invalid type.');
+            throw new LogicException('Not found page setting record has invalid type.');
         }
 
         try {
@@ -106,7 +126,7 @@ class EditNotFound extends EditRecord
                 ]);
 
                 if ($this->updateOrCreateSlugs() === false) {
-                    throw new \RuntimeException('Failed to update not found page slugs.');
+                    throw new RuntimeException('Failed to update not found page slugs.');
                 }
 
                 return $record->fresh() ?? $record;
