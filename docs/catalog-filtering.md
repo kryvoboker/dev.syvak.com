@@ -1,4 +1,4 @@
-[← Catalog Storefront](catalog-storefront.md) · [Back to README](../README.md) · [Category Sorting →](category-sorting.md)
+[← Catalog Storefront](catalog-storefront.md) · [Back to README](../README.md) · [Filter Administration →](catalog-filter-admin.md)
 
 # Catalog Product Filtering
 
