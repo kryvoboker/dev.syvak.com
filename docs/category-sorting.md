@@ -1,4 +1,4 @@
-[← Catalog Filtering](catalog-filtering.md) · [Back to README](../README.md) · [Admin Panel →](admin-panel.md)
+[← Filter Administration](catalog-filter-admin.md) · [Back to README](../README.md) · [Admin Panel →](admin-panel.md)
 
 # Category Product Sorting
 
