@@ -61,6 +61,13 @@ return [
         'get_value_usage' => 'Used in URL/GET contract as fallback flag value (e.g. attribute=1 -> light). Not a DB column. See "Wiki".',
     ],
 
+    'errors' => [
+        'invalid_context_type' => 'The selected context is not supported.',
+        'invalid_source_id' => 'The filter source ID does not match the source type.',
+        'min_price_greater_than_max' => 'Minimum price cannot be greater than maximum price.',
+        'max_price_less_than_min' => 'Maximum price cannot be less than minimum price.',
+    ],
+
     'sections' => [
         'general' => 'General',
         'strategy_by_price' => 'Price Filtering Strategy',
@@ -72,14 +79,17 @@ return [
 
     'actions' => [
         'refresh_index_status' => 'Refresh Index Status',
+        'rebuild_index' => 'Rebuild Index',
         'sync_groups' => 'Sync Groups',
         'sync_values' => 'Sync Values',
         'sync_all' => 'Sync Groups & Values',
     ],
 
     'notifications' => [
-        'index_status_refreshed' => 'Index rebuild completed. Rows: :rows_total, Version: :index_version, Status: :status.',
-        'groups_synced' => 'Groups synchronized. Created: :created, Updated: :updated, Total: :total.',
+        'index_status_refreshed' => 'Index status refreshed. Status: :status.',
+        'index_rebuilt' => 'Index rebuild completed. Rows: :rows_total, Version: :index_version, Status: :status.',
+        'index_rebuild_queued' => 'Index rebuild queued. Active version: :index_version, Status: :status.',
+        'groups_synced' => 'Groups synchronized. Created: :created, Updated: :updated, Disabled: :disabled, Total: :total.',
         'values_synced' => 'Values synchronized. Created: :created, Updated: :updated, Removed: :removed, Total: :total.',
         'all_synced' => 'Catalog filter synchronized. Groups: :groups_total, Values: :values_total.',
     ],

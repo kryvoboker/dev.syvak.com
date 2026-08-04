@@ -60,4 +60,47 @@ class CatalogFilterIndexMeta extends Model
     {
         return $this->belongsTo(CatalogFilterSet::class, 'catalog_filter_set_id');
     }
+
+    public function isStale(): bool
+    {
+        return $this->last_status === CatalogFilterIndexStatusEnum::Stale;
+    }
+
+    public function markAsStale(): bool
+    {
+        if ($this->last_status === CatalogFilterIndexStatusEnum::Running) {
+            return false;
+        }
+
+        if ($this->last_status === CatalogFilterIndexStatusEnum::Stale) {
+            return false;
+        }
+
+        $this->forceFill([
+            'last_status' => CatalogFilterIndexStatusEnum::Stale,
+            'last_error' => null,
+            'last_progress_percent' => null,
+        ])->save();
+
+        return true;
+    }
+
+    public function markAsQueued(): bool
+    {
+        if ($this->last_status === CatalogFilterIndexStatusEnum::Running) {
+            return false;
+        }
+
+        if ($this->last_status === CatalogFilterIndexStatusEnum::Queued) {
+            return false;
+        }
+
+        $this->forceFill([
+            'last_status' => CatalogFilterIndexStatusEnum::Queued,
+            'last_error' => null,
+            'last_progress_percent' => 0,
+        ])->save();
+
+        return true;
+    }
 }
