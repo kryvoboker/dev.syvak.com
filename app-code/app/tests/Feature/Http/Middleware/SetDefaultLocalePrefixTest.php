@@ -77,4 +77,21 @@ class SetDefaultLocalePrefixTest extends TestCase
         $this->assertSame(2, get_app_settings()?->language_id);
         $this->assertSame('uk', session('locale'));
     }
+
+    public function test_it_uses_the_locale_prefix_for_an_unmatched_path(): void
+    {
+        $request = Request::create('/uk/sdfsdf');
+        $request->setLaravelSession(app('session')->driver());
+        $request->session()->put('locale', 'en');
+
+        $response = (new SetDefaultLocalePrefix())->handle(
+            $request,
+            static fn (): Response => response('ok'),
+        );
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertSame('uk', app()->getLocale());
+        $this->assertSame(2, get_app_settings()?->language_id);
+        $this->assertSame('uk', session('locale'));
+    }
 }

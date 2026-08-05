@@ -66,6 +66,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
             }
 
             try {
+                app(SetDefaultLocalePrefix::class)->applyLocaleFromPath($request);
+
                 return response()->view(
                     'catalog.pages.not-found',
                     app(NotFoundPageService::class)->getViewData(),
