@@ -168,6 +168,12 @@ class NotFoundForm
                                     'regex:/^(transparent|#[0-9a-fA-F]{6})$/',
                                 ]),
 
+                            TextInput::make("images.$slot.custom_css_classes")
+                                ->label(__('admin/settings/not_found_page_settings.labels.custom_css_classes'))
+                                ->helperText(__('admin/settings/not_found_page_settings.helpers.custom_css_classes'))
+                                ->maxLength(1000)
+                                ->nullable(),
+
                             TextInput::make("images.$slot.sort_order")
                                 ->label(__('admin/settings/not_found_page_settings.labels.sort_order'))
                                 ->numeric()

@@ -30,6 +30,7 @@ return [
         'height' => 'Height',
         'is_square' => 'Square image',
         'background' => 'Converted image background',
+        'custom_css_classes' => 'Custom CSS Classes',
         'sort_order' => 'Sort order',
     ],
 
@@ -37,6 +38,7 @@ return [
         'link_url' => 'Use an absolute HTTP(S) address or a relative path starting with /. The address is required for every language.',
         'image' => 'Optional image. Supported formats: JPEG, PNG, and SVG. Maximum size: 5 MB.',
         'background' => 'Enter transparent or a six-digit HEX color, for example #FFFFFF.',
+        'custom_css_classes' => 'Enter CSS classes separated by spaces.',
     ],
 
     'defaults' => [
