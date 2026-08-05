@@ -17,28 +17,29 @@ final readonly class NotFoundPageService
 {
     public function __construct(
         private PageSettingsBootstrapService $page_settings_bootstrap_service,
-        private HeaderService                $header_service,
-        private FooterService                $footer_service,
-    ) {}
+        private HeaderService $header_service,
+        private FooterService $footer_service,
+    ) {
+    }
 
     /**
      *
-     * @return array<string, mixed>
      * @throws Throwable
+     * @return array<string, mixed>
      */
     public function getViewData(): array
     {
         $not_found_data = $this->getNotFoundData();
-        $header_data    = ($this->header_service)([
+        $header_data = ($this->header_service)([
             'breadcrumbs' => [],
         ]);
 
         return [
-            'page_type'      => (string)config('page-settings.page_type.not_found', 'not_found'),
-            'page_title'     => $not_found_data['title'],
+            'page_type' => (string)config('page-settings.page_type.not_found', 'not_found'),
+            'page_title' => $not_found_data['title'],
             'not_found_data' => $not_found_data,
-            'header_data'    => $header_data,
-            'footer_data'    => ($this->footer_service)([
+            'header_data' => $header_data,
+            'footer_data' => ($this->footer_service)([
                 'categories' => $header_data['categories'],
             ]),
         ];
@@ -46,6 +47,7 @@ final readonly class NotFoundPageService
 
     /**
      *
+     * @throws Throwable
      * @return array{
      *     title:string,
      *     description?:string,
@@ -55,21 +57,20 @@ final readonly class NotFoundPageService
      *          },
      *      images:array<int,array<string,mixed>>
      * }
-     * @throws Throwable
      */
     public function getNotFoundData(): array
     {
-        $settings           = $this->page_settings_bootstrap_service->getNotFoundSettings();
+        $settings = $this->page_settings_bootstrap_service->getNotFoundSettings();
         $localized_settings = $this->resolveLocalizedSettings($settings);
 
         return [
-            'title'       => $this->resolveTitle($localized_settings),
+            'title' => $this->resolveTitle($localized_settings),
             'description' => $this->resolveDescription($localized_settings),
-            'link'        => [
+            'link' => [
                 'label' => $this->resolveLinkLabel($localized_settings),
-                'url'   => $this->resolveLinkUrl($localized_settings),
+                'url' => $this->resolveLinkUrl($localized_settings),
             ],
-            'images'      => $this->resolveImages($settings),
+            'images' => $this->resolveImages($settings),
         ];
     }
 
@@ -87,7 +88,7 @@ final readonly class NotFoundPageService
         }
 
         $app_settings = get_app_settings();
-        $language_id  = Language::query()
+        $language_id = Language::query()
             ->where('code', app()->getLocale())
             ->where('is_active', true)
             ->value('id');
@@ -161,7 +162,7 @@ final readonly class NotFoundPageService
     /**
      * @param array<string, mixed> $settings
      *
-     * @return array<int, array{urls:array<string,string>,width:int,height:int,is_square:bool,sort_order:int}>
+     * @return array<int, array{urls:array<string,string>,width:int,height:int,is_square:bool,custom_css_classes:string,sort_order:int}>
      */
     private function resolveImages(array $settings): array
     {
@@ -172,8 +173,8 @@ final readonly class NotFoundPageService
         }
 
         return collect($images)
-            ->filter(fn(mixed $image): bool => is_array($image) && filled(Arr::get($image, 'path')))
-            ->sortBy(fn(array $image): int => (int)Arr::get($image, 'sort_order', 0))
+            ->filter(fn (mixed $image): bool => is_array($image) && filled(Arr::get($image, 'path')))
+            ->sortBy(fn (array $image): int => (int)Arr::get($image, 'sort_order', 0))
             ->values()
             ->map(function (array $image): ?array {
                 $path = Str::ltrim((string)Arr::get($image, 'path'), '/');
@@ -183,26 +184,27 @@ final readonly class NotFoundPageService
                 }
 
                 try {
-                    $width  = max(1, (int)Arr::get($image, 'width', 600));
+                    $width = max(1, (int)Arr::get($image, 'width', 600));
                     $height = max(1, (int)Arr::get($image, 'height', $width));
 
                     return [
-                        'urls'       => multiple_convert_img_and_get_url(
+                        'urls' => multiple_convert_img_and_get_url(
                             $path,
                             $width,
                             $height,
                             (bool)Arr::get($image, 'is_square', true),
                             (string)Arr::get($image, 'background', 'transparent'),
                         ),
-                        'width'      => $width,
-                        'height'     => $height,
-                        'is_square'  => (bool)Arr::get($image, 'is_square', true),
+                        'width' => $width,
+                        'height' => $height,
+                        'is_square' => (bool)Arr::get($image, 'is_square', true),
+                        'custom_css_classes' => Str::squish((string)Arr::get($image, 'custom_css_classes', '')),
                         'sort_order' => (int)Arr::get($image, 'sort_order', 0),
                     ];
                 } catch (Throwable $throwable) {
                     Log::channel('stack')->warning('Public 404 image resolution failed.', [
                         'image_path' => $path,
-                        'exception'  => $throwable,
+                        'exception' => $throwable,
                     ]);
 
                     return null;

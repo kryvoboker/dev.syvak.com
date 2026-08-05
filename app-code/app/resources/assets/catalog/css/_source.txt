@@ -3,3 +3,10 @@ h-10
 text-white
 text-light-gray
 mt-2
+
+// 404 page
+hidden md:block
+opacity-50
+hidden
+xl:block
+// 404 page

@@ -647,6 +647,7 @@ class PageSettingsBootstrapService
                     'height' => 600,
                     'is_square' => true,
                     'background' => 'transparent',
+                    'custom_css_classes' => '',
                     'sort_order' => 10,
                 ],
                 'slot_2' => [
@@ -655,6 +656,7 @@ class PageSettingsBootstrapService
                     'height' => 600,
                     'is_square' => true,
                     'background' => 'transparent',
+                    'custom_css_classes' => '',
                     'sort_order' => 20,
                 ],
             ],
@@ -740,11 +742,12 @@ class PageSettingsBootstrapService
                 'height' => max(1, (int) Arr::get($image, 'height', $default_image['height'])),
                 'is_square' => (bool) Arr::get($image, 'is_square', $default_image['is_square']),
                 'background' => $background,
+                'custom_css_classes' => Str::squish((string) Arr::get($image, 'custom_css_classes', $default_image['custom_css_classes'])),
                 'sort_order' => max(0, (int) Arr::get($image, 'sort_order', $default_image['sort_order'])),
             ];
         }
 
-        $normalized_settings = array_replace_recursive(
+        return array_replace_recursive(
             $this->buildNotFoundSettingsContract($defaults),
             $settings,
             [
@@ -755,8 +758,6 @@ class PageSettingsBootstrapService
                 'images' => $normalized_images,
             ],
         );
-
-        return $normalized_settings;
     }
 
     /**
@@ -972,17 +973,17 @@ class PageSettingsBootstrapService
 
         $settings = array_replace_recursive(
             $this->buildProductSettingsContract([
-                'customer_minimum_stock_quantity' => max(0, (int) Arr::get($settings, 'customer.stock.minimum_stock_quantity', $defaults['customer_minimum_stock_quantity'])),
-                'customer_image_width' => max(1, (int) Arr::get($settings, 'customer.images.product.width', (int) Arr::get($settings, 'images.product.width', $defaults['customer_image_width']))),
-                'customer_image_height' => max(1, (int) Arr::get($settings, 'customer.images.product.height', (int) Arr::get($settings, 'images.product.height', $defaults['customer_image_height']))),
-                'admin_ean_max_length' => max(1, (int) Arr::get($settings, 'admin.validation.ean_max_length', (int) Arr::get($settings, 'validation.ean_max_length', $defaults['admin_ean_max_length']))),
-                'admin_upload_max_size_kb' => max(1, (int) Arr::get($settings, 'admin.upload.max_size_kb', $defaults['admin_upload_max_size_kb'])),
+                'customer_minimum_stock_quantity' => (int)max(0, (int) Arr::get($settings, 'customer.stock.minimum_stock_quantity', $defaults['customer_minimum_stock_quantity'])),
+                'customer_image_width' => (int)max(1, (int) Arr::get($settings, 'customer.images.product.width', (int) Arr::get($settings, 'images.product.width', $defaults['customer_image_width']))),
+                'customer_image_height' => (int)max(1, (int) Arr::get($settings, 'customer.images.product.height', (int) Arr::get($settings, 'images.product.height', $defaults['customer_image_height']))),
+                'admin_ean_max_length' => (int)max(1, (int) Arr::get($settings, 'admin.validation.ean_max_length', (int) Arr::get($settings, 'validation.ean_max_length', $defaults['admin_ean_max_length']))),
+                'admin_upload_max_size_kb' => (int)max(1, (int) Arr::get($settings, 'admin.upload.max_size_kb', $defaults['admin_upload_max_size_kb'])),
                 'admin_image_upload_directory' => (string) Arr::get($settings, 'admin.upload.directory', $defaults['admin_image_upload_directory']),
                 'admin_no_image_path' => (string) Arr::get($settings, 'admin.images.no_image.path', $defaults['admin_no_image_path']),
-                'admin_preview_in_list_width' => max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.width', $defaults['admin_preview_in_list_width'])),
-                'admin_preview_in_list_height' => max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.height', $defaults['admin_preview_in_list_height'])),
-                'admin_preview_in_page_width' => max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.width', $defaults['admin_preview_in_page_width'])),
-                'admin_preview_in_page_height' => max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.height', $defaults['admin_preview_in_page_height'])),
+                'admin_preview_in_list_width' => (int)max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.width', $defaults['admin_preview_in_list_width'])),
+                'admin_preview_in_list_height' => (int)max(1, (int) Arr::get($settings, 'admin.images.preview_in_list.height', $defaults['admin_preview_in_list_height'])),
+                'admin_preview_in_page_width' => (int)max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.width', $defaults['admin_preview_in_page_width'])),
+                'admin_preview_in_page_height' => (int)max(1, (int) Arr::get($settings, 'admin.images.preview_in_page.height', $defaults['admin_preview_in_page_height'])),
             ]),
             $settings,
         );
@@ -1063,12 +1064,12 @@ class PageSettingsBootstrapService
 
         $settings = array_replace_recursive(
             $this->buildSearchSettingsContract([
-                'products_per_page_limit' => max(1, (int) Arr::get($settings, 'pagination.products_per_page_limit', $defaults['products_per_page_limit'])),
-                'search_product_width' => max(1, (int) Arr::get($settings, 'images.search_product.width', $defaults['search_product_width'])),
-                'search_product_height' => max(1, (int) Arr::get($settings, 'images.search_product.height', $defaults['search_product_height'])),
+                'products_per_page_limit' => (int)max(1, (int) Arr::get($settings, 'pagination.products_per_page_limit', $defaults['products_per_page_limit'])),
+                'search_product_width' => (int)max(1, (int) Arr::get($settings, 'images.search_product.width', $defaults['search_product_width'])),
+                'search_product_height' => (int)max(1, (int) Arr::get($settings, 'images.search_product.height', $defaults['search_product_height'])),
                 'search_not_found_path' => (string) Arr::get($settings, 'images.search_not_found.path', $defaults['search_not_found_path']),
-                'search_not_found_width' => max(1, (int) Arr::get($settings, 'images.search_not_found.width', $defaults['search_not_found_width'])),
-                'search_not_found_height' => max(1, (int) Arr::get($settings, 'images.search_not_found.height', $defaults['search_not_found_height'])),
+                'search_not_found_width' => (int)max(1, (int) Arr::get($settings, 'images.search_not_found.width', $defaults['search_not_found_width'])),
+                'search_not_found_height' => (int)max(1, (int) Arr::get($settings, 'images.search_not_found.height', $defaults['search_not_found_height'])),
             ]),
             $settings,
         );

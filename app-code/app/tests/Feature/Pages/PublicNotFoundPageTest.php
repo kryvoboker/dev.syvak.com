@@ -175,6 +175,28 @@ class PublicNotFoundPageTest extends TestCase
             ->assertSee('href="/en"', false);
     }
 
+    public function testPublicStorefront404UsesTheLocalePrefixFromAnUnmatchedPath(): void
+    {
+        PageSetting::query()->create([
+            'page_type' => PageSetting::PAGE_TYPE_NOT_FOUND,
+            'settings' => [
+                'localized' => [
+                    '1' => ['title' => 'Page is missing'],
+                    '2' => ['title' => 'Сторінку не знайдено'],
+                ],
+            ],
+        ]);
+
+        $this->withoutVite();
+
+        $response = $this->withSession(['locale' => 'en'])->get('/uk/sdfsdf');
+
+        $response
+            ->assertStatus(404)
+            ->assertSee('Сторінку не знайдено')
+            ->assertDontSee('Page is missing');
+    }
+
     public function testPublic404DoesNotReplaceJsonOrAdminResponses(): void
     {
         PageSetting::query()->create([
@@ -238,6 +260,7 @@ class PublicNotFoundPageTest extends TestCase
                 'images' => [
                     'slot_1' => [
                         'path' => 'images/not-found/second.png',
+                        'custom_css_classes' => '  md:w-1/2   opacity-75 ',
                         'sort_order' => 20,
                     ],
                     'slot_2' => [
@@ -253,5 +276,6 @@ class PublicNotFoundPageTest extends TestCase
         $this->assertCount(2, $images);
         $this->assertSame(10, $images[0]['sort_order']);
         $this->assertSame(20, $images[1]['sort_order']);
+        $this->assertSame('md:w-1/2 opacity-75', $images[1]['custom_css_classes']);
     }
 }

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Catalogs\Products;
 
+use App\Http\Controllers\Pages\ProductController;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Slug;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
 
 class LocalizedProductVariantRouteTest extends TestCase
@@ -103,6 +106,36 @@ class LocalizedProductVariantRouteTest extends TestCase
         );
 
         $this->assertStringContainsString('/en/product/bereginya-sadu/garden-guardian', $generated_url);
+    }
+
+    public function test_it_returns_not_found_for_an_unknown_explicit_variant_slug(): void
+    {
+        $this->seedLanguages();
+
+        $product = Product::query()->create([
+            'model' => 'MODEL-844',
+            'sku' => 'SKU-844',
+            'quantity' => 10,
+            'minimum' => 1,
+            'price' => 1000,
+            'is_active' => true,
+        ]);
+
+        Slug::query()->create([
+            'sluggable_type' => Product::class,
+            'sluggable_id' => (int) $product->id,
+            'language_id' => 1,
+            'slug' => 'product-uk',
+        ]);
+
+        $this->expectException(NotFoundHttpException::class);
+
+        app(ProductController::class)->show(
+            Request::create('/uk/product/product-uk/fdsf'),
+            'uk',
+            'product-uk',
+            'fdsf',
+        );
     }
 
     public function test_it_preserves_sparse_numeric_attribute_ids_when_resolving_variant_route(): void

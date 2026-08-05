@@ -100,6 +100,7 @@ class NotFoundPageSettingsTest extends TestCase
                     'height' => 480,
                     'is_square' => false,
                     'background' => '#ffffff',
+                    'custom_css_classes' => '  md:w-1/2   opacity-75 ',
                     'sort_order' => 2,
                 ],
                 'slot_2' => [
@@ -113,6 +114,7 @@ class NotFoundPageSettingsTest extends TestCase
         $this->assertSame(720, (int) data_get($settings, 'images.slot_1.width'));
         $this->assertFalse((bool) data_get($settings, 'images.slot_1.is_square'));
         $this->assertSame('#ffffff', data_get($settings, 'images.slot_1.background'));
+        $this->assertSame('md:w-1/2 opacity-75', data_get($settings, 'images.slot_1.custom_css_classes'));
         $this->assertSame('transparent', data_get($settings, 'images.slot_2.background'));
         $this->assertArrayNotHasKey('slugs', $settings);
         $this->assertArrayNotHasKey('seo', (array) Arr::get($settings, 'localized.1', []));
