@@ -44,7 +44,7 @@ return [
     'options' => [
         'autoOrientation' => true,
         'decodeAnimation' => true,
-        'blendingColor' => 'ffffff',
+        'blendingColor' => '000000',
         'strip' => false,
     ],
 ];

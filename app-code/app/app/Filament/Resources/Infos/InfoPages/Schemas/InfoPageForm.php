@@ -25,7 +25,7 @@ class InfoPageForm
 
     public static function configure(Schema $schema): Schema
     {
-        $active_languages = self::getAcriveLanguages();
+        $active_languages = self::getActiveLanguages();
 
         return $schema
             ->components([
