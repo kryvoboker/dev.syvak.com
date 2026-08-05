@@ -2,3 +2,9 @@
 /.db
 html
 slim.report.json
+
+# Local and environment-specific secrets.
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
