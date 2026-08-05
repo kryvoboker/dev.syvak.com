@@ -136,13 +136,14 @@ class ProductController extends Controller
         if (filled((string)$variant_slug)) {
             $variant_from_slug = ProductVariant::findBySlug((string)$variant_slug, $language_id);
 
-            if ($variant_from_slug instanceof ProductVariant && (int)$variant_from_slug->product_id !== (int)$product->id) {
+            if (
+                !$variant_from_slug instanceof ProductVariant ||
+                (int)$variant_from_slug->product_id !== (int)$product->id
+            ) {
                 throw new NotFoundHttpException();
             }
 
-            if ($variant_from_slug instanceof ProductVariant) {
-                return $variant_from_slug;
-            }
+            return $variant_from_slug;
         }
 
         $variant_from_attributes = $this->resolveVariantByAttributeQuery($request, $product, $language_id);
@@ -1098,7 +1099,6 @@ class ProductController extends Controller
     private function resolveDetailsSections(Product $product, ?ProductVariant $variant, int $language_id): array
     {
         $variant_translation = [];
-        $product_translation = [];
 
         if ($variant instanceof ProductVariant) {
             $composition = $variant->compositions()

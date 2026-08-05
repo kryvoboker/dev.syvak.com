@@ -48,6 +48,8 @@ class SetDefaultLocalePrefix
         $route_locale = $route?->parameter($locale_key);
         $has_locale_parameter = in_array($locale_key, $route?->parameterNames() ?? [], true);
         $has_valid_route_locale = in_array($route_locale, $allowed_locales, true);
+        $path_locale = Str::before($path_info, '/');
+        $has_valid_path_locale = in_array($path_locale, $allowed_locales, true);
 
         if ($has_locale_parameter && !$has_valid_route_locale && filled($route_name)) {
             $route_parameters = array_merge($route->parameters(), [
@@ -61,7 +63,34 @@ class SetDefaultLocalePrefix
             );
         }
 
-        $resolved_locale = $has_valid_route_locale ? $route_locale : $normalized_session_locale;
+        $resolved_locale = $has_valid_route_locale
+            ? $route_locale
+            : ($has_valid_path_locale ? $path_locale : $normalized_session_locale);
+        $this->applyLocale($request, (string) $resolved_locale);
+
+        return $next($request);
+    }
+
+    /**
+     * Apply a valid locale prefix when Laravel could not resolve a route.
+     *
+     * Unmatched storefront URLs do not execute route middleware, but their
+     * public 404 response still needs to use the locale from the URL.
+     */
+    public function applyLocaleFromPath(Request $request): void
+    {
+        $allowed_locales = get_allowed_locales();
+        $path_info = Str::ltrim($request->getPathInfo(), '/');
+        $path_locale = Str::before($path_info, '/');
+
+        if (in_array($path_locale, $allowed_locales, true)) {
+            $this->applyLocale($request, $path_locale);
+        }
+    }
+
+    private function applyLocale(Request $request, string $resolved_locale): void
+    {
+        $locale_key = config('localization.locale_parameter');
         $language = resolve_language_by_locale($resolved_locale);
 
         if ($language === null) {
@@ -76,8 +105,6 @@ class SetDefaultLocalePrefix
         url()->defaults([$locale_key => $resolved_locale]);
         config(['app.locale' => $resolved_locale]);
         set_app_setting('language_id', $language?->id);
-
-        return $next($request);
     }
 
     /**

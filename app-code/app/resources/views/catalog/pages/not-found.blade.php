@@ -38,10 +38,8 @@
                     @foreach($not_found_images as $image)
                         <x-catalog::common.img
                             @class([
+                                $image['custom_css_classes'] ?? '',
                                 'object-contain',
-                                'opacity-50' => !$loop->first,
-                                'hidden md:block' => $loop->first,
-                                'hidden xl:block' => !$loop->first,
                             ])
                             :urls_data="$image['urls']"
                             :size="$image['width']"
