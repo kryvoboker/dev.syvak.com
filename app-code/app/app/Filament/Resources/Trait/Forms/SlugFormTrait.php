@@ -15,8 +15,11 @@ trait SlugFormTrait
     /**
      * @param  Collection<Language>  $active_languages
      */
-    protected static function createSlugsFormTabs(Collection $active_languages): Tabs\Tab
-    {
+    protected static function createSlugsFormTabs(
+        Collection $active_languages,
+        ?string $tab_label = null,
+        ?string $section_label = null,
+    ): Tabs\Tab {
         $schema_fields = [];
 
         foreach ($active_languages as $language) {
@@ -27,9 +30,9 @@ trait SlugFormTrait
                 ->rules(['nullable', 'string', 'max:500']);
         }
 
-        return Tabs\Tab::make(__('admin/default.tabs.slugs'))
+        return Tabs\Tab::make($tab_label ?? __('admin/default.tabs.slugs'))
             ->schema([
-                Section::make(__('admin/default.sections.slugs'))
+                Section::make($section_label ?? __('admin/default.sections.slugs'))
                     ->schema($schema_fields)
                     ->columnSpanFull(),
             ]);

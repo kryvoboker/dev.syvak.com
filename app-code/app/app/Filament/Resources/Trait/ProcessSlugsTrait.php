@@ -7,10 +7,12 @@ namespace App\Filament\Resources\Trait;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Infos\InfoPage;
+use App\Models\PageSettings\PageSetting;
 use App\Models\Slug;
 use Exception;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use LogicException;
 
 trait ProcessSlugsTrait
@@ -20,14 +22,18 @@ trait ProcessSlugsTrait
         $record = $this->getSluggableRecord();
 
         foreach ($this->slugs as $language_id => $slug_data) {
-            if (empty($slug_data['name'])) {
+            $slug_value = Str::trim((string) ($slug_data['name'] ?? ''));
+
+            if ($slug_value === '') {
+                $record->slugs()->where('language_id', (int) $language_id)->delete();
+
                 continue;
             }
 
             try {
                 $record->slugs()->updateOrCreate(
                     ['language_id' => (int) $language_id],
-                    ['slug' => $slug_data['name']],
+                    ['slug' => $slug_value],
                 );
             } catch (Exception $e) {
                 Log::channel('stack')->error($e->getMessage());
@@ -62,11 +68,11 @@ trait ProcessSlugsTrait
         $data['slugs'] = $slugs;
     }
 
-    private function getSluggableRecord(): Category|Product|InfoPage
+    private function getSluggableRecord(): Category|Product|InfoPage|PageSetting
     {
         $record = $this->record ?? null;
 
-        if ($record instanceof Category || $record instanceof Product || $record instanceof InfoPage) {
+        if ($record instanceof Category || $record instanceof Product || $record instanceof InfoPage || $record instanceof PageSetting) {
             return $record;
         }
 

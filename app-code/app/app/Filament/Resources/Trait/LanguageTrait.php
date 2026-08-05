@@ -42,7 +42,7 @@ trait LanguageTrait
     /**
      * @return Collection<Language>
      */
-    protected static function getAcriveLanguages(): Collection
+    protected static function getActiveLanguages(): Collection
     {
         return (new Language())->getActiveLanguages();
     }

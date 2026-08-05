@@ -13,6 +13,7 @@ return [
         'order' => 'order',
         'thankyou' => 'thankyou',
         'failure' => 'failure',
+        'not_found' => 'not_found',
     ],
     'sort_get_keys' => [
         'sort' => 'sort',
