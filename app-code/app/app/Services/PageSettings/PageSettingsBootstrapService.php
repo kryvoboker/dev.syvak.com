@@ -477,6 +477,57 @@ class PageSettingsBootstrapService
     }
 
     /**
+     * @throws Throwable
+     *
+     * @return array<string, mixed>
+     */
+    public function getContactsSettings(): array
+    {
+        $page_setting = $this->bootstrapContactsPageSetting();
+
+        return is_array($page_setting->settings) ? $page_setting->settings : [];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function bootstrapContactsPageSetting(): PageSetting
+    {
+        try {
+            $defaults = $this->resolveContactsDefaults();
+
+            $page_setting = PageSetting::query()->firstOrCreate(
+                [
+                    'page_type' => PageSetting::PAGE_TYPE_CONTACTS,
+                ],
+                [
+                    'settings' => $this->buildContactsSettingsContract($defaults),
+                ],
+            );
+
+            $this->syncContactsSettingsContract($page_setting, $defaults);
+
+            return $page_setting->fresh() ?? $page_setting;
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('Contacts page setting bootstrap failed.', [
+                'page_type' => PageSetting::PAGE_TYPE_CONTACTS,
+                'exception' => $throwable,
+            ]);
+
+            throw $throwable;
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $settings
+     * @return array<string, mixed>
+     */
+    public function normalizeContactsSettings(array $settings): array
+    {
+        return $this->normalizeContactsSettingsContract($settings, $this->resolveContactsDefaults());
+    }
+
+    /**
      * @return array{
      *     products_per_page_limit:int,
      *     ajax_products_loading_enabled:bool,
@@ -758,6 +809,366 @@ class PageSettingsBootstrapService
                 'images' => $normalized_images,
             ],
         );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function resolveContactsDefaults(): array
+    {
+        $localized = [];
+        $email_templates = [];
+        $telegram_templates = [];
+
+        foreach ((new Language())->getActiveLanguages() as $language) {
+            $language_id = (string) $language->id;
+            $language_code = (string) $language->code;
+
+            $localized[$language_id] = [
+                'title' => (string) __('admin/settings/contacts_page_settings.defaults.title', [], $language_code),
+                'working_hours' => [
+                    'title' => (string) __('admin/settings/contacts_page_settings.defaults.working_hours_title', [], $language_code),
+                    'description' => (string) __('admin/settings/contacts_page_settings.defaults.working_hours_description', [], $language_code),
+                    'content' => (string) __('admin/settings/contacts_page_settings.defaults.working_hours_content', [], $language_code),
+                ],
+            ];
+
+            $email_templates[$language_id] = [
+                'subject' => (string) __('admin/settings/contacts_page_settings.defaults.email_subject', [], $language_code),
+                'body' => (string) __('admin/settings/contacts_page_settings.defaults.email_body', [], $language_code),
+            ];
+
+            $telegram_templates[$language_id] = [
+                'body' => (string) __('admin/settings/contacts_page_settings.defaults.telegram_body', [], $language_code),
+            ];
+        }
+
+        $max_upload_size_kb = max(1, (int) config('app.images.default_max_upload_image_size_kb', 5120));
+
+        return [
+            'localized' => $localized,
+            'images' => [],
+            'phones' => [],
+            'addresses' => [],
+            'contact_form' => [
+                'fields' => [
+                    'name' => ['enabled' => true, 'required' => true, 'regex' => null, 'min_length' => null, 'max_length' => 255],
+                    'email' => ['enabled' => true, 'required' => true, 'regex' => null, 'min_length' => null, 'max_length' => 255],
+                    'phone' => ['enabled' => true, 'required' => false, 'regex' => null, 'min_length' => null, 'max_length' => 50],
+                    'text' => ['enabled' => true, 'required' => true, 'regex' => null, 'min_length' => null, 'max_length' => 5000],
+                    'file' => [
+                        'enabled' => true,
+                        'required' => false,
+                        'regex' => null,
+                        'min_length' => null,
+                        'max_length' => null,
+                        'max_size_kb' => $max_upload_size_kb,
+                        'allowed_types' => ['jpg', 'jpeg', 'png'],
+                        'upload_path' => normalize_upload_path_template('images/contacts/{year}/{month}'),
+                    ],
+                ],
+                'destinations' => [
+                    'email' => ['enabled' => false, 'address' => ''],
+                    'telegram' => ['enabled' => false, 'chat_id' => ''],
+                ],
+            ],
+            'email' => ['templates' => $email_templates],
+            'telegram' => ['templates' => $telegram_templates],
+            'map' => [
+                'iframe' => '',
+                'latitude' => null,
+                'longitude' => null,
+                'width' => 600,
+                'height' => 400,
+                'custom_css_classes' => '',
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $defaults
+     * @return array<string, mixed>
+     */
+    private function buildContactsSettingsContract(array $defaults): array
+    {
+        return [
+            'meta' => ['contract_version' => 1],
+            ...$defaults,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $defaults
+     */
+    private function syncContactsSettingsContract(PageSetting $page_setting, array $defaults): void
+    {
+        $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
+
+        $page_setting->forceFill([
+            'settings' => $this->normalizeContactsSettingsContract($settings, $defaults),
+        ])->save();
+    }
+
+    /**
+     * @param  array<string, mixed>  $settings
+     * @param  array<string, mixed>  $defaults
+     * @return array<string, mixed>
+     */
+    private function normalizeContactsSettingsContract(array $settings, array $defaults): array
+    {
+        $normalized_localized = [];
+
+        foreach ((array) Arr::get($defaults, 'localized', []) as $language_id => $default_content) {
+            $content = Arr::get($settings, "localized.$language_id", []);
+            $content = is_array($content) ? $content : [];
+            $working_hours = Arr::get($content, 'working_hours', []);
+            $working_hours = is_array($working_hours) ? $working_hours : [];
+
+            $normalized_localized[$language_id] = [
+                'title' => Str::trim((string) Arr::get($content, 'title', Arr::get($default_content, 'title', ''))),
+                'working_hours' => [
+                    'title' => Str::trim((string) Arr::get($working_hours, 'title', Arr::get($default_content, 'working_hours.title', ''))),
+                    'description' => $this->normalizeNullableString(Arr::get($working_hours, 'description', Arr::get($default_content, 'working_hours.description'))),
+                    'content' => Str::trim((string) Arr::get($working_hours, 'content', Arr::get($default_content, 'working_hours.content', ''))),
+                ],
+            ];
+        }
+
+        $max_upload_size_kb = max(1, (int) config('app.images.default_max_upload_image_size_kb', 5120));
+        $normalized_fields = [];
+        $default_fields = (array) Arr::get($defaults, 'contact_form.fields', []);
+        $saved_fields = Arr::get($settings, 'contact_form.fields', []);
+        $saved_fields = is_array($saved_fields) ? $saved_fields : [];
+
+        foreach ($default_fields as $field_name => $default_field) {
+            $field = Arr::get($saved_fields, $field_name, []);
+            $field = is_array($field) ? $field : [];
+            $min_length = Arr::get($field, 'min_length');
+            $max_length = Arr::get($field, 'max_length');
+
+            $normalized_fields[$field_name] = [
+                'enabled' => (bool) Arr::get($field, 'enabled', Arr::get($default_field, 'enabled', true)),
+                'required' => (bool) Arr::get($field, 'enabled', Arr::get($default_field, 'enabled', true))
+                    && (bool) Arr::get($field, 'required', Arr::get($default_field, 'required', false)),
+                'regex' => $this->normalizeNullableString(Arr::get($field, 'regex')),
+                'min_length' => filled($min_length) ? max(0, (int) $min_length) : Arr::get($default_field, 'min_length'),
+                'max_length' => filled($max_length) ? max(0, (int) $max_length) : Arr::get($default_field, 'max_length'),
+            ];
+
+            if ($field_name === 'file') {
+                $allowed_types = Arr::get($field, 'allowed_types', Arr::get($default_field, 'allowed_types', ['jpg', 'jpeg', 'png']));
+                $allowed_types = is_array($allowed_types) ? $allowed_types : ['jpg', 'jpeg', 'png'];
+
+                $normalized_fields[$field_name] += [
+                    'max_size_kb' => min(
+                        $max_upload_size_kb,
+                        max(1, (int) Arr::get($field, 'max_size_kb', $max_upload_size_kb)),
+                    ),
+                    'allowed_types' => collect($allowed_types)
+                        ->map(fn (mixed $type): string => Str::lower(Str::trim((string) $type)))
+                        ->filter(fn (string $type): bool => preg_match('/^[a-z0-9]+$/', $type) === 1)
+                        ->unique()
+                        ->values()
+                        ->all() ?: ['jpg', 'jpeg', 'png'],
+                    'upload_path' => normalize_upload_path_template((string) Arr::get(
+                        $field,
+                        'upload_path',
+                        Arr::get($default_field, 'upload_path', 'images/contacts/{year}/{month}'),
+                    )),
+                ];
+            }
+        }
+
+        $normalized_settings = [
+            'localized' => $normalized_localized,
+            'images' => $this->normalizeContactsRepeater(Arr::get($settings, 'images', []), 'image'),
+            'phones' => $this->normalizeContactsRepeater(Arr::get($settings, 'phones', []), 'phone'),
+            'addresses' => $this->normalizeContactsAddressRepeater(Arr::get($settings, 'addresses', [])),
+            'contact_form' => [
+                'fields' => $normalized_fields,
+                'destinations' => [
+                    'email' => [
+                        'enabled' => (bool) Arr::get($settings, 'contact_form.destinations.email.enabled', false),
+                        'address' => Str::trim((string) Arr::get($settings, 'contact_form.destinations.email.address', '')),
+                    ],
+                    'telegram' => [
+                        'enabled' => (bool) Arr::get($settings, 'contact_form.destinations.telegram.enabled', false),
+                        'chat_id' => Str::trim((string) Arr::get($settings, 'contact_form.destinations.telegram.chat_id', '')),
+                    ],
+                ],
+            ],
+            'email' => [
+                'templates' => $this->normalizeLocalizedTemplates(
+                    Arr::get($settings, 'email.templates', []),
+                    Arr::get($defaults, 'email.templates', []),
+                    ['subject', 'body'],
+                ),
+            ],
+            'telegram' => [
+                'templates' => $this->normalizeLocalizedTemplates(
+                    Arr::get($settings, 'telegram.templates', []),
+                    Arr::get($defaults, 'telegram.templates', []),
+                    ['body'],
+                ),
+            ],
+            'map' => [
+                'iframe' => Str::trim((string) Arr::get($settings, 'map.iframe', '')),
+                'latitude' => $this->normalizeNullableDecimal(Arr::get($settings, 'map.latitude')),
+                'longitude' => $this->normalizeNullableDecimal(Arr::get($settings, 'map.longitude')),
+                'width' => max(1, (int) Arr::get($settings, 'map.width', 600)),
+                'height' => max(1, (int) Arr::get($settings, 'map.height', 400)),
+                'custom_css_classes' => Str::squish((string) Arr::get($settings, 'map.custom_css_classes', '')),
+            ],
+        ];
+
+        $normalized_contract = array_replace_recursive(
+            $this->buildContactsSettingsContract($defaults),
+            $settings,
+            [
+                'meta' => ['contract_version' => 1],
+                ...$normalized_settings,
+            ],
+        );
+
+        $normalized_contract['localized'] = $normalized_localized;
+        $normalized_contract['images'] = $normalized_settings['images'];
+        $normalized_contract['phones'] = $normalized_settings['phones'];
+        $normalized_contract['addresses'] = $normalized_settings['addresses'];
+        $normalized_contract['contact_form'] = $normalized_settings['contact_form'];
+        $normalized_contract['email'] = $normalized_settings['email'];
+        $normalized_contract['telegram'] = $normalized_settings['telegram'];
+        $normalized_contract['map'] = $normalized_settings['map'];
+
+        return $normalized_contract;
+    }
+
+    /**
+     * @param  mixed  $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeContactsRepeater(mixed $rows, string $type): array
+    {
+        if (! is_array($rows)) {
+            return [];
+        }
+
+        return collect($rows)
+            ->filter(fn (mixed $row): bool => is_array($row))
+            ->values()
+            ->map(function (array $row, int $index) use ($type): array {
+                $normalized = [
+                    'sort_order' => max(0, (int) Arr::get($row, 'sort_order', ($index + 1) * 10)),
+                ];
+
+                if ($type === 'image') {
+                    return $normalized + [
+                        'path' => Str::trim((string) Arr::get($row, 'path', '')),
+                        'width' => max(1, (int) Arr::get($row, 'width', 600)),
+                        'height' => max(1, (int) Arr::get($row, 'height', 600)),
+                        'is_square' => (bool) Arr::get($row, 'is_square', true),
+                        'background' => $this->normalizeImageBackground(Arr::get($row, 'background', 'transparent')),
+                        'custom_css_classes' => Str::squish((string) Arr::get($row, 'custom_css_classes', '')),
+                    ];
+                }
+
+                if ($type === 'phone') {
+                    return $normalized + [
+                        'type' => Str::trim((string) Arr::get($row, 'type', 'mobile')),
+                        'value' => Str::trim((string) Arr::get($row, 'value', '')),
+                    ];
+                }
+
+                return $normalized + [
+                    'localized' => is_array(Arr::get($row, 'localized')) ? Arr::get($row, 'localized') : [],
+                ];
+            })
+            ->sortBy('sort_order')
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param mixed $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeContactsAddressRepeater(mixed $rows): array
+    {
+        if (! is_array($rows)) {
+            return [];
+        }
+
+        $active_languages = (new Language())->getActiveLanguages();
+
+        return collect($rows)
+            ->filter(fn (mixed $row): bool => is_array($row))
+            ->values()
+            ->map(function (array $row, int $index) use ($active_languages): array {
+                $localized = [];
+
+                foreach ($active_languages as $language) {
+                    $language_id = (string) $language->id;
+                    $content = Arr::get($row, "localized.$language_id", []);
+                    $content = is_array($content) ? $content : [];
+
+                    $localized[$language_id] = [
+                        'title' => Str::trim((string) Arr::get($content, 'title', '')),
+                        'description' => $this->normalizeNullableString(Arr::get($content, 'description')),
+                        'value' => Str::trim((string) Arr::get($content, 'value', '')),
+                        'url' => $this->normalizeNullableString(Arr::get($content, 'url')),
+                    ];
+                }
+
+                return [
+                    'sort_order' => max(0, (int) Arr::get($row, 'sort_order', ($index + 1) * 10)),
+                    'localized' => $localized,
+                ];
+            })
+            ->sortBy('sort_order')
+            ->values()
+            ->all();
+    }
+
+    private function normalizeImageBackground(mixed $background): string
+    {
+        $background = Str::trim((string) $background);
+
+        return $background === 'transparent' || preg_match('/^#[0-9a-fA-F]{6}$/', $background) === 1
+            ? $background
+            : 'transparent';
+    }
+
+    private function normalizeNullableString(mixed $value): ?string
+    {
+        $value = Str::trim((string) $value);
+
+        return filled($value) ? $value : null;
+    }
+
+    private function normalizeNullableDecimal(mixed $value): ?float
+    {
+        return filled($value) && is_numeric($value) ? (float) $value : null;
+    }
+
+    /**
+     * @param  mixed  $templates
+     * @param  mixed  $defaults
+     * @param  array<int, string>  $keys
+     * @return array<string, array<string, string>>
+     */
+    private function normalizeLocalizedTemplates(mixed $templates, mixed $defaults, array $keys): array
+    {
+        $templates = is_array($templates) ? $templates : [];
+        $defaults = is_array($defaults) ? $defaults : [];
+
+        return collect($defaults)->mapWithKeys(function (mixed $default, string $language_id) use ($templates, $keys): array {
+            $saved = Arr::get($templates, $language_id, []);
+            $saved = is_array($saved) ? $saved : [];
+            $default = is_array($default) ? $default : [];
+
+            return [$language_id => collect($keys)->mapWithKeys(fn (string $key): array => [
+                $key => Str::trim((string) Arr::get($saved, $key, Arr::get($default, $key, ''))),
+            ])->all()];
+        })->all();
     }
 
     /**
