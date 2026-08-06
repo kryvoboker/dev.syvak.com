@@ -22,6 +22,8 @@ class PageSetting extends Model
 
     public const PAGE_TYPE_NOT_FOUND = 'not_found';
 
+    public const PAGE_TYPE_CONTACTS = 'contacts';
+
     protected $fillable = [
         'page_type',
         'settings',
