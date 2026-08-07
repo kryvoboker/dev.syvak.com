@@ -75,7 +75,7 @@ const CLUSTER_DISABLE_ZOOM: number = 17;
 const MAP_ID: string = 'checkout-leaflet-map';
 const LIST_ITEM_CLASS_NAMES: string = `flex w-full flex-col gap-1 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition-colors hover:border-white/30 hover:bg-white/10`;
 const LIST_ACTIVE_CLASS_NAMES: string[] = ['border-white/40', 'bg-white/15'];
-const DELIVERY_BUTTON_CLASS_NAMES: string = 'checkout__delivery-here-btn black-btn w-full';
+const DELIVERY_BUTTON_CLASS_NAMES: string = 'checkout__delivery-here-btn btn btn-black w-full';
 
 let activeMapInstance: L.Map | null = null;
 

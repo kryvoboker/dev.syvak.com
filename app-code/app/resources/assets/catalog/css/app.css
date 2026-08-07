@@ -33,7 +33,7 @@
     --color-error: rgb(212, 4, 28);
     --color-error-content: rgb(254, 242, 242);
     --radius-selector: 2rem;
-    --radius-field: 0.25rem;
+    --radius-field: 0;
     --radius-box: 0;
     --size-selector: 0.25rem;
     --size-field: 0.25rem;
@@ -260,6 +260,21 @@
     .card-body {
         @apply min-h-20;
     }
+
+    .btn {
+        @apply items-center justify-center text-lg xl:text-2xl font-normal text-center uppercase duration-200 p-2;
+    }
+
+    .btn-black {
+        --btn-border: var(--color-base-content);
+        --btn-color: var(--color-base-100);
+        --btn-fg: var(--color-base-content);
+
+        &:hover {
+            --btn-color: var(--color-base-content);
+            --btn-fg: var(--color-base-100);
+        }
+    }
 }
 
 @layer app {
@@ -309,12 +324,14 @@
         }
     }
 
+    .section-title,
     h1, h2, h3, h4 {
         @apply font-cormorant-garamond uppercase;
     }
 
+    .section-title,
     h1 {
-        @apply text-42px md:text-64px lg:text-82px 2xl:text-122px font-semibold -tracking-0.05em leading-0.8em;
+        @apply text-42px md:text-64px lg:text-82px 2xl:text-122px font-semibold -tracking-0.05em leading-0.8em mb-6 lg:mb-8;
     }
 
     h2 {
@@ -369,10 +386,6 @@
 
     .section {
         @apply py-6 md:py-7 lg:py-52px xl:py-43px;
-    }
-
-    .section-title {
-        @apply text-32px md:text-44px lg:text-6xl 2xl:text-90px mb-4 lg:mb-8;
     }
 
     .card-title,
@@ -449,9 +462,15 @@
         px-0 pt-0 pb-2 md:px-5 md:py-18px;
     }
 
-    .black-btn,
-    .white-btn {
-        @apply items-center justify-center text-center border border-light-gray ease-in-out duration-200 p-2;
+    .black-btn {
+        --btn-color: var(--color-base-100);
+        --btn-bg: var(--color-base-100);
+
+        @apply btn;
+
+        @supports (color: color-mix(in lab, red, red)) {
+            --btn-border: color-mix(in oklab, var(--btn-bg), #fff calc(var(--depth) * 5%));
+        }
     }
 
     .black-btn:not(.category-filter__clear-all-btn),

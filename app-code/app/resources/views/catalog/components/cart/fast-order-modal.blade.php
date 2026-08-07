@@ -126,7 +126,7 @@
                               id="fast-order-phone-error"></span>
                     </div>
 
-                    <button class="white-btn default-btn w-full text-lg"
+                    <button class="btn default-btn w-full text-lg"
                             data-submit-fast-order
                             type="submit">
                         {{ __('catalog/default.cart.buttons.submit_fast_order') }}

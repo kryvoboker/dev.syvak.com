@@ -5,7 +5,7 @@
     ],
 ])
 
-<a {{ $attributes->merge(['class' => 'footer-subscribe-btn dark-btn inline-flex items-center justify-between gap-3 border border-opacity-light-gray-40% uppercase bg-white px-4 py-2 text-black md:px-4 md:py-3']) }}
+<a {{ $attributes->merge(['class' => 'footer-subscribe-btn btn justify-between! min-h-15']) }}
    href="{{ $telegram_data['url'] }}"
    aria-label="{{ $telegram_data['text'] }}">
     <span>{{ $telegram_data['text'] }}</span>

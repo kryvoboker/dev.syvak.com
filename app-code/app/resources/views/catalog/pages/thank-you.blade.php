@@ -19,7 +19,9 @@
         <div class="container relative">
             @if(($order_found ?? false) === false)
                 <div class="flex min-h-120 max-w-3xl flex-col justify-center gap-6 text-white z-1">
-                    <h1>{{ __('catalog/pages/thank-you.not_found.heading') }}</h1>
+                    <h1 class="section-title">
+                        {{ __('catalog/pages/thank-you.not_found.heading') }}
+                    </h1>
                     <p class="text-lg text-light-gray md:text-2xl">
                         {{ __('catalog/pages/thank-you.not_found.message', ['number' => $requested_order_number ?? '—']) }}
                     </p>
