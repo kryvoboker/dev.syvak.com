@@ -128,10 +128,36 @@ class ContactsForm
                                     ->label(__('admin/default.labels.sort_order'))
                                     ->numeric()
                                     ->minValue(0)
-                                    ->default(10)
+                                    ->default(1)
                                     ->required(),
                             ])
                             ->columns(3)
+                            ->defaultItems(0)
+                            ->addActionLabel(__('admin/default.actions.add'))
+                            ->reorderable()
+                            ->rules(['array']),
+                    ])
+                    ->columnSpanFull(),
+
+                Section::make(__('admin/settings/contacts_page_settings.sections.emails'))
+                    ->schema([
+                        Repeater::make('emails')
+                            ->label(__('admin/settings/contacts_page_settings.sections.emails'))
+                            ->helperText(__('admin/settings/contacts_page_settings.helpers.emails'))
+                            ->schema([
+                                TextInput::make('value')
+                                    ->label(__('admin/settings/contacts_page_settings.labels.email'))
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255),
+                                TextInput::make('sort_order')
+                                    ->label(__('admin/default.labels.sort_order'))
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(1)
+                                    ->required(),
+                            ])
+                            ->columns()
                             ->defaultItems(0)
                             ->addActionLabel(__('admin/default.actions.add'))
                             ->reorderable()
@@ -213,7 +239,7 @@ class ContactsForm
                                     ->label(__('admin/default.labels.sort_order'))
                                     ->numeric()
                                     ->minValue(0)
-                                    ->default(10)
+                                    ->default(1)
                                     ->required(),
                             ])
                             ->columns(),
@@ -437,15 +463,13 @@ class ContactsForm
                                 ->numeric()
                                 ->minValue(1)
                                 ->default(600)
-                                ->required(fn (Get $get): bool => filled($get('map.iframe')))
-                                ->nullable(),
+                                ->required(fn (Get $get): bool => filled($get('map.iframe'))),
                             TextInput::make('map.height')
                                 ->label(__('admin/settings/contacts_page_settings.labels.height'))
                                 ->numeric()
                                 ->minValue(1)
                                 ->default(400)
-                                ->required(fn (Get $get): bool => filled($get('map.iframe')))
-                                ->nullable(),
+                                ->required(fn (Get $get): bool => filled($get('map.iframe'))),
                         ])
                             ->columns(),
 
@@ -478,7 +502,7 @@ class ContactsForm
                             ->label(__('admin/default.labels.sort_order'))
                             ->numeric()
                             ->minValue(0)
-                            ->default(10)
+                            ->default(1)
                             ->required(),
                     ])
                     ->defaultItems(0)

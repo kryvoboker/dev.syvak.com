@@ -71,13 +71,9 @@ class FooterService
 
     private function getContactsData(): array
     {
-        $locale = app()->getLocale();
-
         return [
             'title' => '/ КОНТАКТИ /',
-            'phones' => $this->parsePhones(
-                (string) data_get(get_app_settings(), "contact_phones.$locale"),
-            ),
+            'phones' => $this->parsePhones(get_app_settings()?->contact_phones),
             'find_us_label' => 'ДЕ НАС ЗНАЙТИ',
             'contacts_label' => 'КОНТАКТИ',
         ];
@@ -172,9 +168,19 @@ class FooterService
         ];
     }
 
-    private function parsePhones(string $phones): array
+    private function parsePhones(mixed $phones): array
     {
-        $phone_list = trim_strs_in_arr(explode(',', $phones));
+        if (is_iterable($phones)) {
+            $phones = collect($phones)
+                ->map(
+                    fn (mixed $phone): string => is_array($phone)
+                    ? (string) data_get($phone, 'value', '')
+                    : (string) $phone,
+                )
+                ->implode(',');
+        }
+
+        $phone_list = trim_strs_in_arr(explode(',', (string) $phones));
         $phone_list = collect($phone_list)
             ->filter(fn ($phone) => filled($phone))
             ->values()

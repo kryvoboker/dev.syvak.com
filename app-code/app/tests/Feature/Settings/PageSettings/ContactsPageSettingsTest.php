@@ -77,6 +77,7 @@ class ContactsPageSettingsTest extends TestCase
         $this->assertArrayHasKey('2', (array) data_get($page_setting->settings, 'localized'));
         $this->assertSame(['jpg', 'jpeg', 'png'], data_get($page_setting->settings, 'contact_form.fields.file.allowed_types'));
         $this->assertSame([], data_get($page_setting->settings, 'images'));
+        $this->assertSame([], data_get($page_setting->settings, 'emails'));
 
         $second_page_setting = $service->bootstrapContactsPageSetting();
 
@@ -104,6 +105,11 @@ class ContactsPageSettingsTest extends TestCase
                 ['type' => 'mobile', 'value' => '  +380 00 000 00 00  ', 'sort_order' => 20],
                 ['type' => 'landline', 'value' => '  044 000 00 00  ', 'sort_order' => 10],
             ],
+            'emails' => [
+                ['value' => ' INFO@example.com ', 'sort_order' => 20],
+                ['value' => 'info@example.com', 'sort_order' => 30],
+                ['value' => ' ', 'sort_order' => 40],
+            ],
             'contact_form' => [
                 'fields' => [
                     'file' => [
@@ -122,6 +128,8 @@ class ContactsPageSettingsTest extends TestCase
         $this->assertSame('transparent', data_get($settings, 'images.0.background'));
         $this->assertSame('md:w-1/2 opacity-75', data_get($settings, 'images.1.custom_css_classes'));
         $this->assertSame('044 000 00 00', data_get($settings, 'phones.0.value'));
+        $this->assertSame('info@example.com', data_get($settings, 'emails.0.value'));
+        $this->assertCount(1, data_get($settings, 'emails'));
         $this->assertSame(['jpg', 'jpeg'], data_get($settings, 'contact_form.fields.file.allowed_types'));
         $this->assertSame('images/contacts/{year}/{month}', data_get($settings, 'contact_form.fields.file.upload_path'));
         $this->assertSame(50.4501, data_get($settings, 'map.latitude'));
