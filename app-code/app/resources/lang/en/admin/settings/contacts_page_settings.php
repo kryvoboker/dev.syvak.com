@@ -18,6 +18,7 @@ return [
         'localized_content' => 'Localized page content',
         'working_hours' => 'Working hours',
         'phones' => 'Phone numbers',
+        'emails' => 'Email addresses',
         'email_destination' => 'Email destination',
         'email_templates' => 'Email templates',
         'telegram_destination' => 'Telegram destination',
@@ -33,6 +34,7 @@ return [
         'phones' => 'Phone numbers',
         'phone_type' => 'Phone type',
         'phone' => 'Phone number',
+        'email' => 'Email address',
         'images' => 'Images',
         'image' => 'Image',
         'width' => 'Width',
@@ -67,6 +69,7 @@ return [
     'helpers' => [
         'title' => 'The title is displayed at the top of the Contacts page.',
         'phones' => 'Add any number of mobile or landline phone numbers and reorder them with drag and drop.',
+        'emails' => 'Add public company email addresses and reorder them with drag and drop. Duplicate addresses are removed automatically.',
         'images' => 'Images are optional and are displayed in the configured order.',
         'image' => 'The maximum image size is taken from the application default image upload limit.',
         'background' => 'Use transparent or a six-digit hexadecimal color, for example #FFFFFF.',

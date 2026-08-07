@@ -9,6 +9,7 @@ use App\Filament\Resources\Trait\ProcessSlugsTrait;
 use App\Models\PageSettings\PageSetting;
 use App\Models\Slug;
 use App\Services\PageSettings\PageSettingsBootstrapService;
+use App\Supports\Services\AppSettingsService;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
@@ -108,7 +109,7 @@ class EditContacts extends EditRecord
         }
 
         try {
-            return DB::transaction(function () use ($record): Model {
+            $updated_record = DB::transaction(function () use ($record): Model {
                 $record->update([
                     'settings' => $this->normalized_settings,
                 ]);
@@ -119,6 +120,10 @@ class EditContacts extends EditRecord
 
                 return $record->fresh() ?? $record;
             });
+
+            app(AppSettingsService::class)->removeSettings();
+
+            return $updated_record;
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('Failed to update contacts page settings.', [
                 'page_type' => PageSetting::PAGE_TYPE_CONTACTS,

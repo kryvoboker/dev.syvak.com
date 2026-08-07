@@ -849,6 +849,7 @@ class PageSettingsBootstrapService
             'localized' => $localized,
             'images' => [],
             'phones' => [],
+            'emails' => [],
             'addresses' => [],
             'contact_form' => [
                 'fields' => [
@@ -983,6 +984,7 @@ class PageSettingsBootstrapService
             'localized' => $normalized_localized,
             'images' => $this->normalizeContactsRepeater(Arr::get($settings, 'images', []), 'image'),
             'phones' => $this->normalizeContactsRepeater(Arr::get($settings, 'phones', []), 'phone'),
+            'emails' => $this->normalizeContactsRepeater(Arr::get($settings, 'emails', []), 'email'),
             'addresses' => $this->normalizeContactsAddressRepeater(Arr::get($settings, 'addresses', [])),
             'contact_form' => [
                 'fields' => $normalized_fields,
@@ -1033,6 +1035,7 @@ class PageSettingsBootstrapService
         $normalized_contract['localized'] = $normalized_localized;
         $normalized_contract['images'] = $normalized_settings['images'];
         $normalized_contract['phones'] = $normalized_settings['phones'];
+        $normalized_contract['emails'] = $normalized_settings['emails'];
         $normalized_contract['addresses'] = $normalized_settings['addresses'];
         $normalized_contract['contact_form'] = $normalized_settings['contact_form'];
         $normalized_contract['email'] = $normalized_settings['email'];
@@ -1052,7 +1055,7 @@ class PageSettingsBootstrapService
             return [];
         }
 
-        return collect($rows)
+        $normalized_rows = collect($rows)
             ->filter(fn (mixed $row): bool => is_array($row))
             ->values()
             ->map(function (array $row, int $index) use ($type): array {
@@ -1078,13 +1081,28 @@ class PageSettingsBootstrapService
                     ];
                 }
 
+                if ($type === 'email') {
+                    return $normalized + [
+                        'value' => Str::lower(Str::trim((string) Arr::get($row, 'value', ''))),
+                    ];
+                }
+
                 return $normalized + [
                     'localized' => is_array(Arr::get($row, 'localized')) ? Arr::get($row, 'localized') : [],
                 ];
             })
-            ->sortBy('sort_order')
-            ->values()
-            ->all();
+            ->filter(function (array $row) use ($type): bool {
+                return ! in_array($type, ['phone', 'email'], true) || filled(Arr::get($row, 'value'));
+            })
+            ->sortBy('sort_order');
+
+        if ($type === 'email') {
+            $normalized_rows = $normalized_rows->unique(
+                fn (array $row): string => Str::lower((string) Arr::get($row, 'value')),
+            );
+        }
+
+        return $normalized_rows->values()->all();
     }
 
     /**
