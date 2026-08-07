@@ -14,6 +14,7 @@ return [
         'thankyou' => 'thankyou',
         'failure' => 'failure',
         'not_found' => 'not_found',
+        'contacts' => 'contacts',
     ],
     'sort_get_keys' => [
         'sort' => 'sort',
