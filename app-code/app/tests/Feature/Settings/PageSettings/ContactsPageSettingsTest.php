@@ -13,6 +13,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
+use ReflectionMethod;
 use Tests\TestCase;
 
 class ContactsPageSettingsTest extends TestCase
@@ -157,5 +158,71 @@ class ContactsPageSettingsTest extends TestCase
 
         $this->assertTrue($valid->passes());
         $this->assertTrue($invalid->fails());
+    }
+
+    public function test_admin_edit_page_saves_contacts_settings_and_localized_slugs(): void
+    {
+        $page_setting = app(PageSettingsBootstrapService::class)->bootstrapContactsPageSetting();
+        $page = app(EditContacts::class);
+        $page->record = $page_setting;
+
+        $mutate_method = new ReflectionMethod(EditContacts::class, 'mutateFormDataBeforeSave');
+        $mutate_method->setAccessible(true);
+        $mutate_method->invoke($page, [
+            'localized' => [
+                '1' => [
+                    'title' => 'Updated contacts',
+                    'working_hours' => ['title' => 'Working hours', 'content' => 'Mon-Fri'],
+                ],
+                '2' => [
+                    'title' => 'Оновлені контакти',
+                    'working_hours' => ['title' => 'Графік роботи', 'content' => 'Пн-Пт'],
+                ],
+            ],
+            'phones' => [['type' => 'mobile', 'value' => '+380 00 000 00 00', 'sort_order' => 1]],
+            'emails' => [['value' => 'info@example.com', 'sort_order' => 1]],
+            'contact_form' => [
+                'destinations' => [
+                    'email' => ['enabled' => true, 'address' => 'info@example.com'],
+                    'telegram' => ['enabled' => false],
+                ],
+            ],
+            'slugs' => [
+                '1' => ['name' => 'updated-contacts'],
+                '2' => ['name' => 'onovleni-kontakti'],
+            ],
+        ]);
+
+        $handle_method = new ReflectionMethod(EditContacts::class, 'handleRecordUpdate');
+        $handle_method->setAccessible(true);
+        $handle_method->invoke($page, $page_setting, []);
+
+        $page_setting->refresh();
+
+        $this->assertSame('Updated contacts', data_get($page_setting->settings, 'localized.1.title'));
+        $this->assertSame('info@example.com', data_get($page_setting->settings, 'emails.0.value'));
+        $this->assertSame('updated-contacts', $page_setting->getSlugByLanguageId(1));
+        $this->assertSame('onovleni-kontakti', $page_setting->getSlugByLanguageId(2));
+    }
+
+    public function test_admin_edit_page_rejects_contacts_without_a_delivery_destination(): void
+    {
+        $page_setting = app(PageSettingsBootstrapService::class)->bootstrapContactsPageSetting();
+        $page = app(EditContacts::class);
+        $page->record = $page_setting;
+
+        $mutate_method = new ReflectionMethod(EditContacts::class, 'mutateFormDataBeforeSave');
+        $mutate_method->setAccessible(true);
+
+        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        $mutate_method->invoke($page, [
+            'contact_form' => [
+                'destinations' => [
+                    'email' => ['enabled' => false],
+                    'telegram' => ['enabled' => false],
+                ],
+            ],
+            'slugs' => [],
+        ]);
     }
 }
