@@ -127,20 +127,18 @@
                     @endphp
 
                     @if(($file_field['enabled'] ?? false))
-                        <label class="form-control w-full" for="contacts-file">
-                            <span class="btn btn-black w-full normal-case">
-                                <span class="icon-[mynaui--download] size-6" aria-hidden="true"></span>
-                                <span>{{ __('catalog/contacts.fields.file') }}
-                                    @if(($file_field['required'] ?? false))
-                                        *
-                                    @endif
+                        <label class="input-floating w-full">
+                            @if(($file_field['required'] ?? false))
+                                <span class="absolute top-0 left-0">
+                                    *
                                 </span>
-                            </span>
-                            <input class="sr-only"
+                            @endif
+                            <input class="input border-(--btn-border)"
                                    id="contacts-file"
                                    name="file"
                                    type="file"
                                    accept="{{ $file_accepts }}"
+                                   aria-label="file-input"
                                    aria-describedby="contacts-file-error"
                                 @required(($file_field['required'] ?? false)) />
                             <span class="_error label-text-alt text-error"
