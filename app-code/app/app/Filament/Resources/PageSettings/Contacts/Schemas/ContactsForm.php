@@ -335,11 +335,13 @@ class ContactsForm
                         Checkbox::make('contact_form.destinations.email.enabled')
                             ->label(__('admin/settings/contacts_page_settings.labels.email_enabled'))
                             ->live(),
+                        Toggle::make('contact_form.destinations.email.send_file')
+                            ->label(__('admin/settings/contacts_page_settings.labels.send_file'))
+                            ->helperText(__('admin/settings/contacts_page_settings.helpers.send_file')),
                         TextInput::make('contact_form.destinations.email.address')
                             ->label(__('admin/settings/contacts_page_settings.labels.email_address'))
                             ->email()
-                            ->required(fn (Get $get): bool => (bool) $get('contact_form.destinations.email.enabled'))
-                            ->nullable(),
+                            ->required(fn (Get $get): bool => (bool) $get('contact_form.destinations.email.enabled')),
                     ])
                     ->columns(),
                 Section::make(__('admin/settings/contacts_page_settings.sections.email_templates'))
@@ -362,11 +364,21 @@ class ContactsForm
                         Checkbox::make('contact_form.destinations.telegram.enabled')
                             ->label(__('admin/settings/contacts_page_settings.labels.telegram_enabled'))
                             ->live(),
+                        TextInput::make('contact_form.destinations.telegram.bot_token')
+                            ->label(__('admin/settings/contacts_page_settings.labels.telegram_bot_token'))
+                            ->helperText(__('admin/settings/contacts_page_settings.helpers.telegram_bot_token'))
+                            ->password()
+                            ->revealable()
+                            ->required(fn (Get $get): bool => (bool) $get('contact_form.destinations.telegram.enabled')),
+
+                        Toggle::make('contact_form.destinations.telegram.send_file')
+                            ->label(__('admin/settings/contacts_page_settings.labels.send_file'))
+                            ->helperText(__('admin/settings/contacts_page_settings.helpers.send_file')),
+
                         TextInput::make('contact_form.destinations.telegram.chat_id')
                             ->label(__('admin/settings/contacts_page_settings.labels.telegram_chat_id'))
                             ->helperText(__('admin/settings/contacts_page_settings.helpers.telegram_chat_id'))
-                            ->required(fn (Get $get): bool => (bool) $get('contact_form.destinations.telegram.enabled'))
-                            ->nullable(),
+                            ->required(fn (Get $get): bool => (bool) $get('contact_form.destinations.telegram.enabled')),
                     ])
                     ->columns(),
                 Section::make(__('admin/settings/contacts_page_settings.sections.telegram_templates'))
