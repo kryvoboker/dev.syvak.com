@@ -91,7 +91,7 @@
                                 </span>
 
                                 @if($field_name === 'text')
-                                    <textarea class="textarea min-h-10 w-full border-0 bg-transparent px-4 py-2 text-lg font-light tracking-0.04em text-white placeholder:text-light-gray focus:border-0"
+                                    <textarea class="textarea min-h-10 w-full border-0 bg-transparent px-4 py-2 text-lg font-light tracking-0.04em text-white placeholder:text-secondary focus:border-0"
                                               id="contacts-{{ $field_name }}"
                                               name="{{ $field_name }}"
                                               placeholder="{{ __('catalog/contacts.placeholders.' . $field_name) }}"
@@ -100,7 +100,7 @@
                                               maxlength="{{ filled($field['max_length'] ?? null) ? (int) $field['max_length'] : '' }}"
                                               @required($is_required)>{{ old($field_name) }}</textarea>
                                 @else
-                                    <input class="input w-full border-0 bg-transparent px-4 py-2 text-lg font-light tracking-0.04em text-white placeholder:text-light-gray focus:border-0"
+                                    <input class="input w-full border-0 bg-transparent px-4 py-2 text-lg font-light tracking-0.04em text-white placeholder:text-secondary focus:border-0"
                                            id="contacts-{{ $field_name }}"
                                            name="{{ $field_name }}"
                                            type="{{ $field_name === 'email' ? 'email' : ($field_name === 'phone' ? 'tel' : 'text') }}"
@@ -109,7 +109,7 @@
                                            aria-describedby="contacts-{{ $field_name }}-error"
                                            minlength="{{ filled($field['min_length'] ?? null) ? (int) $field['min_length'] : '' }}"
                                            maxlength="{{ filled($field['max_length'] ?? null) ? (int) $field['max_length'] : '' }}"
-                                           @required($is_required) />
+                                        @required($is_required) />
                                 @endif
 
                                 <span class="_error label-text-alt text-error"
@@ -173,43 +173,58 @@
                 </div>
             @endif
 
-            <div class="mt-8 grid gap-6 lg:grid-cols-[minmax(0,2.06fr)_minmax(18rem,1fr)]" aria-label="{{ __('catalog/contacts.labels.contact_information') }}">
-                <div class="flex flex-col gap-2">
-                    <div class="flex flex-col gap-2 border border-light-gray px-8 py-4">
-                        <h2 class="text-2xl font-medium leading-tight">{{ $working_hours['title'] ?? __('catalog/contacts.fallbacks.working_hours_title') }}</h2>
-                        @if(filled($working_hours['description'] ?? null))
-                            <p class="text-lg leading-tight text-light-gray">{{ $working_hours['description'] }}</p>
-                        @endif
-                        @if(filled($working_hours['content'] ?? null))
-                            <p class="whitespace-pre-line text-lg font-semibold leading-tight">{{ $working_hours['content'] }}</p>
-                        @endif
+            <div class="mt-8 grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-[auto_minmax(0,1fr)]" aria-label="{{ __('catalog/contacts.labels.contact_information') }}">
+                <article class="flex flex-col gap-y-2">
+                    <div class="card">
+                        <div class="card-body p-4 md:px-8 md:py-4">
+                            <h4 class="font-inter font-medium text-2xl leading-tight normal-case">
+                                {{ $working_hours['title'] ?? __('catalog/contacts.fallbacks.working_hours_title') }}
+                            </h4>
+
+                            @if(filled($working_hours['content'] ?? null))
+                                <p class="whitespace-pre-line text-lg font-semibold leading-tight">{{ $working_hours['content'] }}</p>
+                            @endif
+
+                            @if(filled($working_hours['description'] ?? null))
+                                <p class="text-lg leading-tight text-secondary font-light">{{ $working_hours['description'] }}</p>
+                            @endif
+                        </div>
                     </div>
 
                     @foreach($contacts_data['phones'] ?? [] as $phone)
-                        <a class="btn {{ $loop->first ? '' : 'btn-black' }} w-full px-8 py-4 text-2xl font-normal"
+                        <a class="btn w-full text-2xl"
                            href="tel:{{ clear_telephone($phone['value']) }}">
                             {{ parse_telephone($phone['value']) }}
                         </a>
                     @endforeach
 
                     @foreach($contacts_data['emails'] ?? [] as $email)
-                        <a class="btn btn-primary w-full normal-case! wrap-break-word"
+                        <a class="btn btn-black w-full normal-case! wrap-break-word"
                            href="mailto:{{ $email }}">
                             {{ $email }}
                         </a>
                     @endforeach
-                </div>
+                </article>
 
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-wrap gap-4">
                     @foreach($contacts_data['addresses'] ?? [] as $address)
-                        <article class="flex flex-col gap-2 border border-light-gray px-8 py-4">
-                            <h2 class="text-2xl font-medium leading-tight">{{ $address['title'] }}</h2>
-                            @if(filled($address['description'] ?? null))
-                                <p class="text-lg leading-tight text-light-gray">{{ $address['description'] }}</p>
-                            @endif
-                            <p class="whitespace-pre-line text-lg font-semibold leading-tight">{{ $address['value'] }}</p>
+                        <article class="flex flex-col gap-y-2 max-bp1920px:w-full">
+                            <div class="card">
+                                <div class="card-body p-4 md:px-8 md:py-4">
+                                    <h4 class="font-inter font-medium text-2xl leading-tight normal-case">
+                                        {{ $address['title'] }}
+                                    </h4>
+
+                                    <p class="whitespace-pre-line text-lg font-semibold leading-tight">{{ $address['value'] }}</p>
+
+                                    @if(filled($address['description'] ?? null))
+                                        <p class="text-lg leading-tight text-secondary font-light">{{ $address['description'] }}</p>
+                                    @endif
+                                </div>
+                            </div>
+
                             @if(filled($address['url'] ?? null))
-                                <a class="btn mt-2 w-full px-8 py-4 text-2xl font-normal"
+                                <a class="btn w-full text-2xl"
                                    href="{{ $address['url'] }}"
                                    target="_blank"
                                    rel="noopener noreferrer">
