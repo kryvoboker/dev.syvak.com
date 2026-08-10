@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Settings;
 
+use App\Jobs\DeliverContactsFormJob;
 use App\Models\PageSettings\PageSetting;
 use App\Models\Slug;
 use App\Services\PageSettings\ContactsFormDeliveryService;
 use App\Services\PageSettings\ContactsPageService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Client\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ContactsPageServiceTest extends TestCase
@@ -162,7 +166,6 @@ class ContactsPageServiceTest extends TestCase
 
     public function test_it_delivers_a_configured_telegram_message_without_logging_personal_data(): void
     {
-        config()->set('monolog.telegram_token', 'test-token');
         Http::fake([
             'https://api.telegram.org/*' => Http::response(['ok' => true]),
         ]);
@@ -172,7 +175,7 @@ class ContactsPageServiceTest extends TestCase
             'settings' => [
                 'contact_form' => [
                     'destinations' => [
-                        'telegram' => ['enabled' => true, 'chat_id' => '123'],
+                        'telegram' => ['enabled' => true, 'bot_token' => 'test-token', 'chat_id' => '123'],
                     ],
                 ],
                 'telegram' => [
@@ -195,5 +198,102 @@ class ContactsPageServiceTest extends TestCase
                 && $request['chat_id'] === '123'
                 && $request['text'] === 'Name: Test user';
         });
+    }
+
+    public function test_it_queues_contacts_delivery_and_stores_the_uploaded_file_before_dispatching(): void
+    {
+        Queue::fake();
+        Storage::fake('public');
+
+        $page_setting = PageSetting::query()->create([
+            'page_type' => PageSetting::PAGE_TYPE_CONTACTS,
+            'settings' => [
+                'contact_form' => [
+                    'destinations' => [
+                        'email' => ['enabled' => true, 'address' => 'info@example.com'],
+                    ],
+                ],
+            ],
+        ]);
+        $file = UploadedFile::fake()->create('request.pdf', 10, 'application/pdf');
+
+        app(ContactsFormDeliveryService::class)->deliver(
+            page_setting: $page_setting,
+            locale: 'en',
+            language_id: 1,
+            data: ['name' => 'Test user', 'file' => $file],
+            file: $file,
+        );
+
+        Queue::assertPushed(DeliverContactsFormJob::class, function (DeliverContactsFormJob $job): bool {
+            return $job->page_setting_id > 0
+                && $job->file_path !== null
+                && ! array_key_exists('file', $job->data)
+                && Storage::disk('public')->exists($job->file_path);
+        });
+    }
+
+    public function test_it_sends_a_file_link_and_a_separate_telegram_document_when_enabled(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('images/contacts/request.pdf', 'file-content');
+        Http::fake([
+            'https://api.telegram.org/*' => Http::response(['ok' => true]),
+        ]);
+
+        $page_setting = PageSetting::query()->create([
+            'page_type' => PageSetting::PAGE_TYPE_CONTACTS,
+            'settings' => [
+                'contact_form' => [
+                    'destinations' => [
+                        'telegram' => ['enabled' => true, 'send_file' => true, 'bot_token' => 'test-token', 'chat_id' => '123'],
+                    ],
+                ],
+                'telegram' => [
+                    'templates' => ['1' => ['body' => 'File: {file}']],
+                ],
+            ],
+        ]);
+
+        app(ContactsFormDeliveryService::class)->deliverStored(
+            page_setting: $page_setting,
+            locale: 'en',
+            language_id: 1,
+            data: ['name' => 'Test user'],
+            file_path: 'images/contacts/request.pdf',
+        );
+
+        Http::assertSent(function (Request $request): bool {
+            return $request->url() === 'https://api.telegram.org/bottest-token/sendMessage'
+                && str_contains((string) $request['text'], 'images/contacts/request.pdf');
+        });
+        Http::assertSent(function (Request $request): bool {
+            return $request->url() === 'https://api.telegram.org/bottest-token/sendDocument';
+        });
+    }
+
+    public function test_it_skips_telegram_delivery_without_a_page_token(): void
+    {
+        Http::fake();
+
+        $page_setting = PageSetting::query()->create([
+            'page_type' => PageSetting::PAGE_TYPE_CONTACTS,
+            'settings' => [
+                'contact_form' => [
+                    'destinations' => [
+                        'telegram' => ['enabled' => true, 'chat_id' => '123'],
+                    ],
+                ],
+            ],
+        ]);
+
+        app(ContactsFormDeliveryService::class)->deliverStored(
+            page_setting: $page_setting,
+            locale: 'en',
+            language_id: 1,
+            data: ['name' => 'Test user'],
+        );
+
+        Http::assertNothingSent();
     }
 }
