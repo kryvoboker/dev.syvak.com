@@ -869,8 +869,8 @@ class PageSettingsBootstrapService
                     ],
                 ],
                 'destinations' => [
-                    'email' => ['enabled' => false, 'address' => ''],
-                    'telegram' => ['enabled' => false, 'chat_id' => ''],
+                    'email' => ['enabled' => false, 'send_file' => false, 'address' => ''],
+                    'telegram' => ['enabled' => false, 'send_file' => false, 'bot_token' => '', 'chat_id' => ''],
                 ],
             ],
             'email' => ['templates' => $email_templates],
@@ -991,10 +991,13 @@ class PageSettingsBootstrapService
                 'destinations' => [
                     'email' => [
                         'enabled' => (bool) Arr::get($settings, 'contact_form.destinations.email.enabled', false),
+                        'send_file' => (bool) Arr::get($settings, 'contact_form.destinations.email.send_file', false),
                         'address' => Str::trim((string) Arr::get($settings, 'contact_form.destinations.email.address', '')),
                     ],
                     'telegram' => [
                         'enabled' => (bool) Arr::get($settings, 'contact_form.destinations.telegram.enabled', false),
+                        'send_file' => (bool) Arr::get($settings, 'contact_form.destinations.telegram.send_file', false),
+                        'bot_token' => Str::trim((string) Arr::get($settings, 'contact_form.destinations.telegram.bot_token', '')),
                         'chat_id' => Str::trim((string) Arr::get($settings, 'contact_form.destinations.telegram.chat_id', '')),
                     ],
                 ],

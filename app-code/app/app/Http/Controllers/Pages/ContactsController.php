@@ -26,8 +26,8 @@ class ContactsController extends Controller
      * @param string              $locale
      * @param string              $slug
      *
-     * @return View
      * @throws Throwable
+     * @return View
      */
     public function show(
         HeaderService       $header_service,
@@ -36,7 +36,7 @@ class ContactsController extends Controller
         string              $locale,
         string              $slug,
     ): View {
-        $locale   = normalize_locale($locale);
+        $locale = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
 
         if (!$language instanceof Language) {
@@ -67,8 +67,8 @@ class ContactsController extends Controller
      * @param ContactsPageService $contacts_page_service
      * @param string              $locale
      *
-     * @return View|RedirectResponse
      * @throws Throwable
+     * @return View|RedirectResponse
      */
     public function showStatic(
         HeaderService       $header_service,
@@ -83,7 +83,7 @@ class ContactsController extends Controller
         }
 
         $page_setting = $data['page_setting'];
-        $language     = $data['language'];
+        $language = $data['language'];
 
         return $this->renderPage(
             header_service       : $header_service,
@@ -118,8 +118,8 @@ class ContactsController extends Controller
         }
 
         $page_setting = $data['page_setting'];
-        $language     = $data['language'];
-        $locale       = $data['locale'];
+        $language = $data['language'];
+        $locale = $data['locale'];
 
         return $this->deliverForm(
             request              : $request,
@@ -146,8 +146,8 @@ class ContactsController extends Controller
         ContactsPageService $contacts_page_service,
         string              $locale,
     ): array|RedirectResponse {
-        $locale       = normalize_locale($locale);
-        $language     = resolve_language_by_locale($locale);
+        $locale = normalize_locale($locale);
+        $language = resolve_language_by_locale($locale);
         $page_setting = $contacts_page_service->getStaticPageSetting();
 
         if (!$language instanceof Language || !$page_setting instanceof PageSetting) {
@@ -159,7 +159,7 @@ class ContactsController extends Controller
         if (filled($canonical_slug) && $canonical_slug !== 'contacts') {
             return redirect()->route('localized.catalog.contacts.show', [
                 'locale' => $locale,
-                'slug'   => $canonical_slug,
+                'slug' => $canonical_slug,
             ]);
         }
 
@@ -176,8 +176,8 @@ class ContactsController extends Controller
      * @param string              $form_route_name
      * @param array               $form_route_params
      *
-     * @return View
      * @throws Throwable
+     * @return View
      */
     private function renderPage(
         HeaderService       $header_service,
@@ -189,21 +189,21 @@ class ContactsController extends Controller
         string              $form_route_name,
         array               $form_route_params,
     ): View {
-        $header_data   = $header_service([
+        $header_data = $header_service([
             'sluggable_type' => PageSetting::class,
-            'slug'           => $slug,
+            'slug' => $slug,
         ]);
         $contacts_data = $contacts_page_service->getViewData($page_setting, $language_id);
-        $data          = [
-            'header_data'   => $header_data,
-            'footer_data'   => $footer_service([
+        $data = [
+            'header_data' => $header_data,
+            'footer_data' => $footer_service([
                 'categories' => $header_data['categories'],
             ]),
-            'page_type'     => config('page-settings.page_type.contacts', 'contacts'),
-            'page_title'    => (string)data_get($contacts_data, 'title'),
+            'page_type' => config('page-settings.page_type.contacts', 'contacts'),
+            'page_title' => (string)data_get($contacts_data, 'title'),
             'contacts_data' => $contacts_data,
-            'form_action'   => localized_route($form_route_name, $form_route_params),
-            'breadcrumbs'   => [
+            'form_action' => localized_route($form_route_name, $form_route_params),
+            'breadcrumbs' => [
                 breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
                 breadcrumb((string)data_get($contacts_data, 'title', __('catalog/contacts.fallbacks.title'))),
             ],
@@ -228,7 +228,7 @@ class ContactsController extends Controller
         string                      $locale,
         string                      $slug,
     ): RedirectResponse {
-        $locale   = normalize_locale($locale);
+        $locale = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
 
         if (!$language instanceof Language) {
