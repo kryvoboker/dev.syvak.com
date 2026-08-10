@@ -1,7 +1,7 @@
 @if(filled($products))
     <div class="grid grid-cols-2 gap-x-2 gap-y-3 md:grid-cols-3 md:gap-x-3 md:gap-y-4 lg:gap-x-4 lg:gap-y-5 bp1440px:grid-cols-4">
         @foreach($products as $product)
-            <div class="category-card card">
+            <div class="category-card card border-none">
                 <a class="category-img-container flex items-center justify-center overflow-hidden"
                    href="{{ $product['url'] }}"
                    aria-label="{{ $product['name'] }}">
