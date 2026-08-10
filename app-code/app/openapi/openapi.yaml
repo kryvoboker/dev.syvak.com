@@ -9,6 +9,7 @@ info:
     Storefront and page docs:
     - [Checkout page contract](./pages/checkout.yaml)
     - [Cart modal contract](./pages/cart-modal.yaml)
+    - [Contacts page form contract](./pages/contacts.yaml)
 
     Module public API docs:
     - [NovaPoshta public API](../Modules/NovaPoshta/docs/openapi.yaml)
@@ -27,6 +28,8 @@ tags:
     description: Checkout page and AJAX endpoints
   - name: Cart Modal
     description: Cart modal snapshot and mutation endpoints
+  - name: Contacts
+    description: Public Contacts page form submission endpoints
   - name: NovaPoshta
     description: Nova Poshta checkout and sync endpoints
   - name: UkrPoshta
@@ -52,6 +55,10 @@ paths:
     $ref: './pages/cart-modal.yaml#/paths/~1{locale}~1cart'
   /{locale}/cart/{cart_id}:
     $ref: './pages/cart-modal.yaml#/paths/~1{locale}~1cart~1{cart_id}'
+  /{locale}/contacts/contact:
+    $ref: './pages/contacts.yaml#/paths/~1{locale}~1contacts~1contact'
+  /{locale}/{contacts_slug}/contact:
+    $ref: './pages/contacts.yaml#/paths/~1{locale}~1{contacts_slug}~1contact'
   /novaposhta/state:
     $ref: '../Modules/NovaPoshta/docs/openapi.yaml#/paths/~1novaposhta~1state'
   /novaposhta/regions:
