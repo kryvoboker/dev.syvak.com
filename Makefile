@@ -37,6 +37,10 @@ vite-build: set-node
 	cd app-code/app \
 	&& npm run build
 
+# Sign to php terminal
+stpt:
+	docker exec -it $(PART_OF_CONTAINER_NAME)-php-fpm /bin/bash
+
 branch-list:
 	git branch -a --sort=-committerdate
 
