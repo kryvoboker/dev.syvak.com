@@ -26,6 +26,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 if (!function_exists('clear_telephone')) {
+    /**
+     * @param string|null $telephone
+     * @param bool        $is_delete_first_nums
+     *
+     * @return string
+     */
     function clear_telephone(?string $telephone, bool $is_delete_first_nums = false): string
     {
         if (!isset($telephone)) {
@@ -41,6 +47,11 @@ if (!function_exists('clear_telephone')) {
 }
 
 if (!function_exists('parse_telephone')) {
+    /**
+     * @param string $telephone
+     *
+     * @return string
+     */
     function parse_telephone(string $telephone): string
     {
         $telephone = clear_telephone($telephone, true);
@@ -57,6 +68,11 @@ if (!function_exists('parse_telephone')) {
 }
 
 if (!function_exists('trim_strs_in_arr')) {
+    /**
+     * @param array $arr
+     *
+     * @return array
+     */
     function trim_strs_in_arr(array $arr): array
     {
         return array_map(function ($item) {
@@ -109,6 +125,9 @@ if (!function_exists('multiple_convert_img_and_get_url')) {
 }
 
 if (!function_exists('get_app_settings')) {
+    /**
+     * @return AppSettingsData|null
+     */
     function get_app_settings(): ?AppSettingsData
     {
         return app(AppSettingsService::class)->getSettings();
@@ -129,6 +148,12 @@ if (!function_exists('set_app_setting')) {
 }
 
 if (!function_exists('get_global_config')) {
+    /**
+     * @param string     $key
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
     function get_global_config(string $key, mixed $default = null): mixed
     {
         return app(GlobalConfigService::class)->getGlobalConfig($key, $default);
@@ -152,6 +177,9 @@ if (!function_exists('set_global_config')) {
 }
 
 if (!function_exists('get_global_configs')) {
+    /**
+     * @return Collection
+     */
     function get_global_configs(): Collection
     {
         return app(GlobalConfigService::class)->getGlobalConfigs();
@@ -178,8 +206,13 @@ if (!function_exists('disable_global_config')) {
     }
 }
 
-if (!function_exists('sanitaze_str')) {
-    function sanitaze_str(?string $string): string
+if (!function_exists('sanitize_str')) {
+    /**
+     * @param string|null $string
+     *
+     * @return string
+     */
+    function sanitize_str(?string $string): string
     {
         if ($string === null) {
             return '';
@@ -192,16 +225,27 @@ if (!function_exists('sanitaze_str')) {
 }
 
 if (!function_exists('breadcrumb')) {
+    /**
+     * @param string      $title
+     * @param string|null $url
+     *
+     * @return array
+     */
     function breadcrumb(string $title, ?string $url = null): array
     {
         return [
-            'title' => sanitaze_str($title),
+            'title' => sanitize_str($title),
             'url' => $url,
         ];
     }
 }
 
 if (!function_exists('try_detect_page_type')) {
+    /**
+     * @param Request|null $request
+     *
+     * @return string|null
+     */
     function try_detect_page_type(?Request $request = null): ?string
     {
         if ($request === null) {
@@ -237,6 +281,10 @@ if (!function_exists('try_detect_page_type')) {
                 Str::endsWith($route_name, '.thank-you.index') => (string)config('page-settings.page_type.thankyou'),
                 Str::endsWith($route_name, '.failure-order'),
                 Str::endsWith($route_name, '.failure-order.index') => (string)config('page-settings.page_type.failure'),
+                Str::endsWith($route_name, '.contacts.static.submit'),
+                Str::endsWith($route_name, '.contacts.static.show'),
+                Str::endsWith($route_name, '.contacts.submit'),
+                Str::endsWith($route_name, '.contacts.show') => (string)config('page-settings.page_type.contacts'),
                 default => null,
             };
         }
@@ -258,12 +306,20 @@ if (!function_exists('try_detect_page_type')) {
             'order' => (string)config('page-settings.page_type.order'),
             'thank-you' => (string)config('page-settings.page_type.thankyou'),
             'failure' => (string)config('page-settings.page_type.failure'),
+            'contacts' => (string)config('page-settings.page_type.contacts'),
             default => null,
         };
     }
 }
 
 if (!function_exists('localized_route')) {
+    /**
+     * @param BackedEnum|string $route
+     * @param array             $parameters
+     * @param bool              $absolute
+     *
+     * @return string
+     */
     function localized_route(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
     {
         $locale_key = config('localization.locale_parameter');
@@ -398,6 +454,11 @@ if (!function_exists('localized_product_variant_route')) {
 }
 
 if (!function_exists('decode_html_entities')) {
+    /**
+     * @param string|null $string
+     *
+     * @return string
+     */
     function decode_html_entities(?string $string): string
     {
         return html_entity_decode((string)$string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -405,6 +466,11 @@ if (!function_exists('decode_html_entities')) {
 }
 
 if (!function_exists('escape_special_html')) {
+    /**
+     * @param string|null $html_string
+     *
+     * @return string
+     */
     function escape_special_html(?string $html_string): string
     {
         $prepared_html = Str::replaceMatches('/<script>.*?<\/script>/s', function ($match) {
@@ -420,6 +486,13 @@ if (!function_exists('escape_special_html')) {
 }
 
 if (!function_exists('convert_price')) {
+    /**
+     * @param float  $price
+     * @param string $code_from
+     * @param string $code_to
+     *
+     * @return float
+     */
     function convert_price(float $price, string $code_from, string $code_to): float
     {
         return app(ConvertPrice::class)->convert(
@@ -431,6 +504,14 @@ if (!function_exists('convert_price')) {
 }
 
 if (!function_exists('format_price')) {
+    /**
+     * @param float|int   $price
+     * @param string|null $currency_code
+     * @param float|int   $exchange_rate
+     * @param bool        $is_formatting
+     *
+     * @return string|float
+     */
     function format_price(float|int $price, ?string $currency_code = null, float|int $exchange_rate = 0, bool $is_formatting = true): string|float
     {
         return app(ConvertPrice::class)->format(
@@ -443,6 +524,13 @@ if (!function_exists('format_price')) {
 }
 
 if (!function_exists('replace_currency_symbol_to_code')) {
+    /**
+     * @param string      $price_string
+     * @param string|null $currency_symbol
+     * @param string|null $currency_code
+     *
+     * @return string
+     */
     function replace_currency_symbol_to_code(string $price_string, ?string $currency_symbol = null, ?string $currency_code = null): string
     {
         return app(ConvertPrice::class)->replaceCurrencySymbolToCode(
@@ -454,6 +542,12 @@ if (!function_exists('replace_currency_symbol_to_code')) {
 }
 
 if (!function_exists('str_more_or_equal_length')) {
+    /**
+     * @param string|null $string
+     * @param int|null    $length
+     *
+     * @return bool
+     */
     function str_more_or_equal_length(?string $string, ?int $length): bool
     {
         return $string !== null && $length !== null && Str::length(Str::trim($string)) >= $length;
@@ -461,6 +555,12 @@ if (!function_exists('str_more_or_equal_length')) {
 }
 
 if (!function_exists('num_more_or_equal_num')) {
+    /**
+     * @param mixed    $num
+     * @param int|null $num_for_comparison
+     *
+     * @return bool
+     */
     function num_more_or_equal_num(mixed $num, ?int $num_for_comparison): bool
     {
         return is_numeric($num) && $num_for_comparison !== null && $num >= $num_for_comparison;
@@ -468,6 +568,11 @@ if (!function_exists('num_more_or_equal_num')) {
 }
 
 if (!function_exists('get_now_date')) {
+    /**
+     * @param string|null $time_zone
+     *
+     * @return Carbon|CarbonInterface
+     */
     function get_now_date(?string $time_zone = null): Carbon|CarbonInterface
     {
         return now($time_zone ?: config('app.timezone'));
@@ -503,8 +608,13 @@ if (!function_exists('is_enabled_singleton_module')) {
     }
 }
 
-if (!function_exists('sanitaze_url')) {
-    function sanitaze_url(?string $url): string
+if (!function_exists('sanitize_url')) {
+    /**
+     * @param string|null $url
+     *
+     * @return string
+     */
+    function sanitize_url(?string $url): string
     {
         if ($url === null) {
             return '';
@@ -522,6 +632,11 @@ if (!function_exists('sanitaze_url')) {
 }
 
 if (!function_exists('normalize_upload_path_template')) {
+    /**
+     * @param string|null $path
+     *
+     * @return string
+     */
     function normalize_upload_path_template(?string $path): string
     {
         $normalized_path = (string)$path;
@@ -531,6 +646,11 @@ if (!function_exists('normalize_upload_path_template')) {
 }
 
 if (!function_exists('resolve_upload_path_placeholders')) {
+    /**
+     * @param string|null $path
+     *
+     * @return string
+     */
     function resolve_upload_path_placeholders(?string $path): string
     {
         $normalized_path = (string)$path;
@@ -545,6 +665,12 @@ if (!function_exists('resolve_upload_path_placeholders')) {
 }
 
 if (!function_exists('resolve_language_by_locale')) {
+    /**
+     * @param string $locale
+     * @param bool   $is_get_new_instance
+     *
+     * @return Language|null
+     */
     function resolve_language_by_locale(string $locale, bool $is_get_new_instance = false): ?Language
     {
         if ($is_get_new_instance === true) {
@@ -560,6 +686,11 @@ if (!function_exists('resolve_language_by_locale')) {
 }
 
 if (!function_exists('get_page_settings')) {
+    /**
+     * @param PageSetting $page_setting
+     *
+     * @return array
+     */
     function get_page_settings(PageSetting $page_setting): array
     {
         return is_array($page_setting->settings) ? $page_setting->settings : [];
@@ -586,6 +717,12 @@ if (!function_exists('get_sorting_items')) {
 }
 
 if (!function_exists('resolve_sort_code')) {
+    /**
+     * @param PageSetting $page_setting
+     * @param string      $sort_value
+     *
+     * @return string
+     */
     function resolve_sort_code(PageSetting $page_setting, string $sort_value): string
     {
         if ($sort_value === '') {
@@ -609,6 +746,12 @@ if (!function_exists('resolve_sort_code')) {
 }
 
 if (!function_exists('normalize_locale')) {
+    /**
+     * @param string|null $locale
+     * @param bool        $is_get_new_instance
+     *
+     * @return string
+     */
     function normalize_locale(?string $locale, bool $is_get_new_instance = false): string
     {
         if ($locale === null) {
@@ -865,6 +1008,11 @@ if (!function_exists('resolve_product_variant_id_for_slug_variants')) {
 }
 
 if (!function_exists('get_allowed_locales')) {
+    /**
+     * @param bool $is_get_new_instance
+     *
+     * @return array
+     */
     function get_allowed_locales(bool $is_get_new_instance = false): array
     {
         try {
