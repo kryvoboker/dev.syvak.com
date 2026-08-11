@@ -9,6 +9,7 @@ export const $SEARCH_PAGE_TYPE: string = 'search';
 export const $CART_PAGE_TYPE: string = 'cart';
 export const $CHECKOUT_PAGE_TYPE: string = 'checkout';
 export const $THANK_YOU_PAGE_TYPE: string = 'thankyou';
+export const $FAILURE_PAGE_TYPE: string = 'failure';
 export const $PAGE_TYPE_KEY: string = 'page_type';
 export const $HIDDEN_CLASS_NAME = 'hidden';
 export const $ANIMATION_SPIN_CLASS_NAME: string = 'animate-spin';
