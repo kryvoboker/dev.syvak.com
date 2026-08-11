@@ -106,7 +106,7 @@
         @endif
 
         @if(($cart_data['is_empty'] ?? true) === false && $cart_mode === CartModeEnum::Regular->value && $show_checkout_button === true)
-            <a class="white-btn default-btn w-full md:max-w-85.75 lg:max-w-91.75 2xl:max-w-md text-lg mt-3 mx-auto"
+            <a class="btn default-btn w-full md:max-w-85.75 lg:max-w-91.75 2xl:max-w-md text-lg mt-3 mx-auto"
                href="{{ localized_route('localized.catalog.checkout.index') }}">
                 {{ __('catalog/default.cart.buttons.checkout') }}
             </a>

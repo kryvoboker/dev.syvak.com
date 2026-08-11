@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+  title: Contacts Page Form Contract
+  version: 1.0.0
+  description: |
+    Public web-form endpoints for the localized Contacts page.
+
+    The form fields and their validation rules are configured in the Filament
+    Contacts page settings. The request is a browser form submission protected
+    by the application's web CSRF middleware, so successful and failed
+    submissions return redirects rather than JSON bodies. A valid submission is
+    queued for email and/or Telegram delivery.
+servers:
+  - url: https://example.test
+    description: Local or staging environment
+tags:
+  - name: Contacts
+    description: Public Contacts page form submissions
+paths:
+  /{locale}/contacts/contact:
+    post:
+      tags: [Contacts]
+      summary: Submit the Contacts form from the static URL
+      description: |
+        Accepts the form displayed at `/{locale}/contacts`. The static URL is
+        used only when the Contacts page has no configured slug for the current
+        language; otherwise the GET page redirects to its localized slug.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+      requestBody:
+        $ref: '#/components/requestBodies/ContactsForm'
+      responses:
+        '302':
+          $ref: '#/components/responses/ContactsRedirect'
+        '404':
+          description: Contacts page settings or the requested locale were not found.
+        '419':
+          description: CSRF token is missing or expired.
+
+  /{locale}/{contacts_slug}/contact:
+    post:
+      tags: [Contacts]
+      summary: Submit the Contacts form from a localized slug URL
+      description: |
+        Accepts the form displayed at `/{locale}/{contacts_slug}`. The slug is
+        resolved against the current language and must belong to the Contacts
+        page setting.
+      parameters:
+        - $ref: '#/components/parameters/Locale'
+        - $ref: '#/components/parameters/ContactsSlug'
+      requestBody:
+        $ref: '#/components/requestBodies/ContactsForm'
+      responses:
+        '302':
+          $ref: '#/components/responses/ContactsRedirect'
+        '404':
+          description: Contacts page, locale, or slug was not found.
+        '419':
+          description: CSRF token is missing or expired.
+
+components:
+  parameters:
+    Locale:
+      in: path
+      name: locale
+      required: true
+      schema:
+        type: string
+      description: Active storefront locale, for example `en` or `uk`.
+    ContactsSlug:
+      in: path
+      name: contacts_slug
+      required: true
+      schema:
+        type: string
+      description: Localized SEO slug of the Contacts page.
+  requestBodies:
+    ContactsForm:
+      required: true
+      description: |
+        `multipart/form-data` is required when the file field is enabled. The
+        exact enabled/required fields, limits, regex mask, allowed file types,
+        and maximum file size come from the current Contacts page settings.
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/ContactsFormRequest'
+  responses:
+    ContactsRedirect:
+      description: |
+        Redirects back to the Contacts page. On success the session contains
+        `contacts_form_success`; on validation or delivery failure it contains
+        errors and input values except for the uploaded file.
+      headers:
+        Location:
+          schema:
+            type: string
+          description: URL of the Contacts page to which the browser is redirected.
+  schemas:
+    ContactsFormRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        _token:
+          type: string
+          description: Laravel web CSRF token.
+        name:
+          type: string
+          description: Available when enabled in Contacts form settings.
+        email:
+          type: string
+          format: email
+          description: Available when enabled; backend rules may require it.
+        phone:
+          type: string
+          description: Available when enabled; backend rules come from settings.
+        text:
+          type: string
+          description: Available when enabled; backend rules come from settings.
+        file:
+          type: string
+          format: binary
+          description: Optional or required upload according to Contacts settings.

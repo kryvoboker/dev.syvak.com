@@ -54,7 +54,7 @@
                                 @endif
                             </div>
 
-                            <div class="products-carousel-card card">
+                            <div class="products-carousel-card card border-none">
                                 <a class="products-carousel-img-container flex items-center justify-center overflow-hidden"
                                    href="{{ $url }}"
                                    aria-label="{{ $name }}">

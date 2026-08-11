@@ -6,10 +6,12 @@ use App\Http\Controllers\Ajax\CartModalAjaxController;
 use App\Http\Controllers\Ajax\CatalogFilterAjaxController;
 use App\Http\Controllers\Ajax\LiveSearchProductsAjaxController;
 use App\Http\Controllers\Ajax\LoadMoreProductsByAjaxController;
+use App\Http\Controllers\Filament\Inquiries\DownloadInquiryAttachmentController;
 use App\Http\Controllers\Order\OrderConfirmController;
 use App\Http\Controllers\Pages\CartController;
 use App\Http\Controllers\Pages\CategoryController;
 use App\Http\Controllers\Pages\CheckoutController;
+use App\Http\Controllers\Pages\ContactsController;
 use App\Http\Controllers\Pages\FailureOrderController;
 use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ProductController;
@@ -30,6 +32,10 @@ Route::get('/alyo-admin', function (): RedirectResponse {
 Route::get('/alyo-admin/login', function (): RedirectResponse {
     return redirect('/' . app()->getLocale() . '/alyo-admin/login');
 });
+
+Route::get('/admin/inquiries/attachments/{attachment}/download', DownloadInquiryAttachmentController::class)
+    ->name('admin.inquiries.attachments.download')
+    ->middleware('auth');
 
 $locale_key = config('localization.locale_parameter', 'locale');
 $allowed_locales = get_allowed_locales();
@@ -83,4 +89,9 @@ Route::prefix('{' . $locale_key . '}')
             ->where('order_number', '[0-9A-HJKMNP-TV-Z]{26}')
             ->name('thank-you.index');
         Route::get('/failure', [FailureOrderController::class, 'index'])->name('failure-order.index');
+
+        Route::post('/contacts/contact', [ContactsController::class, 'submitStatic'])->name('contacts.static.submit');
+        Route::get('/contacts', [ContactsController::class, 'showStatic'])->name('contacts.static.show');
+        Route::post('/{slug}/contact', [ContactsController::class, 'submit'])->name('contacts.submit');
+        Route::get('/{slug}', [ContactsController::class, 'show'])->name('contacts.show');
     });

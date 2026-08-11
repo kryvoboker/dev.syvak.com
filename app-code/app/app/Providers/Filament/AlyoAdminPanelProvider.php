@@ -77,6 +77,7 @@ class AlyoAdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
                 AdminNavigationGroupEnum::Catalog->getLabel(),
+                AdminNavigationGroupEnum::Inquiries->getLabel(),
                 AdminNavigationGroupEnum::InfoPages->getLabel(),
                 AdminNavigationGroupEnum::Users->getLabel(),
                 AdminNavigationGroupEnum::Marketing->getLabel(),

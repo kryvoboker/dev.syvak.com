@@ -83,6 +83,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'mail' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/mail.log'),
+            'level' => 'debug',
+            'days' => 14,
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

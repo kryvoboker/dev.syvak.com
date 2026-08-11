@@ -6,6 +6,7 @@ return [
     // Menu items
     'menu' => [
         'item_catalog' => 'Каталог',
+        'item_inquiries' => 'Звернення',
         'info_pages' => 'Інформаційні сторінки',
         'item_users' => 'Користувачі',
         'item_marketing' => 'Маркетинг',
@@ -122,6 +123,7 @@ return [
     'buttons' => [
         'save' => 'Зберегти',
         'create' => 'Створити',
+        'back' => 'Назад',
         'edit' => 'Редагувати',
         'update' => 'Оновити',
         'delete' => 'Видалити',
