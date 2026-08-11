@@ -76,7 +76,7 @@
     <section class="checkout section" id="checkout" data-checkout-page>
         <div class="container flex flex-col gap-4 md:gap-6">
             <div class="flex flex-col gap-6 pb-10 md:gap-8 lg:pb-16">
-                <h1 class="font-cormorant-garamond text-32px md:text-44px lg:text-6xl 2xl:text-90px leading-0.9em uppercase">
+                <h1 class="section-title">
                     {{ __('catalog/pages/checkout.title') }}
                 </h1>
 
@@ -398,7 +398,7 @@
 
                                     <div class="hidden text-sm text-light-red md:text-base" data-checkout-order-error role="alert"></div>
 
-                                    <button class="white-btn default-btn w-full md:max-w-sm text-sm md:text-lg"
+                                    <button class="btn default-btn w-full md:max-w-sm text-sm md:text-lg"
                                             data-checkout-submit
                                             type="submit">
                                         {{ __('catalog/pages/checkout.buttons.submit') }}

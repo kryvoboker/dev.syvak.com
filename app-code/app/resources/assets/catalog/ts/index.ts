@@ -34,6 +34,10 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
     import('@ts-shared/lib/validateForm.ts').then((module) => module.handleValidateForms());
 
+    if (findElem('[data-contacts-form]')) {
+        import('@ts-shared/lib/parsePhone.ts').then((module) => module.handleParsePhone());
+    }
+
     import('@ts-features/menu/language.ts').then((module) => module.handleLanguageMenu());
 
     if (deviceType === $DESKTOP_DEVICE_TYPE) {

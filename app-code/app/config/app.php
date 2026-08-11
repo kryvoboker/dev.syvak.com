@@ -216,6 +216,7 @@ return [
         'total_sizes_for_generate' => (int) env('TOTAL_IMAGE_SIZES_FOR_GENERATE'),
         'max_image_width_for_convert' => (int) env('MAX_IMAGE_WIDTH_FOR_CONVERT'),
         'max_image_height_for_convert' => (int) env('MAX_IMAGE_HEIGHT_FOR_CONVERT'),
+        'default_max_upload_image_size_kb' => (int) env('DEFAULT_MAX_UPLOAD_IMAGE_SIZE_KB'),
         'category' => [
             'upload' => [
                 'max_size_kb' => (int) env('MAX_UPLOAD_CATEGORY_IMAGE_SIZE_KB', 5120), // 5 MB,

@@ -184,13 +184,13 @@
     <div class="drawer-footer p-0">
         <div class="category-filter__controls hidden items-center justify-between gap-x-2 w-full"
              id="category-filter-controls">
-            <button class="category-filter__clear-all-btn black-btn"
+            <button class="category-filter__clear-all-btn btn btn-black"
                     id="category-filter-clear-all-btn"
                     type="button">
                 {{ __('catalog/default.buttons.clear_all') }}
             </button>
 
-            <button class="category-filter__apply-btn white-btn"
+            <button class="category-filter__apply-btn btn"
                     id="category-filter-apply-btn"
                     type="button">
                 {{ __('catalog/default.buttons.apply') }}

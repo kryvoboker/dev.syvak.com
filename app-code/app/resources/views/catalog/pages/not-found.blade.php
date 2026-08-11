@@ -11,7 +11,7 @@
              id="not-found-page">
         <div class="container">
             <div class="flex flex-col items-center gap-y-6 text-center md:gap-y-8 mx-auto">
-                <h1 aria-hidden="true">
+                <h1 class="section-title">
                     404
                 </h1>
 
@@ -27,7 +27,7 @@
                     @endif
                 </div>
 
-                <a class="relative default-btn black-btn text-xl xl:text-2xl uppercase leading-[6.5] rounded-full"
+                <a class="relative default-btn btn btn-black text-xl xl:text-2xl uppercase leading-[6.5] rounded-full"
                    href="{{ $not_found_link['url'] ?? localized_route('catalog.home') }}">
                     {{ $not_found_link['label'] ?? __('catalog/pages/not-found.buttons.go_home') }}
                 </a>

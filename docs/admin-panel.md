@@ -27,6 +27,25 @@
 - Page settings for storefront behavior
 - Localization and language-dependent content
 
+## Contacts Page Settings
+
+The Contacts page is configured in
+`Filament/Resources/PageSettings/Contacts/` as a singleton edit page. Its form
+contains localized general content, images, SEO slugs, contact-form rules,
+email and Telegram destinations/templates, map settings, phones, emails, and
+localized addresses.
+
+- Active application languages are rendered as localized tabs.
+- Phone, email, image, and address collections support ordered repeaters.
+- Each form field can be enabled, marked required, constrained by length or a
+  regular-expression mask, and validated on the backend.
+- File uploads define allowed extensions, maximum size, and an upload path.
+- Email and Telegram delivery can be enabled independently. Each destination
+  can be configured to include an uploaded file; Telegram requires its page
+  bot token and chat ID, while email requires a recipient address.
+- Settings changes are normalized by `PageSettingsBootstrapService`; localized
+  slugs are persisted in the shared `slugs` table.
+
 ## See Also
 
 - [Project README](../README.md) — project landing page and navigation hub.

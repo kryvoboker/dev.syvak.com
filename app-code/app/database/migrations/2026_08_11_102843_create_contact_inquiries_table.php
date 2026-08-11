@@ -12,14 +12,11 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        Schema::create('contact_pages', function (Blueprint $table) {
+        Schema::create('contact_inquiries', function (Blueprint $table): void {
             $table->id();
 
-            $table->json('title')->nullable(false);
-            $table->json('description')->nullable();
-            $table->json('meta_title')->nullable();
-            $table->json('meta_description')->nullable();
-            $table->json('meta_keywords')->nullable();
+            $table->text('message')->nullable();
+            $table->json('submitted_fields')->nullable();
 
             $table->timestamps();
         });
@@ -30,6 +27,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('contact_pages');
+        Schema::dropIfExists('contact_inquiries');
     }
 };
