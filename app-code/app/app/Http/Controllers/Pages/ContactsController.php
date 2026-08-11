@@ -12,6 +12,7 @@ use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\PageSettings\ContactsFormDeliveryService;
 use App\Services\PageSettings\ContactsPageService;
+use App\Services\PageSettings\FailurePageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -30,17 +31,31 @@ class ContactsController extends Controller
      * @return View
      */
     public function show(
-        HeaderService       $header_service,
-        FooterService       $footer_service,
+        HeaderService $header_service,
+        FooterService $footer_service,
         ContactsPageService $contacts_page_service,
-        string              $locale,
-        string              $slug,
+        string $locale,
+        string $slug,
+        ?FailurePageService $failure_page_service = null,
     ): View {
         $locale = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
 
         if (!$language instanceof Language) {
             throw new NotFoundHttpException();
+        }
+
+        $failure_page_setting = ($failure_page_service ?? app(FailurePageService::class))
+            ->findBySlug($slug, (int) $language->id);
+
+        if ($failure_page_setting instanceof PageSetting) {
+            return view('catalog.pages.failure-order', [
+                ...($failure_page_service ?? app(FailurePageService::class))
+                    ->getViewData($failure_page_setting, (int) $language->id, $locale),
+                'breadcrumbs' => [
+                    breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
+                ],
+            ]);
         }
 
         $page_setting = $contacts_page_service->findBySlug($slug, (int)$language->id);
@@ -71,10 +86,10 @@ class ContactsController extends Controller
      * @return View|RedirectResponse
      */
     public function showStatic(
-        HeaderService       $header_service,
-        FooterService       $footer_service,
+        HeaderService $header_service,
+        FooterService $footer_service,
         ContactsPageService $contacts_page_service,
-        string              $locale,
+        string $locale,
     ): View|RedirectResponse {
         $data = $this->tryResolveDataForStatic($contacts_page_service, $locale);
 
@@ -106,10 +121,10 @@ class ContactsController extends Controller
      * @return RedirectResponse
      */
     public function submitStatic(
-        ContactsFormRequest         $request,
-        ContactsPageService         $contacts_page_service,
+        ContactsFormRequest $request,
+        ContactsPageService $contacts_page_service,
         ContactsFormDeliveryService $delivery_service,
-        string                      $locale,
+        string $locale,
     ): RedirectResponse {
         $data = $this->tryResolveDataForStatic($contacts_page_service, $locale);
 
@@ -144,7 +159,7 @@ class ContactsController extends Controller
      */
     private function tryResolveDataForStatic(
         ContactsPageService $contacts_page_service,
-        string              $locale,
+        string $locale,
     ): array|RedirectResponse {
         $locale = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
@@ -180,14 +195,14 @@ class ContactsController extends Controller
      * @return View
      */
     private function renderPage(
-        HeaderService       $header_service,
-        FooterService       $footer_service,
+        HeaderService $header_service,
+        FooterService $footer_service,
         ContactsPageService $contacts_page_service,
-        PageSetting         $page_setting,
-        int                 $language_id,
-        ?string             $slug,
-        string              $form_route_name,
-        array               $form_route_params,
+        PageSetting $page_setting,
+        int $language_id,
+        ?string $slug,
+        string $form_route_name,
+        array $form_route_params,
     ): View {
         $header_data = $header_service([
             'sluggable_type' => PageSetting::class,
@@ -222,11 +237,11 @@ class ContactsController extends Controller
      * @return RedirectResponse
      */
     public function submit(
-        ContactsFormRequest         $request,
-        ContactsPageService         $contacts_page_service,
+        ContactsFormRequest $request,
+        ContactsPageService $contacts_page_service,
         ContactsFormDeliveryService $delivery_service,
-        string                      $locale,
-        string                      $slug,
+        string $locale,
+        string $slug,
     ): RedirectResponse {
         $locale = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
@@ -264,13 +279,13 @@ class ContactsController extends Controller
      * @return RedirectResponse
      */
     private function deliverForm(
-        ContactsFormRequest         $request,
+        ContactsFormRequest $request,
         ContactsFormDeliveryService $delivery_service,
-        PageSetting                 $page_setting,
-        int                         $language_id,
-        string                      $locale,
-        string                      $redirect_route_name,
-        array                       $redirect_route_params,
+        PageSetting $page_setting,
+        int $language_id,
+        string $locale,
+        string $redirect_route_name,
+        array $redirect_route_params,
     ): RedirectResponse {
         try {
             $delivery_service->deliver(

@@ -3,6 +3,7 @@ import {
     $CATEGORY_PAGE_TYPE,
     $CHECKOUT_PAGE_TYPE,
     $DESKTOP_DEVICE_TYPE,
+    $FAILURE_PAGE_TYPE,
     $HOME_PAGE_TYPE,
     $PRODUCT_PAGE_TYPE,
     $SEARCH_PAGE_TYPE,
@@ -109,5 +110,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
     if (pageType === $THANK_YOU_PAGE_TYPE) {
         import('@ts-features/pages/thank-you/thankYouPage.ts').then((module) => module.handleThankYouPage());
+    } else if (pageType === $FAILURE_PAGE_TYPE) {
+        import('@ts-features/pages/failure/failurePage.ts').then((module) => module.handleFailurePage());
     }
 });

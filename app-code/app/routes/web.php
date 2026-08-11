@@ -78,6 +78,7 @@ Route::prefix('{' . $locale_key . '}')
         Route::post('/order-validate', [OrderConfirmController::class, 'validateFastOrder'])->name('order-confirm.validate');
         Route::post('/order-confirm/simple', [OrderConfirmController::class, 'storeSimpleOrder'])->name('order-confirm.simple.store');
         Route::post('/order-validate/simple', [OrderConfirmController::class, 'validateSimpleOrder'])->name('order-confirm.simple.validate');
+
         Route::post('/wayforpay/callback', WayForPayCallbackController::class)
             ->withoutMiddleware(PreventRequestForgery::class)
             ->name('wayforpay.callback');
@@ -88,7 +89,10 @@ Route::prefix('{' . $locale_key . '}')
         Route::get('/thank-you/{order_number}', [ThankYouController::class, 'index'])
             ->where('order_number', '[0-9A-HJKMNP-TV-Z]{26}')
             ->name('thank-you.index');
+
         Route::get('/failure', [FailureOrderController::class, 'index'])->name('failure-order.index');
+        Route::post('/failure/retry', [FailureOrderController::class, 'retry'])->name('failure-order.retry');
+        Route::post('/failure/payment', [FailureOrderController::class, 'payment'])->name('failure-order.payment');
 
         Route::post('/contacts/contact', [ContactsController::class, 'submitStatic'])->name('contacts.static.submit');
         Route::get('/contacts', [ContactsController::class, 'showStatic'])->name('contacts.static.show');
