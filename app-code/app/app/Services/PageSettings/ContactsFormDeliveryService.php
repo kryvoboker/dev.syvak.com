@@ -6,6 +6,7 @@ namespace App\Services\PageSettings;
 
 use App\Jobs\DeliverContactsFormJob;
 use App\Models\PageSettings\PageSetting;
+use App\Services\Inquiries\InquiryPersistenceService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
@@ -22,6 +23,7 @@ final readonly class ContactsFormDeliveryService
 {
     public function __construct(
         private ContactsPageService $contacts_page_service,
+        private InquiryPersistenceService $inquiry_persistence_service,
     ) {
     }
 
@@ -32,18 +34,31 @@ final readonly class ContactsFormDeliveryService
         $this->ensureDestinationIsConfigured($settings);
         $file_path = $this->storeFile($settings, $file);
         $queue_data = Arr::except($data, ['file']);
+        $inquiry = $this->inquiry_persistence_service->persistContact(
+            locale      : $locale,
+            language_id : $language_id,
+            data        : $queue_data,
+            file_path   : $file_path,
+            file        : $file,
+        );
 
         DeliverContactsFormJob::dispatch(
             page_setting_id: (int)$page_setting->id,
+            inquiry_id     : (int)$inquiry->id,
             locale         : $locale,
             language_id    : $language_id,
             data           : $queue_data,
             file_path      : $file_path,
         );
+
+        Log::channel('daily')->info('Contact inquiry delivery dispatched.', [
+            'inquiry_id' => $inquiry->id,
+            'page_setting_id' => $page_setting->id,
+        ]);
     }
 
     /** @param array<string, mixed> $data */
-    public function deliverStored(PageSetting $page_setting, string $locale, int $language_id, array $data, ?string $file_path = null): void
+    public function deliverStored(PageSetting $page_setting, string $locale, int $language_id, array $data, ?string $file_path = null, ?int $inquiry_id = null): void
     {
         $settings = $this->contacts_page_service->getSettings($page_setting);
         $placeholders = [
@@ -69,6 +84,7 @@ final readonly class ContactsFormDeliveryService
             } catch (Throwable $throwable) {
                 Log::channel('stack')->error('Contacts form email delivery failed.', [
                     'page_setting_id' => $page_setting->id,
+                    'inquiry_id' => $inquiry_id,
                     'locale' => $locale,
                     'exception' => $throwable,
                 ]);
@@ -81,6 +97,7 @@ final readonly class ContactsFormDeliveryService
         if ($telegram_enabled && $telegram_token === '') {
             Log::channel('stack')->critical('Contacts Telegram delivery skipped because the bot token is not configured.', [
                 'page_setting_id' => $page_setting->id,
+                'inquiry_id' => $inquiry_id,
                 'locale' => $locale,
             ]);
         } elseif ($telegram_enabled) {
@@ -98,6 +115,7 @@ final readonly class ContactsFormDeliveryService
             } catch (Throwable $throwable) {
                 Log::channel('stack')->error('Contacts form Telegram delivery failed.', [
                     'page_setting_id' => $page_setting->id,
+                    'inquiry_id' => $inquiry_id,
                     'locale' => $locale,
                     'exception' => $throwable,
                 ]);
@@ -107,6 +125,7 @@ final readonly class ContactsFormDeliveryService
         if (!$delivery_attempted) {
             Log::channel('stack')->critical('Contacts form request was not delivered to any configured destination.', [
                 'page_setting_id' => $page_setting->id,
+                'inquiry_id' => $inquiry_id,
                 'locale' => $locale,
             ]);
         }

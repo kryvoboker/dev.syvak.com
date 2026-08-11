@@ -43,4 +43,7 @@ return [
         'title' => 'Contacts',
         'working_hours_title' => 'Working hours',
     ],
+    'email' => [
+        'response_subject' => 'Response to your contact inquiry',
+    ],
 ];

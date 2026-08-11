@@ -24,6 +24,7 @@ class DeliverContactsFormJob implements ShouldQueue
     /** @param array<string, mixed> $data */
     public function __construct(
         public readonly int $page_setting_id,
+        public readonly int $inquiry_id,
         public readonly string $locale,
         public readonly int $language_id,
         public readonly array $data,
@@ -41,6 +42,7 @@ class DeliverContactsFormJob implements ShouldQueue
             language_id: $this->language_id,
             data: $this->data,
             file_path: $this->file_path,
+            inquiry_id: $this->inquiry_id,
         );
     }
 
@@ -48,6 +50,7 @@ class DeliverContactsFormJob implements ShouldQueue
     {
         Log::channel('stack')->error('Queued Contacts form delivery failed.', [
             'page_setting_id' => $this->page_setting_id,
+            'inquiry_id' => $this->inquiry_id,
             'locale' => $this->locale,
             'exception' => $throwable,
         ]);

@@ -43,4 +43,7 @@ return [
         'title' => 'Контакти',
         'working_hours_title' => 'Графік роботи',
     ],
+    'email' => [
+        'response_subject' => 'Відповідь на ваше звернення',
+    ],
 ];

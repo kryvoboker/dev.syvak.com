@@ -9,6 +9,7 @@ use Filament\Support\Contracts\HasLabel;
 enum AdminNavigationGroupEnum: string implements HasLabel
 {
     case Catalog = 'catalog';
+    case Inquiries = 'inquiries';
     case InfoPages = 'info_pages';
     case Users = 'users';
     case Marketing = 'marketing';
@@ -22,6 +23,7 @@ enum AdminNavigationGroupEnum: string implements HasLabel
     {
         return match ($this) {
             self::Catalog => __('admin/default.menu.item_catalog'),
+            self::Inquiries => __('admin/default.menu.item_inquiries'),
             self::InfoPages => __('admin/default.menu.info_pages'),
             self::Users => __('admin/default.menu.item_users'),
             self::Marketing => __('admin/default.menu.item_marketing'),

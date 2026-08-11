@@ -6,6 +6,7 @@ use App\Http\Controllers\Ajax\CartModalAjaxController;
 use App\Http\Controllers\Ajax\CatalogFilterAjaxController;
 use App\Http\Controllers\Ajax\LiveSearchProductsAjaxController;
 use App\Http\Controllers\Ajax\LoadMoreProductsByAjaxController;
+use App\Http\Controllers\Filament\Inquiries\DownloadInquiryAttachmentController;
 use App\Http\Controllers\Order\OrderConfirmController;
 use App\Http\Controllers\Pages\CartController;
 use App\Http\Controllers\Pages\CategoryController;
@@ -31,6 +32,10 @@ Route::get('/alyo-admin', function (): RedirectResponse {
 Route::get('/alyo-admin/login', function (): RedirectResponse {
     return redirect('/' . app()->getLocale() . '/alyo-admin/login');
 });
+
+Route::get('/admin/inquiries/attachments/{attachment}/download', DownloadInquiryAttachmentController::class)
+    ->name('admin.inquiries.attachments.download')
+    ->middleware('auth');
 
 $locale_key = config('localization.locale_parameter', 'locale');
 $allowed_locales = get_allowed_locales();
