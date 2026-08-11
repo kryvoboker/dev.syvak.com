@@ -6,6 +6,7 @@ return [
     // Menu items
     'menu' => [
         'item_catalog' => 'Catalog',
+        'item_inquiries' => 'Inquiries',
         'info_pages' => 'Info Pages',
         'item_users' => 'Users',
         'item_marketing' => 'Marketing',
@@ -123,6 +124,7 @@ return [
     'buttons' => [
         'save' => 'Save',
         'create' => 'Create',
+        'back' => 'Back',
         'edit' => 'Edit',
         'update' => 'Update',
         'delete' => 'Delete',

@@ -54,9 +54,7 @@ return new class () extends Migration {
             $table->string('forwarded_ip', 45)->nullable();
             $table->string('user_agent')->nullable();
             $table->timestamp('added_at')->nullable(false);
-            $table->timestamp('deleted_at')
-                ->nullable()
-                ->comment('For soft delete');
+            $table->softDeletes()->comment('For soft delete');
 
             $table->timestamps();
 
