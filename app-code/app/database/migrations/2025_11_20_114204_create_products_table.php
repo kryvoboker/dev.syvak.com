@@ -15,15 +15,9 @@ return new class () extends Migration {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('default_variant_id')
-                ->nullable()
-                ->constrained('product_variants')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
             $table->foreignId('default_category_id')
                 ->nullable()
-                ->constrained('categories')
+                ->constrained('categories', 'id')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
