@@ -13,6 +13,7 @@ import {
     toStringValue,
     toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import { $DELIVERY_METHOD, type CheckoutDeliveryMethod } from './checkoutConstants.ts';
 
 export type { CheckoutDeliveryMethod } from './checkoutConstants.ts';
@@ -140,7 +141,9 @@ export const parseCustomProperties = (value: string | undefined): Record<string,
         return parsedValue !== null && typeof parsedValue === 'object' && !isArray(parsedValue)
             ? (parsedValue as Record<string, unknown>)
             : {};
-    } catch {
+    } catch (error) {
+        reportCriticalFrontendError(error);
+
         return {};
     }
 };

@@ -17,6 +17,7 @@ import {
     toNumber,
     toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import type { WindowAppParams } from '@ts-types/global';
 import type { URLParamsType } from '@ts-types/httpQueryBuild.ts';
 import type { API } from 'nouislider';
@@ -252,6 +253,7 @@ const fireSearchProductsEvent = (): void => {
                 return;
             }
 
+            reportCriticalFrontendError(err);
             console.error('err: ', err);
         })
         .finally((): void => {

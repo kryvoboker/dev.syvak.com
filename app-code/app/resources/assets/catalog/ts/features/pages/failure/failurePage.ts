@@ -1,6 +1,7 @@
 import { initAccordion } from '@ts-shared/accordion/initAccordion.ts';
 import { $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
 import { fetchFunc, findArrayElems, findElem, toggleClass, toTrimmedString } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import { handleCheckoutPayment } from '@ts-shared/payment/checkoutPaymentRegistry.ts';
 
 interface FailureResponse {
@@ -103,7 +104,8 @@ export const handleFailurePage = (): void => {
                     }
                 }
             }
-        } catch {
+        } catch (error) {
+            reportCriticalFrontendError(error);
             showError(root, 'The payment attempt failed.');
         } finally {
             retryButton.disabled = false;
@@ -117,7 +119,8 @@ export const handleFailurePage = (): void => {
 
             try {
                 await submitPayment(root, toTrimmedString(root.dataset.paymentUrl), paymentMethod);
-            } catch {
+            } catch (error) {
+                reportCriticalFrontendError(error);
                 showError(root, 'The payment attempt failed.');
             } finally {
                 button.removeAttribute('aria-busy');

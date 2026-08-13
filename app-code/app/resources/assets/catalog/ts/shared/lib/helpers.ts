@@ -1,4 +1,5 @@
 import { $FLEX_CLASS_NAME, $HIDDEN_CLASS_NAME } from '@ts-shared/lib/constants.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import type { QueryValueType, URLParamsType } from '@ts-types/httpQueryBuild.ts';
 
 type FetchFuncOptions = Record<string | number, string | number>;
@@ -81,7 +82,9 @@ export const goBack = (fallbackUrl: string = '/'): void => {
 
                 return;
             }
-        } catch {
+        } catch (error) {
+            reportCriticalFrontendError(error);
+
             // Ignore malformed referrer and use fallback.
         }
     }

@@ -7,6 +7,7 @@ import {
     toStringValue,
     toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import { registerCheckoutPaymentHandler } from '@ts-shared/payment/checkoutPaymentRegistry.ts';
 
 interface WayForPayWidget {
@@ -159,6 +160,7 @@ const openPayment = async (
             (): void => showError('The payment is being processed.'),
         );
     } catch (error) {
+        reportCriticalFrontendError(error);
         showErrorInConsole('[checkout] Failed to open WayForPay widget.');
 
         if (redirectData) {

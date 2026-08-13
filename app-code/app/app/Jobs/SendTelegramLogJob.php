@@ -38,9 +38,9 @@ class SendTelegramLogJob implements ShouldQueue
     }
 
     /**
-     * @return void
      * @throws ConnectionException
      * @throws RequestException
+     * @return void
      */
     public function handle(): void
     {
@@ -76,9 +76,9 @@ class SendTelegramLogJob implements ShouldQueue
     /**
      * @param string $message
      *
-     * @return void
      * @throws ConnectionException
      * @throws RequestException
+     * @return void
      */
     private function sendMessage(string $message): void
     {

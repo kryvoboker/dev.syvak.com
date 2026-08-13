@@ -1,5 +1,6 @@
 import { $DEBOUNCE_DELAY } from '@ts-shared/lib/constants.ts';
 import { debounce, fetchFunc, isArray, isEmpty, showErrorInConsole, toTrimmedString } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import {
     buildBranchLoadPayload,
     buildSelectionPayload,
@@ -77,7 +78,8 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
                 .map((item) => normalizeBranchPayload(item))
                 .filter((item): item is CheckoutBranchSearchItem => item !== null);
             options.applyBranchResults(state.latestBranchResults);
-        } catch {
+        } catch (error) {
+            reportCriticalFrontendError(error);
             state.latestBranchResults = [];
             options.applyBranchResults(state.branch ? [state.branch] : []);
             options.updateMapButtonState();
@@ -105,7 +107,8 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
                 .map((item) => normalizeCityPayload(item))
                 .filter((item): item is CheckoutCitySearchItem => item !== null);
             options.applyCityResults(state.latestCityResults);
-        } catch {
+        } catch (error) {
+            reportCriticalFrontendError(error);
             state.latestCityResults = [];
             options.applyCityResults(state.city ? [state.city] : []);
         }
@@ -132,7 +135,8 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
             if (response?.cart && options.onCartUpdated) {
                 options.onCartUpdated(response.cart);
             }
-        } catch {
+        } catch (error) {
+            reportCriticalFrontendError(error);
             showErrorInConsole('[checkout] Failed to synchronize delivery selection.');
         }
     };

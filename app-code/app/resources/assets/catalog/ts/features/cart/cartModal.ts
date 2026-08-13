@@ -24,6 +24,7 @@ import {
     toggleClass,
     toNumber,
 } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 
 import $FAST_ORDER = Cart.$FAST_ORDER;
 import $REGULAR = Cart.$REGULAR;
@@ -39,6 +40,7 @@ const initCartModalAccordion = (mode: CartMode): void => {
     try {
         initAccordion(accordionElement);
     } catch (error) {
+        reportCriticalFrontendError(error);
         console.error('[FIX:fast-order-cart-accordion] Failed to initialize cart modal accordion.', {
             mode,
             error,

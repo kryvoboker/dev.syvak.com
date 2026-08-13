@@ -7,6 +7,7 @@ use App\Http\Controllers\Ajax\CatalogFilterAjaxController;
 use App\Http\Controllers\Ajax\LiveSearchProductsAjaxController;
 use App\Http\Controllers\Ajax\LoadMoreProductsByAjaxController;
 use App\Http\Controllers\Filament\Inquiries\DownloadInquiryAttachmentController;
+use App\Http\Controllers\Frontend\FrontendErrorController;
 use App\Http\Controllers\Order\OrderConfirmController;
 use App\Http\Controllers\Pages\CartController;
 use App\Http\Controllers\Pages\CategoryController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ProductController;
 use App\Http\Controllers\Pages\SearchProductsController;
 use App\Http\Controllers\Pages\ThankYouController;
+use App\Http\Middleware\SetDefaultLocalePrefix;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,11 @@ Route::get('/alyo-admin/login', function (): RedirectResponse {
 Route::get('/admin/inquiries/attachments/{attachment}/download', DownloadInquiryAttachmentController::class)
     ->name('admin.inquiries.attachments.download')
     ->middleware('auth');
+
+Route::post('/frontend-errors', FrontendErrorController::class)
+    ->middleware('throttle:frontend-errors')
+    ->withoutMiddleware(SetDefaultLocalePrefix::class)
+    ->name('frontend.errors.store');
 
 $locale_key = config('localization.locale_parameter', 'locale');
 $allowed_locales = get_allowed_locales();
