@@ -121,7 +121,7 @@ class NotFoundForm
                         ->directory('images/not-found')
                         ->maxSize($max_upload_image_size)
                         ->rules([
-                            'nullable',
+                            'required',
                             Rule::file()::types(['image/jpeg', 'image/png', 'image/svg+xml']),
                             "max:$max_upload_image_size",
                         ])
@@ -135,7 +135,7 @@ class NotFoundForm
                             '16:9' => '16:9',
                         ])
                         ->visibility('public')
-                        ->nullable(),
+                        ->required(),
 
                     Grid::make()
                         ->schema([

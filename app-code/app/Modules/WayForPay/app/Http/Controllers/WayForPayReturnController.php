@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\WayForPay\Http\Controllers;
 
+use App\Services\Order\FailureOrderRecoveryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +21,7 @@ final class WayForPayReturnController
         Request $request,
         WayForPayConfig $wayforpay_config,
         WayForPayOrderPaymentService $order_payment_service,
+        FailureOrderRecoveryService $failure_order_recovery_service,
     ): RedirectResponse {
         try {
             $settings = $wayforpay_config->getSettings();
@@ -41,6 +43,8 @@ final class WayForPayReturnController
 
                 return redirect()->to(localized_route('localized.catalog.failure-order.index', ['locale' => $locale]));
             }
+
+            $failure_order_recovery_service->rememberByOrderNumber((string) ($request_data['orderReference'] ?? ''));
 
             $service_response = $handler->parseRequestFromArray($request_data);
             $transaction = $service_response->getTransaction();
