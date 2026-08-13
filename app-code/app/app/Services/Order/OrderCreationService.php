@@ -38,6 +38,7 @@ readonly class OrderCreationService
         private OrderLifecycleService $order_lifecycle_service,
         private PickupCheckoutDataService $pickup_checkout_data_service,
         private ?PromoCodeService $promo_code_service = null,
+        private ?FailureOrderRecoveryService $failure_order_recovery_service = null,
     ) {
     }
 
@@ -149,6 +150,7 @@ readonly class OrderCreationService
         }
 
         $this->markPaymentFailed($payment, (array) Arr::get($payment_result, 'errors', []));
+        $this->failure_order_recovery_service?->remember($order);
 
         // Keep cart untouched for failed payment flow.
         return [
@@ -282,10 +284,12 @@ readonly class OrderCreationService
 
             if (($payment_result['success'] ?? false) !== true) {
                 $this->markPaymentFailed($payment, (array) Arr::get($payment_result, 'errors', []));
+                $this->failure_order_recovery_service?->remember($order);
 
                 return [
                     'success' => false,
                     'order_number' => $order_number,
+                    'redirect_url' => localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
                     'status' => 'failed',
                     'errors' => (array) Arr::get($payment_result, 'errors', []),
                 ];
@@ -325,10 +329,12 @@ readonly class OrderCreationService
         }
 
         $this->markPaymentFailed($payment, (array) Arr::get($payment_result, 'errors', []));
+        $this->failure_order_recovery_service?->remember($order);
 
         return [
             'success' => false,
             'order_number' => $order_number,
+            'redirect_url' => localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
             'status' => 'failed',
             'errors' => [
                 'payment' => [__('catalog/default.cart.messages.payment_failed')],

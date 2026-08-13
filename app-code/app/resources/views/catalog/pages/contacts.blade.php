@@ -172,37 +172,11 @@
             @endif
 
             <div class="mt-8 grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-[auto_minmax(0,1fr)]" aria-label="{{ __('catalog/contacts.labels.contact_information') }}">
-                <article class="flex flex-col gap-y-2">
-                    <div class="card">
-                        <div class="card-body p-4 md:px-8 md:py-4">
-                            <h4 class="font-inter font-medium text-2xl leading-tight normal-case">
-                                {{ $working_hours['title'] ?? __('catalog/contacts.fallbacks.working_hours_title') }}
-                            </h4>
-
-                            @if(filled($working_hours['content'] ?? null))
-                                <p class="whitespace-pre-line text-lg font-semibold leading-tight">{{ $working_hours['content'] }}</p>
-                            @endif
-
-                            @if(filled($working_hours['description'] ?? null))
-                                <p class="text-lg leading-tight text-secondary font-light">{{ $working_hours['description'] }}</p>
-                            @endif
-                        </div>
-                    </div>
-
-                    @foreach($contacts_data['phones'] ?? [] as $phone)
-                        <a class="btn w-full text-2xl"
-                           href="tel:{{ clear_telephone($phone['value']) }}">
-                            {{ parse_telephone($phone['value']) }}
-                        </a>
-                    @endforeach
-
-                    @foreach($contacts_data['emails'] ?? [] as $email)
-                        <a class="btn btn-black w-full normal-case! wrap-break-word"
-                           href="mailto:{{ $email }}">
-                            {{ $email }}
-                        </a>
-                    @endforeach
-                </article>
+                <x-catalog::contacts.working-hours
+                    :working_hours="$working_hours"
+                    :phones="$contacts_data['phones'] ?? []"
+                    :emails="$contacts_data['emails'] ?? []"
+                />
 
                 <div class="flex flex-wrap gap-4">
                     @foreach($contacts_data['addresses'] ?? [] as $address)

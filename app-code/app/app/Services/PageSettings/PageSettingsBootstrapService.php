@@ -519,6 +519,55 @@ class PageSettingsBootstrapService
     }
 
     /**
+     * @throws Throwable
+     */
+    public function getFailureSettings(): array
+    {
+        $page_setting = $this->bootstrapFailurePageSetting();
+
+        return is_array($page_setting->settings) ? $page_setting->settings : [];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function bootstrapFailurePageSetting(): PageSetting
+    {
+        try {
+            $defaults = $this->resolveFailureDefaults();
+
+            $page_setting = PageSetting::query()->firstOrCreate(
+                [
+                    'page_type' => PageSetting::PAGE_TYPE_FAILURE,
+                ],
+                [
+                    'settings' => $this->buildFailureSettingsContract($defaults),
+                ],
+            );
+
+            $this->syncFailureSettingsContract($page_setting, $defaults);
+
+            return $page_setting->fresh() ?? $page_setting;
+        } catch (Throwable $throwable) {
+            Log::channel('stack')->error('Failure page setting bootstrap failed.', [
+                'page_type' => PageSetting::PAGE_TYPE_FAILURE,
+                'exception' => $throwable,
+            ]);
+
+            throw $throwable;
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     * @return array<string, mixed>
+     */
+    public function normalizeFailureSettings(array $settings): array
+    {
+        return $this->normalizeFailureSettingsContract($settings, $this->resolveFailureDefaults());
+    }
+
+    /**
      * @param  array<string, mixed>  $settings
      * @return array<string, mixed>
      */
@@ -712,6 +761,216 @@ class PageSettingsBootstrapService
                 ],
             ],
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function resolveFailureDefaults(): array
+    {
+        $localized = [];
+
+        foreach ((new Language())->getActiveLanguages() as $language) {
+            $language_id = (string) $language->id;
+            $language_code = (string) $language->code;
+
+            $localized[$language_id] = [
+                'title' => (string) __('admin/settings/failure_page_settings.defaults.title', [], $language_code),
+                'description' => (string) __('admin/settings/failure_page_settings.defaults.description', [], $language_code),
+                'retry_button' => [
+                    'label' => (string) __('admin/settings/failure_page_settings.defaults.retry_button', [], $language_code),
+                ],
+                'alternative_payment_button' => [
+                    'label' => (string) __('admin/settings/failure_page_settings.defaults.alternative_payment_button', [], $language_code),
+                ],
+                'working_hours' => '',
+            ];
+        }
+
+        return [
+            'localized' => $localized,
+            'images' => [],
+            'buttons' => [
+                'retry' => [
+                    'enabled' => true,
+                    'custom_css_classes' => '',
+                ],
+                'alternative_payment' => [
+                    'enabled' => true,
+                    'custom_css_classes' => '',
+                ],
+                'available_payment_methods' => [
+                    'enabled' => true,
+                ],
+            ],
+            'support_contacts' => [
+                'use_contacts_working_hours' => true,
+                'working_hours' => collect($localized)
+                    ->map(fn (): array => ['content' => null])
+                    ->all(),
+                'use_contacts_phones' => true,
+                'phones' => [],
+                'use_contacts_emails' => true,
+                'emails' => [],
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $defaults
+     * @return array<string, mixed>
+     */
+    private function buildFailureSettingsContract(array $defaults): array
+    {
+        return [
+            'meta' => [
+                'contract_version' => 1,
+            ],
+            ...$defaults,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $defaults
+     */
+    private function syncFailureSettingsContract(PageSetting $page_setting, array $defaults): void
+    {
+        $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
+
+        $page_setting->forceFill([
+            'settings' => $this->normalizeFailureSettingsContract($settings, $defaults),
+        ])->save();
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     * @param array<string, mixed> $defaults
+     * @return array<string, mixed>
+     */
+    private function normalizeFailureSettingsContract(array $settings, array $defaults): array
+    {
+        $normalized_localized = [];
+
+        foreach ((array) Arr::get($defaults, 'localized', []) as $language_id => $default_content) {
+            $content = Arr::get($settings, "localized.$language_id", []);
+            $content = is_array($content) ? $content : [];
+
+            $normalized_localized[$language_id] = [
+                'title' => Str::trim((string) Arr::get($content, 'title', Arr::get($default_content, 'title', ''))),
+                'description' => filled(Arr::get($content, 'description'))
+                    ? Str::trim((string) Arr::get($content, 'description'))
+                    : null,
+                'retry_button' => [
+                    'label' => Str::trim((string) Arr::get($content, 'retry_button.label', Arr::get($default_content, 'retry_button.label', ''))),
+                ],
+                'alternative_payment_button' => [
+                    'label' => Str::trim((string) Arr::get($content, 'alternative_payment_button.label', Arr::get($default_content, 'alternative_payment_button.label', ''))),
+                ],
+                'working_hours' => filled(Arr::get($content, 'working_hours'))
+                    ? Str::trim((string) Arr::get($content, 'working_hours'))
+                    : null,
+            ];
+        }
+
+        $images = collect(Arr::get($settings, 'images', []))
+            ->filter(fn (mixed $image): bool => is_array($image))
+            ->map(function (array $image): array {
+                $background = (string) Arr::get($image, 'background', 'transparent');
+
+                return [
+                    'path' => Str::trim((string) Arr::get($image, 'path', '')),
+                    'width' => max(1, (int) Arr::get($image, 'width', 600)),
+                    'height' => max(1, (int) Arr::get($image, 'height', 600)),
+                    'is_square' => (bool) Arr::get($image, 'is_square', true),
+                    'background' => preg_match('/^(transparent|#[0-9a-fA-F]{6})$/', $background) === 1
+                        ? $background
+                        : 'transparent',
+                    'custom_css_classes' => Str::squish((string) Arr::get($image, 'custom_css_classes', '')),
+                    'sort_order' => max(0, (int) Arr::get($image, 'sort_order', 0)),
+                ];
+            })
+            ->sortBy('sort_order')
+            ->values()
+            ->all();
+
+        $alternative_payment_enabled = (bool) Arr::get($settings, 'buttons.alternative_payment.enabled', true);
+        $available_payment_methods_enabled = (bool) Arr::get($settings, 'buttons.available_payment_methods.enabled', true)
+            || $alternative_payment_enabled;
+
+        $normalized_settings = [
+            'localized' => $normalized_localized,
+            'images' => $images,
+            'buttons' => [
+                'available_payment_methods' => [
+                    'enabled' => $available_payment_methods_enabled,
+                ],
+                'retry' => [
+                    'enabled' => (bool) Arr::get($settings, 'buttons.retry.enabled', true),
+                    'custom_css_classes' => Str::squish((string) Arr::get($settings, 'buttons.retry.custom_css_classes', '')),
+                ],
+                'alternative_payment' => [
+                    'enabled' => $alternative_payment_enabled,
+                    'custom_css_classes' => Str::squish((string) Arr::get($settings, 'buttons.alternative_payment.custom_css_classes', '')),
+                ],
+            ],
+            'support_contacts' => [
+                'use_contacts_working_hours' => (bool) Arr::get($settings, 'support_contacts.use_contacts_working_hours', true),
+                'working_hours' => collect(Arr::get($settings, 'support_contacts.working_hours', []))
+                    ->filter(fn (mixed $content): bool => is_array($content))
+                    ->map(fn (array $content): array => [
+                        'content' => filled($content['content'] ?? null)
+                            ? Str::trim((string) $content['content'])
+                            : null,
+                    ])
+                    ->all(),
+                'use_contacts_phones' => (bool) Arr::get($settings, 'support_contacts.use_contacts_phones', true),
+                'phones' => $this->normalizeFailureContactItems(Arr::get($settings, 'support_contacts.phones', []), true),
+                'use_contacts_emails' => (bool) Arr::get($settings, 'support_contacts.use_contacts_emails', true),
+                'emails' => $this->normalizeFailureContactItems(Arr::get($settings, 'support_contacts.emails', [])),
+            ],
+        ];
+
+        return array_replace_recursive(
+            $this->buildFailureSettingsContract($defaults),
+            $settings,
+            [
+                'meta' => ['contract_version' => 1],
+                ...$normalized_settings,
+            ],
+        );
+    }
+
+    /**
+     * @param mixed $items
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeFailureContactItems(mixed $items, bool $is_phone = false): array
+    {
+        if (! is_array($items)) {
+            return [];
+        }
+
+        return collect($items)
+            ->filter(fn (mixed $item): bool => is_array($item))
+            ->map(function (array $item) use ($is_phone): array {
+                $normalized = [
+                    'value' => Str::trim((string) Arr::get($item, 'value', '')),
+                    'sort_order' => max(0, (int) Arr::get($item, 'sort_order', 0)),
+                    'custom_css_classes' => Str::squish((string) Arr::get($item, 'custom_css_classes', '')),
+                ];
+
+                if ($is_phone) {
+                    $normalized['type'] = in_array(Arr::get($item, 'type'), ['mobile', 'landline'], true)
+                        ? Arr::get($item, 'type')
+                        : 'mobile';
+                }
+
+                return $normalized;
+            })
+            ->filter(fn (array $item): bool => filled($item['value']))
+            ->sortBy('sort_order')
+            ->values()
+            ->all();
     }
 
     /**

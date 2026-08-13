@@ -24,6 +24,8 @@ class PageSetting extends Model
 
     public const PAGE_TYPE_CONTACTS = 'contacts';
 
+    public const PAGE_TYPE_FAILURE = 'failure';
+
     protected $fillable = [
         'page_type',
         'settings',
