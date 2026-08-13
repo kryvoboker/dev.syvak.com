@@ -11,6 +11,10 @@ import {
 } from '@ts-shared/lib/constants.ts';
 import { findElem, goBack } from '@ts-shared/lib/helpers.ts';
 
+if (window.app_params?.frontend_critical_error_reporting_enabled === true) {
+    import('@ts-shared/lib/reportCriticalError.ts').then((module) => module.handleCriticalErrorReporting());
+}
+
 document.addEventListener('DOMContentLoaded', (): void => {
     window.$hsDropdownCollection = window.$hsDropdownCollection || [];
     window.$hsOverlayCollection = window.$hsOverlayCollection || [];

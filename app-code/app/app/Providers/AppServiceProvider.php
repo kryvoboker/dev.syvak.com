@@ -28,7 +28,10 @@ use App\Supports\Services\RequestLookupContext;
 use App\Supports\Services\StorefrontCacheService;
 use Detection\Exception\MobileDetectException;
 use Detection\MobileDetect;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -87,6 +90,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('frontend-errors', function (Request $request): Limit {
+            return Limit::perMinute(10)->by($request->ip() ?? 'unknown');
+        });
+
         $new_storage_path = config('filesystems.new_storage_path');
         $new_public_path = config('filesystems.new_public_path');
 
