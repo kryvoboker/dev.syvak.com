@@ -49,6 +49,15 @@ class PublicNotFoundPageTest extends TestCase
             $table->timestamps();
         });
 
+        Schema::create('slugs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('sluggable_id');
+            $table->string('sluggable_type');
+            $table->foreignId('language_id')->constrained('languages');
+            $table->string('slug', 500)->unique();
+            $table->timestamps();
+        });
+
         Schema::create('carts', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
