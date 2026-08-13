@@ -263,7 +263,7 @@
     }
 
     .btn {
-        @apply items-center justify-center text-lg xl:text-2xl font-normal text-center uppercase duration-200 p-2;
+        @apply items-center justify-center h-auto text-lg xl:text-2xl font-normal text-center uppercase duration-200 p-2;
     }
 
     .btn-black {
