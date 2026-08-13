@@ -35,6 +35,7 @@ class GlobalConfigServiceTest extends TestCase
 
         $this->createAppSettingsTable();
         $this->createGlobalConfigsTable();
+        $this->createPageSettingsTable();
         $this->createLanguagesTable();
         $this->createUserGroupsTable();
 
@@ -503,6 +504,16 @@ class GlobalConfigServiceTest extends TestCase
             $table->string('key', 191)->unique();
             $table->text('value')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+    }
+
+    private function createPageSettingsTable(): void
+    {
+        Schema::create('page_settings', function (Blueprint $table): void {
+            $table->id();
+            $table->string('page_type', 100)->unique();
+            $table->json('settings')->nullable();
             $table->timestamps();
         });
     }
