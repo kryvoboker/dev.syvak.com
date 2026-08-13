@@ -10,3 +10,7 @@ opacity-50
 hidden
 xl:block
 // 404 page
+
+// failure page
+bp1440px:block
+// failure page
