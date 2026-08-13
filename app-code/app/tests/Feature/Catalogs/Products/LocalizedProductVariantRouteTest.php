@@ -223,7 +223,7 @@ class LocalizedProductVariantRouteTest extends TestCase
             'is_active' => true,
         ]);
 
-        $variant = ProductVariant::query()->create([
+        ProductVariant::query()->create([
             'product_id' => (int)$product->id,
             'is_default' => true,
             'is_active' => true,

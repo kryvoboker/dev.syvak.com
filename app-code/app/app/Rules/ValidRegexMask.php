@@ -10,13 +10,22 @@ use Illuminate\Support\Str;
 
 final class ValidRegexMask implements ValidationRule
 {
+    /**
+     * @param string  $attribute
+     * @param mixed   $value
+     * @param Closure $fail
+     *
+     * @return void
+     *
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+     */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (blank($value)) {
             return;
         }
 
-        $value = Str::trim((string) $value);
+        $value = Str::trim((string)$value);
 
         if (Str::length($value) > 1000 || @preg_match($value, '') === false) {
             $fail('admin/settings/contacts_page_settings.errors.invalid_regex');
