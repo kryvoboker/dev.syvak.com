@@ -17,7 +17,7 @@ export default {
         ],
         'no-unknown-custom-properties': true,
         'selector-class-pattern': null,
-        'color-function-notation': ['modern', { 'disableFix': true }],
+        'color-function-notation': 'modern',
         'import-notation': 'string',
         'property-no-vendor-prefix': [
             true,
