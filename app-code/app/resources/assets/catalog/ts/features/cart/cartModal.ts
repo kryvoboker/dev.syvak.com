@@ -129,6 +129,14 @@ const bindAddToCartButtons = (): void => {
         const variantId: number = toNumber(rawVariantId);
 
         if (!isIntegerNumber(variantId) || variantId <= 0) {
+            const error = new Error('Cart add-to-cart button has an invalid product variant ID.');
+
+            reportCriticalFrontendError(error);
+            console.error('[FIX:products-carousel-cart] Invalid product variant ID on add-to-cart button.', {
+                sourceButton,
+                rawVariantId,
+            });
+
             return;
         }
 
