@@ -3,35 +3,35 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
-
 @import "flyonui/variants.css";
 
 @plugin "../../../../node_modules/flyonui/index.js";
+
 @plugin "../../../../node_modules/flyonui/theme/index.js" {
     name: "black";
     default: true;
     color-scheme: black;
 
-    --color-base-100: rgb(9, 9, 11);
-    --color-base-200: rgb(12, 18, 12);
+    --color-base-100: rgb(9 9 11);
+    --color-base-200: rgb(12 18 12);
     --color-base-300: rgb(28 28 28);
-    --color-base-content: rgb(255, 251, 254);
-    --color-primary: rgb(96, 93, 255);
-    --color-primary-content: rgb(253, 249, 232);
-    --color-secondary: rgb(136, 136, 136);
-    --color-secondary-content: rgb(239, 252, 249);
-    --color-accent: rgb(60, 61, 252);
-    --color-accent-content: rgb(255, 255, 255);
-    --color-neutral: rgb(248, 248, 248);
-    --color-neutral-content: rgb(49, 65, 87);
-    --color-info: rgb(0, 130, 206);
-    --color-info-content: rgb(237, 247, 253);
-    --color-success: rgb(92, 163, 0);
-    --color-success-content: rgb(245, 252, 229);
-    --color-warning: rgb(185, 75, 0);
-    --color-warning-content: rgb(252, 250, 230);
-    --color-error: rgb(212, 4, 28);
-    --color-error-content: rgb(254, 242, 242);
+    --color-base-content: rgb(255 251 254);
+    --color-primary: rgb(96 93 255);
+    --color-primary-content: rgb(253 249 232);
+    --color-secondary: rgb(136 136 136);
+    --color-secondary-content: rgb(239 252 249);
+    --color-accent: rgb(60 61 252);
+    --color-accent-content: rgb(255 255 255);
+    --color-neutral: rgb(248 248 248);
+    --color-neutral-content: rgb(49 65 87);
+    --color-info: rgb(0 130 206);
+    --color-info-content: rgb(237 247 253);
+    --color-success: rgb(92 163 0);
+    --color-success-content: rgb(245 252 229);
+    --color-warning: rgb(185 75 0);
+    --color-warning-content: rgb(252 250 230);
+    --color-error: rgb(212 4 28);
+    --color-error-content: rgb(254 242 242);
     --radius-selector: 2rem;
     --radius-field: 0;
     --radius-box: 0;
@@ -42,30 +42,47 @@
     --depth: 1;
     --noise: 0;
 }
+
 @source "../../../../node_modules/flyonui/flyonui.js";
+
 @plugin "@iconify/tailwind4";
 
 @source "../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
-/*@source '../../../../../storage/framework/views!*.php';*/
+
+/* @source '../../../../../storage/framework/views!*.php'; */
+
 @source "../../../views/catalog/**/*.blade.php";
 @source "../../../../Modules/**/resources/assets/ts/**/*.ts";
 @source "../../../../Modules/**/resources/views/storefront/**/*.blade.php";
 @source "../ts/**/*.ts";
-
 @source "./_source.txt";
+
+@property --spacing {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: unset;
+}
+
+@property --font-weight-normal {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: unset;
+}
+
+@property --font-weight-bold {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: unset;
+}
 
 @layer theme {
     :root {
         --base-font-size: 16;
-
         --max-viewport-width: 1920;
         --max-viewport-width-rem: calc(1920 / var(--base-font-size) * 1rem);
-
         --container-padding: calc(16 / var(--base-font-size) * 1rem);
-
         --site-header-height: calc(76 / var(--base-font-size) * 1rem);
         --default-transition-duration: 300ms;
-
         --choices-text-color: var(--color-base-content); /* #FFFBFE */
         --choices-border-radius: var(--radius-box);
         --choices-list-single-padding: 0 0.25rem; /* 0.25rem - 4px */
@@ -95,10 +112,8 @@
     --breakpoint-bp425px: 26.5625rem;
     --breakpoint-bp1440px: 90rem;
     --breakpoint-bp1920px: 120rem;
-
     --font-inter: "Inter", sans-serif;
     --font-cormorant-garamond: "Cormorant Garamond", serif;
-
     --text-11px: calc(11 / var(--base-font-size) * 1rem);
     --text-26px: calc(26 / var(--base-font-size) * 1rem);
     --text-32px: calc(32 / var(--base-font-size) * 1rem);
@@ -110,15 +125,14 @@
     --text-122px: calc(122 / var(--base-font-size) * 1rem);
     --text-150px: calc(150 / var(--base-font-size) * 1rem);
     --text-192px: calc(192 / var(--base-font-size) * 1rem);
-
     --color-white: var(--color-base-content); /* #FFFBFE */
     --color-black: var(--color-base-100); /* #0C120C */
     --color-light-black: var(--color-base-300); /* #0C120C33 */
     --color-light-gray: var(--color-secondary); /* #888888 */
-    --color-opacity-light-gray-40\%: rgba(136, 136, 136, 0.4); /* #888888 */
+    --color-opacity-light-gray-40\%: rgb(136 136 136 / 40%); /* #888888 */
     --color-light-red: var(--color-error); /* #D4041CFF */
-    --color-dark-red: rgba(212, 4, 28, 0.7); /* #D4041CB3 */
-    --color-dark-green: rgb(0, 135, 95); /* #00875FFF */
+    --color-dark-red: rgb(212 4 28 / 70%); /* #D4041CB3 */
+    --color-dark-green: rgb(0 135 95); /* #00875FFF */
     --spacing-0\.8em: 0.8em;
     --spacing-0\.9em: 0.9em;
     --spacing-1\.4em: 1.4em;
@@ -140,7 +154,6 @@
     --spacing-133px: calc(133 / var(--base-font-size) * 1rem);
     --spacing-496px: calc(496 / var(--base-font-size) * 1rem);
     --spacing-500px: calc(500 / var(--base-font-size) * 1rem);
-
     --tracking-0\.02em: 0.02em;
     --tracking-0\.028em: 0.028em;
     --tracking-0\.04em: 0.04em;
@@ -153,16 +166,13 @@
 
         &:has(section.product)::before {
             content: "";
-
             background: radial-gradient(
-                    circle at center,
-                    rgba(139, 0, 0, 0.95) 0%,
-                    rgba(90, 0, 0, 0.9) 35%,
-                    rgba(30, 0, 0, 0.95) 70%,
-                    rgba(0, 0, 0, 1) 100%
-                )
-                no-repeat center 0;
-
+                circle at center,
+                rgb(139 0 0 / 95%) 0%,
+                rgb(90 0 0 / 9%) 35%,
+                rgb(30 0 0 / 95%) 70%,
+                rgb(0 0 0) 100%
+            ) no-repeat center 0;
             background-size: 50% 50%;
 
             /* 104px */
@@ -303,6 +313,7 @@
 
     input:focus-visible {
         outline: 0;
+
         @apply border-b border-b-white;
     }
 
@@ -320,7 +331,7 @@
 
     /* 48rem - 768px */
     @media (width >= 48rem) {
-        /*noinspection CssUnresolvedCustomProperty*/
+        /* noinspection CssUnresolvedCustomProperty */
         :root {
             scrollbar-color: var(--color-light-gray) var(--color-opacity-light-gray-40\%);
             scrollbar-width: thin;
@@ -480,40 +491,12 @@
         @apply default-btn flex items-center justify-between gap-x-4 w-full text-sm lg:text-base xl:text-lg uppercase tracking-0.04em md:border md:border-opacity-light-gray-40% md:hover:border-white md:duration-200 md:ease-in-out px-0 pt-0 pb-2 md:px-5 md:py-18px;
     }
 
-    .black-btn {
-        --btn-color: var(--color-base-100);
-        --btn-bg: var(--color-base-100);
-
-        @apply btn;
-
-        @supports (color: color-mix(in lab, red, red)) {
-            --btn-border: color-mix(in oklab, var(--btn-bg), #fff calc(var(--depth) * 5%));
-        }
-    }
-
-    .black-btn:not(.category-filter__clear-all-btn),
-    .white-btn:not(.category-filter__apply-btn) {
-        @apply flex;
-    }
-
-    .black-btn {
-        @apply hover:text-black bg-transparent hover:bg-white;
-    }
-
-    .white-btn {
-        @apply text-black hover:text-white uppercase bg-white hover:bg-black;
-    }
-
     .icon-park--setting-config {
         display: inline-block;
         background-repeat: no-repeat;
         background-size: 100% 100%;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23fffbfe' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'%3E%3Cpath d='M41.5 10H35.5'/%3E%3Cpath d='M27.5 6V14'/%3E%3Cpath d='M27.5 10L5.5 10'/%3E%3Cpath d='M13.5 24H5.5'/%3E%3Cpath d='M21.5 20V28'/%3E%3Cpath d='M43.5 24H21.5'/%3E%3Cpath d='M41.5 38H35.5'/%3E%3Cpath d='M27.5 34V42'/%3E%3Cpath d='M27.5 38H5.5'/%3E%3C/g%3E%3C/svg%3E");
     }
-
-    /*.custom-icon {
-        @apply size-6 md:size-8 text-white;
-    }*/
 }
 
 .drawer-body {
@@ -525,16 +508,12 @@
 }
 
 .noUi-horizontal .noUi-handle {
-    @apply size-2 bg-white rounded-full cursor-pointer before:hidden after:hidden;
+    @apply -top-0.5 -right-1 size-2 bg-white rounded-full cursor-pointer before:hidden after:hidden;
 }
 
 .noUi-target,
 .noUi-horizontal .noUi-handle {
     @apply border-0 border-none shadow-none;
-}
-
-.noUi-horizontal .noUi-handle {
-    @apply -top-0.5 -right-1;
 }
 
 @utility default-btn {
@@ -546,10 +525,9 @@
 }
 
 @utility modal-shadow {
-    box-shadow:
-        0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.2) inset,
-        -0.0625rem -0.25rem 1.5625rem 0 rgba(255, 255, 255, 0.4) inset,
-        0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.2) inset;
+    box-shadow: 0.0625rem 0.0625rem 0.25rem 0 rgb(255 255 255 / 20%) inset,
+    -0.0625rem -0.25rem 1.5625rem 0 rgb(255 255 255 / 40%) inset,
+    0.0625rem 0.0625rem 0.25rem 0 rgb(255 255 255 / 20%) inset;
 }
 
 .choices__inner,
@@ -598,10 +576,6 @@
 .leaflet-bar a.leaflet-disabled {
     @apply bg-base-300/70;
 }
-
-/*.leaflet-container {
-    @apply md:max-w-3/5;
-}*/
 
 .leaflet-container {
     @apply static inset-[unset] top-[unset] left-[unset] transform-none;
