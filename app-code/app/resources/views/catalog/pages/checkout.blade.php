@@ -187,7 +187,9 @@
                                                         {{ __('catalog/pages/checkout.labels.delivery_method') }}
                                                     </span>
 
-                                                    <div class="flex flex-col gap-3">
+                                                    <div class="relative flex flex-col gap-3"
+                                                         data-checkout-delivery-methods-wrapper
+                                                         aria-busy="false">
                                                         @include('novaposhta::storefront.checkout-methods', [
                                                             'selected_delivery_method' => $selected_delivery_method,
                                                         ])
@@ -202,6 +204,10 @@
                                                                 'selected_delivery_method' => $selected_delivery_method,
                                                             ])
                                                         @endif
+
+                                                        <x-catalog::common.loader variant="container"
+                                                                                   data-checkout-delivery-methods-loader
+                                                                                   aria-hidden="true" />
                                                     </div>
                                                 </div>
 

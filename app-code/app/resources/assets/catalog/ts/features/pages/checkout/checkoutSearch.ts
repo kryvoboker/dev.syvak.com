@@ -33,6 +33,7 @@ interface CheckoutSearchOptions {
     applyCityResults: (cities: CheckoutCitySearchItem[]) => void;
     applyBranchResults: (branches: CheckoutBranchSearchItem[]) => void;
     updateMapButtonState: () => void;
+    setDeliveryMethodsLoading: (isLoading: boolean) => void;
     onCartUpdated?: (cart: Record<string, unknown>) => void;
 }
 
@@ -66,6 +67,7 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
         }
 
         state.branchSearchStateKey = searchStateKey;
+        options.setDeliveryMethodsLoading(true);
 
         try {
             const response = await fetchFunc<CheckoutBranchSearchResponse>(
@@ -83,6 +85,8 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
             state.latestBranchResults = [];
             options.applyBranchResults(state.branch ? [state.branch] : []);
             options.updateMapButtonState();
+        } finally {
+            options.setDeliveryMethodsLoading(false);
         }
     }, $DEBOUNCE_DELAY);
 
@@ -94,6 +98,8 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
             options.applyCityResults(state.city ? [state.city] : []);
             return;
         }
+
+        options.setDeliveryMethodsLoading(true);
 
         try {
             const response = await fetchFunc<CheckoutCitySearchResponse>(
@@ -111,6 +117,8 @@ export const createCheckoutSearch = (options: CheckoutSearchOptions) => {
             reportCriticalFrontendError(error);
             state.latestCityResults = [];
             options.applyCityResults(state.city ? [state.city] : []);
+        } finally {
+            options.setDeliveryMethodsLoading(false);
         }
     }, $DEBOUNCE_DELAY);
 

@@ -6,7 +6,7 @@
 @import "flyonui/variants.css";
 
 @plugin "../../../../node_modules/flyonui/index.js" {
-    include: dropdown, accordion, drawer, carousel, modal, button, checkbox, radio, input, badge;
+    include: dropdown, accordion, drawer, carousel, modal, button, checkbox, radio, input, badge, loading;
 }
 
 @plugin "../../../../node_modules/flyonui/theme/index.js" {
