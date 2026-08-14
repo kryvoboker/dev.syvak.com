@@ -84,18 +84,18 @@ final readonly class FailurePageService
 
             return [
                 'page_type' => (string) config('page-settings.page_type.failure', 'failure'),
-                'page_title' => (string) Arr::get($localized, 'title', __('catalog/failure.fallbacks.title', [], $locale)),
+                'page_title' => (string) Arr::get($localized, 'title', __('storefront/failure.fallbacks.title', [], $locale)),
                 'title' => (string) Arr::get($localized, 'title', ''),
                 'description' => Arr::get($localized, 'description'),
                 'images' => $this->resolveImages(Arr::get($settings, 'images', [])),
                 'buttons' => [
                     'retry' => [
                         ...((array) Arr::get($settings, 'buttons.retry', [])),
-                        'label' => (string) Arr::get($localized, 'retry_button.label', __('catalog/failure.buttons.retry', [], $locale)),
+                        'label' => (string) Arr::get($localized, 'retry_button.label', __('storefront/failure.buttons.retry', [], $locale)),
                     ],
                     'alternative_payment' => [
                         ...((array) Arr::get($settings, 'buttons.alternative_payment', [])),
-                        'label' => (string) Arr::get($localized, 'alternative_payment_button.label', __('catalog/failure.buttons.alternative_payment', [], $locale)),
+                        'label' => (string) Arr::get($localized, 'alternative_payment_button.label', __('storefront/failure.buttons.alternative_payment', [], $locale)),
                     ],
                     'available_payment_methods' => (array) Arr::get($settings, 'buttons.available_payment_methods', []),
                 ],
@@ -219,7 +219,7 @@ final readonly class FailurePageService
         $methods = [
             [
                 'payment_method' => 'cash_on_delivery',
-                'payment_name' => (string) __('catalog/pages/checkout.payment_methods.cash_on_delivery', [], $locale),
+                'payment_name' => (string) __('storefront/pages/checkout.payment_methods.cash_on_delivery', [], $locale),
                 'is_available' => true,
             ],
             $this->payment_upon_delivery_data_service->getCheckoutData(),

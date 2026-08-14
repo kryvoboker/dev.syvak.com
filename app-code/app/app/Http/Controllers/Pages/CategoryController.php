@@ -101,7 +101,7 @@ class CategoryController extends Controller
             ...$response_data,
         ];
 
-        return view('catalog.pages.category', $data);
+        return view('storefront.pages.category', $data);
     }
 
     /**
@@ -172,7 +172,7 @@ class CategoryController extends Controller
             return $first_available_label;
         }
 
-        $translation_key = 'catalog/default.sort.' . $sort_code;
+        $translation_key = 'storefront/default.sort.' . $sort_code;
         $label = __($translation_key);
 
         if ($label === $translation_key) {
@@ -302,11 +302,11 @@ class CategoryController extends Controller
      */
     private function resolveCategoryContext(string $slug, string $locale): array
     {
-        $fallback_title = (string) __('catalog/default.texts.category_title_fallback');
+        $fallback_title = (string) __('storefront/default.texts.category_title_fallback');
 
         $breadcrumbs = [
             breadcrumb(
-                title: (string) __('catalog/default.links.home'),
+                title: (string) __('storefront/default.links.home'),
                 url  : localized_route('localized.catalog.home'),
             ),
         ];

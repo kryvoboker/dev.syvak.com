@@ -10,7 +10,7 @@ class CategoryProductsListViewTest extends TestCase
 {
     public function test_product_card_contains_default_variant_id_for_regular_cart_addition(): void
     {
-        $html = view('catalog.pages.partials.category.products-list', [
+        $html = view('storefront.pages.partials.category.products-list', [
             'products' => [
                 [
                     'variant_id' => 42,
@@ -35,7 +35,7 @@ class CategoryProductsListViewTest extends TestCase
 
         $this->assertStringContainsString('data-add-to-cart="42"', $html);
         $this->assertStringContainsString(
-            'aria-label="' . __('catalog/default.aria_labels.add_product_to_cart') . '"',
+            'aria-label="' . __('storefront/default.aria_labels.add_product_to_cart') . '"',
             $html,
         );
     }

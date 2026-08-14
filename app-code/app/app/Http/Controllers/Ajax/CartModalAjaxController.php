@@ -35,7 +35,7 @@ class CartModalAjaxController extends Controller
             'mode' => $cart_mode,
             'cart' => $cart_data,
             'rendered' => [
-                'modal_items_html' => view('catalog.partials.cart.modal-items', [
+                'modal_items_html' => view('storefront.partials.cart.modal-items', [
                     'cart_data' => $cart_data,
                     CartRequestKeyEnum::CartMode->value => $cart_mode,
                 ])->render(),

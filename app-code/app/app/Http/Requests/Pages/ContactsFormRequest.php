@@ -27,7 +27,7 @@ class ContactsFormRequest extends FormRequest
 
         if ($page_setting === null) {
             throw ValidationException::withMessages([
-                'contact_form' => __('catalog/contacts.errors.page_not_found'),
+                'contact_form' => __('storefront/contacts.errors.page_not_found'),
             ]);
         }
 
@@ -38,11 +38,11 @@ class ContactsFormRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => __('catalog/contacts.fields.name'),
-            'email' => __('catalog/contacts.fields.email'),
-            'phone' => __('catalog/contacts.fields.phone'),
-            'text' => __('catalog/contacts.fields.text'),
-            'file' => __('catalog/contacts.fields.file'),
+            'name' => __('storefront/contacts.fields.name'),
+            'email' => __('storefront/contacts.fields.email'),
+            'phone' => __('storefront/contacts.fields.phone'),
+            'text' => __('storefront/contacts.fields.text'),
+            'file' => __('storefront/contacts.fields.file'),
         ];
     }
 }

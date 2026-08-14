@@ -62,10 +62,10 @@ class FooterService
         $telegram_url = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
         return [
-            'title' => __('catalog/footer.texts.subscribe'),
-            'text' => __('catalog/footer.buttons.telegram'),
+            'title' => __('storefront/footer.texts.subscribe'),
+            'text' => __('storefront/footer.buttons.telegram'),
             'url' => filled($telegram_url) ? $telegram_url : '#',
-            'support_text' => __('catalog/footer.texts.support'),
+            'support_text' => __('storefront/footer.texts.support'),
         ];
     }
 

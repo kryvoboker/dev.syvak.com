@@ -42,7 +42,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
             $price_to = $this->input('price_to');
 
             if (is_numeric($price_from) && is_numeric($price_to) && (float) $price_from > (float) $price_to) {
-                $validator->errors()->add('price_from', __('catalog/default.errors.price_from'));
+                $validator->errors()->add('price_from', __('storefront/default.errors.price_from'));
             }
         });
     }

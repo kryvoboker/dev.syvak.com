@@ -190,7 +190,7 @@ class CheckoutControllerTest extends TestCase
         $response = app(CheckoutController::class)->index(null);
 
         $this->assertInstanceOf(View::class, $response);
-        $this->assertSame('catalog.pages.checkout', $response->name());
+        $this->assertSame('storefront.pages.checkout', $response->name());
 
         /** @var array<string, mixed> $view_data */
         $view_data = $response->getData();

@@ -192,7 +192,7 @@ Integration uses the application's shared checkout components:
 | `app/Http/Controllers/Pages/CheckoutController.php` | Provides payment option data and initial state |
 | `app/Http/Requests/Pages/CheckoutSelectionStoreRequest.php` | Normalizes and validates the selected method |
 | `app/Services/Checkout/CheckoutSelectionStateService.php` | Stores `payment_method` in session state |
-| `resources/views/catalog/pages/checkout.blade.php` | Renders the payment radio inside the accordion |
+| `resources/views/storefront/pages/checkout.blade.php` | Renders the payment radio inside the accordion |
 | `resources/assets/catalog/ts/features/pages/checkout/checkoutPage.ts` | Synchronizes the selection with the backend |
 
 ### Markup contract
@@ -331,7 +331,7 @@ __('paymentupondelivery::admin/modules/payment_upon_delivery.description');
 __('paymentupondelivery::storefront/checkout.payment_methods.payment_upon_delivery');
 ```
 
-Do not move these strings to `resources/lang/catalog` or the shared application language tree without an explicit decision to create a shared contract.
+Do not move these strings to `resources/lang/storefront` or the shared application language tree without an explicit decision to create a shared contract.
 
 ## Routes and removed scaffold
 

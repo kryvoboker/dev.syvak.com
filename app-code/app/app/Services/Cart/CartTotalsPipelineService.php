@@ -23,7 +23,7 @@ class CartTotalsPipelineService
         $totals_data = [
             'lines' => [[
                 'code' => 'items_subtotal',
-                'label' => __('catalog/default.cart.totals.items_subtotal'),
+                'label' => __('storefront/default.cart.totals.items_subtotal'),
                 'amount' => $subtotal,
                 'is_visible' => true,
                 'include_in_grand_total' => true,

@@ -51,7 +51,7 @@ class LiveSearchProductsAjaxController extends Controller
         $search_not_found_img_data['height'] = (int) ($not_found_img_data['height'] ?: $not_found_img_data['width']);
 
         if ($request->ajax()) {
-            $rendered_html = view('catalog::components.common.search-result', [
+            $rendered_html = view('storefront::components.common.search-result', [
                 'products_data' => $search_products->toArray($request),
                 'search_not_found_img_data' => $search_not_found_img_data,
             ])->render();

@@ -91,7 +91,7 @@
                                                             srcset="{{ $desktop_image_urls['thumb_2x'] }}">
                                                 @endif
 
-                                                <x-catalog::common.img
+                                                <x-storefront::common.img
                                                     class="object-contain"
                                                     :urls_data="$image_urls_data"
                                                     :size="$image_width"
@@ -128,7 +128,7 @@
                                                             srcset="{{ $desktop_image_urls['thumb_2x'] }}">
                                                 @endif
 
-                                                <x-catalog::common.img
+                                                <x-storefront::common.img
                                                     class="object-contain"
                                                     :urls_data="$image_urls_data"
                                                     :size="$image_width"

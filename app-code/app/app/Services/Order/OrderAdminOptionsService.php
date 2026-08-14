@@ -142,14 +142,14 @@ final class OrderAdminOptionsService
 
         if (is_enabled_singleton_module('NovaPoshta')) {
             $methods = [
-                DeliveryMethodEnum::NovaPoshta->value => $this->translate('catalog/pages/checkout.delivery_methods.nova_poshta', 'Nova Poshta (Branch)'),
-                DeliveryMethodEnum::NovaPoshtaCourier->value => $this->translate('catalog/pages/checkout.delivery_methods.nova_poshta_courier', 'Nova Poshta (Courier)'),
-                DeliveryMethodEnum::NovaPoshtaPoshtomat->value => $this->translate('catalog/pages/checkout.delivery_methods.nova_poshta_poshtomat', 'Nova Poshta (Poshtomat)'),
+                DeliveryMethodEnum::NovaPoshta->value => $this->translate('storefront/pages/checkout.delivery_methods.nova_poshta', 'Nova Poshta (Branch)'),
+                DeliveryMethodEnum::NovaPoshtaCourier->value => $this->translate('storefront/pages/checkout.delivery_methods.nova_poshta_courier', 'Nova Poshta (Courier)'),
+                DeliveryMethodEnum::NovaPoshtaPoshtomat->value => $this->translate('storefront/pages/checkout.delivery_methods.nova_poshta_poshtomat', 'Nova Poshta (Poshtomat)'),
             ];
         }
 
         if (is_enabled_singleton_module('UkrPoshta')) {
-            $methods[DeliveryMethodEnum::UkrPoshta->value] = $this->translate('catalog/pages/checkout.delivery_methods.ukr_poshta', 'Ukr Poshta');
+            $methods[DeliveryMethodEnum::UkrPoshta->value] = $this->translate('storefront/pages/checkout.delivery_methods.ukr_poshta', 'Ukr Poshta');
         }
 
         if (is_enabled_singleton_module('Pickup')) {
