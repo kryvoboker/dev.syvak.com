@@ -1,7 +1,7 @@
 @extends('catalog.layouts.main')
 
 @push('styles')
-    @vite(['./node_modules/@fancyapps/ui/dist/fancybox/fancybox.css'])
+    @vite(['node_modules/@fancyapps/ui/dist/fancybox/fancybox.css'])
 @endpush
 
 @section('content')

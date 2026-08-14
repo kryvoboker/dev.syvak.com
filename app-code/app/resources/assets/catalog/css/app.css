@@ -5,7 +5,9 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "flyonui/variants.css";
 
-@plugin "../../../../node_modules/flyonui/index.js";
+@plugin "../../../../node_modules/flyonui/index.js" {
+    include: dropdown, accordion, drawer, carousel, modal, button, checkbox, radio, input, badge;
+}
 
 @plugin "../../../../node_modules/flyonui/theme/index.js" {
     name: "black";
@@ -43,7 +45,12 @@
     --noise: 0;
 }
 
-@source "../../../../node_modules/flyonui/flyonui.js";
+/* @source "../../../../node_modules/flyonui/flyonui.js"; */
+
+@source "../../../../node_modules/flyonui/dist/accordion.js";
+@source "../../../../node_modules/flyonui/dist/carousel.js";
+@source "../../../../node_modules/flyonui/dist/drawer.js";
+@source "../../../../node_modules/flyonui/dist/dropdown.js";
 
 @plugin "@iconify/tailwind4";
 

@@ -4,7 +4,7 @@
 
 @if(isset($is_filter_enabled) && $is_filter_enabled === true)
     @prepend('styles')
-        @vite(['./node_modules/nouislider/dist/nouislider.css'])
+        @vite(['node_modules/nouislider/dist/nouislider.css'])
     @endprepend
 @endif
 
