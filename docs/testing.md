@@ -9,6 +9,7 @@
 - Pint `v1` (formatting)
 - Biome `v2` (TypeScript formatting and linting)
 - TypeScript `v6` (`tsc --noEmit` type checking)
+- Stylelint `v17` (CSS quality and custom-property validation)
 
 ## Common Commands
 
@@ -43,6 +44,10 @@ npm run ts:fix
 npm run ts:format
 npm run ts:lint
 npm run ts:typecheck
+
+# CSS quality
+npm run css:lint
+npm run css:lint-fix
 ```
 
 ## Recommended Change Validation
@@ -53,7 +58,9 @@ npm run ts:typecheck
 4. Run `composer phpcs` when you need PHPCS warnings checked.
 5. Run `composer phpmd` when you need PHPMD violations checked.
 6. Run `npm run ts:check` for the storefront TypeScript and module TypeScript tree.
-7. Optionally run full suite before release.
+7. Run `npm run css:lint` for storefront and module CSS files.
+8. Use `npm run css:lint-fix` to apply Stylelint's safe CSS fixes, then review the diff.
+9. Optionally run the full suite before release.
 
 ## Module Test Placement
 
@@ -75,8 +82,12 @@ npm run ts:typecheck
 - TypeScript quality uses `Biome` for format/lint and `tsc --noEmit` for type checking.
 - The `ts:check` script runs `biome check .` and `tsc --noEmit -p tsconfig.json` together.
 - The `ts:fix` script runs `biome check --write .` to auto-fix TypeScript formatting and safe lint issues.
+- CSS quality uses `Stylelint` with `stylelint-config-standard` for style consistency and `no-unknown-custom-properties` for CSS variable validation.
+- The `css:lint` script checks CSS in `resources/assets/catalog/css/**/*.css` and `Modules/**/resources/assets/**/*.css`.
+- The `css:lint-fix` script runs the same checks with `--fix`; review its changes before committing.
+- CSS variables declared in project CSS are loaded through `referenceFiles`; variables created only in TypeScript, JavaScript, or HTML are not statically discoverable by Stylelint.
 - Recommended cleanup order is `composer pint` -> `composer phpcs` -> `composer phpcs:fix` if needed -> `composer phpmd` -> `composer phpstan`.
-- Recommended frontend cleanup order is `npm run ts:fix` -> `npm run ts:check` -> `npm run ts:typecheck` when you need to isolate type-only failures.
+- Recommended frontend cleanup order is `npm run ts:fix` -> `npm run ts:check` -> `npm run css:lint` -> `npm run css:lint-fix` when fixes are needed -> `npm run ts:typecheck` when you need to isolate type-only failures.
 
 ## See Also
 
