@@ -1,6 +1,6 @@
-import path from 'node:path';
-import { existsSync, readdirSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { existsSync, readdirSync }    from 'node:fs';
+import path                           from 'node:path';
+import { pathToFileURL }              from 'node:url';
 import type { ModuleViteConfigShape } from '../types';
 
 interface LoadModuleAliasesParams {
@@ -15,7 +15,7 @@ export const loadModuleAliases = async ({
     }
 
     const aliases: Record<string, string> = {};
-    const moduleDirectories = readdirSync(modulesRootPath, { withFileTypes: true }).filter((directoryEntry) =>
+    const moduleDirectories               = readdirSync(modulesRootPath, { withFileTypes: true }).filter((directoryEntry) =>
         directoryEntry.isDirectory(),
     );
 
@@ -27,9 +27,9 @@ export const loadModuleAliases = async ({
         }
 
         const moduleConfigImport = await import(pathToFileURL(moduleConfigPath).href);
-        const moduleConfig = (moduleConfigImport.moduleViteConfig ?? moduleConfigImport.default ?? null) as
-            | ModuleViteConfigShape
-            | null;
+        const moduleConfig       = (moduleConfigImport.moduleViteConfig ??
+                                    moduleConfigImport.default ??
+                                    null) as ModuleViteConfigShape | null;
 
         if (!moduleConfig?.alias) {
             continue;

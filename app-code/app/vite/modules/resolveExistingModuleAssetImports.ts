@@ -1,10 +1,9 @@
-import path from 'node:path';
-import { existsSync } from 'node:fs';
-import { LoadedModuleViteConfig } from '../types';
-import { toPosixPath } from '../utils/toPosixPath';
+import { existsSync }                  from 'node:fs';
+import path                            from 'node:path';
+import type { LoadedModuleViteConfig } from '../types';
+import { toPosixPath }                 from '../utils/toPosixPath';
 
-interface ResolveExistingModuleAssetImportsParams
-{
+interface ResolveExistingModuleAssetImportsParams {
     loadedModuleConfigs: LoadedModuleViteConfig[];
     appRootPath: string;
     appEntryPath: string;
@@ -15,7 +14,7 @@ export const resolveExistingModuleAssetImports = (
     params: ResolveExistingModuleAssetImportsParams,
 ): string[] => {
     const appEntryDirectoryPath: string = path.posix.dirname(params.appEntryPath);
-    const moduleAssetImports: string[] = [];
+    const moduleAssetImports: string[]  = [];
 
     for (const loadedModuleConfig of params.loadedModuleConfigs) {
         const moduleAssetEntries: string[] = loadedModuleConfig.config.inject?.[params.moduleAssetType] ?? [];
@@ -27,14 +26,15 @@ export const resolveExistingModuleAssetImports = (
                 continue;
             }
 
-            const appRelativeModuleAssetPath: string = toPosixPath(path.posix.relative(
-                appEntryDirectoryPath,
-                toPosixPath(path.posix.relative(params.appRootPath, moduleAssetAbsolutePath)),
-            ));
+            const appRelativeModuleAssetPath: string = toPosixPath(
+                path.posix.relative(
+                    appEntryDirectoryPath,
+                    toPosixPath(path.posix.relative(params.appRootPath, moduleAssetAbsolutePath)),
+                ));
 
             moduleAssetImports.push(appRelativeModuleAssetPath);
         }
     }
 
-    return [...new Set(moduleAssetImports)];
+    return [... new Set(moduleAssetImports)];
 };
