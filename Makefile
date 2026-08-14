@@ -33,6 +33,9 @@ set-node:
 vite: set-node
 	cd app-code/app && npm run dev
 
+vite-debug: set-node
+	cd app-code/app && npm run dev:debug
+
 vite-build: set-node
 	cd app-code/app \
 	&& npm run build
