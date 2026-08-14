@@ -58,7 +58,7 @@
                                 <a class="products-carousel-img-container flex items-center justify-center overflow-hidden"
                                    href="{{ $url }}"
                                    aria-label="{{ $name }}">
-                                    <x-catalog::common.img
+                                    <x-storefront::common.img
                                         class="object-contain transition-transform hover:scale-105 duration-500 ease-in-out"
                                         :urls_data="$image_urls_data"
                                         :size="$image_width"
@@ -87,7 +87,7 @@
                                         <button class="add-to-cart"
                                                 type="button"
                                                 data-add-to-cart="{{ (int) ($product['variant_id'] ?? 0) }}"
-                                                aria-label="{{ __('catalog/default.aria_labels.add_product_to_cart') }}">
+                                                aria-label="{{ __('storefront/default.aria_labels.add_product_to_cart') }}">
                                             <span class="icon-[solar--cart-5-linear] custom-icon"></span>
                                         </button>
                                     </div>

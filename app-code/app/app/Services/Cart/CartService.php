@@ -41,7 +41,7 @@ readonly class CartService
         if (! $this->isVariantAvailableForCart($product_variant_id)) {
             return [
                 'success' => false,
-                'message' => __('catalog/default.cart.messages.variant_not_found'),
+                'message' => __('storefront/default.cart.messages.variant_not_found'),
                 'cart' => $this->getSnapshot($locale, $mode),
             ];
         }
@@ -51,7 +51,7 @@ readonly class CartService
 
         return [
             'success' => true,
-            'message' => __('catalog/default.cart.messages.item_added'),
+            'message' => __('storefront/default.cart.messages.item_added'),
             'cart' => $this->getSnapshot($locale, $mode),
         ];
     }
@@ -70,8 +70,8 @@ readonly class CartService
         return [
             'success' => $is_updated,
             'message' => $is_updated
-                ? __('catalog/default.cart.messages.item_updated')
-                : __('catalog/default.cart.messages.variant_not_found'),
+                ? __('storefront/default.cart.messages.item_updated')
+                : __('storefront/default.cart.messages.variant_not_found'),
             'cart' => $this->getSnapshot($locale, $mode),
         ];
     }
@@ -90,8 +90,8 @@ readonly class CartService
         return [
             'success' => $is_removed,
             'message' => $is_removed
-                ? __('catalog/default.cart.messages.item_removed')
-                : __('catalog/default.cart.messages.variant_not_found'),
+                ? __('storefront/default.cart.messages.item_removed')
+                : __('storefront/default.cart.messages.variant_not_found'),
             'cart' => $this->getSnapshot($locale, $mode),
         ];
     }

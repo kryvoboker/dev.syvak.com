@@ -19,7 +19,7 @@ Now, module output is resolved dynamically at runtime.
    - `$top_entrypoint_for_module`
    - `$bottom_entrypoint_for_module`
 2. Each anchor calls a shared Blade entrypoint:
-   - `resources/views/catalog/components/modules/placement.blade.php`
+   - `resources/views/storefront/components/modules/placement.blade.php`
 3. The entrypoint asks:
    - `App\Services\Modules\StorefrontModulePlacementResolverService`
 4. The resolver uses:

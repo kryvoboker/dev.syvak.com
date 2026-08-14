@@ -32,7 +32,7 @@ class StorefrontModulePlacementResolverServiceTest extends TestCase
         $this->assertCount(2, $items);
         $this->assertSame(501, $items[0]['module_definition_id']);
         $this->assertSame('FakeModule', $items[0]['module_name']);
-        $this->assertSame('catalog.pages.home', $items[0]['view']);
+        $this->assertSame('storefront.pages.home', $items[0]['view']);
         $this->assertSame(7001, $items[0]['view_data']['fake_module_data']['instance_id']);
         $this->assertSame('top', $items[0]['view_data']['fake_module_data']['placement']);
         $this->assertSame('home', $items[0]['view_data']['fake_module_data']['page_type']);

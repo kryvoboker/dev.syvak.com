@@ -120,11 +120,11 @@ class ProductController extends Controller
             'variant' => $variant,
             'telegram_data' => [
                 'url' => $telegram_link,
-                'text' => __('catalog/default.product.labels.telegram'),
+                'text' => __('storefront/default.product.labels.telegram'),
             ],
         ];
 
-        return view('catalog.pages.product', $data);
+        return view('storefront.pages.product', $data);
     }
 
     private function resolveRequestedVariant(
@@ -188,7 +188,7 @@ class ProductController extends Controller
     {
         $product_title = $this->resolveProductTitle($product, $variant, $language_id);
         $breadcrumbs = [
-            breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
+            breadcrumb(__('storefront/default.links.home'), localized_route('catalog.home')),
         ];
 
         foreach ($this->resolveProductCategoryBreadcrumbs($product, $language_id) as $category_breadcrumb) {
@@ -856,7 +856,7 @@ class ProductController extends Controller
 
                 return [
                     'key' => 'attribute_' . $attribute_id,
-                    'name' => filled($attribute_name) ? $attribute_name : __('catalog/default.product.option_groups.attribute_fallback'),
+                    'name' => filled($attribute_name) ? $attribute_name : __('storefront/default.product.option_groups.attribute_fallback'),
                     'values' => collect($values_data)
                         ->pluck('value')
                         ->filter(fn (mixed $value): bool => filled((string)$value))
@@ -1138,8 +1138,8 @@ class ProductController extends Controller
         ];
 
         $section_defaults = [
-            'composition' => __('catalog/default.product.details.composition'),
-            'care' => __('catalog/default.product.details.care'),
+            'composition' => __('storefront/default.product.details.composition'),
+            'care' => __('storefront/default.product.details.care'),
         ];
 
         return collect($section_defaults)

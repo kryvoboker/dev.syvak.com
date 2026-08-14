@@ -6,7 +6,7 @@ return [
     'runtime' => [
         'storefront' => [
             'data_service' => 'Services\\Storefront\\FakeModuleStorefrontService',
-            'view' => 'catalog.pages.home',
+            'view' => 'storefront.pages.home',
             'view_data_key' => 'fake_module_data',
         ],
     ],

@@ -30,7 +30,7 @@ class LoadMoreProductsByAjaxController extends Controller
                 params       : compact('page_type'),
             );
 
-            $html = view('catalog.pages.partials.category.category-content-container', $response_data)->render();
+            $html = view('storefront.pages.partials.category.category-content-container', $response_data)->render();
 
             return response()->json([
                 'html' => $html,
@@ -43,7 +43,7 @@ class LoadMoreProductsByAjaxController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => __('catalog/default.errors.filtering_products'),
+                'message' => __('storefront/default.errors.filtering_products'),
                 'paginator' => null,
                 'next_page' => null,
                 'is_has_more_pages' => false,

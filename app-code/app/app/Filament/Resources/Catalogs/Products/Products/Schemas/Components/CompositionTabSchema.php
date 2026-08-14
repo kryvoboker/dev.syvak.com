@@ -50,7 +50,7 @@ class CompositionTabSchema
                     ->schema([
                         TextInput::make("$section_path.title")
                             ->label(__('admin/catalogs/products/products.labels.composition_title'))
-                            ->default(__('catalog/default.product.details.composition'))
+                            ->default(__('storefront/default.product.details.composition'))
                             ->maxLength(255)
                             ->columnSpanFull(),
 

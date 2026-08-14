@@ -121,12 +121,12 @@ class AppServiceProvider extends ServiceProvider
             Route::pattern($locale_key, $allowed_locales_pattern);
         }
 
-        // Register view namespaces for frontend (catalog) and admin
-        // This allows usage like view('catalog::layouts.partials.header')
-        $catalog_path = resource_path('views/catalog');
+        // Register view namespaces for frontend (storefront) and admin
+        // This allows usage like view('storefront::layouts.partials.header')
+        $storefront_path = resource_path('views/storefront');
 
-        if (File::isDirectory($catalog_path)) {
-            View::addNamespace('catalog', $catalog_path);
+        if (File::isDirectory($storefront_path)) {
+            View::addNamespace('storefront', $storefront_path);
         }
 
         $default_no_image_path = (string) config('app.images.default_no_image', 'images/no-image.png');
@@ -199,7 +199,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('current_locale', app()->getLocale());
         });
 
-        View::composer('catalog.layouts.partials.header', function (LaravelView $view): void {
+        View::composer('storefront.layouts.partials.header', function (LaravelView $view): void {
             $view->with(
                 'cart_total_products',
                 app(CartService::class)->getTotalProducts(CartModeEnum::Regular->value),

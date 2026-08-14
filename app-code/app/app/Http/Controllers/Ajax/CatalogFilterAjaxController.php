@@ -39,7 +39,7 @@ class CatalogFilterAjaxController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => __('catalog/default.errors.filtering_products'),
+                'message' => __('storefront/default.errors.filtering_products'),
             ]);
         }
     }

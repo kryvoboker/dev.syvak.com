@@ -99,7 +99,7 @@ final readonly class FailureOrderRecoveryService
         if (! $order instanceof Orders || ! $this->isAvailablePaymentMethod($payment_method, $locale)) {
             return [
                 'success' => false,
-                'errors' => ['payment' => [__('catalog/failure.errors.payment_unavailable', [], $locale)]],
+                'errors' => ['payment' => [__('storefront/failure.errors.payment_unavailable', [], $locale)]],
             ];
         }
 
@@ -180,7 +180,7 @@ final readonly class FailureOrderRecoveryService
 
             return [
                 'success' => false,
-                'errors' => ['payment' => [__('catalog/failure.errors.retry_failed', [], $locale)]],
+                'errors' => ['payment' => [__('storefront/failure.errors.retry_failed', [], $locale)]],
             ];
         }
     }
