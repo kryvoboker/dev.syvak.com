@@ -14,6 +14,7 @@
             "!pint.json",
             "!boost.json",
             "!resources/lang",
+            "!resources/views",
             "!vendor",
             "!app",
             "!bootstrap",
@@ -30,7 +31,8 @@
         "indentStyle": "space",
         "indentWidth": 4,
         "lineWidth": 120,
-        "trailingNewline": true
+        "trailingNewline": true,
+        "includes": ["!/node_modules/**", "!/dist/**"]
     },
     "javascript": {
         "formatter": {
@@ -63,7 +65,8 @@
             "style": {
                 "noDescendingSpecificity": "off"
             }
-        }
+        },
+        "includes": ["!/node_modules/**", "!/dist/**"]
     },
     "vcs": {
         "enabled": true,

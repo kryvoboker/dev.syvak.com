@@ -16,7 +16,7 @@
         "ts:check": "biome check . && tsc --noEmit -p tsconfig.json",
         "ts:fix": "biome check --write .",
         "ts:format": "biome format --write .",
-        "ts:lint": "biome lint --write .",
+        "ts:lint": "biome lint .",
         "ts:typecheck": "tsc --noEmit -p tsconfig.json"
     },
     "devDependencies": {

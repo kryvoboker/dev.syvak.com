@@ -2,9 +2,6 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "flyonui/flyonui": [
-                "./resources/assets/catalog/ts/types/vendor/flyonui/flyonui.d.ts"
-            ],
             "flyonui/src/js/plugins/*": [
                 "./resources/assets/catalog/ts/types/vendor/flyonui/src/js/plugins/*"
             ],

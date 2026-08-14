@@ -11,8 +11,4 @@ export const baseEntryPoints: string[] = [
     appTsEntryPath,
 ];
 
-export const baseRefreshGlobs: string[] = [
-    'resources/views/**',
-    'app/**',
-    'routes/**',
-];
+export const baseRefreshGlobs: string[] = ['resources/views/**', 'app/**', 'routes/**'];
