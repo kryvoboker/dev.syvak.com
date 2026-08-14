@@ -1,7 +1,7 @@
-import path from 'node:path';
 import { existsSync, readdirSync } from 'node:fs';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { LoadedModuleViteConfig, ModuleViteConfigShape } from '../types';
+import type { LoadedModuleViteConfig, ModuleViteConfigShape } from '../types';
 import { readModuleStatuses } from './readModuleStatuses';
 
 interface LoadActiveModuleConfigsParams
