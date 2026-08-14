@@ -45,12 +45,12 @@
 @source "../../../../node_modules/flyonui/flyonui.js";
 @plugin "@iconify/tailwind4";
 
-@source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source "../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
 /*@source '../../../../../storage/framework/views!*.php';*/
-@source '../../../views/catalog/**/*.blade.php';
-@source '../../../../Modules/**/resources/assets/ts/**/*.ts';
-@source '../../../../Modules/**/resources/views/storefront/**/*.blade.php';
-@source '../ts/**/*.ts';
+@source "../../../views/catalog/**/*.blade.php";
+@source "../../../../Modules/**/resources/assets/ts/**/*.ts";
+@source "../../../../Modules/**/resources/views/storefront/**/*.blade.php";
+@source "../ts/**/*.ts";
 
 @source "./_source.txt";
 
@@ -115,9 +115,9 @@
     --color-black: var(--color-base-100); /* #0C120C */
     --color-light-black: var(--color-base-300); /* #0C120C33 */
     --color-light-gray: var(--color-secondary); /* #888888 */
-    --color-opacity-light-gray-40\%: rgba(136, 136, 136, .4); /* #888888 */
+    --color-opacity-light-gray-40\%: rgba(136, 136, 136, 0.4); /* #888888 */
     --color-light-red: var(--color-error); /* #D4041CFF */
-    --color-dark-red: rgba(212, 4, 28, .7); /* #D4041CB3 */
+    --color-dark-red: rgba(212, 4, 28, 0.7); /* #D4041CB3 */
     --color-dark-green: rgb(0, 135, 95); /* #00875FFF */
     --spacing-0\.8em: 0.8em;
     --spacing-0\.9em: 0.9em;
@@ -155,12 +155,13 @@
             content: "";
 
             background: radial-gradient(
-                circle at center,
-                rgba(139, 0, 0, 0.95) 0%,
-                rgba(90, 0, 0, 0.9) 35%,
-                rgba(30, 0, 0, 0.95) 70%,
-                rgba(0, 0, 0, 1) 100%
-            ) no-repeat center 0;
+                    circle at center,
+                    rgba(139, 0, 0, 0.95) 0%,
+                    rgba(90, 0, 0, 0.9) 35%,
+                    rgba(30, 0, 0, 0.95) 70%,
+                    rgba(0, 0, 0, 1) 100%
+                )
+                no-repeat center 0;
 
             background-size: 50% 50%;
 
@@ -191,9 +192,7 @@
     }
 
     .carousel-nav {
-        @apply pointer-events-auto inline-flex size-14 items-center justify-center rounded-full border border-white/50
-        bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white
-        backdrop-blur-xs hover:text-black opacity-80 carousel-disabled:opacity-50;
+        @apply pointer-events-auto inline-flex size-14 items-center justify-center rounded-full border border-white/50 bg-black/80 text-white transition-colors duration-300 ease-in-out hover:border-white hover:bg-white backdrop-blur-xs hover:text-black opacity-80 carousel-disabled:opacity-50;
     }
 
     .carousel-pagination:not(.product-carousel__pagination) {
@@ -280,7 +279,11 @@
 
 @layer app {
     /* Disable animation if user disable it in his device */
-    *, ::after, ::before, ::backdrop, ::file-selector-button {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
         @apply motion-reduce:animate-none! motion-reduce:transition-none! motion-reduce:scroll-auto!;
     }
 
@@ -304,8 +307,7 @@
     }
 
     body {
-        @apply font-inter font-normal text-sm lg:text-base 2xl:text-lg leading-1.4em
-        tracking-normal lg:tracking-0.02em 2xl:tracking-normal text-white;
+        @apply font-inter font-normal text-sm lg:text-base 2xl:text-lg leading-1.4em tracking-normal lg:tracking-0.02em 2xl:tracking-normal text-white;
     }
 
     :root::-webkit-scrollbar-thumb {
@@ -326,7 +328,10 @@
     }
 
     .section-title,
-    h1, h2, h3, h4 {
+    h1,
+    h2,
+    h3,
+    h4 {
         @apply font-cormorant-garamond uppercase;
     }
 
@@ -347,7 +352,8 @@
         @apply text-lg md:text-2xl 2xl:text-4xl font-bold tracking-normal leading-none;
     }
 
-    h5, h6 {
+    h5,
+    h6 {
         @apply font-inter font-normal tracking-normal leading-1.4em;
     }
 
@@ -367,9 +373,21 @@
         @apply text-inherit leading-[inherit] tracking-[inherit];
     }
 
-    [type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'],
-    [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'],
-    [type='week'], [multiple], textarea, select {
+    [type="text"],
+    [type="email"],
+    [type="url"],
+    [type="password"],
+    [type="number"],
+    [type="date"],
+    [type="datetime-local"],
+    [type="month"],
+    [type="search"],
+    [type="tel"],
+    [type="time"],
+    [type="week"],
+    [multiple],
+    textarea,
+    select {
         @apply text-inherit leading-[inherit] tracking-[inherit] appearance-none bg-black border-b border-opacity-light-gray-40% p-2 lg:px-4;
 
         &:focus {
@@ -435,7 +453,8 @@
         @apply text-black border-light-gray bg-light-gray cursor-pointer duration-500 ease-in-out;
     }
 
-    ._error, ._success {
+    ._error,
+    ._success {
         @apply hidden rounded p-1 mt-1;
     }
 
@@ -458,9 +477,7 @@
     }
 
     .filter-sort-btns {
-        @apply default-btn flex items-center justify-between gap-x-4 w-full text-sm lg:text-base xl:text-lg
-        uppercase tracking-0.04em md:border md:border-opacity-light-gray-40% md:hover:border-white md:duration-200 md:ease-in-out
-        px-0 pt-0 pb-2 md:px-5 md:py-18px;
+        @apply default-btn flex items-center justify-between gap-x-4 w-full text-sm lg:text-base xl:text-lg uppercase tracking-0.04em md:border md:border-opacity-light-gray-40% md:hover:border-white md:duration-200 md:ease-in-out px-0 pt-0 pb-2 md:px-5 md:py-18px;
     }
 
     .black-btn {
@@ -529,15 +546,16 @@
 }
 
 @utility modal-shadow {
-    box-shadow: 0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset,
-    -0.0625rem -0.25rem 1.5625rem 0 rgba(255, 255, 255, 0.40) inset,
-    0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.20) inset;
+    box-shadow:
+        0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.2) inset,
+        -0.0625rem -0.25rem 1.5625rem 0 rgba(255, 255, 255, 0.4) inset,
+        0.0625rem 0.0625rem 0.25rem 0 rgba(255, 255, 255, 0.2) inset;
 }
 
 .choices__inner,
 .choices__list--dropdown,
 .choices__list[aria-expanded],
-.choices[data-type*=select-one] .choices__input,
+.choices[data-type*="select-one"] .choices__input,
 .choices__list--dropdown .choices__item--selectable.is-selected,
 .choices__list[aria-expanded] .choices__item--selectable.is-selected,
 .choices__list--dropdown .choices__item--selectable.is-highlighted,
@@ -556,7 +574,7 @@
     @apply w-full top-[unset] bottom-full;
 }
 
-.choices__inner:has(select[name=city]) + .choices__list.choices__list--dropdown {
+.choices__inner:has(select[name="city"]) + .choices__list.choices__list--dropdown {
     @apply bottom-[unset] top-full;
 }
 
@@ -610,5 +628,5 @@
 }
 
 .leaflet-popup-tip {
-    transform: translate(.25rem, -0.5rem) rotate(135deg);
+    transform: translate(0.25rem, -0.5rem) rotate(135deg);
 }

@@ -1,11 +1,11 @@
 @layer theme, base, utilities, components, app;
 
-@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import "../../../../vendor/filament/filament/resources/css/theme.css";
 
-@source '../../../../app/Filament/**/*';
-@source '../../../../Modules/**/app/Filament/**/*.php';
-@source '../../../../Modules/**/resources/views/filament/**/*.blade.php';
-@source '../../../../resources/views/filament/**/*';
+@source "../../../../app/Filament/**/*";
+@source "../../../../Modules/**/app/Filament/**/*.php";
+@source "../../../../Modules/**/resources/views/filament/**/*.blade.php";
+@source "../../../../resources/views/filament/**/*";
 
 @layer app {
     .fi-header > div:first-of-type {
