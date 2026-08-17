@@ -41,10 +41,6 @@ class CartSessionService
         $resolved_items = [];
 
         foreach ($cart_rows as $cart_row) {
-            if (!$cart_row instanceof Cart) {
-                continue;
-            }
-
             $resolved_items[] = [
                 'cart_id' => (int)$cart_row->id,
                 'product_variant_id' => (int)$cart_row->product_variant_id,
@@ -87,10 +83,6 @@ class CartSessionService
         $existing_item = null;
 
         foreach ($matching_rows as $matching_row) {
-            if (!$matching_row instanceof Cart) {
-                continue;
-            }
-
             $item_attributes = is_array($matching_row->chosen_attributes) ? $matching_row->chosen_attributes : [];
 
             if ($this->buildAttributesSignature($item_attributes) === $attributes_signature) {
@@ -186,7 +178,7 @@ class CartSessionService
 
         $query = $this->resolveOwnerQuery($owner_context);
 
-        if (is_string($mode) && $mode !== '') {
+        if ($mode !== null && $mode !== '') {
             $query->where('cart_mode', $mode);
         }
 
@@ -206,7 +198,7 @@ class CartSessionService
 
         $query = $this->resolveOwnerQuery($owner_context);
 
-        if (is_string($mode) && $mode !== '') {
+        if ($mode !== null && $mode !== '') {
             $query->where('cart_mode', $mode);
         }
 
@@ -220,27 +212,28 @@ class CartSessionService
     {
         $session_id = session()->getId();
 
-        if (!is_string($session_id) || $session_id === '') {
+        if ($session_id === '') {
             session()->start();
             $session_id = session()->getId();
         }
 
         $user_id = Auth::check() ? (int)Auth::id() : null;
 
-        if (($user_id === null || $user_id <= 0) && (!is_string($session_id) || $session_id === '')) {
+        if (($user_id === null || $user_id <= 0) && $session_id === '') {
             Log::channel('stack')->warning('Cart owner context could not be resolved.');
 
             return null;
         }
 
         return [
-            'session_id' => is_string($session_id) && $session_id !== '' ? $session_id : null,
+            'session_id' => $session_id !== '' ? $session_id : null,
             'user_id' => $user_id !== null && $user_id > 0 ? $user_id : null,
         ];
     }
 
     /**
      * @param array{session_id: ?string, user_id: ?int} $owner_context
+     * @return Builder<Cart>
      */
     private function resolveOwnerQuery(array $owner_context): Builder
     {
@@ -306,10 +299,6 @@ class CartSessionService
             $existing_user_row = null;
 
             foreach ($user_rows as $user_row) {
-                if (!$user_row instanceof Cart) {
-                    continue;
-                }
-
                 $user_attributes = is_array($user_row->chosen_attributes) ? $user_row->chosen_attributes : [];
 
                 if ($this->buildAttributesSignature($user_attributes) === $signature) {

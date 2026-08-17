@@ -71,7 +71,7 @@ class CategoryController extends Controller
             fallback_sort_code  : $fallback_active_sort,
         );
 
-        /** @var LengthAwarePaginator|null $paginator */
+        /** @var LengthAwarePaginator<int, mixed>|null $paginator */
         $paginator = Arr::get($response_data, 'paginator');
         $current_page = $paginator?->currentPage();
         $is_has_more_pages = (bool) $paginator?->hasMorePages();
@@ -237,7 +237,9 @@ class CategoryController extends Controller
     }
 
     /**
-     * @param  array<int, string>  $sorting_keys
+     * @param array<string, mixed> $request_query
+     * @param array<int, string> $sorting_keys
+     * @return string
      */
     private function buildSortOptionUrl(
         string $request_url,
@@ -267,6 +269,7 @@ class CategoryController extends Controller
         return filled($query_string) ? $request_url . '?' . $query_string : $request_url;
     }
 
+    /** @param array<int|string, mixed> $query_parameters */
     private function forgetByGetKey(array &$query_parameters, string $get_key): void
     {
         if (Str::contains($get_key, '[') && Str::endsWith($get_key, ']')) {
@@ -285,6 +288,7 @@ class CategoryController extends Controller
         Arr::forget($query_parameters, $get_key);
     }
 
+    /** @param array<int|string, mixed> $query_parameters */
     private function setByGetKey(array &$query_parameters, string $get_key, string $value): void
     {
         if (Str::contains($get_key, '[') && Str::endsWith($get_key, ']')) {

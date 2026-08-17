@@ -31,13 +31,14 @@ class CreateProductVariant extends CreateRecord
     #[Locked]
     public ?int $product_id = null;
 
+    /** @var array<string, mixed> */
     private array $relationship_data = [];
 
     public function mount(): void
     {
         $this->product_id = request()->integer('product');
 
-        abort_if($this->product_id === null || $this->product_id < 1, 404);
+        abort_if($this->product_id < 1, 404);
 
         parent::mount();
     }

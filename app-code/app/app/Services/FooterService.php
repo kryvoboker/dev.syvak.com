@@ -15,6 +15,10 @@ class FooterService
 {
     use SocialServiceTrait;
 
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
     public function __invoke(array $params = []): array
     {
         $app_settings = get_app_settings();
@@ -27,7 +31,7 @@ class FooterService
             (string) config('app.images.path_to_logo', 'images/logo.png'),
         );
 
-        /** @var Collection<Category>|SupportCollection<Category> $categories */
+        /** @var Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>> $categories */
         $categories = $params['categories'] ?? (new Category())->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
             $app_settings->language_id,
         );
@@ -54,6 +58,9 @@ class FooterService
         ];
     }
 
+    /** @param array<int, array<string, mixed>> $social_items
+     * @return array<string, mixed>
+     */
     private function getSubscriptionData(array $social_items): array
     {
         $locale = app()->getLocale();
@@ -69,6 +76,7 @@ class FooterService
         ];
     }
 
+    /** @return array<string, mixed> */
     private function getContactsData(): array
     {
         return [
@@ -80,7 +88,8 @@ class FooterService
     }
 
     /**
-     * @param  Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>>  $categories
+     * @param Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>> $categories
+     * @return array<int, array{label: string, url: string}>
      */
     private function getMenuItems(Collection|SupportCollection $categories): array
     {
@@ -106,6 +115,7 @@ class FooterService
             ->all();
     }
 
+    /** @return array<string, mixed> */
     private function getInformationData(): array
     {
         return [
@@ -120,11 +130,12 @@ class FooterService
         ];
     }
 
+    /** @return array<int, array<string, mixed>> */
     private function getSocialItems(): array
     {
         $locale = app()->getLocale();
 
-        $social_items = collect(data_get(get_app_settings(), "socials.$locale", []))
+        $social_items = collect((array) data_get(get_app_settings(), "socials.$locale", []))
             ->map(function (mixed $item) use ($locale): array {
                 $social_type = (string) data_get($item, 'social_type');
                 $label = Str::title($social_type);
@@ -144,6 +155,7 @@ class FooterService
         return filled($social_items) ? $social_items : $this->getFallbackSocialItems();
     }
 
+    /** @return array<int, array<string, string>> */
     private function getFallbackSocialItems(): array
     {
         return [
@@ -168,6 +180,7 @@ class FooterService
         ];
     }
 
+    /** @return list<string> */
     private function parsePhones(mixed $phones): array
     {
         if (is_iterable($phones)) {

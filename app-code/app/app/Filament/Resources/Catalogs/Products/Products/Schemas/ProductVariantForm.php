@@ -215,7 +215,7 @@ class ProductVariantForm
     }
 
     /**
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      * @return array<Tab>
      */
     private static function buildTranslationTabs(Collection $active_languages): array
@@ -278,7 +278,7 @@ class ProductVariantForm
     }
 
     /**
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      * @return array<Tab>
      */
     private static function buildAttributeTabs(Collection $active_languages): array

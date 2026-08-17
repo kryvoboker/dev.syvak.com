@@ -18,6 +18,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+/**
+ * @property PromoCodeTypeEnum $promo_type
+ * @property PromoCodeDiscountTypeEnum $discount_type
+ * @property PromoCodeDiscountBaseModeEnum $discount_base_mode
+ * @property PromoCodeLimitModeEnum $user_limit_mode
+ * @property PromoCodeLimitModeEnum $group_limit_mode
+ */
 class PromoCode extends Model
 {
     protected $fillable = [
@@ -60,41 +67,49 @@ class PromoCode extends Model
         ];
     }
 
+    /** @return HasMany<PromoCodeDiscount, $this> */
     public function discounts(): HasMany
     {
         return $this->hasMany(PromoCodeDiscount::class);
     }
 
+    /** @return HasMany<PromoCodeErrorTranslation, $this> */
     public function errorTranslations(): HasMany
     {
         return $this->hasMany(PromoCodeErrorTranslation::class);
     }
 
+    /** @return HasMany<PromoCodeUsage, $this> */
     public function usages(): HasMany
     {
         return $this->hasMany(PromoCodeUsage::class);
     }
 
+    /** @return BelongsToMany<User, $this> */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'promo_code_user');
     }
 
+    /** @return BelongsToMany<UserGroup, $this> */
     public function userGroups(): BelongsToMany
     {
         return $this->belongsToMany(UserGroup::class, 'promo_code_user_group');
     }
 
+    /** @return BelongsToMany<Product, $this> */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'promo_code_product');
     }
 
+    /** @return BelongsToMany<Category, $this> */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'promo_code_category');
     }
 
+    /** @return BelongsToMany<Orders, $this> */
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Orders::class, 'promo_code_usages')

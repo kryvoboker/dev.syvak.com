@@ -76,6 +76,7 @@ class Currency extends Model
         });
     }
 
+    /** @return Collection<int, self> */
     public function getAllActiveCurrencies(): Collection
     {
         return self::query()
@@ -101,6 +102,7 @@ class Currency extends Model
             ->first();
     }
 
+    /** @return Collection<int, self> */
     public function getAllCurrencies(): Collection
     {
         return self::query()

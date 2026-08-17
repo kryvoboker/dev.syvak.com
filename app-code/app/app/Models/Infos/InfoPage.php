@@ -36,11 +36,13 @@ class InfoPage extends Model
         ];
     }
 
+    /** @return HasMany<InfoPageDescription, $this> */
     public function infoPageDescription(): HasMany
     {
         return $this->hasMany(InfoPageDescription::class);
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function positions(): Attribute
     {
         return Attribute::make(

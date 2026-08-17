@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 
 class ProductsLimitService
 {
+    /** @param array<string, mixed> $page_setting_settings */
     public static function getProductsCategoryLimit(array $page_setting_settings): int
     {
         return max(

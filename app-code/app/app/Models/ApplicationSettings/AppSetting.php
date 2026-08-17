@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class AppSetting extends Model
 {
+    /** @var array<string, mixed>|null */
+    protected $user_settings;
+
+    /** @var array<string, mixed>|null */
+    protected $system_settings;
+
+    /** @var array<string, mixed>|null */
+    protected $ai_settings;
+
     protected $fillable = [
         'titles',
         'meta_titles',
@@ -40,6 +49,7 @@ class AppSetting extends Model
         ];
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function titles(): Attribute
     {
         return Attribute::make(
@@ -47,6 +57,7 @@ class AppSetting extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function metaTitles(): Attribute
     {
         return Attribute::make(
@@ -54,6 +65,7 @@ class AppSetting extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function metaDescriptions(): Attribute
     {
         return Attribute::make(
@@ -61,6 +73,7 @@ class AppSetting extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function metaKeywords(): Attribute
     {
         return Attribute::make(
@@ -68,6 +81,7 @@ class AppSetting extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function workTime(): Attribute
     {
         return Attribute::make(
@@ -75,6 +89,7 @@ class AppSetting extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function contactAddresses(): Attribute
     {
         return Attribute::make(
@@ -82,6 +97,7 @@ class AppSetting extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function aiSettings(): Attribute
     {
         return Attribute::make(
@@ -89,6 +105,7 @@ class AppSetting extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function systemSettings(): Attribute
     {
         return Attribute::make(
@@ -96,6 +113,7 @@ class AppSetting extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function userSettings(): Attribute
     {
         return Attribute::make(

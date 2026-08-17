@@ -12,6 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property CatalogFilterPriceSourceModeEnum $price_source_mode
+ * @property CatalogFilterDiscountOnlyPolicyEnum $discount_only_policy
+ * @property array<int, string>|null $context_types
+ */
 class CatalogFilterSet extends Model
 {
     protected $fillable = [

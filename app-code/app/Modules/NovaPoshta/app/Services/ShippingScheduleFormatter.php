@@ -11,14 +11,16 @@ namespace Modules\NovaPoshta\Services;
 class ShippingScheduleFormatter
 {
     // Map English weekday keys to Ukrainian short names
-    private static array $weekday_map;
+    /** @var array<string, string> */
+    private static array $weekday_map = [];
     // Order of days to ensure correct grouping
+    /** @var list<string> */
     private static array $ordered_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     /**
      * Format schedule from JSON string or associative array.
      *
-     * @param string|array $input              JSON string or associative array like ["Monday":"09:00-18:00", ...]
+     * @param string|array<string, mixed> $input JSON string or associative schedule array
      * @param string       $text_day_off       Text to use for closed days
      * @param string       $text_work_schedule Header text for the schedule
      *
@@ -104,7 +106,7 @@ class ShippingScheduleFormatter
     }
 
     /**
-     * @param array $weekday_map
+     * @param array<string, string> $weekday_map
      *
      * @return void
      */
@@ -114,7 +116,7 @@ class ShippingScheduleFormatter
     }
 
     /**
-     * @param array $ordered_days
+     * @param list<string> $ordered_days
      *
      * @return void
      */

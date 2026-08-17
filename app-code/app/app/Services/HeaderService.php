@@ -16,6 +16,10 @@ use Throwable;
 
 class HeaderService
 {
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
     public function __invoke(array $params = []): array
     {
         $category = new Category();
@@ -128,7 +132,9 @@ class HeaderService
     }
 
     /**
-     * @param Collection<Language> $languages
+     * @param \Illuminate\Support\Collection<int, array{id: int, descriptions: array<mixed>, slug: string, preview_image?: array{urls: array<string, string>, width: int, height: int, alt: string}}> $categories
+     * @param Collection<int, Language> $languages
+     * @return array<string, mixed>
      */
     private function processCreateMainMenu(\Illuminate\Support\Collection $categories, Collection $languages): array
     {

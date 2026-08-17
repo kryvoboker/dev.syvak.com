@@ -122,7 +122,10 @@ final readonly class FailurePageService
         }
     }
 
-    /** @param array<string, mixed> $settings @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $settings
+     * @return array<string, mixed>
+     */
     private function resolveLocalized(array $settings, int $language_id): array
     {
         $localized = (array) Arr::get($settings, 'localized', []);
@@ -137,7 +140,10 @@ final readonly class FailurePageService
         return is_array($first) ? $first : [];
     }
 
-    /** @param array<string, mixed> $settings @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $settings
+     * @return array<string, mixed>
+     */
     private function resolveSupportContacts(array $settings, int $language_id, string $locale): array
     {
         $support = (array) Arr::get($settings, 'support_contacts', []);
@@ -159,7 +165,10 @@ final readonly class FailurePageService
         ];
     }
 
-    /** @param mixed $items @return array<int, array<string, mixed>> */
+    /**
+     * @param mixed $items
+     * @return array<int, array<string, mixed>>
+     */
     private function normalizeSupportItems(mixed $items, string $locale): array
     {
         return collect(is_array($items) ? $items : [])
@@ -179,7 +188,10 @@ final readonly class FailurePageService
             ->all();
     }
 
-    /** @param mixed $rows @return array<int, array<string, mixed>> */
+    /**
+     * @param mixed $rows
+     * @return array<int, array<string, mixed>>
+     */
     private function resolveImages(mixed $rows): array
     {
         return collect(is_array($rows) ? $rows : [])

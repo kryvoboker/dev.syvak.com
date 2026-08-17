@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/** @property InquiryTypeEnum $type */
 class Inquiry extends Model
 {
     /** @use HasFactory<InquiryFactory> */
@@ -56,6 +57,7 @@ class Inquiry extends Model
     /**
      * @return Attribute
      */
+    /** @return Attribute<mixed, mixed> */
     public function phone(): Attribute
     {
         return Attribute::make(

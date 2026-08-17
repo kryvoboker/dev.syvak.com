@@ -66,6 +66,7 @@ class UserGroup extends Model
         });
     }
 
+    /** @return Collection<int, self> */
     public function getAllActiveUserGroups(): Collection
     {
         return self::query()
@@ -90,6 +91,7 @@ class UserGroup extends Model
             ->first();
     }
 
+    /** @return Collection<int, self> */
     public function getActiveUserGroups(): Collection
     {
         return self::where('is_active', true)

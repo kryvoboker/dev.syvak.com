@@ -67,6 +67,7 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
+    /** @return array<string, mixed> */
     public function setDeliveryMethod(string $delivery_method): array
     {
         $state = $this->getState();
@@ -99,6 +100,7 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
+    /** @return array<string, mixed> */
     public function clearDeliveryPoint(): array
     {
         $state = $this->getState();
@@ -107,6 +109,7 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
+    /** @return array<string, mixed> */
     public function clearDeliveryAddress(): array
     {
         $state = $this->getState();

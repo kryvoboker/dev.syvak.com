@@ -246,6 +246,10 @@ class OrdersTable
             ->defaultSort('added_at', 'desc');
     }
 
+    /**
+     * @param Builder<\App\Models\Orders\Orders> $query
+     * @return Builder<\App\Models\Orders\Orders>
+     */
     private static function whereLike(Builder $query, string $column, mixed $value): Builder
     {
         $value = trim((string) $value);
@@ -253,6 +257,10 @@ class OrdersTable
         return $value === '' ? $query : $query->where($column, 'like', "%$value%");
     }
 
+    /**
+     * @param Builder<\App\Models\Orders\Orders> $query
+     * @return Builder<\App\Models\Orders\Orders>
+     */
     private static function whereCustomerLike(Builder $query, string $column, mixed $value): Builder
     {
         $value = trim((string) $value);
@@ -263,6 +271,10 @@ class OrdersTable
         );
     }
 
+    /**
+     * @param Builder<\App\Models\Orders\Orders> $query
+     * @return Builder<\App\Models\Orders\Orders>
+     */
     private static function whereProductLike(Builder $query, string $column, mixed $value): Builder
     {
         $value = trim((string) $value);

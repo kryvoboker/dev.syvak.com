@@ -69,7 +69,7 @@ class InfoPagesTable
                             return '-';
                         }
 
-                        return collect($state)
+                        return collect((array) $state)
                             ->map(fn (PositionInPageEnum $enum) => Str::ucfirst($enum->value))
                             ->join(', ');
                     }),
@@ -98,7 +98,7 @@ class InfoPagesTable
                         $slug = $info_page->slugs
                             ->firstWhere('language_id', $current_language_id)->slug;
 
-                        return $slug ?? '-';
+                        return (string) $slug;
                     }),
 
                 IconColumn::make('is_noindex')

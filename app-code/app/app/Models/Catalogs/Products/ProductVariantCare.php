@@ -27,6 +27,7 @@ class ProductVariantCare extends Model
         ];
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function items(): Attribute
     {
         return new Attribute(

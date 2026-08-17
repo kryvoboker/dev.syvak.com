@@ -16,6 +16,7 @@ use Illuminate\Validation\ValidationException;
 final class PromoCodePersistenceService
 {
     /**
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     public function prepareForSave(array $data, ?PromoCode $ignore = null): array
@@ -95,6 +96,7 @@ final class PromoCodePersistenceService
         ];
     }
 
+    /** @param array<string, mixed> $data @return array<string, mixed> */
     public function syncRelations(PromoCode $promo_code, array $data): void
     {
         $promo_code->users()->sync($this->idsFromSelect($data['selected_users'] ?? [], 'user_id'));
@@ -110,6 +112,7 @@ final class PromoCodePersistenceService
     }
 
     /**
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     private function extractRelationshipState(array &$data): array
@@ -175,11 +178,14 @@ final class PromoCodePersistenceService
             ->all();
     }
 
-    /** @return array<int, array{currency_id:int, value:mixed}> */
+    /**
+     * @param array<int, array<string, mixed>> $items
+     * @return array<int, array{currency_id:int, value:mixed}>
+     */
     private function normalizeDiscounts(array $items): array
     {
         return collect($items)
-            ->filter(fn (mixed $item): bool => is_array($item) && is_numeric($item['currency_id'] ?? null))
+            ->filter(fn (array $item): bool => filled($item['currency_id'] ?? null))
             ->map(fn (array $item): array => [
                 'currency_id' => (int) $item['currency_id'],
                 'value' => $item['value'] ?? 0,
@@ -189,12 +195,15 @@ final class PromoCodePersistenceService
             ->all();
     }
 
-    /** @return array<int, array<string, mixed>> */
+    /**
+     * @param array<int, array<string, mixed>> $translations
+     * @return array<int, array<string, mixed>>
+     */
     private function normalizeErrorTranslations(array $translations): array
     {
         return collect($translations)
             ->map(function (mixed $messages, int|string $language_id): ?array {
-                if (! is_array($messages) || ! is_numeric($language_id)) {
+                if ($language_id < 1) {
                     return null;
                 }
 

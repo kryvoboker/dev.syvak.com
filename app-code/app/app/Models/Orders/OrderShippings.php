@@ -39,6 +39,7 @@ class OrderShippings extends Model
     /**
      * @return Attribute
      */
+    /** @return Attribute<mixed, mixed> */
     public function providerData(): Attribute
     {
         return Attribute::make(

@@ -69,6 +69,7 @@ class Attribute extends Model
         });
     }
 
+    /** @return Collection<int, self> */
     public function getActiveAttributesWithDescriptionsByLanguageId(int $language_id): Collection
     {
         return self::query()

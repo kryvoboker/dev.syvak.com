@@ -11,6 +11,10 @@ class CashOnDeliveryPaymentModule
      * - add COD-specific validation and constraints
      * - map COD flow into unified order status machine
      */
+    /**
+     * @param array<string, mixed> $order_payload
+     * @return array<string, mixed>
+     */
     public function process(array $order_payload): array
     {
         return [

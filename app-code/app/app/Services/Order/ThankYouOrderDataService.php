@@ -205,7 +205,7 @@ final readonly class ThankYouOrderDataService
     private function formatTotal(Orders $order, TotalTypesEnum $type, string $currency_code, float $exchange_rate): string
     {
         $total = $order->totals->first(function ($item) use ($type): bool {
-            $item_type = $item->total_type instanceof TotalTypesEnum ? $item->total_type : TotalTypesEnum::tryFrom((string) $item->total_type);
+            $item_type = $item->total_type;
 
             return $item_type === $type;
         });

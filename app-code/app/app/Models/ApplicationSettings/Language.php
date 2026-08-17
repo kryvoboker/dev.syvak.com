@@ -96,6 +96,7 @@ class Language extends Model
     /**
      * Get validation rules for the model.
      */
+    /** @return array<string, list<mixed>> */
     public static function validationRules(?int $id = null): array
     {
         return [
@@ -150,6 +151,7 @@ class Language extends Model
             ->first();
     }
 
+    /** @return Collection<int, self> */
     public function getActiveLanguagesWithoutExceptCode(string $code): Collection
     {
         return self::query()

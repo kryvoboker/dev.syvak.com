@@ -69,9 +69,9 @@ if (!function_exists('parse_telephone')) {
 
 if (!function_exists('trim_strs_in_arr')) {
     /**
-     * @param array $arr
+     * @param array<int|string, mixed> $arr
      *
-     * @return array
+     * @return array<int|string, mixed>
      */
     function trim_strs_in_arr(array $arr): array
     {
@@ -178,7 +178,7 @@ if (!function_exists('set_global_config')) {
 
 if (!function_exists('get_global_configs')) {
     /**
-     * @return Collection
+     * @return Collection<string, mixed>
      */
     function get_global_configs(): Collection
     {
@@ -229,7 +229,7 @@ if (!function_exists('breadcrumb')) {
      * @param string      $title
      * @param string|null $url
      *
-     * @return array
+     * @return array{title: string, url: string|null}
      */
     function breadcrumb(string $title, ?string $url = null): array
     {
@@ -258,7 +258,7 @@ if (!function_exists('try_detect_page_type')) {
             return null;
         }
 
-        if (is_string($route_name) && filled($route_name)) {
+        if (filled($route_name)) {
             return match (true) {
                 Str::endsWith($route_name, '.home') => (string)config('page-settings.page_type.home'),
                 Str::endsWith($route_name, '.product.static.show'),
@@ -318,7 +318,7 @@ if (!function_exists('try_detect_page_type')) {
 if (!function_exists('localized_route')) {
     /**
      * @param BackedEnum|string $route
-     * @param array             $parameters
+     * @param array<string, mixed> $parameters
      * @param bool              $absolute
      *
      * @return string
@@ -476,13 +476,9 @@ if (!function_exists('escape_special_html')) {
      */
     function escape_special_html(?string $html_string): string
     {
-        $prepared_html = Str::replaceMatches('/<script>.*?<\/script>/s', function ($match) {
-            if (isset($match[0])) {
-                return Str::replace(['<', '>'], ['&lt;', '&gt;'], $match[0], false);
-            }
-
-            return '';
-        }, decode_html_entities($html_string));
+        $prepared_html = preg_replace_callback('/<script>.*?<\/script>/s', function (array $match): string {
+            return Str::replace(['<', '>'], ['&lt;', '&gt;'], $match[0], false);
+        }, decode_html_entities($html_string)) ?? '';
 
         return Str::replace("'", '&apos;', $prepared_html, false);
     }
@@ -586,6 +582,7 @@ if (!function_exists('resolve_modules_for_context')) {
     /**
      * @throws BindingResolutionException
      * @throws CircularDependencyException
+     * @return Collection<int, mixed>
      */
     function resolve_modules_for_context(?string $placement = null, ?string $context_key = null): Collection
     {
@@ -692,7 +689,7 @@ if (!function_exists('get_page_settings')) {
     /**
      * @param PageSetting $page_setting
      *
-     * @return array
+     * @return array<string, mixed>
      */
     function get_page_settings(PageSetting $page_setting): array
     {
@@ -767,7 +764,7 @@ if (!function_exists('normalize_locale')) {
 
         if (
             $languages->contains(function (mixed $language) use ($locale): bool {
-                return $language instanceof Language && $language->code === $locale;
+                return $language->code === $locale;
             }) === false
         ) {
             $locale = app()->getLocale();
@@ -1014,7 +1011,7 @@ if (!function_exists('get_allowed_locales')) {
     /**
      * @param bool $is_get_new_instance
      *
-     * @return array
+     * @return list<string>
      */
     function get_allowed_locales(bool $is_get_new_instance = false): array
     {
@@ -1028,7 +1025,7 @@ if (!function_exists('get_allowed_locales')) {
             $allowed_locales = [];
         }
 
-        if (is_array($allowed_locales) && $allowed_locales !== []) {
+        if ($allowed_locales !== []) {
             return $allowed_locales;
         }
 

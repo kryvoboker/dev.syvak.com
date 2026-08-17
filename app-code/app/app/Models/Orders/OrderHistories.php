@@ -38,6 +38,7 @@ class OrderHistories extends Model
     /**
      * @return Attribute
      */
+    /** @return Attribute<mixed, mixed> */
     public function json(): Attribute
     {
         return Attribute::make(

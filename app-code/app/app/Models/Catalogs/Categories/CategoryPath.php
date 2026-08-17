@@ -28,11 +28,13 @@ class CategoryPath extends Model
         ];
     }
 
+    /** @return BelongsTo<Category, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
 
+    /** @return Collection<int, self> */
     public function getPathIdsByCategoryId(int $category_id): Collection
     {
         return self::query()

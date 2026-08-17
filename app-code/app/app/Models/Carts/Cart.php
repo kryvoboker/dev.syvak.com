@@ -10,6 +10,10 @@ use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property CartModeEnum $cart_mode
+ * @property array<int|string, mixed>|null $chosen_attributes
+ */
 class Cart extends Model
 {
     protected $fillable = [

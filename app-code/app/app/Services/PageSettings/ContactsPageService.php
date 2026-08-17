@@ -134,7 +134,10 @@ final readonly class ContactsPageService
         return $rules;
     }
 
-    /** @param array<int, mixed> $field_rules @param array<string, mixed> $field */
+    /**
+     * @param array<int, mixed> $field_rules
+     * @param array<string, mixed> $field
+     */
     private function appendStringLengthRules(array &$field_rules, array $field): void
     {
         $min_length = Arr::get($field, 'min_length');
@@ -149,7 +152,10 @@ final readonly class ContactsPageService
         }
     }
 
-    /** @param array<string, mixed> $settings @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $settings
+     * @return array<string, mixed>
+     */
     private function resolveLocalizedContent(array $settings, int $language_id): array
     {
         $localized = Arr::get($settings, 'localized', []);
@@ -165,7 +171,10 @@ final readonly class ContactsPageService
         return is_array($first_content) ? $first_content : [];
     }
 
-    /** @param mixed $rows @return array<int, array{type: string, value: string}> */
+    /**
+     * @param mixed $rows
+     * @return array<int, array{type: string, value: string}>
+     */
     private function resolvePhones(mixed $rows): array
     {
         return collect(is_array($rows) ? $rows : [])
@@ -178,7 +187,9 @@ final readonly class ContactsPageService
             ->all();
     }
 
-    /** @param mixed $rows @return array<int, string> */
+    /** @param mixed $rows
+     * @return array<int, string>
+     */
     private function resolveEmails(mixed $rows): array
     {
         return collect(is_array($rows) ? $rows : [])
@@ -188,7 +199,9 @@ final readonly class ContactsPageService
             ->all();
     }
 
-    /** @param mixed $rows @return array<int, array{title: string, description: ?string, value: string, url: ?string}> */
+    /** @param mixed $rows
+     * @return array<int, array{title: string, description: ?string, value: string, url: ?string}>
+     */
     private function resolveAddresses(mixed $rows, int $language_id): array
     {
         return collect(is_array($rows) ? $rows : [])
@@ -213,7 +226,9 @@ final readonly class ContactsPageService
             ->all();
     }
 
-    /** @param mixed $rows @return array<int, array<string, mixed>> */
+    /** @param mixed $rows
+     * @return array<int, array<string, mixed>>
+     */
     private function resolveImages(mixed $rows): array
     {
         return collect(is_array($rows) ? $rows : [])
@@ -248,7 +263,9 @@ final readonly class ContactsPageService
             ->all();
     }
 
-    /** @param mixed $map @return array<string, mixed> */
+    /** @param mixed $map
+     * @return array<string, mixed>
+     */
     private function resolveMap(mixed $map): array
     {
         $map = is_array($map) ? $map : [];

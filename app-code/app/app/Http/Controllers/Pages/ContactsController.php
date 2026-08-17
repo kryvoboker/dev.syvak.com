@@ -189,7 +189,7 @@ class ContactsController extends Controller
      * @param int                 $language_id
      * @param string|null         $slug
      * @param string              $form_route_name
-     * @param array               $form_route_params
+     * @param array<string, mixed> $form_route_params
      *
      * @throws Throwable
      * @return View

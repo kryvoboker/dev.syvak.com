@@ -222,6 +222,7 @@ final readonly class ImageUrlBuilderService
         }
     }
 
+    /** @return array{0: string, 1: string, 2: string} */
     private function splitPath(string $path): array
     {
         // "images/products/2025/12/ABC.jpg" -> ["images/products/2025/12", "ABC", "jpg"]

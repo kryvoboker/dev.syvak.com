@@ -17,11 +17,7 @@ trait LanguageTrait
         // Get current locale language ID (adjust based on your logic)
         $current_language_id = $language->getLanguageByCode(app()->getLocale())->id;
 
-        if ($current_language_id === null) {
-            $current_language_id = $language->getDefaultLanguage()->id;
-        }
-
-        return $current_language_id;
+        return (int) $current_language_id;
     }
 
     protected static function validateLanguageIdIsNotNull(?int $language_id, ?string $returned_value = null): ?string
@@ -40,7 +36,7 @@ trait LanguageTrait
     }
 
     /**
-     * @return Collection<Language>
+     * @return Collection<int, Language>
      */
     protected static function getActiveLanguages(): Collection
     {
@@ -48,17 +44,13 @@ trait LanguageTrait
     }
 
     /**
-     * @param  Collection<Language>  $active_languages
+     * @param  Collection<int, Language>  $active_languages
      */
     protected static function tryGetCurrentLanguageIdFromActiveLangs(Collection $active_languages): ?int
     {
         /** @var Language $language */
         $language = $active_languages->where('is_default', true)->first();
         $current_language_id = $language->id;
-
-        if (self::validateLanguageIdIsNotNull($current_language_id) !== null) {
-            return null;
-        }
 
         return (int) $current_language_id;
     }

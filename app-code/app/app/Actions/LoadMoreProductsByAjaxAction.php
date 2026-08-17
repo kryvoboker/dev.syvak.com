@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Http\Requests\Ajax\LoadMoreProductsByAjaxIndexRequest;
+use App\Models\Catalogs\Products\Product;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\Products\ProductsLimitService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -50,7 +51,7 @@ readonly class LoadMoreProductsByAjaxAction
             'page_path' => $page_path,
         ], locale: $locale);
 
-        /** @var LengthAwarePaginator|null $paginator */
+        /** @var LengthAwarePaginator<int, Product>|null $paginator */
         $paginator = Arr::get($response_data, 'paginator');
         $current_page = $paginator instanceof LengthAwarePaginator ? $paginator->currentPage() : null;
         $is_has_more_pages = $paginator instanceof LengthAwarePaginator && $paginator->hasMorePages();

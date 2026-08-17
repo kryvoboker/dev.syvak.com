@@ -26,10 +26,6 @@ final class AppSettingsService
     {
         $locale = app()->getLocale();
 
-        if ($locale === null) {
-            return;
-        }
-
         $language_id = $this->resolveLanguageId($locale);
         $user = Auth::user();
         $user_group_id = $user?->user_group_id;

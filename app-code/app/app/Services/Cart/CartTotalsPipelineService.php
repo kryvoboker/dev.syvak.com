@@ -35,16 +35,9 @@ class CartTotalsPipelineService
         ];
 
         foreach ($callbacks as $callback) {
-            if (! is_callable($callback)) {
-                continue;
-            }
-
             try {
                 $result_data = $callback($totals_data);
-
-                if (is_array($result_data)) {
-                    $totals_data = $result_data;
-                }
+                $totals_data = $result_data;
             } catch (Throwable $exception) {
                 Log::channel('stack')->error($exception->getMessage(), [
                     'file' => $exception->getFile(),

@@ -39,6 +39,10 @@ final class PromoCodeAdminOptionsService
     /**
      * @return array<string, string>
      */
+    /**
+     * @param array<int, int> $excluded_ids
+     * @return array<string, string>
+     */
     public function userOptions(string $search = '', array $excluded_ids = []): array
     {
         $search = Str::trim($search);
@@ -93,6 +97,10 @@ final class PromoCodeAdminOptionsService
     /**
      * @return array<string, string>
      */
+    /**
+     * @param array<int, int> $excluded_ids
+     * @return array<string, string>
+     */
     public function userGroupSearchOptions(string $search, array $excluded_ids = []): array
     {
         return UserGroup::query()
@@ -125,6 +133,10 @@ final class PromoCodeAdminOptionsService
     }
 
     /**
+     * @return array<string, string>
+     */
+    /**
+     * @param array<int, int> $excluded_ids
      * @return array<string, string>
      */
     public function productSearchOptions(string $search, array $excluded_ids = []): array
@@ -163,6 +175,10 @@ final class PromoCodeAdminOptionsService
     }
 
     /**
+     * @return array<string, string>
+     */
+    /**
+     * @param array<int, int> $excluded_ids
      * @return array<string, string>
      */
     public function categorySearchOptions(string $search, array $excluded_ids = []): array

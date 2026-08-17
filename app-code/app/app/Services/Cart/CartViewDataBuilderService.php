@@ -190,6 +190,7 @@ readonly class CartViewDataBuilderService
             ->filter(fn (?array $item_data): bool => is_array($item_data))
             ->values();
 
+        /** @var Collection<int, array<string, mixed>> $resolved_items */
         return $this->collectCartData($resolved_items, $mode, $locale);
     }
 
@@ -320,6 +321,7 @@ readonly class CartViewDataBuilderService
     }
 
     /**
+     * @param Collection<int, array<string, mixed>> $resolved_items
      * @return array<int, callable(array<string, mixed>): array<string, mixed>>
      */
     private function resolveTotalsCallbacks(Collection $resolved_items, string $locale): array
@@ -368,10 +370,10 @@ readonly class CartViewDataBuilderService
     }
 
     /**
-     * @param Collection $resolved_items
+     * @param Collection<int, array<string, mixed>> $resolved_items
      * @param string     $mode
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function collectCartData(Collection $resolved_items, string $mode, string $locale): array
     {

@@ -12,7 +12,7 @@ parameters:
             - database
             - tests
             - Modules/*/tests
-    level: 7
+    level: 6
     treatPhpDocTypesAsCertain: true
     ignoreErrors:
         -

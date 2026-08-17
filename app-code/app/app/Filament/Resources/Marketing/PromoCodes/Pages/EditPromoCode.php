@@ -17,6 +17,7 @@ class EditPromoCode extends EditRecord
 {
     protected static string $resource = PromoCodeResource::class;
 
+    /** @var array<string, mixed> */
     private array $relationship_data = [];
 
     protected function mutateFormDataBeforeFill(array $data): array

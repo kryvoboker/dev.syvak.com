@@ -143,7 +143,10 @@ final readonly class ContactsFormDeliveryService
         }
     }
 
-    /** @param array<string, mixed> $settings @param array<string, string> $placeholders */
+    /**
+     * @param array<string, mixed> $settings
+     * @param array<string, string> $placeholders
+     */
     private function sendEmail(array $settings, int $language_id, array $placeholders, ?string $file_path, bool $send_file): void
     {
         $recipient = Str::trim((string)Arr::get($settings, 'contact_form.destinations.email.address', ''));
@@ -182,6 +185,10 @@ final readonly class ContactsFormDeliveryService
      *
      * @throws ConnectionException
      * @return void
+     */
+    /**
+     * @param array<string, mixed> $settings
+     * @param array<string, string> $placeholders
      */
     private function sendTelegram(array $settings, int $language_id, array $placeholders, ?string $file_path, bool $send_file, string $bot_token): void
     {
@@ -253,6 +260,7 @@ final readonly class ContactsFormDeliveryService
     }
 
     /** @param mixed $templates @return array<string, string> */
+    /** @return array<string, string> */
     private function resolveLocalizedTemplate(mixed $templates, int $language_id): array
     {
         $templates = is_array($templates) ? $templates : [];

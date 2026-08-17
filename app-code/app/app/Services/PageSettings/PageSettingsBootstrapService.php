@@ -521,6 +521,7 @@ class PageSettingsBootstrapService
     /**
      * @throws Throwable
      */
+    /** @return array<string, mixed> */
     public function getFailureSettings(): array
     {
         $page_setting = $this->bootstrapFailurePageSetting();
@@ -872,7 +873,7 @@ class PageSettingsBootstrapService
             ];
         }
 
-        $images = collect(Arr::get($settings, 'images', []))
+        $images = collect((array) Arr::get($settings, 'images', []))
             ->filter(fn (mixed $image): bool => is_array($image))
             ->map(function (array $image): array {
                 $background = (string) Arr::get($image, 'background', 'transparent');
@@ -915,7 +916,7 @@ class PageSettingsBootstrapService
             ],
             'support_contacts' => [
                 'use_contacts_working_hours' => (bool) Arr::get($settings, 'support_contacts.use_contacts_working_hours', true),
-                'working_hours' => collect(Arr::get($settings, 'support_contacts.working_hours', []))
+                'working_hours' => collect((array) Arr::get($settings, 'support_contacts.working_hours', []))
                     ->filter(fn (mixed $content): bool => is_array($content))
                     ->map(fn (array $content): array => [
                         'content' => filled($content['content'] ?? null)
@@ -1521,6 +1522,7 @@ class PageSettingsBootstrapService
         ];
     }
 
+    /** @param array<string, mixed> $defaults */
     private function syncCategorySettingsContract(PageSetting $page_setting, array $defaults): void
     {
         $settings = $page_setting->settings;

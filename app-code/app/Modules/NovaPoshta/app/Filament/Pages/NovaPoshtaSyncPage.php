@@ -39,8 +39,10 @@ class NovaPoshtaSyncPage extends Page
 
     protected static string|null|UnitEnum $navigationGroup = AdminNavigationGroupEnum::Modules;
 
+    /** @var array<string, mixed> */
     public array $settings_form = [];
 
+    /** @var array<string, mixed> */
     public array $sync_state = [];
 
     public function mount(NovaPoshtaConfig $nova_poshta_config): void

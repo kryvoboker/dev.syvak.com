@@ -48,9 +48,7 @@ final readonly class FailureOrderRecoveryService
 
         $this->request->session()->put(self::SESSION_KEY, [
             'order_number' => (string) $order->order_number,
-            'order_type' => $order->order_type instanceof CartModeEnum
-                ? $order->order_type->value
-                : (string) $order->order_type,
+            'order_type' => $order->order_type->value,
             'retry_count' => (int) $this->request->session()->get(self::SESSION_KEY . '.retry_count', 0),
         ]);
     }
@@ -115,7 +113,7 @@ final readonly class FailureOrderRecoveryService
             if ($payment_method === $this->wayforpay_config->getPaymentMethod()) {
                 $payment_result = $this->wayforpay_payment_module->prepare($payload);
 
-                if (($payment_result['success'] ?? false) !== true) {
+                if ($payment_result['success'] !== true) {
                     $this->markFailed($payment, (array) Arr::get($payment_result, 'errors', []));
                     $this->incrementRetryCount();
 

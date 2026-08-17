@@ -29,10 +29,13 @@ class EditNotFound extends EditRecord
 
     protected static string $resource = NotFoundResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $localized_content = [];
 
+    /** @var array<int, array<string, mixed>> */
     protected array $images = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
     public int|string|Model|null $record = null;

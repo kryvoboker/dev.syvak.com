@@ -118,7 +118,7 @@ readonly class ProductsCarouselStorefrontService
                     'name' => $instance->name,
                     'module_name_for_user' => $localized_shared_content['module_name_for_user'],
                     'short_description_for_user' => $localized_shared_content['short_description_for_user'],
-                    'page_types' => collect(Arr::get($instance_settings, 'shared.page_types', []))
+                    'page_types' => collect((array) Arr::get($instance_settings, 'shared.page_types', []))
                         ->filter(fn (mixed $page_type): bool => is_string($page_type) && filled($page_type))
                         ->values()
                         ->all(),
@@ -150,7 +150,7 @@ readonly class ProductsCarouselStorefrontService
         $translations_payload = Arr::get($shared_settings, 'translations', []);
         $translations_payload = is_array($translations_payload) ? $translations_payload : [];
 
-        $translations_by_locale = collect($translations_payload)
+        $translations_by_locale = collect((array) $translations_payload)
             ->filter(fn (mixed $translation): bool => is_array($translation))
             ->map(function (array $translation): array {
                 return [
@@ -162,7 +162,7 @@ readonly class ProductsCarouselStorefrontService
         $resolved_locale = $requested_locale;
         $fallback_used = false;
         $resolved_translation = $translations_by_locale->get($requested_locale, []);
-        $resolved_translation = is_array($resolved_translation) ? $resolved_translation : [];
+        $resolved_translation = (array) $resolved_translation;
 
         $requested_has_values = filled((string) Arr::get($resolved_translation, 'module_name_for_user'))
             || filled((string) Arr::get($resolved_translation, 'short_description_for_user'));
@@ -177,7 +177,7 @@ readonly class ProductsCarouselStorefrontService
             $default_translation = is_string($default_locale)
                 ? $translations_by_locale->get($default_locale, [])
                 : [];
-            $default_translation = is_array($default_translation) ? $default_translation : [];
+            $default_translation = (array) $default_translation;
 
             $default_has_values = filled((string) Arr::get($default_translation, 'module_name_for_user'))
                 || filled((string) Arr::get($default_translation, 'short_description_for_user'));
@@ -248,6 +248,7 @@ readonly class ProductsCarouselStorefrontService
      *      sort_sequence: array<int, string>
      * }                            $runtime_shared_settings
      * @param  array<string, mixed>  $instance_settings
+     * @param array<int, int> $selected_variant_ids
      * @return EloquentCollection<int, Product>
      */
     private function resolveProductsForInstance(
@@ -272,6 +273,7 @@ readonly class ProductsCarouselStorefrontService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }                           $runtime_shared_settings
+     * @param array<int, int>       $selected_variant_ids
      * @return EloquentCollection<int, Product>
      */
     private function resolveCategoryBasedProducts(
@@ -326,7 +328,6 @@ readonly class ProductsCarouselStorefrontService
         $products = $products_query
             ->limit($runtime_shared_settings['products_limit'])
             ->get()
-            ->filter(fn (mixed $product): bool => $product instanceof Product)
             ->values();
 
         return new EloquentCollection($products->all());
@@ -342,6 +343,7 @@ readonly class ProductsCarouselStorefrontService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }                           $runtime_shared_settings
+     * @param array<int, int>       $selected_variant_ids
      * @return EloquentCollection<int, Product>
      */
     private function resolveManualOnlyProducts(
@@ -363,7 +365,6 @@ readonly class ProductsCarouselStorefrontService
                 ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')')
                 ->limit($runtime_shared_settings['products_limit'])
                 ->get()
-                ->filter(fn (mixed $product): bool => $product instanceof Product)
                 ->values();
         }
 
@@ -382,12 +383,15 @@ readonly class ProductsCarouselStorefrontService
             ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')')
             ->limit($runtime_shared_settings['products_limit'])
             ->get()
-            ->filter(fn (mixed $product): bool => $product instanceof Product)
             ->values();
 
         return new EloquentCollection($products->all());
     }
 
+    /**
+     * @param array<int, int> $selected_variant_ids
+     * @return Builder<Product>
+     */
     private function buildBaseProductsQuery(int $min_quantity, array $selected_variant_ids = []): Builder
     {
         $language_id = $this->resolveLanguageId();
@@ -455,7 +459,8 @@ readonly class ProductsCarouselStorefrontService
     }
 
     /**
-     * @param  array<int, string>  $sort_sequence
+     * @param Builder<Product> $products_query
+     * @param array<int, string> $sort_sequence
      */
     private function applySortPipeline(Builder $products_query, array $sort_sequence, int $language_id): void
     {
@@ -573,13 +578,14 @@ readonly class ProductsCarouselStorefrontService
     }
 
     /**
+     * @param array<string, mixed> $instance_settings
      * @return array<int, string>
      */
     private function resolveCustomSortSequence(array $instance_settings): array
     {
         $allowed_sort_options = $this->getAllowedSortOptions();
 
-        $custom_sort_options = collect(Arr::get($instance_settings, 'shared.custom_sort', []))
+        $custom_sort_options = collect((array) Arr::get($instance_settings, 'shared.custom_sort', []))
             ->filter(function (mixed $option, mixed $key) use ($allowed_sort_options): bool {
                 if (! is_string($option) || ! is_string($key)) {
                     return false;
@@ -659,7 +665,7 @@ readonly class ProductsCarouselStorefrontService
      */
     private function getAllowedSortModes(): array
     {
-        return collect($this->products_carousel_config->get('settings.allowed_sort_modes', []))
+        return collect((array) $this->products_carousel_config->get('settings.allowed_sort_modes', []))
             ->filter(fn (mixed $mode): bool => is_string($mode) && filled($mode))
             ->values()
             ->all();
@@ -676,7 +682,7 @@ readonly class ProductsCarouselStorefrontService
             return [];
         }
 
-        return collect($sort_options)
+        return collect((array) $sort_options)
             ->filter(fn (mixed $sort_option): bool => filled($sort_option) && is_string($sort_option))
             ->values()
             ->all();
@@ -729,6 +735,7 @@ readonly class ProductsCarouselStorefrontService
 
     /**
      * @param  array<int>  $selected_variant_ids
+     * @return array<int, array<string, mixed>>
      */
     private function mapProductCards(
         Product $product,
@@ -839,7 +846,7 @@ readonly class ProductsCarouselStorefrontService
         }
 
         $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-        $page_types = collect(Arr::get($instance_settings, 'shared.page_types', []));
+        $page_types = collect((array) Arr::get($instance_settings, 'shared.page_types', []));
 
         if ($page_types->isEmpty()) {
             return true;

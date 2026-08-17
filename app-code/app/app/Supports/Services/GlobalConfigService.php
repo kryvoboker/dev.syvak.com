@@ -11,14 +11,18 @@ use Illuminate\Support\Str;
 
 final class GlobalConfigService
 {
+    /** @return Collection<string, string|null> */
     public function getActiveGlobalConfigs(): Collection
     {
-        return GlobalConfig::query()
+        $configs = GlobalConfig::query()
             ->where('is_active', true)
             ->orderBy('key')
             ->pluck('value', 'key');
+
+        return $configs;
     }
 
+    /** @return Collection<string, mixed> */
     public function getGlobalConfigs(): Collection
     {
         return $this->getActiveGlobalConfigs();
@@ -35,24 +39,31 @@ final class GlobalConfigService
         return $this->getActiveGlobalConfigs()->get($key, $default);
     }
 
+    /** @return Collection<int, mixed> */
     public function getGlobalConfigsForForm(): Collection
     {
-        return GlobalConfig::query()
+        /** @var Collection<int, array{key: string, value: string|null, is_active: bool, selected: bool}> $configs */
+        $configs = GlobalConfig::query()
             ->orderBy('key')
             ->get()
             ->map(function (GlobalConfig $global_config): array {
+                $selected = filter_var($global_config->getAttribute('selected'), FILTER_VALIDATE_BOOLEAN) === true;
+
                 return [
                     'key' => (string) $global_config->key,
                     'value' => $global_config->value,
                     'is_active' => (bool) $global_config->is_active,
-                    'selected' => false,
+                    'selected' => $selected,
                 ];
             })
             ->values();
+
+        return $configs;
     }
 
     /**
-     * @param  array<string, mixed>|string  $key
+     * @param array<string, mixed>|string $key
+     * @return GlobalConfig|Collection<string, GlobalConfig>
      */
     public function upsertGlobalConfig(array|string $key, mixed $value = null, bool $is_active = true): GlobalConfig|Collection
     {
@@ -337,11 +348,7 @@ final class GlobalConfigService
     {
         /** @var array<int, array{key: string, value: ?string, is_active: bool, selected: bool}> $normalized_configs */
         $normalized_configs = collect($global_configs)
-            ->map(function (mixed $global_config): ?array {
-                if (! is_array($global_config)) {
-                    return null;
-                }
-
+            ->map(function (array $global_config): ?array {
                 $key = Str::trim((string) ($global_config['key'] ?? ''));
 
                 if ($key === '') {
@@ -377,7 +384,7 @@ final class GlobalConfigService
     }
 
     /**
-     * @param  array<string, mixed>|string  $key
+     * @param  array<int|string, mixed>|string  $key
      * @return array<int, string>
      */
     private function normalizeGlobalConfigKeys(array|string $key): array

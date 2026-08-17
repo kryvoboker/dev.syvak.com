@@ -321,6 +321,7 @@ class AppSettingForm
     /**
      * Create language tabs for specific section
      */
+    /** @param \Illuminate\Database\Eloquent\Collection<int, \App\Models\ApplicationSettings\Language> $languages */
     protected static function createLanguageTabs(Collection $languages, string $section): Tabs
     {
         $tabs = [];
@@ -340,6 +341,7 @@ class AppSettingForm
     /**
      * Get schema for specific section and language
      */
+    /** @return array<int, \Filament\Schemas\Components\Component> */
     protected static function getSchemaForSection(string $section, string $lang_code): array
     {
         return match ($section) {

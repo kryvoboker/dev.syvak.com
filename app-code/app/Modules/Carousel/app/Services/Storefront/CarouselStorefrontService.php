@@ -56,11 +56,11 @@ class CarouselStorefrontService
             ->map(function (ModuleInstance $instance): array {
                 $instance_settings = is_array($instance->settings) ? $instance->settings : [];
                 $shared_settings = Arr::get($instance_settings, 'shared', []);
-                $page_types = collect(Arr::get($shared_settings, 'page_types', []))
+                $page_types = collect((array) Arr::get($shared_settings, 'page_types', []))
                     ->filter(fn (mixed $item): bool => is_string($item) && filled($item))
                     ->values()
                     ->all();
-                $slides = collect(Arr::get($instance_settings, 'slides', []))
+                $slides = collect((array) Arr::get($instance_settings, 'slides', []))
                     ->filter(fn (mixed $slide): bool => is_array($slide) && Arr::get($slide, 'is_active', true))
                     ->sortBy(fn (array $slide): int => (int) Arr::get($slide, 'sort_order', 0))
                     ->values()
@@ -253,7 +253,7 @@ class CarouselStorefrontService
         }
 
         $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-        $page_types = collect(Arr::get($instance_settings, 'shared.page_types', []));
+        $page_types = collect((array) Arr::get($instance_settings, 'shared.page_types', []));
 
         if ($page_types->isEmpty()) {
             return true;

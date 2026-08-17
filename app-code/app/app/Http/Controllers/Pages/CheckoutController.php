@@ -178,7 +178,7 @@ class CheckoutController extends Controller
             $pickup_checkout_data = $this->pickup_checkout_data_service->getCheckoutData($locale);
             $validated['city'] = [];
             $validated['delivery_point'] = [];
-            $validated['delivery_address'] = (string)($pickup_checkout_data['store_address'] ?? '');
+            $validated['delivery_address'] = (string) $pickup_checkout_data['store_address'];
         }
 
         $state = $this->checkout_selection_state_service->replaceState($validated);

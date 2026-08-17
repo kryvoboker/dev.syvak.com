@@ -963,6 +963,7 @@ class OrderForm
 
     /**
      * @param array<int, mixed> $products
+     * @param array<string, mixed> $shipping_cost
      * @param array<int, mixed> $totals
      */
     private static function recalculateTotals(

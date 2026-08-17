@@ -23,6 +23,7 @@ class Slug extends Model
         'slug',
     ];
 
+    /** @return MorphTo<Model, $this> */
     public function sluggable(): MorphTo
     {
         return $this->morphTo();
