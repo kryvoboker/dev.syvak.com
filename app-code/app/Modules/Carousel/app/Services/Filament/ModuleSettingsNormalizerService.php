@@ -32,7 +32,7 @@ class ModuleSettingsNormalizerService
     public function normalize(array $settings): array
     {
         $active_languages = (new Language())->getActiveLanguages();
-        $allowed_page_types = collect(config('page-settings.page_type', []))->values()->all();
+        $allowed_page_types = collect((array) config('page-settings.page_type', []))->values()->all();
         $shared_settings = Arr::get($settings, 'shared', []);
         $slides = Arr::get($settings, 'slides', []);
 
@@ -65,7 +65,7 @@ class ModuleSettingsNormalizerService
             ),
         ];
 
-        $normalized_slides = collect($slides)
+        $normalized_slides = collect((array) $slides)
             ->values()
             ->map(fn (mixed $slide, int $index): array => $this->normalizeSlide($slide, $index, $active_languages))
             ->sortBy('sort_order')

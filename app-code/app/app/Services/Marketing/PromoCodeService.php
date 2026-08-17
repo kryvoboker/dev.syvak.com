@@ -263,7 +263,11 @@ final class PromoCodeService
         return compact('eligible_subtotal', 'non_discounted_subtotal', 'rrc_subtotal', 'has_discounted_products');
     }
 
-    /** @return array<int, array<int, int>> */
+    /**
+     * @param array<int, array<string, mixed>> $cart_items
+     * @param array<int, int> $category_ids
+     * @return array<int, array<int, int>>
+     */
     private function resolveProductCategories(array $cart_items, array $category_ids): array
     {
         if ($category_ids === []) {
@@ -420,7 +424,10 @@ final class PromoCodeService
         return ['is_valid' => false, 'error_type' => $error_type, 'message' => $message];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $totals_data
+     * @return array<string, mixed>
+     */
     private function reject(array $totals_data, string $error_type, string $message = ''): array
     {
         $totals_data['promo_code'] = [

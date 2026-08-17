@@ -27,8 +27,10 @@ class EditInfoPage extends EditRecord
 
     protected static string $resource = InfoPageResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $descriptions = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
     public int|string|Model|null $record = null;

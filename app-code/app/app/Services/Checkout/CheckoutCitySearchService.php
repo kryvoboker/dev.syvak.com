@@ -216,7 +216,7 @@ class CheckoutCitySearchService
     }
 
     /**
-     * @param array $cities_data
+     * @param array<int, array<string, mixed>> $cities_data
      *
      * @return void
      */
@@ -232,7 +232,7 @@ class CheckoutCitySearchService
     }
 
     /**
-     * @param array $results
+     * @param array<int, object> $results
      *
      * @return array<int, array{
      *     city_name: string,
@@ -262,9 +262,9 @@ class CheckoutCitySearchService
     }
 
     /**
-     * @param array $primary_cities
-     * @param array $secondary_cities
-     * @param array $cities_data
+     * @param array<int, array<string, mixed>> $primary_cities
+     * @param array<int, array<string, mixed>> $secondary_cities
+     * @param array<int, array<string, mixed>> $cities_data
      *
      * @return void
      */

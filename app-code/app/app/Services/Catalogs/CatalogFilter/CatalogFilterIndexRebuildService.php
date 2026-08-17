@@ -16,11 +16,11 @@ use App\Models\Catalogs\CatalogFilter\CatalogFilterProductIndex;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValue;
 use App\Models\Catalogs\Products\Product;
-use App\Models\Catalogs\Products\ProductVariantAttributeValue;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Throwable;
@@ -157,7 +157,7 @@ readonly class CatalogFilterIndexRebuildService
         $settings = (array) ($filter_set->settings ?? []);
         $default_timeout_seconds = (int) config('catalog-filter.defaults.rebuild_lock_timeout_seconds', 600);
 
-        return max(1, (int) ($settings['rebuild_lock_timeout_seconds'] ?? $default_timeout_seconds));
+        return max(1, (int) Arr::get($settings, 'rebuild_lock_timeout_seconds', $default_timeout_seconds));
     }
 
     /**
@@ -245,10 +245,6 @@ readonly class CatalogFilterIndexRebuildService
                         }
 
                         foreach (collect($variant->attributeValues) as $attribute_value) {
-                            if (! $attribute_value instanceof ProductVariantAttributeValue) {
-                                continue;
-                            }
-
                             $attribute_id = (int) $attribute_value->attribute_id;
 
                             if ($attribute_id <= 0 || ! in_array($attribute_id, $attribute_ids, true)) {
@@ -441,24 +437,14 @@ readonly class CatalogFilterIndexRebuildService
     {
         $price_source_mode = $filter_set->price_source_mode;
 
-        if ($price_source_mode instanceof CatalogFilterPriceSourceModeEnum) {
-            return $price_source_mode;
-        }
-
-        return CatalogFilterPriceSourceModeEnum::tryFrom((string) $price_source_mode)
-            ?? CatalogFilterPriceSourceModeEnum::Both;
+        return $price_source_mode;
     }
 
     private function resolveDiscountOnlyPolicy(CatalogFilterSet $filter_set): CatalogFilterDiscountOnlyPolicyEnum
     {
         $discount_only_policy = $filter_set->discount_only_policy;
 
-        if ($discount_only_policy instanceof CatalogFilterDiscountOnlyPolicyEnum) {
-            return $discount_only_policy;
-        }
-
-        return CatalogFilterDiscountOnlyPolicyEnum::tryFrom((string) $discount_only_policy)
-            ?? CatalogFilterDiscountOnlyPolicyEnum::ExcludeWithoutDiscount;
+        return $discount_only_policy;
     }
 
     /**

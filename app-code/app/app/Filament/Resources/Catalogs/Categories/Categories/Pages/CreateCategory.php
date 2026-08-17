@@ -20,8 +20,10 @@ class CreateCategory extends CreateRecord
 
     protected static string $resource = CategoryResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $descriptions = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
     protected ?string $preview_image = null;

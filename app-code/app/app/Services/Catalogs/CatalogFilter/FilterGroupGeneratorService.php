@@ -103,7 +103,7 @@ class FilterGroupGeneratorService
 
             $was_existing_group = $group->exists;
 
-            $group->source_type = (string) $payload['source_type'];
+            $group->source_type = CatalogFilterGroupSourceTypeEnum::from((string) $payload['source_type']);
             $group->source_id = null;
 
             if (! $was_existing_group) {
@@ -115,10 +115,6 @@ class FilterGroupGeneratorService
 
             if (blank((string) $group->get_key)) {
                 $group->get_key = (string) $payload['get_key'];
-            }
-
-            if (! is_array($group->config)) {
-                $group->setAttribute('config', []);
             }
 
             $group->save();
@@ -145,7 +141,7 @@ class FilterGroupGeneratorService
         int $updated_count,
         array $canonical_group_codes,
     ): array {
-        /** @var Collection<Attribute> $active_attributes */
+        /** @var Collection<int, Attribute> $active_attributes */
         $active_attributes = Attribute::query()
             ->where('is_active', true)
             ->whereHas('productToAttribute.variant.product', function ($query): void {
@@ -169,7 +165,7 @@ class FilterGroupGeneratorService
 
             $was_existing_group = $group->exists;
 
-            $group->source_type = CatalogFilterGroupSourceTypeEnum::Attribute->value;
+            $group->source_type = CatalogFilterGroupSourceTypeEnum::Attribute;
             $group->source_id = (int) $attribute->id;
 
             if (! $was_existing_group) {
@@ -181,10 +177,6 @@ class FilterGroupGeneratorService
 
             if (blank((string) $group->get_key)) {
                 $group->get_key = 'filters[' . (int) $attribute->id . ']';
-            }
-
-            if (! is_array($group->config)) {
-                $group->setAttribute('config', []);
             }
 
             $group->save();
@@ -230,7 +222,7 @@ class FilterGroupGeneratorService
                     'language_id' => (int) $language->id,
                 ],
                 [
-                    'label' => (string) ($translate ?? ucfirst($group->code)),
+                    'label' => (string) $translate,
                 ],
             );
         }

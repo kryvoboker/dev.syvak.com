@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 final class ProductVariantContentPersistenceService
 {
     /**
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     public function prepareForSave(array $data): array
@@ -123,7 +124,7 @@ final class ProductVariantContentPersistenceService
                 }
 
                 $section_data = Arr::get($translation, $section, []);
-                $items = collect(is_array($section_data) ? ($section_data['items'] ?? []) : [])
+                $items = collect((array) (is_array($section_data) ? ($section_data['items'] ?? []) : []))
                     ->filter(fn (mixed $item): bool => is_array($item) && filled($item['value'] ?? null))
                     ->map(fn (array $item): array => ['value' => Str::trim((string) $item['value'])])
                     ->values()

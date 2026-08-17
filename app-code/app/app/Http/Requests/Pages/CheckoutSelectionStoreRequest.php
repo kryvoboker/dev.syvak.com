@@ -143,7 +143,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
             default => app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData(),
         };
 
-        return ($payment_data['is_available'] ?? false) === true
-            && ($payment_data['payment_method'] ?? '') === $payment_method;
+        return $payment_data['is_available'] === true
+            && $payment_data['payment_method'] === $payment_method;
     }
 }

@@ -76,6 +76,7 @@ class Category extends Model
      * $product = Product::with('categories')->find(1);
      * ```
      */
+    /** @return BelongsToMany<Product, $this> */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -191,6 +192,9 @@ class Category extends Model
         return $categories;
     }
 
+    /** @param array<int, int> $path_ids
+     * @return Collection<int, self>
+     */
     public function getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds(int $language_id, array $path_ids): Collection
     {
         return self::query()

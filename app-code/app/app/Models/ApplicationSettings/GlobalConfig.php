@@ -26,6 +26,7 @@ class GlobalConfig extends Model
         ];
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function key(): Attribute
     {
         return Attribute::make(
@@ -33,6 +34,7 @@ class GlobalConfig extends Model
         );
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function value(): Attribute
     {
         return Attribute::make(

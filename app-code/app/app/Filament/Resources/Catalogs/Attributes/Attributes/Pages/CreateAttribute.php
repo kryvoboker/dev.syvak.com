@@ -14,6 +14,7 @@ class CreateAttribute extends CreateRecord
 {
     protected static string $resource = AttributeResource::class;
 
+    /** @var array<int, array<string, mixed>> */
     protected array $descriptions = [];
 
     public ?Model $record = null;

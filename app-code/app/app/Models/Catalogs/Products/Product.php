@@ -94,6 +94,7 @@ class Product extends Model
         return $this->hasOne(ProductNameHash::class)->latestOfMany('updated_at');
     }
 
+    /** @return HasOne<ProductDescriptionHash, $this> */
     public function lagestProductDescriptionHash(): HasOne
     {
         return $this->hasOne(ProductDescriptionHash::class)->latestOfMany('updated_at');
@@ -217,6 +218,7 @@ class Product extends Model
             ->where('is_active', true);
     }
 
+    /** @return BelongsToMany<Category, $this> */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -246,6 +248,7 @@ class Product extends Model
         return $variant->getLastActualAndLastModifiedDiscountForUserGroup((int) $app_settings->user_group_id);
     }
 
+    /** @return LengthAwarePaginator<int, self> */
     public function search(string $keyword, int $per_page): LengthAwarePaginator
     {
         $app_settings = get_app_settings();

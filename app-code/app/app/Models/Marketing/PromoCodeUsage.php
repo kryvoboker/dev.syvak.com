@@ -26,21 +26,25 @@ class PromoCodeUsage extends Model
         return ['used_at' => 'datetime'];
     }
 
+    /** @return BelongsTo<PromoCode, $this> */
     public function promoCode(): BelongsTo
     {
         return $this->belongsTo(PromoCode::class);
     }
 
+    /** @return BelongsTo<Orders, $this> */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Orders::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<UserGroup, $this> */
     public function userGroup(): BelongsTo
     {
         return $this->belongsTo(UserGroup::class);

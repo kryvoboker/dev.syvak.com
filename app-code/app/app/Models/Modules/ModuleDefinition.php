@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
+/**
+ * @property array<string, mixed>|null $settings_schema
+ * @property array<string, mixed>|null $meta
+ */
 class ModuleDefinition extends Model
 {
     protected static function booted(): void

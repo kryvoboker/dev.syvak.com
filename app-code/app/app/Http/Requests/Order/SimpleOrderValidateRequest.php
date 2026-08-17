@@ -126,7 +126,7 @@ class SimpleOrderValidateRequest extends FormRequest
                 default => ['is_available' => true],
             };
 
-            if (($payment_data['is_available'] ?? false) !== true) {
+            if ($payment_data['is_available'] !== true) {
                 $message = match ($payment_method) {
                     app(WayForPayConfig::class)->getPaymentMethod() => __('wayforpay::storefront/checkout.validation.payment_method_unavailable'),
                     BankTransferConfig::PAYMENT_METHOD => __('banktransfer::storefront/checkout.validation.payment_method_unavailable'),

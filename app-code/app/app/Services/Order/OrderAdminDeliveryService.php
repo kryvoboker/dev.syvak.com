@@ -188,6 +188,7 @@ final class OrderAdminDeliveryService
     }
 
     /** @param class-string<NovaPoshtaPostOffice|NovaPoshtaPoshtomat> $model */
+    /** @return array<int, array<string, mixed>> */
     private function searchNovaPoshtaPoints(string $model, string $city_id, string $search): array
     {
         return $model::query()->where('city_ref', $city_id)

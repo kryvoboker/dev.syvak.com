@@ -214,7 +214,7 @@ class ProductForm
     /**
      * Create categories tab
      *
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      */
     protected static function createCategoriesTabs(Collection $active_languages): Tab
     {
@@ -311,10 +311,6 @@ class ProductForm
         foreach ($path_ids as $path_id) {
             /** @var Category $category */
             $category = $categories->get($path_id);
-
-            if ($category === null) {
-                continue;
-            }
 
             $description = $category->categoryDescription
                 ->firstWhere('language_id', $language_id);
@@ -419,10 +415,9 @@ class ProductForm
         try {
             $service_settings = app(PageSettingsBootstrapService::class)->getProductSettings();
 
-            if (is_array($service_settings)) {
-                $settings_cache = array_replace_recursive(
-                    $settings_cache,
-                    [
+            $settings_cache = array_replace_recursive(
+                $settings_cache,
+                [
                         'upload' => [
                             'max_size_kb' => (int) data_get($service_settings, 'admin.upload.max_size_kb', (int) config('app.images.product.upload.max_size_kb', 5120)),
                             'directory' => (string) data_get($service_settings, 'admin.upload.directory', (string) config('app.images.product.image_path', 'images/products/' . date('Y/m'))),
@@ -434,8 +429,7 @@ class ProductForm
                             ],
                         ],
                     ],
-                );
-            }
+            );
         } catch (Throwable) {
             // Keep config fallback when page settings are not available.
         }
@@ -521,7 +515,7 @@ class ProductForm
     /**
      * Create attributes tab
      *
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      */
     protected static function createAttributesTabs(Collection $active_languages): Tab
     {

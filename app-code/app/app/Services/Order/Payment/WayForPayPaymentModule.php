@@ -12,6 +12,10 @@ class WayForPayPaymentModule
      * - handle callback/webhook result
      * - map provider status to local order status
      */
+    /**
+     * @param array<string, mixed> $order_payload
+     * @return array<string, mixed>
+     */
     public function process(array $order_payload): array
     {
         return [

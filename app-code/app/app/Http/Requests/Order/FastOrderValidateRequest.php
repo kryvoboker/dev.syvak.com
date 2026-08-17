@@ -79,7 +79,7 @@ class FastOrderValidateRequest extends FormRequest
                 ? app(BankTransferModuleDataService::class)->getCheckoutData(normalize_locale(null))
                 : app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData();
 
-            if (($payment_data['is_available'] ?? false) !== true) {
+            if ($payment_data['is_available'] !== true) {
                 $validator->errors()->add(
                     OrderDataKeyEnum::PaymentMethod->value,
                     $payment_method === BankTransferConfig::PAYMENT_METHOD

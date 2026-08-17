@@ -9,6 +9,9 @@ use App\Models\Trait\SlugTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
+/**
+ * @property array<string, mixed>|null $settings
+ */
 class PageSetting extends Model
 {
     use HasSlugsTrait;

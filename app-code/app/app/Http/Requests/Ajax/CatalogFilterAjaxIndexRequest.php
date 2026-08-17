@@ -88,7 +88,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
     {
         $source_type = (string) $group->getRawOriginal('source_type');
         $group_get_key = (string) $group->get_key;
-        $group_config = is_array($group->config) ? $group->config : [];
+        $group_config = $group->config ?? [];
         $group_get_value = trim((string) Arr::get($group_config, 'get.value', ''));
 
         if ($source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {

@@ -103,7 +103,7 @@ class ProductController extends Controller
         ]);
         $page_type = try_detect_page_type();
         $app_settings = get_app_settings();
-        $telegram_row = collect($app_settings?->socials[$locale] ?? [])
+        $telegram_row = collect((array) ($app_settings?->socials[$locale] ?? []))
             ->first(fn (mixed $social_item): bool => (string)data_get($social_item, 'social_type') === 'telegram');
         $telegram_link = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
@@ -606,9 +606,9 @@ class ProductController extends Controller
      */
     private function resolveProductPriceData(Product $product, ?ProductVariant $variant): array
     {
-        $rrc_price = $variant instanceof ProductVariant && is_numeric($variant->price)
+        $rrc_price = $variant instanceof ProductVariant
             ? (float)$variant->price
-            : (is_numeric($product->price) ? (float)$product->price : 0.0);
+            : (float)$product->price;
         $discount = $variant?->getLastActualAndLastModifiedDiscountForUserGroup(
             get_app_settings()?->user_group_id,
         );

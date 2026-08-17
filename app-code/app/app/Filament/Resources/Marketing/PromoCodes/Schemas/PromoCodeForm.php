@@ -394,6 +394,7 @@ class PromoCodeForm
         ];
     }
 
+    /** @return array<string, string> */
     private static function searchUserOptions(string $search, Get $get, string $field): array
     {
         if (Str::length($search) < 3) {
@@ -407,7 +408,7 @@ class PromoCodeForm
         }
 
         $repeater_name = $field === 'user_id' ? 'selected_users' : 'selected_user_groups';
-        $selected_ids = collect($get('../../' . $repeater_name))
+        $selected_ids = collect((array) $get('../../' . $repeater_name))
             ->pluck($field)
             ->filter()
             ->map(fn (mixed $id): int => (int) $id)
@@ -418,6 +419,7 @@ class PromoCodeForm
             : app(PromoCodeAdminOptionsService::class)->userGroupSearchOptions($search, $selected_ids);
     }
 
+    /** @return array<string, string> */
     private static function searchCatalogOptions(string $search, Get $get, string $field): array
     {
         if (Str::length($search) < 3) {
@@ -430,7 +432,7 @@ class PromoCodeForm
             return [];
         }
 
-        $selected_ids = collect($get('../../' . ($field === 'product_id' ? 'product_items' : 'category_items')))
+        $selected_ids = collect((array) $get('../../' . ($field === 'product_id' ? 'product_items' : 'category_items')))
             ->pluck($field)
             ->filter()
             ->map(fn (mixed $id): int => (int) $id)

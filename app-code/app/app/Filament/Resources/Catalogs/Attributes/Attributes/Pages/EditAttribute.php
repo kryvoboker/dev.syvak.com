@@ -19,6 +19,7 @@ class EditAttribute extends EditRecord
 {
     protected static string $resource = AttributeResource::class;
 
+    /** @var array<int, array<string, mixed>> */
     protected array $descriptions = [];
 
     #[Locked]

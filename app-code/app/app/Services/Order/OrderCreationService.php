@@ -282,7 +282,7 @@ readonly class OrderCreationService
         if ($payment_method === $this->wayforpay_config->getPaymentMethod()) {
             $payment_result = $this->wayforpay_payment_module->prepare($order_payload);
 
-            if (($payment_result['success'] ?? false) !== true) {
+            if ($payment_result['success'] !== true) {
                 $this->markPaymentFailed($payment, (array) Arr::get($payment_result, 'errors', []));
                 $this->failure_order_recovery_service?->remember($order);
 

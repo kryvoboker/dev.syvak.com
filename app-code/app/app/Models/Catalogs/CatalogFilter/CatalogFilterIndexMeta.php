@@ -9,6 +9,7 @@ use App\Enums\CatalogFilter\CatalogFilterIndexStatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/** @property CatalogFilterIndexStatusEnum $last_status */
 class CatalogFilterIndexMeta extends Model
 {
     protected $table = 'catalog_filter_index_meta';

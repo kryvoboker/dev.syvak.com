@@ -230,10 +230,6 @@ class CheckoutBranchSearchService
         ShippingScheduleFormatter::setWeekdayMap($weekday_map);
 
         foreach ($rows as $post_office) {
-            if (!is_array($post_office)) {
-                continue;
-            }
-
             if (isset($post_office['schedule'])) {
                 $post_office['schedule'] = ShippingScheduleFormatter::formatSchedule(
                     $post_office['schedule'],

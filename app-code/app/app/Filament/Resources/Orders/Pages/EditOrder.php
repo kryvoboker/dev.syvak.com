@@ -204,6 +204,7 @@ class EditOrder extends EditRecord
      * @throws Halt
      * @return Model
      */
+    /** @param array<string, mixed> $data */
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         if (!$record instanceof Orders) {

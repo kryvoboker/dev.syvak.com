@@ -26,14 +26,19 @@ class CreateProduct extends CreateRecord
 
     protected static string $resource = ProductResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $descriptions = [];
 
+    /** @var array<int, int> */
     protected array $category_ids = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
+    /** @var array<int, array<string, mixed>> */
     protected array $images = [];
 
+    /** @var array<string, mixed> */
     protected array $variant_relationship_data = [];
 
     public ?Model $record = null;
@@ -114,7 +119,6 @@ class CreateProduct extends CreateRecord
         $default_variant = $this->resolveDefaultVariant();
 
         $prepared_images = collect($this->images)
-            ->filter(fn (mixed $image): bool => is_array($image))
             ->map(function (array $image_data): array {
                 return [
                     'image' => (string) ($image_data['image'] ?? ''),

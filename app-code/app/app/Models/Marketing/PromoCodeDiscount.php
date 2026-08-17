@@ -21,11 +21,13 @@ class PromoCodeDiscount extends Model
         return ['value' => 'decimal:4'];
     }
 
+    /** @return BelongsTo<PromoCode, $this> */
     public function promoCode(): BelongsTo
     {
         return $this->belongsTo(PromoCode::class);
     }
 
+    /** @return BelongsTo<Currency, $this> */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);

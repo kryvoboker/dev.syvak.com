@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
+/** @property string|null $password */
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
@@ -91,6 +92,7 @@ class User extends Authenticatable implements FilamentUser
         });
     }
 
+    /** @return Attribute<mixed, mixed> */
     public function telephone(): Attribute
     {
         return Attribute::make(

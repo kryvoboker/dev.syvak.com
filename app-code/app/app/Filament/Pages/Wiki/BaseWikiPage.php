@@ -74,6 +74,7 @@ abstract class BaseWikiPage extends Page
         return (string) __(static::getWikiTranslationPath() . '.intro_description');
     }
 
+    /** @return array<string, string> */
     public function getTableHeadings(): array
     {
         return [

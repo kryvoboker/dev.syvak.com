@@ -174,6 +174,7 @@ readonly class ProductsCarouselProductSearchService
         return [$search_term, $price];
     }
 
+    /** @return Builder<ProductVariant> */
     private function buildBaseVariantQuery(string $search_term, ?float $search_price): Builder
     {
         $language_id = $this->resolveLanguageId();
@@ -235,6 +236,7 @@ readonly class ProductsCarouselProductSearchService
             ->orderBy('product_variants.id');
     }
 
+    /** @param Builder<\Illuminate\Database\Eloquent\Model>|Relation<\Illuminate\Database\Eloquent\Model, \Illuminate\Database\Eloquent\Model, mixed> $query */
     private function applyCurrentDiscountScope(Builder|Relation $query): void
     {
         $current_date_time = now(config('app.timezone'));

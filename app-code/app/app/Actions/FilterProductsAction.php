@@ -129,11 +129,10 @@ readonly class FilterProductsAction
     }
 
     /**
-     * @param  array<string, mixed>  $validated_data
-     *
+     * @param array<string, mixed> $validated_data
      * @throws Throwable
      * @return array{
-     *     query: Builder,
+     *     query: Builder<Product>,
      *     category_id: int,
      *     language_id: int,
      *     filter_set: ?CatalogFilterSet,
@@ -280,6 +279,7 @@ readonly class FilterProductsAction
             ->values();
     }
 
+    /** @return Builder<Product> */
     private function buildBaseProductsQuery(
         ?CatalogFilterSet $filter_set,
         int $category_id,
@@ -347,6 +347,9 @@ readonly class FilterProductsAction
 
     /**
      * @param  array<string, mixed>  $validated_data
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param Builder<Product> $query
+     * @return Builder<Product>
      */
     private function applyAttributeFilters(
         Builder $query,
@@ -435,6 +438,9 @@ readonly class FilterProductsAction
 
     /**
      * @param  array<string, mixed>  $validated_data
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param Builder<Product> $query
+     * @return Builder<Product>
      */
     private function applyPriceRangeFilter(
         Builder $query,
@@ -469,6 +475,7 @@ readonly class FilterProductsAction
         return $query;
     }
 
+    /** @param Builder<Product> $query */
     private function applySorting(Builder $query, string $resolved_sort_code, string $effective_price_expression): void
     {
         /**
@@ -526,12 +533,7 @@ readonly class FilterProductsAction
 
         $price_source_mode = $filter_set->price_source_mode;
 
-        if ($price_source_mode instanceof CatalogFilterPriceSourceModeEnum) {
-            return $price_source_mode;
-        }
-
-        return CatalogFilterPriceSourceModeEnum::tryFrom((string) $price_source_mode)
-            ?? CatalogFilterPriceSourceModeEnum::Both;
+        return $price_source_mode;
     }
 
     private function resolveDiscountOnlyPolicy(?CatalogFilterSet $filter_set): CatalogFilterDiscountOnlyPolicyEnum
@@ -542,15 +544,11 @@ readonly class FilterProductsAction
 
         $discount_only_policy = $filter_set->discount_only_policy;
 
-        if ($discount_only_policy instanceof CatalogFilterDiscountOnlyPolicyEnum) {
-            return $discount_only_policy;
-        }
-
-        return CatalogFilterDiscountOnlyPolicyEnum::tryFrom((string) $discount_only_policy)
-            ?? CatalogFilterDiscountOnlyPolicyEnum::ExcludeWithoutDiscount;
+        return $discount_only_policy;
     }
 
     /**
+     * @param LengthAwarePaginator<int, Product> $products
      * @throws Throwable
      *
      * @return array<int, array<string, mixed>>
@@ -622,11 +620,11 @@ readonly class FilterProductsAction
                     'image_data' => [
                         'urls' => multiple_convert_img_and_get_url(
                             $variant_image,
-                            (int) ($catalog_image_sizes['width'] ?? 420),
-                            (int) ($catalog_image_sizes['height'] ?? 420),
+                            (int) $catalog_image_sizes['width'],
+                            (int) $catalog_image_sizes['height'],
                         ),
-                        'width' => (int) ($catalog_image_sizes['width'] ?? 420),
-                        'height' => (int) ($catalog_image_sizes['height'] ?? 420),
+                        'width' => (int) $catalog_image_sizes['width'],
+                        'height' => (int) $catalog_image_sizes['height'],
                     ],
                     'price' => [
                         'value' => $effective_price,
@@ -649,8 +647,8 @@ readonly class FilterProductsAction
     }
 
     /**
-     * @param  Collection<int, CatalogFilterGroup>  $filter_groups
-     * @param  array<string, mixed>  $validated_data
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param array<string, mixed> $validated_data
      * @return array<string, array<string, mixed>>
      */
     private function buildFiltersData(
@@ -690,14 +688,12 @@ readonly class FilterProductsAction
                 'source_id' => (int) $group->source_id,
                 'get_key' => (string) $group->get_key,
                 'get_value' => (string) Arr::get((array) ($group->config ?? []), 'get.value', ''),
-                'get_extra' => is_array(Arr::get((array) ($group->config ?? []), 'get.extra'))
-                    ? (array) Arr::get((array) ($group->config ?? []), 'get.extra')
-                    : [],
+                'get_extra' => (array) Arr::get((array) ($group->config ?? []), 'get.extra', []),
                 'items' => [],
             ];
 
             if ($group_source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
-                $group_config = is_array($group->config) ? $group->config : [];
+                $group_config = (array) $group->config;
                 $selected_from = Arr::get($validated_data, 'price_from');
                 $selected_to = Arr::get($validated_data, 'price_to');
                 $price_from_key = trim((string) Arr::get($group_config, 'get.extra.from_key', 'price_from'));
@@ -778,6 +774,8 @@ readonly class FilterProductsAction
      * category + stock threshold + selected attribute options.
      * Price bounds from request are intentionally not applied here, because this
      * value is used as a price-filter upper bound candidate.
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param array<string, mixed> $validated_data
      */
     private function resolveDynamicPriceRangeMax(
         CatalogFilterSet $filter_set,
@@ -886,6 +884,7 @@ readonly class FilterProductsAction
             : $request->url();
     }
 
+    /** @param array<string, mixed> $query_parameters */
     private function extractQueryValueByGetKey(array $query_parameters, string $get_key): mixed
     {
         if (Str::contains($get_key, '[') && Str::endsWith($get_key, ']')) {

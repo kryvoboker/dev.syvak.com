@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/** @property InquiryResponseDeliveryStatusEnum $delivery_status */
 class InquiryResponse extends Model
 {
     /** @use HasFactory<\Database\Factories\Inquiries\InquiryResponseFactory> */

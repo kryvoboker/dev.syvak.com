@@ -32,7 +32,7 @@ class FilterValueGeneratorService
             $updated_count = 0;
             $removed_count = 0;
 
-            /** @var Collection<CatalogFilterGroup> $groups */
+            /** @var Collection<int, CatalogFilterGroup> $groups */
             $groups = CatalogFilterGroup::query()
                 ->where('catalog_filter_set_id', (int) $filter_set->id)
                 ->where('is_enabled', true)
@@ -197,6 +197,7 @@ class FilterValueGeneratorService
             ->delete();
     }
 
+    /** @param array<int, string> $labels_by_language */
     private function syncAttributeValueTranslations(
         CatalogFilterValue $value,
         string $fallback_label,
