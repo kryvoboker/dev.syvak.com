@@ -50,9 +50,9 @@ final readonly class ContactsPageService
             $localized = $this->resolveLocalizedContent($settings, $language_id);
 
             return [
-                'title' => $this->resolveString(Arr::get($localized, 'title'), __('catalog/contacts.fallbacks.title')),
+                'title' => $this->resolveString(Arr::get($localized, 'title'), __('storefront/contacts.fallbacks.title')),
                 'working_hours' => [
-                    'title' => $this->resolveString(Arr::get($localized, 'working_hours.title'), __('catalog/contacts.fallbacks.working_hours_title')),
+                    'title' => $this->resolveString(Arr::get($localized, 'working_hours.title'), __('storefront/contacts.fallbacks.working_hours_title')),
                     'description' => $this->resolveNullableString(Arr::get($localized, 'working_hours.description')),
                     'content' => $this->resolveString(Arr::get($localized, 'working_hours.content'), ''),
                 ],

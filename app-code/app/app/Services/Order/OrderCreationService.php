@@ -55,7 +55,7 @@ readonly class OrderCreationService
             return [
                 'success' => false,
                 'errors' => [
-                    'cart' => [__('catalog/default.cart.messages.cart_is_empty')],
+                    'cart' => [__('storefront/default.cart.messages.cart_is_empty')],
                 ],
             ];
         }
@@ -108,7 +108,7 @@ readonly class OrderCreationService
                 'order_number' => null,
                 'status' => 'failed',
                 'errors' => [
-                    'order' => [__('catalog/default.cart.messages.payment_failed')],
+                    'order' => [__('storefront/default.cart.messages.payment_failed')],
                 ],
             ];
         }
@@ -159,7 +159,7 @@ readonly class OrderCreationService
             'redirect_url' => localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
             'status' => 'failed',
             'errors' => [
-                'payment' => [__('catalog/default.cart.messages.payment_failed')],
+                'payment' => [__('storefront/default.cart.messages.payment_failed')],
             ],
         ];
     }
@@ -196,7 +196,7 @@ readonly class OrderCreationService
             return [
                 'success' => false,
                 'errors' => [
-                    'cart' => [__('catalog/default.cart.messages.cart_is_empty')],
+                    'cart' => [__('storefront/default.cart.messages.cart_is_empty')],
                 ],
             ];
         }
@@ -255,7 +255,7 @@ readonly class OrderCreationService
                 'order_number' => null,
                 'status' => 'failed',
                 'errors' => [
-                    'order' => [__('catalog/default.cart.messages.payment_failed')],
+                    'order' => [__('storefront/default.cart.messages.payment_failed')],
                 ],
             ];
         }
@@ -337,7 +337,7 @@ readonly class OrderCreationService
             'redirect_url' => localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
             'status' => 'failed',
             'errors' => [
-                'payment' => [__('catalog/default.cart.messages.payment_failed')],
+                'payment' => [__('storefront/default.cart.messages.payment_failed')],
             ],
         ];
     }

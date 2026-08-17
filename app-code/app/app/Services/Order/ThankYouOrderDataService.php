@@ -178,10 +178,10 @@ final readonly class ThankYouOrderDataService
         }
 
         $translation_key = match ($code) {
-            'nova_poshta' => 'catalog/pages/checkout.delivery_methods.nova_poshta',
-            'nova_poshta_poshtomat' => 'catalog/pages/checkout.delivery_methods.nova_poshta_poshtomat',
-            'nova_poshta_courier' => 'catalog/pages/checkout.delivery_methods.nova_poshta_courier',
-            'ukr_poshta' => 'catalog/pages/checkout.delivery_methods.ukr_poshta',
+            'nova_poshta' => 'storefront/pages/checkout.delivery_methods.nova_poshta',
+            'nova_poshta_poshtomat' => 'storefront/pages/checkout.delivery_methods.nova_poshta_poshtomat',
+            'nova_poshta_courier' => 'storefront/pages/checkout.delivery_methods.nova_poshta_courier',
+            'ukr_poshta' => 'storefront/pages/checkout.delivery_methods.ukr_poshta',
             default => null,
         };
 

@@ -515,6 +515,40 @@ class ProductsCarouselModuleServicesTest extends TestCase
         $this->assertSame(format_price(150, 'UAH', 1), $card['price']);
         $this->assertSame(format_price(200, 'UAH', 1), $card['rrc_price']);
         $this->assertTrue($card['is_discounted']);
+        $this->assertSame(402, $card['variant_id']);
+    }
+
+    public function test_storefront_products_carousel_card_contains_variant_id_for_cart_addition(): void
+    {
+        $html = view('productscarousel::storefront.products-carousel', [
+            'products_carousel_module_data' => [
+                'instance_id' => 1,
+                'module_name_for_user' => 'Products',
+                'short_description_for_user' => '',
+                'page_types' => [],
+                'products' => [
+                    [
+                        'variant_id' => 42,
+                        'name' => 'Test product',
+                        'price' => '100 UAH',
+                        'rrc_price' => '',
+                        'is_discounted' => false,
+                        'url' => '#',
+                        'image_data' => [
+                            'urls' => [
+                                'original_thumb' => '',
+                                'thumb_1x' => '',
+                            ],
+                            'width' => 420,
+                            'height' => 420,
+                        ],
+                    ],
+                ],
+            ],
+            'page_type' => 'home',
+        ])->render();
+
+        $this->assertStringContainsString('data-add-to-cart="42"', $html);
     }
 
     public function test_runtime_resolver_uses_current_locale_shared_translation_with_fallback(): void

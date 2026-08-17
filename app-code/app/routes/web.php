@@ -7,6 +7,7 @@ use App\Http\Controllers\Ajax\CatalogFilterAjaxController;
 use App\Http\Controllers\Ajax\LiveSearchProductsAjaxController;
 use App\Http\Controllers\Ajax\LoadMoreProductsByAjaxController;
 use App\Http\Controllers\Filament\Inquiries\DownloadInquiryAttachmentController;
+use App\Http\Controllers\Frontend\FrontendErrorController;
 use App\Http\Controllers\Order\OrderConfirmController;
 use App\Http\Controllers\Pages\CartController;
 use App\Http\Controllers\Pages\CategoryController;
@@ -17,11 +18,9 @@ use App\Http\Controllers\Pages\HomeController;
 use App\Http\Controllers\Pages\ProductController;
 use App\Http\Controllers\Pages\SearchProductsController;
 use App\Http\Controllers\Pages\ThankYouController;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use App\Http\Middleware\SetDefaultLocalePrefix;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
-use Modules\WayForPay\Http\Controllers\WayForPayCallbackController;
-use Modules\WayForPay\Http\Controllers\WayForPayReturnController;
 
 Route::redirect('/', '/' . app()->getLocale());
 
@@ -37,8 +36,15 @@ Route::get('/admin/inquiries/attachments/{attachment}/download', DownloadInquiry
     ->name('admin.inquiries.attachments.download')
     ->middleware('auth');
 
+Route::post('/frontend-errors', FrontendErrorController::class)
+    ->middleware('throttle:frontend-errors')
+    ->withoutMiddleware(SetDefaultLocalePrefix::class)
+    ->name('frontend.errors.store');
+
 $locale_key = config('localization.locale_parameter', 'locale');
 $allowed_locales = get_allowed_locales();
+
+require base_path('Modules/WayForPay/routes/web.php');
 
 Route::prefix('{' . $locale_key . '}')
     ->whereIn($locale_key, $allowed_locales)
@@ -78,13 +84,6 @@ Route::prefix('{' . $locale_key . '}')
         Route::post('/order-validate', [OrderConfirmController::class, 'validateFastOrder'])->name('order-confirm.validate');
         Route::post('/order-confirm/simple', [OrderConfirmController::class, 'storeSimpleOrder'])->name('order-confirm.simple.store');
         Route::post('/order-validate/simple', [OrderConfirmController::class, 'validateSimpleOrder'])->name('order-confirm.simple.validate');
-
-        Route::post('/wayforpay/callback', WayForPayCallbackController::class)
-            ->withoutMiddleware(PreventRequestForgery::class)
-            ->name('wayforpay.callback');
-        Route::match(['get', 'post'], '/wayforpay/return', WayForPayReturnController::class)
-            ->withoutMiddleware(PreventRequestForgery::class)
-            ->name('wayforpay.return');
 
         Route::get('/thank-you/{order_number}', [ThankYouController::class, 'index'])
             ->where('order_number', '[0-9A-HJKMNP-TV-Z]{26}')

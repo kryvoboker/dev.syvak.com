@@ -12,7 +12,7 @@ class CartModalViewTest extends TestCase
     {
         $cart_data = $this->makeCartData();
 
-        $html = view('catalog.partials.cart.modal-items', [
+        $html = view('storefront.partials.cart.modal-items', [
             'cart_data' => $cart_data,
             'cart_mode' => 'regular',
         ])->render();
@@ -27,7 +27,7 @@ class CartModalViewTest extends TestCase
     {
         $cart_data = $this->makeCartData();
 
-        $html = view('catalog.partials.cart.page-content', [
+        $html = view('storefront.partials.cart.page-content', [
             'cart_data' => $cart_data,
         ])->render();
 
@@ -47,7 +47,7 @@ class CartModalViewTest extends TestCase
         ] as $locale => $expected_text) {
             app()->setLocale($locale);
 
-            $html = view('catalog.partials.cart.modal-items', [
+            $html = view('storefront.partials.cart.modal-items', [
                 'cart_data' => [
                     'is_empty' => true,
                     'items_count' => 0,
@@ -68,11 +68,11 @@ class CartModalViewTest extends TestCase
         $cart_data = $this->makeCartData();
         $cart_data['hidden_items'] = [$cart_data['first_item']];
 
-        $regular_html = view('catalog.partials.cart.modal-items', [
+        $regular_html = view('storefront.partials.cart.modal-items', [
             'cart_data' => $cart_data,
             'cart_mode' => 'regular',
         ])->render();
-        $fast_order_html = view('catalog.partials.cart.modal-items', [
+        $fast_order_html = view('storefront.partials.cart.modal-items', [
             'cart_data' => $cart_data,
             'cart_mode' => 'fast_order',
         ])->render();
@@ -87,7 +87,7 @@ class CartModalViewTest extends TestCase
     {
         app()->setLocale('uk');
 
-        $html = view('catalog.components.cart.modal', [
+        $html = view('storefront.components.cart.modal', [
             'cart_data' => [
                 'is_empty' => true,
                 'items_count' => 0,
@@ -98,7 +98,7 @@ class CartModalViewTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('Поки що кошик порожній ;(', $html);
-        $this->assertStringContainsString(__('catalog/default.cart.buttons.continue_shopping'), $html);
+        $this->assertStringContainsString(__('storefront/default.cart.buttons.continue_shopping'), $html);
         $this->assertGreaterThanOrEqual(2, substr_count($html, 'data-overlay="#cart-modal"'));
     }
 

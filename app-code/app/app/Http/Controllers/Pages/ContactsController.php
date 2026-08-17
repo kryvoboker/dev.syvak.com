@@ -49,11 +49,11 @@ class ContactsController extends Controller
             ->findBySlug($slug, (int) $language->id);
 
         if ($failure_page_setting instanceof PageSetting) {
-            return view('catalog.pages.failure-order', [
+            return view('storefront.pages.failure-order', [
                 ...($failure_page_service ?? app(FailurePageService::class))
                     ->getViewData($failure_page_setting, (int) $language->id, $locale),
                 'breadcrumbs' => [
-                    breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
+                    breadcrumb(__('storefront/default.links.home'), localized_route('catalog.home')),
                 ],
             ]);
         }
@@ -219,12 +219,12 @@ class ContactsController extends Controller
             'contacts_data' => $contacts_data,
             'form_action' => localized_route($form_route_name, $form_route_params),
             'breadcrumbs' => [
-                breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
-                breadcrumb((string)data_get($contacts_data, 'title', __('catalog/contacts.fallbacks.title'))),
+                breadcrumb(__('storefront/default.links.home'), localized_route('catalog.home')),
+                breadcrumb((string)data_get($contacts_data, 'title', __('storefront/contacts.fallbacks.title'))),
             ],
         ];
 
-        return view('catalog.pages.contacts', $data);
+        return view('storefront.pages.contacts', $data);
     }
 
     /**
@@ -304,7 +304,7 @@ class ContactsController extends Controller
 
             return redirect()
                 ->route($redirect_route_name, $redirect_route_params)
-                ->withErrors(['contact_form' => __('catalog/contacts.errors.delivery_failed')])
+                ->withErrors(['contact_form' => __('storefront/contacts.errors.delivery_failed')])
                 ->withInput($request->except('file'));
         }
     }

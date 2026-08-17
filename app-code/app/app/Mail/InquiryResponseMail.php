@@ -30,7 +30,7 @@ class InquiryResponseMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.inquiries.response',
+            view: 'storefront.layouts.emails.inquiries.response',
             with: [
                 'body_html' => $this->response->body_html,
                 'admin_name' => $this->response->admin_name,

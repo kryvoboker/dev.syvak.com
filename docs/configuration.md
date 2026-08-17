@@ -29,6 +29,8 @@
   - `npm run ts:format`
   - `npm run ts:lint`
   - `npm run ts:typecheck`
+  - `npm run css:lint`
+  - `npm run css:lint-fix`
 
 ## PHP/Laravel Config
 

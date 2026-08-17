@@ -1,11 +1,11 @@
 @layer theme, base, utilities, components, app;
 
-@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import "../../../../vendor/filament/filament/resources/css/theme.css";
 
-@source '../../../../app/Filament/**/*';
-@source '../../../../Modules/**/app/Filament/**/*.php';
-@source '../../../../Modules/**/resources/views/filament/**/*.blade.php';
-@source '../../../../resources/views/filament/**/*';
+@source "../../../../app/Filament/**/*";
+@source "../../../../Modules/**/app/Filament/**/*.php";
+@source "../../../../Modules/**/resources/views/filament/**/*.blade.php";
+@source "../../../../resources/views/filament/**/*";
 
 @layer app {
     .fi-header > div:first-of-type {
@@ -16,7 +16,7 @@
         @apply sm:max-w-9/12;
 
         & .fi-ac {
-            @apply sm:justify-end
+            @apply sm:justify-end;
         }
     }
 
@@ -30,7 +30,7 @@
     }
 
     tr:has(.total-row) > td > div {
-        @apply border-2 border-primary-600 dark:border-primary-400 rounded
+        @apply border-2 border-primary-600 dark:border-primary-400 rounded;
     }
 
     /*input.fi-input {

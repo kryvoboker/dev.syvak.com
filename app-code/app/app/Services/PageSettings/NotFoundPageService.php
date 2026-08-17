@@ -139,7 +139,7 @@ final readonly class NotFoundPageService
 
         return filled($label)
             ? $label
-            : (string)__('catalog/pages/not-found.buttons.go_home');
+            : (string)__('storefront/pages/not-found.buttons.go_home');
     }
 
     /**

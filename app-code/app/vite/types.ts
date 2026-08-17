@@ -1,5 +1,4 @@
-export interface ModuleViteConfigShape
-{
+export interface ModuleViteConfigShape {
     moduleName?: string;
     refresh?: string[];
     alias?: Record<string, string>;
@@ -8,8 +7,7 @@ export interface ModuleViteConfigShape
     };
 }
 
-export interface LoadedModuleViteConfig
-{
+export interface LoadedModuleViteConfig {
     moduleName: string;
     moduleRootPath: string;
     config: ModuleViteConfigShape;

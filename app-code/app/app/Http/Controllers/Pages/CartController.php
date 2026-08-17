@@ -35,13 +35,13 @@ class CartController extends Controller
             ]),
             'page_type' => config('page-settings.page_type.cart', 'cart'),
             'breadcrumbs' => [
-                breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
-                breadcrumb(__('catalog/default.cart.labels.cart')),
+                breadcrumb(__('storefront/default.links.home'), localized_route('catalog.home')),
+                breadcrumb(__('storefront/default.cart.labels.cart')),
             ],
             'cart_data' => $cart_data,
             'show_checkout_button' => true,
         ];
 
-        return view('catalog.pages.cart', $data);
+        return view('storefront.pages.cart', $data);
     }
 }

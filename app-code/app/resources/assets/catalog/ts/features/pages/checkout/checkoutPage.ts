@@ -3,9 +3,11 @@ import {
     findElem,
     getDataset,
     isEmpty,
+    setAttribute,
     setDataset,
     setTextContent,
     toggleClass,
+    toggleElement,
     toStringValue,
     toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
@@ -36,6 +38,8 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         branchSelectElement,
         deliveryAddressInputElement,
         cityWarningElement,
+        deliveryMethodsWrapperElement,
+        deliveryMethodsLoaderElement,
         deliveryAddressWrapperElement,
         branchWrapperElement,
         branchLabelElement,
@@ -139,6 +143,16 @@ export const initializeCheckoutDeliveryLogic = (): void => {
     let latestCitySearchResults: CheckoutCitySearchItem[] = [];
     let latestBranchSearchResults: CheckoutBranchSearchItem[] = [];
     let currentBranchSearchStateKey = '';
+    let deliveryMethodsLoadingCount = 0;
+
+    const setDeliveryMethodsLoading = (isLoading: boolean): void => {
+        deliveryMethodsLoadingCount = Math.max(0, deliveryMethodsLoadingCount + (isLoading ? 1 : -1));
+        const hasLoadingRequests = deliveryMethodsLoadingCount > 0;
+
+        toggleElement(deliveryMethodsLoaderElement, hasLoadingRequests);
+        setAttribute(deliveryMethodsLoaderElement, 'aria-hidden', hasLoadingRequests ? 'false' : 'true');
+        setAttribute(deliveryMethodsWrapperElement, 'aria-busy', hasLoadingRequests ? 'true' : 'false');
+    };
 
     const checkoutState = {
         get city(): CheckoutCitySearchItem | null {
@@ -277,6 +291,7 @@ export const initializeCheckoutDeliveryLogic = (): void => {
         applyCityResults: applyCitySearchResults,
         applyBranchResults: applyBranchSearchResults,
         updateMapButtonState,
+        setDeliveryMethodsLoading,
         onCartUpdated: updateCheckoutTotals,
     });
     const { loadBranches, searchCities, syncSelectionToServer } = checkoutSearch;

@@ -1,5 +1,5 @@
-import path from 'node:path';
 import { existsSync, readdirSync } from 'node:fs';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { ModuleViteConfigShape } from '../types';
 
@@ -27,9 +27,9 @@ export const loadModuleAliases = async ({
         }
 
         const moduleConfigImport = await import(pathToFileURL(moduleConfigPath).href);
-        const moduleConfig = (moduleConfigImport.moduleViteConfig ?? moduleConfigImport.default ?? null) as
-            | ModuleViteConfigShape
-            | null;
+        const moduleConfig = (moduleConfigImport.moduleViteConfig ??
+            moduleConfigImport.default ??
+            null) as ModuleViteConfigShape | null;
 
         if (!moduleConfig?.alias) {
             continue;

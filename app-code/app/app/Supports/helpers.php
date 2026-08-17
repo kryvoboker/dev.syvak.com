@@ -116,7 +116,7 @@ if (!function_exists('multiple_convert_img_and_get_url')) {
      *      thumb_4x?: string
      *  }
      *
-     * @note Use this function with 'x-catalog::common.img' blade component
+     * @note Use this function with 'x-storefront::common.img' blade component
      */
     function multiple_convert_img_and_get_url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): array
     {

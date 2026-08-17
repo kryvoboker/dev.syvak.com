@@ -50,7 +50,7 @@ class CareTabSchema
                     ->schema([
                         TextInput::make("$section_path.title")
                             ->label(__('admin/catalogs/products/products.labels.care_title'))
-                            ->default(__('catalog/default.product.details.care'))
+                            ->default(__('storefront/default.product.details.care'))
                             ->maxLength(255)
                             ->columnSpanFull(),
 

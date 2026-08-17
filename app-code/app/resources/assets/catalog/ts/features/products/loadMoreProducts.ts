@@ -9,6 +9,7 @@ import {
     setHistoryState,
     toggleElement,
 } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import type { WindowAppParams } from '@ts-types/global';
 import type { URLParamsType } from '@ts-types/httpQueryBuild.ts';
 
@@ -72,7 +73,10 @@ const processLoadMoreProducts = (): void => {
                     addClass(this, $HIDDEN_CLASS_NAME);
                 }
             })
-            .catch((err) => console.error('err: ', err))
+            .catch((err) => {
+                reportCriticalFrontendError(err);
+                console.error('err: ', err);
+            })
             .finally((): void => {
                 toggleElement(arrowDownIconEl, true);
                 toggleElement(roundedArrowIconEl, false);
