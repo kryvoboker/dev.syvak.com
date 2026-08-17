@@ -1,11 +1,10 @@
-import path from 'node:path';
 import { existsSync, readdirSync } from 'node:fs';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { LoadedModuleViteConfig, ModuleViteConfigShape } from '../types';
+import type { LoadedModuleViteConfig, ModuleViteConfigShape } from '../types';
 import { readModuleStatuses } from './readModuleStatuses';
 
-interface LoadActiveModuleConfigsParams
-{
+interface LoadActiveModuleConfigsParams {
     modulesRootPath: string;
     modulesStatusesPath: string;
 }
@@ -18,11 +17,9 @@ export const loadActiveModuleConfigs = async (
     }
 
     const moduleStatuses: Record<string, boolean> = readModuleStatuses(params.modulesStatusesPath);
-    const moduleDirectories = readdirSync(params.modulesRootPath, { withFileTypes: true })
-        .filter((directoryEntry: {
-            isDirectory(): boolean;
-            name: string
-        }): boolean => directoryEntry.isDirectory());
+    const moduleDirectories = readdirSync(params.modulesRootPath, { withFileTypes: true }).filter(
+        (directoryEntry: { isDirectory(): boolean; name: string }): boolean => directoryEntry.isDirectory(),
+    );
 
     const loadedConfigs: LoadedModuleViteConfig[] = [];
 

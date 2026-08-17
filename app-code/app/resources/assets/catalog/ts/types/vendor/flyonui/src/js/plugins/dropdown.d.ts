@@ -1,5 +1,1 @@
-export default class HSDropdown {
-    public constructor(element: HTMLElement);
-
-    public close(): void;
-}
+export { HSDropdown as default } from 'flyonui/flyonui';

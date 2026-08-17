@@ -24,6 +24,7 @@ import {
     toggleClass,
     toNumber,
 } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 
 import $FAST_ORDER = Cart.$FAST_ORDER;
 import $REGULAR = Cart.$REGULAR;
@@ -39,6 +40,7 @@ const initCartModalAccordion = (mode: CartMode): void => {
     try {
         initAccordion(accordionElement);
     } catch (error) {
+        reportCriticalFrontendError(error);
         console.error('[FIX:fast-order-cart-accordion] Failed to initialize cart modal accordion.', {
             mode,
             error,
@@ -127,6 +129,14 @@ const bindAddToCartButtons = (): void => {
         const variantId: number = toNumber(rawVariantId);
 
         if (!isIntegerNumber(variantId) || variantId <= 0) {
+            const error = new Error('Cart add-to-cart button has an invalid product variant ID.');
+
+            reportCriticalFrontendError(error);
+            console.error('[FIX:products-carousel-cart] Invalid product variant ID on add-to-cart button.', {
+                sourceButton,
+                rawVariantId,
+            });
+
             return;
         }
 

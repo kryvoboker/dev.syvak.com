@@ -3,14 +3,27 @@
     "files": {
         "ignoreUnknown": true,
         "includes": [
-            "resources/assets/catalog/ts/**/*.ts",
-            "resources/assets/catalog/ts/**/*.d.ts",
-            "Modules/**/resources/assets/ts/**/*.ts",
-            "Modules/**/resources/assets/ts/**/*.d.ts",
-            "vite.config.ts",
-            "vite-env.d.ts",
-            "Modules/**/vite.config.module.ts",
-            "vite-plugins/**/*.ts"
+            "**",
+            "!!**/node_modules",
+            "!!**/dist",
+            "!!**/composer.json",
+            "!!**/tsconfig.json",
+            "!Modules/**/module.json",
+            "!Modules/**/package.json",
+            "!modules_statuses.json",
+            "!pint.json",
+            "!boost.json",
+            "!resources/lang",
+            "!resources/views",
+            "!vendor",
+            "!app",
+            "!bootstrap",
+            "!config",
+            "!database",
+            "!openapi",
+            "!phpcs",
+            "!routes",
+            "!tests"
         ]
     },
     "formatter": {
@@ -18,7 +31,8 @@
         "indentStyle": "space",
         "indentWidth": 4,
         "lineWidth": 120,
-        "trailingNewline": true
+        "trailingNewline": true,
+        "includes": ["!/node_modules/**", "!/dist/**"]
     },
     "javascript": {
         "formatter": {
@@ -37,8 +51,22 @@
             "enabled": true
         }
     },
+    "css": {
+        "parser": {
+            "tailwindDirectives": true
+        },
+        "formatter": {
+            "enabled": true
+        }
+    },
     "linter": {
-        "enabled": true
+        "enabled": true,
+        "rules": {
+            "style": {
+                "noDescendingSpecificity": "off"
+            }
+        },
+        "includes": ["!/node_modules/**", "!/dist/**"]
     },
     "vcs": {
         "enabled": true,

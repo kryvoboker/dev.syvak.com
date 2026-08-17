@@ -8,12 +8,14 @@ use App\Enums\Cart\CartModeEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
+use App\Models\Orders\Orders;
 use App\Models\Orders\OrderStatuses;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
 use App\Services\Order\OrderAdminDeliveryService;
 use App\Services\Order\OrderAdminOptionsService;
 use App\Supports\Services\Currency\ConvertPrice;
+use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\KeyValue;
@@ -23,6 +25,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions as SchemaActions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Utilities\Get;
@@ -85,6 +88,17 @@ class OrderForm
                             })
                             ->disabled()
                             ->dehydrated(false),
+                        SchemaActions::make([
+                            RestoreAction::make('restoreOrder')
+                                ->label(__('admin/orders/orders.actions.restore'))
+                                ->after(function (Orders $record): void {
+                                    Log::channel('daily')->info('[OrderForm] order restored', [
+                                        'admin_user_id' => auth()->id(),
+                                        'order_id' => $record->getKey(),
+                                        'order_number' => $record->order_number,
+                                    ]);
+                                }),
+                        ]),
                         Textarea::make('comment')
                             ->label(__('admin/orders/orders.labels.comment'))
                             ->rows(4)

@@ -26,6 +26,6 @@ class HomeController extends Controller
             'page_type' => $page_type,
         ];
 
-        return view('catalog.pages.home', $data);
+        return view('storefront.pages.home', $data);
     }
 }

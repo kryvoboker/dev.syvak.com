@@ -69,7 +69,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 app(SetDefaultLocalePrefix::class)->applyLocaleFromPath($request);
 
                 return response()->view(
-                    'catalog.pages.not-found',
+                    'storefront.pages.not-found',
                     app(NotFoundPageService::class)->getViewData(),
                     Response::HTTP_NOT_FOUND,
                 );

@@ -12,6 +12,7 @@ import {
     toggleClass,
     toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import { handleCheckoutPayment } from '@ts-shared/payment/checkoutPaymentRegistry.ts';
 
 interface CheckoutOrderResponse {
@@ -103,7 +104,8 @@ const handleCheckoutSubmit = (): void => {
                 if (redirectUrl !== '') {
                     redirect(redirectUrl);
                 }
-            } catch {
+            } catch (error) {
+                reportCriticalFrontendError(error);
                 showCheckoutError('The order could not be created. Please try again.');
             } finally {
                 submitElement.disabled = false;

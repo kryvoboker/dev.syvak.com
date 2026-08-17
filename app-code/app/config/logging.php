@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Logging\AsyncTelegramBotHandler;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\NullHandler;
@@ -42,7 +43,7 @@ return [
     */
 
     'deprecations' => [
-        'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
+        'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'browser'),
         'trace' => env('LOG_DEPRECATIONS_TRACE', false),
     ],
 
@@ -80,6 +81,14 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
+        'browser' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/browser.log'),
+            'level' => env('LOG_BROWSER_LEVEL', 'debug'),
+            'days' => env('LOG_BROWSER_DAYS', 14),
             'replace_placeholders' => true,
         ],
 
@@ -188,7 +197,35 @@ return [
                 'apiKey' => env('MONOLOG_TELEGRAM_BOT_API_KEY'),
                 'channel' => env('MONOLOG_TELEGRAM_CHAT_ID'),
                 'splitLongMessages' => true,
-                'delayBetweenMessages' => 1,
+                'delayBetweenMessages' => true,
+            ],
+        ],
+
+        'monolog_async_telegram_bot' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => AsyncTelegramBotHandler::class,
+            'formatter' => LineFormatter::class,
+            'formatter_with' => [
+                'format' => '[%datetime%] ' . env('APP_NAME') . " - %channel%.%level_name%: %message% %context% %extra%\n",
+                'dateFormat' => 'Y-m-d H:i:s',
+                'allowInlineLineBreaks' => true,
+                'ignoreEmptyContextAndExtra' => true,
+            ],
+            'processors' => [
+                UidProcessor::class,
+                WebProcessor::class,
+                PsrLogMessageProcessor::class,
+                MemoryPeakUsageProcessor::class,
+                MemoryUsageProcessor::class,
+            ],
+            'handler_with' => [
+                // Use env() here because config() lookups inside config files can resolve to null
+                // when another config file has not been loaded yet.
+                'api_key' => env('MONOLOG_TELEGRAM_BOT_API_KEY'),
+                'channel' => env('MONOLOG_TELEGRAM_CHAT_ID'),
+                'split_long_messages' => true,
+                'delay_between_messages' => true,
             ],
         ],
 

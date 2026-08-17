@@ -758,6 +758,7 @@ readonly class ProductsCarouselStorefrontService
     /**
      * @return array{
      *     id: int,
+     *     variant_id: int,
      *     name: string,
      *     model: string,
      *     sku: string,
@@ -793,6 +794,7 @@ readonly class ProductsCarouselStorefrontService
 
         return [
             'id' => (int) $product->id,
+            'variant_id' => (int) ($product_variant->id ?? 0),
             'name' => escape_special_html((string) ($product_variant_description instanceof ProductVariantDescription
                 ? $product_variant_description->name
                 : $product_description?->name)),

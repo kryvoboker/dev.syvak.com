@@ -266,7 +266,7 @@ The shared application files integrate BankTransfer with checkout:
 | `app/Http/Requests/Order/FastOrderValidateRequest.php` | Requires and validates the final payment method |
 | `app/Services/Checkout/CheckoutSelectionStateService.php` | Persists `payment_method` in checkout session state |
 | `app/Services/Order/OrderCreationService.php` | Dispatches `bank_transfer` to the module payment service |
-| `resources/views/catalog/pages/checkout.blade.php` | Renders the radio and optional payment information |
+| `resources/views/storefront/pages/checkout.blade.php` | Renders the radio and optional payment information |
 | `resources/assets/catalog/ts/features/pages/checkout/checkoutPage.ts` | Synchronizes payment selection and toggles optional information |
 
 ### Markup contract

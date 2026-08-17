@@ -241,10 +241,10 @@ final readonly class OrderAggregatePersistenceService
         }
 
         $translation_key = match ($code) {
-            DeliveryMethodEnum::NovaPoshta->value => 'catalog/pages/checkout.delivery_methods.nova_poshta',
-            DeliveryMethodEnum::NovaPoshtaCourier->value => 'catalog/pages/checkout.delivery_methods.nova_poshta_courier',
-            DeliveryMethodEnum::NovaPoshtaPoshtomat->value => 'catalog/pages/checkout.delivery_methods.nova_poshta_poshtomat',
-            DeliveryMethodEnum::UkrPoshta->value => 'catalog/pages/checkout.delivery_methods.ukr_poshta',
+            DeliveryMethodEnum::NovaPoshta->value => 'storefront/pages/checkout.delivery_methods.nova_poshta',
+            DeliveryMethodEnum::NovaPoshtaCourier->value => 'storefront/pages/checkout.delivery_methods.nova_poshta_courier',
+            DeliveryMethodEnum::NovaPoshtaPoshtomat->value => 'storefront/pages/checkout.delivery_methods.nova_poshta_poshtomat',
+            DeliveryMethodEnum::UkrPoshta->value => 'storefront/pages/checkout.delivery_methods.ukr_poshta',
             DeliveryMethodEnum::PickupStore->value => 'pickup::storefront/checkout.delivery_method',
             default => null,
         };
@@ -271,7 +271,7 @@ final readonly class OrderAggregatePersistenceService
 
         $translation_key = match ($code) {
             PaymentMethodEnum::PaymentUponDelivery->value => 'paymentupondelivery::storefront/checkout.payment_methods.payment_upon_delivery',
-            PaymentMethodEnum::CashOnDelivery->value => 'catalog/pages/checkout.payment_methods.cash_on_delivery',
+            PaymentMethodEnum::CashOnDelivery->value => 'storefront/pages/checkout.payment_methods.cash_on_delivery',
             BankTransferConfig::PAYMENT_METHOD => 'banktransfer::storefront/checkout.payment_methods.bank_transfer',
             default => $code === $this->wayforpay_config->getPaymentMethod()
                 ? $this->wayforpay_config->getTranslationKey()

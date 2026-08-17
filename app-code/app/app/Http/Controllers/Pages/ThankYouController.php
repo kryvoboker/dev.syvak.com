@@ -35,7 +35,7 @@ class ThankYouController extends Controller
             'height' => 326,
         ];
 
-        return view('catalog.pages.thank-you', [
+        return view('storefront.pages.thank-you', [
             'header_data' => $header_data,
             'footer_data' => $footer_service([
                 'categories' => $header_data['categories'],
@@ -46,8 +46,8 @@ class ThankYouController extends Controller
             'order_found' => $thank_you_data !== null,
             'requested_order_number' => $order_number,
             'breadcrumbs' => [
-                breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
-                breadcrumb(__('catalog/default.cart.labels.cart')),
+                breadcrumb(__('storefront/default.links.home'), localized_route('catalog.home')),
+                breadcrumb(__('storefront/default.cart.labels.cart')),
             ],
         ]);
     }

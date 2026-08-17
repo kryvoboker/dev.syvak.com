@@ -13,7 +13,7 @@ This document describes how category product filters are configured in Filament,
 | Category page endpoint | `app/Http/Controllers/Pages/CategoryController.php` |
 | Request normalization and validation | `app/Http/Requests/Ajax/CatalogFilterAjaxIndexRequest.php` |
 | Admin filter-set form | `app/Filament/Resources/Catalogs/CatalogFilter/Schemas/CatalogFilterSetForm.php` |
-| Storefront filter UI | `resources/views/catalog/pages/partials/category/filter-content.blade.php` |
+| Storefront filter UI | `resources/views/storefront/pages/partials/category/filter-content.blade.php` |
 | Storefront filter behavior | `resources/assets/catalog/ts/features/products/productsFilter.ts` |
 | Filter configuration defaults | `config/catalog-filter.php` |
 

@@ -16,6 +16,7 @@ import {
     toStringValue,
     toTrimmedString,
 } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 import SearchControl from 'leaflet-search';
 
 export interface CheckoutMapCity {
@@ -239,7 +240,9 @@ const closeModal = (modalEl: HTMLDivElement): void => {
     try {
         activeMapInstance?.off();
         activeMapInstance?.remove();
-    } catch {
+    } catch (error) {
+        reportCriticalFrontendError(error);
+
         // Ignore cleanup failures.
     }
 

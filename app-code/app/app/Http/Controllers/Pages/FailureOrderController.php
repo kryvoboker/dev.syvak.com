@@ -29,10 +29,10 @@ class FailureOrderController extends Controller
 
         $data = $failure_page_service->getViewData($page_setting, (int) $language->id, $locale);
 
-        return view('catalog.pages.failure-order', [
+        return view('storefront.pages.failure-order', [
             ...$data,
             'breadcrumbs' => [
-                breadcrumb(__('catalog/default.links.home'), localized_route('catalog.home')),
+                breadcrumb(__('storefront/default.links.home'), localized_route('catalog.home')),
             ],
         ]);
     }

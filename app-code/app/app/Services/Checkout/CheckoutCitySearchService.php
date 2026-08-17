@@ -51,7 +51,7 @@ class CheckoutCitySearchService
      *     success: bool,
      *     error_message?: string,
      *     cities_data: array<int, array{
-     *         nova_poshta_city_id: int|null,
+     *         nova_poshta_city_id: string|null,
      *         city_description: string,
      *         ukr_poshta_city_id: int|null,
      *         city_lat: float|null,
@@ -154,6 +154,8 @@ class CheckoutCitySearchService
             $sql = '
 				SELECT ref         AS nova_poshta_city_id,
 					   description AS city_description,
+					   city_name,
+					   region_description AS region_name,
 					   NULL        AS ukr_poshta_city_id,
 					   latitude,
 					   longitude
@@ -166,6 +168,8 @@ class CheckoutCitySearchService
             $sql = '
 				SELECT NULL        AS nova_poshta_city_id,
 					   description AS city_description,
+					   city_ua     AS city_name,
+					   region_ua   AS region_name,
 					   city_id     AS ukr_poshta_city_id,
 					   latitude,
 					   longitude
@@ -233,7 +237,7 @@ class CheckoutCitySearchService
      * @return array<int, array{
      *     city_name: string,
      *     region_name: string,
-     *     nova_poshta_city_id: int|null,
+     *     nova_poshta_city_id: string|null,
      *     ukr_poshta_city_id: int|null,
      *     latitude: float|null,
      *     longitude: float|null,
@@ -246,7 +250,9 @@ class CheckoutCitySearchService
             return [
                 'city_name' => (string) $result->city_name,
                 'region_name' => (string) $result->region_name,
-                'nova_poshta_city_id' => isset($result->nova_poshta_city_id) ? (int) $result->nova_poshta_city_id : null,
+                'nova_poshta_city_id' => isset($result->nova_poshta_city_id)
+                    ? (string) $result->nova_poshta_city_id
+                    : null,
                 'ukr_poshta_city_id' => isset($result->ukr_poshta_city_id) ? (int) $result->ukr_poshta_city_id : null,
                 'latitude' => isset($result->latitude) ? (float) $result->latitude : null,
                 'longitude' => isset($result->longitude) ? (float) $result->longitude : null,

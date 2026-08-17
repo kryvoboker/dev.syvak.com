@@ -279,6 +279,10 @@ return [
     ],
     'frontend' => [
         'max_viewport_width' => (int) env('MAX_VIEWPORT_WIDTH'),
+        'critical_error_reporting_enabled' => (bool) env(
+            'FRONTEND_CRITICAL_ERROR_REPORTING',
+            ! (bool) env('APP_DEBUG', false),
+        ),
     ],
 
 ];

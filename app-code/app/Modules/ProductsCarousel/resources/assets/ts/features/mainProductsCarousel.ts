@@ -2,6 +2,7 @@ import { initCarousel } from '@ts-shared/carousel/initCarousel.ts';
 import { $PAGE_TYPE_KEY } from '@ts-shared/lib/constants.ts';
 import { getAppParam } from '@ts-shared/lib/getAppParam.ts';
 import { arrayFrom, findArrayElems, fromJson, getDataset, isArray, isEmpty, toRem } from '@ts-shared/lib/helpers.ts';
+import { reportCriticalFrontendError } from '@ts-shared/lib/reportCriticalError.ts';
 
 function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
     const pageType: string | null = getAppParam<string>($PAGE_TYPE_KEY);
@@ -26,7 +27,9 @@ function isPageTypeAllowed(carouselElement: HTMLElement): boolean {
         return allowedPageTypes
             .filter((value: unknown): value is string => typeof value === 'string' && !isEmpty(value))
             .includes(pageType);
-    } catch {
+    } catch (error) {
+        reportCriticalFrontendError(error);
+
         return true;
     }
 }

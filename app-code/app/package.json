@@ -12,12 +12,15 @@
     },
     "scripts": {
         "build": "cross-env NODE_ENV=production vite build",
-        "dev": "DEBUG=vite:* vite",
+        "dev": "cross-env NODE_ENV=development vite",
+        "dev:debug": "cross-env NODE_ENV=development DEBUG=vite:* vite",
         "ts:check": "biome check . && tsc --noEmit -p tsconfig.json",
         "ts:fix": "biome check --write .",
         "ts:format": "biome format --write .",
         "ts:lint": "biome lint .",
-        "ts:typecheck": "tsc --noEmit -p tsconfig.json"
+        "ts:typecheck": "tsc --noEmit -p tsconfig.json",
+        "css:lint": "stylelint \"resources/assets/catalog/css/**/*.css\" \"Modules/**/resources/assets/**/*.css\" --cache --cache-strategy=content",
+        "css:lint-fix": "stylelint \"resources/assets/catalog/css/**/*.css\" \"Modules/**/resources/assets/**/*.css\" --fix --cache --cache-strategy=content"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.5.2",
@@ -36,6 +39,8 @@
         "laravel-vite-plugin": "^3.1.0",
         "postcss": "^8.5.12",
         "sass-embedded": "^1.99.0",
+        "stylelint": "^17.14.1",
+        "stylelint-config-standard": "^40.0.0",
         "tailwindcss": "^4.2.4",
         "typescript": "^6.0.3",
         "vite": "^8.0.10",

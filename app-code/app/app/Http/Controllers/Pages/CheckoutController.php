@@ -121,7 +121,7 @@ class CheckoutController extends Controller
             'order_store_url' => localized_route('localized.catalog.order-confirm.simple.store'),
         ];
 
-        return view('catalog.pages.checkout', $data);
+        return view('storefront.pages.checkout', $data);
     }
 
     /**
@@ -329,15 +329,15 @@ class CheckoutController extends Controller
                 'ukr_poshta' => asset('storage/images/icons/ukr-poshta-marker.svg'),
             ],
             'texts' => [
-                'title' => __('catalog/pages/checkout.map.title'),
-                'search_placeholder' => __('catalog/pages/checkout.map.search_placeholder'),
-                'list_title' => __('catalog/pages/checkout.map.list_title'),
-                'empty' => __('catalog/pages/checkout.map.empty'),
-                'choose_city_first' => __('catalog/pages/checkout.warnings.choose_city_first'),
-                'deliver_here' => __('catalog/pages/checkout.map.deliver_here'),
-                'close' => __('catalog/pages/checkout.map.close'),
-                'work_schedule' => __('catalog/pages/checkout.map.work_schedule'),
-                'day_off' => __('catalog/pages/checkout.map.day_off'),
+                'title' => __('storefront/pages/checkout.map.title'),
+                'search_placeholder' => __('storefront/pages/checkout.map.search_placeholder'),
+                'list_title' => __('storefront/pages/checkout.map.list_title'),
+                'empty' => __('storefront/pages/checkout.map.empty'),
+                'choose_city_first' => __('storefront/pages/checkout.warnings.choose_city_first'),
+                'deliver_here' => __('storefront/pages/checkout.map.deliver_here'),
+                'close' => __('storefront/pages/checkout.map.close'),
+                'work_schedule' => __('storefront/pages/checkout.map.work_schedule'),
+                'day_off' => __('storefront/pages/checkout.map.day_off'),
             ],
         ];
     }

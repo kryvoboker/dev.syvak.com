@@ -15,7 +15,7 @@ This document describes how category sorting options are configured in the admin
 | Runtime settings bootstrap | `app/Services/PageSettings/PageSettingsBootstrapService.php` |
 | Shared sorting helpers | `app/Supports/helpers.php` |
 | Sort configuration values | `config/page-settings.php` |
-| Storefront sort menu | `resources/views/catalog/pages/partials/category/sort.blade.php` |
+| Storefront sort menu | `resources/views/storefront/pages/partials/category/sort.blade.php` |
 
 ## Admin settings
 

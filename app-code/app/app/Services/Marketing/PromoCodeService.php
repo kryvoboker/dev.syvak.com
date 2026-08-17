@@ -71,7 +71,7 @@ final class PromoCodeService
         $lines = (array) Arr::get($totals_data, 'lines', []);
         $lines[] = [
             'code' => 'promo_code',
-            'label' => __('catalog/default.cart.totals.promo_code', ['promo_code' => $promo_code->code]),
+            'label' => __('storefront/default.cart.totals.promo_code', ['promo_code' => $promo_code->code]),
             'amount' => -$discount_amount,
             'is_visible' => true,
             'include_in_grand_total' => true,
@@ -136,7 +136,7 @@ final class PromoCodeService
         }
 
         if (! $this->isEligibleIdentity($promo_code, $user_id, $user_group_id)) {
-            return $this->invalidResult('not_eligible', __('catalog/default.cart.errors.promo_not_eligible'));
+            return $this->invalidResult('not_eligible', __('storefront/default.cart.errors.promo_not_eligible'));
         }
 
         $consumer_key = $this->resolveConsumerKey($user_id);
@@ -411,7 +411,7 @@ final class PromoCodeService
 
         return filled($translation?->{$field})
             ? (string) $translation->{$field}
-            : (string) __('catalog/default.cart.errors.promo_' . $error_type);
+            : (string) __('storefront/default.cart.errors.promo_' . $error_type);
     }
 
     /** @return array{is_valid:false,error_type:string,message:string} */
@@ -426,7 +426,7 @@ final class PromoCodeService
         $totals_data['promo_code'] = [
             'is_valid' => false,
             'error_type' => $error_type,
-            'message' => $message !== '' ? $message : __('catalog/default.cart.errors.promo_invalid'),
+            'message' => $message !== '' ? $message : __('storefront/default.cart.errors.promo_invalid'),
         ];
 
         return $totals_data;

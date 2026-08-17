@@ -5,6 +5,8 @@ export interface CheckoutDomElements {
     branchSelectElement: HTMLSelectElement | null;
     deliveryAddressInputElement: HTMLInputElement | null;
     cityWarningElement: HTMLElement | null;
+    deliveryMethodsWrapperElement: HTMLElement | null;
+    deliveryMethodsLoaderElement: HTMLElement | null;
     deliveryAddressWrapperElement: HTMLElement | null;
     branchWrapperElement: HTMLElement | null;
     branchLabelElement: HTMLElement | null;
@@ -20,6 +22,8 @@ export const getCheckoutDomElements = (): CheckoutDomElements => ({
     branchSelectElement: <HTMLSelectElement | null>findElem('#checkout-branch'),
     deliveryAddressInputElement: <HTMLInputElement | null>findElem('#checkout-delivery-address'),
     cityWarningElement: <HTMLElement | null>findElem('[data-checkout-city-warning]'),
+    deliveryMethodsWrapperElement: <HTMLElement | null>findElem('[data-checkout-delivery-methods-wrapper]'),
+    deliveryMethodsLoaderElement: <HTMLElement | null>findElem('[data-checkout-delivery-methods-loader]'),
     deliveryAddressWrapperElement: <HTMLElement | null>findElem('[data-checkout-delivery-address-wrapper]'),
     branchWrapperElement: <HTMLElement | null>findElem('[data-checkout-branch-wrapper]'),
     branchLabelElement: <HTMLElement | null>findElem('[data-checkout-branch-label]'),
