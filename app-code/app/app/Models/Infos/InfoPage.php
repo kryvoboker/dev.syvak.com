@@ -46,7 +46,7 @@ class InfoPage extends Model
     public function positions(): Attribute
     {
         return Attribute::make(
-            get: function (mixed $positions, array $attributes): array {
+            get: function (mixed $positions): array {
                 if (is_string($positions)) {
                     $positions = json_decode($positions, true);
                 }
@@ -60,7 +60,7 @@ class InfoPage extends Model
                     array_values(array_filter($positions, is_string(...))),
                 );
             },
-            set: function (mixed $positions, array $attributes): ?string {
+            set: function (mixed $positions): ?string {
                 if ($positions === null || $positions === '') {
                     return null;
                 }

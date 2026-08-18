@@ -207,7 +207,6 @@ readonly class CatalogFilterIndexRebuildService
             $insert_chunk_size,
             &$indexed_rows_total,
         ): void {
-            /** @var Collection<int, Product> $products */
             $rows_to_insert = [];
 
             foreach ($products as $product) {

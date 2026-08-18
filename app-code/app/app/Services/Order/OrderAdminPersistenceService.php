@@ -383,7 +383,7 @@ final readonly class OrderAdminPersistenceService
                     'quantity' => $quantity,
                     'discount' => $discount,
                     'unit_price' => $unit_price,
-                    'line_total' => max(0, round((float) $quantity * (float) $unit_price - (float) $discount, 4)),
+                    'line_total' => max(0, round((float) $quantity * $unit_price - (float) $discount, 4)),
                 ]);
                 $submitted_product_ids[] = $new_order_product->getKey();
                 $changed_sections[] = 'products';
@@ -395,7 +395,7 @@ final readonly class OrderAdminPersistenceService
                 continue;
             }
 
-            $is_product_replaced = $product_id !== null && (int) $product_id !== (int) $order_product->product_id;
+            $is_product_replaced = $product_id !== null && $product_id !== (int) $order_product->product_id;
             $snapshot = $is_product_replaced
                 ? $this->resolveProductSnapshot($product_id)
                 : [
@@ -421,7 +421,7 @@ final readonly class OrderAdminPersistenceService
                 'quantity' => $quantity,
                 'discount' => $discount,
                 'unit_price' => $unit_price,
-                'line_total' => max(0, round((float) $quantity * (float) $unit_price - (float) $discount, 4)),
+                'line_total' => max(0, round((float) $quantity * $unit_price - (float) $discount, 4)),
             ]);
 
             if ($order_product->isDirty()) {

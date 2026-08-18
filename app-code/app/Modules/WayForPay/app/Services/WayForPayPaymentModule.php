@@ -39,7 +39,6 @@ final class WayForPayPaymentModule
     {
         try {
             $settings = $this->wayforpay_config->getSettings();
-            /** @var array<string, mixed> $settings */
             $cart = (array) Arr::get($order_payload, 'cart', []);
             $products = new ProductCollection($this->buildProducts($this->toArray(Arr::get($cart, 'items', []))));
             $credential = new AccountSecretCredential(

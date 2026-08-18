@@ -166,8 +166,8 @@ final class PromoCodeService
         $base_amount = min(max(0, $base_amount), max(0, $current_total));
         $discount_value = $this->resolveDiscountValue($promo_code, $currency_code);
         $discount_amount = $promo_code->discount_type === PromoCodeDiscountTypeEnum::Percentage
-            ? (float) $base_amount * ((float) $discount_value / (float) 100)
-            : min((float) $base_amount, (float) $discount_value);
+            ? (float) $base_amount * ($discount_value / (float) 100)
+            : min((float) $base_amount, $discount_value);
 
         return [
             'is_valid' => true,
@@ -380,7 +380,6 @@ final class PromoCodeService
         $default_currency = (new Currency())->getDefaultActiveCurrency();
         /** @var Collection<int, PromoCodeDiscount> $discounts */
         $discounts = $promo_code->discounts;
-        /** @var PromoCodeDiscount|null $discount */
         $discount = $discounts->first(fn (PromoCodeDiscount $item): bool => $this->integerValue($item->currency_id) === $this->integerValue($target_currency?->getKey()));
 
         if ($discount === null) {

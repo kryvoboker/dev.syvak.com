@@ -101,7 +101,7 @@ readonly class CartViewDataBuilderService
                 },
                 'discounts' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                     $query
-                        ->where('user_group_id', (int) (get_app_settings()->user_group_id ?? 0))
+                        ->where('user_group_id', get_app_settings()->user_group_id ?? 0)
                         ->where('date_start', '<=', now())
                         ->where('date_end', '>=', now())
                         ->orderBy('priority')
@@ -114,7 +114,6 @@ readonly class CartViewDataBuilderService
 
         $resolved_items = collect($cart_items)
             ->map(function (array $item_data) use ($variants, $language_id): ?array {
-                /** @var ProductVariant|null $variant */
                 $variant = $variants->get($this->integerValue($item_data['product_variant_id']));
 
                 if (!$variant instanceof ProductVariant || !$variant->product) {

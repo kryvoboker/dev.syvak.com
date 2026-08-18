@@ -397,7 +397,7 @@ readonly class UkrPoshtaSyncService
             );
         }
 
-        $current_id = (int)array_shift($queue);
+        $current_id = array_shift($queue);
         try {
             $imported_rows = $batch_callback($current_id);
         } catch (Throwable $throwable) {

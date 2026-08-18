@@ -23,7 +23,6 @@ trait MetaTextFormTrait
         $tabs = [];
 
         foreach ($active_languages as $language) {
-            /** @var Language $language */
             $tabs[] = Tabs\Tab::make($language->name)
                 ->schema([
                     Hidden::make("descriptions.$language->id.language_id")
@@ -84,7 +83,6 @@ trait MetaTextFormTrait
         $total_languages = $active_languages->count();
 
         foreach ($active_languages as $language) {
-            /** @var Language $language */
             $tabs[] = Tabs\Tab::make($language->name)
                 ->schema([
                     Hidden::make("descriptions.$language->id.language_id")

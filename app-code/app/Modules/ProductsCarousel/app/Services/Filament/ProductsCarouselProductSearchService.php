@@ -141,7 +141,6 @@ readonly class ProductsCarouselProductSearchService
             return [];
         }
 
-        /** @var non-falsy-string $order_sql */
         $order_sql = 'FIELD(product_variants.id, ' . implode(',', $normalized_variant_ids) . ')';
 
         $variants = $this->buildBaseVariantQuery('', null)
@@ -173,8 +172,8 @@ readonly class ProductsCarouselProductSearchService
             return [$search_query, null];
         }
 
-        $search_term = Str::trim((string) $matches[1]);
-        $price = (float) Str::replace(',', '.', (string) $matches[2]);
+        $search_term = Str::trim($matches[1]);
+        $price = (float) Str::replace(',', '.', $matches[2]);
 
         return [$search_term, $price];
     }

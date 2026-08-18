@@ -70,7 +70,7 @@ class CategoryPageFilterSyncService
         ];
 
         foreach ($payloads as $index => &$payload) {
-            $payload['sort_order'] = (int) (($index + 1) * 10);
+            $payload['sort_order'] = ($index + 1) * 10;
         }
         unset($payload);
 

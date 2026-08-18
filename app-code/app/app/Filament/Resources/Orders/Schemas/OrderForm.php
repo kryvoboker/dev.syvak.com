@@ -817,7 +817,7 @@ class OrderForm
 
         $set(
             'line_total',
-            max(0.0, round((float) $line_total, 4)),
+            max(0.0, round($line_total, 4)),
         );
 
         self::recalculateTotals(
@@ -976,14 +976,14 @@ class OrderForm
         string                      $totals_path,
     ): void {
         $subtotal = collect($products)
-            ->filter(fn (mixed $value, mixed $key): bool => is_array($value))
+            ->filter(fn (mixed $value): bool => is_array($value))
             ->sum(function (array $product): float {
                 $quantity = max(1, (int)($product['quantity'] ?? 1));
                 $unit_price = max(0, (float)($product['unit_price'] ?? 0));
                 $discount = max(0, (float)($product['discount'] ?? 0));
                 $line_total = ((float) $quantity * (float) $unit_price) - (float) $discount;
 
-                return max(0.0, round((float) $line_total, 4));
+                return max(0.0, round($line_total, 4));
             });
         $shipping_value = ! $shipping_cost_enabled || is_array($shipping_cost)
             ? 0.0
@@ -991,7 +991,7 @@ class OrderForm
         $grand_total = 0.0;
 
         $updated_totals = collect($totals)
-            ->filter(fn (mixed $value, mixed $key): bool => is_array($value))
+            ->filter(fn (mixed $value): bool => is_array($value))
             ->map(function (array $total) use ($subtotal, $shipping_value, &$grand_total): array {
                 $total_type = (string)($total['total_type'] ?? '');
                 $value = (float)($total['value'] ?? 0);
@@ -1003,7 +1003,7 @@ class OrderForm
                 }
 
                 if ($total_type !== 'total') {
-                    $grand_total = (float) $grand_total + (float) $value;
+                    $grand_total = $grand_total + (float) $value;
                 }
 
                 $total['value'] = round($value, 4);

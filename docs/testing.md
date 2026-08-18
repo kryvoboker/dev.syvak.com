@@ -38,6 +38,14 @@ composer phpcs:fix
 # Design smell checks
 composer phpmd
 
+# Psalm production checks
+composer psalm:production:storefront
+composer psalm:production:admin
+composer psalm:production
+
+# Diagnostic strict audit (not a production gate)
+composer psalm:production:strict
+
 # TypeScript quality
 npm run ts:check
 npm run ts:fix
@@ -79,6 +87,7 @@ npm run css:lint-fix
 - PHPCS checks `PSR12`, `Generic.Files.LineLength`, and `phpcs/ProjectStandard`.
 - PHPMD uses `rulesets/unusedcode.xml`.
 - PHPStan uses Larastan with `level: 5` and scans `app`, `Modules`, `routes`, `config`, `database`, and `tests`.
+- Psalm production checks are split between `psalm-production.xml` for storefront/backend code and `psalm-production.admin.xml` for Filament/Livewire code. The strict Psalm configuration is an audit tool, not a required production gate, because Laravel's dynamic APIs produce framework-related diagnostics.
 - TypeScript quality uses `Biome` for format/lint and `tsc --noEmit` for type checking.
 - The `ts:check` script runs `biome check .` and `tsc --noEmit -p tsconfig.json` together.
 - The `ts:fix` script runs `biome check --write .` to auto-fix TypeScript formatting and safe lint issues.

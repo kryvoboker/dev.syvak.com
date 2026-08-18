@@ -382,7 +382,6 @@ readonly class FilterProductsAction
                 continue;
             }
 
-            /** @var CatalogFilterGroup|null $attribute_group */
             $attribute_group = $attribute_groups_by_id->get($attribute_id);
 
             if (! $attribute_group instanceof CatalogFilterGroup) {
@@ -461,7 +460,6 @@ readonly class FilterProductsAction
             return $query;
         }
 
-        /** @var CatalogFilterGroup|null $price_group */
         $price_group = $filter_groups
             ->first(fn (CatalogFilterGroup $group): bool => (string) $group->code === CatalogFilterGroupSourceTypeEnum::Price->value);
 
@@ -579,7 +577,6 @@ readonly class FilterProductsAction
         $catalog_image_sizes = $this->page_settings_bootstrap_service->getCategoryProductImageSize();
         $locale_key = $this->toString(config('localization.locale_parameter'), 'locale');
 
-        /** @var array<int, Product> $product_items */
         $product_items = $products->items();
 
         return collect($product_items)
@@ -735,7 +732,7 @@ readonly class FilterProductsAction
                 $group_payload['range'] = [
                     'min' => Arr::get($group_config, 'min_price'),
                     'max' => is_numeric($dynamic_price_max)
-                        ? (float) $dynamic_price_max
+                        ? $dynamic_price_max
                         : Arr::get($group_config, 'max_price'),
                     'step' => Arr::get($group_config, 'step'),
                     'selected_from' => $selected_from,
@@ -788,7 +785,7 @@ readonly class FilterProductsAction
                 ];
             }
 
-            $filters_data[(string) $group_key] = $group_payload;
+            $filters_data[$group_key] = $group_payload;
         }
 
         return $filters_data;
@@ -932,7 +929,6 @@ readonly class FilterProductsAction
      */
     private function replaceQueryValueByGetKey(array $query_parameters, string $get_key, mixed $next_value): array
     {
-        /** @var array<string, mixed> $query_parameters */
         if (Str::contains($get_key, '[') && Str::endsWith($get_key, ']')) {
             $normalized_get_key = str_replace(['[', ']'], ['.', ''], $get_key);
 
