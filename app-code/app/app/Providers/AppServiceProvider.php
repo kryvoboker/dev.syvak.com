@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $new_storage_path = config('filesystems.new_storage_path');
+        $new_storage_path = $this->stringValue(config('filesystems.new_storage_path'));
 
         if ($new_storage_path) {
             config([
@@ -94,8 +94,8 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by($request->ip() ?? 'unknown');
         });
 
-        $new_storage_path = config('filesystems.new_storage_path');
-        $new_public_path = config('filesystems.new_public_path');
+        $new_storage_path = $this->stringValue(config('filesystems.new_storage_path'));
+        $new_public_path = $this->stringValue(config('filesystems.new_public_path'));
 
         if ($new_storage_path && $new_public_path) {
             // Override symbolic links configuration
@@ -113,7 +113,7 @@ class AppServiceProvider extends ServiceProvider
          * locale-aware routes and stabilizes URL matching for storefront/admin routes.
          */
         $allowed_locales = get_allowed_locales();
-        $locale_key = config('localization.locale_parameter', 'locale');
+        $locale_key = $this->stringValue(config('localization.locale_parameter', 'locale'));
 
         if ($allowed_locales !== []) {
             $allowed_locales_pattern = implode('|', array_map('preg_quote', $allowed_locales));
@@ -129,10 +129,10 @@ class AppServiceProvider extends ServiceProvider
             View::addNamespace('storefront', $storefront_path);
         }
 
-        $default_no_image_path = (string) config('app.images.default_no_image', 'images/no-image.png');
+        $default_no_image_path = $this->stringValue(config('app.images.default_no_image', 'images/no-image.png'));
         $app_settings_service = null;
-        $device_type = config('devices.types.desktop');
-        $max_viewport_width = (int) config('app.frontend.max_viewport_width', 1920);
+        $device_type = $this->stringValue(config('devices.types.desktop'));
+        $max_viewport_width = $this->integerValue(config('app.frontend.max_viewport_width', 1920));
 
         if (! $this->app->runningUnitTests()) {
             $currency = (new Currency())->getDefaultActiveCurrency();
@@ -141,22 +141,24 @@ class AppServiceProvider extends ServiceProvider
             $detect = new MobileDetect();
 
             if ($detect->isMobile()) {
-                $device_type = $detect->isTablet() ? config('devices.types.tablet') : config('devices.types.mobile');
+                $device_type = $detect->isTablet()
+                    ? $this->stringValue(config('devices.types.tablet'))
+                    : $this->stringValue(config('devices.types.mobile'));
             }
 
             $max_viewport_width = max(
                 1,
-                (int) data_get(
+                $this->integerValue(data_get(
                     $app_settings_service->getSettings(),
                     'system_settings.frontend.max_viewport_width',
-                    (int) config('app.frontend.max_viewport_width', 1920),
-                ),
+                    $this->integerValue(config('app.frontend.max_viewport_width', 1920)),
+                )),
             );
-            $default_no_image_path = (string) data_get(
+            $default_no_image_path = $this->stringValue(data_get(
                 $app_settings_service->getSettings(),
                 'system_settings.images.default_no_image',
-                (string) config('app.images.default_no_image', 'images/no-image.png'),
-            );
+                $this->stringValue(config('app.images.default_no_image', 'images/no-image.png')),
+            ));
 
             if ($currency !== null) {
                 config([
@@ -205,5 +207,15 @@ class AppServiceProvider extends ServiceProvider
                 app(CartService::class)->getTotalProducts(CartModeEnum::Regular->value),
             );
         });
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

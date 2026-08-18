@@ -14,6 +14,7 @@ final class GlobalConfigService
     /** @return Collection<string, string|null> */
     public function getActiveGlobalConfigs(): Collection
     {
+        /** @var Collection<string, string|null> $configs */
         $configs = GlobalConfig::query()
             ->where('is_active', true)
             ->orderBy('key')
@@ -22,7 +23,7 @@ final class GlobalConfigService
         return $configs;
     }
 
-    /** @return Collection<string, mixed> */
+    /** @return Collection<string, string|null> */
     public function getGlobalConfigs(): Collection
     {
         return $this->getActiveGlobalConfigs();
@@ -39,7 +40,7 @@ final class GlobalConfigService
         return $this->getActiveGlobalConfigs()->get($key, $default);
     }
 
-    /** @return Collection<int, mixed> */
+    /** @return Collection<int, array{key: string, value: string|null, is_active: bool, selected: bool}> */
     public function getGlobalConfigsForForm(): Collection
     {
         /** @var Collection<int, array{key: string, value: string|null, is_active: bool, selected: bool}> $configs */
@@ -50,7 +51,7 @@ final class GlobalConfigService
                 $selected = filter_var($global_config->getAttribute('selected'), FILTER_VALIDATE_BOOLEAN) === true;
 
                 return [
-                    'key' => (string) $global_config->key,
+                    'key' => $this->stringValue($global_config->key),
                     'value' => $global_config->value,
                     'is_active' => (bool) $global_config->is_active,
                     'selected' => $selected,
@@ -88,7 +89,7 @@ final class GlobalConfigService
                     $global_config_data['is_active'],
                 );
             })
-            ->keyBy(fn (GlobalConfig $global_config): string => (string) $global_config->key);
+            ->keyBy(fn (GlobalConfig $global_config): string => $this->stringValue($global_config->key));
     }
 
     /**
@@ -111,7 +112,7 @@ final class GlobalConfigService
                 ],
             );
 
-            $kept_keys[] = (string) $global_config->key;
+            $kept_keys[] = $this->stringValue($global_config->key);
 
             if ($global_config->wasRecentlyCreated) {
                 $created_count++;
@@ -199,7 +200,7 @@ final class GlobalConfigService
 
         $this->clearAppSettingsCache();
 
-        return $deleted_count;
+        return $this->integerValue($deleted_count);
     }
 
     /**
@@ -221,7 +222,7 @@ final class GlobalConfigService
             $this->clearAppSettingsCache();
         }
 
-        return $deleted_count;
+        return $this->integerValue($deleted_count);
     }
 
     /**
@@ -302,7 +303,7 @@ final class GlobalConfigService
             $this->clearAppSettingsCache();
         }
 
-        return $deleted_count;
+        return $this->integerValue($deleted_count);
     }
 
     /**
@@ -349,7 +350,7 @@ final class GlobalConfigService
         /** @var array<int, array{key: string, value: ?string, is_active: bool, selected: bool}> $normalized_configs */
         $normalized_configs = collect($global_configs)
             ->map(function (array $global_config): ?array {
-                $key = Str::trim((string) ($global_config['key'] ?? ''));
+                $key = Str::trim($this->stringValue($global_config['key'] ?? ''));
 
                 if ($key === '') {
                     return null;
@@ -380,6 +381,7 @@ final class GlobalConfigService
         return collect($global_configs)
             ->filter(fn (array $global_config): bool => $global_config['selected'])
             ->pluck('key')
+            ->map(fn (mixed $key): string => $this->stringValue($key))
             ->all();
     }
 
@@ -398,8 +400,8 @@ final class GlobalConfigService
         $keys = Arr::isAssoc($key) ? array_keys($key) : $key;
 
         return collect($keys)
-            ->filter(fn (mixed $config_key): bool => Str::trim((string) $config_key) !== '')
-            ->map(fn (mixed $config_key): string => Str::trim((string) $config_key))
+            ->filter(fn (mixed $config_key): bool => Str::trim($this->stringValue($config_key)) !== '')
+            ->map(fn (mixed $config_key): string => Str::trim($this->stringValue($config_key)))
             ->values()
             ->all();
     }
@@ -433,7 +435,7 @@ final class GlobalConfigService
             return json_encode($value, JSON_UNESCAPED_UNICODE) ?: null;
         }
 
-        $string_value = (string) $value;
+        $string_value = $this->stringValue($value);
 
         return $string_value === '' ? null : $string_value;
     }
@@ -449,11 +451,21 @@ final class GlobalConfigService
             $query->whereNotIn('key', $kept_keys);
         }
 
-        return $query->delete();
+        return $this->integerValue($query->delete());
     }
 
     private function clearAppSettingsCache(): void
     {
         app(AppSettingsService::class)->removeSettings();
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
     }
 }

@@ -22,14 +22,14 @@ class FooterService
     public function __invoke(array $params = []): array
     {
         $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
-        $logo_sizes = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
-        $logo_width = (int) ($logo_sizes['width'] ?? config('app.images.logo_width'));
-        $logo_height = (int) ($logo_sizes['height'] ?? config('app.images.logo_height'));
-        $logo_path = (string) data_get(
+        $logo_sizes = $this->arrayValue($app_settings->image_sizes?->firstWhere('name', 'logo'));
+        $logo_width = $this->integerValue($logo_sizes['width'] ?? config('app.images.logo_width'));
+        $logo_height = $this->integerValue($logo_sizes['height'] ?? config('app.images.logo_height'));
+        $logo_path = $this->stringValue(data_get(
             $app_settings,
             'system_settings.images.path_to_logo',
-            (string) config('app.images.path_to_logo', 'images/logo.png'),
-        );
+            $this->stringValue(config('app.images.path_to_logo', 'images/logo.png')),
+        ));
 
         /** @var Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>> $categories */
         $categories = $params['categories'] ?? (new Category())->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
@@ -65,7 +65,7 @@ class FooterService
     {
         $locale = app()->getLocale();
         $telegram_row = collect($social_items)
-            ->first(fn (mixed $social_item): bool => (string) data_get($social_item, 'social_type') === 'telegram');
+            ->first(fn (mixed $social_item): bool => $this->stringValue(data_get($social_item, 'social_type')) === 'telegram');
         $telegram_url = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
         return [
@@ -96,12 +96,12 @@ class FooterService
         return $categories
             ->map(function (Category|array $category): array {
                 $label = $category instanceof Category
-                    ? (string) $category->categoryDescription->first()?->name
-                    : (string) Arr::get($category, 'descriptions.name');
+                    ? $this->stringValue($category->categoryDescription->first()?->name)
+                    : $this->stringValue(Arr::get($category, 'descriptions.name'));
 
                 $slug = $category instanceof Category
-                    ? (string) $category->slugs->first()?->slug
-                    : (string) Arr::get($category, 'slug');
+                    ? $this->stringValue($category->slugs->first()?->slug)
+                    : $this->stringValue(Arr::get($category, 'slug'));
 
                 return [
                     'label' => Str::upper($label),
@@ -137,14 +137,14 @@ class FooterService
 
         $social_items = collect((array) data_get(get_app_settings(), "socials.$locale", []))
             ->map(function (mixed $item) use ($locale): array {
-                $social_type = (string) data_get($item, 'social_type');
+                $social_type = $this->stringValue(data_get($item, 'social_type'));
                 $label = Str::title($social_type);
                 $social_url = $this->normalizeSocialUrl(data_get($item, 'url'), $locale);
 
                 return [
                     'social_type' => $social_type,
                     'url' => filled($social_url) ? $social_url : '#',
-                    'svg_icon' => escape_special_html((string) data_get($item, 'svg_icon')),
+                    'svg_icon' => escape_special_html($this->stringValue(data_get($item, 'svg_icon'))),
                     'label' => filled($label) ? $label : 'Link',
                 ];
             })
@@ -187,13 +187,13 @@ class FooterService
             $phones = collect($phones)
                 ->map(
                     fn (mixed $phone): string => is_array($phone)
-                    ? (string) data_get($phone, 'value', '')
-                    : (string) $phone,
+                    ? $this->stringValue(data_get($phone, 'value', ''))
+                    : $this->stringValue($phone),
                 )
                 ->implode(',');
         }
 
-        $phone_list = trim_strs_in_arr(explode(',', (string) $phones));
+        $phone_list = trim_strs_in_arr(explode(',', $this->stringValue($phones)));
         $phone_list = collect($phone_list)
             ->filter(fn ($phone) => filled($phone))
             ->values()
@@ -202,5 +202,23 @@ class FooterService
         $phone_list = array_values(array_filter($phone_list, is_string(...)));
 
         return filled($phone_list) ? $phone_list : ['0 800 000 000'];
+    }
+
+    /**
+     * @return array<string|int, mixed>
+     */
+    private function arrayValue(mixed $value): array
+    {
+        return is_array($value) ? $value : [];
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }
