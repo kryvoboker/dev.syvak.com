@@ -11,8 +11,13 @@ parameters:
         analyse:
             - database
             - tests
-            - Modules/*/tests
-    level: 6
+            - Modules/*/tests/**
+            - app/Filament/**
+            - app/Providers/Filament/**
+            - Modules/*/app/Filament/**
+            - Modules/*/app/Services/Filament/**
+            - Modules/*/app/Livewire/**
+    level: 9
     treatPhpDocTypesAsCertain: true
     ignoreErrors:
         -
