@@ -62,15 +62,15 @@ class CheckoutSelectionStoreRequest extends FormRequest
     {
         $normalized_data = $this->all();
 
-        $delivery_method = Str::lower(Str::squish((string) $this->input(OrderDataKeyEnum::DeliveryMethod->value, '')));
+        $delivery_method = Str::lower(Str::squish($this->stringValue($this->input(OrderDataKeyEnum::DeliveryMethod->value, ''))));
         Arr::set($normalized_data, OrderDataKeyEnum::DeliveryMethod->value, $delivery_method !== '' ? $delivery_method : null);
 
-        $payment_method = Str::lower(Str::squish((string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '')));
+        $payment_method = Str::lower(Str::squish($this->stringValue($this->input(OrderDataKeyEnum::PaymentMethod->value, ''))));
         Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, $payment_method !== '' ? $payment_method : null);
 
-        $city = (array) $this->input('city', []);
-        Arr::set($normalized_data, 'city.city_description', Str::squish((string) Arr::get($city, 'city_description', '')));
-        Arr::set($normalized_data, 'city.nova_poshta_city_id', Str::squish((string) Arr::get($city, 'nova_poshta_city_id', '')));
+        $city = $this->arrayValue($this->input('city', []));
+        Arr::set($normalized_data, 'city.city_description', Str::squish($this->stringValue(Arr::get($city, 'city_description', ''))));
+        Arr::set($normalized_data, 'city.nova_poshta_city_id', Str::squish($this->stringValue(Arr::get($city, 'nova_poshta_city_id', ''))));
 
         $ukr_poshta_city_id = Arr::get($city, 'ukr_poshta_city_id');
         Arr::set($normalized_data, 'city.ukr_poshta_city_id', is_numeric($ukr_poshta_city_id) ? (int) $ukr_poshta_city_id : null);
@@ -81,17 +81,17 @@ class CheckoutSelectionStoreRequest extends FormRequest
         $city_lng = Arr::get($city, 'city_lng');
         Arr::set($normalized_data, 'city.city_lng', is_numeric($city_lng) ? (float) $city_lng : null);
 
-        Arr::set($normalized_data, OrderDataKeyEnum::DeliveryPoint->value, (array) $this->input(OrderDataKeyEnum::DeliveryPoint->value, []));
+        Arr::set($normalized_data, OrderDataKeyEnum::DeliveryPoint->value, $this->arrayValue($this->input(OrderDataKeyEnum::DeliveryPoint->value, [])));
         Arr::set(
             $normalized_data,
             OrderDataKeyEnum::DeliveryAddress->value,
-            Str::squish((string) $this->input(OrderDataKeyEnum::DeliveryAddress->value, '')) !== ''
-                ? Str::squish((string) $this->input(OrderDataKeyEnum::DeliveryAddress->value, ''))
+            Str::squish($this->stringValue($this->input(OrderDataKeyEnum::DeliveryAddress->value, ''))) !== ''
+                ? Str::squish($this->stringValue($this->input(OrderDataKeyEnum::DeliveryAddress->value, '')))
                 : null,
         );
 
         foreach (['first_name', 'last_name', 'phone', 'email', OrderDataKeyEnum::Comment->value, OrderDataKeyEnum::PromoCode->value] as $key) {
-            Arr::set($normalized_data, $key, Str::squish((string) $this->input($key, '')));
+            Arr::set($normalized_data, $key, Str::squish($this->stringValue($this->input($key, ''))));
         }
 
         Arr::set($normalized_data, OrderDataKeyEnum::NoCall->value, $this->boolean(OrderDataKeyEnum::NoCall->value));
@@ -105,7 +105,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
-            $payment_method = (string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '');
+            $payment_method = $this->stringValue($this->input(OrderDataKeyEnum::PaymentMethod->value, ''));
 
             if ($payment_method !== '' && ! $this->isAvailablePaymentMethod($payment_method)) {
                 $validator->errors()->add(
@@ -125,7 +125,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
             $active_language_codes = (new Language())
                 ->getActiveLanguages()
                 ->pluck('code')
-                ->map(fn (mixed $code): string => strtolower((string) $code))
+                ->map(fn (mixed $code): string => strtolower($this->stringValue($code)))
                 ->values()
                 ->all();
 
@@ -145,5 +145,16 @@ class CheckoutSelectionStoreRequest extends FormRequest
 
         return $payment_data['is_available'] === true
             && $payment_data['payment_method'] === $payment_method;
+    }
+
+    /** @return array<string|int, mixed> */
+    private function arrayValue(mixed $value): array
+    {
+        return is_array($value) ? $value : [];
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }
