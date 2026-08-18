@@ -12,8 +12,10 @@ use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
+use App\Models\Users\User;
 use App\Supports\Services\CacheInvalidationService;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
@@ -87,7 +89,7 @@ final readonly class OrderAggregatePersistenceService
             $this->createTotals($order, $totals);
             $this->createShipping($order, $validated_data, $locale);
             $actor_label = (string) __('admin/orders/orders.history_data.actor');
-            $actor_value = auth()->check()
+            $actor_value = Auth::check()
                 ? (string) __('admin/orders/orders.history_data.customer')
                 : (string) __('admin/orders/orders.history_data.guest');
 
@@ -137,11 +139,11 @@ final readonly class OrderAggregatePersistenceService
      */
     private function createCustomer(Orders $order, array $validated_data): void
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $order->customer()->create([
-            'user_id' => auth()->id(),
-            'user_group_id' => is_object($user) ? $user->user_group_id : null,
+            'user_id' => Auth::id(),
+            'user_group_id' => $user instanceof User ? $user->user_group_id : null,
             'first_name' => $this->stringValue(Arr::get($validated_data, 'first_name', '')),
             'last_name' => $this->stringValue(Arr::get($validated_data, 'last_name', '')),
             'email' => $this->nullableString(Arr::get($validated_data, 'email')),

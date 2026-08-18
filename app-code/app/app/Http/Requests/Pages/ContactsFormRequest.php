@@ -35,6 +35,7 @@ class ContactsFormRequest extends FormRequest
     }
 
     /** @return array<string, string> */
+    #[\Override]
     public function attributes(): array
     {
         return [

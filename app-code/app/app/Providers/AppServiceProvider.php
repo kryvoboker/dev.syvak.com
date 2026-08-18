@@ -42,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
+    #[\Override]
     public function register(): void
     {
         $new_storage_path = $this->stringValue(config('filesystems.new_storage_path'));

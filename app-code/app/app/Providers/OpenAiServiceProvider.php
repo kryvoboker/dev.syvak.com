@@ -14,6 +14,7 @@ class OpenAiServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
+    #[\Override]
     public function register(): void
     {
         $this->app->singleton(Client::class, function () {

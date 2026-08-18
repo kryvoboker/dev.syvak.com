@@ -24,6 +24,9 @@ use Illuminate\Support\Str;
  * @property PromoCodeDiscountBaseModeEnum $discount_base_mode
  * @property PromoCodeLimitModeEnum $user_limit_mode
  * @property PromoCodeLimitModeEnum $group_limit_mode
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $starts_at
+ * @property \Illuminate\Support\Carbon|null $ends_at
  */
 class PromoCode extends Model
 {
@@ -47,6 +50,7 @@ class PromoCode extends Model
         'is_active',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [

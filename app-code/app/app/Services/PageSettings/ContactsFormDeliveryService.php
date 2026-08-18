@@ -7,6 +7,7 @@ namespace App\Services\PageSettings;
 use App\Jobs\DeliverContactsFormJob;
 use App\Models\PageSettings\PageSetting;
 use App\Services\Inquiries\InquiryPersistenceService;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
@@ -167,7 +168,7 @@ final readonly class ContactsFormDeliveryService
             $message->to($recipient)->subject($subject);
 
             if ($send_file && $this->publicFileExists($file_path)) {
-                $file_contents = Storage::disk('public')->get($file_path ?? '');
+                $file_contents = $this->publicDisk()->get($file_path ?? '');
 
                 if (! is_string($file_contents)) {
                     return;
@@ -176,7 +177,7 @@ final readonly class ContactsFormDeliveryService
                 $message->attachData(
                     $file_contents,
                     basename($file_path ?? ''),
-                    ['mime' => Storage::disk('public')->mimeType($file_path ?? '')],
+                    ['mime' => $this->publicDisk()->mimeType($file_path ?? '')],
                 );
             }
         });
@@ -218,7 +219,7 @@ final readonly class ContactsFormDeliveryService
         }
 
         if ($send_file && $this->publicFileExists($file_path)) {
-            $file_contents = Storage::disk('public')->get($file_path ?? '');
+            $file_contents = $this->publicDisk()->get($file_path ?? '');
 
             if (! is_string($file_contents)) {
                 throw new RuntimeException('Contacts Telegram file could not be read.');
@@ -258,14 +259,19 @@ final readonly class ContactsFormDeliveryService
 
     private function publicFileExists(?string $file_path): bool
     {
-        return filled($file_path) && Storage::disk('public')->exists($file_path);
+        return filled($file_path) && $this->publicDisk()->exists($file_path);
     }
 
     private function resolveFileUrl(?string $file_path): string
     {
         return $this->publicFileExists($file_path)
-            ? Storage::disk('public')->url($file_path ?? '')
+            ? $this->publicDisk()->url($file_path ?? '')
             : '';
+    }
+
+    private function publicDisk(): FilesystemAdapter
+    {
+        return Storage::disk('public');
     }
 
     /** @param mixed $templates @return array<string, string> */

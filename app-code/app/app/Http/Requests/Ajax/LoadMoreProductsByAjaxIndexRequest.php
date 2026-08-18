@@ -13,6 +13,7 @@ class LoadMoreProductsByAjaxIndexRequest extends CatalogFilterAjaxIndexRequest
      *
      * @return array<string, array<int, string>>
      */
+    #[\Override]
     public function rules(): array
     {
         $page_types = collect([
@@ -26,6 +27,7 @@ class LoadMoreProductsByAjaxIndexRequest extends CatalogFilterAjaxIndexRequest
         ]);
     }
 
+    #[\Override]
     protected function prepareForValidation(): void
     {
         parent::prepareForValidation();

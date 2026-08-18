@@ -54,21 +54,15 @@
         <file name="bootstrap/app.php"/>
     </stubs>
     <issueHandlers>
-        <!-- These diagnostics are caused by Laravel's dynamic runtime APIs. -->
-        <MissingOverrideAttribute errorLevel="suppress"/>
-        <UndefinedThisPropertyFetch errorLevel="suppress"/>
-
         <!-- Laravel's Eloquent and container APIs resolve these members dynamically. -->
         <UndefinedMagicPropertyFetch errorLevel="suppress"/>
         <UndefinedMagicPropertyAssignment errorLevel="suppress"/>
         <UndefinedMagicMethod errorLevel="suppress"/>
-        <UndefinedInterfaceMethod errorLevel="suppress"/>
 
         <!-- Framework entry points are resolved by routes, the container, and queues. -->
         <UnusedClass errorLevel="suppress"/>
         <PossiblyUnusedMethod errorLevel="suppress"/>
         <PossiblyUnusedProperty errorLevel="suppress"/>
-        <PossiblyUnusedReturnValue errorLevel="suppress"/>
 
     </issueHandlers>
 </psalm>

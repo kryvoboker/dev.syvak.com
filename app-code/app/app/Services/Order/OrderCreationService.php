@@ -14,6 +14,7 @@ use App\Services\Cart\CartService;
 use App\Services\Marketing\PromoCodeService;
 use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Modules\BankTransfer\Services\BankTransferPaymentModule;
 use Modules\BankTransfer\Support\BankTransferConfig;
@@ -407,7 +408,7 @@ readonly class OrderCreationService
             $this->promo_code_service->consume(
                 $promo_code,
                 $order,
-                is_numeric(auth()->id()) ? (int) auth()->id() : null,
+                is_numeric(Auth::id()) ? (int) Auth::id() : null,
                 is_numeric($app_settings?->user_group_id) ? (int) $app_settings->user_group_id : null,
             );
         } catch (Throwable $throwable) {

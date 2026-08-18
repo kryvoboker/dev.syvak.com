@@ -9,6 +9,7 @@ use App\Mail\InquiryResponseMail;
 use App\Models\Inquiries\Inquiry;
 use App\Models\Inquiries\InquiryResponse;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -32,7 +33,7 @@ final readonly class InquiryResponseService
 
         $response = $inquiry->responses()->create([
             'subject' => $subject,
-            'admin_user_id' => auth()->id(),
+            'admin_user_id' => Auth::id(),
             'admin_name' => $this->resolveNullableString($data['admin_name'] ?? null) ?? 'Адмін',
             'body_html' => $body_html,
             'recipient_email' => $recipient_email,

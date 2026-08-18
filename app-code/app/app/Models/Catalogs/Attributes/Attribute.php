@@ -20,6 +20,7 @@ class Attribute extends Model
     /**
      * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -66,6 +67,7 @@ class Attribute extends Model
         return $this->hasMany(ProductVariantAttributeValue::class, 'attribute_id');
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::deleting(function (Attribute $attribute): void {

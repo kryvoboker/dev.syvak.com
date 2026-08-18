@@ -37,6 +37,7 @@ final class AsyncTelegramBotHandler extends AbstractProcessingHandler
      *
      * @return void
      */
+    #[\Override]
     protected function write(LogRecord $record): void
     {
         $formatted_message = $record->formatted;

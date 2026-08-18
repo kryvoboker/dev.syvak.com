@@ -23,6 +23,7 @@ class InquiryAttachment extends Model
         'sort_order',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [

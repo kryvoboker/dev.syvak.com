@@ -21,6 +21,7 @@ class PaymentStatuses extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -30,6 +31,7 @@ class PaymentStatuses extends Model
         ];
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::saving(function (PaymentStatuses $payment_status): void {

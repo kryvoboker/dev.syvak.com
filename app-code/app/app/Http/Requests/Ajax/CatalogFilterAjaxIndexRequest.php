@@ -47,6 +47,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
         });
     }
 
+    #[\Override]
     protected function prepareForValidation(): void
     {
         $normalized_data = [

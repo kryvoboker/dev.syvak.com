@@ -24,6 +24,7 @@ class ProductNameAiTranslatorService extends AiDbCachedTranslatorAbstract
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     protected function findCached(string $hash): ?string
     {
         $product_hash = ProductNameHash::getNameHash($this->product_id, $hash);
@@ -42,6 +43,7 @@ class ProductNameAiTranslatorService extends AiDbCachedTranslatorAbstract
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model
     {
         $product_hash = $this->getProductNameHash();

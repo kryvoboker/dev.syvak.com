@@ -16,6 +16,7 @@ use App\Supports\Services\CacheInvalidationService;
 use App\Supports\Services\Currency\ConvertPrice;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -80,7 +81,7 @@ final readonly class OrderAdminPersistenceService
                 Log::channel('daily')->info('[OrderAdminPersistenceService] order updated by admin', [
                     'order_id' => $order->getKey(),
                     'order_number' => $order->order_number,
-                    'admin_user_id' => auth()->id(),
+                    'admin_user_id' => Auth::id(),
                     'changed_sections' => $changed_sections,
                     'order_status_id' => $order->order_status_id,
                 ]);
@@ -900,7 +901,7 @@ final readonly class OrderAdminPersistenceService
 
         foreach ($entries as $entry) {
             $order->histories()->create([
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'old_order_status_id' => $old_order_status_id,
                 'order_status_id' => $order->order_status_id,
                 'event' => $entry['event'],
@@ -1047,8 +1048,8 @@ final readonly class OrderAdminPersistenceService
      */
     private function getHistoryActorData(): array
     {
-        $user = auth()->user();
-        $roles = $user?->getRoleNames()->implode(', ');
+        $user = Auth::user();
+        $roles = $user instanceof User ? $user->getRoleNames()->implode(', ') : null;
 
         return [
             (string) __('admin/orders/orders.history_data.actor') => $user !== null

@@ -14,6 +14,7 @@ use App\Services\Cart\Modules\Discount\PromoCodeModule;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -358,7 +359,7 @@ readonly class CartViewDataBuilderService
                     'cart_items' => $resolved_items->all(),
                     'code' => $checkout_state['promo_code'] ?? null,
                     'locale' => $locale,
-                    'user_id' => auth()->id(),
+                    'user_id' => Auth::id(),
                     'user_group_id' => $app_settings?->user_group_id,
                 ]),
                 app(GiftCertificateModule::class)->resolveCallback(),

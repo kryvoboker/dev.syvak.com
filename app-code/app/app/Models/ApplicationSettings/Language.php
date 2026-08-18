@@ -24,6 +24,7 @@ class Language extends Model
     /**
      * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -44,6 +45,7 @@ class Language extends Model
     /**
      * Boot the model.
      */
+    #[\Override]
     protected static function booted(): void
     {
         // Ensure only one default language

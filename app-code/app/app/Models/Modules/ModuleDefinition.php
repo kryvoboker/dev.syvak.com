@@ -15,9 +15,12 @@ use Throwable;
 /**
  * @property array<string, mixed>|null $settings_schema
  * @property array<string, mixed>|null $meta
+ * @property int $id
+ * @property string $nwidart_name
  */
 class ModuleDefinition extends Model
 {
+    #[\Override]
     protected static function booted(): void
     {
         static::saved(function (): void {
@@ -53,6 +56,7 @@ class ModuleDefinition extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

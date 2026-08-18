@@ -18,6 +18,7 @@ class ProductVariantCare extends Model
         'items',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [
