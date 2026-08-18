@@ -11,9 +11,12 @@ use App\Services\Cart\Modules\Delivery\NovaPoshtaDeliveryModule;
 use App\Services\Cart\Modules\Delivery\UkrPoshtaDeliveryModule;
 use App\Services\Cart\Modules\Discount\GiftCertificateModule;
 use App\Services\Cart\Modules\Discount\PromoCodeModule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 readonly class CartViewDataBuilderService
 {
@@ -59,16 +62,16 @@ readonly class CartViewDataBuilderService
                 'minimum',
             ])
             ->with([
-                'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                'descriptions' => function (Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                'slugs' => function (Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'images' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
+                'images' => function (Relation $query): void {
                     $query->orderBy('sort_order')->orderBy('id');
                 },
-                'product' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
+                'product' => function (Relation $query): void {
                     $query->select([
                         'id',
                         'price',
@@ -78,20 +81,20 @@ readonly class CartViewDataBuilderService
                         'ean',
                     ])->with('categories:id');
                 },
-                'product.productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                'product.productDescription' => function (Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'product.slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                'product.slugs' => function (Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'attributeValues' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                'attributeValues' => function (Relation $query) use ($language_id): void {
                     $query
                         ->with([
-                            'attribute' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                            'attribute' => function (Relation $query) use ($language_id): void {
                                 $query
                                     ->where('is_active', true)
                                     ->with([
-                                        'attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                                        'attributeDescription' => function (Relation $query) use ($language_id): void {
                                             $query->where('language_id', $language_id);
                                         },
                                     ]);
@@ -99,7 +102,7 @@ readonly class CartViewDataBuilderService
                         ])
                         ->where('language_id', $language_id);
                 },
-                'discounts' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
+                'discounts' => function (Relation $query): void {
                     $query
                         ->where('user_group_id', get_app_settings()->user_group_id ?? 0)
                         ->where('date_start', '<=', now())
@@ -344,21 +347,27 @@ readonly class CartViewDataBuilderService
      */
     private function resolveTotalsCallbacks(Collection $resolved_items, string $locale): array
     {
-        $checkout_state = (array) session()->get('checkout.selection_state', []);
-        $app_settings = get_app_settings();
+        try {
+            $checkout_state = (array)session()->get('checkout.selection_state', []);
+            $app_settings = get_app_settings();
 
-        return [
-            app(UkrPoshtaDeliveryModule::class)->resolveCallback(),
-            app(NovaPoshtaDeliveryModule::class)->resolveCallback(),
-            app(PromoCodeModule::class)->resolveCallback([
-                'cart_items' => $resolved_items->all(),
-                'code' => $checkout_state['promo_code'] ?? null,
-                'locale' => $locale,
-                'user_id' => auth()->id(),
-                'user_group_id' => $app_settings?->user_group_id,
-            ]),
-            app(GiftCertificateModule::class)->resolveCallback(),
-        ];
+            return [
+                app(UkrPoshtaDeliveryModule::class)->resolveCallback(),
+                app(NovaPoshtaDeliveryModule::class)->resolveCallback(),
+                app(PromoCodeModule::class)->resolveCallback([
+                    'cart_items' => $resolved_items->all(),
+                    'code' => $checkout_state['promo_code'] ?? null,
+                    'locale' => $locale,
+                    'user_id' => auth()->id(),
+                    'user_group_id' => $app_settings?->user_group_id,
+                ]),
+                app(GiftCertificateModule::class)->resolveCallback(),
+            ];
+        } catch (Throwable $e) {
+            Log::channel('stack')->error($e->getMessage(), $e->getTrace());
+
+            return [];
+        }
     }
 
     /**
@@ -389,7 +398,8 @@ readonly class CartViewDataBuilderService
 
     /**
      * @param Collection<int, array<string, mixed>> $resolved_items
-     * @param string     $mode
+     * @param string                                $mode
+     * @param string                                $locale
      *
      * @return array<string, mixed>
      */

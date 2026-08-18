@@ -60,11 +60,6 @@
         <TooManyTemplateParams errorLevel="suppress"/>
         <InvalidTemplateParam errorLevel="suppress"/>
 
-        <!-- Null-safe access is intentionally retained for request and persisted relation boundaries. -->
-        <RedundantCondition errorLevel="suppress"/>
-        <TypeDoesNotContainNull errorLevel="suppress"/>
-        <TypeDoesNotContainType errorLevel="suppress"/>
-
         <!-- These diagnostics are caused by Laravel's dynamic runtime APIs. -->
         <MissingOverrideAttribute errorLevel="suppress"/>
         <UndefinedThisPropertyFetch errorLevel="suppress"/>
@@ -74,8 +69,6 @@
         <UndefinedMagicPropertyAssignment errorLevel="suppress"/>
         <UndefinedMagicMethod errorLevel="suppress"/>
         <UndefinedInterfaceMethod errorLevel="suppress"/>
-        <RedundantPropertyInitializationCheck errorLevel="suppress"/>
-        <TooManyArguments errorLevel="suppress"/>
 
         <!-- Framework entry points are resolved by routes, the container, and queues. -->
         <UnusedClass errorLevel="suppress"/>

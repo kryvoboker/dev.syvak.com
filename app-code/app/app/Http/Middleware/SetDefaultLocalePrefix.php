@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -43,10 +44,18 @@ class SetDefaultLocalePrefix
             return $next($request);
         }
 
+        /** @var Route|null $route */
         $route = $request->route();
-        $route_name = $route?->getName();
-        $route_locale = $route?->parameter($locale_key);
-        $has_locale_parameter = in_array($locale_key, $route?->parameterNames() ?? [], true);
+
+        if ($route === null) {
+            $this->applyLocaleFromPath($request);
+
+            return $next($request);
+        }
+
+        $route_name = $route->getName();
+        $route_locale = $route->parameter($locale_key);
+        $has_locale_parameter = in_array($locale_key, $route->parameterNames(), true);
         $has_valid_route_locale = is_string($route_locale) && in_array($route_locale, $allowed_locales, true);
         $path_locale = Str::before($path_info, '/');
         $has_valid_path_locale = in_array($path_locale, $allowed_locales, true);

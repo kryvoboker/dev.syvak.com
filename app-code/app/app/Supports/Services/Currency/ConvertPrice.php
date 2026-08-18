@@ -12,32 +12,33 @@ use RuntimeException;
 
 final class ConvertPrice
 {
-    private Currency $default_currency;
+    private ?Currency $default_currency = null;
 
     /** @var Collection<string, Currency> */
-    private Collection $currencies;
+    private ?Collection $currencies = null;
 
-    private string $locale;
+    private ?string $locale = null;
 
     public function format(float|int $price, ?string $currency_code = null, float|int $exchange_rate = 0, bool $is_formatting = true): string|float
     {
         $this->setValues();
+        [$default_currency, $currencies, $locale] = $this->getInitializedValues();
 
         if (empty($currency_code)) {
-            $currency_code = $this->default_currency->code;
+            $currency_code = $default_currency->code;
         }
 
-        if ($this->currencies->has($currency_code) === false) {
+        if ($currencies->has($currency_code) === false) {
             $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode($currency_code);
 
             if ($currency !== null) {
-                $this->currencies->offsetSet($currency_code, $currency);
+                $currencies->offsetSet($currency_code, $currency);
             } else {
                 return '';
             }
         } else {
-            $currency = $this->currencies->get($currency_code);
+            $currency = $currencies->get($currency_code);
         }
 
         if (! $currency instanceof Currency) {
@@ -65,7 +66,7 @@ final class ConvertPrice
         return (string) Number::currency(
             $amount,
             $currency_code,
-            $this->locale,
+            $locale,
             $decimal_place,
         );
     }
@@ -73,17 +74,18 @@ final class ConvertPrice
     public function convert(float $price, string $code_from, string $code_to): float
     {
         $this->setValues();
+        [$default_currency, $currencies] = $this->getInitializedValues();
 
-        if ($this->default_currency->code == $code_from) {
-            $code_from = $this->default_currency->exchange_rate;
-        } elseif (($currency_rate = $this->currencies->get($code_from)?->exchange_rate) !== null) {
+        if ($default_currency->code == $code_from) {
+            $code_from = $default_currency->exchange_rate;
+        } elseif (($currency_rate = $currencies->get($code_from)?->exchange_rate) !== null) {
             $code_from = $currency_rate;
         } else {
             $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode($code_from);
 
             if ($currency !== null) {
-                $this->currencies->offsetSet($code_from, $currency);
+                $currencies->offsetSet($code_from, $currency);
 
                 $code_from = $currency->exchange_rate;
             } else {
@@ -91,16 +93,16 @@ final class ConvertPrice
             }
         }
 
-        if ($this->default_currency->code == $code_to) {
-            $code_to = $this->default_currency->exchange_rate;
-        } elseif (($currency_rate = $this->currencies->get($code_to)?->exchange_rate) !== null) {
+        if ($default_currency->code == $code_to) {
+            $code_to = $default_currency->exchange_rate;
+        } elseif (($currency_rate = $currencies->get($code_to)?->exchange_rate) !== null) {
             $code_to = $currency_rate;
         } else {
             $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode($code_to);
 
             if ($currency !== null) {
-                $this->currencies->offsetSet($code_to, $currency);
+                $currencies->offsetSet($code_to, $currency);
 
                 $code_to = $currency->exchange_rate;
             } else {
@@ -130,11 +132,11 @@ final class ConvertPrice
 
     private function setValues(): void
     {
-        if (! isset($this->locale)) {
+        if ($this->locale === null) {
             $this->locale = app()->getLocale();
         }
 
-        if (! isset($this->default_currency)) {
+        if (! $this->default_currency instanceof Currency) {
             $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode(
                 $this->stringValue(config('app.currency.current_currency_code')),
@@ -147,7 +149,7 @@ final class ConvertPrice
             $this->default_currency = $currency;
         }
 
-        if (! isset($this->currencies)) {
+        if (! $this->currencies instanceof Collection) {
             $this->currencies = new Collection();
         }
 
@@ -158,12 +160,15 @@ final class ConvertPrice
 
     public function replaceCurrencySymbolToCode(string $price_string, ?string $currency_symbol = null, ?string $currency_code = null): string
     {
+        $this->setValues();
+        [$default_currency] = $this->getInitializedValues();
+
         if ($currency_symbol === null) {
-            $currency_symbol = $this->default_currency->symbol_left ?: $this->default_currency->symbol_right;
+            $currency_symbol = $default_currency->symbol_left ?: $default_currency->symbol_right;
         }
 
         if ($currency_code === null) {
-            $currency_code = $this->default_currency->code;
+            $currency_code = $default_currency->code;
         }
 
         return Str::replace((string) $currency_symbol, $currency_code, $price_string, caseSensitive: false);
@@ -174,6 +179,18 @@ final class ConvertPrice
         $this->default_currency = $default_currency;
 
         return $this;
+    }
+
+    /**
+     * @return array{Currency, Collection<string, Currency>, string}
+     */
+    private function getInitializedValues(): array
+    {
+        if (! $this->default_currency instanceof Currency || ! $this->currencies instanceof Collection || $this->locale === null) {
+            throw new RuntimeException('Currency conversion values are not initialized.');
+        }
+
+        return [$this->default_currency, $this->currencies, $this->locale];
     }
 
     private function stringValue(mixed $value): string

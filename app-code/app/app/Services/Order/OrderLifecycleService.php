@@ -142,9 +142,9 @@ final class OrderLifecycleService
         string $event,
         array $context = [],
     ): bool {
-        $old_status = $order->status;
+        $old_status = $order->getRelationValue('status');
 
-        if ($old_status?->is($new_status) === true) {
+        if ($old_status instanceof OrderStatuses && $old_status->is($new_status)) {
             return false;
         }
 
@@ -153,7 +153,7 @@ final class OrderLifecycleService
 
         $order->histories()->create([
             'user_id' => null,
-            'old_order_status_id' => $old_status?->getKey(),
+            'old_order_status_id' => $old_status instanceof OrderStatuses ? $old_status->getKey() : null,
             'order_status_id' => $new_status->getKey(),
             'event' => $event,
             'json' => [
@@ -164,7 +164,7 @@ final class OrderLifecycleService
 
         Log::channel('daily')->info('[OrderLifecycleService] order status changed', [
             'order_number' => $order->order_number,
-            'old_status' => $old_status?->code,
+            'old_status' => $old_status instanceof OrderStatuses ? $old_status->code : null,
             'new_status' => $new_status->code,
             'event' => $event,
         ]);
@@ -183,9 +183,9 @@ final class OrderLifecycleService
         ?string $failure_reason = null,
     ): bool {
         $new_status = $this->getPaymentStatusByCode($status_code);
-        $old_status = $payment->paymentStatus;
+        $old_status = $payment->getRelationValue('paymentStatus');
 
-        if ($old_status?->code === self::PAYMENT_STATUS_PAID && $status_code !== self::PAYMENT_STATUS_PAID) {
+        if ($old_status instanceof PaymentStatuses && $old_status->code === self::PAYMENT_STATUS_PAID && $status_code !== self::PAYMENT_STATUS_PAID) {
             Log::channel('stack')->error('[OrderLifecycleService] paid payment transition rejected', [
                 'payment_id' => $payment->getKey(),
                 'requested_status' => $status_code,
@@ -194,7 +194,7 @@ final class OrderLifecycleService
             return false;
         }
 
-        if ($old_status?->is($new_status) === true) {
+        if ($old_status instanceof PaymentStatuses && $old_status->is($new_status)) {
             return false;
         }
 
@@ -212,7 +212,7 @@ final class OrderLifecycleService
 
         Log::channel('daily')->info('[OrderLifecycleService] payment status changed', [
             'payment_id' => $payment->getKey(),
-            'old_status' => $old_status?->code,
+            'old_status' => $old_status instanceof PaymentStatuses ? $old_status->code : null,
             'new_status' => $new_status->code,
         ]);
         $this->cache_invalidation_service->flushAfterCommit('payment_status_changed');
