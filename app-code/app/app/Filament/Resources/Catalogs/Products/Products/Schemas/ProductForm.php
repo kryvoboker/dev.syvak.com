@@ -455,7 +455,6 @@ class ProductForm
                                         return (new UserGroup())
                                             ->getActiveUserGroups()
                                             ->mapWithKeys(function ($user_group) {
-                                                /** @var UserGroup $user_group */
                                                 $name = $user_group->name ?: "User Group #$user_group->id";
 
                                                 return [$user_group->id => $name];
@@ -542,7 +541,6 @@ class ProductForm
                                         return (new Attribute())
                                             ->getActiveAttributesWithDescriptionsByLanguageId($current_language_id)
                                             ->mapWithKeys(function ($attribute) use ($current_language_id) {
-                                                /** @var Attribute $attribute */
                                                 $description = $attribute->attributeDescription
                                                     ->firstWhere('language_id', $current_language_id);
                                                 $description_name = $description?->name;
@@ -582,7 +580,7 @@ class ProductForm
                                                 ? $fallback_description_name
                                                 : "Attribute #$attribute->id");
                                     })
-                                    ->afterStateUpdated(function ($state, $set, $get): void {
+                                    ->afterStateUpdated(function (): void {
                                         // Auto-validate uniqueness on change
                                     })
                                     ->searchable()
@@ -595,7 +593,7 @@ class ProductForm
                                 Select::make('language_id')
                                     ->label(__('admin/default.labels.language'))
                                     ->options($active_languages->pluck('name', 'id'))
-                                    ->afterStateUpdated(function ($state, $set, $get): void {
+                                    ->afterStateUpdated(function (): void {
                                         // Auto-validate uniqueness on change
                                     })
                                     ->searchable()

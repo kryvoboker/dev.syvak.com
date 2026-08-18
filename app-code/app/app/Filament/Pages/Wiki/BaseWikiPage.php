@@ -54,7 +54,7 @@ abstract class BaseWikiPage extends Page
 
     public static function getNavigationParentItem(): ?string
     {
-        return (string) static::getWikiParentNavigationGroup()->getLabel();
+        return static::getWikiParentNavigationGroup()->getLabel();
     }
 
     public function getBreadcrumbs(): array

@@ -33,7 +33,7 @@ class FooterService
 
         /** @var Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>> $categories */
         $categories = $params['categories'] ?? (new Category())->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
-            (int) ($app_settings->language_id ?? 0),
+            $app_settings->language_id ?? 0,
         );
         $social_items = $this->getSocialItems();
 

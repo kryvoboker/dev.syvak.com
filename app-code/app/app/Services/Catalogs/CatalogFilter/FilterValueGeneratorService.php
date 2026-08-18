@@ -12,7 +12,6 @@ use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValue;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValueTranslation;
 use App\Models\Catalogs\Products\ProductVariantAttributeValue;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -32,7 +31,6 @@ class FilterValueGeneratorService
             $updated_count = 0;
             $removed_count = 0;
 
-            /** @var Collection<int, CatalogFilterGroup> $groups */
             $groups = CatalogFilterGroup::query()
                 ->where('catalog_filter_set_id', (int) $filter_set->id)
                 ->where('is_enabled', true)
@@ -226,7 +224,6 @@ class FilterValueGeneratorService
      */
     private function resolveAttributeValueOptions(int $attribute_id): array
     {
-        /** @var array<int, ProductVariantAttributeValue> $attribute_rows */
         $attribute_rows = ProductVariantAttributeValue::query()
             ->where('attribute_id', $attribute_id)
             ->whereNotNull('value_string')

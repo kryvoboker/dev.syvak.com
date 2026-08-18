@@ -116,7 +116,7 @@ class EditOrder extends EditRecord
                 $unit_price = max(0, (float)($product['unit_price'] ?? 0));
                 $discount = max(0, (float)($product['discount'] ?? 0));
                 $line_total = ((float) $quantity * (float) $unit_price) - (float) $discount;
-                $product['line_total'] = max(0.0, round((float) $line_total, 4));
+                $product['line_total'] = max(0.0, round($line_total, 4));
 
                 return $product;
             })
@@ -179,7 +179,7 @@ class EditOrder extends EditRecord
                 }
 
                 if ($total_type !== 'total') {
-                    $grand_total = (float) $grand_total + (float) $value;
+                    $grand_total = $grand_total + (float) $value;
                 }
 
                 $total['value'] = round($value, 4);

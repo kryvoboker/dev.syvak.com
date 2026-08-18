@@ -58,7 +58,6 @@ readonly class ProductsCarouselStorefrontService
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
         try {
-            /** @var Collection<int, ModuleDefinition> $definitions */
             $definitions = resolve_modules_for_context($placement);
             $definitions = $definitions
                 ->filter(fn (ModuleDefinition $definition): bool => $definition->nwidart_name === 'ProductsCarousel');
@@ -154,7 +153,7 @@ readonly class ProductsCarouselStorefrontService
         $translations_payload = Arr::get($shared_settings, 'translations', []);
         $translations_payload = is_array($translations_payload) ? $translations_payload : [];
 
-        $translations_by_locale = collect((array) $translations_payload)
+        $translations_by_locale = collect($translations_payload)
             ->filter(fn (mixed $translation): bool => is_array($translation))
             ->map(function (array $translation): array {
                 return [
@@ -312,7 +311,6 @@ readonly class ProductsCarouselStorefrontService
                 return new EloquentCollection();
             }
 
-            /** @var non-falsy-string $variant_order_sql */
             $variant_order_sql = 'FIELD(id, ' . implode(',', $selected_variant_ids) . ')';
             $selected_product_ids = ProductVariant::query()
                 ->whereIn('id', $selected_variant_ids)
@@ -322,7 +320,6 @@ readonly class ProductsCarouselStorefrontService
                 ->map(fn (mixed $id): int => $this->toInt($id))
                 ->all();
 
-            /** @var non-falsy-string $product_order_sql */
             $product_order_sql = 'FIELD(id, ' . implode(',', $selected_product_ids) . ')';
             $products_query
                 ->whereIn('id', $selected_product_ids)
@@ -371,7 +368,6 @@ readonly class ProductsCarouselStorefrontService
                 return new EloquentCollection();
             }
 
-            /** @var non-falsy-string $product_order_sql */
             $product_order_sql = 'FIELD(id, ' . implode(',', $selected_product_ids) . ')';
             return $this->buildBaseProductsQuery($runtime_shared_settings['min_quantity'])
                 ->whereIn('id', $selected_product_ids)
@@ -382,7 +378,6 @@ readonly class ProductsCarouselStorefrontService
                 ->values();
         }
 
-        /** @var non-falsy-string $variant_order_sql */
         $variant_order_sql = 'FIELD(id, ' . implode(',', $selected_variant_ids) . ')';
         $selected_product_ids = ProductVariant::query()
             ->whereIn('id', $selected_variant_ids)
@@ -392,7 +387,6 @@ readonly class ProductsCarouselStorefrontService
             ->map(fn (mixed $id): int => $this->toInt($id))
             ->all();
 
-        /** @var non-falsy-string $product_order_sql */
         $product_order_sql = 'FIELD(id, ' . implode(',', $selected_product_ids) . ')';
         $products = $this->buildBaseProductsQuery(
             $runtime_shared_settings['min_quantity'],
@@ -430,7 +424,7 @@ readonly class ProductsCarouselStorefrontService
                 return;
             }
 
-            $query->where('user_group_id', (int) $user_group_id);
+            $query->where('user_group_id', $user_group_id);
         };
         $relations = [
             'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {

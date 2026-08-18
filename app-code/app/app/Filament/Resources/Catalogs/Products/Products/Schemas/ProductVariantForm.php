@@ -223,7 +223,6 @@ class ProductVariantForm
         $tabs = [];
 
         foreach ($active_languages as $language) {
-            /** @var Language $language */
             $tabs[] = Tab::make((string) $language->name)
                 ->badge((string) $language->code)
                 ->schema([
@@ -286,7 +285,6 @@ class ProductVariantForm
         $tabs = [];
 
         foreach ($active_languages as $language) {
-            /** @var Language $language */
             $tabs[] = Tab::make((string) $language->name)
                 ->badge((string) $language->code)
                 ->schema([

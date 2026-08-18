@@ -21,7 +21,6 @@ class CarouselStorefrontService
      */
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
-        /** @var Collection<int, ModuleDefinition> $definitions */
         $definitions = resolve_modules_for_context($placement);
 
         $carousel_modules = $definitions

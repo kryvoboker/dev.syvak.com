@@ -49,7 +49,7 @@ final class PickupIframeSanitizer
             return ['value' => '', 'errors' => ['invalid_iframe']];
         }
 
-        $source = trim((string) $iframe->getAttribute('src'));
+        $source = trim($iframe->getAttribute('src'));
 
         if (! $this->isAllowedSource($source)) {
             return ['value' => '', 'errors' => ['invalid_source']];
@@ -57,13 +57,13 @@ final class PickupIframeSanitizer
 
         $attributes = [
             'src' => $source,
-            'title' => trim((string) $iframe->getAttribute('title')) ?: 'Google Maps',
+            'title' => trim($iframe->getAttribute('title')) ?: 'Google Maps',
             'loading' => 'lazy',
-            'referrerpolicy' => trim((string) $iframe->getAttribute('referrerpolicy')) ?: 'no-referrer-when-downgrade',
+            'referrerpolicy' => trim($iframe->getAttribute('referrerpolicy')) ?: 'no-referrer-when-downgrade',
             'allowfullscreen' => 'true',
         ];
 
-        $allow = trim((string) $iframe->getAttribute('allow'));
+        $allow = trim($iframe->getAttribute('allow'));
 
         if ($allow !== '') {
             $attributes['allow'] = Str::of($allow)
@@ -91,8 +91,8 @@ final class PickupIframeSanitizer
             return false;
         }
 
-        $host = Str::lower((string) $url['host']);
-        $path = (string) ($url['path'] ?? '');
+        $host = Str::lower($url['host']);
+        $path = $url['path'] ?? '';
 
         return in_array($host, ['google.com', 'www.google.com', 'maps.google.com'], true)
             && Str::startsWith($path, '/maps/embed');

@@ -236,7 +236,6 @@ class ProductController extends Controller
         }
 
         foreach ($product_categories as $current_category) {
-            /** @var Category $current_category */
             if ((int)$current_category->id === (int)$target_category->id) {
                 continue;
             }
@@ -302,7 +301,6 @@ class ProductController extends Controller
 
         $breadcrumbs = collect($path_ids)
             ->map(function (int $path_id) use ($categories_by_id): ?array {
-                /** @var Category|null $category */
                 $category = $categories_by_id->get($path_id);
 
                 if (!$category instanceof Category) {
@@ -833,14 +831,12 @@ class ProductController extends Controller
             return [];
         }
 
-        /** @var array<int, array{value_id:int,value:string,value_normalized:string}> $selected_attributes */
         $selected_attributes = $selected_variant_data['attributes'];
         $variant_id_order = collect($variant_data)
             ->pluck('variant_id')
             ->map(fn (mixed $variant_id): int => $this->integerValue($variant_id))
             ->values()
             ->all();
-        /** @var array<int, array{name:string,values:array<string, array{value_id:int,value:string}>}> $group_data_map */
         $group_data_map = $this->buildGroupValuesData($variant_data, $attribute_name_map);
 
         return collect($group_data_map)
@@ -856,9 +852,7 @@ class ProductController extends Controller
                 $product
             ): array {
                 $selected_value_normalized = $this->stringValue(data_get($selected_attributes, "$attribute_id.value_normalized", ''));
-                /** @var string $attribute_name */
                 $attribute_name = $group_data['name'];
-                /** @var array<string, array{value_id:int,value:string}> $values_data */
                 $values_data = $group_data['values'];
                 $values_data = collect($values_data)
                     ->sortKeys()

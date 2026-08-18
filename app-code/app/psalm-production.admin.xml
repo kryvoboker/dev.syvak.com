@@ -42,9 +42,19 @@
         <file name="bootstrap/app.php"/>
     </stubs>
     <issueHandlers>
-        <MissingOverrideAttribute errorLevel="suppress"/>
+        <!-- These diagnostics are false positives around Laravel's relation generics and collection templates. -->
+        <InvalidDocblock errorLevel="suppress"/>
+        <LessSpecificImplementedReturnType errorLevel="suppress"/>
+        <TooManyTemplateParams errorLevel="suppress"/>
         <InvalidTemplateParam errorLevel="suppress"/>
         <MissingTemplateParam errorLevel="suppress"/>
+
+        <!-- Null-safe access is intentionally retained for request and persisted relation boundaries. -->
+        <RedundantCondition errorLevel="suppress"/>
+        <TypeDoesNotContainNull errorLevel="suppress"/>
+        <TypeDoesNotContainType errorLevel="suppress"/>
+
+        <MissingOverrideAttribute errorLevel="suppress"/>
         <UndefinedThisPropertyFetch errorLevel="suppress"/>
 
         <!-- Translation return values and Filament component signatures are dynamic. -->
@@ -61,18 +71,8 @@
         <UndefinedMagicPropertyAssignment errorLevel="suppress"/>
         <UndefinedMagicMethod errorLevel="suppress"/>
         <UndefinedInterfaceMethod errorLevel="suppress"/>
-        <InvalidDocblock errorLevel="suppress"/>
-        <TooManyTemplateParams errorLevel="suppress"/>
-        <LessSpecificImplementedReturnType errorLevel="suppress"/>
         <RedundantPropertyInitializationCheck errorLevel="suppress"/>
-        <RedundantCast errorLevel="suppress"/>
-        <UnnecessaryVarAnnotation errorLevel="suppress"/>
-        <ParadoxicalCondition errorLevel="suppress"/>
-        <UnusedClosureParam errorLevel="suppress"/>
         <TooManyArguments errorLevel="suppress"/>
-        <TypeDoesNotContainNull errorLevel="suppress"/>
-        <TypeDoesNotContainType errorLevel="suppress"/>
-        <RedundantCondition errorLevel="suppress"/>
         <UnusedClass errorLevel="suppress"/>
         <PossiblyUnusedMethod errorLevel="suppress"/>
         <PossiblyUnusedProperty errorLevel="suppress"/>

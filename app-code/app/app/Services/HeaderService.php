@@ -31,20 +31,18 @@ class HeaderService
             $this->stringValue(config('app.images.path_to_logo', 'images/logo.png')),
         ));
         $categories = $category->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
-            (int) ($app_settings->language_id ?? 0),
+            $app_settings->language_id ?? 0,
         );
         $categories->load('categoryImage');
 
         $current_device_type = $this->stringValue(config('devices.current_device_type', config('devices.types.desktop')));
         $is_desktop_device = $current_device_type === $this->stringValue(config('devices.types.desktop'));
 
-        $categories = $categories->map(function ($category_item) use ($is_desktop_device): array {
-            /** @var Category $category */
-            $category = $category_item;
+        $categories = $categories->map(function (Category $category) use ($is_desktop_device): array {
 
             $category_data = [
                 'id' => $this->integerValue($category->id),
-                'descriptions' => $category->categoryDescription->first()?->toArray() ?? [],
+                'descriptions' => $this->arrayValue($category->categoryDescription->first()?->toArray() ?? []),
                 'slug' => $this->stringValue($category->slugs->first()?->slug),
             ];
 

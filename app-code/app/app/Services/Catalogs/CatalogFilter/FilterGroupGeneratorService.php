@@ -10,7 +10,6 @@ use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroupTranslation;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -96,23 +95,23 @@ class FilterGroupGeneratorService
         foreach ($system_groups as $payload) {
             $group = CatalogFilterGroup::query()->firstOrNew([
                 'catalog_filter_set_id' => (int) $filter_set->id,
-                'code' => (string) $payload['code'],
+                'code' => $payload['code'],
             ]);
 
             $was_existing_group = $group->exists;
 
-            $group->source_type = CatalogFilterGroupSourceTypeEnum::from((string) $payload['source_type']);
+            $group->source_type = CatalogFilterGroupSourceTypeEnum::from($payload['source_type']);
             $group->source_id = null;
 
             if (! $was_existing_group) {
                 $group->is_enabled = true;
-                $group->sort_order = (int) $payload['sort_order'];
-                $group->get_key = (string) $payload['get_key'];
+                $group->sort_order = $payload['sort_order'];
+                $group->get_key = $payload['get_key'];
                 $group->setAttribute('config', []);
             }
 
             if (blank((string) $group->get_key)) {
-                $group->get_key = (string) $payload['get_key'];
+                $group->get_key = $payload['get_key'];
             }
 
             $group->save();
@@ -139,7 +138,6 @@ class FilterGroupGeneratorService
         int $updated_count,
         array $canonical_group_codes,
     ): array {
-        /** @var Collection<int, Attribute> $active_attributes */
         $active_attributes = Attribute::query()
             ->where('is_active', true)
             ->whereHas('productToAttribute.variant.product', function ($query): void {
