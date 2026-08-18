@@ -67,7 +67,7 @@ class CreateProduct extends CreateRecord
      */
     protected function handleRecordCreation(array $data): Model
     {
-        $record = DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data) {
             $this->record = static::getModel()::create($data);
 
             $this->createDescriptions();

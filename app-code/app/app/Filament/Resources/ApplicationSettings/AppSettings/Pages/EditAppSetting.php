@@ -129,7 +129,7 @@ class EditAppSetting extends EditRecord
      */
     private function normalizeUserSettingsForForm(AppSetting $record): array
     {
-        $user_settings = (array) $record->user_settings;
+        $user_settings = (array) $record->getAttribute('user_settings');
 
         return [
             'upload' => [
@@ -218,7 +218,7 @@ class EditAppSetting extends EditRecord
      */
     private function normalizeAiSettingsForForm(AppSetting $record): array
     {
-        $ai_settings = (array) $record->ai_settings;
+        $ai_settings = (array) $record->getAttribute('ai_settings');
 
         return [
             'api_model' => (string) Arr::get($ai_settings, 'api_model', (string) config('open-ai.api_model', 'gpt-5-mini')),
@@ -255,7 +255,7 @@ class EditAppSetting extends EditRecord
      */
     private function normalizeSystemSettingsForForm(AppSetting $record): array
     {
-        $system_settings = (array) $record->system_settings;
+        $system_settings = (array) $record->getAttribute('system_settings');
 
         return [
             'max_viewport_width' => max(

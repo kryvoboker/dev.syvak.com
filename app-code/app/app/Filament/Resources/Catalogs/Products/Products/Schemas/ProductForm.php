@@ -31,6 +31,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
+use RuntimeException;
 use Throwable;
 
 class ProductForm
@@ -295,11 +296,11 @@ class ProductForm
             ->pluck('path_id')
             ->toArray();
 
-        throw_if(
-            empty($path_ids),
-            'Exception',
-            __('admin/default.errors.category_path_not_found', ['id' => $category_id]),
-        );
+        if (empty($path_ids)) {
+            throw new RuntimeException(
+                (string) __('admin/default.errors.category_path_not_found', ['id' => $category_id]),
+            );
+        }
 
         // Get all categories in the path with descriptions
         $categories = (new Category())->getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds($language_id, $path_ids)
