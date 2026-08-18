@@ -149,10 +149,10 @@ final readonly class ImageUrlBuilderService
 
         if ($original_width > $original_height) {
             $k = min($original_width, $target_width) / max($original_width, $target_width);
-            $target_height = (int) round($original_height * $k);
+            $target_height = (int) round((float) $original_height * (float) $k);
         } else {
             $k = min($original_height, $target_height) / max($original_height, $target_height);
-            $target_width = (int) round($original_width * $k);
+            $target_width = (int) round((float) $original_width * (float) $k);
         }
     }
 

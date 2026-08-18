@@ -202,7 +202,7 @@ final class PromoCodePersistenceService
      */
     private function normalizeErrorTranslations(array $translations): array
     {
-        return collect($translations)
+        $normalized_translations = collect($translations)
             ->map(function (mixed $messages, int|string $language_id): ?array {
                 if ($language_id < 1) {
                     return null;
@@ -223,6 +223,9 @@ final class PromoCodePersistenceService
             ->filter()
             ->values()
             ->all();
+
+        /** @var array<int, array<string, mixed>> $normalized_translations */
+        return $normalized_translations;
     }
 
     /**

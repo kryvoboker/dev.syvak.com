@@ -18,10 +18,10 @@ use App\Services\Catalogs\CatalogFilter\CatalogFilterBootstrapService;
 use App\Services\Catalogs\CatalogFilter\PriceSourceResolverService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\Products\ProductsLimitService;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -412,8 +412,12 @@ readonly class FilterProductsAction
                         ->pluck('label')
                         ->map(fn (mixed $label): string => $this->toString($label))
                         ->all();
+                    /** @var array<int, string> $translation_labels */
 
-                    return [...$value_candidates, ...$translation_labels];
+                    return [
+                        ...$value_candidates,
+                        ...$translation_labels,
+                    ];
                 })
                 ->map(fn (mixed $value): string => $this->normalizeAttributeValue($this->toString($value)))
                 ->filter(fn (string $value): bool => filled($value))
@@ -575,7 +579,10 @@ readonly class FilterProductsAction
         $catalog_image_sizes = $this->page_settings_bootstrap_service->getCategoryProductImageSize();
         $locale_key = $this->toString(config('localization.locale_parameter'), 'locale');
 
-        return collect($products->items())
+        /** @var array<int, Product> $product_items */
+        $product_items = $products->items();
+
+        return collect($product_items)
             ->map(function (Product $product) use ($language_id, $filter_set, $catalog_image_sizes, $minimum_stock_quantity, $locale_key): array {
                 $variant_price = $product->getAttribute('default_variant_price');
                 $variant_stock = $product->getAttribute('default_variant_quantity');

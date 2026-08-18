@@ -6,6 +6,7 @@ namespace App\Supports\Services;
 
 use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\AppSetting;
+use App\Models\Users\User;
 use App\Models\Users\UserGroup;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Support\Arr;
@@ -28,7 +29,7 @@ final class AppSettingsService
 
         $language_id = $this->resolveLanguageId($locale);
         $user = Auth::user();
-        $user_group_id = $user?->user_group_id;
+        $user_group_id = $user instanceof User ? $user->user_group_id : null;
 
         if ($user_group_id === null) {
             $user_group_id = (new UserGroup())->getDefaultUserGroupId();

@@ -34,7 +34,11 @@ class CategoryPath extends Model
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    /** @return Collection<int, self> */
+    /**
+     * @return Collection<int, CategoryPath>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getPathIdsByCategoryId(int $category_id): Collection
     {
         return self::query()

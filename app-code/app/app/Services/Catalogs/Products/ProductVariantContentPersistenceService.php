@@ -82,7 +82,7 @@ final class ProductVariantContentPersistenceService
     {
         $translations = Arr::get(is_array($data) ? $data : [], 'translations', []);
 
-        return collect(is_array($translations) ? $translations : [])
+        $normalized_guides = collect(is_array($translations) ? $translations : [])
             ->map(function (mixed $translation, int|string $language_id): ?array {
                 if (! is_array($translation) || ! is_numeric($language_id)) {
                     return null;
@@ -108,6 +108,9 @@ final class ProductVariantContentPersistenceService
             ->filter()
             ->values()
             ->all();
+
+        /** @var array<int, array<string, mixed>> $normalized_guides */
+        return $normalized_guides;
     }
 
     /**
@@ -117,7 +120,7 @@ final class ProductVariantContentPersistenceService
     {
         $translations = Arr::get(is_array($data) ? $data : [], 'translations', []);
 
-        return collect(is_array($translations) ? $translations : [])
+        $normalized_details = collect(is_array($translations) ? $translations : [])
             ->map(function (mixed $translation, int|string $language_id) use ($section): ?array {
                 if (! is_array($translation) || ! is_numeric($language_id)) {
                     return null;
@@ -144,6 +147,9 @@ final class ProductVariantContentPersistenceService
             ->filter()
             ->values()
             ->all();
+
+        /** @var array<int, array<string, mixed>> $normalized_details */
+        return $normalized_details;
     }
 
     /**

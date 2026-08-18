@@ -155,7 +155,7 @@ readonly class CartViewDataBuilderService
                     'height' => 220,
                 ];
 
-                $line_total = $price * $quantity;
+                $line_total = (float) $price * (float) $quantity;
 
                 $selected_attributes = $this->resolveItemAttributes(
                     $variant,
@@ -177,18 +177,18 @@ readonly class CartViewDataBuilderService
                     'available_quantity' => max(0, $this->integerValue($variant->quantity)),
                     'is_in_stock' => $this->integerValue($variant->quantity) >= max(1, $this->integerValue($variant->minimum ?: $variant->product->minimum ?: 1)),
                     'unit_price' => $price,
-                    'unit_price_formatted' => replace_currency_symbol_to_code(format_price(
+                    'unit_price_formatted' => replace_currency_symbol_to_code((string) format_price(
                         $price,
                         $this->nullableString(config('app.currency.current_currency_code')),
                         $this->floatValue(config('app.currency.current_exchange_rate')),
                     )),
                     'line_total' => $line_total,
                     'rrc_unit_price' => $rrc_price,
-                    'rrc_line_total' => $rrc_price * $quantity,
+                    'rrc_line_total' => (float) $rrc_price * (float) $quantity,
                     'is_discounted' => $is_discounted,
                     'active_discount_id' => $active_discount?->getKey(),
                     'category_ids' => $variant->product->categories->modelKeys(),
-                    'line_total_formatted' => replace_currency_symbol_to_code(format_price(
+                    'line_total_formatted' => replace_currency_symbol_to_code((string) format_price(
                         $line_total,
                         $this->nullableString(config('app.currency.current_currency_code')),
                         $this->floatValue(config('app.currency.current_exchange_rate')),
@@ -246,8 +246,15 @@ readonly class CartViewDataBuilderService
                     'value' => $text,
                 ];
             })
-            ->filter(fn (?array $attribute): bool => is_array($attribute))
-            ->map(function (array $attribute) use ($attribute_label_map): array {
+            ->filter(fn (array|null $attribute): bool => $attribute !== null)
+            ->map(function (array|null $attribute) use ($attribute_label_map): array {
+                if ($attribute === null) {
+                    return [
+                        'label' => '',
+                        'value' => '',
+                    ];
+                }
+
                 $attribute_id = Arr::get($attribute, 'attribute_id');
                 $label = Str::trim($this->stringValue(Arr::get($attribute, 'label', '')));
 

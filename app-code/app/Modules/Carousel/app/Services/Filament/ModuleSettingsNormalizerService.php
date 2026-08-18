@@ -65,7 +65,7 @@ class ModuleSettingsNormalizerService
             ),
         ];
 
-        $normalized_slides = collect((array) $slides)
+        $normalized_slides = collect($slides)
             ->values()
             ->map(fn (mixed $slide, int $index): array => $this->normalizeSlide($slide, $index, $active_languages))
             ->sortBy('sort_order')

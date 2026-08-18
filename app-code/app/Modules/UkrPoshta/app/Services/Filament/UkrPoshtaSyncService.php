@@ -1020,7 +1020,7 @@ readonly class UkrPoshtaSyncService
             return $stage_weight;
         }
 
-        $stage_progress = (int)round(($processed_rows / $total_rows) * 25);
+        $stage_progress = (int) round((((float) $processed_rows / (float) $total_rows) * (float) 25));
 
         return min(100, $stage_weight + $stage_progress);
     }

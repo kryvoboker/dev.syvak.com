@@ -46,7 +46,7 @@ class ProductsCarouselCategoryTreeService
 
         Log::channel('daily')->info('ProductsCarousel category tree options generated.', [
             'categories_count' => count($options),
-            'elapsed_ms' => (int) ((microtime(true) - $started_at) * 1000),
+            'elapsed_ms' => (int) (((float) microtime(true) - (float) $started_at) * (float) 1000),
         ]);
 
         return $options;
@@ -85,7 +85,7 @@ class ProductsCarouselCategoryTreeService
         $description = $category->categoryDescription->first();
 
         return is_string($description?->name) && filled($description->name)
-            ? $description->name
+            ? (string) $description->name
             : 'Category #' . $category->id;
     }
 

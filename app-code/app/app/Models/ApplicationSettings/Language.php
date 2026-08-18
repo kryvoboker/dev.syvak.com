@@ -151,7 +151,11 @@ class Language extends Model
             ->first();
     }
 
-    /** @return Collection<int, self> */
+    /**
+     * @return Collection<int, Language>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getActiveLanguagesWithoutExceptCode(string $code): Collection
     {
         return self::query()
