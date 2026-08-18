@@ -17,7 +17,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
-/** @property string|null $password */
+/**
+ * @property string|null $password
+ * @property bool $is_active
+ * @property string $name
+ * @property string|null $lastname
+ */
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
@@ -62,6 +67,7 @@ class User extends Authenticatable implements FilamentUser
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -72,6 +78,7 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    #[\Override]
     public function canAccessPanel(Panel $panel): bool
     {
         if ($this->is_active === false) {
@@ -81,6 +88,7 @@ class User extends Authenticatable implements FilamentUser
         return $this->shieldCanAccessPanel($panel);
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::saving(function (User $user) {

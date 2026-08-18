@@ -25,6 +25,7 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     protected function findCached(string $hash): ?string
     {
         $product_attribute_text_hash = ProductAttributeTextHash::getAttributeTextHash(
@@ -47,6 +48,7 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model
     {
         $product_attribute_text_hash = $this->getProductAttributeTextHash();

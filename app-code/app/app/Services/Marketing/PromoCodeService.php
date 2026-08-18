@@ -184,6 +184,7 @@ final class PromoCodeService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param PromoCode $promo_code
      * @param Orders    $order
      * @param int|null  $user_id

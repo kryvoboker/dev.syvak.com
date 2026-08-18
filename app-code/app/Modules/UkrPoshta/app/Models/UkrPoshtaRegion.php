@@ -20,6 +20,7 @@ class UkrPoshtaRegion extends Model
     /**
      * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

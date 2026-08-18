@@ -23,6 +23,7 @@ class ProductVariantSizeGuide extends Model
         'full_description',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [

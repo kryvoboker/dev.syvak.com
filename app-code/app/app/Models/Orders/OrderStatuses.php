@@ -20,6 +20,7 @@ class OrderStatuses extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -29,6 +30,7 @@ class OrderStatuses extends Model
         ];
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::saving(function (OrderStatuses $order_status): void {

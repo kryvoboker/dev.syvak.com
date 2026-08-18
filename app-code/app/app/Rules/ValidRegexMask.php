@@ -19,6 +19,7 @@ final class ValidRegexMask implements ValidationRule
      *
      * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
+    #[\Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (blank($value)) {

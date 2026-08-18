@@ -20,6 +20,15 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Throwable;
 
+/**
+ * @property int $id
+ * @property string|null $image
+ * @property float|null $price
+ * @property string|null $sku
+ * @property-read ProductVariant|null $defaultVariant
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Slug> $slugs
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductDescription> $productDescription
+ */
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -47,6 +56,7 @@ class Product extends Model
     /**
      * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

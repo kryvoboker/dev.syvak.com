@@ -20,6 +20,7 @@ class UserGroup extends Model
     /**
      * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -28,6 +29,7 @@ class UserGroup extends Model
         ];
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         // Ensure only one default user group

@@ -21,6 +21,7 @@ class PromoCodeUsage extends Model
         'used_at',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return ['used_at' => 'datetime'];

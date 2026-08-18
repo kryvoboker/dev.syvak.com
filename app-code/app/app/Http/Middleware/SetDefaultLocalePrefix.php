@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -37,7 +38,7 @@ class SetDefaultLocalePrefix
 
             session()->put($locale_key, $normalized_session_locale);
             app()->setLocale($normalized_session_locale);
-            url()->defaults([$locale_key => $normalized_session_locale]);
+            URL::defaults([$locale_key => $normalized_session_locale]);
             config(['app.locale' => $normalized_session_locale]);
             set_app_setting('language_id', $language_id);
 
@@ -111,7 +112,7 @@ class SetDefaultLocalePrefix
 
         session()->put($locale_key, $resolved_locale);
         app()->setLocale($resolved_locale);
-        url()->defaults([$locale_key => $resolved_locale]);
+        URL::defaults([$locale_key => $resolved_locale]);
         config(['app.locale' => $resolved_locale]);
         set_app_setting('language_id', $language?->id);
     }

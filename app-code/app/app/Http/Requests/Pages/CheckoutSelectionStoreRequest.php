@@ -58,6 +58,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
         ];
     }
 
+    #[\Override]
     protected function prepareForValidation(): void
     {
         $normalized_data = $this->all();

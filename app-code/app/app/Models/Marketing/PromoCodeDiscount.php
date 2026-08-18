@@ -16,6 +16,7 @@ class PromoCodeDiscount extends Model
         'value',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return ['value' => 'decimal:4'];

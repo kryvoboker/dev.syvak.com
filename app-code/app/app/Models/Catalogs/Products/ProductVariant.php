@@ -28,6 +28,7 @@ class ProductVariant extends Model
     /**
      * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -114,6 +115,7 @@ class ProductVariant extends Model
         return $this->hasMany(ProductVariantCare::class);
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::saved(function (ProductVariant $variant): void {

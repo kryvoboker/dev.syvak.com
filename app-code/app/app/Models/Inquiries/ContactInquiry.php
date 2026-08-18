@@ -18,6 +18,7 @@ class ContactInquiry extends Model
         'submitted_fields',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [

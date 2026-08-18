@@ -33,6 +33,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
@@ -46,6 +47,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $region
      * @return array<string, mixed>
      */
@@ -60,6 +62,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $city
      * @return array<string, mixed>
      */
@@ -72,7 +75,10 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     * @return array<string, mixed>
+     */
     public function setDeliveryMethod(string $delivery_method): array
     {
         $state = $this->getState();
@@ -82,6 +88,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  mixed  $delivery_address
      * @return array<string, mixed>
      */
@@ -94,6 +101,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $delivery_point
      * @return array<string, mixed>
      */
@@ -105,7 +113,10 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     * @return array<string, mixed>
+     */
     public function clearDeliveryPoint(): array
     {
         $state = $this->getState();
@@ -114,7 +125,10 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     * @return array<string, mixed>
+     */
     public function clearDeliveryAddress(): array
     {
         $state = $this->getState();

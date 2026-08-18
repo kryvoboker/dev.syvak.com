@@ -29,6 +29,7 @@ class InquiryResponse extends Model
         'sent_at',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [

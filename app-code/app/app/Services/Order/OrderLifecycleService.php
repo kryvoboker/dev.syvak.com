@@ -8,8 +8,10 @@ use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
 use App\Models\Orders\OrderStatuses;
 use App\Models\Payment\PaymentStatuses;
+use App\Models\Users\User;
 use App\Supports\Services\CacheInvalidationService;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
@@ -101,6 +103,7 @@ final class OrderLifecycleService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param array<string, mixed> $context
      */
     public function transitionOrderForPayment(Orders $order, string $payment_status, array $context = []): bool
@@ -174,6 +177,7 @@ final class OrderLifecycleService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param array<string, mixed> $provider_data
      */
     public function transitionPayment(
@@ -249,8 +253,8 @@ final class OrderLifecycleService
      */
     private function getHistoryActorData(): array
     {
-        $user = auth()->user();
-        $roles = $user?->getRoleNames()->implode(', ');
+        $user = Auth::user();
+        $roles = $user instanceof User ? $user->getRoleNames()->implode(', ') : null;
 
         return [
             (string) __('admin/orders/orders.history_data.actor') => $user !== null

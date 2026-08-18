@@ -9,6 +9,9 @@ use App\Models\Catalogs\Attributes\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string|null $value_string
+ */
 class ProductVariantAttributeValue extends Model
 {
     protected $fillable = [
@@ -21,6 +24,7 @@ class ProductVariantAttributeValue extends Model
     /**
      * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

@@ -12,6 +12,7 @@ class ProductComposition extends Model
 {
     protected $fillable = ['product_id', 'language_id', 'title', 'items'];
 
+    #[\Override]
     protected function casts(): array
     {
         return ['product_id' => 'integer', 'language_id' => 'integer', 'items' => 'array'];

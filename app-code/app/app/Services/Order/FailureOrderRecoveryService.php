@@ -198,7 +198,8 @@ final readonly class FailureOrderRecoveryService
     private function incrementRetryCount(): void
     {
         if ($this->request->hasSession()) {
-            $this->request->session()->increment(self::SESSION_KEY . '.retry_count');
+            $retry_count = $this->integerValue($this->request->session()->get(self::SESSION_KEY . '.retry_count', 0));
+            $this->request->session()->put(self::SESSION_KEY . '.retry_count', $retry_count + 1);
         }
     }
 

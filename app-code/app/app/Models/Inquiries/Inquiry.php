@@ -41,6 +41,7 @@ class Inquiry extends Model
         'submitted_at',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [

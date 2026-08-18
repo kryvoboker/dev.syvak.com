@@ -20,6 +20,7 @@ class SearchProductResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function toArray(Request $request): array
     {
         static $search_product_sizes_cache = null;
@@ -43,7 +44,7 @@ class SearchProductResource extends JsonResource
         $variant_discount = $variant?->discounts?->first();
 
         $price = format_price(
-            $price_source,
+            $this->floatValue($price_source),
             $this->nullableString(config('app.currency.current_currency_code')),
             $this->floatValue(config('app.currency.current_exchange_rate')),
         );

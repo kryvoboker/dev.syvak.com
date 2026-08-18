@@ -25,6 +25,7 @@ class Currency extends Model
     /**
      * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -38,6 +39,7 @@ class Currency extends Model
     /**
      * Boot the model.
      */
+    #[\Override]
     protected static function booted(): void
     {
         // Ensure only one default currency
