@@ -24,10 +24,10 @@ class SetDefaultLocalePrefix
         $allowed_locales = get_allowed_locales();
         $path_info = Str::ltrim($request->getPathInfo(), '/');
         $is_livewire_request = Str::startsWith($path_info, ['livewire-', 'livewire/']);
-        $locale_key = config('localization.locale_parameter');
+        $locale_key = $this->stringValue(config('localization.locale_parameter'));
         $fallback_locale = $this->resolveFallbackLocale($allowed_locales);
         $session_locale = session($locale_key);
-        $normalized_session_locale = in_array($session_locale, $allowed_locales, true)
+        $normalized_session_locale = is_string($session_locale) && in_array($session_locale, $allowed_locales, true)
             ? $session_locale
             : $fallback_locale;
 
@@ -47,7 +47,7 @@ class SetDefaultLocalePrefix
         $route_name = $route?->getName();
         $route_locale = $route?->parameter($locale_key);
         $has_locale_parameter = in_array($locale_key, $route?->parameterNames() ?? [], true);
-        $has_valid_route_locale = in_array($route_locale, $allowed_locales, true);
+        $has_valid_route_locale = is_string($route_locale) && in_array($route_locale, $allowed_locales, true);
         $path_locale = Str::before($path_info, '/');
         $has_valid_path_locale = in_array($path_locale, $allowed_locales, true);
 
@@ -90,7 +90,7 @@ class SetDefaultLocalePrefix
 
     private function applyLocale(Request $request, string $resolved_locale): void
     {
-        $locale_key = config('localization.locale_parameter');
+        $locale_key = $this->stringValue(config('localization.locale_parameter'));
         $language = resolve_language_by_locale($resolved_locale);
 
         if ($language === null) {
@@ -112,12 +112,18 @@ class SetDefaultLocalePrefix
      */
     private function resolveFallbackLocale(array $allowed_locales): string
     {
-        $configured_locale = (string)config('app.locale', 'en');
+        $configured_locale_value = config('app.locale', 'en');
+        $configured_locale = is_scalar($configured_locale_value) ? (string) $configured_locale_value : 'en';
 
         if (in_array($configured_locale, $allowed_locales, true)) {
             return $configured_locale;
         }
 
         return Arr::first($allowed_locales, default: 'en');
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

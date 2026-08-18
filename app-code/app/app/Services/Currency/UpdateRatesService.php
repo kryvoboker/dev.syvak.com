@@ -24,7 +24,7 @@ class UpdateRatesService
         $json_url = config('app.currency.json_url');
 
         try {
-            $response = Http::timeout(10)->get((string) $json_url);
+            $response = Http::timeout(10)->get($this->stringValue($json_url));
 
             if ($response->failed()) {
                 Log::channel('stack')->error(__('admin/settings/currencies.error_failed_to_update_rates'), [
@@ -36,7 +36,7 @@ class UpdateRatesService
 
             $json = $response->json();
 
-            if (! $json) {
+            if (! is_array($json) || $json === []) {
                 return null;
             }
         } catch (Exception $e) {
@@ -52,9 +52,16 @@ class UpdateRatesService
             $default_active_currency->code => $default_active_currency->exchange_rate,
         ];
 
-        foreach ($json as $currency) {
-            if (isset($currency['cc'])) {
-                $currencies_data[$currency['cc']] = $currency['rate'];
+        foreach ($json as $rate_data) {
+            if (! is_array($rate_data)) {
+                continue;
+            }
+
+            $code = $rate_data['cc'] ?? null;
+            $rate = $rate_data['rate'] ?? null;
+
+            if (is_string($code) && is_numeric($rate)) {
+                $currencies_data[$code] = (float) $rate;
             }
         }
 
@@ -65,10 +72,17 @@ class UpdateRatesService
                 return;
             }
 
-            $currency->exchange_rate = (float) $currencies_data[$currency->code];
+            $rate = $currencies_data[$currency->code];
+
+            $currency->exchange_rate = (float) $rate;
             $currency->save();
         });
 
         return null;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

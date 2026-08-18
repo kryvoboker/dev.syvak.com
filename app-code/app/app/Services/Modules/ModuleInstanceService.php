@@ -53,16 +53,16 @@ readonly class ModuleInstanceService
 
             /** @var ModuleInstance $instance */
             $instance = DB::transaction(function () use ($definition, $attributes): ModuleInstance {
-                $next_sort_order = ((int) $definition->instances()->max('sort_order')) + 1;
+                $next_sort_order = $this->integerValue($definition->instances()->max('sort_order')) + 1;
                 $default_name = trim($definition->name . ' ' . $next_sort_order);
-                $name = (string) Arr::get($attributes, 'name', $default_name);
+                $name = $this->stringValue(Arr::get($attributes, 'name', $default_name));
 
                 return $definition->instances()->create([
                     'name' => $name,
                     'placement' => Arr::get($attributes, 'placement'),
                     'context_key' => Arr::get($attributes, 'context_key'),
                     'is_enabled' => (bool) Arr::get($attributes, 'is_enabled', true),
-                    'sort_order' => (int) Arr::get($attributes, 'sort_order', $next_sort_order),
+                    'sort_order' => $this->integerValue(Arr::get($attributes, 'sort_order', $next_sort_order)),
                     'settings' => Arr::get($attributes, 'settings', []),
                     'meta' => Arr::get($attributes, 'meta', []),
                 ]);
@@ -101,15 +101,15 @@ readonly class ModuleInstanceService
             /** @var ModuleInstance $duplicated_instance */
             $duplicated_instance = DB::transaction(function () use ($instance, $attributes): ModuleInstance {
                 $definition = $instance->definition()->firstOrFail();
-                $next_sort_order = ((int) $definition->instances()->max('sort_order')) + 1;
-                $duplicated_name = (string) Arr::get($attributes, 'name', $instance->name . ' Copy');
+                $next_sort_order = $this->integerValue($definition->instances()->max('sort_order')) + 1;
+                $duplicated_name = $this->stringValue(Arr::get($attributes, 'name', $instance->name . ' Copy'));
 
                 return $definition->instances()->create([
                     'name' => $duplicated_name,
                     'placement' => Arr::get($attributes, 'placement', $instance->placement),
                     'context_key' => Arr::get($attributes, 'context_key', $instance->context_key),
                     'is_enabled' => (bool) Arr::get($attributes, 'is_enabled', $instance->is_enabled),
-                    'sort_order' => (int) Arr::get($attributes, 'sort_order', $next_sort_order),
+                    'sort_order' => $this->integerValue(Arr::get($attributes, 'sort_order', $next_sort_order)),
                     'settings' => Arr::get($attributes, 'settings', $instance->settings ?? []),
                     'meta' => Arr::get($attributes, 'meta', $instance->meta ?? []),
                 ]);
@@ -145,7 +145,7 @@ readonly class ModuleInstanceService
             'placement' => Arr::get($attributes, 'placement', $instance->placement),
             'context_key' => Arr::get($attributes, 'context_key', $instance->context_key),
             'is_enabled' => (bool) Arr::get($attributes, 'is_enabled', $instance->is_enabled),
-            'sort_order' => (int) Arr::get($attributes, 'sort_order', $instance->sort_order),
+            'sort_order' => $this->integerValue(Arr::get($attributes, 'sort_order', $instance->sort_order)),
             'settings' => Arr::get($attributes, 'settings', $instance->settings ?? []),
             'meta' => Arr::get($attributes, 'meta', $instance->meta ?? []),
         ])->save();
@@ -182,5 +182,15 @@ readonly class ModuleInstanceService
         $instance->delete();
 
         $this->module_cache_service->flush();
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }
