@@ -234,7 +234,7 @@ class FilterValueGeneratorService
                         $product_query->where('is_active', true);
                     });
             })
-            ->select('product_variant_id', 'language_id', 'value_string')
+            ->select(['product_variant_id', 'language_id', 'value_string'])
             ->orderBy('product_variant_id')
             ->orderBy('language_id')
             ->get()

@@ -620,8 +620,7 @@ if (!function_exists('sanitize_url')) {
             return '';
         }
 
-        $sanitized_url = filter_var($url, FILTER_SANITIZE_URL);
-        $sanitized_url = is_string($sanitized_url) ? $sanitized_url : '';
+        $sanitized_url = filter_var($url, FILTER_SANITIZE_URL) ?: '';
 
         // Ensure the URL has a valid scheme (http or https)
         if (Str::startsWith($sanitized_url, ['http://', 'https://']) === false) {
