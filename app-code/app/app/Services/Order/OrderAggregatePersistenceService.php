@@ -10,10 +10,8 @@ use App\Enums\Order\PaymentMethodEnum;
 use App\Enums\Order\TotalTypesEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
-use App\Models\Orders\OrderCustomers;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
-use App\Models\Orders\OrderShippings;
 use App\Supports\Services\CacheInvalidationService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -88,14 +86,17 @@ final readonly class OrderAggregatePersistenceService
             $this->createProducts($order, $this->listValue(Arr::get($cart_data, 'items', [])));
             $this->createTotals($order, $totals);
             $this->createShipping($order, $validated_data, $locale);
+            $actor_label = (string) __('admin/orders/orders.history_data.actor');
+            $actor_value = auth()->check()
+                ? (string) __('admin/orders/orders.history_data.customer')
+                : (string) __('admin/orders/orders.history_data.guest');
+
             $order->histories()->create([
                 'old_order_status_id' => null,
                 'order_status_id' => $order_status->getKey(),
                 'event' => 'order_created',
                 'json' => [
-                    __('admin/orders/orders.history_data.actor') => auth()->check()
-                        ? __('admin/orders/orders.history_data.customer')
-                        : __('admin/orders/orders.history_data.guest'),
+                    $actor_label => $actor_value,
                 ],
             ]);
 
@@ -133,13 +134,12 @@ final readonly class OrderAggregatePersistenceService
      * @param Orders               $order
      * @param array<string, mixed> $validated_data
      *
-     * @return OrderCustomers
      */
-    private function createCustomer(Orders $order, array $validated_data): OrderCustomers
+    private function createCustomer(Orders $order, array $validated_data): void
     {
         $user = auth()->user();
 
-        return $order->customer()->create([
+        $order->customer()->create([
             'user_id' => auth()->id(),
             'user_group_id' => is_object($user) ? $user->user_group_id : null,
             'first_name' => $this->stringValue(Arr::get($validated_data, 'first_name', '')),
@@ -212,7 +212,7 @@ final readonly class OrderAggregatePersistenceService
     /**
      * @param array<string, mixed> $validated_data
      */
-    private function createShipping(Orders $order, array $validated_data, string $locale): OrderShippings
+    private function createShipping(Orders $order, array $validated_data, string $locale): void
     {
         $city = $this->stringKeyedArray(Arr::get($validated_data, 'city', []));
         $delivery_point = $this->stringKeyedArray(Arr::get($validated_data, OrderDataKeyEnum::DeliveryPoint->value, []));
@@ -220,7 +220,7 @@ final readonly class OrderAggregatePersistenceService
         $delivery_point_id = Arr::get($delivery_point, 'ref') ?: Arr::get($delivery_point, 'id');
         $code = $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value));
 
-        return $order->shipping()->create([
+        $order->shipping()->create([
             'method' => $this->resolveDeliveryMethodName($code, $locale),
             'code' => $code,
             'is_cost_enabled' => $code !== DeliveryMethodEnum::PickupStore->value,

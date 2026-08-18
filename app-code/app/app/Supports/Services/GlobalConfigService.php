@@ -33,8 +33,12 @@ final class GlobalConfigService
     {
         $cached_global_configs = app(AppSettingsService::class)->getSettings()?->global_configs;
 
-        if ($cached_global_configs instanceof Collection && $cached_global_configs->has($key)) {
-            return $cached_global_configs->get($key);
+        if ($cached_global_configs instanceof Collection) {
+            $cached_values = $cached_global_configs->all();
+
+            if (array_key_exists($key, $cached_values)) {
+                return $cached_values[$key];
+            }
         }
 
         return $this->getActiveGlobalConfigs()->get($key, $default);

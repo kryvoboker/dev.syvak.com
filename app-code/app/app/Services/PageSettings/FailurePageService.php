@@ -190,11 +190,11 @@ final readonly class FailurePageService
 
     /**
      * @param mixed $rows
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array{urls: array<string, string>, width: int, height: int, custom_css_classes: string}>
      */
     private function resolveImages(mixed $rows): array
     {
-        return collect(is_array($rows) ? $rows : [])
+        $resolved_images = collect(is_array($rows) ? $rows : [])
             ->filter(fn (mixed $row): bool => is_array($row) && filled(Arr::get($row, 'path')))
             ->sortBy(fn (array $row): int => $this->integerValue(Arr::get($row, 'sort_order', 0)))
             ->map(function (array $row): ?array {
@@ -220,9 +220,12 @@ final readonly class FailurePageService
                     'custom_css_classes' => Str::squish($this->stringValue(Arr::get($row, 'custom_css_classes', ''))),
                 ];
             })
-            ->filter()
+            ->filter(fn (?array $image): bool => $image !== null)
             ->values()
             ->all();
+
+        /** @var array<int, array{urls: array<string, string>, width: int, height: int, custom_css_classes: string}> $resolved_images */
+        return $resolved_images;
     }
 
     /** @return array<int, array<string, mixed>> */

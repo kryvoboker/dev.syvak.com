@@ -179,7 +179,7 @@ final readonly class ContactsPageService
      */
     private function resolvePhones(mixed $rows): array
     {
-        return collect(is_array($rows) ? $rows : [])
+        $resolved_phones = collect(is_array($rows) ? $rows : [])
             ->map(fn (mixed $row): array => [
                 'type' => $this->resolveString(data_get($row, 'type'), 'mobile'),
                 'value' => $this->resolveString(data_get($row, 'value'), ''),
@@ -187,6 +187,9 @@ final readonly class ContactsPageService
             ->filter(fn (array $phone): bool => filled($phone['value']))
             ->values()
             ->all();
+
+        /** @var array<int, array{type: string, value: string}> $resolved_phones */
+        return $resolved_phones;
     }
 
     /** @param mixed $rows
@@ -194,11 +197,13 @@ final readonly class ContactsPageService
      */
     private function resolveEmails(mixed $rows): array
     {
-        return collect(is_array($rows) ? $rows : [])
+        $resolved_emails = collect(is_array($rows) ? $rows : [])
             ->map(fn (mixed $row): string => $this->resolveString(data_get($row, 'value'), ''))
             ->filter(fn (string $email): bool => filled($email))
             ->values()
             ->all();
+
+        return $resolved_emails;
     }
 
     /** @param mixed $rows
@@ -206,7 +211,7 @@ final readonly class ContactsPageService
      */
     private function resolveAddresses(mixed $rows, int $language_id): array
     {
-        return collect(is_array($rows) ? $rows : [])
+        $resolved_addresses = collect(is_array($rows) ? $rows : [])
             ->map(function (mixed $row) use ($language_id): array {
                 $localized = data_get($row, 'localized.' . $language_id);
 
@@ -226,14 +231,16 @@ final readonly class ContactsPageService
             ->filter(fn (array $address): bool => filled($address['value']))
             ->values()
             ->all();
+
+        return $resolved_addresses;
     }
 
     /** @param mixed $rows
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array{urls: array<string, string>, width: int, height: int, custom_css_classes: string, sort_order: int}>
      */
     private function resolveImages(mixed $rows): array
     {
-        return collect(is_array($rows) ? $rows : [])
+        $resolved_images = collect(is_array($rows) ? $rows : [])
             ->filter(fn (mixed $row): bool => is_array($row) && filled(data_get($row, 'path')))
             ->map(function (array $row): ?array {
                 $path = Str::ltrim($this->stringValue(Arr::get($row, 'path')), '/');
@@ -259,10 +266,13 @@ final readonly class ContactsPageService
                     'sort_order' => $this->integerValue(Arr::get($row, 'sort_order', 0)),
                 ];
             })
-            ->filter()
+            ->filter(fn (?array $image): bool => $image !== null)
             ->sortBy('sort_order')
             ->values()
             ->all();
+
+        /** @var array<int, array{urls: array<string, string>, width: int, height: int, custom_css_classes: string, sort_order: int}> $resolved_images */
+        return $resolved_images;
     }
 
     /** @param mixed $map
@@ -274,7 +284,9 @@ final readonly class ContactsPageService
         $iframe_src = $this->resolveIframeSrc(Arr::get($map, 'iframe'));
         $latitude = Arr::get($map, 'latitude');
         $longitude = Arr::get($map, 'longitude');
-        $coordinates = is_numeric($latitude) && is_numeric($longitude) ? $latitude . ',' . $longitude : null;
+        $coordinates = is_numeric($latitude) && is_numeric($longitude)
+            ? (string) $latitude . ',' . (string) $longitude
+            : null;
 
         return [
             'iframe_src' => $iframe_src,

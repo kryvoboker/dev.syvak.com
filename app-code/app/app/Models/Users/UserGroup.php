@@ -66,7 +66,11 @@ class UserGroup extends Model
         });
     }
 
-    /** @return Collection<int, self> */
+    /**
+     * @return Collection<int, UserGroup>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getAllActiveUserGroups(): Collection
     {
         return self::query()

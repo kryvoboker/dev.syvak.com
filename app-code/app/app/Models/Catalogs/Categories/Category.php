@@ -195,7 +195,9 @@ class Category extends Model
     }
 
     /** @param array<int, int> $path_ids
-     * @return Collection<int, self>
+     * @return Collection<int, Category>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
      */
     public function getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds(int $language_id, array $path_ids): Collection
     {

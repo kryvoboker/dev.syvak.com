@@ -103,7 +103,8 @@ class ProductController extends Controller
         ]);
         $page_type = try_detect_page_type();
         $app_settings = get_app_settings();
-        $telegram_row = collect((array) ($app_settings?->socials[$locale] ?? []))
+        $socials = $app_settings?->socials?->all() ?? [];
+        $telegram_row = collect((array) Arr::get($socials, $locale, []))
             ->first(fn (mixed $social_item): bool => $this->stringValue(data_get($social_item, 'social_type')) === 'telegram');
         $telegram_link = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
@@ -299,7 +300,7 @@ class ProductController extends Controller
             ->get()
             ->keyBy('id');
 
-        return collect($path_ids)
+        $breadcrumbs = collect($path_ids)
             ->map(function (int $path_id) use ($categories_by_id): ?array {
                 /** @var Category|null $category */
                 $category = $categories_by_id->get($path_id);
@@ -326,6 +327,9 @@ class ProductController extends Controller
             ->filter(fn (?array $breadcrumb): bool => $breadcrumb !== null)
             ->values()
             ->all();
+
+        /** @var array<int, array{title: string, url: string|null}> $breadcrumbs */
+        return $breadcrumbs;
     }
 
     /**
@@ -1143,8 +1147,8 @@ class ProductController extends Controller
         ];
 
         $section_defaults = [
-            'composition' => __('storefront/default.product.details.composition'),
-            'care' => __('storefront/default.product.details.care'),
+            'composition' => (string) __('storefront/default.product.details.composition'),
+            'care' => (string) __('storefront/default.product.details.care'),
         ];
 
         return collect($section_defaults)

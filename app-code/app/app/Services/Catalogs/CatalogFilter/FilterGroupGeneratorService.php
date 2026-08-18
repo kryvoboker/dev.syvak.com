@@ -26,8 +26,6 @@ class FilterGroupGeneratorService
         try {
             $created_count = 0;
             $updated_count = 0;
-            $canonical_group_codes = [];
-
             [$created_count, $updated_count, $canonical_group_codes] = $this->syncSystemGroups(
                 $filter_set,
                 $created_count,

@@ -104,7 +104,7 @@ final class BankTransferConfig
                 continue;
             }
 
-            $normalized_language_code = Str::lower(Str::trim((string) $language_code));
+            $normalized_language_code = Str::lower(Str::trim($language_code));
             $normalized_value = Str::trim((string) $value);
 
             if ($normalized_language_code !== '' && $normalized_value !== '') {

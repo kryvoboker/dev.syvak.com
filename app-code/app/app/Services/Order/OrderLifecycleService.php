@@ -253,10 +253,10 @@ final class OrderLifecycleService
         $roles = $user?->getRoleNames()->implode(', ');
 
         return [
-            __('admin/orders/orders.history_data.actor') => $user !== null
-                ? __('admin/orders/orders.history_data.administrator')
-                : __('admin/orders/orders.history_data.system'),
-            __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
+            (string) __('admin/orders/orders.history_data.actor') => $user !== null
+                ? (string) __('admin/orders/orders.history_data.administrator')
+                : (string) __('admin/orders/orders.history_data.system'),
+            (string) __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
         ];
     }
 }

@@ -166,7 +166,7 @@ final readonly class NotFoundPageService
             return [];
         }
 
-        return collect($images)
+        $resolved_images = collect($images)
             ->filter(fn (mixed $image): bool => is_array($image) && filled(Arr::get($image, 'path')))
             ->sortBy(fn (array $image): int => $this->integerValue(Arr::get($image, 'sort_order', 0)))
             ->values()
@@ -204,8 +204,11 @@ final readonly class NotFoundPageService
                     return null;
                 }
             })
-            ->filter()
+            ->filter(fn (?array $image): bool => $image !== null)
             ->all();
+
+        /** @var array<int, array{urls: array<string, string>, width: int, height: int, is_square: bool, custom_css_classes: string, sort_order: int}> $resolved_images */
+        return $resolved_images;
     }
 
     /** @return array<string, mixed> */

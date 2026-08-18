@@ -383,7 +383,7 @@ final readonly class OrderAdminPersistenceService
                     'quantity' => $quantity,
                     'discount' => $discount,
                     'unit_price' => $unit_price,
-                    'line_total' => max(0, round($quantity * $unit_price - $discount, 4)),
+                    'line_total' => max(0, round((float) $quantity * (float) $unit_price - (float) $discount, 4)),
                 ]);
                 $submitted_product_ids[] = $new_order_product->getKey();
                 $changed_sections[] = 'products';
@@ -421,7 +421,7 @@ final readonly class OrderAdminPersistenceService
                 'quantity' => $quantity,
                 'discount' => $discount,
                 'unit_price' => $unit_price,
-                'line_total' => max(0, round($quantity * $unit_price - $discount, 4)),
+                'line_total' => max(0, round((float) $quantity * (float) $unit_price - (float) $discount, 4)),
             ]);
 
             if ($order_product->isDirty()) {
@@ -977,7 +977,7 @@ final readonly class OrderAdminPersistenceService
 
         foreach ($data as $key => $value) {
             $translation_key = 'admin/orders/orders.history_data.' . Str::snake((string) $key);
-            $translated_label = __($translation_key);
+            $translated_label = (string) __($translation_key);
             $label = $translated_label !== $translation_key
                 ? $translated_label
                 : Str::headline((string) $key);
@@ -991,8 +991,8 @@ final readonly class OrderAdminPersistenceService
     {
         if (is_bool($value)) {
             return $value
-                ? __('admin/orders/orders.history_data.yes')
-                : __('admin/orders/orders.history_data.no');
+                ? (string) __('admin/orders/orders.history_data.yes')
+                : (string) __('admin/orders/orders.history_data.no');
         }
 
         if ($value === null || $value === '') {
@@ -1051,10 +1051,10 @@ final readonly class OrderAdminPersistenceService
         $roles = $user?->getRoleNames()->implode(', ');
 
         return [
-            __('admin/orders/orders.history_data.actor') => $user !== null
-                ? __('admin/orders/orders.history_data.administrator')
-                : __('admin/orders/orders.history_data.system'),
-            __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
+            (string) __('admin/orders/orders.history_data.actor') => $user !== null
+                ? (string) __('admin/orders/orders.history_data.administrator')
+                : (string) __('admin/orders/orders.history_data.system'),
+            (string) __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
         ];
     }
 }

@@ -65,7 +65,7 @@ class HeaderService
             }
 
             return $item;
-        }, $this->arrayValue($app_settings->socials[app()->getLocale()] ?? []));
+        }, $this->arrayValue(Arr::get($app_settings->socials?->all() ?? [], app()->getLocale(), [])));
 
         return [
             'logo_data' => [
@@ -102,7 +102,7 @@ class HeaderService
                 Arr::get($settings, 'header.categories', []),
             );
 
-            return app(HeaderCategoryService::class)
+            $resolved_categories = app(HeaderCategoryService::class)
                 ->getActiveCategories($category_ids, $language_id)
                 ->map(function (Category $category): ?array {
                     $description = $category->categoryDescription->first();
@@ -121,9 +121,12 @@ class HeaderService
                         'slug' => $this->stringValue($slug),
                     ];
                 })
-                ->filter()
+                ->filter(fn (?array $category): bool => $category !== null)
                 ->values()
                 ->all();
+
+            /** @var array<int, array{id: int, descriptions: array<string, mixed>, slug: string}> $resolved_categories */
+            return $resolved_categories;
         } catch (Throwable $throwable) {
             Log::channel('stack')->warning('Header categories payload resolution failed.', [
                 'language_id' => $language_id,

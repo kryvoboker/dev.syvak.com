@@ -215,13 +215,13 @@ class CheckoutBranchSearchService
         $normalized_rows = [];
 
         $weekday_map = [
-            'Monday' => __('novaposhta::storefront/checkout.texts.monday'),
-            'Tuesday' => __('novaposhta::storefront/checkout.texts.tuesday'),
-            'Wednesday' => __('novaposhta::storefront/checkout.texts.wednesday'),
-            'Thursday' => __('novaposhta::storefront/checkout.texts.thursday'),
-            'Friday' => __('novaposhta::storefront/checkout.texts.friday'),
-            'Saturday' => __('novaposhta::storefront/checkout.texts.saturday'),
-            'Sunday' => __('novaposhta::storefront/checkout.texts.sunday'),
+            'Monday' => (string) __('novaposhta::storefront/checkout.texts.monday'),
+            'Tuesday' => (string) __('novaposhta::storefront/checkout.texts.tuesday'),
+            'Wednesday' => (string) __('novaposhta::storefront/checkout.texts.wednesday'),
+            'Thursday' => (string) __('novaposhta::storefront/checkout.texts.thursday'),
+            'Friday' => (string) __('novaposhta::storefront/checkout.texts.friday'),
+            'Saturday' => (string) __('novaposhta::storefront/checkout.texts.saturday'),
+            'Sunday' => (string) __('novaposhta::storefront/checkout.texts.sunday'),
         ];
 
         $text_day_off = __('novaposhta::storefront/checkout.texts.day_off');

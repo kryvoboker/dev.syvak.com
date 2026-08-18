@@ -85,7 +85,7 @@ class SearchProductResource extends JsonResource
 
                     return [
                         'id' => $variant_discount->id,
-                        'discounted_price' => replace_currency_symbol_to_code($discounted_price),
+                        'discounted_price' => replace_currency_symbol_to_code((string) $discounted_price),
                         'start_date' => $variant_discount->date_start,
                         'end_date' => $variant_discount->date_end,
                     ];

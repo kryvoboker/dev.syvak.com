@@ -75,6 +75,8 @@ class HeaderCategoryService
     /**
      * @param  array<int|string, mixed>  $selected_category_ids
      * @return array<int, string>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
      */
     public function searchOptions(string $search, array $selected_category_ids = []): array
     {
@@ -165,16 +167,16 @@ class HeaderCategoryService
         }
 
         return collect($category_ids)
-            ->map(function (mixed $category_id): ?int {
+            ->map(function (mixed $category_id): int {
                 if (! is_int($category_id) && ! is_string($category_id) && ! is_numeric($category_id)) {
-                    return null;
+                    return 0;
                 }
 
                 $normalized_id = (int) $category_id;
 
-                return $normalized_id > 0 ? $normalized_id : null;
+                return $normalized_id > 0 ? $normalized_id : 0;
             })
-            ->filter(fn (?int $category_id): bool => $category_id !== null)
+            ->filter(fn (int $category_id): bool => $category_id > 0)
             ->unique()
             ->values()
             ->all();

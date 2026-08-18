@@ -155,19 +155,19 @@ final class PromoCodeService
         $currency_code = $this->stringValue(Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code')));
         $item_totals = $this->resolveEligibleItemTotals($promo_code, $cart_items);
         $non_product_total = max(0, $current_total - $this->floatValue(Arr::get($totals_data, 'items_subtotal', 0)));
-        $base_amount = $item_totals['eligible_subtotal'] + $non_product_total;
+        $base_amount = (float) $item_totals['eligible_subtotal'] + (float) $non_product_total;
 
         if ($promo_code->promo_type !== PromoCodeTypeEnum::Super && $item_totals['has_discounted_products']) {
             $base_amount = $promo_code->discount_base_mode === PromoCodeDiscountBaseModeEnum::ExcludeDiscountedProducts
-                ? $item_totals['non_discounted_subtotal'] + $non_product_total
-                : $item_totals['rrc_subtotal'] + $non_product_total;
+                ? (float) $item_totals['non_discounted_subtotal'] + (float) $non_product_total
+                : (float) $item_totals['rrc_subtotal'] + (float) $non_product_total;
         }
 
         $base_amount = min(max(0, $base_amount), max(0, $current_total));
         $discount_value = $this->resolveDiscountValue($promo_code, $currency_code);
         $discount_amount = $promo_code->discount_type === PromoCodeDiscountTypeEnum::Percentage
-            ? $base_amount * ($discount_value / 100)
-            : min($base_amount, $discount_value);
+            ? (float) $base_amount * ((float) $discount_value / (float) 100)
+            : min((float) $base_amount, (float) $discount_value);
 
         return [
             'is_valid' => true,

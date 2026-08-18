@@ -69,7 +69,11 @@ class Attribute extends Model
         });
     }
 
-    /** @return Collection<int, self> */
+    /**
+     * @return Collection<int, Attribute>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getActiveAttributesWithDescriptionsByLanguageId(int $language_id): Collection
     {
         return self::query()

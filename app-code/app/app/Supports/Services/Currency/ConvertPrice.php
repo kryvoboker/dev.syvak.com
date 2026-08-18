@@ -50,7 +50,7 @@ final class ConvertPrice
             $exchange_rate = (float) $currency->exchange_rate;
         }
 
-        $amount = $exchange_rate ? $price * $exchange_rate : $price;
+        $amount = $exchange_rate ? (float) $price * (float) $exchange_rate : (float) $price;
 
         if (! $decimal_place) {
             $amount = ceil($amount);
