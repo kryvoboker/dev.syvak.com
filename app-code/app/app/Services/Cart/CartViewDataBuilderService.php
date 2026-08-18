@@ -30,7 +30,7 @@ readonly class CartViewDataBuilderService
     public function build(array $cart_items, string $locale, string $mode = CartModeEnum::Regular->value): array
     {
         $language = resolve_language_by_locale($locale);
-        $language_id = $language instanceof Language ? (int)$language->id : 0;
+        $language_id = $language instanceof Language ? $this->integerValue($language->id) : 0;
 
         if ($cart_items === []) {
             return $this->emptyPayload($mode);
@@ -38,7 +38,7 @@ readonly class CartViewDataBuilderService
 
         $variant_ids = collect($cart_items)
             ->pluck('product_variant_id')
-            ->map(fn (mixed $variant_id): int => (int)$variant_id)
+            ->map(fn (mixed $variant_id): int => $this->integerValue($variant_id))
             ->filter(fn (int $variant_id): bool => $variant_id > 0)
             ->unique()
             ->values()
@@ -103,24 +103,24 @@ readonly class CartViewDataBuilderService
         $resolved_items = collect($cart_items)
             ->map(function (array $item_data) use ($variants, $language_id): ?array {
                 /** @var ProductVariant|null $variant */
-                $variant = $variants->get((int)$item_data['product_variant_id']);
+                $variant = $variants->get($this->integerValue($item_data['product_variant_id']));
 
                 if (!$variant instanceof ProductVariant || !$variant->product) {
                     return null;
                 }
 
-                $quantity = max(1, (int)Arr::get($item_data, 'quantity', 1));
-                $rrc_price = max(0, (float) ($variant->price ?? $variant->product->price ?? 0));
+                $quantity = max(1, $this->integerValue(Arr::get($item_data, 'quantity', 1)));
+                $rrc_price = max(0, $this->floatValue($variant->price ?? $variant->product->price ?? 0));
                 $active_discount = $variant->discounts->first();
-                $price = max(0, (float) ($active_discount->price ?? $rrc_price));
+                $price = max(0, $this->floatValue($active_discount->price ?? $rrc_price));
                 $is_discounted = $active_discount !== null && $price < $rrc_price;
 
-                $variant_name = Str::trim((string)$variant->descriptions->first()?->name);
-                $product_name = Str::trim((string)$variant->product->productDescription->first()?->name);
+                $variant_name = Str::trim($this->stringValue($variant->descriptions->first()?->name));
+                $product_name = Str::trim($this->stringValue($variant->product->productDescription->first()?->name));
                 $item_name = filled($variant_name) ? $variant_name : $product_name;
 
-                $product_slug = Str::trim((string)$variant->product->slugs->first()?->slug);
-                $variant_slug = Str::trim((string)$variant->slugs->first()?->slug);
+                $product_slug = Str::trim($this->stringValue($variant->product->slugs->first()?->slug));
+                $variant_slug = Str::trim($this->stringValue($variant->slugs->first()?->slug));
 
                 if (filled($product_slug)) {
                     if (filled($variant_slug)) {
@@ -147,28 +147,28 @@ readonly class CartViewDataBuilderService
 
                 $selected_attributes = $this->resolveItemAttributes(
                     $variant,
-                    (array)Arr::get($item_data, 'chosen_attributes', []),
+                    $this->arrayValue(Arr::get($item_data, 'chosen_attributes', [])),
                 );
 
                 return [
-                    'cart_id' => (int)Arr::get($item_data, 'cart_id', 0),
-                    'variant_id' => (int)$variant->id,
-                    'product_id' => (int)$variant->product_id,
+                    'cart_id' => $this->integerValue(Arr::get($item_data, 'cart_id', 0)),
+                    'variant_id' => $this->integerValue($variant->id),
+                    'product_id' => $this->integerValue($variant->product_id),
                     'language_id' => $language_id,
                     'model' => $variant->product->model,
-                    'sku' => (string)$variant->product->sku,
+                    'sku' => $this->stringValue($variant->product->sku),
                     'ean' => $variant->product->ean,
                     'name' => $item_name,
                     'url' => $item_url,
                     'quantity' => $quantity,
-                    'minimum_quantity' => max(1, (int)($variant->minimum ?: $variant->product->minimum ?: 1)),
-                    'available_quantity' => max(0, (int)$variant->quantity),
-                    'is_in_stock' => (int)$variant->quantity >= max(1, (int)($variant->minimum ?: $variant->product->minimum ?: 1)),
+                    'minimum_quantity' => max(1, $this->integerValue($variant->minimum ?: $variant->product->minimum ?: 1)),
+                    'available_quantity' => max(0, $this->integerValue($variant->quantity)),
+                    'is_in_stock' => $this->integerValue($variant->quantity) >= max(1, $this->integerValue($variant->minimum ?: $variant->product->minimum ?: 1)),
                     'unit_price' => $price,
                     'unit_price_formatted' => replace_currency_symbol_to_code(format_price(
                         $price,
-                        config('app.currency.current_currency_code'),
-                        (float)config('app.currency.current_exchange_rate'),
+                        $this->nullableString(config('app.currency.current_currency_code')),
+                        $this->floatValue(config('app.currency.current_exchange_rate')),
                     )),
                     'line_total' => $line_total,
                     'rrc_unit_price' => $rrc_price,
@@ -178,12 +178,12 @@ readonly class CartViewDataBuilderService
                     'category_ids' => $variant->product->categories->modelKeys(),
                     'line_total_formatted' => replace_currency_symbol_to_code(format_price(
                         $line_total,
-                        config('app.currency.current_currency_code'),
-                        (float)config('app.currency.current_exchange_rate'),
+                        $this->nullableString(config('app.currency.current_currency_code')),
+                        $this->floatValue(config('app.currency.current_exchange_rate')),
                     )),
                     'attributes' => $selected_attributes,
                     'selected_attributes' => $selected_attributes,
-                    'chosen_attributes_raw' => (array)Arr::get($item_data, 'chosen_attributes', []),
+                    'chosen_attributes_raw' => $this->arrayValue(Arr::get($item_data, 'chosen_attributes', [])),
                     'image_data' => $image_data,
                 ];
             })
@@ -207,21 +207,21 @@ readonly class CartViewDataBuilderService
             ->map(function (mixed $value, int|string $key): ?array {
                 if (is_array($value)) {
                     $raw_attribute_id = Arr::get($value, 'attribute_id');
-                    $attribute_id = is_numeric($raw_attribute_id) ? (int)$raw_attribute_id : null;
-                    $label = Str::trim((string)Arr::get(
+                    $attribute_id = is_numeric($raw_attribute_id) ? $this->integerValue($raw_attribute_id) : null;
+                    $label = Str::trim($this->stringValue(Arr::get(
                         $value,
                         'label',
                         Arr::get($value, 'attribute_name', Arr::get($value, 'name', $key)),
-                    ));
-                    $text = Str::trim((string)Arr::get(
+                    )));
+                    $text = Str::trim($this->stringValue(Arr::get(
                         $value,
                         'value',
                         Arr::get($value, 'text', Arr::get($value, 'attribute_value', '')),
-                    ));
+                    )));
                 } else {
-                    $attribute_id = is_int($key) || ctype_digit($key) ? (int)$key : null;
-                    $label = Str::trim((string)$key);
-                    $text = Str::trim((string)$value);
+                    $attribute_id = is_int($key) || ctype_digit($key) ? $this->integerValue($key) : null;
+                    $label = Str::trim($this->stringValue($key));
+                    $text = Str::trim($this->stringValue($value));
                 }
 
                 if ($text === '') {
@@ -235,9 +235,9 @@ readonly class CartViewDataBuilderService
                 ];
             })
             ->filter(fn (?array $attribute): bool => is_array($attribute))
-            ->map(static function (array $attribute) use ($attribute_label_map): array {
+            ->map(function (array $attribute) use ($attribute_label_map): array {
                 $attribute_id = Arr::get($attribute, 'attribute_id');
-                $label = Str::trim((string)Arr::get($attribute, 'label', ''));
+                $label = Str::trim($this->stringValue(Arr::get($attribute, 'label', '')));
 
                 if (is_int($attribute_id) && filled($attribute_label_map[$attribute_id] ?? null)) {
                     $label = $attribute_label_map[$attribute_id];
@@ -245,10 +245,10 @@ readonly class CartViewDataBuilderService
 
                 return [
                     'label' => $label,
-                    'value' => Str::trim((string)Arr::get($attribute, 'value', '')),
+                    'value' => Str::trim($this->stringValue(Arr::get($attribute, 'value', ''))),
                 ];
             })
-            ->filter(static fn (array $attribute): bool => $attribute['value'] !== '')
+            ->filter(fn (array $attribute): bool => $attribute['value'] !== '')
             ->values();
 
         if ($resolved_attributes->isNotEmpty()) {
@@ -257,13 +257,13 @@ readonly class CartViewDataBuilderService
 
         return $variant->attributeValues
             ->map(function ($attribute_value): ?array {
-                $value_string = Str::trim((string)$attribute_value->value_string);
+                $value_string = Str::trim($this->stringValue($attribute_value->value_string));
 
                 if ($value_string === '') {
                     return null;
                 }
 
-                $attribute_label = Str::trim((string)$attribute_value->attribute?->attributeDescription->first()?->name);
+                $attribute_label = Str::trim($this->stringValue($attribute_value->attribute?->attributeDescription->first()?->name));
 
                 return [
                     'label' => $attribute_label,
@@ -283,13 +283,13 @@ readonly class CartViewDataBuilderService
         $label_map = [];
 
         foreach ($variant->attributeValues as $attribute_value) {
-            $attribute_id = (int)($attribute_value->attribute_id ?? 0);
+            $attribute_id = $this->integerValue($attribute_value->attribute_id ?? 0);
 
             if ($attribute_id <= 0) {
                 continue;
             }
 
-            $attribute_label = Str::trim((string)$attribute_value->attribute?->attributeDescription->first()?->name);
+            $attribute_label = Str::trim($this->stringValue($attribute_value->attribute?->attributeDescription->first()?->name));
 
             if ($attribute_label === '') {
                 continue;
@@ -303,19 +303,19 @@ readonly class CartViewDataBuilderService
 
     private function resolveVariantImagePath(ProductVariant $variant): ?string
     {
-        $variant_image = Str::trim((string)$variant->image);
+        $variant_image = Str::trim($this->stringValue($variant->image));
 
         if (filled($variant_image)) {
             return $variant_image;
         }
 
-        $image_from_images = Str::trim((string)optional($variant->images->first())->image);
+        $image_from_images = Str::trim($this->stringValue(data_get($variant->images->first(), 'image')));
 
         if (filled($image_from_images)) {
             return $image_from_images;
         }
 
-        $product_image = Str::trim((string)optional($variant->product)->image);
+        $product_image = Str::trim($this->stringValue(data_get($variant->product, 'image')));
 
         return filled($product_image) ? $product_image : null;
     }
@@ -382,7 +382,7 @@ readonly class CartViewDataBuilderService
             callbacks : $this->resolveTotalsCallbacks($resolved_items, $locale),
         );
 
-        $total_quantity = (int)$resolved_items->sum(fn (array $item_data): int => (int)$item_data['quantity']);
+        $total_quantity = $this->integerValue($resolved_items->sum(fn (array $item_data): int => $this->integerValue($item_data['quantity'])));
 
         return [
             'mode' => $mode,
@@ -401,5 +401,33 @@ readonly class CartViewDataBuilderService
                 'order_store' => localized_route('localized.catalog.order-confirm.store'),
             ],
         ];
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function nullableString(mixed $value): ?string
+    {
+        $value = $this->stringValue($value);
+
+        return $value !== '' ? $value : null;
+    }
+
+    /** @return array<int|string, mixed> */
+    private function arrayValue(mixed $value): array
+    {
+        return is_array($value) ? $value : [];
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function floatValue(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
     }
 }

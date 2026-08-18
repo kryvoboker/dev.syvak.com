@@ -6,6 +6,7 @@ use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
+use App\Models\Modules\ModuleDefinition;
 use App\Models\PageSettings\PageSetting;
 use App\Models\Slug;
 use App\Services\Modules\ModuleRuntimeResolverService;
@@ -24,6 +25,20 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+
+if (!function_exists('string_value')) {
+    function string_value(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+}
+
+if (!function_exists('integer_value')) {
+    function integer_value(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+}
 
 if (!function_exists('clear_telephone')) {
     /**
@@ -173,7 +188,7 @@ if (!function_exists('set_global_config')) {
 
 if (!function_exists('get_global_configs')) {
     /**
-     * @return Collection<string, mixed>
+     * @return Collection<string, string|null>
      */
     function get_global_configs(): Collection
     {
@@ -255,34 +270,34 @@ if (!function_exists('try_detect_page_type')) {
 
         if (filled($route_name)) {
             return match (true) {
-                Str::endsWith($route_name, '.home') => (string)config('page-settings.page_type.home'),
+                Str::endsWith($route_name, '.home') => string_value(config('page-settings.page_type.home')),
                 Str::endsWith($route_name, '.product.static.show'),
                 Str::endsWith($route_name, '.product.variant.show'),
-                Str::endsWith($route_name, '.product.show') => (string)config('page-settings.page_type.product'),
+                Str::endsWith($route_name, '.product.show') => string_value(config('page-settings.page_type.product')),
                 Str::endsWith($route_name, '.catalog-filter-ajax.index'),
                 Str::endsWith($route_name, '.load-more-products-ajax.index'),
-                Str::endsWith($route_name, '.category.show') => (string)config('page-settings.page_type.category'),
-                Str::endsWith($route_name, '.search-products.index') => (string)config('page-settings.page_type.search'),
+                Str::endsWith($route_name, '.category.show') => string_value(config('page-settings.page_type.category')),
+                Str::endsWith($route_name, '.search-products.index') => string_value(config('page-settings.page_type.search')),
                 Str::endsWith($route_name, '.cart.store'),
                 Str::endsWith($route_name, '.cart.update'),
                 Str::endsWith($route_name, '.cart.delete'),
-                Str::endsWith($route_name, '.cart.index') => (string)config('page-settings.page_type.cart'),
+                Str::endsWith($route_name, '.cart.index') => string_value(config('page-settings.page_type.cart')),
                 Str::endsWith($route_name, '.checkout.selection.store'),
                 Str::endsWith($route_name, '.checkout.branches'),
                 Str::endsWith($route_name, '.checkout.cities'),
-                Str::endsWith($route_name, '.checkout.index') => (string)config('page-settings.page_type.checkout'),
+                Str::endsWith($route_name, '.checkout.index') => string_value(config('page-settings.page_type.checkout')),
                 Str::endsWith($route_name, '.order-confirm.simple.store'),
                 Str::endsWith($route_name, '.order-confirm.simple.validate'),
                 Str::endsWith($route_name, '.order-confirm.store'),
-                Str::endsWith($route_name, '.order-confirm.validate') => (string)config('page-settings.page_type.order'),
-                Str::endsWith($route_name, '.thank-you.index') => (string)config('page-settings.page_type.thankyou'),
+                Str::endsWith($route_name, '.order-confirm.validate') => string_value(config('page-settings.page_type.order')),
+                Str::endsWith($route_name, '.thank-you.index') => string_value(config('page-settings.page_type.thankyou')),
                 Str::endsWith($route_name, '.failure-order.retry'),
                 Str::endsWith($route_name, '.failure-order.payment'),
-                Str::endsWith($route_name, '.failure-order.index') => (string)config('page-settings.page_type.failure'),
+                Str::endsWith($route_name, '.failure-order.index') => string_value(config('page-settings.page_type.failure')),
                 Str::endsWith($route_name, '.contacts.static.submit'),
                 Str::endsWith($route_name, '.contacts.static.show'),
                 Str::endsWith($route_name, '.contacts.submit'),
-                Str::endsWith($route_name, '.contacts.show') => (string)config('page-settings.page_type.contacts'),
+                Str::endsWith($route_name, '.contacts.show') => string_value(config('page-settings.page_type.contacts')),
                 default => null,
             };
         }
@@ -292,19 +307,19 @@ if (!function_exists('try_detect_page_type')) {
             ->values();
 
         if ($segments->count() === 1) {
-            return (string)config('page-settings.page_type.home');
+            return string_value(config('page-settings.page_type.home'));
         }
 
         return match ($segments->get(1)) {
-            'product' => (string)config('page-settings.page_type.product'),
-            'category' => (string)config('page-settings.page_type.category'),
-            'search' => (string)config('page-settings.page_type.search'),
-            'cart' => (string)config('page-settings.page_type.cart'),
-            'checkout' => (string)config('page-settings.page_type.checkout'),
-            'order' => (string)config('page-settings.page_type.order'),
-            'thank-you' => (string)config('page-settings.page_type.thankyou'),
-            'failure' => (string)config('page-settings.page_type.failure'),
-            'contacts' => (string)config('page-settings.page_type.contacts'),
+            'product' => string_value(config('page-settings.page_type.product')),
+            'category' => string_value(config('page-settings.page_type.category')),
+            'search' => string_value(config('page-settings.page_type.search')),
+            'cart' => string_value(config('page-settings.page_type.cart')),
+            'checkout' => string_value(config('page-settings.page_type.checkout')),
+            'order' => string_value(config('page-settings.page_type.order')),
+            'thank-you' => string_value(config('page-settings.page_type.thankyou')),
+            'failure' => string_value(config('page-settings.page_type.failure')),
+            'contacts' => string_value(config('page-settings.page_type.contacts')),
             default => null,
         };
     }
@@ -321,7 +336,7 @@ if (!function_exists('localized_route')) {
     function localized_route(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
     {
         $route = $route instanceof BackedEnum ? (string) $route->value : $route;
-        $locale_key = config('localization.locale_parameter');
+        $locale_key = string_value(config('localization.locale_parameter'));
 
         if (Str::startsWith($route, 'localized.') === false) {
             $route = 'localized.' . $route;
@@ -359,24 +374,24 @@ if (!function_exists('prepare_product_attrs')) {
                     return [];
                 }
 
-                $prepared_values = collect(is_array($raw_value) ? $raw_value : explode(',', (string)$raw_value))
-                    ->map(function (mixed $value): int {
-                        if (is_int($value) || ctype_digit((string)$value)) {
-                            return (int)$value;
-                        }
+                $prepared_values = collect(is_array($raw_value) ? $raw_value : explode(',', string_value($raw_value)))
+                        ->map(function (mixed $value): int {
+                            if (is_int($value) || ctype_digit(string_value($value))) {
+                                return integer_value($value);
+                            }
 
-                        $matched_value_id = Str::match('/^attribute_value_(\d+)$/i', Str::trim((string)$value));
+                            $matched_value_id = Str::match('/^attribute_value_(\d+)$/i', Str::trim(string_value($value)));
 
-                        if (filled($matched_value_id)) {
-                            return (int)$matched_value_id;
-                        }
+                            if (filled($matched_value_id)) {
+                                return (int)$matched_value_id;
+                            }
 
-                        return 0;
-                    })
-                    ->filter(fn (int $value_id): bool => $value_id > 0)
-                    ->unique()
-                    ->values()
-                    ->all();
+                            return 0;
+                        })
+                        ->filter(fn (int $value_id): bool => $value_id > 0)
+                        ->unique()
+                        ->values()
+                        ->all();
 
                 if ($prepared_values === []) {
                     return [];
@@ -570,7 +585,7 @@ if (!function_exists('get_now_date')) {
      */
     function get_now_date(?string $time_zone = null): Carbon|CarbonInterface
     {
-        return now($time_zone ?: config('app.timezone'));
+        return now($time_zone ?: string_value(config('app.timezone')));
     }
 }
 
@@ -578,7 +593,7 @@ if (!function_exists('resolve_modules_for_context')) {
     /**
      * @throws BindingResolutionException
      * @throws CircularDependencyException
-     * @return Collection<int, mixed>
+     * @return Collection<int, ModuleDefinition>
      */
     function resolve_modules_for_context(?string $placement = null, ?string $context_key = null): Collection
     {
@@ -730,10 +745,10 @@ if (!function_exists('resolve_sort_code')) {
 
         foreach ($sorting_items as $sorting_item) {
             $item_get = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
-            $item_value = (string)Arr::get($item_get, 'value', '');
+            $item_value = string_value(Arr::get($item_get, 'value', ''));
 
             if (filled($item_value)) {
-                $sorting_values_to_code[$item_value] = (string)Arr::get($sorting_item, 'code', '');
+                $sorting_values_to_code[$item_value] = string_value(Arr::get($sorting_item, 'code', ''));
             }
         }
 
@@ -829,9 +844,9 @@ if (!function_exists('get_slug_variants')) {
 
         return $slugs
             ->mapWithKeys(function (Slug $slug) use ($language_codes_by_id): array {
-                $language_code = Arr::get($language_codes_by_id, $slug->language_id);
+                $language_code = string_value(Arr::get($language_codes_by_id, $slug->language_id));
 
-                if ($language_code === null) {
+                if (blank($language_code)) {
                     return [];
                 }
 
@@ -903,16 +918,18 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
         $result = [];
 
         foreach ($language_ids_by_code as $language_code => $language_id) {
-            $localized_product_slug = (string)optional(
+            $localized_product_slug = string_value(data_get(
                 $related_slugs
                     ->first(fn (Slug $slug): bool => (int)$slug->language_id === $language_id
                         && (string)$slug->sluggable_type === Product::class),
-            )->slug;
-            $localized_variant_slug = (string)optional(
+                'slug',
+            ));
+            $localized_variant_slug = string_value(data_get(
                 $related_slugs
                     ->first(fn (Slug $slug): bool => (int)$slug->language_id === $language_id
                         && (string)$slug->sluggable_type === ProductVariant::class),
-            )->slug;
+                'slug',
+            ));
 
             if (filled($localized_product_slug) && filled($localized_variant_slug)) {
                 $result[$language_code] = [

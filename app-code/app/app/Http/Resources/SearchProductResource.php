@@ -26,8 +26,8 @@ class SearchProductResource extends JsonResource
 
         if (! is_array($search_product_sizes_cache)) {
             $search_product_sizes_cache = [
-                'width' => (int) config('app.page_settings.search.images.search_product.width', 219),
-                'height' => (int) config('app.page_settings.search.images.search_product.height', 219),
+                'width' => $this->integerValue(config('app.page_settings.search.images.search_product.width', 219)),
+                'height' => $this->integerValue(config('app.page_settings.search.images.search_product.height', 219)),
             ];
 
             try {
@@ -44,8 +44,8 @@ class SearchProductResource extends JsonResource
 
         $price = format_price(
             $price_source,
-            config('app.currency.current_currency_code'),
-            (float) config('app.currency.current_exchange_rate'),
+            $this->nullableString(config('app.currency.current_currency_code')),
+            $this->floatValue(config('app.currency.current_exchange_rate')),
         );
 
         return [
@@ -55,11 +55,11 @@ class SearchProductResource extends JsonResource
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
                     $image_source,
-                    (int) $search_product_sizes_cache['width'],
-                    (int) $search_product_sizes_cache['height'],
+                    $this->integerValue($search_product_sizes_cache['width']),
+                    $this->integerValue($search_product_sizes_cache['height']),
                 ),
-                'width' => (int) $search_product_sizes_cache['width'],
-                'height' => (int) $search_product_sizes_cache['height'],
+                'width' => $this->integerValue($search_product_sizes_cache['width']),
+                'height' => $this->integerValue($search_product_sizes_cache['height']),
             ],
             'link' => $this->whenLoaded('slugs', function () {
                 $slug = $this->slugs->first()?->slug;
@@ -79,8 +79,8 @@ class SearchProductResource extends JsonResource
                 if ($variant_discount !== null) {
                     $discounted_price = format_price(
                         $variant_discount->price,
-                        config('app.currency.current_currency_code'),
-                        (float) config('app.currency.current_exchange_rate'),
+                        $this->nullableString(config('app.currency.current_currency_code')),
+                        $this->floatValue(config('app.currency.current_exchange_rate')),
                     );
 
                     return [
@@ -94,5 +94,20 @@ class SearchProductResource extends JsonResource
                 return [];
             }),
         ];
+    }
+
+    private function nullableString(mixed $value): ?string
+    {
+        return is_scalar($value) && filled($value) ? (string) $value : null;
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function floatValue(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
     }
 }

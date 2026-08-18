@@ -18,7 +18,7 @@ class CartTotalsPipelineService
     public function calculate(array $cart_items, array $callbacks = []): array
     {
         $subtotal = collect($cart_items)
-            ->sum(fn (array $item_data): float => (float) Arr::get($item_data, 'line_total', 0));
+            ->sum(fn (array $item_data): float => $this->floatValue(Arr::get($item_data, 'line_total', 0)));
 
         $totals_data = [
             'lines' => [[
@@ -30,8 +30,8 @@ class CartTotalsPipelineService
             ]],
             'items_subtotal' => $subtotal,
             'grand_total' => $subtotal,
-            'currency_code' => (string) config('app.currency.current_currency_code'),
-            'exchange_rate' => (float) config('app.currency.current_exchange_rate'),
+            'currency_code' => $this->stringValue(config('app.currency.current_currency_code')),
+            'exchange_rate' => $this->floatValue(config('app.currency.current_exchange_rate')),
         ];
 
         foreach ($callbacks as $callback) {
@@ -51,9 +51,9 @@ class CartTotalsPipelineService
                 $line_data = is_array($line_data) ? $line_data : [];
 
                 return [
-                    'code' => (string) Arr::get($line_data, 'code', ''),
-                    'label' => (string) Arr::get($line_data, 'label', ''),
-                    'amount' => (float) Arr::get($line_data, 'amount', 0),
+                    'code' => $this->stringValue(Arr::get($line_data, 'code', '')),
+                    'label' => $this->stringValue(Arr::get($line_data, 'label', '')),
+                    'amount' => $this->floatValue(Arr::get($line_data, 'amount', 0)),
                     'is_visible' => (bool) Arr::get($line_data, 'is_visible', true),
                     'include_in_grand_total' => (bool) Arr::get($line_data, 'include_in_grand_total', true),
                 ];
@@ -63,15 +63,15 @@ class CartTotalsPipelineService
 
         $grand_total = $lines
             ->filter(fn (array $line_data): bool => $line_data['is_visible'] === true && $line_data['include_in_grand_total'] === true)
-            ->sum(fn (array $line_data): float => (float) $line_data['amount']);
+            ->sum(fn (array $line_data): float => $this->floatValue($line_data['amount']));
 
-        $currency_code = (string) Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code'));
-        $exchange_rate = (float) Arr::get($totals_data, 'exchange_rate', config('app.currency.current_exchange_rate'));
+        $currency_code = $this->stringValue(Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code')));
+        $exchange_rate = $this->floatValue(Arr::get($totals_data, 'exchange_rate', config('app.currency.current_exchange_rate')));
 
         $normalized_lines = $lines
             ->map(function (array $line_data) use ($currency_code, $exchange_rate): array {
                 $line_data['formatted'] = $this->formatMoney(
-                    (float) $line_data['amount'],
+                    $this->floatValue($line_data['amount']),
                     $currency_code,
                     $exchange_rate,
                 );
@@ -82,9 +82,9 @@ class CartTotalsPipelineService
 
         $result_data = [
             'lines' => $normalized_lines,
-            'items_subtotal' => (float) Arr::get($totals_data, 'items_subtotal', 0),
+            'items_subtotal' => $this->floatValue(Arr::get($totals_data, 'items_subtotal', 0)),
             'items_subtotal_formatted' => $this->formatMoney(
-                (float) Arr::get($totals_data, 'items_subtotal', 0),
+                $this->floatValue(Arr::get($totals_data, 'items_subtotal', 0)),
                 $currency_code,
                 $exchange_rate,
             ),
@@ -108,5 +108,15 @@ class CartTotalsPipelineService
         return replace_currency_symbol_to_code(
             format_price($amount, $currency_code, $exchange_rate),
         );
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function floatValue(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
     }
 }
