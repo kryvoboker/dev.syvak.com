@@ -21,7 +21,7 @@ class ProductVariantDiscount extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -37,7 +37,8 @@ class ProductVariantDiscount extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function variant(): BelongsTo
     {
@@ -45,7 +46,8 @@ class ProductVariantDiscount extends Model
     }
 
     /**
-     * @return BelongsTo<UserGroup, $this>
+     * @phpstan-return BelongsTo<UserGroup, $this>
+     * @psalm-return BelongsTo<UserGroup, self>
      */
     public function userGroup(): BelongsTo
     {

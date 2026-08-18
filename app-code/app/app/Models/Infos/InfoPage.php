@@ -24,7 +24,7 @@ class InfoPage extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -36,13 +36,18 @@ class InfoPage extends Model
         ];
     }
 
-    /** @return HasMany<InfoPageDescription, $this> */
+    /** @phpstan-return HasMany<InfoPageDescription, $this>
+     * @psalm-return HasMany<InfoPageDescription, self>
+     */
     public function infoPageDescription(): HasMany
     {
         return $this->hasMany(InfoPageDescription::class);
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function positions(): Attribute
     {
         return Attribute::make(

@@ -206,7 +206,6 @@ class ProductController extends Controller
      */
     private function resolveProductCategoryBreadcrumbs(Product $product, int $language_id): array
     {
-        /** @var \Illuminate\Database\Eloquent\Collection<int, Category> $product_categories */
         $product_categories = $product->categories()
             ->with([
                 'categoryPaths' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {

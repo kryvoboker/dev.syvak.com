@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Catalogs\CatalogFilter;
 
 use App\Jobs\RebuildCatalogFilterIndexJob;
-use App\Models\Catalogs\CatalogFilter\CatalogFilterIndexMeta;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -29,7 +28,6 @@ class CatalogFilterIndexRebuildDispatcherService
             return $summary;
         }
 
-        /** @var CatalogFilterIndexMeta $index_meta */
         $index_meta = $filter_set->indexMeta()->firstOrCreate(
             ['catalog_filter_set_id' => (int) $filter_set->id],
             [

@@ -55,7 +55,8 @@ class CatalogFilterIndexMeta extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterSet, $this>
+     * @phpstan-return BelongsTo<CatalogFilterSet, $this>
+     * @psalm-return BelongsTo<CatalogFilterSet, self>
      */
     public function filterSet(): BelongsTo
     {

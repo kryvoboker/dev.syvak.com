@@ -672,7 +672,7 @@ final readonly class OrderAdminPersistenceService
                 'delivery_point',
                 'postcode',
             ]),
-            'payments' => $order->payments()->with('paymentStatus')->get()->mapWithKeys(fn (OrderPayments $payment): array => [
+            'payments' => $order->payments()->with('paymentStatus')->get()->toBase()->mapWithKeys(fn (OrderPayments $payment): array => [
                 $this->stringValue($payment->getKey()) => [
                     'method' => $payment->method,
                     'code' => $payment->code,
@@ -683,7 +683,7 @@ final readonly class OrderAdminPersistenceService
                     'failure_reason' => $payment->failure_reason,
                 ],
             ])->all(),
-            'products' => $order->products()->get()->mapWithKeys(fn ($product): array => [
+            'products' => $order->products()->get()->toBase()->mapWithKeys(fn ($product): array => [
                 $this->stringValue($product->getKey()) => $product->only([
                     'id',
                     'product_id',
@@ -698,7 +698,7 @@ final readonly class OrderAdminPersistenceService
                     'line_total',
                 ]),
             ])->all(),
-            'totals' => $order->totals()->get()->mapWithKeys(fn ($total): array => [
+            'totals' => $order->totals()->get()->toBase()->mapWithKeys(fn ($total): array => [
                 $this->stringValue($total->getKey()) => [
                     'total_type' => $this->stringValue($total->getRawOriginal('total_type')),
                     'name' => $total->name,

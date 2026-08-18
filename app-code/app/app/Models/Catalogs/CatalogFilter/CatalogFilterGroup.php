@@ -39,7 +39,8 @@ class CatalogFilterGroup extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterSet, $this>
+     * @phpstan-return BelongsTo<CatalogFilterSet, $this>
+     * @psalm-return BelongsTo<CatalogFilterSet, self>
      */
     public function filterSet(): BelongsTo
     {
@@ -47,7 +48,8 @@ class CatalogFilterGroup extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterGroupTranslation, $this>
+     * @phpstan-return HasMany<CatalogFilterGroupTranslation, $this>
+     * @psalm-return HasMany<CatalogFilterGroupTranslation, self>
      */
     public function translations(): HasMany
     {
@@ -55,7 +57,8 @@ class CatalogFilterGroup extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterValue, $this>
+     * @phpstan-return HasMany<CatalogFilterValue, $this>
+     * @psalm-return HasMany<CatalogFilterValue, self>
      */
     public function values(): HasMany
     {
@@ -63,7 +66,8 @@ class CatalogFilterGroup extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterProductIndex, $this>
+     * @phpstan-return HasMany<CatalogFilterProductIndex, $this>
+     * @psalm-return HasMany<CatalogFilterProductIndex, self>
      */
     public function indexRows(): HasMany
     {

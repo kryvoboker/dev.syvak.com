@@ -16,14 +16,16 @@ class AiAnswerCache extends Model
         'answer',
     ];
 
-    /** @return MorphTo<Model, $this> */
+    /** @phpstan-return MorphTo<Model, $this>
+     * @psalm-return MorphTo<Model, self>
+     */
     public function hashable(): MorphTo
     {
         return $this->morphTo();
     }
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {

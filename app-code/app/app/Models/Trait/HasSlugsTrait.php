@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 trait HasSlugsTrait
 {
     /**
-     * @return MorphMany<Slug, $this>
+     * @phpstan-return MorphMany<Slug, $this>
+     * @psalm-return MorphMany<Slug, self>
      */
     public function slugs(): MorphMany
     {

@@ -29,7 +29,8 @@ class CatalogFilterValueTranslation extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterValue, $this>
+     * @phpstan-return BelongsTo<CatalogFilterValue, $this>
+     * @psalm-return BelongsTo<CatalogFilterValue, self>
      */
     public function filterValue(): BelongsTo
     {
@@ -37,7 +38,8 @@ class CatalogFilterValueTranslation extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

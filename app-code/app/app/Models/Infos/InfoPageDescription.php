@@ -20,7 +20,7 @@ class InfoPageDescription extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -31,7 +31,8 @@ class InfoPageDescription extends Model
     }
 
     /**
-     * @return BelongsTo<InfoPage, $this>
+     * @phpstan-return BelongsTo<InfoPage, $this>
+     * @psalm-return BelongsTo<InfoPage, self>
      */
     public function infoPage(): BelongsTo
     {

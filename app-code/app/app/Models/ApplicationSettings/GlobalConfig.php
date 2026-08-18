@@ -26,7 +26,10 @@ class GlobalConfig extends Model
         ];
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function key(): Attribute
     {
         return Attribute::make(
@@ -34,7 +37,10 @@ class GlobalConfig extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function value(): Attribute
     {
         return Attribute::make(

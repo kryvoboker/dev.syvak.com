@@ -38,11 +38,10 @@ class OrderPayments extends Model
             'failed_at' => 'datetime',
         ];
     }
-
     /**
-     * @return Attribute
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
      */
-    /** @return Attribute<mixed, mixed> */
     public function providerData(): Attribute
     {
         return Attribute::make(
@@ -51,7 +50,8 @@ class OrderPayments extends Model
     }
 
     /**
-     * @return BelongsTo<Orders, $this>
+     * @phpstan-return BelongsTo<Orders, $this>
+     * @psalm-return BelongsTo<Orders, self>
      */
     public function order(): BelongsTo
     {
@@ -59,7 +59,8 @@ class OrderPayments extends Model
     }
 
     /**
-     * @return BelongsTo<PaymentStatuses, $this>
+     * @phpstan-return BelongsTo<PaymentStatuses, $this>
+     * @psalm-return BelongsTo<PaymentStatuses, self>
      */
     public function paymentStatus(): BelongsTo
     {

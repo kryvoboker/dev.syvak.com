@@ -93,7 +93,10 @@ class User extends Authenticatable implements FilamentUser
         });
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function telephone(): Attribute
     {
         return Attribute::make(

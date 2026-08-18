@@ -26,7 +26,7 @@ class ProductVariant extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -43,7 +43,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return BelongsTo<Product, $this>
+     * @phpstan-return BelongsTo<Product, $this>
+     * @psalm-return BelongsTo<Product, self>
      */
     public function product(): BelongsTo
     {
@@ -51,7 +52,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantDescription, $this>
+     * @phpstan-return HasMany<ProductVariantDescription, $this>
+     * @psalm-return HasMany<ProductVariantDescription, self>
      */
     public function descriptions(): HasMany
     {
@@ -59,7 +61,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantImage, $this>
+     * @phpstan-return HasMany<ProductVariantImage, $this>
+     * @psalm-return HasMany<ProductVariantImage, self>
      */
     public function images(): HasMany
     {
@@ -67,7 +70,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantDiscount, $this>
+     * @phpstan-return HasMany<ProductVariantDiscount, $this>
+     * @psalm-return HasMany<ProductVariantDiscount, self>
      */
     public function discounts(): HasMany
     {
@@ -75,7 +79,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantAttributeValue, $this>
+     * @phpstan-return HasMany<ProductVariantAttributeValue, $this>
+     * @psalm-return HasMany<ProductVariantAttributeValue, self>
      */
     public function attributeValues(): HasMany
     {
@@ -83,7 +88,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantSizeGuide, $this>
+     * @phpstan-return HasMany<ProductVariantSizeGuide, $this>
+     * @psalm-return HasMany<ProductVariantSizeGuide, self>
      */
     public function sizeGuides(): HasMany
     {
@@ -91,7 +97,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantComposition, $this>
+     * @phpstan-return HasMany<ProductVariantComposition, $this>
+     * @psalm-return HasMany<ProductVariantComposition, self>
      */
     public function compositions(): HasMany
     {
@@ -99,7 +106,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantCare, $this>
+     * @phpstan-return HasMany<ProductVariantCare, $this>
+     * @psalm-return HasMany<ProductVariantCare, self>
      */
     public function cares(): HasMany
     {

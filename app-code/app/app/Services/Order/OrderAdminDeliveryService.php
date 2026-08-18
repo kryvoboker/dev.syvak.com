@@ -93,7 +93,7 @@ final class OrderAdminDeliveryService
                         ->orWhere('city_name', 'like', "%{$search}%")
                         ->orWhere('ref', 'like', "%{$search}%");
                 })
-                ->orderBy('description')->limit(self::SEARCH_LIMIT)->get()
+                ->orderBy('description')->limit(self::SEARCH_LIMIT)->get()->toBase()
                 ->mapWithKeys(fn (NovaPoshtaCity $city): array => [
                     $this->stringValue($city->getAttribute('ref')) => $this->cityLabel($this->stringValue($city->getAttribute('description') ?: $city->getAttribute('city_name'))),
                 ])->all(),
@@ -103,7 +103,7 @@ final class OrderAdminDeliveryService
                         ->orWhere('description', 'like', "%{$search}%")
                         ->orWhere('city_id', 'like', "%{$search}%");
                 })
-                ->orderBy('city_ua')->limit(self::SEARCH_LIMIT)->get()
+                ->orderBy('city_ua')->limit(self::SEARCH_LIMIT)->get()->toBase()
                 ->mapWithKeys(fn (UkrPoshtaCity $city): array => [
                     $this->stringValue($city->getAttribute('city_id')) => $this->cityLabel($this->stringValue($city->getAttribute('city_ua') ?: $city->getAttribute('description'))),
                 ])->all(),
@@ -129,7 +129,7 @@ final class OrderAdminDeliveryService
                     $query->where('postcode', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%");
                 })
-                ->orderBy('postcode')->limit(self::SEARCH_LIMIT)->get()
+                ->orderBy('postcode')->limit(self::SEARCH_LIMIT)->get()->toBase()
                 ->mapWithKeys(fn (UkrPoshtaPostOffice $point): array => [
                     $this->stringValue($point->getAttribute('postcode')) => $this->pointLabel($this->stringValue($point->getAttribute('description')), $this->stringValue($point->getAttribute('postcode'))),
                 ])->all(),
@@ -200,7 +200,7 @@ final class OrderAdminDeliveryService
                     ->orWhere('number', 'like', "%{$search}%")
                     ->orWhere('ref', 'like', "%{$search}%");
             })
-            ->orderBy('number')->limit(self::SEARCH_LIMIT)->get()
+            ->orderBy('number')->limit(self::SEARCH_LIMIT)->get()->toBase()
             ->mapWithKeys(fn (NovaPoshtaPostOffice|NovaPoshtaPoshtomat $point): array => [
                 $this->stringValue($point->getAttribute('ref')) => $this->pointLabel($this->stringValue($point->getAttribute('description')), $this->stringValue($point->getAttribute('number'))),
             ])->all();

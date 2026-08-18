@@ -54,7 +54,8 @@ class Orders extends Model
     }
 
     /**
-     * @return BelongsTo<OrderStatuses, $this>
+     * @phpstan-return BelongsTo<OrderStatuses, $this>
+     * @psalm-return BelongsTo<OrderStatuses, self>
      */
     public function status(): BelongsTo
     {
@@ -62,7 +63,8 @@ class Orders extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {
@@ -70,7 +72,8 @@ class Orders extends Model
     }
 
     /**
-     * @return BelongsTo<Currency, $this>
+     * @phpstan-return BelongsTo<Currency, $this>
+     * @psalm-return BelongsTo<Currency, self>
      */
     public function currency(): BelongsTo
     {
@@ -78,7 +81,8 @@ class Orders extends Model
     }
 
     /**
-     * @return HasOne<OrderCustomers, $this>
+     * @phpstan-return HasOne<OrderCustomers, $this>
+     * @psalm-return HasOne<OrderCustomers, self>
      */
     public function customer(): HasOne
     {
@@ -86,7 +90,8 @@ class Orders extends Model
     }
 
     /**
-     * @return HasOne<OrderShippings, $this>
+     * @phpstan-return HasOne<OrderShippings, $this>
+     * @psalm-return HasOne<OrderShippings, self>
      */
     public function shipping(): HasOne
     {
@@ -94,7 +99,8 @@ class Orders extends Model
     }
 
     /**
-     * @return HasMany<OrderPayments, $this>
+     * @phpstan-return HasMany<OrderPayments, $this>
+     * @psalm-return HasMany<OrderPayments, self>
      */
     public function payments(): HasMany
     {
@@ -102,7 +108,8 @@ class Orders extends Model
     }
 
     /**
-     * @return HasMany<OrderProducts, $this>
+     * @phpstan-return HasMany<OrderProducts, $this>
+     * @psalm-return HasMany<OrderProducts, self>
      */
     public function products(): HasMany
     {
@@ -110,7 +117,8 @@ class Orders extends Model
     }
 
     /**
-     * @return HasMany<OrderTotals, $this>
+     * @phpstan-return HasMany<OrderTotals, $this>
+     * @psalm-return HasMany<OrderTotals, self>
      */
     public function totals(): HasMany
     {
@@ -118,7 +126,8 @@ class Orders extends Model
     }
 
     /**
-     * @return HasMany<OrderHistories, $this>
+     * @phpstan-return HasMany<OrderHistories, $this>
+     * @psalm-return HasMany<OrderHistories, self>
      */
     public function histories(): HasMany
     {

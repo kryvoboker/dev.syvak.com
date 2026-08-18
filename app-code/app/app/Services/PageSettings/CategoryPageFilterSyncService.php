@@ -183,7 +183,7 @@ class CategoryPageFilterSyncService
             ->orderBy('id')
             ->get();
 
-        return $attributes->map(function (Attribute $attribute): array {
+        return $attributes->toBase()->map(function (Attribute $attribute): array {
             $attribute_discription = $attribute->attributeDescription->first();
             $attribute_name = $this->stringValue($attribute_discription?->name);
 

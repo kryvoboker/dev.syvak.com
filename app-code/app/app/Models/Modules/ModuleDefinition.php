@@ -66,7 +66,8 @@ class ModuleDefinition extends Model
     }
 
     /**
-     * @return HasMany<ModuleInstance, $this>
+     * @phpstan-return HasMany<ModuleInstance, $this>
+     * @psalm-return HasMany<ModuleInstance, self>
      */
     public function instances(): HasMany
     {
@@ -99,7 +100,6 @@ class ModuleDefinition extends Model
      */
     public function getEnabledInstances(): Collection
     {
-        /** @var Collection<int, ModuleInstance> $instances */
         $instances = $this->instances()->where('is_enabled', true)->get();
 
         return $instances;

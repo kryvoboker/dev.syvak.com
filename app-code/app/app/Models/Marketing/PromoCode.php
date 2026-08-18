@@ -67,49 +67,65 @@ class PromoCode extends Model
         ];
     }
 
-    /** @return HasMany<PromoCodeDiscount, $this> */
+    /** @phpstan-return HasMany<PromoCodeDiscount, $this>
+     * @psalm-return HasMany<PromoCodeDiscount, self>
+     */
     public function discounts(): HasMany
     {
         return $this->hasMany(PromoCodeDiscount::class);
     }
 
-    /** @return HasMany<PromoCodeErrorTranslation, $this> */
+    /** @phpstan-return HasMany<PromoCodeErrorTranslation, $this>
+     * @psalm-return HasMany<PromoCodeErrorTranslation, self>
+     */
     public function errorTranslations(): HasMany
     {
         return $this->hasMany(PromoCodeErrorTranslation::class);
     }
 
-    /** @return HasMany<PromoCodeUsage, $this> */
+    /** @phpstan-return HasMany<PromoCodeUsage, $this>
+     * @psalm-return HasMany<PromoCodeUsage, self>
+     */
     public function usages(): HasMany
     {
         return $this->hasMany(PromoCodeUsage::class);
     }
 
-    /** @return BelongsToMany<User, $this> */
+    /** @phpstan-return BelongsToMany<User, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<User, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'promo_code_user');
     }
 
-    /** @return BelongsToMany<UserGroup, $this> */
+    /** @phpstan-return BelongsToMany<UserGroup, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<UserGroup, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function userGroups(): BelongsToMany
     {
         return $this->belongsToMany(UserGroup::class, 'promo_code_user_group');
     }
 
-    /** @return BelongsToMany<Product, $this> */
+    /** @phpstan-return BelongsToMany<Product, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<Product, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'promo_code_product');
     }
 
-    /** @return BelongsToMany<Category, $this> */
+    /** @phpstan-return BelongsToMany<Category, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<Category, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'promo_code_category');
     }
 
-    /** @return BelongsToMany<Orders, $this> */
+    /** @phpstan-return BelongsToMany<Orders, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<Orders, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Orders::class, 'promo_code_usages')

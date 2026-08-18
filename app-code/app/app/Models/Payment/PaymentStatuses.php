@@ -104,7 +104,8 @@ class PaymentStatuses extends Model
     }
 
     /**
-     * @return HasMany<PaymentStatusDescriptions, $this>
+     * @phpstan-return HasMany<PaymentStatusDescriptions, $this>
+     * @psalm-return HasMany<PaymentStatusDescriptions, self>
      */
     public function descriptions(): HasMany
     {
@@ -112,7 +113,8 @@ class PaymentStatuses extends Model
     }
 
     /**
-     * @return HasMany<OrderPayments, $this>
+     * @phpstan-return HasMany<OrderPayments, $this>
+     * @psalm-return HasMany<OrderPayments, self>
      */
     public function payments(): HasMany
     {

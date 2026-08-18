@@ -215,6 +215,7 @@ final class OrderAdminOptionsService
         return $this->user_group_options ??= UserGroup::query()
             ->orderBy('name')
             ->get(['id', 'name'])
+            ->toBase()
             ->mapWithKeys(fn (UserGroup $group): array => [
                 $this->stringValue($group->getKey()) => $this->stringValue($group->name),
             ])
@@ -231,6 +232,7 @@ final class OrderAdminOptionsService
             ->orderByDesc('is_default')
             ->orderByDesc('name')
             ->get(['id', 'code', 'name'])
+            ->toBase()
             ->mapWithKeys(fn (Currency $currency): array => [
                 $this->stringValue($currency->getKey()) => sprintf(
                     '%s — %s',
@@ -270,7 +272,7 @@ final class OrderAdminOptionsService
             })
             ->orderBy('sort_order');
 
-        return $this->status_options[$cache_key] = $query->get()
+        return $this->status_options[$cache_key] = $query->get()->toBase()
             ->mapWithKeys(function (OrderStatuses|PaymentStatuses $status): array {
                 $description = $status->descriptions->first();
 

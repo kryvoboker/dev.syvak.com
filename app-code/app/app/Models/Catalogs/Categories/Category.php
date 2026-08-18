@@ -24,7 +24,7 @@ class Category extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -36,7 +36,8 @@ class Category extends Model
     }
 
     /**
-     * @return HasMany<CategoryDescription, $this>
+     * @phpstan-return HasMany<CategoryDescription, $this>
+     * @psalm-return HasMany<CategoryDescription, self>
      */
     public function categoryDescription(): HasMany
     {
@@ -44,7 +45,8 @@ class Category extends Model
     }
 
     /**
-     * @return HasMany<CategoryImage, $this>
+     * @phpstan-return HasMany<CategoryImage, $this>
+     * @psalm-return HasMany<CategoryImage, self>
      */
     public function categoryImage(): HasMany
     {
@@ -52,7 +54,8 @@ class Category extends Model
     }
 
     /**
-     * @return HasMany<CategoryPath, $this>
+     * @phpstan-return HasMany<CategoryPath, $this>
+     * @psalm-return HasMany<CategoryPath, self>
      */
     public function categoryPaths(): HasMany
     {
@@ -76,7 +79,9 @@ class Category extends Model
      * $product = Product::with('categories')->find(1);
      * ```
      */
-    /** @return BelongsToMany<Product, $this> */
+    /** @phpstan-return BelongsToMany<Product, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<Product, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(

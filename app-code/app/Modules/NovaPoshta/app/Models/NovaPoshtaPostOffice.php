@@ -26,7 +26,7 @@ class NovaPoshtaPostOffice extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -38,7 +38,8 @@ class NovaPoshtaPostOffice extends Model
     }
 
     /**
-     * @return BelongsTo<NovaPoshtaCity, $this>
+     * @phpstan-return BelongsTo<NovaPoshtaCity, $this>
+     * @psalm-return BelongsTo<NovaPoshtaCity, self>
      */
     public function novaPoshtaCity(): BelongsTo
     {

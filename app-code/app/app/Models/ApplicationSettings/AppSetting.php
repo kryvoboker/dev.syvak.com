@@ -32,7 +32,7 @@ class AppSetting extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -49,7 +49,10 @@ class AppSetting extends Model
         ];
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function titles(): Attribute
     {
         return Attribute::make(
@@ -57,7 +60,10 @@ class AppSetting extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function metaTitles(): Attribute
     {
         return Attribute::make(
@@ -65,7 +71,10 @@ class AppSetting extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function metaDescriptions(): Attribute
     {
         return Attribute::make(
@@ -73,7 +82,10 @@ class AppSetting extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function metaKeywords(): Attribute
     {
         return Attribute::make(
@@ -81,7 +93,10 @@ class AppSetting extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function workTime(): Attribute
     {
         return Attribute::make(
@@ -89,7 +104,10 @@ class AppSetting extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function contactAddresses(): Attribute
     {
         return Attribute::make(
@@ -97,7 +115,10 @@ class AppSetting extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function aiSettings(): Attribute
     {
         return Attribute::make(
@@ -105,7 +126,10 @@ class AppSetting extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function systemSettings(): Attribute
     {
         return Attribute::make(
@@ -113,7 +137,10 @@ class AppSetting extends Model
         );
     }
 
-    /** @return Attribute<mixed, mixed> */
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function userSettings(): Attribute
     {
         return Attribute::make(

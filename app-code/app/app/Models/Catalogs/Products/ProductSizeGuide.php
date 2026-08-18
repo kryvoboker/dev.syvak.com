@@ -33,13 +33,17 @@ class ProductSizeGuide extends Model
         ];
     }
 
-    /** @return BelongsTo<Product, $this> */
+    /** @phpstan-return BelongsTo<Product, $this>
+     * @psalm-return BelongsTo<Product, self>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /** @return BelongsTo<Language, $this> */
+    /** @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
+     */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
