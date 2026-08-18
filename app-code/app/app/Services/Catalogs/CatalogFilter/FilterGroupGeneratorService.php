@@ -235,10 +235,12 @@ class FilterGroupGeneratorService
     private function syncAttributeGroupTranslations(CatalogFilterGroup $group, Attribute $attribute): void
     {
         foreach ((new Language())->getActiveLanguages() as $language) {
-            $attribute_name = (string) optional(
+            $attribute_description = optional(
                 $attribute->attributeDescription
                     ->firstWhere('language_id', (int) $language->id),
-            )->name;
+            );
+            $attribute_name_value = data_get($attribute_description, 'name');
+            $attribute_name = is_scalar($attribute_name_value) ? (string) $attribute_name_value : '';
 
             CatalogFilterGroupTranslation::query()->updateOrCreate(
                 [

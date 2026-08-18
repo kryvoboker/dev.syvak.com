@@ -66,16 +66,26 @@ class AppSettingsData extends Data
             socials          : isset($data['socials']) ? collect((array) $data['socials']) : null,
             work_time        : isset($data['work_time']) ? collect((array) $data['work_time']) : null,
             contact_addresses: isset($data['contact_addresses']) ? collect((array) $data['contact_addresses']) : null,
-            coordinates      : $data['coordinates'] ?? null,
-            iframe_map       : $data['iframe_map'] ?? null,
-            timezone         : $data['timezone'] ?? null,
+            coordinates      : self::nullableString($data['coordinates'] ?? null),
+            iframe_map       : self::nullableString($data['iframe_map'] ?? null),
+            timezone         : self::nullableString($data['timezone'] ?? null),
             image_sizes      : isset($data['image_sizes']) ? collect((array) $data['image_sizes']) : null,
             system_settings  : isset($data['system_settings']) ? collect((array) $data['system_settings']) : null,
             user_settings    : isset($data['user_settings']) ? collect((array) $data['user_settings']) : null,
             ai_settings      : isset($data['ai_settings']) ? collect((array) $data['ai_settings']) : null,
             global_configs   : isset($data['global_configs']) ? collect((array) $data['global_configs']) : null,
-            language_id      : $data['language_id'] ?? null,
-            user_group_id    : $data['user_group_id'] ?? null,
+            language_id      : self::nullableInteger($data['language_id'] ?? null),
+            user_group_id    : self::nullableInteger($data['user_group_id'] ?? null),
         );
+    }
+
+    private static function nullableString(mixed $value): ?string
+    {
+        return is_scalar($value) ? (string) $value : null;
+    }
+
+    private static function nullableInteger(mixed $value): ?int
+    {
+        return is_numeric($value) ? (int) $value : null;
     }
 }

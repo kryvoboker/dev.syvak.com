@@ -23,7 +23,7 @@ class ProductCategorySyncService
     {
         $normalized_category_ids = $this->normalizeCategoryIds($category_ids);
         $max_attempts = 3;
-        $product_id = (int) $product->getKey();
+        $product_id = $this->integerValue($product->getKey());
 
         for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
             try {
@@ -68,7 +68,7 @@ class ProductCategorySyncService
         }
 
         return collect($category_ids)
-            ->map(fn (mixed $category_id): int => (int) $category_id)
+            ->map(fn (mixed $category_id): int => $this->integerValue($category_id))
             ->filter(fn (int $category_id): bool => $category_id > 0)
             ->unique()
             ->sort()
@@ -82,5 +82,10 @@ class ProductCategorySyncService
             $throwable->getMessage(),
             ['Lock wait timeout exceeded', 'SQLSTATE[HY000]: General error: 1205'],
         );
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
     }
 }

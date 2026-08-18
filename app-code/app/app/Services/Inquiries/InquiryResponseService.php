@@ -22,7 +22,7 @@ final readonly class InquiryResponseService
     /** @param array<string, mixed> $data */
     public function createAndDeliver(Inquiry $inquiry, array $data): InquiryResponse
     {
-        $body_html = $this->sanitizeHtml((string) ($data['body_html'] ?? ''));
+        $body_html = $this->sanitizeHtml($this->stringValue($data['body_html'] ?? ''));
         $recipient_email = $this->resolveNullableString($inquiry->email);
         $subject = $this->resolveNullableString($data['subject'] ?? null);
 
@@ -104,13 +104,18 @@ final readonly class InquiryResponseService
 
     private function resolveNullableString(mixed $value): ?string
     {
-        $value = Str::trim((string) $value);
+        $value = Str::trim($this->stringValue($value));
 
         return $value === '' ? null : $value;
     }
 
     private function resolveResponseDate(mixed $value): Carbon
     {
-        return filled($value) ? Carbon::parse((string) $value) : now();
+        return filled($value) ? Carbon::parse($this->stringValue($value)) : now();
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

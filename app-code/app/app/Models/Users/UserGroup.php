@@ -77,10 +77,12 @@ class UserGroup extends Model
 
     public function getDefaultUserGroupId(): ?int
     {
-        return self::query()
+        $group_id = self::query()
             ->where('is_active', true)
             ->where('is_default', true)
             ->value('id');
+
+        return is_numeric($group_id) ? (int) $group_id : null;
     }
 
     public function getDefaultUserGroup(): ?self

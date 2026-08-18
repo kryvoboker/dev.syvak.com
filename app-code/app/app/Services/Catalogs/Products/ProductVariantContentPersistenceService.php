@@ -126,7 +126,7 @@ final class ProductVariantContentPersistenceService
                 $section_data = Arr::get($translation, $section, []);
                 $items = collect((array) (is_array($section_data) ? ($section_data['items'] ?? []) : []))
                     ->filter(fn (mixed $item): bool => is_array($item) && filled($item['value'] ?? null))
-                    ->map(fn (array $item): array => ['value' => Str::trim((string) $item['value'])])
+                    ->map(fn (array $item): array => ['value' => Str::trim($this->stringValue($item['value']))])
                     ->values()
                     ->all();
                 $title = $this->stringValue(is_array($section_data) ? ($section_data['title'] ?? null) : null);
@@ -172,7 +172,7 @@ final class ProductVariantContentPersistenceService
 
     private function stringValue(mixed $value): string
     {
-        return Str::trim((string) $value);
+        return Str::trim(is_scalar($value) ? (string) $value : '');
     }
 
     private function nullableInteger(mixed $value): ?int

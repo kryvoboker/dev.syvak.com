@@ -18,7 +18,8 @@ class CheckForbiddenIpMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $ip = $request->ip();
-        $forbidden_ips = trim_strs_in_arr(config('ip.forbidden_list', []));
+        $configured_forbidden_ips = config('ip.forbidden_list', []);
+        $forbidden_ips = trim_strs_in_arr(is_array($configured_forbidden_ips) ? $configured_forbidden_ips : []);
 
         if (in_array($ip, $forbidden_ips, true)) {
             abort(403, 'Access denied for this site!');

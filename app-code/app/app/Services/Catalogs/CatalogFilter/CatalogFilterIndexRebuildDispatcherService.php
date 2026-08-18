@@ -44,7 +44,7 @@ class CatalogFilterIndexRebuildDispatcherService
 
         if (! $index_meta->markAsQueued()) {
             return [
-                'status' => (string) ($index_meta->getRawOriginal('last_status') ?? 'unknown'),
+                'status' => is_scalar($index_meta->getRawOriginal('last_status')) ? (string) $index_meta->getRawOriginal('last_status') : 'unknown',
                 'rows_total' => (int) $index_meta->index_rows_total,
                 'index_version' => (int) $index_meta->active_index_version,
             ];

@@ -252,7 +252,7 @@ class Product extends Model
     public function search(string $keyword, int $per_page): LengthAwarePaginator
     {
         $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
-        $minimum_stock_quantity = (int) config('app.products.minimum_stock_quantity', 1);
+        $minimum_stock_quantity = $this->integerValue(config('app.products.minimum_stock_quantity', 1));
 
         try {
             $minimum_stock_quantity = app(PageSettingsBootstrapService::class)->getProductMinimumStockQuantity();
@@ -269,7 +269,8 @@ class Product extends Model
                     $query->where('language_id', $app_settings->language_id);
                 },
                 'defaultVariant.discounts' => function ($query) use ($app_settings): void {
-                    $current_date_time = now(config('app.timezone'));
+                    $timezone = config('app.timezone');
+                    $current_date_time = now(is_scalar($timezone) ? (string) $timezone : null);
 
                     $query
                         ->where('user_group_id', $app_settings->user_group_id)
@@ -293,5 +294,10 @@ class Product extends Model
             ->orderByDesc('date_added')
             ->paginate($per_page)
             ->withQueryString();
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
     }
 }

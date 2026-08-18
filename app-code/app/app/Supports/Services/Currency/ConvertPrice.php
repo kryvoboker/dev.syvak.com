@@ -137,7 +137,7 @@ final class ConvertPrice
         if (! isset($this->default_currency)) {
             $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode(
-                config('app.currency.current_currency_code'),
+                $this->stringValue(config('app.currency.current_currency_code')),
             );
 
             if ($currency === null) {
@@ -174,5 +174,10 @@ final class ConvertPrice
         $this->default_currency = $default_currency;
 
         return $this;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

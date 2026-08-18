@@ -16,9 +16,10 @@ class CleanupExpiredCartItemsCommand extends Command
 
     public function handle(): int
     {
-        $ttl_days = max(1, (int) config('cart-modal.item_ttl_days', 30));
-        $chunk_size = max(100, (int) config('cart-modal.cleanup_chunk_size', 500));
-        $threshold = now(config('app.timezone'))->subDays($ttl_days);
+        $ttl_days = max(1, $this->integerValue(config('cart-modal.item_ttl_days', 30)));
+        $chunk_size = max(100, $this->integerValue(config('cart-modal.cleanup_chunk_size', 500)));
+        $timezone = config('app.timezone');
+        $threshold = now(is_scalar($timezone) ? (string) $timezone : null)->subDays($ttl_days);
         $deleted = 0;
 
         try {
@@ -27,13 +28,14 @@ class CleanupExpiredCartItemsCommand extends Command
                 ->select('id')
                 ->orderBy('id')
                 ->chunkById($chunk_size, function ($rows) use (&$deleted): void {
-                    $ids = $rows->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+                    $ids = $rows->pluck('id')->map(fn (mixed $id): int => is_numeric($id) ? (int) $id : 0)->all();
 
                     if ($ids === []) {
                         return;
                     }
 
-                    $deleted += Cart::query()->whereIn('id', $ids)->delete();
+                    $deleted_result = Cart::query()->whereIn('id', $ids)->delete();
+                    $deleted += is_numeric($deleted_result) ? (int) $deleted_result : 0;
                 });
 
             Log::channel('daily')->info('Expired cart items cleanup completed.', [
@@ -55,5 +57,10 @@ class CleanupExpiredCartItemsCommand extends Command
 
             return self::FAILURE;
         }
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
     }
 }

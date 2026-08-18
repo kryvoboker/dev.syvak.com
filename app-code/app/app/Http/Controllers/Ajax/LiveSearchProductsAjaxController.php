@@ -22,11 +22,13 @@ class LiveSearchProductsAjaxController extends Controller
         SearchProductsAction $search_product_action,
         PageSettingsBootstrapService $page_settings_bootstrap_service,
     ): ?JsonResponse {
-        $products_per_page_limit = (int) config('app.page_settings.search.products_per_page_limit', 15);
+        $products_per_page_limit = $this->integerValue(config('app.page_settings.search.products_per_page_limit', 15));
+        $search_config = config('app.page_settings.search', []);
+        $search_config = is_array($search_config) ? $search_config : [];
         $not_found_img_data = [
-            'path' => (string) Arr::get(config('app.page_settings.search', []), 'images.search_not_found.path', config('app.images.default_image_search_not_found')),
-            'width' => (int) config('app.page_settings.search.images.search_not_found.width', 600),
-            'height' => (int) config('app.page_settings.search.images.search_not_found.height', 600),
+            'path' => $this->stringValue(Arr::get($search_config, 'images.search_not_found.path', config('app.images.default_image_search_not_found'))),
+            'width' => $this->integerValue(config('app.page_settings.search.images.search_not_found.width', 600)),
+            'height' => $this->integerValue(config('app.page_settings.search.images.search_not_found.height', 600)),
         ];
 
         try {
@@ -38,7 +40,7 @@ class LiveSearchProductsAjaxController extends Controller
 
         $search_products = $search_product_action->handle(
             $request->query('keyword'),
-            (int) ($request->query('per_page') ?: $products_per_page_limit),
+            $this->integerValue($request->query('per_page') ?: $products_per_page_limit),
         );
         $search_not_found_img_data['urls'] = multiple_convert_img_and_get_url(
             $not_found_img_data['path'],
@@ -47,8 +49,8 @@ class LiveSearchProductsAjaxController extends Controller
             bg_color : 'transparent',
         );
 
-        $search_not_found_img_data['width'] = (int) $not_found_img_data['width'];
-        $search_not_found_img_data['height'] = (int) ($not_found_img_data['height'] ?: $not_found_img_data['width']);
+        $search_not_found_img_data['width'] = $this->integerValue($not_found_img_data['width']);
+        $search_not_found_img_data['height'] = $this->integerValue($not_found_img_data['height'] ?: $not_found_img_data['width']);
 
         if ($request->ajax()) {
             $rendered_html = view('storefront::components.common.search-result', [
@@ -64,5 +66,15 @@ class LiveSearchProductsAjaxController extends Controller
         }
 
         return null;
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

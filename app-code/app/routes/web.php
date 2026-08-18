@@ -41,7 +41,8 @@ Route::post('/frontend-errors', FrontendErrorController::class)
     ->withoutMiddleware(SetDefaultLocalePrefix::class)
     ->name('frontend.errors.store');
 
-$locale_key = config('localization.locale_parameter', 'locale');
+$locale_key_value = config('localization.locale_parameter', 'locale');
+$locale_key = is_scalar($locale_key_value) ? (string) $locale_key_value : 'locale';
 $allowed_locales = get_allowed_locales();
 
 require base_path('Modules/WayForPay/routes/web.php');

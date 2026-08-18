@@ -83,7 +83,8 @@ final class OrderStatusManagementService
     private function syncDescriptions(OrderStatuses $status, array $descriptions): void
     {
         foreach ($descriptions as $language_id => $description) {
-            $name = trim((string) Arr::get((array) $description, 'name', ''));
+            $name_value = Arr::get((array) $description, 'name', '');
+            $name = trim(is_scalar($name_value) ? (string) $name_value : '');
 
             if ($name === '') {
                 continue;

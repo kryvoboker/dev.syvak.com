@@ -48,7 +48,7 @@ final class BankTransferSettingsService
         $normalized_values = [];
 
         foreach ($localized_values as $language_code => $value) {
-            if ((! is_string($language_code) && ! is_int($language_code)) || ! is_scalar($value)) {
+            if (! is_scalar($value)) {
                 continue;
             }
 

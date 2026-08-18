@@ -124,11 +124,11 @@ class UkrPoshtaCheckoutStateService
     private function normalizeState(array $payload): array
     {
         return [
-            'delivery_method' => Str::lower(Str::squish((string) Arr::get($payload, 'delivery_method', ''))),
-            'region' => $this->normalizeRow((array) Arr::get($payload, 'region', [])),
-            'district' => $this->normalizeRow((array) Arr::get($payload, 'district', [])),
-            'city' => $this->normalizeRow((array) Arr::get($payload, 'city', [])),
-            'delivery_point' => $this->normalizeRow((array) Arr::get($payload, 'delivery_point', [])),
+            'delivery_method' => Str::lower(Str::squish($this->stringValue(Arr::get($payload, 'delivery_method', '')))),
+            'region' => $this->normalizeRow($this->stringKeyedArray(Arr::get($payload, 'region', []))),
+            'district' => $this->normalizeRow($this->stringKeyedArray(Arr::get($payload, 'district', []))),
+            'city' => $this->normalizeRow($this->stringKeyedArray(Arr::get($payload, 'city', []))),
+            'delivery_point' => $this->normalizeRow($this->stringKeyedArray(Arr::get($payload, 'delivery_point', []))),
         ];
     }
 
@@ -163,5 +163,30 @@ class UkrPoshtaCheckoutStateService
             ])
             ->filter(fn (mixed $value): bool => ! is_null($value) && $value !== '')
             ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function stringKeyedArray(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($value as $key => $item) {
+            if (is_string($key)) {
+                $result[$key] = $item;
+            }
+        }
+
+        return $result;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

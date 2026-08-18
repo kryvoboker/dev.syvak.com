@@ -38,7 +38,8 @@ class CartStoreRequest extends FormRequest
 
         $variant_id = $this->input('product_variant_id');
         $quantity = $this->input('quantity', 1);
-        $cart_mode = Str::lower((string) $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
+        $cart_mode_value = $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
+        $cart_mode = Str::lower(is_scalar($cart_mode_value) ? (string) $cart_mode_value : CartModeEnum::Regular->value);
 
         Arr::set($normalized_data, 'product_variant_id', is_numeric($variant_id) ? (int) $variant_id : $variant_id);
         Arr::set($normalized_data, 'quantity', is_numeric($quantity) ? (int) $quantity : $quantity);

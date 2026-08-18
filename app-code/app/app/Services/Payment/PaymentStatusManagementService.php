@@ -83,7 +83,7 @@ final class PaymentStatusManagementService
     private function syncDescriptions(PaymentStatuses $status, array $descriptions): void
     {
         foreach ($descriptions as $language_id => $description) {
-            $name = trim((string) Arr::get((array) $description, 'name', ''));
+            $name = trim($this->stringValue(Arr::get((array) $description, 'name', '')));
 
             if ($name === '') {
                 continue;
@@ -94,5 +94,10 @@ final class PaymentStatusManagementService
                 ['name' => $name],
             );
         }
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

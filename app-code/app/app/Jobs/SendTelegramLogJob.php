@@ -101,7 +101,9 @@ class SendTelegramLogJob implements ShouldQueue
         $response->throw();
 
         if ($response->json('ok') !== true) {
-            throw new RuntimeException((string) $response->json('description', 'Telegram API returned an unsuccessful response.'));
+            $description = $response->json('description', 'Telegram API returned an unsuccessful response.');
+
+            throw new RuntimeException(is_scalar($description) ? (string) $description : 'Telegram API returned an unsuccessful response.');
         }
     }
 

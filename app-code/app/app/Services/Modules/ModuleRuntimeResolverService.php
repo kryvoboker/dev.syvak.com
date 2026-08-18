@@ -79,7 +79,7 @@ readonly class ModuleRuntimeResolverService
         foreach ($modules_placements as $placement_key => $placement_label) {
             if (
                 Str::lower((string) $placement_key) === $normalized_placement
-                || Str::lower((string) $placement_label) === $normalized_placement
+                || Str::lower(is_scalar($placement_label) ? (string) $placement_label : '') === $normalized_placement
             ) {
                 return (string) $placement_key;
             }

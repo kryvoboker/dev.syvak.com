@@ -194,7 +194,7 @@ class HeaderCategoryService
                 ->where('is_active', true)
                 ->whereIn('id', $normalized_ids)
                 ->pluck('id')
-                ->map(fn (int|string $category_id): int => (int) $category_id)
+                ->map(fn (mixed $category_id): int => is_numeric($category_id) ? (int) $category_id : 0)
                 ->all();
 
             return collect($normalized_ids)
