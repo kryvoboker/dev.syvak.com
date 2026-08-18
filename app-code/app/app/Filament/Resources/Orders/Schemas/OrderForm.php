@@ -813,10 +813,11 @@ class OrderForm
         $quantity = max(1, (int)$get('quantity'));
         $unit_price = max(0, (float)$get('unit_price'));
         $discount = max(0, (float)($get('discount') ?: 0));
+        $line_total = ((float) $quantity * (float) $unit_price) - (float) $discount;
 
         $set(
             'line_total',
-            max(0, round($quantity * $unit_price - $discount, 4)),
+            max(0.0, round((float) $line_total, 4)),
         );
 
         self::recalculateTotals(
@@ -980,8 +981,9 @@ class OrderForm
                 $quantity = max(1, (int)($product['quantity'] ?? 1));
                 $unit_price = max(0, (float)($product['unit_price'] ?? 0));
                 $discount = max(0, (float)($product['discount'] ?? 0));
+                $line_total = ((float) $quantity * (float) $unit_price) - (float) $discount;
 
-                return max(0, round($quantity * $unit_price - $discount, 4));
+                return max(0.0, round((float) $line_total, 4));
             });
         $shipping_value = ! $shipping_cost_enabled || is_array($shipping_cost)
             ? 0.0
@@ -1001,7 +1003,7 @@ class OrderForm
                 }
 
                 if ($total_type !== 'total') {
-                    $grand_total += $value;
+                    $grand_total = (float) $grand_total + (float) $value;
                 }
 
                 $total['value'] = round($value, 4);

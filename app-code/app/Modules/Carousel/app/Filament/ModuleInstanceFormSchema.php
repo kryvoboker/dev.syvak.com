@@ -163,9 +163,21 @@ readonly class ModuleInstanceFormSchema
                             $translations = Arr::get($state, 'translations', []);
                             $current_locale = app()->getLocale();
 
-                            return Arr::get($translations, $current_locale . '.title')
-                                ?? Arr::get($translations, array_key_first($translations) . '.title')
-                                ?? __('carousel::admin/modules/carousel.labels.slide');
+                            $current_title = Arr::get($translations, $current_locale . '.title');
+                            if (is_string($current_title) && filled($current_title)) {
+                                return $current_title;
+                            }
+
+                            $first_translation_key = is_array($translations)
+                                ? array_key_first($translations)
+                                : null;
+                            $fallback_title = $first_translation_key === null
+                                ? null
+                                : Arr::get($translations, $first_translation_key . '.title');
+
+                            return is_string($fallback_title) && filled($fallback_title)
+                                ? $fallback_title
+                                : (string) __('carousel::admin/modules/carousel.labels.slide');
                         })
                         ->schema([
                             Section::make(__('carousel::admin/modules/carousel.sections.slide_state.title'))

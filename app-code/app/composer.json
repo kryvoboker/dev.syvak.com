@@ -108,7 +108,10 @@
         "phpstan:production": "phpstan --configuration=phpstan.production.neon --memory-limit=1G analyse && phpstan --configuration=phpstan.production.admin.neon --memory-limit=1G analyse",
         "phpmd": "@php -d error_reporting=\"E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED\" vendor/bin/phpmd app,routes,config,database,tests,Modules text phpmd.xml --ignore-errors-on-exit --ignore-violations-on-exit",
         "psalm": "php -d memory_limit=1G /usr/local/bin/psalm",
-        "psalm:production": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.xml"
+        "psalm:production": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.xml && php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.admin.xml",
+        "psalm:production:storefront": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.xml",
+        "psalm:production:admin": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.admin.xml",
+        "psalm:production:strict": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.strict.xml"
     },
     "extra": {
         "merge-plugin": {
