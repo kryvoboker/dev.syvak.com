@@ -30,6 +30,7 @@ class CatalogFilterSetConfigurationService
                 $filter_items = $this->listOfArrays(Arr::pull($normalized_data, 'filter_items', []));
                 Arr::forget($normalized_data, 'index_meta');
 
+                /** @var array<string, mixed> $normalized_data */
                 $filter_set->update($normalized_data);
                 $sync_summary = $this->syncFilterItems($filter_set, $filter_items);
                 app(CatalogFilterIndexFreshnessService::class)->markStale($filter_set);
@@ -73,6 +74,7 @@ class CatalogFilterSetConfigurationService
         Arr::set($data, 'context_types', $selected_context_types);
         Arr::set($data, 'context_type', $selected_context_types[0]);
 
+        /** @var array<string, mixed> $data */
         return $data;
     }
 

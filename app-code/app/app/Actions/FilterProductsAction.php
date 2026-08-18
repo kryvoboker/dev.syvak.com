@@ -53,6 +53,7 @@ readonly class FilterProductsAction
         if (! is_array($validated_data)) {
             $validated_data = [];
         }
+        /** @var array<string, mixed> $validated_data */
 
         $query_context = $this->buildProductsQueryContext(
             validated_data: $validated_data,
@@ -241,14 +242,14 @@ readonly class FilterProductsAction
 
         $filter_set->loadMissing([
             'indexMeta',
-            'groups' => function ($query): void {
+            'groups' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                 $query
                     ->where('is_enabled', true)
                     ->orderBy('sort_order')
                     ->orderBy('id')
                     ->with([
                         'translations',
-                        'values' => function ($values_query): void {
+                        'values' => function (\Illuminate\Database\Eloquent\Relations\Relation $values_query): void {
                             $values_query
                                 ->where('is_enabled', true)
                                 ->orderBy('sort_order')
@@ -301,18 +302,18 @@ readonly class FilterProductsAction
             ->selectRaw($db_prefix . 'default_product_variant.image as default_variant_image')
             ->selectRaw($db_prefix . 'active_product_discount.price as active_discount_price')
             ->with([
-                'slugs' => function ($query) use ($language_id): void {
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'productDescription' => function ($query) use ($language_id): void {
+                'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'defaultVariant' => function ($query) use ($language_id): void {
+                'defaultVariant' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->with([
-                        'slugs' => function ($slug_query) use ($language_id): void {
+                        'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $slug_query) use ($language_id): void {
                             $slug_query->where('language_id', $language_id);
                         },
-                        'descriptions' => function ($description_query) use ($language_id): void {
+                        'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $description_query) use ($language_id): void {
                             $description_query->where('language_id', $language_id);
                         },
                     ]);
@@ -838,6 +839,7 @@ readonly class FilterProductsAction
 
         $request = request();
         $query_parameters = (array) $request->query();
+        /** @var array<string, mixed> $query_parameters */
         $query_value = $this->extractQueryValueByGetKey($query_parameters, $get_key);
 
         if ($query_value === null) {
@@ -883,8 +885,11 @@ readonly class FilterProductsAction
 
         $request = request();
         $next_query_parameters = (array) $request->query();
+        /** @var array<string, mixed> $next_query_parameters */
+        /** @var array<string, mixed> $typed_query_parameters */
+        $typed_query_parameters = $next_query_parameters;
         $next_query_parameters = $this->replaceQueryValueByGetKey(
-            query_parameters: $next_query_parameters,
+            query_parameters: $typed_query_parameters,
             get_key         : $price_from_get_key,
             next_value      : null,
         );
@@ -920,6 +925,7 @@ readonly class FilterProductsAction
      */
     private function replaceQueryValueByGetKey(array $query_parameters, string $get_key, mixed $next_value): array
     {
+        /** @var array<string, mixed> $query_parameters */
         if (Str::contains($get_key, '[') && Str::endsWith($get_key, ']')) {
             $normalized_get_key = str_replace(['[', ']'], ['.', ''], $get_key);
 
@@ -931,22 +937,26 @@ readonly class FilterProductsAction
                     Arr::forget($query_parameters, $root_key);
                 }
 
+                /** @var array<string, mixed> $query_parameters */
                 return $query_parameters;
             }
 
             Arr::set($query_parameters, $normalized_get_key, $next_value);
 
+            /** @var array<string, mixed> $query_parameters */
             return $query_parameters;
         }
 
         if ($next_value === null) {
             Arr::forget($query_parameters, $get_key);
 
+            /** @var array<string, mixed> $query_parameters */
             return $query_parameters;
         }
 
         Arr::set($query_parameters, $get_key, $next_value);
 
+        /** @var array<string, mixed> $query_parameters */
         return $query_parameters;
     }
 

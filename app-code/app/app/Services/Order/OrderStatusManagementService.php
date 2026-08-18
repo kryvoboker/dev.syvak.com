@@ -18,6 +18,7 @@ final class OrderStatusManagementService
     {
         return DB::transaction(function () use ($data): OrderStatuses {
             $descriptions = (array) Arr::pull($data, 'descriptions', []);
+            /** @var array<string, mixed> $data */
             $status = OrderStatuses::query()->create($data);
 
             $this->syncDescriptions($status, $descriptions);
@@ -33,6 +34,7 @@ final class OrderStatusManagementService
     {
         return DB::transaction(function () use ($status, $data): OrderStatuses {
             $descriptions = (array) Arr::pull($data, 'descriptions', []);
+            /** @var array<string, mixed> $data */
             $status->update($data);
 
             $this->syncDescriptions($status, $descriptions);

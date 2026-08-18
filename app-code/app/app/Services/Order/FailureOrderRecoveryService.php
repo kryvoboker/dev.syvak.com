@@ -67,7 +67,12 @@ final readonly class FailureOrderRecoveryService
     {
         $state = $this->request->hasSession() ? $this->request->session()->get(self::SESSION_KEY, []) : [];
 
-        return is_array($state) ? $state : [];
+        if (! is_array($state)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $state */
+        return $state;
     }
 
     public function resolveOrder(): ?Orders
@@ -268,7 +273,7 @@ final readonly class FailureOrderRecoveryService
             $payment,
             OrderLifecycleService::PAYMENT_STATUS_FAILED,
             ['source' => 'failure_page_retry'],
-            Arr::flatten($errors)[0] ?? null,
+            is_scalar(Arr::flatten($errors)[0] ?? null) ? (string) Arr::flatten($errors)[0] : null,
         );
     }
 

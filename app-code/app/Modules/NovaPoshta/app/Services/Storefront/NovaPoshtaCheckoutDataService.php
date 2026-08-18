@@ -196,7 +196,10 @@ class NovaPoshtaCheckoutDataService
             ->where('ref', $region_ref)
             ->first();
 
-        return $region?->toArray() ?? [];
+        $region_data = $region?->toArray() ?? [];
+
+        /** @var array<string, mixed> $region_data */
+        return $region_data;
     }
 
     /**
@@ -217,6 +220,7 @@ class NovaPoshtaCheckoutDataService
             return [];
         }
 
+        /** @var array<string, mixed> $city_data */
         $city_data = $city->toArray();
         $city_data['region'] = $city->novaPoshtaRegion?->toArray() ?? [];
 

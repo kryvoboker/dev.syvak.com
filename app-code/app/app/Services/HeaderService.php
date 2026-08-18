@@ -112,9 +112,12 @@ class HeaderService
                         return null;
                     }
 
+                    $description_data = $description->toArray();
+                    /** @var array<string, mixed> $description_data */
+
                     return [
                         'id' => $this->integerValue($category->id),
-                        'descriptions' => $description->toArray(),
+                        'descriptions' => $description_data,
                         'slug' => $this->stringValue($slug),
                     ];
                 })

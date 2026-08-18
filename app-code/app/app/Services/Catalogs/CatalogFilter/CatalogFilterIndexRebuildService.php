@@ -329,11 +329,13 @@ readonly class CatalogFilterIndexRebuildService
                 CatalogFilterGroupSourceTypeEnum::Attribute->value,
             ])
             ->with([
-                'values' => fn ($query) => $query
-                    ->where('is_enabled', true)
-                    ->orderBy('sort_order')
-                    ->orderBy('id')
-                    ->with('translations'),
+                'values' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
+                    $query
+                        ->where('is_enabled', true)
+                        ->orderBy('sort_order')
+                        ->orderBy('id')
+                        ->with('translations');
+                },
             ])
             ->orderBy('sort_order')
             ->orderBy('id')
@@ -371,12 +373,15 @@ readonly class CatalogFilterIndexRebuildService
             ->where('default_product_variant.is_active', true)
             ->with([
                 'categories:id',
-                'variants' => fn ($query) => $query
-                    ->where('is_active', true)
-                    ->with([
-                        'attributeValues' => fn ($attribute_query) => $attribute_query
-                            ->select('id', 'product_variant_id', 'attribute_id', 'value_string'),
-                    ]),
+                'variants' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
+                    $query
+                        ->where('is_active', true)
+                        ->with([
+                            'attributeValues' => function (\Illuminate\Database\Eloquent\Relations\Relation $attribute_query): void {
+                                $attribute_query->select('id', 'product_variant_id', 'attribute_id', 'value_string');
+                            },
+                        ]);
+                },
             ])
             ->orderBy('products.id');
     }

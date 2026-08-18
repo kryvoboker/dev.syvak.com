@@ -95,7 +95,7 @@ class Category extends Model
         /** @var Collection<int, Category> $categories */
         $categories = self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -114,10 +114,10 @@ class Category extends Model
         /** @var Collection<int, Category> $categories */
         $categories = self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'slugs' => function ($query) use ($language_id) {
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -132,7 +132,7 @@ class Category extends Model
     {
         return self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -201,7 +201,7 @@ class Category extends Model
     {
         return self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -217,10 +217,10 @@ class Category extends Model
         /** @var Collection<int, Category> $categories */
         $categories = self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'categoryPaths' => function ($query) {
+                'categoryPaths' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                     $query->orderBy('level', 'desc');
                 },
             ])

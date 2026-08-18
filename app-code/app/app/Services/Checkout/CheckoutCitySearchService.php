@@ -115,8 +115,12 @@ class CheckoutCitySearchService
             ';
 
             try {
-                $ukr_poshta_cities_data = $this->normalizeResults($connection->select($ukr_poshta_sql, [$search_like]));
-                $nova_poshta_cities_data = $this->normalizeResults($connection->select($nova_poshta_sql, [$search_like]));
+                $ukr_poshta_results = array_values($connection->select($ukr_poshta_sql, [$search_like]));
+                /** @var array<int, object> $ukr_poshta_results */
+                $nova_poshta_results = array_values($connection->select($nova_poshta_sql, [$search_like]));
+                /** @var array<int, object> $nova_poshta_results */
+                $ukr_poshta_cities_data = $this->normalizeResults($ukr_poshta_results);
+                $nova_poshta_cities_data = $this->normalizeResults($nova_poshta_results);
 
                 if (count($ukr_poshta_cities_data) > count($nova_poshta_cities_data)) {
                     $this->matchAndMergeCities($nova_poshta_cities_data, $ukr_poshta_cities_data, $cities_data);
@@ -194,7 +198,9 @@ class CheckoutCitySearchService
         }
 
         try {
-            $cities_data = $this->normalizeResults($connection->select($sql, [$search_like]));
+            $city_results = array_values($connection->select($sql, [$search_like]));
+            /** @var array<int, object> $city_results */
+            $cities_data = $this->normalizeResults($city_results);
 
             $this->sortCities($cities_data);
 

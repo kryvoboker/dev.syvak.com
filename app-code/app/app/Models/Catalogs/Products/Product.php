@@ -262,13 +262,13 @@ class Product extends Model
 
         return self::query()
             ->with([
-                'slugs' => function ($query) use ($app_settings): void {
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($app_settings): void {
                     $query->where('language_id', $app_settings->language_id);
                 },
-                'productDescription' => function ($query) use ($app_settings): void {
+                'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($app_settings): void {
                     $query->where('language_id', $app_settings->language_id);
                 },
-                'defaultVariant.discounts' => function ($query) use ($app_settings): void {
+                'defaultVariant.discounts' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($app_settings): void {
                     $timezone = config('app.timezone');
                     $current_date_time = now(is_scalar($timezone) ? (string) $timezone : null);
 

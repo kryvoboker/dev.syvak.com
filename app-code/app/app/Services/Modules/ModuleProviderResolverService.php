@@ -145,9 +145,13 @@ readonly class ModuleProviderResolverService
             return [];
         }
 
+        /** @var mixed $config_data */
         $config_data = require $config_path;
 
-        return is_array($config_data) ? $config_data : [];
+        /** @var array<string, mixed> $config_data */
+        $config_data = is_array($config_data) ? $config_data : [];
+
+        return $config_data;
     }
 
     private function normalizeStrategy(mixed $strategy, ?ModuleDefinition $definition = null): string

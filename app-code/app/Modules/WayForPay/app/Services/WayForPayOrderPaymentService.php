@@ -139,7 +139,7 @@ final class WayForPayOrderPaymentService
      */
     private function filterProviderData(array $provider_data): array
     {
-        return Arr::only($provider_data, [
+        $filtered_data = Arr::only($provider_data, [
             'orderReference',
             'transactionStatus',
             'transactionId',
@@ -149,6 +149,9 @@ final class WayForPayOrderPaymentService
             'currency',
             'authCode',
         ]);
+
+        /** @var array<string, mixed> $filtered_data */
+        return $filtered_data;
     }
 
     private function stringValue(mixed $value): string

@@ -45,14 +45,14 @@ class StorefrontModulePlacementResolverService
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
         $cache_key = $placement . '|' . ($page_type ?? 'null');
-        $definitions = collect();
+        /** @var Collection<int, ModuleDefinition> $definitions */
+        $definitions = new Collection();
 
         if (array_key_exists($cache_key, $this->resolved_placements_cache)) {
             return $this->resolved_placements_cache[$cache_key];
         }
 
         try {
-            /** @var Collection<int, ModuleDefinition> $definitions */
             $definitions = resolve_modules_for_context($placement);
         } catch (BindingResolutionException | CircularDependencyException $e) {
             report($e);
@@ -171,9 +171,13 @@ class StorefrontModulePlacementResolverService
             return [];
         }
 
+        /** @var mixed $config_data */
         $config_data = require $config_path;
 
-        return is_array($config_data) ? $config_data : [];
+        /** @var array<string, mixed> $config_data */
+        $config_data = is_array($config_data) ? $config_data : [];
+
+        return $config_data;
     }
 
     private function stringValue(mixed $value): string

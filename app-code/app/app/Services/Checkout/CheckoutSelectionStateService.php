@@ -30,7 +30,12 @@ class CheckoutSelectionStateService
 
         $state = $this->request->session()->get(self::SESSION_KEY, []);
 
-        return is_array($state) ? $state : [];
+        if (! is_array($state)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $state */
+        return $state;
     }
 
     /**

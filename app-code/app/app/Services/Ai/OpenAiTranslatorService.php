@@ -95,7 +95,8 @@ final readonly class OpenAiTranslatorService
             $resp = $e->getResponse();
 
             if (is_object($resp) && method_exists($resp, 'getHeaderLine')) {
-                $ra = (string) $resp->getHeaderLine('Retry-After');
+                $header_value = $resp->getHeaderLine('Retry-After');
+                $ra = is_scalar($header_value) ? (string) $header_value : '';
 
                 if ($ra !== '' && ctype_digit($ra)) {
                     return (int) $ra;

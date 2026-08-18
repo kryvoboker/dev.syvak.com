@@ -226,12 +226,15 @@ final class OrderLifecycleService
      */
     private function filterContext(array $context): array
     {
-        return Arr::only($context, [
+        $filtered_context = Arr::only($context, [
             'payment_id',
             'payment_status',
             'provider_status',
             'provider_reason_code',
         ]);
+
+        /** @var array<string, mixed> $filtered_context */
+        return $filtered_context;
     }
 
     private function logMissingDefaultStatus(string $table): void

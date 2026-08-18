@@ -31,6 +31,15 @@ readonly class ModuleInstanceFormSchemaResolverService
         /** @var callable $resolver */
         $resolver = [$schema, 'getComponents'];
 
-        return $resolver($definition, $instance);
+        $components = $resolver($definition, $instance);
+
+        if (! is_array($components)) {
+            return null;
+        }
+
+        return array_values(array_filter(
+            $components,
+            static fn (mixed $component): bool => $component instanceof Component,
+        ));
     }
 }

@@ -540,7 +540,9 @@ final readonly class OrderAdminPersistenceService
         $product = Product::query()
             ->with([
                 'defaultVariant',
-                'productDescription' => fn ($query) => $query->where('language_id', $language_id),
+                'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
             ])
             ->find($product_id);
 

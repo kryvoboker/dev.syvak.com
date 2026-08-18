@@ -14,6 +14,7 @@ class PromoCodeModule
     public function resolveCallback(array $context = []): callable
     {
         return function (array $totals_data) use ($context): array {
+            /** @var array<string, mixed> $totals_data */
             return app(PromoCodeService::class)->applyToTotals(
                 totals_data: $totals_data,
                 cart_items: $this->arrayRows($context['cart_items'] ?? []),

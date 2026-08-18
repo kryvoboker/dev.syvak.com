@@ -32,20 +32,28 @@ final readonly class ThankYouOrderDataService
                     'status',
                     'customer',
                     'shipping',
-                    'payments' => fn ($query) => $query->latest('id'),
+                    'payments' => function ($query): void {
+                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<*, *, *> $query */
+                        $query->latest('id');
+                    },
                     'products.productVariant.images',
                     'products.productVariant.attributeValues' => function ($query) use ($language_id): void {
+                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<*, *, *> $query */
                         if ($language_id !== null) {
                             $query->where('language_id', $language_id);
                         }
                     },
                     'products.productVariant.attributeValues.attribute.attributeDescription' => function ($query) use ($language_id): void {
+                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<*, *, *> $query */
                         if ($language_id !== null) {
                             $query->where('language_id', $language_id);
                         }
                     },
                     'products.product.productImage',
-                    'totals' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+                    'totals' => function ($query): void {
+                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<*, *, *> $query */
+                        $query->orderBy('sort_order')->orderBy('id');
+                    },
                 ])
                 ->where('order_number', $order_number)
                 ->first();
