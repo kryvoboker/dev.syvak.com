@@ -79,7 +79,7 @@ final class OrderAdminOptionsService
                     ->where('code', app()->getLocale()))
                 ->value('name');
 
-        return $name
+        return $this->stringValue($name)
             ?: $this->translate('admin/orders/orders.statuses.unnamed', 'Unnamed status');
     }
 
@@ -214,7 +214,10 @@ final class OrderAdminOptionsService
     {
         return $this->user_group_options ??= UserGroup::query()
             ->orderBy('name')
-            ->pluck('name', 'id')
+            ->get(['id', 'name'])
+            ->mapWithKeys(fn (UserGroup $group): array => [
+                $this->stringValue($group->getKey()) => $this->stringValue($group->name),
+            ])
             ->all();
     }
 
@@ -229,10 +232,10 @@ final class OrderAdminOptionsService
             ->orderByDesc('name')
             ->get(['id', 'code', 'name'])
             ->mapWithKeys(fn (Currency $currency): array => [
-                (string) $currency->getKey() => sprintf(
+                $this->stringValue($currency->getKey()) => sprintf(
                     '%s — %s',
-                    $currency->code,
-                    $currency->name,
+                    $this->stringValue($currency->code),
+                    $this->stringValue($currency->name),
                 ),
             ])
             ->all();
@@ -272,7 +275,7 @@ final class OrderAdminOptionsService
                 $description = $status->descriptions->first();
 
                 return [
-                    (string) $status->getKey() => $description?->name
+                    $this->stringValue($status->getKey()) => $this->stringValue($description?->name)
                         ?: $this->translate('admin/orders/orders.statuses.unnamed', 'Unnamed status'),
                 ];
             })
@@ -282,9 +285,10 @@ final class OrderAdminOptionsService
     public function getCurrentLanguageId(): ?int
     {
         if (! $this->language_id_resolved) {
-            $this->language_id = $this->request_lookup_context
+            $language_id = $this->request_lookup_context
                 ->getLanguageByCode(app()->getLocale())
                 ?->getKey();
+            $this->language_id = is_numeric($language_id) ? (int) $language_id : null;
             $this->language_id_resolved = true;
         }
 
@@ -295,6 +299,11 @@ final class OrderAdminOptionsService
     {
         $translation = __($key);
 
-        return $translation === $key ? $fallback : (string) $translation;
+        return $translation === $key ? $fallback : $this->stringValue($translation);
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

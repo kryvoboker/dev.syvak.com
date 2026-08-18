@@ -114,8 +114,8 @@ class FilterValueGeneratorService
         $updated_count = 0;
 
         foreach ($value_options as $sort_index => $value_option) {
-            $canonical_key = (string) Arr::get($value_option, 'canonical_key', '');
-            $value_label = (string) Arr::get($value_option, 'canonical_label', '');
+            $canonical_key = $this->stringValue(Arr::get($value_option, 'canonical_key', ''));
+            $value_label = $this->stringValue(Arr::get($value_option, 'canonical_label', ''));
 
             if (blank($canonical_key) || blank($value_label)) {
                 continue;
@@ -146,7 +146,7 @@ class FilterValueGeneratorService
             $this->syncAttributeValueTranslations(
                 value: $value,
                 fallback_label: $value_label,
-                labels_by_language: (array) Arr::get($value_option, 'labels_by_language', []),
+                labels_by_language: $this->stringLabels(Arr::get($value_option, 'labels_by_language', [])),
             );
 
             if ($was_existing_value) {
@@ -156,10 +156,11 @@ class FilterValueGeneratorService
             }
         }
 
-        $removed_count = CatalogFilterValue::query()
+        $removed_result = CatalogFilterValue::query()
             ->where('catalog_filter_group_id', (int) $group->id)
             ->whereNotIn('code', $active_codes)
             ->delete();
+        $removed_count = is_numeric($removed_result) ? (int) $removed_result : 0;
 
         return [
             'created_count' => $created_count,
@@ -192,9 +193,11 @@ class FilterValueGeneratorService
             ->whereIn('catalog_filter_value_id', $value_ids)
             ->delete();
 
-        return CatalogFilterValue::query()
+        $removed_result = CatalogFilterValue::query()
             ->whereIn('id', $value_ids)
             ->delete();
+
+        return is_numeric($removed_result) ? (int) $removed_result : 0;
     }
 
     /** @param array<int, string> $labels_by_language */
@@ -204,7 +207,7 @@ class FilterValueGeneratorService
         array $labels_by_language,
     ): void {
         foreach ((new Language())->getActiveLanguages() as $language) {
-            $translated_label = trim((string) ($labels_by_language[(int) $language->id] ?? ''));
+            $translated_label = trim($this->stringValue($labels_by_language[(int) $language->id] ?? ''));
 
             CatalogFilterValueTranslation::query()->updateOrCreate(
                 [
@@ -361,7 +364,7 @@ class FilterValueGeneratorService
         return (new Language())
             ->getActiveLanguages()
             ->pluck('id')
-            ->map(fn (mixed $language_id): int => (int) $language_id)
+            ->map(fn (mixed $language_id): int => $this->integerValue($language_id))
             ->values()
             ->all();
     }
@@ -390,5 +393,35 @@ class FilterValueGeneratorService
         }
 
         return 'value_' . sha1($value_label);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function stringLabels(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $labels = [];
+
+        foreach ($value as $language_id => $label) {
+            if (is_numeric($language_id)) {
+                $labels[(int) $language_id] = $this->stringValue($label);
+            }
+        }
+
+        return $labels;
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

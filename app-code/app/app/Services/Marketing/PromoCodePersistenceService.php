@@ -21,7 +21,7 @@ final class PromoCodePersistenceService
      */
     public function prepareForSave(array $data, ?PromoCode $ignore = null): array
     {
-        $code = Str::squish((string) Arr::get($data, 'code', ''));
+        $code = Str::squish($this->stringValue(Arr::get($data, 'code', '')));
         $normalized_code = PromoCode::normalizeCode($code);
         $ignore_id = $ignore?->getKey();
 
@@ -46,7 +46,7 @@ final class PromoCodePersistenceService
             ->map(fn (mixed $currency_id): int => (int) $currency_id)
             ->all();
 
-        if ($default_currency === null || ! in_array((int) $default_currency->getKey(), $discount_currency_ids, true)) {
+        if ($default_currency === null || ! in_array($this->integerValue($default_currency->getKey()), $discount_currency_ids, true)) {
             throw ValidationException::withMessages([
                 'data.discount_items' => __('admin/marketing/promo_codes.errors.default_currency_required'),
             ]);
@@ -87,7 +87,7 @@ final class PromoCodePersistenceService
             ])->all(),
             'error_messages' => $error_translations
                 ->mapWithKeys(fn (PromoCodeErrorTranslation $translation): array => [
-                    (string) $translation->language_id => [
+                    $this->stringValue($translation->language_id) => [
                         'expired_message' => $translation->expired_message,
                         'minimum_order_message' => $translation->minimum_order_message,
                         'usage_limit_message' => $translation->usage_limit_message,
@@ -106,10 +106,10 @@ final class PromoCodePersistenceService
         $promo_code->categories()->sync($this->idsFromRepeater($data['category_items'] ?? [], 'category_id'));
 
         $promo_code->discounts()->delete();
-        $promo_code->discounts()->createMany($this->normalizeDiscounts((array) ($data['discount_items'] ?? [])));
+        $promo_code->discounts()->createMany($this->normalizeDiscounts($this->arrayRows($data['discount_items'] ?? [])));
 
         $promo_code->errorTranslations()->delete();
-        $promo_code->errorTranslations()->createMany($this->normalizeErrorTranslations((array) ($data['error_messages'] ?? [])));
+        $promo_code->errorTranslations()->createMany($this->normalizeErrorTranslations($this->arrayRows($data['error_messages'] ?? [])));
     }
 
     /**
@@ -188,7 +188,7 @@ final class PromoCodePersistenceService
         return collect($items)
             ->filter(fn (array $item): bool => filled($item['currency_id'] ?? null))
             ->map(fn (array $item): array => [
-                'currency_id' => (int) $item['currency_id'],
+                'currency_id' => $this->integerValue($item['currency_id']),
                 'value' => $item['value'] ?? 0,
             ])
             ->unique('currency_id')
@@ -212,16 +212,56 @@ final class PromoCodePersistenceService
                     'expired_message',
                     'minimum_order_message',
                     'usage_limit_message',
-                ])->map(fn (mixed $message): ?string => filled($message) ? Str::squish((string) $message) : null)->all();
+                ])->map(fn (mixed $message): ?string => filled($message) ? Str::squish($this->stringValue($message)) : null)->all();
 
                 if (collect($messages)->filter(fn (mixed $message): bool => filled($message))->isEmpty()) {
                     return null;
                 }
 
-                return ['language_id' => (int) $language_id, ...$messages];
+                return ['language_id' => $this->integerValue($language_id), ...$messages];
             })
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function arrayRows(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $rows = [];
+
+        foreach ($value as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $row = [];
+
+            foreach ($item as $key => $field) {
+                if (is_string($key)) {
+                    $row[$key] = $field;
+                }
+            }
+
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

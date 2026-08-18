@@ -79,7 +79,7 @@ class SimpleOrderValidateRequest extends FormRequest
             Arr::set($normalized_data, 'city', $selection_city);
         } else {
             Arr::set($normalized_data, 'city', [
-                'city_description' => Str::squish((string) $this->input('city', '')),
+                'city_description' => Str::squish($this->stringValue($this->input('city', ''))),
             ]);
         }
 
@@ -95,11 +95,11 @@ class SimpleOrderValidateRequest extends FormRequest
         }
 
         foreach (['first_name', 'last_name', 'phone', 'email', OrderDataKeyEnum::DeliveryMethod->value, OrderDataKeyEnum::DeliveryAddress->value, OrderDataKeyEnum::Comment->value, OrderDataKeyEnum::PromoCode->value] as $key) {
-            Arr::set($normalized_data, $key, Str::squish((string) $this->input($key, '')));
+            Arr::set($normalized_data, $key, Str::squish($this->stringValue($this->input($key, ''))));
         }
 
         Arr::set($normalized_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
-        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower(Str::squish((string) $this->input(OrderDataKeyEnum::PaymentMethod->value, ''))));
+        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower(Str::squish($this->stringValue($this->input(OrderDataKeyEnum::PaymentMethod->value, '')))));
         Arr::set(
             $normalized_data,
             OrderDataKeyEnum::DeliveryPoint->value,
@@ -113,7 +113,7 @@ class SimpleOrderValidateRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            $payment_method = (string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '');
+            $payment_method = $this->stringValue($this->input(OrderDataKeyEnum::PaymentMethod->value, ''));
 
             if ($payment_method === '') {
                 return;
@@ -140,9 +140,9 @@ class SimpleOrderValidateRequest extends FormRequest
                 );
             }
 
-            $delivery_method = (string) $this->input(OrderDataKeyEnum::DeliveryMethod->value, '');
+            $delivery_method = $this->stringValue($this->input(OrderDataKeyEnum::DeliveryMethod->value, ''));
             $delivery_point = (array) $this->input(OrderDataKeyEnum::DeliveryPoint->value, []);
-            $delivery_address = (string) $this->input(OrderDataKeyEnum::DeliveryAddress->value, '');
+            $delivery_address = $this->stringValue($this->input(OrderDataKeyEnum::DeliveryAddress->value, ''));
 
             if ($delivery_method === DeliveryMethodEnum::NovaPoshtaCourier->value && $delivery_address === '') {
                 $validator->errors()->add(OrderDataKeyEnum::DeliveryAddress->value, 'A delivery address is required.');
@@ -159,5 +159,10 @@ class SimpleOrderValidateRequest extends FormRequest
                 $validator->errors()->add(OrderDataKeyEnum::DeliveryPoint->value, 'A delivery point is required.');
             }
         });
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }
