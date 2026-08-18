@@ -314,11 +314,13 @@ class ProductForm
 
             $description = $category->categoryDescription
                 ->firstWhere('language_id', $language_id);
+            $description_name = $description?->name;
+            $fallback_description_name = $category->categoryDescription->first()?->name;
 
-            $name = is_string($description->name ?? null) && filled($description->name)
-                ? $description->name
-                : (is_string($category->categoryDescription->first()->name ?? null) && filled($category->categoryDescription->first()->name)
-                    ? $category->categoryDescription->first()->name
+            $name = is_string($description_name) && filled($description_name)
+                ? $description_name
+                : (filled($fallback_description_name)
+                    ? $fallback_description_name
                     : "Category #$category->id");
 
             $path[] = $name;
@@ -542,11 +544,13 @@ class ProductForm
                                                 /** @var Attribute $attribute */
                                                 $description = $attribute->attributeDescription
                                                     ->firstWhere('language_id', $current_language_id);
+                                                $description_name = $description?->name;
+                                                $fallback_description_name = $attribute->attributeDescription->first()?->name;
 
-                                                $name = is_string($description->name ?? null) && filled($description->name)
-                                                    ? $description->name
-                                                    : (is_string($attribute->attributeDescription->first()->name ?? null) && filled($attribute->attributeDescription->first()->name)
-                                                        ? $attribute->attributeDescription->first()->name
+                                                $name = is_string($description_name) && filled($description_name)
+                                                    ? $description_name
+                                                    : (filled($fallback_description_name)
+                                                        ? $fallback_description_name
                                                         : "Attribute #$attribute->id");
 
                                                 return [$attribute->id => $name];
@@ -568,11 +572,13 @@ class ProductForm
 
                                         $description = $attribute->attributeDescription
                                             ->firstWhere('language_id', $current_language_id);
+                                        $description_name = $description?->name;
+                                        $fallback_description_name = $attribute->attributeDescription->first()?->name;
 
-                                        return is_string($description->name ?? null) && filled($description->name)
-                                            ? $description->name
-                                            : (is_string($attribute->attributeDescription->first()->name ?? null) && filled($attribute->attributeDescription->first()->name)
-                                                ? $attribute->attributeDescription->first()->name
+                                        return is_string($description_name) && filled($description_name)
+                                            ? $description_name
+                                            : (filled($fallback_description_name)
+                                                ? $fallback_description_name
                                                 : "Attribute #$attribute->id");
                                     })
                                     ->afterStateUpdated(function ($state, $set, $get): void {

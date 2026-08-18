@@ -29,7 +29,7 @@ class OrdersTable
 {
     public static function configure(Table $table): Table
     {
-        $language_id = app(Language::class)->getLanguageByCode(app()->getLocale())->id;
+        $language_id = app(Language::class)->getLanguageByCode(app()->getLocale())?->id;
 
         return $table
             ->modifyQueryUsing(function (Builder $query) use ($language_id): void {

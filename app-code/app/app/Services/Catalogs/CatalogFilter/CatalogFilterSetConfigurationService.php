@@ -110,7 +110,11 @@ class CatalogFilterSetConfigurationService
 
             if (! $group instanceof CatalogFilterGroup) {
                 $group = new CatalogFilterGroup();
-                $group->catalog_filter_set_id = (int) $filter_set->id;
+                $catalog_filter_set_id = (int) $filter_set->id;
+
+                if ($catalog_filter_set_id > 0) {
+                    $group->catalog_filter_set_id = $catalog_filter_set_id;
+                }
                 $group->code = $group_code;
             }
 

@@ -199,7 +199,7 @@ final class OrderLifecycleService
         }
 
         $payment->paymentStatus()->associate($new_status);
-        $payment->provider_data = $provider_data !== [] ? $provider_data : $payment->provider_data;
+        $payment->setAttribute('provider_data', $provider_data !== [] ? $provider_data : $payment->provider_data);
         $payment->failure_reason = $failure_reason;
         $payment->paid_at = $status_code === self::PAYMENT_STATUS_PAID ? now()->toDateTimeString() : null;
         $payment->failed_at = in_array($status_code, [

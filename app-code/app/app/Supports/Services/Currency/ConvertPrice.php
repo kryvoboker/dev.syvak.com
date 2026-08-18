@@ -14,10 +14,8 @@ final class ConvertPrice
 {
     private Currency $default_currency;
 
-    /**
-     * @var null|Collection<string, Currency>
-     */
-    private ?Collection $currencies = null;
+    /** @var Collection<string, Currency> */
+    private Collection $currencies;
 
     private string $locale;
 
@@ -42,6 +40,10 @@ final class ConvertPrice
             $currency = $this->currencies->get($currency_code);
         }
 
+        if (! $currency instanceof Currency) {
+            return '';
+        }
+
         $decimal_place = $currency->decimal_places;
 
         if (! $exchange_rate) {
@@ -60,7 +62,7 @@ final class ConvertPrice
             return $amount;
         }
 
-        return Number::currency(
+        return (string) Number::currency(
             $amount,
             $currency_code,
             $this->locale,
@@ -74,8 +76,8 @@ final class ConvertPrice
 
         if ($this->default_currency->code == $code_from) {
             $code_from = $this->default_currency->exchange_rate;
-        } elseif ($this->currencies->has($code_from)) {
-            $code_from = $this->currencies->get($code_from)->exchange_rate;
+        } elseif (($currency_rate = $this->currencies->get($code_from)?->exchange_rate) !== null) {
+            $code_from = $currency_rate;
         } else {
             $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode($code_from);
@@ -91,8 +93,8 @@ final class ConvertPrice
 
         if ($this->default_currency->code == $code_to) {
             $code_to = $this->default_currency->exchange_rate;
-        } elseif ($this->currencies->has($code_to)) {
-            $code_to = $this->currencies->get($code_to)->exchange_rate;
+        } elseif (($currency_rate = $this->currencies->get($code_to)?->exchange_rate) !== null) {
+            $code_to = $currency_rate;
         } else {
             $currency_model = app(Currency::class);
             $currency = $currency_model->getActiveCurrencyByCode($code_to);
@@ -145,7 +147,7 @@ final class ConvertPrice
             $this->default_currency = $currency;
         }
 
-        if ($this->currencies === null) {
+        if (! isset($this->currencies)) {
             $this->currencies = new Collection();
         }
 
@@ -164,7 +166,7 @@ final class ConvertPrice
             $currency_code = $this->default_currency->code;
         }
 
-        return Str::replace($currency_symbol, $currency_code, $price_string, caseSensitive: false);
+        return Str::replace((string) $currency_symbol, $currency_code, $price_string, caseSensitive: false);
     }
 
     public function setDefaultCurrency(Currency $default_currency): ConvertPrice

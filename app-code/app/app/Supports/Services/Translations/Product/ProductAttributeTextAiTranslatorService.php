@@ -35,6 +35,10 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
 
         $this->setProductAttributeTextHash($product_attribute_text_hash);
 
+        if ($product_attribute_text_hash === null) {
+            return null;
+        }
+
         $ai_answer_cache = $product_attribute_text_hash->aiAnswerCache()->first();
 
         return $ai_answer_cache?->answer;

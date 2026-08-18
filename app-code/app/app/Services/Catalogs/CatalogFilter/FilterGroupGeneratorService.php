@@ -166,7 +166,11 @@ class FilterGroupGeneratorService
             $was_existing_group = $group->exists;
 
             $group->source_type = CatalogFilterGroupSourceTypeEnum::Attribute;
-            $group->source_id = (int) $attribute->id;
+            $source_id = (int) $attribute->id;
+
+            if ($source_id > 0) {
+                $group->source_id = $source_id;
+            }
 
             if (! $was_existing_group) {
                 $group->is_enabled = true;

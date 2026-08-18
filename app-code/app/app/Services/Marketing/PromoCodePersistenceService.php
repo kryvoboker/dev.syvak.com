@@ -23,10 +23,11 @@ final class PromoCodePersistenceService
     {
         $code = Str::squish((string) Arr::get($data, 'code', ''));
         $normalized_code = PromoCode::normalizeCode($code);
+        $ignore_id = $ignore?->getKey();
 
         $duplicate_exists = PromoCode::query()
             ->where('normalized_code', $normalized_code)
-            ->when($ignore instanceof PromoCode, fn ($query): mixed => $query->where('id', '!=', $ignore->getKey()))
+            ->when($ignore_id !== null, fn ($query): mixed => $query->where('id', '!=', $ignore_id))
             ->exists();
 
         if ($duplicate_exists) {

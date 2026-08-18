@@ -9,6 +9,7 @@ use App\Models\Catalogs\Products\ProductVariant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\ProductsCarousel\Services\ProductsCarouselProductFilterService;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
@@ -140,9 +141,13 @@ readonly class ProductsCarouselProductSearchService
             return [];
         }
 
+        /** @var non-falsy-string $order_sql */
+        $order_sql = 'FIELD(product_variants.id, ' . implode(',', $normalized_variant_ids) . ')';
+
         $variants = $this->buildBaseVariantQuery('', null)
             ->whereIn('product_variants.id', $normalized_variant_ids)
-            ->orderByRaw('FIELD(product_variants.id, ' . implode(',', $normalized_variant_ids) . ')')
+            // @phpstan-ignore argument.type (The IDs are normalized integers before interpolation.)
+            ->orderBy(DB::raw($order_sql))
             ->get();
 
         return $this->mapVariantsToOptions($variants);

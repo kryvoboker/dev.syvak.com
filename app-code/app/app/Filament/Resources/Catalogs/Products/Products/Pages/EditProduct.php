@@ -45,7 +45,7 @@ class EditProduct extends EditRecord
     /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
-    /** @var array<int, array<string, mixed>> */
+    /** @var array<int|string, array<string, mixed>> */
     protected array $images = [];
 
     /** @var array<string, mixed> */
@@ -126,10 +126,10 @@ class EditProduct extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->descriptions = trim_strs_in_arr((array) ($data['descriptions'] ?? []));
         $this->category_ids = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
-        $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
-        $this->images = trim_strs_in_arr($data['images'] ?? []);
+        $this->slugs = trim_strs_in_arr((array) ($data['slugs'] ?? []));
+        $this->images = trim_strs_in_arr((array) ($data['images'] ?? []));
         $prepared_variant_data = app(ProductVariantContentPersistenceService::class)->prepareForSave($data);
         $this->variant_relationship_data = $prepared_variant_data['relationships'];
         $this->validateProductSlugsUniqueness();
@@ -253,7 +253,11 @@ class EditProduct extends EditRecord
             'sort_order' => 1,
         ]);
 
-        $product->default_variant_id = (int)$default_variant->id;
+        $default_variant_id = (int) $default_variant->id;
+
+        if ($default_variant_id > 0) {
+            $product->default_variant_id = $default_variant_id;
+        }
         $product->save();
 
         return $default_variant;

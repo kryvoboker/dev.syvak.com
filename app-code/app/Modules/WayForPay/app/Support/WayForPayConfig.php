@@ -19,19 +19,21 @@ final class WayForPayConfig
             return $this->withDefaults($this->normalizeSettings($value));
         }
 
-        $decoded_value = json_decode((string) $value, true);
+        $decoded_value = json_decode(is_scalar($value) ? (string) $value : '', true);
 
         return is_array($decoded_value) ? $this->withDefaults($this->normalizeSettings($decoded_value)) : $this->withDefaults([]);
     }
 
     public function get(string $key, string $default = ''): string
     {
-        return trim((string) ($this->getSettings()[$key] ?? $default));
+        $value = $this->getSettings()[$key] ?? $default;
+
+        return trim(is_scalar($value) ? (string) $value : $default);
     }
 
     public function getDefault(string $key, string $fallback = ''): string
     {
-        return trim((string) config("wayforpay.settings.defaults.$key", $fallback));
+        return $this->getConfigString("wayforpay.settings.defaults.$key", $fallback);
     }
 
     public function getDefaultBoolean(string $key, bool $fallback = false): bool
@@ -59,57 +61,57 @@ final class WayForPayConfig
 
     public function getPaymentMethod(): string
     {
-        return (string) config('wayforpay.identifiers.payment_method', 'wayforpay');
+        return $this->getConfigString('wayforpay.identifiers.payment_method', 'wayforpay');
     }
 
     public function getTranslationKey(): string
     {
-        return (string) config('wayforpay.identifiers.translation_key', '');
+        return $this->getConfigString('wayforpay.identifiers.translation_key', '');
     }
 
     public function getPaymentEndpoint(): string
     {
-        return (string) config('wayforpay.endpoints.payment', '');
+        return $this->getConfigString('wayforpay.endpoints.payment', '');
     }
 
     public function getWidgetScriptUrl(): string
     {
-        return (string) config('wayforpay.endpoints.widget_script', '');
+        return $this->getConfigString('wayforpay.endpoints.widget_script', '');
     }
 
     public function getCallbackRouteName(): string
     {
-        return (string) config('wayforpay.callback.route_name', '');
+        return $this->getConfigString('wayforpay.callback.route_name', '');
     }
 
     public function getCallbackHandlerMethod(): string
     {
-        return (string) config('wayforpay.callback.handler_method', '');
+        return $this->getConfigString('wayforpay.callback.handler_method', '');
     }
 
     public function getReturnRouteName(): string
     {
-        return (string) config('wayforpay.return.route_name', '');
+        return $this->getConfigString('wayforpay.return.route_name', '');
     }
 
     public function getSettingsGlobalConfigKey(): string
     {
-        return (string) config('wayforpay.storage.settings_global_config_key', '');
+        return $this->getConfigString('wayforpay.storage.settings_global_config_key', '');
     }
 
     public function getPaymentNamesGlobalConfigKey(): string
     {
-        return (string) config('wayforpay.storage.payment_names_global_config_key', '');
+        return $this->getConfigString('wayforpay.storage.payment_names_global_config_key', '');
     }
 
     public function getRedirectMethod(): string
     {
-        return (string) config('wayforpay.request.redirect_method', 'POST');
+        return $this->getConfigString('wayforpay.request.redirect_method', 'POST');
     }
 
     public function getClientCountry(): string
     {
-        return (string) config('wayforpay.request.client_country', 'Ukraine');
+        return $this->getConfigString('wayforpay.request.client_country', 'Ukraine');
     }
 
     /**
@@ -125,7 +127,9 @@ final class WayForPayConfig
 
     public function getPaymentName(string $locale): string
     {
-        return trim((string) ($this->getPaymentNames()[Str::lower($locale)] ?? ''));
+        $value = $this->getPaymentNames()[Str::lower($locale)] ?? '';
+
+        return trim(is_scalar($value) ? (string) $value : '');
     }
 
     /**
@@ -139,7 +143,7 @@ final class WayForPayConfig
             return $this->normalizeLocalizedValues($value);
         }
 
-        $decoded_value = json_decode((string) $value, true);
+        $decoded_value = json_decode(is_scalar($value) ? (string) $value : '', true);
 
         return is_array($decoded_value) ? $this->normalizeLocalizedValues($decoded_value) : [];
     }
@@ -171,14 +175,14 @@ final class WayForPayConfig
     }
 
     /**
-     * @param array<string, mixed> $settings
+     * @param array<int|string, mixed> $settings
      * @return array<string, string>
      */
     private function normalizeSettings(array $settings): array
     {
         return collect($settings)
             ->mapWithKeys(fn (mixed $value, mixed $key): array => [
-                trim((string) $key) => is_bool($value) ? ($value ? '1' : '0') : trim((string) $value),
+                trim((string) $key) => is_bool($value) ? ($value ? '1' : '0') : (is_scalar($value) ? trim((string) $value) : ''),
             ])
             ->filter(fn (string $value, string $key): bool => $key !== '')
             ->all();
@@ -210,16 +214,33 @@ final class WayForPayConfig
     }
 
     /**
-     * @param array<string, mixed> $localized_values
+     * @param array<int|string, mixed> $localized_values
      * @return array<string, string>
      */
     private function normalizeLocalizedValues(array $localized_values): array
     {
-        return collect($localized_values)
-            ->mapWithKeys(fn (mixed $value, mixed $language_code): array => [
-                Str::lower(trim((string) $language_code)) => trim((string) $value),
-            ])
-            ->filter(fn (string $value, string $language_code): bool => $language_code !== '' && $value !== '')
-            ->all();
+        $normalized_values = [];
+
+        foreach ($localized_values as $language_code => $value) {
+            if (! is_string($language_code) || ! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized_language_code = Str::lower(trim($language_code));
+            $normalized_value = trim((string) $value);
+
+            if ($normalized_language_code !== '' && $normalized_value !== '') {
+                $normalized_values[$normalized_language_code] = $normalized_value;
+            }
+        }
+
+        return $normalized_values;
+    }
+
+    private function getConfigString(string $key, string $default): string
+    {
+        $value = config($key, $default);
+
+        return is_scalar($value) ? (string) $value : $default;
     }
 }

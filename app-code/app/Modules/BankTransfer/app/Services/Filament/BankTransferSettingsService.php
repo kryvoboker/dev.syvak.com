@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Modules\BankTransfer\Services\Filament;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Modules\BankTransfer\Support\BankTransferConfig;
 use Throwable;
 
 final class BankTransferSettingsService
 {
     /**
-     * @param array<string, string> $payment_names
-     * @param array<string, string> $payment_information
+     * @param array<int|string, mixed> $payment_names
+     * @param array<int|string, mixed> $payment_information
      * @return array{payment_names: array<string, string>, payment_information: array<string, string>}
      */
     public function save(array $payment_names, array $payment_information): array
@@ -39,16 +40,26 @@ final class BankTransferSettingsService
     }
 
     /**
-     * @param array<string, string> $localized_values
+     * @param array<int|string, mixed> $localized_values
      * @return array<string, string>
      */
     private function normalizeLocalizedValues(array $localized_values): array
     {
-        return collect($localized_values)
-            ->mapWithKeys(fn (mixed $value, mixed $language_code): array => [
-                strtolower(trim((string) $language_code)) => trim((string) $value),
-            ])
-            ->filter(fn (string $value, string $language_code): bool => $language_code !== '' && $value !== '')
-            ->all();
+        $normalized_values = [];
+
+        foreach ($localized_values as $language_code => $value) {
+            if ((! is_string($language_code) && ! is_int($language_code)) || ! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized_language_code = Str::lower(Str::trim((string) $language_code));
+            $normalized_value = Str::trim((string) $value);
+
+            if ($normalized_language_code !== '' && $normalized_value !== '') {
+                $normalized_values[$normalized_language_code] = $normalized_value;
+            }
+        }
+
+        return $normalized_values;
     }
 }

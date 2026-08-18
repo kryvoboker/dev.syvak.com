@@ -32,9 +32,14 @@ final class PickupIframeSanitizer
         }
 
         $body = $document->getElementsByTagName('body')->item(0);
-        $iframes = $body instanceof DOMElement ? $body->getElementsByTagName('iframe') : [];
 
-        if ($body === null || $iframes->length !== 1 || $body->childNodes->length !== 1) {
+        if (! $body instanceof DOMElement) {
+            return ['value' => '', 'errors' => ['iframe_only']];
+        }
+
+        $iframes = $body->getElementsByTagName('iframe');
+
+        if ($iframes->length !== 1 || $body->childNodes->length !== 1) {
             return ['value' => '', 'errors' => ['iframe_only']];
         }
 

@@ -74,7 +74,13 @@ final class WayForPayOrderPaymentService
             'provider_reason_code' => Arr::get($provider_data, 'reasonCode'),
         ]);
 
-        return $order->fresh(['status', 'payments.paymentStatus']);
+        $fresh_order = $order->fresh(['status', 'payments.paymentStatus']);
+
+        if (! $fresh_order instanceof Orders) {
+            throw new RuntimeException('WayForPay order could not be refreshed after payment update.');
+        }
+
+        return $fresh_order;
     }
 
     /**

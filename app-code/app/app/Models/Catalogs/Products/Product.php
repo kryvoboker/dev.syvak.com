@@ -238,7 +238,7 @@ class Product extends Model
 
     public function getLastActualAndLastModifiedDiscountFromModel(self $product): ?ProductVariantDiscount
     {
-        $app_settings = get_app_settings();
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
         $variant = $product->defaultVariant;
 
         if (! $variant instanceof ProductVariant) {
@@ -251,7 +251,7 @@ class Product extends Model
     /** @return LengthAwarePaginator<int, self> */
     public function search(string $keyword, int $per_page): LengthAwarePaginator
     {
-        $app_settings = get_app_settings();
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
         $minimum_stock_quantity = (int) config('app.products.minimum_stock_quantity', 1);
 
         try {

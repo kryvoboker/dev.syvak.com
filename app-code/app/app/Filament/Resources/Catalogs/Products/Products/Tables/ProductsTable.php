@@ -126,7 +126,7 @@ class ProductsTable
                         'style' => 'object-fit: contain;',
                     ])
                     ->getStateUsing(function (Product $record): ?string {
-                        return $record->defaultVariant->image;
+                        return $record->defaultVariant?->image;
                     }),
 
                 TextColumn::make('price')

@@ -83,7 +83,7 @@ readonly class NovaPoshtaApiService
 
     private function getApiUrl(): string
     {
-        return (string) $this->config->get('api.url', 'https://api.novaposhta.ua/v2.0/json/');
+        return $this->toString($this->config->get('api.url', 'https://api.novaposhta.ua/v2.0/json/'));
     }
 
     private function getApiKey(): string
@@ -93,17 +93,17 @@ readonly class NovaPoshtaApiService
 
     private function getLanguage(): string
     {
-        return (string) $this->config->get('api.language', 'UA');
+        return $this->toString($this->config->get('api.language', 'UA'));
     }
 
     private function getLimit(): int
     {
-        return max(1, (int) $this->config->get('api.limit', 500));
+        return max(1, $this->toInt($this->config->get('api.limit', 500)));
     }
 
     private function getTimeout(): int
     {
-        return max(1, (int) $this->config->get('api.timeout', 30));
+        return max(1, $this->toInt($this->config->get('api.timeout', 30)));
     }
 
     /**
@@ -111,7 +111,7 @@ readonly class NovaPoshtaApiService
      */
     private function getWaihtTimeout(): int
     {
-        return max(1, (int)$this->config->get('api.wait_timeout', 1));
+        return max(1, $this->toInt($this->config->get('api.wait_timeout', 1)));
     }
 
     /**
@@ -137,7 +137,10 @@ readonly class NovaPoshtaApiService
                 'Nova Poshta API reported warnings or errors for %s::%s: %s',
                 $model_name,
                 $called_method,
-                Str::squish(implode(' ', array_merge(array_map('strval', $warnings), array_map('strval', $errors)))),
+                Str::squish(implode(' ', array_merge(
+                    array_map(fn (mixed $value): string => $this->toString($value), $warnings),
+                    array_map(fn (mixed $value): string => $this->toString($value), $errors),
+                ))),
             ));
         }
 
@@ -147,5 +150,15 @@ readonly class NovaPoshtaApiService
             'info' => is_array(Arr::get($payload, 'info')) ? Arr::get($payload, 'info') : [],
             'raw' => $payload,
         ];
+    }
+
+    private function toString(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function toInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
     }
 }

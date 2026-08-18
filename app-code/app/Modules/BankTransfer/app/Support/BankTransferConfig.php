@@ -43,7 +43,7 @@ final class BankTransferConfig
             return $this->normalizeLocalizedValues($value);
         }
 
-        $decoded_value = json_decode((string) $value, true);
+        $decoded_value = json_decode(is_scalar($value) ? (string) $value : '', true);
 
         return is_array($decoded_value) ? $this->normalizeLocalizedValues($decoded_value) : [];
     }
@@ -66,7 +66,7 @@ final class BankTransferConfig
             return $this->normalizeLocalizedValues($value);
         }
 
-        $decoded_value = json_decode((string) $value, true);
+        $decoded_value = json_decode(is_scalar($value) ? (string) $value : '', true);
 
         return is_array($decoded_value) ? $this->normalizeLocalizedValues($decoded_value) : [];
     }
@@ -92,16 +92,26 @@ final class BankTransferConfig
     }
 
     /**
-     * @param array<string, mixed> $localized_values
+     * @param array<int|string, mixed> $localized_values
      * @return array<string, string>
      */
     private function normalizeLocalizedValues(array $localized_values): array
     {
-        return collect($localized_values)
-            ->mapWithKeys(fn (mixed $value, mixed $language_code): array => [
-                Str::lower(trim((string) $language_code)) => trim((string) $value),
-            ])
-            ->filter(fn (string $value, string $language_code): bool => $language_code !== '' && $value !== '')
-            ->all();
+        $normalized_values = [];
+
+        foreach ($localized_values as $language_code => $value) {
+            if (! is_string($language_code) || ! is_scalar($value)) {
+                continue;
+            }
+
+            $normalized_language_code = Str::lower(Str::trim((string) $language_code));
+            $normalized_value = Str::trim((string) $value);
+
+            if ($normalized_language_code !== '' && $normalized_value !== '') {
+                $normalized_values[$normalized_language_code] = $normalized_value;
+            }
+        }
+
+        return $normalized_values;
     }
 }

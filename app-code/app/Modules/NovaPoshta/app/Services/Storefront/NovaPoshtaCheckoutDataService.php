@@ -25,19 +25,28 @@ class NovaPoshtaCheckoutDataService
     public function getCheckoutData(): array
     {
         $state = $this->checkout_state_service->getState();
-        $selected_region_ref = (string) Arr::get($state, 'region.ref', '');
-        $selected_city_ref = (string) Arr::get($state, 'city.ref', '');
-        $delivery_method = (string) Arr::get($state, 'delivery_method', '');
+        $selected_region_ref = $this->toString(Arr::get($state, 'region.ref', ''));
+        $selected_city_ref = $this->toString(Arr::get($state, 'city.ref', ''));
+        $delivery_method = $this->toString(Arr::get($state, 'delivery_method', ''));
         $has_saved_selection = filled($selected_region_ref) || filled($selected_city_ref) || filled($delivery_method);
+
+        /** @var Collection<int, NovaPoshtaRegion> $regions */
+        $regions = $has_saved_selection ? $this->getRegionRows() : new Collection();
+        /** @var Collection<int, NovaPoshtaCity> $cities */
+        $cities = filled($selected_region_ref) ? $this->getCityRows($selected_region_ref) : new Collection();
+        /** @var Collection<int, NovaPoshtaPostOffice> $post_offices */
+        $post_offices = filled($selected_city_ref) && $delivery_method === 'post_office' ? $this->getPostOfficeRows($selected_city_ref) : new Collection();
+        /** @var Collection<int, NovaPoshtaPoshtomat> $poshtomats */
+        $poshtomats = filled($selected_city_ref) && $delivery_method === 'poshtomat' ? $this->getPoshtomatRows($selected_city_ref) : new Collection();
 
         return [
             'state' => $state,
             'delivery_method' => $delivery_method,
             'is_prefilled' => $has_saved_selection,
-            'regions' => $has_saved_selection ? $this->getRegionRows() : collect(),
-            'cities' => filled($selected_region_ref) ? $this->getCityRows($selected_region_ref) : collect(),
-            'post_offices' => filled($selected_city_ref) && $delivery_method === 'post_office' ? $this->getPostOfficeRows($selected_city_ref) : collect(),
-            'poshtomats' => filled($selected_city_ref) && $delivery_method === 'poshtomat' ? $this->getPoshtomatRows($selected_city_ref) : collect(),
+            'regions' => $regions,
+            'cities' => $cities,
+            'post_offices' => $post_offices,
+            'poshtomats' => $poshtomats,
             'selected_region' => $this->findSelectedRegion($selected_region_ref),
             'selected_city' => $this->findSelectedCity($selected_city_ref),
             'selected_delivery_point' => Arr::get($state, 'delivery_point', []),
@@ -105,19 +114,28 @@ class NovaPoshtaCheckoutDataService
     {
         $checkout_data = $this->getCheckoutData();
 
+        /** @var Collection<int, NovaPoshtaRegion> $regions */
+        $regions = $checkout_data['regions'];
+        /** @var Collection<int, NovaPoshtaCity> $cities */
+        $cities = $checkout_data['cities'];
+        /** @var Collection<int, NovaPoshtaPostOffice> $post_offices */
+        $post_offices = $checkout_data['post_offices'];
+        /** @var Collection<int, NovaPoshtaPoshtomat> $poshtomats */
+        $poshtomats = $checkout_data['poshtomats'];
+
         return [
             'placement' => $placement,
             'page_type' => $page_type,
             'state' => $checkout_data['state'],
             'is_prefilled' => (bool) $checkout_data['is_prefilled'],
-            'delivery_method' => (string) $checkout_data['delivery_method'],
+            'delivery_method' => $this->toString($checkout_data['delivery_method']),
             'selected_region' => $checkout_data['selected_region'],
             'selected_city' => $checkout_data['selected_city'],
             'selected_delivery_point' => $checkout_data['selected_delivery_point'],
-            'regions_html' => $this->renderRegionsHtml($checkout_data['regions']),
-            'cities_html' => $this->renderCitiesHtml($checkout_data['cities']),
-            'post_offices_html' => $this->renderPostOfficesHtml($checkout_data['post_offices']),
-            'poshtomats_html' => $this->renderPoshtomatsHtml($checkout_data['poshtomats']),
+            'regions_html' => $this->renderRegionsHtml($regions),
+            'cities_html' => $this->renderCitiesHtml($cities),
+            'post_offices_html' => $this->renderPostOfficesHtml($post_offices),
+            'poshtomats_html' => $this->renderPoshtomatsHtml($poshtomats),
         ];
     }
 
@@ -128,7 +146,7 @@ class NovaPoshtaCheckoutDataService
     {
         return view('novaposhta::storefront.partials.regions', [
             'regions' => $rows,
-            'selected_region_ref' => (string) Arr::get($this->checkout_state_service->getState(), 'region.ref', ''),
+            'selected_region_ref' => $this->toString(Arr::get($this->checkout_state_service->getState(), 'region.ref', '')),
         ])->render();
     }
 
@@ -139,7 +157,7 @@ class NovaPoshtaCheckoutDataService
     {
         return view('novaposhta::storefront.partials.cities', [
             'cities' => $rows,
-            'selected_city_ref' => (string) Arr::get($this->checkout_state_service->getState(), 'city.ref', ''),
+            'selected_city_ref' => $this->toString(Arr::get($this->checkout_state_service->getState(), 'city.ref', '')),
         ])->render();
     }
 
@@ -150,7 +168,7 @@ class NovaPoshtaCheckoutDataService
     {
         return view('novaposhta::storefront.partials.post-offices', [
             'post_offices' => $rows,
-            'selected_delivery_point_ref' => (string) Arr::get($this->checkout_state_service->getState(), 'delivery_point.ref', ''),
+            'selected_delivery_point_ref' => $this->toString(Arr::get($this->checkout_state_service->getState(), 'delivery_point.ref', '')),
         ])->render();
     }
 
@@ -161,7 +179,7 @@ class NovaPoshtaCheckoutDataService
     {
         return view('novaposhta::storefront.partials.poshtomats', [
             'poshtomats' => $rows,
-            'selected_delivery_point_ref' => (string) Arr::get($this->checkout_state_service->getState(), 'delivery_point.ref', ''),
+            'selected_delivery_point_ref' => $this->toString(Arr::get($this->checkout_state_service->getState(), 'delivery_point.ref', '')),
         ])->render();
     }
 
@@ -203,5 +221,10 @@ class NovaPoshtaCheckoutDataService
         $city_data['region'] = $city->novaPoshtaRegion?->toArray() ?? [];
 
         return $city_data;
+    }
+
+    private function toString(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

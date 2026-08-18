@@ -44,7 +44,7 @@ class CategoryController extends Controller
         $page_type = try_detect_page_type($request);
         $page_setting = app(PageSettingsBootstrapService::class)->bootstrapCategoryPageSetting();
         $page_settings_arr = get_page_settings($page_setting);
-        $category_context = $this->resolveCategoryContext($slug, $locale);
+        $category_context = $this->resolveCategoryContext((string) $slug, $locale);
         $products_per_page_limit = ProductsLimitService::getProductsCategoryLimit($page_settings_arr);
         $requested_sort_value = $this->normalizeSortValue((string) Arr::get($request->validated(), 'sort', ''));
         $fallback_active_sort = resolve_sort_code($page_setting, $requested_sort_value);

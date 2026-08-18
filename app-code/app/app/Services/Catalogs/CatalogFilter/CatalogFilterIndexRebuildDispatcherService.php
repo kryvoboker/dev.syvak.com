@@ -23,7 +23,10 @@ class CatalogFilterIndexRebuildDispatcherService
     public function dispatch(CatalogFilterSet $filter_set): array
     {
         if (! (bool) config('catalog-filter.rebuild.queue_enabled', false)) {
-            return $this->rebuild_service->rebuild($filter_set);
+            /** @var array{status: string, rows_total: int, index_version: int} $summary */
+            $summary = $this->rebuild_service->rebuild($filter_set);
+
+            return $summary;
         }
 
         /** @var CatalogFilterIndexMeta $index_meta */
