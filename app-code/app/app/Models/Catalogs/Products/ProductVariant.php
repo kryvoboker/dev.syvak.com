@@ -125,7 +125,8 @@ class ProductVariant extends Model
 
     public function getLastActualAndLastModifiedDiscountForUserGroup(?int $user_group_id): ?ProductVariantDiscount
     {
-        $current_date_time = now(config('app.timezone'));
+        $timezone = config('app.timezone');
+        $current_date_time = now(is_scalar($timezone) ? (string) $timezone : null);
 
         /** @var ProductVariantDiscount|null $discount */
         $discount = $this->discounts()

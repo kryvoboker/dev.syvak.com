@@ -29,7 +29,8 @@ class CheckoutCitySearchRequest extends FormRequest
     {
         $normalized_data = $this->all();
 
-        Arr::set($normalized_data, 'city_keyword', Str::squish((string) $this->input('city_keyword', '')));
+        $city_keyword = $this->input('city_keyword', '');
+        Arr::set($normalized_data, 'city_keyword', Str::squish(is_scalar($city_keyword) ? (string) $city_keyword : ''));
 
         $this->replace($normalized_data);
     }

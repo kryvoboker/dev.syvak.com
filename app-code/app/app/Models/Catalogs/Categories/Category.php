@@ -174,9 +174,11 @@ class Category extends Model
      */
     public function getLevel(): int
     {
-        return $this->categoryPaths()
+        $level = $this->categoryPaths()
             ->where('category_id', $this->id)
             ->max('level') ?? 0;
+
+        return is_numeric($level) ? (int) $level : 0;
     }
 
     /**

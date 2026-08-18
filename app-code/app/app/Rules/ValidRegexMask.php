@@ -25,7 +25,7 @@ final class ValidRegexMask implements ValidationRule
             return;
         }
 
-        $value = Str::trim((string)$value);
+        $value = Str::trim(is_scalar($value) ? (string) $value : '');
 
         if (Str::length($value) > 1000 || @preg_match($value, '') === false) {
             $fail('admin/settings/contacts_page_settings.errors.invalid_regex');

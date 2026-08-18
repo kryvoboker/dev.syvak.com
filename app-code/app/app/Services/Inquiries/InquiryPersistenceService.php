@@ -82,7 +82,7 @@ final readonly class InquiryPersistenceService
 
     private function resolveNullableString(mixed $value): ?string
     {
-        $value = Str::trim((string) $value);
+        $value = Str::trim(is_scalar($value) ? (string) $value : '');
 
         return $value === '' ? null : $value;
     }

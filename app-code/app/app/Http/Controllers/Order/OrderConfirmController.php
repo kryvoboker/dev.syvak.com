@@ -28,11 +28,11 @@ class OrderConfirmController extends Controller
             return response()->json($result_data);
         }
 
-        return redirect((string) Arr::get(
+        return redirect($this->stringValue(Arr::get(
             $result_data,
             'redirect_url',
             localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
-        ));
+        )));
     }
 
     public function storeFastOrder(
@@ -47,11 +47,11 @@ class OrderConfirmController extends Controller
             return response()->json($result_data);
         }
 
-        $redirect_url = (string) Arr::get(
+        $redirect_url = $this->stringValue(Arr::get(
             $result_data,
             'redirect_url',
             localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
-        );
+        ));
 
         return redirect($redirect_url);
     }
@@ -76,5 +76,10 @@ class OrderConfirmController extends Controller
         $result_data = $fast_order_creation_service->validateFastOrderData($request->validated(), $locale);
 
         return response()->json($result_data);
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

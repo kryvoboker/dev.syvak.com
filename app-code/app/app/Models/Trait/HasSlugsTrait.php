@@ -22,10 +22,12 @@ trait HasSlugsTrait
      */
     public function getSlugByLanguageId(int $language_id): ?string
     {
-        return $this
+        $slug = $this
             ->slugs()
             ->where('language_id', $language_id)
             ->value('slug');
+
+        return is_scalar($slug) ? (string) $slug : null;
     }
 
     /**

@@ -37,7 +37,8 @@ class CartUpdateRequest extends FormRequest
 
         $cart_id = $this->input('cart_id', $this->route('cart_id'));
         $quantity = $this->input('quantity', 1);
-        $cart_mode = Str::lower((string) $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
+        $cart_mode_value = $this->input(CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
+        $cart_mode = Str::lower(is_scalar($cart_mode_value) ? (string) $cart_mode_value : CartModeEnum::Regular->value);
 
         Arr::set($normalized_data, 'cart_id', is_numeric($cart_id) ? (int) $cart_id : $cart_id);
         Arr::set($normalized_data, 'quantity', is_numeric($quantity) ? (int) $quantity : $quantity);

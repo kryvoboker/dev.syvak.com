@@ -112,7 +112,7 @@ class ModuleDefinition extends Model
 
     public function getAdminModuleListActionUrl(): ?string
     {
-        $page_class = (string) data_get($this->getAdminModuleConfig(), 'module_list_action.page', '');
+        $page_class = $this->stringValue(data_get($this->getAdminModuleConfig(), 'module_list_action.page', ''));
 
         if (blank($page_class) || ! class_exists($page_class) || ! is_subclass_of($page_class, Page::class)) {
             return null;
@@ -141,7 +141,7 @@ class ModuleDefinition extends Model
         $admin_config = data_get($this->meta, 'admin', []);
 
         if (is_array($admin_config) && $admin_config !== []) {
-            return $admin_config;
+            return $this->stringKeyedArray($admin_config);
         }
 
         $module_config_path = base_path(
@@ -160,6 +160,28 @@ class ModuleDefinition extends Model
 
         $admin_config = data_get($module_config, 'admin', []);
 
-        return is_array($admin_config) ? $admin_config : [];
+        return is_array($admin_config) ? $this->stringKeyedArray($admin_config) : [];
+    }
+
+    /**
+     * @param array<int|string, mixed> $value
+     * @return array<string, mixed>
+     */
+    private function stringKeyedArray(array $value): array
+    {
+        $result = [];
+
+        foreach ($value as $key => $item) {
+            if (is_string($key)) {
+                $result[$key] = $item;
+            }
+        }
+
+        return $result;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

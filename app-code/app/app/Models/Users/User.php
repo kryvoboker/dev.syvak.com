@@ -87,7 +87,8 @@ class User extends Authenticatable implements FilamentUser
             // If password is null and it's being changed, prevent saving it
             if ($user->password === null && $user->isDirty('password')) {
                 // Restore the original password value from database
-                $user->password = $user->getOriginal('password');
+                $original_password = $user->getOriginal('password');
+                $user->password = is_string($original_password) ? $original_password : null;
             }
         });
     }

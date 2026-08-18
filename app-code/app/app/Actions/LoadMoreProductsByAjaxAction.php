@@ -66,8 +66,8 @@ readonly class LoadMoreProductsByAjaxAction
             'is_ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
             'paginator' => $paginator,
             'applied_filters' => (array) Arr::get($response_data, 'applied_filters', []),
-            'active_sort_code' => (string) Arr::get($response_data, 'active_sort_code', 'default'),
-            'selected_sort_value' => (string) Arr::get($response_data, 'selected_sort_value', ''),
+            'active_sort_code' => $this->stringValue(Arr::get($response_data, 'active_sort_code', 'default')),
+            'selected_sort_value' => $this->stringValue(Arr::get($response_data, 'selected_sort_value', '')),
             'is_filter_enabled' => (bool) Arr::get($response_data, 'is_filter_enabled', false),
         ];
     }
@@ -79,5 +79,10 @@ readonly class LoadMoreProductsByAjaxAction
         }
 
         return localized_route('localized.catalog.category.show', ['slug' => $category_slug], absolute: false);
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

@@ -34,7 +34,7 @@ final class WayForPayOrderPaymentService
      */
     private function applyProviderResponseInTransaction(array $provider_data): Orders
     {
-        $order_reference = trim((string) Arr::get($provider_data, 'orderReference', ''));
+        $order_reference = trim($this->stringValue(Arr::get($provider_data, 'orderReference', '')));
 
         if ($order_reference === '') {
             throw new RuntimeException('WayForPay response does not contain an order reference.');
@@ -54,8 +54,8 @@ final class WayForPayOrderPaymentService
         }
 
         $payment = $this->resolvePayment($order, $provider_data);
-        $payment_status = $this->resolvePaymentStatus((string) Arr::get($provider_data, 'transactionStatus', ''));
-        $transaction_id = trim((string) Arr::get($provider_data, 'transactionId', ''));
+        $payment_status = $this->resolvePaymentStatus($this->stringValue(Arr::get($provider_data, 'transactionStatus', '')));
+        $transaction_id = trim($this->stringValue(Arr::get($provider_data, 'transactionId', '')));
 
         if ($transaction_id !== '') {
             $payment->transaction_id = $transaction_id;
@@ -88,7 +88,7 @@ final class WayForPayOrderPaymentService
      */
     private function resolvePayment(Orders $order, array $provider_data): OrderPayments
     {
-        $transaction_id = trim((string) Arr::get($provider_data, 'transactionId', ''));
+        $transaction_id = trim($this->stringValue(Arr::get($provider_data, 'transactionId', '')));
 
         if ($transaction_id !== '') {
             $payment = $order->payments->first(
@@ -128,7 +128,7 @@ final class WayForPayOrderPaymentService
      */
     private function resolveFailureReason(array $provider_data): ?string
     {
-        $reason = trim((string) Arr::get($provider_data, 'reason', ''));
+        $reason = trim($this->stringValue(Arr::get($provider_data, 'reason', '')));
 
         return $reason !== '' ? $reason : null;
     }
@@ -149,5 +149,10 @@ final class WayForPayOrderPaymentService
             'currency',
             'authCode',
         ]);
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

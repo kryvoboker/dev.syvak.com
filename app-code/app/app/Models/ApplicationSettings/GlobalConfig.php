@@ -30,7 +30,7 @@ class GlobalConfig extends Model
     public function key(): Attribute
     {
         return Attribute::make(
-            set: fn (mixed $value): ?string => filled($value) ? trim((string) $value) : null,
+            set: fn (mixed $value): ?string => filled($value) && is_scalar($value) ? trim((string) $value) : null,
         );
     }
 
@@ -51,7 +51,7 @@ class GlobalConfig extends Model
                     return json_encode($value, JSON_UNESCAPED_UNICODE) ?: null;
                 }
 
-                $string_value = (string) $value;
+                $string_value = is_scalar($value) ? (string) $value : '';
 
                 return $string_value === '' ? null : $string_value;
             },

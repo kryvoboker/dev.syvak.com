@@ -15,10 +15,10 @@ class LoadMoreProductsByAjaxIndexRequest extends CatalogFilterAjaxIndexRequest
      */
     public function rules(): array
     {
-        $page_types = implode(',', [
+        $page_types = collect([
             config('page-settings.page_type.category'),
             config('page-settings.page_type.search'),
-        ]);
+        ])->map(fn (mixed $page_type): string => is_scalar($page_type) ? (string) $page_type : '')->implode(',');
 
         return array_merge(parent::rules(), [
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:200'],

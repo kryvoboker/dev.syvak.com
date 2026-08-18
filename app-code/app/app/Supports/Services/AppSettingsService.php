@@ -102,11 +102,12 @@ final class AppSettingsService
     {
         $localized_settings = Arr::get($contacts_settings, 'localized', []);
         $localized_settings = is_array($localized_settings) ? $localized_settings : [];
-        $localized_content = is_array(Arr::get($localized_settings, (string) $language_id))
-            ? Arr::get($localized_settings, (string) $language_id)
+        $language_key = $this->stringValue($language_id);
+        $localized_content = is_array(Arr::get($localized_settings, $language_key))
+            ? Arr::get($localized_settings, $language_key)
             : [];
 
-        $working_hours_content = (string) Arr::get($localized_content, 'working_hours.content', '');
+        $working_hours_content = $this->stringValue(Arr::get($localized_content, 'working_hours.content', ''));
         $work_time = $working_hours_content === '' ? [] : [$locale => $working_hours_content];
 
         $coordinates = null;
@@ -129,8 +130,13 @@ final class AppSettingsService
 
     private function resolveNullableString(mixed $value): ?string
     {
-        $value = Str::trim((string) $value);
+        $value = Str::trim($this->stringValue($value));
 
         return filled($value) ? $value : null;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

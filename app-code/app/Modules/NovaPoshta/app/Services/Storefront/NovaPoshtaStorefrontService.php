@@ -16,12 +16,17 @@ class NovaPoshtaStorefrontService
      */
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
-        if ($page_type !== (string) config('page-settings.page_type.checkout', 'checkout')) {
+        if ($page_type !== $this->stringValue(config('page-settings.page_type.checkout', 'checkout'))) {
             return [];
         }
 
         return [
             $this->checkout_data_service->buildModulePayload($placement, $page_type),
         ];
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }
