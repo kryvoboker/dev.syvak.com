@@ -58,11 +58,11 @@ final readonly class OrderAdminPersistenceService
                 $changed_sections[] = 'order';
             }
 
-            $this->updateCustomer($order, (array) ($data['customer'] ?? []), $changed_sections);
-            $this->updateShipping($order, (array) ($data['shipping'] ?? []), $changed_sections);
+            $this->updateCustomer($order, $this->stringKeyedArray($data['customer'] ?? []), $changed_sections);
+            $this->updateShipping($order, $this->stringKeyedArray($data['shipping'] ?? []), $changed_sections);
             $this->updateShippingCost($order, $data, $changed_sections);
-            $this->updateProducts($order, (array) ($data['products'] ?? []), $changed_sections, $currency_changed);
-            $this->updatePayments($order, (array) ($data['payments'] ?? []), $changed_sections);
+            $this->updateProducts($order, $this->listArray($data['products'] ?? []), $changed_sections, $currency_changed);
+            $this->updatePayments($order, $this->listArray($data['payments'] ?? []), $changed_sections);
 
             $this->recalculateOrderTotal($order);
 
@@ -219,10 +219,10 @@ final readonly class OrderAdminPersistenceService
         $customer->fill([
             'user_id' => $user_id,
             'user_group_id' => $user_group_id,
-            'first_name' => (string) Arr::get($data, 'first_name', $customer->first_name),
-            'last_name' => (string) Arr::get($data, 'last_name', $customer->last_name),
+            'first_name' => $this->stringValue(Arr::get($data, 'first_name', $customer->first_name)),
+            'last_name' => $this->stringValue(Arr::get($data, 'last_name', $customer->last_name)),
             'email' => $this->nullableString(Arr::get($data, 'email', $customer->email)),
-            'telephone' => (string) Arr::get($data, 'telephone', $customer->telephone),
+            'telephone' => $this->stringValue(Arr::get($data, 'telephone', $customer->telephone)),
         ]);
 
         if ($customer->isDirty()) {
@@ -327,7 +327,7 @@ final readonly class OrderAdminPersistenceService
                 'total_type' => 'shipping',
                 'name' => __('admin/orders/orders.labels.shipping_cost'),
                 'value' => $shipping_cost,
-                'sort_order' => ((int) $order->totals()->max('sort_order')) + 1,
+                'sort_order' => $this->integerValue($order->totals()->max('sort_order')) + 1,
             ]);
             $changed_sections[] = 'shipping';
 
@@ -353,6 +353,7 @@ final readonly class OrderAdminPersistenceService
         array &$changed_sections,
         bool $currency_changed = false,
     ): void {
+        /** @var array<int, int> $submitted_product_ids */
         $submitted_product_ids = [];
 
         foreach ($products as $product_data) {
@@ -373,9 +374,9 @@ final readonly class OrderAdminPersistenceService
 
             if (! $order_product && $product_id !== null) {
                 $snapshot = $this->resolveProductSnapshot($product_id);
-                $quantity = max(1, (int) ($product_data['quantity'] ?? 1));
+                $quantity = max(1, $this->integerValue($product_data['quantity'] ?? 1));
                 $discount = $this->nullableFloat($product_data['discount'] ?? 0) ?? 0;
-                $unit_price = (float) ($snapshot['unit_price'] ?? 0);
+                $unit_price = $this->floatValue($snapshot['unit_price'] ?? 0);
 
                 $new_order_product = $order->products()->create([
                     ...$snapshot,
@@ -408,12 +409,12 @@ final readonly class OrderAdminPersistenceService
                     'unit_price' => $order_product->unit_price,
                 ];
 
-            $quantity = max(1, (int) ($product_data['quantity'] ?? $order_product->quantity));
+            $quantity = max(1, $this->integerValue($product_data['quantity'] ?? $order_product->quantity));
             $discount = $this->nullableFloat($product_data['discount'] ?? $order_product->discount) ?? 0;
             $unit_price = ($currency_changed || ! $is_product_replaced)
                 && is_numeric($product_data['unit_price'] ?? null)
-                ? (float) $product_data['unit_price']
-                : (float) ($snapshot['unit_price'] ?? $order_product->unit_price);
+                ? $this->floatValue($product_data['unit_price'])
+                : $this->floatValue($snapshot['unit_price'] ?? $order_product->unit_price);
 
             $order_product->fill([
                 ...$snapshot,
@@ -430,7 +431,10 @@ final readonly class OrderAdminPersistenceService
         }
 
         $existing_product_ids = $order->products()->pluck('id')->all();
-        $removed_product_ids = array_diff($existing_product_ids, $submitted_product_ids);
+        $removed_product_ids = array_diff(
+            array_map(fn (mixed $id): int => $this->integerValue($id), $existing_product_ids),
+            array_map(fn (mixed $id): int => $this->integerValue($id), $submitted_product_ids),
+        );
 
         if ($removed_product_ids !== []) {
             $order->products()->whereKey($removed_product_ids)->delete();
@@ -515,7 +519,7 @@ final readonly class OrderAdminPersistenceService
                 'total_type' => 'total',
                 'name' => __('admin/orders/orders.labels.order_total'),
                 'value' => $grand_total,
-                'sort_order' => ((int)$order->totals()->max('sort_order')) + 1,
+                'sort_order' => $this->integerValue($order->totals()->max('sort_order')) + 1,
             ]);
         } else {
             $total->value = $grand_total;
@@ -560,7 +564,7 @@ final readonly class OrderAdminPersistenceService
             'product_id' => $product->getKey(),
             'product_variant_id' => $variant_id,
             'is_default_variant' => $is_default_variant,
-            'name' => $description?->name ?: $product->model ?: $product->sku ?: (string) $product->getKey(),
+            'name' => $description?->name ?: $product->model ?: $product->sku ?: $this->stringValue($product->getKey()),
             'model' => $product->model,
             'sku' => $product->sku,
             'ean' => $product->ean,
@@ -582,19 +586,59 @@ final readonly class OrderAdminPersistenceService
 
     private function nullableString(mixed $value): ?string
     {
-        $value = Str::trim((string) $value);
+        $value = Str::trim($this->stringValue($value));
 
         return $value !== '' ? $value : null;
     }
 
     private function nullableInteger(mixed $value): ?int
     {
-        return is_numeric($value) && (int) $value > 0 ? (int) $value : null;
+        return is_numeric($value) && $this->integerValue($value) > 0 ? $this->integerValue($value) : null;
     }
 
     private function nullableFloat(mixed $value): ?float
     {
         return is_numeric($value) ? (float) $value : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function stringKeyedArray(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $value */
+        return $value;
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private function listArray(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        return array_values($value);
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function floatValue(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 
     /**
@@ -627,7 +671,7 @@ final readonly class OrderAdminPersistenceService
                 'postcode',
             ]),
             'payments' => $order->payments()->with('paymentStatus')->get()->mapWithKeys(fn (OrderPayments $payment): array => [
-                (string) $payment->getKey() => [
+                $this->stringValue($payment->getKey()) => [
                     'method' => $payment->method,
                     'code' => $payment->code,
                     'payment_status_id' => $payment->payment_status_id,
@@ -638,7 +682,7 @@ final readonly class OrderAdminPersistenceService
                 ],
             ])->all(),
             'products' => $order->products()->get()->mapWithKeys(fn ($product): array => [
-                (string) $product->getKey() => $product->only([
+                $this->stringValue($product->getKey()) => $product->only([
                     'id',
                     'product_id',
                     'product_variant_id',
@@ -653,8 +697,8 @@ final readonly class OrderAdminPersistenceService
                 ]),
             ])->all(),
             'totals' => $order->totals()->get()->mapWithKeys(fn ($total): array => [
-                (string) $total->getKey() => [
-                    'total_type' => (string) $total->getRawOriginal('total_type'),
+                $this->stringValue($total->getKey()) => [
+                    'total_type' => $this->stringValue($total->getRawOriginal('total_type')),
                     'name' => $total->name,
                     'value' => (float) $total->value,
                 ],
@@ -699,8 +743,8 @@ final readonly class OrderAdminPersistenceService
         $this->appendEntityChange(
             $entries,
             'admin_order_customer_updated',
-            (array) $before['customer'],
-            (array) $after['customer'],
+            $this->stringKeyedArray($before['customer'] ?? []),
+            $this->stringKeyedArray($after['customer'] ?? []),
             [
                 'first_name' => 'first_name',
                 'last_name' => 'last_name',
@@ -728,8 +772,8 @@ final readonly class OrderAdminPersistenceService
         $this->appendEntityChange(
             $entries,
             'admin_order_shipping_updated',
-            $before_shipping,
-            $after_shipping,
+            $this->stringKeyedArray($before_shipping),
+            $this->stringKeyedArray($after_shipping),
             [
                 'city' => 'city',
                 'address' => 'address',
@@ -759,12 +803,12 @@ final readonly class OrderAdminPersistenceService
         $after_payments = (array) $after['payments'];
 
         foreach ($after_payments as $payment_id => $payment) {
-            $old_payment = (array) ($before_payments[$payment_id] ?? []);
+            $old_payment = $this->stringKeyedArray($before_payments[$payment_id] ?? []);
 
             if ($old_payment === []) {
                 $entries[] = [
                     'event' => 'admin_order_payment_added',
-                    'json' => $this->historyData($payment),
+                    'json' => $this->historyData($this->stringKeyedArray($payment)),
                 ];
 
                 continue;
@@ -774,7 +818,7 @@ final readonly class OrderAdminPersistenceService
                 $entries,
                 'admin_order_payment_updated',
                 $old_payment,
-                (array) $payment,
+                $this->stringKeyedArray($payment),
                 [
                     'method' => 'method',
                     'code' => 'code',
@@ -789,7 +833,7 @@ final readonly class OrderAdminPersistenceService
         foreach (array_diff_key($before_payments, $after_payments) as $payment) {
             $entries[] = [
                 'event' => 'admin_order_payment_removed',
-                'json' => $this->historyData((array) $payment),
+                'json' => $this->historyData($this->stringKeyedArray($payment)),
             ];
         }
 
@@ -800,7 +844,7 @@ final readonly class OrderAdminPersistenceService
             if (! isset($before_products[$product_id])) {
                 $entries[] = [
                     'event' => 'admin_order_product_added',
-                    'json' => $this->historyData((array) $product),
+                    'json' => $this->historyData($this->stringKeyedArray($product)),
                 ];
 
                 continue;
@@ -809,8 +853,8 @@ final readonly class OrderAdminPersistenceService
             $this->appendEntityChange(
                 $entries,
                 'admin_order_product_updated',
-                (array) $before_products[$product_id],
-                (array) $product,
+                $this->stringKeyedArray($before_products[$product_id]),
+                $this->stringKeyedArray($product),
                 [
                     'name' => 'name',
                     'model' => 'model',
@@ -822,13 +866,13 @@ final readonly class OrderAdminPersistenceService
                     'line_total' => 'line_total',
                 ],
                 [
-                    'id' => $product['id'] ?? $product_id,
-                    'product_id' => $product['product_id'] ?? null,
-                    'product_variant_id' => $product['product_variant_id'] ?? null,
-                    'model' => $product['model'] ?? null,
-                    'sku' => $product['sku'] ?? null,
-                    'ean' => $product['ean'] ?? null,
-                    'name' => $product['name'] ?? null,
+                    'id' => $this->stringKeyedArray($product)['id'] ?? $product_id,
+                    'product_id' => $this->stringKeyedArray($product)['product_id'] ?? null,
+                    'product_variant_id' => $this->stringKeyedArray($product)['product_variant_id'] ?? null,
+                    'model' => $this->stringKeyedArray($product)['model'] ?? null,
+                    'sku' => $this->stringKeyedArray($product)['sku'] ?? null,
+                    'ean' => $this->stringKeyedArray($product)['ean'] ?? null,
+                    'name' => $this->stringKeyedArray($product)['name'] ?? null,
                 ],
             );
         }
@@ -836,7 +880,7 @@ final readonly class OrderAdminPersistenceService
         foreach (array_diff_key($before_products, $after_products) as $product) {
             $entries[] = [
                 'event' => 'admin_order_product_removed',
-                'json' => $this->historyData((array) $product),
+                'json' => $this->historyData($this->stringKeyedArray($product)),
             ];
         }
 
@@ -844,8 +888,8 @@ final readonly class OrderAdminPersistenceService
             $entries[] = [
                 'event' => 'admin_order_totals_recalculated',
                 'json' => $this->historyData([
-                    'old_totals' => $this->formatHistoryTotals((array) $before['totals']),
-                    'new_totals' => $this->formatHistoryTotals((array) $after['totals']),
+                    'old_totals' => $this->formatHistoryTotals($this->stringKeyedArray($before['totals'] ?? [])),
+                    'new_totals' => $this->formatHistoryTotals($this->stringKeyedArray($after['totals'] ?? [])),
                     'old_order_total' => $before_order['total'],
                     'new_order_total' => $after_order['total'],
                 ]),
@@ -954,10 +998,10 @@ final readonly class OrderAdminPersistenceService
         }
 
         if (is_array($value)) {
-            return (string) json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            return $this->stringValue(json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
 
-        return (string) $value;
+        return $this->stringValue($value);
     }
 
     /**
@@ -965,9 +1009,10 @@ final readonly class OrderAdminPersistenceService
      */
     private function getHistoryTotalValue(array $snapshot, string $type): ?float
     {
-        foreach ((array) $snapshot['totals'] as $total) {
+        foreach ($this->stringKeyedArray($snapshot['totals'] ?? []) as $total) {
+            $total = $this->stringKeyedArray($total);
             if (($total['total_type'] ?? null) === $type) {
-                return (float) $total['value'];
+                return $this->floatValue($total['value'] ?? null);
             }
         }
 
@@ -980,12 +1025,19 @@ final readonly class OrderAdminPersistenceService
     private function formatHistoryTotals(array $totals): string
     {
         return collect($totals)
-            ->map(fn (array $total): string => sprintf(
-                '%s: %s',
-                $total['name'] ?? $total['total_type'] ?? '',
-                format_price((float) ($total['value'] ?? 0)),
-            ))
+            ->map(fn (mixed $total): string => $this->formatHistoryTotal($total))
             ->implode('; ');
+    }
+
+    private function formatHistoryTotal(mixed $total): string
+    {
+        $total = $this->stringKeyedArray($total);
+
+        return sprintf(
+            '%s: %s',
+            $this->stringValue($total['name'] ?? $total['total_type'] ?? ''),
+            format_price($this->floatValue($total['value'] ?? 0)),
+        );
     }
 
     /**

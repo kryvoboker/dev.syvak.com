@@ -37,7 +37,7 @@ final class PaymentStatusManagementService
 
             $this->syncDescriptions($status, $descriptions);
 
-            return $status->fresh(['descriptions']);
+            return $status->fresh(['descriptions']) ?? $status;
         });
     }
 

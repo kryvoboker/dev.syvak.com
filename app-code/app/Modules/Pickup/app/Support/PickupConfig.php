@@ -32,7 +32,7 @@ final class PickupConfig
             return $this->normalizeAddresses($value);
         }
 
-        $decoded_value = json_decode((string) $value, true);
+        $decoded_value = json_decode(is_scalar($value) ? (string) $value : '', true);
 
         return is_array($decoded_value) ? $this->normalizeAddresses($decoded_value) : [];
     }
@@ -44,7 +44,9 @@ final class PickupConfig
 
     public function getMapIframe(): string
     {
-        return trim((string) get_global_config(self::MAP_IFRAME_GLOBAL_CONFIG_KEY, ''));
+        $value = get_global_config(self::MAP_IFRAME_GLOBAL_CONFIG_KEY, '');
+
+        return trim(is_scalar($value) ? (string) $value : '');
     }
 
     public function getSafeMapIframe(): string
@@ -73,16 +75,26 @@ final class PickupConfig
     }
 
     /**
-     * @param  array<string, mixed>  $addresses
+     * @param  array<int|string, mixed>  $addresses
      * @return array<string, string>
      */
     private function normalizeAddresses(array $addresses): array
     {
-        return collect($addresses)
-            ->mapWithKeys(fn (mixed $address, mixed $language_code): array => [
-                Str::lower(trim((string) $language_code)) => Str::squish((string) $address),
-            ])
-            ->filter(fn (string $address, string $language_code): bool => $language_code !== '' && $address !== '')
-            ->all();
+        $normalized_addresses = [];
+
+        foreach ($addresses as $language_code => $address) {
+            if (! is_string($language_code) || ! is_scalar($address)) {
+                continue;
+            }
+
+            $normalized_language_code = Str::lower(trim($language_code));
+            $normalized_address = Str::squish((string) $address);
+
+            if ($normalized_language_code !== '' && $normalized_address !== '') {
+                $normalized_addresses[$normalized_language_code] = $normalized_address;
+            }
+        }
+
+        return $normalized_addresses;
     }
 }

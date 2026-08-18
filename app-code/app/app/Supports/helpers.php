@@ -60,10 +60,10 @@ if (!function_exists('parse_telephone')) {
         $phone_length = Str::length($telephone);
 
         for ($index_number = 0; $index_number < $phone_length; $index_number++) {
-            $mask = Str::replaceMatches('/_/', $telephone[$index_number], $mask, 1);
+            $mask = (string) Str::replaceMatches('/_/', (string) $telephone[$index_number], (string) $mask, 1);
         }
 
-        return $mask;
+        return (string) $mask;
     }
 }
 
@@ -109,12 +109,7 @@ if (!function_exists('multiple_convert_img_and_get_url')) {
      * @param bool        $is_square
      * @param string      $bg_color HEX or transparent color
      *
-     * @return array{
-     *      thumb_1x: string,
-     *      thumb_2x: string,
-     *      thumb_3x: string,
-     *      thumb_4x?: string
-     *  }
+     * @return array<string, string>
      *
      * @note Use this function with 'x-storefront::common.img' blade component
      */
@@ -325,6 +320,7 @@ if (!function_exists('localized_route')) {
      */
     function localized_route(BackedEnum|string $route, array $parameters = [], bool $absolute = true): string
     {
+        $route = $route instanceof BackedEnum ? (string) $route->value : $route;
         $locale_key = config('localization.locale_parameter');
 
         if (Str::startsWith($route, 'localized.') === false) {
@@ -530,10 +526,10 @@ if (!function_exists('replace_currency_symbol_to_code')) {
      *
      * @return string
      */
-    function replace_currency_symbol_to_code(string $price_string, ?string $currency_symbol = null, ?string $currency_code = null): string
+    function replace_currency_symbol_to_code(string|float|int $price_string, ?string $currency_symbol = null, ?string $currency_code = null): string
     {
         return app(ConvertPrice::class)->replaceCurrencySymbolToCode(
-            price_string   : $price_string,
+            price_string   : (string) $price_string,
             currency_symbol: $currency_symbol,
             currency_code  : $currency_code,
         );
@@ -620,7 +616,7 @@ if (!function_exists('sanitize_url')) {
             return '';
         }
 
-        $sanitized_url = filter_var($url, FILTER_SANITIZE_URL);
+        $sanitized_url = (string) filter_var($url, FILTER_SANITIZE_URL);
 
         // Ensure the URL has a valid scheme (http or https)
         if (Str::startsWith($sanitized_url, ['http://', 'https://']) === false) {
@@ -1026,15 +1022,18 @@ if (!function_exists('get_allowed_locales')) {
         }
 
         if ($allowed_locales !== []) {
-            return $allowed_locales;
+            return array_values(array_filter($allowed_locales, is_string(...)));
         }
 
         $configured_locales = config('app.allowed_locales', []);
 
         if (is_array($configured_locales)) {
-            return $configured_locales;
+            return array_values(array_filter($configured_locales, is_string(...)));
         }
 
-        return string_to_array(is_string($configured_locales) ? $configured_locales : null);
+        /** @var list<string> $locales */
+        $locales = string_to_array(is_string($configured_locales) ? $configured_locales : null);
+
+        return $locales;
     }
 }

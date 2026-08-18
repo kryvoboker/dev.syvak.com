@@ -30,6 +30,10 @@ class ProductNameAiTranslatorService extends AiDbCachedTranslatorAbstract
 
         $this->setProductNameHash($product_hash);
 
+        if ($product_hash === null) {
+            return null;
+        }
+
         $ai_answer_cache = $product_hash->aiAnswerCache()->first();
 
         return $ai_answer_cache?->answer;

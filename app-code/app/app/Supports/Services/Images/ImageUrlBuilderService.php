@@ -29,12 +29,7 @@ final readonly class ImageUrlBuilderService
      * @param bool        $is_square
      * @param string      $bg_color HEX or transparent color
      *
-     * @return array{
-     *     thumb_1x: string,
-     *     thumb_2x: string,
-     *     thumb_3x: string,
-     *     thumb_4x?: string
-     * }
+     * @return array<string, string>
      */
     public function multipleUrl(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): array
     {

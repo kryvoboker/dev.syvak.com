@@ -48,24 +48,18 @@ final readonly class NotFoundPageService
     /**
      *
      * @throws Throwable
-     * @return array{
-     *     title:string,
-     *     description?:string,
-     *          link:array{
-     *              label:string,
-     *              url:string
-     *          },
-     *      images:array<int,array<string,mixed>>
-     * }
+     * @return array<string, mixed>
      */
     public function getNotFoundData(): array
     {
         $settings = $this->page_settings_bootstrap_service->getNotFoundSettings();
         $localized_settings = $this->resolveLocalizedSettings($settings);
 
+        $description = $this->resolveDescription($localized_settings);
+
         return [
             'title' => $this->resolveTitle($localized_settings),
-            'description' => $this->resolveDescription($localized_settings),
+            ...($description !== null ? ['description' => $description] : []),
             'link' => [
                 'label' => $this->resolveLinkLabel($localized_settings),
                 'url' => $this->resolveLinkUrl($localized_settings),

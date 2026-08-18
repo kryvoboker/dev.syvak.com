@@ -63,7 +63,7 @@ class CreateCategory extends CreateRecord
             $this->getCategoryRecord()->rebuildPaths();
             app(HeaderCategoryService::class)->setCategoryVisibility((int) $this->getCategoryRecord()->id, $this->show_in_header);
 
-            return $this->record;
+            return $this->getCategoryRecord();
         });
     }
 

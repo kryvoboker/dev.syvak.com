@@ -23,7 +23,7 @@ class HeaderService
     public function __invoke(array $params = []): array
     {
         $category = new Category();
-        $app_settings = get_app_settings();
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
         $logo_sizes = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
         $logo_path = (string)data_get(
             $app_settings,
@@ -31,7 +31,7 @@ class HeaderService
             (string)config('app.images.path_to_logo', 'images/logo.png'),
         );
         $categories = $category->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
-            $app_settings->language_id,
+            (int) ($app_settings->language_id ?? 0),
         );
         $categories->load('categoryImage');
 
@@ -45,8 +45,8 @@ class HeaderService
 
             $category_data = [
                 'id' => (int)$category->id,
-                'descriptions' => $category->categoryDescription->first()->toArray(),
-                'slug' => $category->slugs->first()->slug,
+                'descriptions' => $category->categoryDescription->first()?->toArray() ?? [],
+                'slug' => (string) ($category->slugs->first()->slug ?? ''),
             ];
 
             if ($is_desktop_device) {
@@ -141,7 +141,7 @@ class HeaderService
         return [
             'categories' => $categories,
             'languages' => $languages,
-            'socials' => get_app_settings()->socials,
+            'socials' => get_app_settings()?->socials,
             'current_language' => app()->getLocale(),
         ];
     }
@@ -153,8 +153,16 @@ class HeaderService
     {
         $category_image = $category->categoryImage->first();
         $preview_image_path = (string)($category_image !== null ? $category_image->preview_image : '');
-        $preview_image_width = $category_image?->preview_image_width;
-        $preview_image_height = $category_image?->preview_image_height;
+        $preview_image_width = (int) data_get(
+            $category_image,
+            'preview_image_width',
+            config('app.images.category.preview_in_page_in_catalog_menu.width', 0),
+        );
+        $preview_image_height = (int) data_get(
+            $category_image,
+            'preview_image_height',
+            config('app.images.category.preview_in_page_in_catalog_menu.height', 0),
+        );
         $fallback_image_path = (string)(config('app.images.default_no_image') ?: 'images/no-image.png');
 
         if (blank($preview_image_path) || Storage::fileExists($preview_image_path) === false) {
@@ -162,9 +170,6 @@ class HeaderService
         }
 
         try {
-            $preview_image_width ??= (int)config('app.images.category.preview_in_page_in_catalog_menu.width', 0);
-            $preview_image_height ??= (int)config('app.images.category.preview_in_page_in_catalog_menu.height', 0);
-
             return [
                 'urls' => multiple_convert_img_and_get_url(
                     $preview_image_path,

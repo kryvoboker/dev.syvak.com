@@ -182,7 +182,7 @@ class ProductController extends Controller
     }
 
     /**
-     * @return array<int, array{title: string, url: string}>
+     * @return array<int, array{title: string, url: string|null}>
      */
     private function resolveBreadcrumbs(Product $product, ?ProductVariant $variant, int $language_id): array
     {
@@ -201,7 +201,7 @@ class ProductController extends Controller
     }
 
     /**
-     * @return array<int, array{title: string, url: string}>
+     * @return array<int, array{title: string, url: string|null}>
      */
     private function resolveProductCategoryBreadcrumbs(Product $product, int $language_id): array
     {

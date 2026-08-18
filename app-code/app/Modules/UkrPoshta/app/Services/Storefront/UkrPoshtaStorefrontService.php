@@ -16,7 +16,9 @@ class UkrPoshtaStorefrontService
      */
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
-        if ($page_type !== (string) config('page-settings.page_type.checkout', 'checkout')) {
+        $checkout_page_type = config('page-settings.page_type.checkout', 'checkout');
+
+        if ($page_type !== (is_scalar($checkout_page_type) ? (string) $checkout_page_type : 'checkout')) {
             return [];
         }
 

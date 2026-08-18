@@ -61,7 +61,7 @@ class CheckoutBranchSearchService
             ];
         }
 
-        $city_ref = Str::squish((string)Arr::get($city, 'nova_poshta_city_id', ''));
+        $city_ref = Str::squish($this->toString(Arr::get($city, 'nova_poshta_city_id', '')));
 
         if ($city_ref === '') {
             return [
@@ -115,7 +115,7 @@ class CheckoutBranchSearchService
             ];
         }
 
-        $city_ref = Str::squish((string)Arr::get($city, 'nova_poshta_city_id', ''));
+        $city_ref = Str::squish($this->toString(Arr::get($city, 'nova_poshta_city_id', '')));
 
         if ($city_ref === '') {
             return [
@@ -169,7 +169,7 @@ class CheckoutBranchSearchService
             ];
         }
 
-        $city_id = (int)Arr::get($city, 'ukr_poshta_city_id', 0);
+        $city_id = $this->toInt(Arr::get($city, 'ukr_poshta_city_id', 0));
 
         if ($city_id <= 0) {
             return [
@@ -206,7 +206,7 @@ class CheckoutBranchSearchService
     }
 
     /**
-     * @param array<int, array<string, mixed>> $rows
+     * @param array<int, mixed> $rows
      *
      * @return array<int, array<string, mixed>>
      */
@@ -230,9 +230,14 @@ class CheckoutBranchSearchService
         ShippingScheduleFormatter::setWeekdayMap($weekday_map);
 
         foreach ($rows as $post_office) {
+            if (! is_array($post_office)) {
+                continue;
+            }
+
             if (isset($post_office['schedule'])) {
+                $schedule = $post_office['schedule'];
                 $post_office['schedule'] = ShippingScheduleFormatter::formatSchedule(
-                    $post_office['schedule'],
+                    $this->toScheduleInput($schedule),
                     $text_day_off,
                     $text_work_schedule,
                 );
@@ -242,10 +247,10 @@ class CheckoutBranchSearchService
 
             $normalized_rows[] = array_filter([
                 'id' => $post_office['id'] ?? null,
-                'branch_value' => (string)($post_office['id'] ?? ''),
+                'branch_value' => $this->toString($post_office['id'] ?? ''),
                 'delivery_method' => $delivery_method,
                 'description' => $post_office['description'] ?? null,
-                'label' => trim($post_office['description'] ?? ''),
+                'label' => trim($this->toString($post_office['description'] ?? '')),
                 'ref' => $post_office['ref'] ?? null,
                 'city_ref' => $post_office['city_ref'] ?? null,
                 'city_description' => $post_office['city_description'] ?? null,
@@ -276,10 +281,10 @@ class CheckoutBranchSearchService
 
             $normalized_rows[] = array_filter([
                 'id' => $post_office['id'] ?? null,
-                'branch_value' => (string)($post_office['id'] ?? ''),
+                'branch_value' => $this->toString($post_office['id'] ?? ''),
                 'delivery_method' => 'ukr_poshta',
                 'description' => $post_office['description'] ?? null,
-                'label' => trim($post_office['description'] ?? ''),
+                'label' => trim($this->toString($post_office['description'] ?? '')),
                 'poregion_id' => $post_office['poregion_id'] ?? null,
                 'podistrict_id' => $post_office['podistrict_id'] ?? null,
                 'pdcity_id' => $post_office['pdcity_id'] ?? null,
@@ -294,5 +299,30 @@ class CheckoutBranchSearchService
         }
 
         return $normalized_rows;
+    }
+
+    private function toString(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function toInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    /** @return array<string, mixed>|string */
+    private function toScheduleInput(mixed $value): array|string
+    {
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (! is_array($value)) {
+            return '';
+        }
+
+        /** @var array<string, mixed> $value */
+        return $value;
     }
 }

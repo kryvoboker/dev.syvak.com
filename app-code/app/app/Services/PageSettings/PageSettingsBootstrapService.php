@@ -714,7 +714,7 @@ class PageSettingsBootstrapService
     }
 
     /**
-     * @return array{localized:array<string, array<string, mixed>>,images:array<string, array<string, mixed>>}
+     * @return array{localized:array<int|string, array<string, mixed>>,images:array<string, array<string, mixed>>}
      */
     private function resolveNotFoundDefaults(): array
     {
@@ -975,7 +975,7 @@ class PageSettingsBootstrapService
     }
 
     /**
-     * @param  array{localized:array<string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
+     * @param  array{localized:array<int|string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
      * @return array<string, mixed>
      */
     private function buildNotFoundSettingsContract(array $defaults): array
@@ -999,7 +999,7 @@ class PageSettingsBootstrapService
     }
 
     /**
-     * @param  array{localized:array<string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
+     * @param  array{localized:array<int|string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
      */
     private function syncNotFoundSettingsContract(PageSetting $page_setting, array $defaults): void
     {
@@ -1011,7 +1011,7 @@ class PageSettingsBootstrapService
 
     /**
      * @param  array<string, mixed>  $settings
-     * @param  array{localized:array<string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
+     * @param  array{localized:array<int|string, array<string, mixed>>,images:array<string, array<string, mixed>>}  $defaults
      * @return array<string, mixed>
      */
     private function normalizeNotFoundSettingsContract(array $settings, array $defaults): array

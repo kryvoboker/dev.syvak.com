@@ -37,7 +37,8 @@ class NovaPoshtaConfig
 
     public function getApiKey(): string
     {
-        $api_key = trim((string) get_global_config(self::API_KEY_GLOBAL_CONFIG_KEY, ''));
+        $raw_api_key = get_global_config(self::API_KEY_GLOBAL_CONFIG_KEY, '');
+        $api_key = trim(is_scalar($raw_api_key) ? (string) $raw_api_key : '');
 
         if ($api_key === '') {
             throw new RuntimeException('Nova Poshta API key is not configured in global configs.');
@@ -48,7 +49,8 @@ class NovaPoshtaConfig
 
     public function getDeliveryCost(): string
     {
-        $delivery_cost = trim((string) get_global_config(self::DELIVERY_COST_GLOBAL_CONFIG_KEY, '0'));
+        $raw_delivery_cost = get_global_config(self::DELIVERY_COST_GLOBAL_CONFIG_KEY, '0');
+        $delivery_cost = trim(is_scalar($raw_delivery_cost) ? (string) $raw_delivery_cost : '');
 
         if ($delivery_cost === '') {
             return '0.00';

@@ -55,14 +55,14 @@ class CarouselStorefrontService
             ->filter(fn (ModuleInstance $instance): bool => $this->matchesPageType($instance, $page_type))
             ->map(function (ModuleInstance $instance): array {
                 $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-                $shared_settings = Arr::get($instance_settings, 'shared', []);
-                $page_types = collect((array) Arr::get($shared_settings, 'page_types', []))
+                $shared_settings = $this->toArray(Arr::get($instance_settings, 'shared', []));
+                $page_types = collect($this->toArray(Arr::get($shared_settings, 'page_types', [])))
                     ->filter(fn (mixed $item): bool => is_string($item) && filled($item))
                     ->values()
                     ->all();
-                $slides = collect((array) Arr::get($instance_settings, 'slides', []))
+                $slides = collect($this->toArray(Arr::get($instance_settings, 'slides', [])))
                     ->filter(fn (mixed $slide): bool => is_array($slide) && Arr::get($slide, 'is_active', true))
-                    ->sortBy(fn (array $slide): int => (int) Arr::get($slide, 'sort_order', 0))
+                    ->sortBy(fn (array $slide): int => $this->toInt(Arr::get($slide, 'sort_order', 0)))
                     ->values()
                     ->map(fn (array $slide): array => $this->mapSlide($slide, $shared_settings))
                     ->filter(fn (array $slide): bool => $slide !== [])
@@ -76,10 +76,10 @@ class CarouselStorefrontService
                     'page_types' => $page_types,
                     'open_links_in_new_tab' => (bool) Arr::get($shared_settings, 'open_links_in_new_tab', true),
                     'slides' => $slides,
-                    'desctop_max_width' => (int) $shared_settings['desktop_image']['max_width'],
-                    'desctop_max_height' => (int) $shared_settings['desktop_image']['max_height'],
-                    'mobile_max_width' => (int) $shared_settings['mobile_image']['max_width'],
-                    'mobile_max_height' => (int) $shared_settings['mobile_image']['max_height'],
+                    'desctop_max_width' => $this->normalizeImageSizeSettings($this->toArray($shared_settings['desktop_image'] ?? []))['max_width'],
+                    'desctop_max_height' => $this->normalizeImageSizeSettings($this->toArray($shared_settings['desktop_image'] ?? []))['max_height'],
+                    'mobile_max_width' => $this->normalizeImageSizeSettings($this->toArray($shared_settings['mobile_image'] ?? []))['max_width'],
+                    'mobile_max_height' => $this->normalizeImageSizeSettings($this->toArray($shared_settings['mobile_image'] ?? []))['max_height'],
                 ];
             })
             ->filter(fn (array $module_data): bool => $module_data['slides'] !== [])
@@ -88,13 +88,13 @@ class CarouselStorefrontService
     }
 
     /**
-     * @param  array<string, mixed>  $slide
-     * @param  array<string, mixed>  $shared_settings
+     * @param  array<int|string, mixed>  $slide
+     * @param  array<int|string, mixed>  $shared_settings
      * @return array<string, mixed>
      */
     private function mapSlide(array $slide, array $shared_settings): array
     {
-        $translations = Arr::get($slide, 'translations', []);
+        $translations = $this->toArray(Arr::get($slide, 'translations', []));
         $current_locale = app()->getLocale();
         $primary_translation_payload = $this->resolvePrimaryTranslation($translations, $current_locale);
         $translation = $primary_translation_payload['translation'];
@@ -107,8 +107,8 @@ class CarouselStorefrontService
             return [];
         }
 
-        $desktop_image_settings = $this->normalizeImageSizeSettings(Arr::get($shared_settings, 'desktop_image', []));
-        $mobile_image_settings = $this->normalizeImageSizeSettings(Arr::get($shared_settings, 'mobile_image', []));
+        $desktop_image_settings = $this->normalizeImageSizeSettings($this->toArray(Arr::get($shared_settings, 'desktop_image', [])));
+        $mobile_image_settings = $this->normalizeImageSizeSettings($this->toArray(Arr::get($shared_settings, 'mobile_image', [])));
 
         $desktop_width = $desktop_image_settings['width'];
         $desktop_height = $desktop_image_settings['height'];
@@ -119,14 +119,14 @@ class CarouselStorefrontService
         $mobile_image_path_payload = $this->resolveTranslationImagePath($translations, 'mobile_image', $current_locale);
 
         return [
-            'title' => (string) Arr::get($translation, 'title', ''),
-            'description' => (string) Arr::get($translation, 'description', ''),
-            'button_text' => (string) Arr::get($translation, 'button_text', ''),
-            'button_url' => (string) Arr::get($translation, 'button_url', ''),
-            'image_url' => (string) Arr::get($translation, 'image_url', ''),
+            'title' => $this->toString(Arr::get($translation, 'title', '')),
+            'description' => $this->toString(Arr::get($translation, 'description', '')),
+            'button_text' => $this->toString(Arr::get($translation, 'button_text', '')),
+            'button_url' => $this->toString(Arr::get($translation, 'button_url', '')),
+            'image_url' => $this->toString(Arr::get($translation, 'image_url', '')),
             'price' => $price,
             'formatted_price' => $price !== null ? format_price($price) : null,
-            'sort_order' => (int) Arr::get($slide, 'sort_order', 0),
+            'sort_order' => $this->toInt(Arr::get($slide, 'sort_order', 0)),
             'desktop_image' => $this->buildImagePayload(
                 $desktop_image_path_payload['path'],
                 $desktop_width,
@@ -141,7 +141,7 @@ class CarouselStorefrontService
     }
 
     /**
-     * @return array{locale: string|null, translation: array<string, mixed>|null}
+     * @return array{locale: string|null, translation: array<int|string, mixed>|null}
      */
     private function resolvePrimaryTranslation(mixed $translations, string $current_locale): array
     {
@@ -190,7 +190,7 @@ class CarouselStorefrontService
 
         $current_translation = Arr::get($translations, $current_locale, []);
         $current_path = is_array($current_translation)
-            ? Str::trim((string) Arr::get($current_translation, $image_field, ''))
+            ? Str::trim($this->toString(Arr::get($current_translation, $image_field, '')))
             : '';
 
         if (filled($current_path)) {
@@ -205,7 +205,7 @@ class CarouselStorefrontService
                 continue;
             }
 
-            $candidate_path = Str::trim((string) Arr::get($translation, $image_field, ''));
+            $candidate_path = Str::trim($this->toString(Arr::get($translation, $image_field, '')));
 
             if (filled($candidate_path)) {
                 return [
@@ -288,16 +288,37 @@ class CarouselStorefrontService
     }
 
     /**
-     * @param  array<string, mixed>  $settings
+     * @param  array<int|string, mixed>  $settings
      * @return array<string, int>
      */
     private function normalizeImageSizeSettings(array $settings): array
     {
         return [
-            'width' => max((int) Arr::get($settings, 'width', 1), 1),
-            'height' => max((int) Arr::get($settings, 'height', 1), 1),
-            'max_width' => max((int) Arr::get($settings, 'max_width', 1), 1),
-            'max_height' => max((int) Arr::get($settings, 'max_height', 1), 1),
+            'width' => max($this->toInt(Arr::get($settings, 'width', 1)), 1),
+            'height' => max($this->toInt(Arr::get($settings, 'height', 1)), 1),
+            'max_width' => max($this->toInt(Arr::get($settings, 'max_width', 1)), 1),
+            'max_height' => max($this->toInt(Arr::get($settings, 'max_height', 1)), 1),
         ];
+    }
+
+    /** @return array<int|string, mixed> */
+    private function toArray(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        /** @var array<int|string, mixed> $value */
+        return $value;
+    }
+
+    private function toInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function toString(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

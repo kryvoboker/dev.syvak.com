@@ -329,6 +329,7 @@ class NovaPoshtaSyncService
 
     /**
      * @param  array<string, mixed>  $state
+     * @param  class-string<NovaPoshtaCity|NovaPoshtaPoshtomat|NovaPoshtaPostOffice|NovaPoshtaRegion>  $model_class
      * @return array<string, mixed>
      */
     private function processWarehousesStage(array $state, string $model_class, bool $is_poshtomat): array

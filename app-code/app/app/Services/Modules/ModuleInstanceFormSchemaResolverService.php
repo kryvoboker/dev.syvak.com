@@ -26,9 +26,11 @@ readonly class ModuleInstanceFormSchemaResolverService
             return null;
         }
 
-        /** @var object{getComponents: callable} $schema */
+        /** @var object $schema */
         $schema = app($schema_class);
+        /** @var callable $resolver */
+        $resolver = [$schema, 'getComponents'];
 
-        return $schema->getComponents($definition, $instance);
+        return $resolver($definition, $instance);
     }
 }

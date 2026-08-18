@@ -345,9 +345,10 @@ readonly class CatalogFilterIndexRebuildService
      */
     private function buildProductsBaseQuery(): Builder
     {
-        $app_settings = get_app_settings();
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
         $current_datetime = now(config('app.timezone'));
-        $db_prefix = config('database.prefix');
+        /** @var literal-string $db_prefix */
+        $db_prefix = (string) config('database.prefix');
 
         return Product::query()
             ->select('products.*')

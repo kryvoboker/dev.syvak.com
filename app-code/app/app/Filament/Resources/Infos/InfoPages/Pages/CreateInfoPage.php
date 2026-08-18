@@ -49,7 +49,7 @@ class CreateInfoPage extends CreateRecord
 
             $this->createDescriptions();
 
-            return $this->record;
+            return $this->getInfoPageRecord();
         });
     }
 

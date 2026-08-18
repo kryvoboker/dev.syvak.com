@@ -37,7 +37,7 @@ final class OrderStatusManagementService
 
             $this->syncDescriptions($status, $descriptions);
 
-            return $status->fresh(['descriptions']);
+            return $status->fresh(['descriptions']) ?? $status;
         });
     }
 

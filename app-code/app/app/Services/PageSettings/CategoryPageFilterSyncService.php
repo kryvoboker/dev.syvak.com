@@ -235,8 +235,8 @@ class CategoryPageFilterSyncService
                 'code' => $code,
                 'source_type' => Arr::get($payload, 'source_type'),
                 'source_id' => Arr::get($payload, 'source_id'),
-                'is_enabled' => (bool) Arr::get($existing_item, 'is_enabled', Arr::get($payload, 'is_enabled', true)),
-                'sort_order' => (int) Arr::get($payload, 'sort_order', Arr::get($existing_item, 'sort_order', 0)),
+                'is_enabled' => (bool) Arr::get($existing_item ?? [], 'is_enabled', Arr::get($payload, 'is_enabled', true)),
+                'sort_order' => (int) Arr::get($payload, 'sort_order', Arr::get($existing_item ?? [], 'sort_order', 0)),
                 'get' => [
                     'key' => (string) Arr::get($payload, 'get.key', ''),
                     'value' => Arr::get($payload, 'get.value'),

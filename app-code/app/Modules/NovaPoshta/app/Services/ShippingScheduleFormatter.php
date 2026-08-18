@@ -48,10 +48,12 @@ class ShippingScheduleFormatter
 
             // Normalize different possible formats
             if (is_array($raw_value)) {
-                // join array values with comma
-                $value = implode(', ', $raw_value);
+                $value = implode(', ', array_filter(
+                    $raw_value,
+                    is_string(...),
+                ));
             } else {
-                $value = trim((string)$raw_value);
+                $value = is_scalar($raw_value) ? trim((string) $raw_value) : '';
             }
 
             // Interpret dash or empty as closed

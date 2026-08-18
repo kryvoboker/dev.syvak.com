@@ -407,7 +407,7 @@ readonly class OrderCreationService
             $this->promo_code_service->consume(
                 $promo_code,
                 $order,
-                auth()->id(),
+                is_numeric(auth()->id()) ? (int) auth()->id() : null,
                 is_numeric($app_settings?->user_group_id) ? (int) $app_settings->user_group_id : null,
             );
         } catch (Throwable $throwable) {

@@ -21,7 +21,7 @@ class FooterService
      */
     public function __invoke(array $params = []): array
     {
-        $app_settings = get_app_settings();
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
         $logo_sizes = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
         $logo_width = (int) ($logo_sizes['width'] ?? config('app.images.logo_width'));
         $logo_height = (int) ($logo_sizes['height'] ?? config('app.images.logo_height'));
@@ -33,7 +33,7 @@ class FooterService
 
         /** @var Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>> $categories */
         $categories = $params['categories'] ?? (new Category())->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
-            $app_settings->language_id,
+            (int) ($app_settings->language_id ?? 0),
         );
         $social_items = $this->getSocialItems();
 
@@ -198,6 +198,8 @@ class FooterService
             ->filter(fn ($phone) => filled($phone))
             ->values()
             ->all();
+
+        $phone_list = array_values(array_filter($phone_list, is_string(...)));
 
         return filled($phone_list) ? $phone_list : ['0 800 000 000'];
     }
