@@ -19,7 +19,7 @@ return [
     */
 
     'enabled' => env('TELESCOPE_ENABLED', true),
-    'allowed_emails' => string_to_array(env('ADMIN_EMAILS_FOR_ACCESS', '')),
+    'allowed_emails' => string_to_array((string) env('ADMIN_EMAILS_FOR_ACCESS', '')),
     'auth_credentials' => [
         'login' => env('TELESCOPE_LOGIN'),
         'password' => env('TELESCOPE_PASSWORD'),
