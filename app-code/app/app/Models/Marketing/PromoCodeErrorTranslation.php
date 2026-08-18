@@ -18,13 +18,17 @@ class PromoCodeErrorTranslation extends Model
         'usage_limit_message',
     ];
 
-    /** @return BelongsTo<PromoCode, $this> */
+    /** @phpstan-return BelongsTo<PromoCode, $this>
+     * @psalm-return BelongsTo<PromoCode, self>
+     */
     public function promoCode(): BelongsTo
     {
         return $this->belongsTo(PromoCode::class);
     }
 
-    /** @return BelongsTo<Language, $this> */
+    /** @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
+     */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);

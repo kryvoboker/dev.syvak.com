@@ -280,6 +280,7 @@ final class PromoCodeService
             ->with('categories:id')
             ->whereIn('id', $product_ids)
             ->get()
+            ->toBase()
             ->mapWithKeys(fn (Product $product): array => [
                 $this->integerValue($product->getKey()) => $product->categories->modelKeys(),
             ])

@@ -34,7 +34,8 @@ class OrderCustomers extends Model
     }
 
     /**
-     * @return BelongsTo<Orders, $this>
+     * @phpstan-return BelongsTo<Orders, $this>
+     * @psalm-return BelongsTo<Orders, self>
      */
     public function order(): BelongsTo
     {
@@ -42,7 +43,8 @@ class OrderCustomers extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @phpstan-return BelongsTo<User, $this>
+     * @psalm-return BelongsTo<User, self>
      */
     public function user(): BelongsTo
     {
@@ -50,7 +52,8 @@ class OrderCustomers extends Model
     }
 
     /**
-     * @return BelongsTo<UserGroup, $this>
+     * @phpstan-return BelongsTo<UserGroup, $this>
+     * @psalm-return BelongsTo<UserGroup, self>
      */
     public function userGroup(): BelongsTo
     {

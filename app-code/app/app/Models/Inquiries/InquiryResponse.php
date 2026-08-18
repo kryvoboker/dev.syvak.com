@@ -40,13 +40,17 @@ class InquiryResponse extends Model
         ];
     }
 
-    /** @return BelongsTo<Inquiry, $this> */
+    /** @phpstan-return BelongsTo<Inquiry, $this>
+     * @psalm-return BelongsTo<Inquiry, self>
+     */
     public function inquiry(): BelongsTo
     {
         return $this->belongsTo(Inquiry::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @phpstan-return BelongsTo<User, $this>
+     * @psalm-return BelongsTo<User, self>
+     */
     public function adminUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'admin_user_id');

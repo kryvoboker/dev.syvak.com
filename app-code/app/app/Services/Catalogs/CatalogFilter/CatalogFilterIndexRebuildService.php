@@ -38,7 +38,6 @@ readonly class CatalogFilterIndexRebuildService
      */
     public function rebuild(CatalogFilterSet $filter_set): array
     {
-        /** @var CatalogFilterIndexMeta $index_meta */
         $index_meta = $filter_set->indexMeta()->firstOrCreate(
             ['catalog_filter_set_id' => $this->integerValue($filter_set->id)],
             [

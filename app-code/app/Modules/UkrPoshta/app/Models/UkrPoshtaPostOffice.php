@@ -27,7 +27,7 @@ class UkrPoshtaPostOffice extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -39,7 +39,8 @@ class UkrPoshtaPostOffice extends Model
     }
 
     /**
-     * @return BelongsTo<UkrPoshtaRegion, $this>
+     * @phpstan-return BelongsTo<UkrPoshtaRegion, $this>
+     * @psalm-return BelongsTo<UkrPoshtaRegion, self>
      */
     public function ukrPoshtaRegion(): BelongsTo
     {
@@ -47,7 +48,8 @@ class UkrPoshtaPostOffice extends Model
     }
 
     /**
-     * @return BelongsTo<UkrPoshtaDistrict, $this>
+     * @phpstan-return BelongsTo<UkrPoshtaDistrict, $this>
+     * @psalm-return BelongsTo<UkrPoshtaDistrict, self>
      */
     public function ukrPoshtaDistrict(): BelongsTo
     {
@@ -55,7 +57,8 @@ class UkrPoshtaPostOffice extends Model
     }
 
     /**
-     * @return BelongsTo<UkrPoshtaCity, $this>
+     * @phpstan-return BelongsTo<UkrPoshtaCity, $this>
+     * @psalm-return BelongsTo<UkrPoshtaCity, self>
      */
     public function ukrPoshtaCity(): BelongsTo
     {

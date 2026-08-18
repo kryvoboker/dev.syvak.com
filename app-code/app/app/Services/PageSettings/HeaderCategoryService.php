@@ -114,6 +114,7 @@ class HeaderCategoryService
                 ->get();
 
             return $categories
+                ->toBase()
                 ->mapWithKeys(fn (Category $category): array => [
                     (string) $category->id => $this->resolveCategoryLabel($category),
                 ])

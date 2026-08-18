@@ -32,7 +32,9 @@ class InquiryAttachment extends Model
         ];
     }
 
-    /** @return BelongsTo<Inquiry, $this> */
+    /** @phpstan-return BelongsTo<Inquiry, $this>
+     * @psalm-return BelongsTo<Inquiry, self>
+     */
     public function inquiry(): BelongsTo
     {
         return $this->belongsTo(Inquiry::class);

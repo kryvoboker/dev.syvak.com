@@ -38,7 +38,7 @@ class HeaderService
         $current_device_type = $this->stringValue(config('devices.current_device_type', config('devices.types.desktop')));
         $is_desktop_device = $current_device_type === $this->stringValue(config('devices.types.desktop'));
 
-        $categories = $categories->map(function (Category $category) use ($is_desktop_device): array {
+        $categories = $categories->toBase()->map(function (Category $category) use ($is_desktop_device): array {
 
             $category_data = [
                 'id' => $this->integerValue($category->id),
@@ -102,6 +102,7 @@ class HeaderService
 
             $resolved_categories = app(HeaderCategoryService::class)
                 ->getActiveCategories($category_ids, $language_id)
+                ->toBase()
                 ->map(function (Category $category): ?array {
                     $description = $category->categoryDescription->first();
                     $slug = $category->slugs->first()?->slug;

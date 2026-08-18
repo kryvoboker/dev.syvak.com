@@ -16,7 +16,7 @@ class ProductVariantImage extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -27,7 +27,8 @@ class ProductVariantImage extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function variant(): BelongsTo
     {

@@ -45,7 +45,7 @@ class Product extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -63,7 +63,8 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductNameHash, $this>
+     * @phpstan-return HasMany<ProductNameHash, $this>
+     * @psalm-return HasMany<ProductNameHash, self>
      */
     public function productNameHash(): HasMany
     {
@@ -71,7 +72,8 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductDescriptionHash, $this>
+     * @phpstan-return HasMany<ProductDescriptionHash, $this>
+     * @psalm-return HasMany<ProductDescriptionHash, self>
      */
     public function productDescriptionHash(): HasMany
     {
@@ -79,7 +81,8 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductAttributeTextHash, $this>
+     * @phpstan-return HasMany<ProductAttributeTextHash, $this>
+     * @psalm-return HasMany<ProductAttributeTextHash, self>
      */
     public function productAttributeTextHash(): HasMany
     {
@@ -87,21 +90,25 @@ class Product extends Model
     }
 
     /**
-     * @return HasOne<ProductNameHash, $this>
+     * @phpstan-return HasOne<ProductNameHash, $this>
+     * @psalm-return HasOne<ProductNameHash, self>
      */
     public function latestProductNameHash(): HasOne
     {
         return $this->hasOne(ProductNameHash::class)->latestOfMany('updated_at');
     }
 
-    /** @return HasOne<ProductDescriptionHash, $this> */
+    /** @phpstan-return HasOne<ProductDescriptionHash, $this>
+     * @psalm-return HasOne<ProductDescriptionHash, self>
+     */
     public function lagestProductDescriptionHash(): HasOne
     {
         return $this->hasOne(ProductDescriptionHash::class)->latestOfMany('updated_at');
     }
 
     /**
-     * @return HasOne<ProductAttributeTextHash, $this>
+     * @phpstan-return HasOne<ProductAttributeTextHash, $this>
+     * @psalm-return HasOne<ProductAttributeTextHash, self>
      */
     public function latestProductAttributeTextHash(): HasOne
     {
@@ -109,7 +116,8 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductDescription, $this>
+     * @phpstan-return HasMany<ProductDescription, $this>
+     * @psalm-return HasMany<ProductDescription, self>
      */
     public function productDescription(): HasMany
     {
@@ -119,7 +127,8 @@ class Product extends Model
     /**
      * Compatibility relation for legacy code paths.
      *
-     * @return HasManyThrough<ProductVariantDiscount, ProductVariant, $this>
+     * @phpstan-return HasManyThrough<ProductVariantDiscount, ProductVariant, $this>
+     * @psalm-return HasManyThrough<ProductVariantDiscount, ProductVariant, self>
      */
     public function productDiscount(): HasManyThrough
     {
@@ -136,7 +145,8 @@ class Product extends Model
     /**
      * Compatibility relation for legacy code paths.
      *
-     * @return HasManyThrough<ProductVariantImage, ProductVariant, $this>
+     * @phpstan-return HasManyThrough<ProductVariantImage, ProductVariant, $this>
+     * @psalm-return HasManyThrough<ProductVariantImage, ProductVariant, self>
      */
     public function productImage(): HasManyThrough
     {
@@ -153,7 +163,8 @@ class Product extends Model
     /**
      * Compatibility relation for legacy code paths.
      *
-     * @return HasManyThrough<ProductVariantAttributeValue, ProductVariant, $this>
+     * @phpstan-return HasManyThrough<ProductVariantAttributeValue, ProductVariant, $this>
+     * @psalm-return HasManyThrough<ProductVariantAttributeValue, ProductVariant, self>
      */
     public function productToAttribute(): HasManyThrough
     {
@@ -168,7 +179,8 @@ class Product extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function defaultVariant(): BelongsTo
     {
@@ -176,7 +188,8 @@ class Product extends Model
     }
 
     /**
-     * @return BelongsTo<Category, $this>
+     * @phpstan-return BelongsTo<Category, $this>
+     * @psalm-return BelongsTo<Category, self>
      */
     public function defaultCategory(): BelongsTo
     {
@@ -184,33 +197,41 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductVariant, $this>
+     * @phpstan-return HasMany<ProductVariant, $this>
+     * @psalm-return HasMany<ProductVariant, self>
      */
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
     }
 
-    /** @return HasMany<ProductSizeGuide, $this> */
+    /** @phpstan-return HasMany<ProductSizeGuide, $this>
+     * @psalm-return HasMany<ProductSizeGuide, self>
+     */
     public function sizeGuides(): HasMany
     {
         return $this->hasMany(ProductSizeGuide::class);
     }
 
-    /** @return HasMany<ProductComposition, $this> */
+    /** @phpstan-return HasMany<ProductComposition, $this>
+     * @psalm-return HasMany<ProductComposition, self>
+     */
     public function compositions(): HasMany
     {
         return $this->hasMany(ProductComposition::class);
     }
 
-    /** @return HasMany<ProductCare, $this> */
+    /** @phpstan-return HasMany<ProductCare, $this>
+     * @psalm-return HasMany<ProductCare, self>
+     */
     public function cares(): HasMany
     {
         return $this->hasMany(ProductCare::class);
     }
 
     /**
-     * @return HasMany<ProductVariant, $this>
+     * @phpstan-return HasMany<ProductVariant, $this>
+     * @psalm-return HasMany<ProductVariant, self>
      */
     public function activeVariants(): HasMany
     {
@@ -218,7 +239,9 @@ class Product extends Model
             ->where('is_active', true);
     }
 
-    /** @return BelongsToMany<Category, $this> */
+    /** @phpstan-return BelongsToMany<Category, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<Category, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(

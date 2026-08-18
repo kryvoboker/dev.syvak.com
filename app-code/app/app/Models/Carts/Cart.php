@@ -40,7 +40,8 @@ class Cart extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @phpstan-return BelongsTo<User, $this>
+     * @psalm-return BelongsTo<User, self>
      */
     public function user(): BelongsTo
     {
@@ -48,7 +49,8 @@ class Cart extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function productVariant(): BelongsTo
     {

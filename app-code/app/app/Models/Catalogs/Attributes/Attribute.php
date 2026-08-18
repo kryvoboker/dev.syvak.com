@@ -18,7 +18,7 @@ class Attribute extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -29,7 +29,8 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<ProductAttributeTextHash, $this>
+     * @phpstan-return HasMany<ProductAttributeTextHash, $this>
+     * @psalm-return HasMany<ProductAttributeTextHash, self>
      */
     public function productAttributeTextHash(): HasMany
     {
@@ -37,7 +38,8 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<AttributeDescription, $this>
+     * @phpstan-return HasMany<AttributeDescription, $this>
+     * @psalm-return HasMany<AttributeDescription, self>
      */
     public function attributeDescription(): HasMany
     {
@@ -47,7 +49,8 @@ class Attribute extends Model
     /**
      * Compatibility relation for legacy naming in services.
      *
-     * @return HasMany<ProductVariantAttributeValue, $this>
+     * @phpstan-return HasMany<ProductVariantAttributeValue, $this>
+     * @psalm-return HasMany<ProductVariantAttributeValue, self>
      */
     public function productToAttribute(): HasMany
     {
@@ -55,7 +58,8 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantAttributeValue, $this>
+     * @phpstan-return HasMany<ProductVariantAttributeValue, $this>
+     * @psalm-return HasMany<ProductVariantAttributeValue, self>
      */
     public function productVariantAttributeValues(): HasMany
     {

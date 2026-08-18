@@ -19,7 +19,7 @@ class ProductVariantAttributeValue extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -31,7 +31,8 @@ class ProductVariantAttributeValue extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function variant(): BelongsTo
     {
@@ -39,7 +40,8 @@ class ProductVariantAttributeValue extends Model
     }
 
     /**
-     * @return BelongsTo<Attribute, $this>
+     * @phpstan-return BelongsTo<Attribute, $this>
+     * @psalm-return BelongsTo<Attribute, self>
      */
     public function attribute(): BelongsTo
     {
@@ -47,7 +49,8 @@ class ProductVariantAttributeValue extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

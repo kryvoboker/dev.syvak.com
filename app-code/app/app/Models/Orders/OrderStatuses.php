@@ -103,7 +103,8 @@ class OrderStatuses extends Model
     }
 
     /**
-     * @return HasMany<OrderStatusDescriptions, $this>
+     * @phpstan-return HasMany<OrderStatusDescriptions, $this>
+     * @psalm-return HasMany<OrderStatusDescriptions, self>
      */
     public function descriptions(): HasMany
     {
@@ -111,7 +112,8 @@ class OrderStatuses extends Model
     }
 
     /**
-     * @return HasMany<Orders, $this>
+     * @phpstan-return HasMany<Orders, $this>
+     * @psalm-return HasMany<Orders, self>
      */
     public function orders(): HasMany
     {
@@ -119,7 +121,8 @@ class OrderStatuses extends Model
     }
 
     /**
-     * @return HasMany<OrderHistories, $this>
+     * @phpstan-return HasMany<OrderHistories, $this>
+     * @psalm-return HasMany<OrderHistories, self>
      */
     public function histories(): HasMany
     {
@@ -127,7 +130,8 @@ class OrderStatuses extends Model
     }
 
     /**
-     * @return HasMany<OrderHistories, $this>
+     * @phpstan-return HasMany<OrderHistories, $this>
+     * @psalm-return HasMany<OrderHistories, self>
      */
     public function previousHistories(): HasMany
     {

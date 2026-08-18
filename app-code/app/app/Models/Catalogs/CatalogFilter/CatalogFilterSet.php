@@ -53,7 +53,8 @@ class CatalogFilterSet extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterGroup, $this>
+     * @phpstan-return HasMany<CatalogFilterGroup, $this>
+     * @psalm-return HasMany<CatalogFilterGroup, self>
      */
     public function groups(): HasMany
     {
@@ -61,7 +62,8 @@ class CatalogFilterSet extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterProductIndex, $this>
+     * @phpstan-return HasMany<CatalogFilterProductIndex, $this>
+     * @psalm-return HasMany<CatalogFilterProductIndex, self>
      */
     public function indexRows(): HasMany
     {
@@ -69,7 +71,8 @@ class CatalogFilterSet extends Model
     }
 
     /**
-     * @return HasOne<CatalogFilterIndexMeta, $this>
+     * @phpstan-return HasOne<CatalogFilterIndexMeta, $this>
+     * @psalm-return HasOne<CatalogFilterIndexMeta, self>
      */
     public function indexMeta(): HasOne
     {

@@ -28,7 +28,8 @@ class OrderStatusDescriptions extends Model
     }
 
     /**
-     * @return BelongsTo<OrderStatuses, $this>
+     * @phpstan-return BelongsTo<OrderStatuses, $this>
+     * @psalm-return BelongsTo<OrderStatuses, self>
      */
     public function orderStatus(): BelongsTo
     {
@@ -36,7 +37,8 @@ class OrderStatusDescriptions extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

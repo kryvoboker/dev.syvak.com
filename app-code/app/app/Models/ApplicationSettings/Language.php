@@ -22,7 +22,7 @@ class Language extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
     protected function casts(): array
     {
@@ -33,7 +33,8 @@ class Language extends Model
     }
 
     /**
-     * @return HasMany<Slug, $this>
+     * @phpstan-return HasMany<Slug, $this>
+     * @psalm-return HasMany<Slug, self>
      */
     public function slug(): HasMany
     {

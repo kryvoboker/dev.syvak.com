@@ -53,11 +53,10 @@ class Inquiry extends Model
             'submitted_at' => 'datetime',
         ];
     }
-
     /**
-     * @return Attribute
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
      */
-    /** @return Attribute<mixed, mixed> */
     public function phone(): Attribute
     {
         return Attribute::make(
@@ -66,31 +65,41 @@ class Inquiry extends Model
         );
     }
 
-    /** @return MorphTo<Model, $this> */
+    /** @phpstan-return MorphTo<Model, $this>
+     * @psalm-return MorphTo<Model, self>
+     */
     public function inquiryable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    /** @return BelongsTo<Language, $this> */
+    /** @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
+     */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @phpstan-return BelongsTo<User, $this>
+     * @psalm-return BelongsTo<User, self>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /** @return HasMany<InquiryAttachment, $this> */
+    /** @phpstan-return HasMany<InquiryAttachment, $this>
+     * @psalm-return HasMany<InquiryAttachment, self>
+     */
     public function attachments(): HasMany
     {
         return $this->hasMany(InquiryAttachment::class)->orderBy('sort_order')->orderBy('id');
     }
 
-    /** @return HasMany<InquiryResponse, $this> */
+    /** @phpstan-return HasMany<InquiryResponse, $this>
+     * @psalm-return HasMany<InquiryResponse, self>
+     */
     public function responses(): HasMany
     {
         return $this->hasMany(InquiryResponse::class)->latest('id');

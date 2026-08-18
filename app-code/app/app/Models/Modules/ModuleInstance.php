@@ -43,7 +43,8 @@ class ModuleInstance extends Model
     }
 
     /**
-     * @return BelongsTo<ModuleDefinition, $this>
+     * @phpstan-return BelongsTo<ModuleDefinition, $this>
+     * @psalm-return BelongsTo<ModuleDefinition, self>
      */
     public function definition(): BelongsTo
     {

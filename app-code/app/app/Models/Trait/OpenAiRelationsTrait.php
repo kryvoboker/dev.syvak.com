@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 trait OpenAiRelationsTrait
 {
     /**
-     * @return MorphOne<AiAnswerCache, $this>
+     * @phpstan-return MorphOne<AiAnswerCache, $this>
+     * @psalm-return MorphOne<AiAnswerCache, self>
      */
     public function aiAnswerCache(): MorphOne
     {

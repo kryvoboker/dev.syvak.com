@@ -23,14 +23,17 @@ class Slug extends Model
         'slug',
     ];
 
-    /** @return MorphTo<Model, $this> */
+    /** @phpstan-return MorphTo<Model, $this>
+     * @psalm-return MorphTo<Model, self>
+     */
     public function sluggable(): MorphTo
     {
         return $this->morphTo();
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

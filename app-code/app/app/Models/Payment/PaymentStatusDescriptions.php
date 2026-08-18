@@ -28,7 +28,8 @@ class PaymentStatusDescriptions extends Model
     }
 
     /**
-     * @return BelongsTo<PaymentStatuses, $this>
+     * @phpstan-return BelongsTo<PaymentStatuses, $this>
+     * @psalm-return BelongsTo<PaymentStatuses, self>
      */
     public function paymentStatus(): BelongsTo
     {
@@ -36,7 +37,8 @@ class PaymentStatusDescriptions extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

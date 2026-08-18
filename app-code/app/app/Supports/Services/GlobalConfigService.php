@@ -51,6 +51,7 @@ final class GlobalConfigService
         $configs = GlobalConfig::query()
             ->orderBy('key')
             ->get()
+            ->toBase()
             ->map(function (GlobalConfig $global_config): array {
                 $selected = filter_var($global_config->getAttribute('selected'), FILTER_VALIDATE_BOOLEAN) === true;
 

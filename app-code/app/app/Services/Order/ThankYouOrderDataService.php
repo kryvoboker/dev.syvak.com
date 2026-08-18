@@ -33,25 +33,25 @@ final readonly class ThankYouOrderDataService
                     'customer',
                     'shipping',
                     'payments' => function ($query): void {
-                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<*, *, *> $query */
+                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model, \Illuminate\Database\Eloquent\Model, mixed> $query */
                         $query->latest('id');
                     },
                     'products.productVariant.images',
                     'products.productVariant.attributeValues' => function ($query) use ($language_id): void {
-                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<*, *, *> $query */
+                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model, \Illuminate\Database\Eloquent\Model, mixed> $query */
                         if ($language_id !== null) {
                             $query->where('language_id', $language_id);
                         }
                     },
                     'products.productVariant.attributeValues.attribute.attributeDescription' => function ($query) use ($language_id): void {
-                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<*, *, *> $query */
+                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model, \Illuminate\Database\Eloquent\Model, mixed> $query */
                         if ($language_id !== null) {
                             $query->where('language_id', $language_id);
                         }
                     },
                     'products.product.productImage',
                     'totals' => function ($query): void {
-                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<*, *, *> $query */
+                        /** @var \Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model, \Illuminate\Database\Eloquent\Model, mixed> $query */
                         $query->orderBy('sort_order')->orderBy('id');
                     },
                 ])
@@ -166,6 +166,7 @@ final readonly class ThankYouOrderDataService
         }
 
         return $attribute_values
+            ->toBase()
             ->mapWithKeys(function (ProductVariantAttributeValue $attribute_value): array {
                 $name = Str::trim($this->stringValue($attribute_value->attribute?->attributeDescription->first()?->name));
                 $value = Str::trim($this->stringValue($attribute_value->value_string));

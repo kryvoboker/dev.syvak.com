@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\Catalogs\Categories\Category;
 use App\Services\Trait\SocialServiceTrait;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Str;
@@ -31,8 +30,8 @@ class FooterService
             $this->stringValue(config('app.images.path_to_logo', 'images/logo.png')),
         ));
 
-        /** @var Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>> $categories */
-        $categories = $params['categories'] ?? (new Category())->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
+        $categories = $this->normalizeCategories(
+            $params['categories'] ?? null,
             $app_settings->language_id ?? 0,
         );
         $social_items = $this->getSocialItems();
@@ -88,20 +87,21 @@ class FooterService
     }
 
     /**
-     * @param Collection<int, Category|array<string, mixed>>|SupportCollection<int, Category|array<string, mixed>> $categories
+     * @param SupportCollection<int, Category|array<string, mixed>> $categories
      * @return array<int, array{label: string, url: string}>
      */
-    private function getMenuItems(Collection|SupportCollection $categories): array
+    private function getMenuItems(SupportCollection $categories): array
     {
         return $categories
+            ->toBase()
             ->map(function (Category|array $category): array {
-                $label = $category instanceof Category
-                    ? $this->stringValue($category->categoryDescription->first()?->name)
-                    : $this->stringValue(Arr::get($category, 'descriptions.name'));
+                $label = is_array($category)
+                    ? $this->stringValue(Arr::get($category, 'descriptions.name'))
+                    : $this->stringValue($category->categoryDescription->first()?->name);
 
-                $slug = $category instanceof Category
-                    ? $this->stringValue($category->slugs->first()?->slug)
-                    : $this->stringValue(Arr::get($category, 'slug'));
+                $slug = is_array($category)
+                    ? $this->stringValue(Arr::get($category, 'slug'))
+                    : $this->stringValue($category->slugs->first()?->slug);
 
                 return [
                     'label' => Str::upper($label),
@@ -113,6 +113,28 @@ class FooterService
             ->filter(fn (array $item): bool => filled($item['label']) && filled($item['url']))
             ->values()
             ->all();
+    }
+
+    /**
+     * @param mixed $categories
+     * @return SupportCollection<int, Category|array<string, mixed>>
+     */
+    private function normalizeCategories(mixed $categories, int $language_id): SupportCollection
+    {
+        if ($categories instanceof SupportCollection) {
+            /** @var SupportCollection<int, Category|array<string, mixed>> $categories */
+            return $categories;
+        }
+
+        if (is_array($categories)) {
+            /** @var array<int, Category|array<string, mixed>> $categories */
+            return collect($categories);
+        }
+
+        /** @var SupportCollection<int, Category|array<string, mixed>> $categories */
+        $categories = collect((new Category())->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId($language_id));
+
+        return $categories;
     }
 
     /** @return array<string, mixed> */

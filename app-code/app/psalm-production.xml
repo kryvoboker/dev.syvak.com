@@ -54,12 +54,6 @@
         <file name="bootstrap/app.php"/>
     </stubs>
     <issueHandlers>
-        <!-- These diagnostics are false positives around Laravel's relation generics and collection templates. -->
-        <InvalidDocblock errorLevel="suppress"/>
-        <LessSpecificImplementedReturnType errorLevel="suppress"/>
-        <TooManyTemplateParams errorLevel="suppress"/>
-        <InvalidTemplateParam errorLevel="suppress"/>
-
         <!-- These diagnostics are caused by Laravel's dynamic runtime APIs. -->
         <MissingOverrideAttribute errorLevel="suppress"/>
         <UndefinedThisPropertyFetch errorLevel="suppress"/>

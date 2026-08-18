@@ -35,11 +35,10 @@ class OrderShippings extends Model
             'provider_data' => 'array',
         ];
     }
-
     /**
-     * @return Attribute
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
      */
-    /** @return Attribute<mixed, mixed> */
     public function providerData(): Attribute
     {
         return Attribute::make(
@@ -48,7 +47,8 @@ class OrderShippings extends Model
     }
 
     /**
-     * @return BelongsTo<Orders, $this>
+     * @phpstan-return BelongsTo<Orders, $this>
+     * @psalm-return BelongsTo<Orders, self>
      */
     public function order(): BelongsTo
     {

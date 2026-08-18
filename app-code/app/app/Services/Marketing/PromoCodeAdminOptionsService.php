@@ -25,6 +25,7 @@ final class PromoCodeAdminOptionsService
             ->orderByDesc('is_default')
             ->orderBy('name')
             ->get()
+            ->toBase()
             ->mapWithKeys(fn (Currency $currency): array => [
                 $this->stringValue($currency->getKey()) => sprintf(
                     '%s — %s%s',
