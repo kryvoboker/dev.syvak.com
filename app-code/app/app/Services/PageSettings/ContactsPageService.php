@@ -107,7 +107,7 @@ final readonly class ContactsPageService
                 $allowed_types = array_values(array_filter((array) Arr::get($field, 'allowed_types', []), 'is_string'));
                 $field_rules[] = Rule::file()
                     ->types($allowed_types)
-                    ->max(max(1, (int) Arr::get($field, 'max_size_kb', 1)));
+                    ->max(max(1, $this->integerValue(Arr::get($field, 'max_size_kb', 1))));
             } else {
                 $field_rules[] = 'string';
 
@@ -122,7 +122,7 @@ final readonly class ContactsPageService
 
             if ($regex !== null) {
                 $field_rules[] = function (string $attribute, mixed $value, Closure $fail) use ($regex): void {
-                    if (preg_match($regex, (string) $value) !== 1) {
+                    if (preg_match($regex, $this->stringValue($value)) !== 1) {
                         $fail(__('validation.regex', ['attribute' => $attribute]));
                     }
                 };
@@ -144,11 +144,11 @@ final readonly class ContactsPageService
         $max_length = Arr::get($field, 'max_length');
 
         if (filled($min_length)) {
-            $field_rules[] = 'min:' . max(0, (int) $min_length);
+            $field_rules[] = 'min:' . max(0, $this->integerValue($min_length));
         }
 
         if (filled($max_length)) {
-            $field_rules[] = 'max:' . max(0, (int) $max_length);
+            $field_rules[] = 'max:' . max(0, $this->integerValue($max_length));
         }
     }
 
@@ -163,12 +163,12 @@ final readonly class ContactsPageService
         $content = Arr::get($localized, (string) $language_id);
 
         if (is_array($content)) {
-            return $content;
+            return $this->stringKeyedArray($content);
         }
 
         $first_content = Arr::first($localized);
 
-        return is_array($first_content) ? $first_content : [];
+        return is_array($first_content) ? $this->stringKeyedArray($first_content) : [];
     }
 
     /**
@@ -234,14 +234,14 @@ final readonly class ContactsPageService
         return collect(is_array($rows) ? $rows : [])
             ->filter(fn (mixed $row): bool => is_array($row) && filled(data_get($row, 'path')))
             ->map(function (array $row): ?array {
-                $path = Str::ltrim((string) Arr::get($row, 'path'), '/');
+                $path = Str::ltrim($this->stringValue(Arr::get($row, 'path')), '/');
 
                 if (! Storage::disk('public')->exists($path)) {
                     return null;
                 }
 
-                $width = max(1, (int) Arr::get($row, 'width', 600));
-                $height = max(1, (int) Arr::get($row, 'height', 600));
+                $width = max(1, $this->integerValue(Arr::get($row, 'width', 600)));
+                $height = max(1, $this->integerValue(Arr::get($row, 'height', 600)));
 
                 return [
                     'urls' => multiple_convert_img_and_get_url(
@@ -249,12 +249,12 @@ final readonly class ContactsPageService
                         $width,
                         $height,
                         (bool) Arr::get($row, 'is_square', true),
-                        (string) Arr::get($row, 'background', 'transparent'),
+                        $this->stringValue(Arr::get($row, 'background', 'transparent')),
                     ),
                     'width' => $width,
                     'height' => $height,
-                    'custom_css_classes' => Str::squish((string) Arr::get($row, 'custom_css_classes', '')),
-                    'sort_order' => (int) Arr::get($row, 'sort_order', 0),
+                    'custom_css_classes' => Str::squish($this->stringValue(Arr::get($row, 'custom_css_classes', ''))),
+                    'sort_order' => $this->integerValue(Arr::get($row, 'sort_order', 0)),
                 ];
             })
             ->filter()
@@ -277,23 +277,23 @@ final readonly class ContactsPageService
         return [
             'iframe_src' => $iframe_src,
             'coordinates' => $coordinates,
-            'coordinates_url' => $coordinates === null ? null : 'https://www.google.com/maps/search/?api=1&query=' . urlencode((string) $coordinates),
-            'width' => max(1, (int) Arr::get($map, 'width', 600)),
-            'height' => max(1, (int) Arr::get($map, 'height', 400)),
-            'custom_css_classes' => Str::squish((string) Arr::get($map, 'custom_css_classes', '')),
+            'coordinates_url' => $coordinates === null ? null : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($this->stringValue($coordinates)),
+            'width' => max(1, $this->integerValue(Arr::get($map, 'width', 600))),
+            'height' => max(1, $this->integerValue(Arr::get($map, 'height', 400))),
+            'custom_css_classes' => Str::squish($this->stringValue(Arr::get($map, 'custom_css_classes', ''))),
         ];
     }
 
     private function resolveIframeSrc(mixed $iframe): ?string
     {
-        $iframe = Str::trim((string) $iframe);
+        $iframe = Str::trim($this->stringValue($iframe));
 
         if ($iframe === '') {
             return null;
         }
 
         preg_match('/<iframe\b[^>]*\bsrc\s*=\s*["\']([^"\']+)["\']/i', $iframe, $matches);
-        $src = Str::trim((string) Arr::get($matches, 1, ''));
+        $src = Str::trim($this->stringValue(Arr::get($matches, 1, '')));
 
         return Str::startsWith($src, 'https://') ? $src : null;
     }
@@ -307,15 +307,36 @@ final readonly class ContactsPageService
 
     private function resolveString(mixed $value, string $fallback): string
     {
-        $value = Str::trim((string) $value);
+        $value = Str::trim($this->stringValue($value));
 
         return filled($value) ? $value : $fallback;
     }
 
     private function resolveNullableString(mixed $value): ?string
     {
-        $value = Str::trim((string) $value);
+        $value = Str::trim($this->stringValue($value));
 
         return filled($value) ? $value : null;
+    }
+
+    private function stringValue(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    /** @return array<string, mixed> */
+    private function stringKeyedArray(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $value */
+        return $value;
+    }
+
+    private function integerValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
     }
 }
