@@ -208,7 +208,9 @@ class ProductController extends Controller
         /** @var \Illuminate\Database\Eloquent\Collection<int, Category> $product_categories */
         $product_categories = $product->categories()
             ->with([
-                'categoryPaths' => fn ($query) => $query->orderBy('level'),
+                'categoryPaths' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
+                    $query->orderBy('level');
+                },
             ])
             ->get();
 
@@ -286,10 +288,10 @@ class ProductController extends Controller
         /** @var Collection<int, Category> $categories_by_id */
         $categories_by_id = Category::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id): void {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'slugs' => function ($query) use ($language_id): void {
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -779,11 +781,11 @@ class ProductController extends Controller
         $variants = ProductVariant::query()
             ->where('product_id', (int)$product->id)
             ->with([
-                'attributeValues' => function ($query) use ($language_id): void {
+                'attributeValues' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id)
                         ->orderBy('attribute_id');
                 },
-                'attributeValues.attribute.attributeDescription' => function ($query) use ($language_id): void {
+                'attributeValues.attribute.attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])

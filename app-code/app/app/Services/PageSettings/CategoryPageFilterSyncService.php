@@ -8,6 +8,7 @@ use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\PageSettings\PageSetting;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -94,7 +95,7 @@ class CategoryPageFilterSyncService
         $discount_price_stats = DB::table('product_variant_discounts')
             ->where('date_start', '<=', $now)
             ->where('date_end', '>=', $now)
-            ->whereExists(function ($query): void {
+            ->whereExists(function (\Illuminate\Database\Query\Builder $query): void {
                 $query->selectRaw('1')
                     ->from('product_variants')
                     ->join('products', 'products.id', '=', 'product_variants.product_id')
@@ -170,11 +171,11 @@ class CategoryPageFilterSyncService
     {
         $attributes = Attribute::query()
             ->where('is_active', true)
-            ->whereHas('productVariantAttributeValues.variant.product', function ($query): void {
+            ->whereHas('productVariantAttributeValues.variant.product', function (Builder $query): void {
                 $query->where('products.is_active', true);
             })
             ->with([
-                'attributeDescription' => function ($query) use ($language_id): void {
+                'attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])

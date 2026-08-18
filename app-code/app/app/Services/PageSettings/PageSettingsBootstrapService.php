@@ -932,7 +932,8 @@ class PageSettingsBootstrapService
             ],
         ];
 
-        return array_replace_recursive(
+        /** @var array<string, mixed> $normalized_contract */
+        $normalized_contract = array_replace_recursive(
             $this->buildFailureSettingsContract($defaults),
             $settings,
             [
@@ -940,6 +941,8 @@ class PageSettingsBootstrapService
                 ...$normalized_settings,
             ],
         );
+
+        return $normalized_contract;
     }
 
     /**
@@ -1061,7 +1064,8 @@ class PageSettingsBootstrapService
             ];
         }
 
-        return array_replace_recursive(
+        /** @var array<string, mixed> $normalized_contract */
+        $normalized_contract = array_replace_recursive(
             $this->buildNotFoundSettingsContract($defaults),
             $settings,
             [
@@ -1072,6 +1076,8 @@ class PageSettingsBootstrapService
                 'images' => $normalized_images,
             ],
         );
+
+        return $normalized_contract;
     }
 
     /**
@@ -1292,6 +1298,7 @@ class PageSettingsBootstrapService
             ],
         ];
 
+        /** @var array<string, mixed> $normalized_contract */
         $normalized_contract = array_replace_recursive(
             $this->buildContactsSettingsContract($defaults),
             $settings,

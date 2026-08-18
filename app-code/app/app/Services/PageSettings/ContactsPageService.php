@@ -105,9 +105,10 @@ final readonly class ContactsPageService
 
             if ($field_name === 'file') {
                 $allowed_types = array_values(array_filter((array) Arr::get($field, 'allowed_types', []), 'is_string'));
+                /** @var array<string, mixed> $field */
                 $field_rules[] = Rule::file()
-                    ->types($allowed_types)
-                    ->max(max(1, $this->integerValue(Arr::get($field, 'max_size_kb', 1))));
+                        ->types($allowed_types)
+                        ->max(max(1, $this->integerValue(Arr::get($field, 'max_size_kb', 1))));
             } else {
                 $field_rules[] = 'string';
 
@@ -115,6 +116,7 @@ final readonly class ContactsPageService
                     $field_rules[] = 'email';
                 }
 
+                /** @var array<string, mixed> $field */
                 $this->appendStringLengthRules($field_rules, $field);
             }
 

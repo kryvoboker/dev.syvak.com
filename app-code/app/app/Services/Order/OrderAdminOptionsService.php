@@ -257,7 +257,7 @@ final class OrderAdminOptionsService
 
         $query = $model::query()
             ->with([
-                'descriptions' => function ($description_query) use ($language_id): void {
+                'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $description_query) use ($language_id): void {
                     $description_query->where('language_id', $language_id);
                 },
             ])

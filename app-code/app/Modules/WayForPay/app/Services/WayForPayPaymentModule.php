@@ -39,6 +39,7 @@ final class WayForPayPaymentModule
     {
         try {
             $settings = $this->wayforpay_config->getSettings();
+            /** @var array<string, mixed> $settings */
             $cart = (array) Arr::get($order_payload, 'cart', []);
             $products = new ProductCollection($this->buildProducts($this->toArray(Arr::get($cart, 'items', []))));
             $credential = new AccountSecretCredential(
@@ -70,11 +71,12 @@ final class WayForPayPaymentModule
             }
 
             $payment_data = $payment_form->getForm()->getData();
+            /** @var array<string, mixed> $payment_data */
             $payment_data['apiVersion'] = $this->toInt($settings['api_version'] ?? $this->wayforpay_config->getDefault('api_version'));
             $payment_data['merchantAuthType'] = $this->toString($settings['merchant_auth_type'] ?? $this->wayforpay_config->getDefault('merchant_auth_type'));
 
             foreach (['holdTimeout', 'orderTimeout', 'orderLifetime'] as $optional_timeout) {
-                if (isset($payment_data[$optional_timeout]) && (int) $payment_data[$optional_timeout] <= 0) {
+                if (isset($payment_data[$optional_timeout]) && is_numeric($payment_data[$optional_timeout]) && (int) $payment_data[$optional_timeout] <= 0) {
                     unset($payment_data[$optional_timeout]);
                 }
             }

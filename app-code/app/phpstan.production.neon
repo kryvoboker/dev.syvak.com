@@ -17,7 +17,7 @@ parameters:
             - Modules/*/app/Filament/**
             - Modules/*/app/Services/Filament/**
             - Modules/*/app/Livewire/**
-    level: 9
+    level: 10
     treatPhpDocTypesAsCertain: true
     ignoreErrors:
         -

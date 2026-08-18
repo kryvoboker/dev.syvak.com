@@ -156,7 +156,9 @@ final class PromoCodeAdminOptionsService
                     ->orWhereLike('ean', "%{$search}%");
             })
             ->when($excluded_ids !== [], fn (Builder $query): Builder => $query->whereNotIn('id', $excluded_ids))
-            ->with(['productDescription' => fn ($query) => $query->where('language_id', $language_id)])
+            ->with(['productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                $query->where('language_id', $language_id);
+            }])
             ->orderBy('id')
             ->limit(50)
             ->get()
@@ -192,7 +194,9 @@ final class PromoCodeAdminOptionsService
                 ->whereIn('language_id', $active_language_ids)
                 ->whereLike('name', "%{$search}%"))
             ->when($excluded_ids !== [], fn (Builder $query): Builder => $query->whereNotIn('id', $excluded_ids))
-            ->with(['categoryDescription' => fn ($query) => $query->where('language_id', $language_id)])
+            ->with(['categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                $query->where('language_id', $language_id);
+            }])
             ->orderBy('sort_order')
             ->orderBy('id')
             ->limit(50)
@@ -210,7 +214,7 @@ final class PromoCodeAdminOptionsService
         }
 
         $product = Product::query()
-            ->with(['productDescription' => function ($query): void {
+            ->with(['productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                 $query->where('language_id', resolve_language_by_locale(app()->getLocale())?->id);
             }])
             ->find($this->integerValue($id));
@@ -225,7 +229,7 @@ final class PromoCodeAdminOptionsService
         }
 
         $category = Category::query()
-            ->with(['categoryDescription' => function ($query): void {
+            ->with(['categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                 $query->where('language_id', resolve_language_by_locale(app()->getLocale())?->id);
             }])
             ->find($this->integerValue($id));

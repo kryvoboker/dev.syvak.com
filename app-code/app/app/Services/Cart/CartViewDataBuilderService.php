@@ -59,10 +59,16 @@ readonly class CartViewDataBuilderService
                 'minimum',
             ])
             ->with([
-                'descriptions' => fn ($query) => $query->where('language_id', $language_id),
-                'slugs' => fn ($query) => $query->where('language_id', $language_id),
-                'images' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
-                'product' => function ($query): void {
+                'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'images' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
+                    $query->orderBy('sort_order')->orderBy('id');
+                },
+                'product' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                     $query->select([
                         'id',
                         'price',
@@ -72,22 +78,28 @@ readonly class CartViewDataBuilderService
                         'ean',
                     ])->with('categories:id');
                 },
-                'product.productDescription' => fn ($query) => $query->where('language_id', $language_id),
-                'product.slugs' => fn ($query) => $query->where('language_id', $language_id),
-                'attributeValues' => function ($query) use ($language_id) {
-                    return $query
+                'product.productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'product.slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'attributeValues' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                    $query
                         ->with([
-                            'attribute' => function ($query) use ($language_id) {
-                                return $query
+                            'attribute' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                                $query
                                     ->where('is_active', true)
                                     ->with([
-                                        'attributeDescription' => fn ($query) => $query->where('language_id', $language_id),
+                                        'attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                                            $query->where('language_id', $language_id);
+                                        },
                                     ]);
                             },
                         ])
                         ->where('language_id', $language_id);
                 },
-                'discounts' => function ($query): void {
+                'discounts' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                     $query
                         ->where('user_group_id', (int) (get_app_settings()->user_group_id ?? 0))
                         ->where('date_start', '<=', now())

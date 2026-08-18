@@ -115,6 +115,7 @@ class CategoryController extends Controller
         $sorting_items = get_sorting_items($page_setting);
         $request_url = app()->bound('request') ? request()->url() : '';
         $request_query = app()->bound('request') ? (array) request()->query() : [];
+        /** @var array<string, mixed> $request_query */
         $sorting_keys = $this->resolveSortingGetKeys($sorting_items);
 
         return $sorting_items
@@ -193,7 +194,8 @@ class CategoryController extends Controller
         string $requested_sort_value,
         string $fallback_sort_code,
     ): array {
-        return array_replace_recursive([
+        /** @var array<string, mixed> $normalized_data */
+        $normalized_data = array_replace_recursive([
             'products' => [],
             'paginator' => null,
             'applied_filters' => [
@@ -208,6 +210,8 @@ class CategoryController extends Controller
             'filters_data' => [],
             'is_show_clear_filters_link' => false,
         ], $response_data);
+
+        return $normalized_data;
     }
 
     private function normalizeSortValue(string $sort_value): string
@@ -346,10 +350,10 @@ class CategoryController extends Controller
 
         $path_categories = Category::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language): void {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language): void {
                     $query->where('language_id', $this->integerValue($language->id));
                 },
-                'slugs' => function ($query) use ($language): void {
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language): void {
                     $query->where('language_id', $this->integerValue($language->id));
                 },
             ])

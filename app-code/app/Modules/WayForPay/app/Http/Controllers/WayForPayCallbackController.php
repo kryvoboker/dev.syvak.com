@@ -26,9 +26,11 @@ final class WayForPayCallbackController
                 $settings['merchant_account'] ?? '',
                 $settings['secret_key'] ?? '',
             ));
-            $service_response = $handler->parseRequestFromArray($request->all());
+            $request_data = $request->all();
+            /** @var array<string, mixed> $request_data */
+            $service_response = $handler->parseRequestFromArray($request_data);
             $transaction = $service_response->getTransaction();
-            $order = $order_payment_service->applyProviderResponse($request->all());
+            $order = $order_payment_service->applyProviderResponse($request_data);
 
             Log::channel('stack')->info('[WayForPayCallbackController] payment status received', [
                 'order_reference' => $transaction->getOrderReference(),

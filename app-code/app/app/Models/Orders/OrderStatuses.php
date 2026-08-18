@@ -83,7 +83,7 @@ class OrderStatuses extends Model
 
         return self::query()
             ->with([
-                'descriptions' => function ($query) use ($locale): void {
+                'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($locale): void {
                     $query
                         ->select([
                             'id',

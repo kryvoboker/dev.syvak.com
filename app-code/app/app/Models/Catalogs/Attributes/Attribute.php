@@ -75,7 +75,7 @@ class Attribute extends Model
         return self::query()
             ->where('is_active', true)
             ->with([
-                'attributeDescription' => function ($query) use ($language_id): void {
+                'attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -85,7 +85,7 @@ class Attribute extends Model
     public function getActiveAttributeWithDescriptionByAttributeIdAndLanguageId(int $attribute_id, int $language_id): ?self
     {
         return self::with([
-            'attributeDescription' => function ($query) use ($language_id): void {
+            'attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                 $query->where('language_id', $language_id);
             },
         ])

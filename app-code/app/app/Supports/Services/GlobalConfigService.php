@@ -378,11 +378,14 @@ final class GlobalConfigService
      */
     private function getSelectedKeys(array $global_configs): array
     {
-        return collect($global_configs)
+        /** @var array<int, string> $selected_keys */
+        $selected_keys = collect($global_configs)
             ->filter(fn (array $global_config): bool => $global_config['selected'])
             ->pluck('key')
             ->map(fn (mixed $key): string => $this->stringValue($key))
             ->all();
+
+        return $selected_keys;
     }
 
     /**

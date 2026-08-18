@@ -184,7 +184,10 @@ class FooterService
     private function parsePhones(mixed $phones): array
     {
         if (is_iterable($phones)) {
-            $phones = collect($phones)
+            $phone_values = is_array($phones)
+                ? $phones
+                : iterator_to_array($phones);
+            $phones = collect($phone_values)
                 ->map(
                     fn (mixed $phone): string => is_array($phone)
                     ? $this->stringValue(data_get($phone, 'value', ''))

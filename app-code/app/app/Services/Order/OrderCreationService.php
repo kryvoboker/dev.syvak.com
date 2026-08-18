@@ -367,7 +367,7 @@ readonly class OrderCreationService
                 $payment,
                 OrderLifecycleService::PAYMENT_STATUS_FAILED,
                 ['source' => 'payment_preparation'],
-                Arr::flatten($errors)[0] ?? null,
+                is_scalar(Arr::flatten($errors)[0] ?? null) ? (string) Arr::flatten($errors)[0] : null,
             );
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[OrderCreationService] failed payment status update failed', [

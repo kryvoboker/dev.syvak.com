@@ -434,7 +434,7 @@ if (!function_exists('localized_product_variant_route')) {
 
             $variant = $variant_query
                 ->with([
-                    'slugs' => function ($query) use ($language_id): void {
+                    'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                         $query->where('language_id', $language_id);
                     },
                 ])
@@ -717,13 +717,29 @@ if (!function_exists('get_sorting_items')) {
         $page_settings = get_page_settings($page_setting);
 
         if (Arr::get($page_settings, 'ui.sorting.enabled', true) !== true) {
-            return collect();
+            /** @var Collection<int, array<string, mixed>> $empty_items */
+            $empty_items = new Collection();
+
+            return $empty_items;
         }
 
-        return collect($page_setting->getSortingItemsFromSettings())
+        /** @var Collection<int, array<string, mixed>> $sorting_items */
+        $sorting_items = collect($page_setting->getSortingItemsFromSettings())
             ->filter(fn (array $sorting_item): bool => (bool)Arr::get($sorting_item, 'is_enabled', true))
             ->sortBy('sort_order')
             ->values();
+
+        /** @var array<int, array<string, mixed>> $items */
+        $items = [];
+
+        foreach ($sorting_items as $sorting_item) {
+            $items[] = $sorting_item;
+        }
+
+        /** @var Collection<int, array<string, mixed>> $result */
+        $result = new Collection($items);
+
+        return $result;
     }
 }
 

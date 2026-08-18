@@ -45,6 +45,8 @@ final class AppSettingsService
         $contacts_settings = app(PageSettingsBootstrapService::class)->getContactsSettings();
         $global_configs = app(GlobalConfigService::class)->getActiveGlobalConfigs();
 
+        /** @var array<string, mixed> $app_settings */
+        /** @var array<string, mixed> $global_configs */
         $this->app_settings_data = AppSettingsData::fromArray(array_merge(
             $app_settings,
             $this->resolveContactsRuntimeSettings($contacts_settings, $locale, $language_id),

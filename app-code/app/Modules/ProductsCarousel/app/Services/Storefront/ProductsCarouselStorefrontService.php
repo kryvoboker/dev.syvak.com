@@ -97,6 +97,7 @@ readonly class ProductsCarouselStorefrontService
                 $runtime_shared_settings = $this->resolveRuntimeSharedSettings($instance_settings);
                 $localized_shared_content = $this->resolveLocalizedSharedContent($instance_settings);
                 $selected_variant_ids = $this->resolveSelectedVariantIdsForInstance($source_mode, $instance_settings);
+                /** @var array<int, int> $selected_variant_ids */
                 $products = $this->resolveProductsForInstance(
                     $source_mode,
                     $instance_settings,
@@ -296,6 +297,7 @@ readonly class ProductsCarouselStorefrontService
             $selected_variant_ids,
             $category_ids,
         );
+        /** @var array<int, int> $selected_variant_ids */
 
         $products_query = $this->buildBaseProductsQuery(
             $runtime_shared_settings['min_quantity'],
@@ -413,7 +415,7 @@ readonly class ProductsCarouselStorefrontService
     private function buildBaseProductsQuery(int $min_quantity, array $selected_variant_ids = []): Builder
     {
         $language_id = $this->resolveLanguageId();
-        $discount_scope = function ($query): void {
+        $discount_scope = function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
             $query
                 ->where('date_start', '<=', now($this->toString(config('app.timezone'))))
                 ->where('date_end', '>=', now($this->toString(config('app.timezone'))))
@@ -431,19 +433,19 @@ readonly class ProductsCarouselStorefrontService
             $query->where('user_group_id', (int) $user_group_id);
         };
         $relations = [
-            'productDescription' => function ($query) use ($language_id): void {
+            'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                 $query->where('language_id', $language_id);
             },
-            'slugs' => function ($query) use ($language_id): void {
+            'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                 $query->where('language_id', $language_id);
             },
-            'defaultVariant' => function ($query) use ($language_id, $discount_scope): void {
+            'defaultVariant' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id, $discount_scope): void {
                 $query->where('is_active', true)
                     ->with([
-                        'descriptions' => function ($description_query) use ($language_id): void {
+                        'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $description_query) use ($language_id): void {
                             $description_query->where('language_id', $language_id);
                         },
-                        'slugs' => function ($slug_query) use ($language_id): void {
+                        'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $slug_query) use ($language_id): void {
                             $slug_query->where('language_id', $language_id);
                         },
                         'discounts' => $discount_scope,
@@ -452,15 +454,15 @@ readonly class ProductsCarouselStorefrontService
         ];
 
         if ($selected_variant_ids !== []) {
-            $relations['variants'] = function ($query) use ($language_id, $selected_variant_ids, $discount_scope): void {
+            $relations['variants'] = function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id, $selected_variant_ids, $discount_scope): void {
                 $query
                     ->where('is_active', true)
                     ->whereIn('id', $selected_variant_ids)
                     ->with([
-                        'descriptions' => function ($description_query) use ($language_id): void {
+                        'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $description_query) use ($language_id): void {
                             $description_query->where('language_id', $language_id);
                         },
-                        'slugs' => function ($slug_query) use ($language_id): void {
+                        'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $slug_query) use ($language_id): void {
                             $slug_query->where('language_id', $language_id);
                         },
                         'discounts' => $discount_scope,
@@ -491,6 +493,7 @@ readonly class ProductsCarouselStorefrontService
             if ($sort_option === 'name_asc' || $sort_option === 'name_desc') {
                 if ($name_sort_join_applied === false) {
                     $products_query->leftJoin('product_descriptions as products_carousel_sort_description', function ($join) use ($language_id, $product_table): void {
+                        /** @var \Illuminate\Database\Query\JoinClause $join */
                         $join->on('products_carousel_sort_description.product_id', '=', $product_table . '.id')
                             ->where('products_carousel_sort_description.language_id', '=', $language_id);
                     });

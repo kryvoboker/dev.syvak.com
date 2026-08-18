@@ -79,7 +79,7 @@ class CheckoutBranchSearchService
 
             return [
                 'success' => $rows->isNotEmpty(),
-                'items' => $this->normalizeNovaPoshtaRows($rows->toArray(), 'nova_poshta'),
+                'items' => $this->normalizeNovaPoshtaRows(array_values($rows->toArray()), 'nova_poshta'),
             ];
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[CheckoutBranchSearchService.loadNovaPoshtaBranches] query failed', [
@@ -133,7 +133,7 @@ class CheckoutBranchSearchService
 
             return [
                 'success' => $rows->isNotEmpty(),
-                'items' => $this->normalizeNovaPoshtaRows($rows->toArray(), 'nova_poshta_poshtomat'),
+                'items' => $this->normalizeNovaPoshtaRows(array_values($rows->toArray()), 'nova_poshta_poshtomat'),
             ];
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[CheckoutBranchSearchService.loadNovaPoshtaPoshtomats] query failed', [

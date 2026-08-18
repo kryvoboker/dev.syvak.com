@@ -188,10 +188,13 @@ class UkrPoshtaCheckoutDataService
             return [];
         }
 
-        return UkrPoshtaRegion::query()
+        $region_data = UkrPoshtaRegion::query()
             ->where('region_id', $region_id)
             ->first()
             ?->toArray() ?? [];
+
+        /** @var array<string, mixed> $region_data */
+        return $region_data;
     }
 
     /**
@@ -212,6 +215,7 @@ class UkrPoshtaCheckoutDataService
             return [];
         }
 
+        /** @var array<string, mixed> $district_data */
         $district_data = $district->toArray();
         $district_data['region'] = $district->ukrPoshtaRegion?->toArray() ?? [];
 
@@ -236,6 +240,7 @@ class UkrPoshtaCheckoutDataService
             return [];
         }
 
+        /** @var array<string, mixed> $city_data */
         $city_data = $city->toArray();
         $city_data['region'] = $city->ukrPoshtaRegion?->toArray() ?? [];
         $city_data['district'] = $city->ukrPoshtaDistrict?->toArray() ?? [];

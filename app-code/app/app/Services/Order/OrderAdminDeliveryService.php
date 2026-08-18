@@ -191,7 +191,10 @@ final class OrderAdminDeliveryService
     /** @return array<string, string> */
     private function searchNovaPoshtaPoints(string $model, string $city_id, string $search): array
     {
-        return $model::query()->where('city_ref', $city_id)
+        $query = $model::query();
+        /** @var Builder<NovaPoshtaPostOffice|NovaPoshtaPoshtomat> $query */
+
+        return $query->where('city_ref', $city_id)
             ->where(function (Builder $query) use ($search): void {
                 $query->where('description', 'like', "%{$search}%")
                     ->orWhere('number', 'like', "%{$search}%")

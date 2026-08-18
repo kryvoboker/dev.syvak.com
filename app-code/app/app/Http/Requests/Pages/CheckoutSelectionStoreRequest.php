@@ -104,7 +104,7 @@ class CheckoutSelectionStoreRequest extends FormRequest
      */
     public function withValidator(Validator $validator): void
     {
-        $validator->after(function ($validator): void {
+        $validator->after(function (Validator $validator): void {
             $payment_method = $this->stringValue($this->input(OrderDataKeyEnum::PaymentMethod->value, ''));
 
             if ($payment_method !== '' && ! $this->isAvailablePaymentMethod($payment_method)) {

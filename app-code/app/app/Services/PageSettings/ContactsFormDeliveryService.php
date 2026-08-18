@@ -34,6 +34,7 @@ final readonly class ContactsFormDeliveryService
         $this->ensureDestinationIsConfigured($settings);
         $file_path = $this->storeFile($settings, $file);
         $queue_data = Arr::except($data, ['file']);
+        /** @var array<string, mixed> $queue_data */
         $inquiry = $this->inquiry_persistence_service->persistContact(
             locale      : $locale,
             language_id : $language_id,
@@ -189,8 +190,8 @@ final readonly class ContactsFormDeliveryService
      * @param bool                 $send_file
      * @param string               $bot_token
      *
-     * @return void
      * @throws ConnectionException
+     * @return void
      */
     private function sendTelegram(array $settings, int $language_id, array $placeholders, ?string $file_path, bool $send_file, string $bot_token): void
     {
