@@ -132,10 +132,10 @@ class CheckoutSelectionStateService
         $current_state = $this->getState();
 
         return [
-            OrderDataKeyEnum::DeliveryMethod->value => Str::lower(Str::squish($this->stringValue(Arr::get($payload, OrderDataKeyEnum::DeliveryMethod->value, '')))),
-            OrderDataKeyEnum::PaymentMethod->value => Str::lower(Str::squish($this->stringValue(Arr::get($payload, OrderDataKeyEnum::PaymentMethod->value, '')))),
-            OrderDataKeyEnum::City->value => $this->normalizeRow($this->stringKeyedArray(Arr::get($payload, OrderDataKeyEnum::City->value, []))),
-            OrderDataKeyEnum::DeliveryPoint->value => $this->normalizeRow($this->stringKeyedArray(Arr::get($payload, OrderDataKeyEnum::DeliveryPoint->value, []))),
+            OrderDataKeyEnum::DeliveryMethod->value => Str::lower(Str::squish(string_value(Arr::get($payload, OrderDataKeyEnum::DeliveryMethod->value, '')))),
+            OrderDataKeyEnum::PaymentMethod->value => Str::lower(Str::squish(string_value(Arr::get($payload, OrderDataKeyEnum::PaymentMethod->value, '')))),
+            OrderDataKeyEnum::City->value => $this->normalizeRow(string_keyed_array(Arr::get($payload, OrderDataKeyEnum::City->value, []))),
+            OrderDataKeyEnum::DeliveryPoint->value => $this->normalizeRow(string_keyed_array(Arr::get($payload, OrderDataKeyEnum::DeliveryPoint->value, []))),
             OrderDataKeyEnum::DeliveryAddress->value => $this->normalizeDeliveryAddress(Arr::get($payload, OrderDataKeyEnum::DeliveryAddress->value, '')),
             'first_name' => $this->normalizeText($payload, $current_state, 'first_name'),
             'last_name' => $this->normalizeText($payload, $current_state, 'last_name'),
@@ -155,7 +155,7 @@ class CheckoutSelectionStateService
     {
         $value = Arr::has($payload, $key) ? Arr::get($payload, $key) : Arr::get($current_state, $key, '');
 
-        return Str::squish($this->stringValue($value));
+        return Str::squish(string_value($value));
     }
 
     /**
@@ -178,7 +178,7 @@ class CheckoutSelectionStateService
             return '';
         }
 
-        return Str::squish($this->stringValue($delivery_address));
+        return Str::squish(string_value($delivery_address));
     }
 
     /**
@@ -230,30 +230,5 @@ class CheckoutSelectionStateService
             ])
             ->filter(fn (mixed $value): bool => ! is_null($value) && $value !== '')
             ->all();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function stringKeyedArray(mixed $value): array
-    {
-        if (! is_array($value)) {
-            return [];
-        }
-
-        $result = [];
-
-        foreach ($value as $key => $item) {
-            if (is_string($key)) {
-                $result[$key] = $item;
-            }
-        }
-
-        return $result;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

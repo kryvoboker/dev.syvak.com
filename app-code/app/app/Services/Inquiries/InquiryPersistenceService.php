@@ -31,16 +31,16 @@ final readonly class InquiryPersistenceService
         try {
             $inquiry = DB::transaction(function () use ($locale, $language_id, $data, $file_path, $file): Inquiry {
                 $contact_inquiry = ContactInquiry::query()->create([
-                    'message' => $this->resolveNullableString(Arr::get($data, 'text')),
+                    'message' => nullable_string(Arr::get($data, 'text')),
                     'submitted_fields' => Arr::except($data, ['file']),
                 ]);
 
                 $inquiry = $contact_inquiry->inquiry()->create([
                     'type' => InquiryTypeEnum::Contacts,
                     'status' => InquiryStatusEnum::New,
-                    'name' => $this->resolveNullableString(Arr::get($data, 'name')),
-                    'email' => $this->resolveNullableString(Arr::get($data, 'email')),
-                    'phone' => $this->resolveNullableString(Arr::get($data, 'phone')),
+                    'name' => nullable_string(Arr::get($data, 'name')),
+                    'email' => nullable_string(Arr::get($data, 'email')),
+                    'phone' => nullable_string(Arr::get($data, 'phone')),
                     'locale' => Str::trim($locale),
                     'language_id' => $language_id,
                     'user_id' => Auth::id(),
@@ -79,12 +79,5 @@ final readonly class InquiryPersistenceService
 
             throw $throwable;
         }
-    }
-
-    private function resolveNullableString(mixed $value): ?string
-    {
-        $value = Str::trim(is_scalar($value) ? (string) $value : '');
-
-        return $value === '' ? null : $value;
     }
 }

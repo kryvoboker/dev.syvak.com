@@ -39,7 +39,7 @@ readonly class CatalogFilterIndexRebuildService
     public function rebuild(CatalogFilterSet $filter_set): array
     {
         $index_meta = $filter_set->indexMeta()->firstOrCreate(
-            ['catalog_filter_set_id' => $this->integerValue($filter_set->id)],
+            ['catalog_filter_set_id' => integer_value($filter_set->id)],
             [
                 'index_version' => 1,
                 'active_index_version' => 1,
@@ -48,20 +48,20 @@ readonly class CatalogFilterIndexRebuildService
             ],
         );
 
-        $started_at = now($this->stringValue(config('app.timezone')));
+        $started_at = now(string_value(config('app.timezone')));
         $rebuild_lock_timeout_seconds = $this->resolveRebuildLockTimeoutSeconds($filter_set);
 
         if (! $this->canAcquireRebuildLock($index_meta, $started_at, $rebuild_lock_timeout_seconds)) {
             return [
                 'status' => 'locked',
-                'rows_total' => $this->integerValue($index_meta->index_rows_total),
-                'index_version' => $this->integerValue($index_meta->active_index_version),
+                'rows_total' => integer_value($index_meta->index_rows_total),
+                'index_version' => integer_value($index_meta->active_index_version),
             ];
         }
 
         $next_index_version = max(
-            $this->integerValue($index_meta->index_version),
-            $this->integerValue($index_meta->active_index_version),
+            integer_value($index_meta->index_version),
+            integer_value($index_meta->active_index_version),
             1,
         ) + 1;
 
@@ -79,12 +79,12 @@ readonly class CatalogFilterIndexRebuildService
             $indexed_rows_total = $this->buildRowsForIndexVersion($filter_set, $next_index_version, $started_at);
 
             CatalogFilterProductIndex::query()
-                ->where('catalog_filter_set_id', $this->integerValue($filter_set->id))
+                ->where('catalog_filter_set_id', integer_value($filter_set->id))
                 ->where('index_version', '!=', $next_index_version)
                 ->delete();
 
             $enabled_groups_count = CatalogFilterGroup::query()
-                ->where('catalog_filter_set_id', $this->integerValue($filter_set->id))
+                ->where('catalog_filter_set_id', integer_value($filter_set->id))
                 ->where('is_enabled', true)
                 ->count();
 
@@ -92,7 +92,7 @@ readonly class CatalogFilterIndexRebuildService
                 ->whereIn(
                     'catalog_filter_group_id',
                     CatalogFilterGroup::query()
-                        ->where('catalog_filter_set_id', $this->integerValue($filter_set->id))
+                        ->where('catalog_filter_set_id', integer_value($filter_set->id))
                         ->where('is_enabled', true)
                         ->pluck('id')
                         ->all(),
@@ -100,7 +100,7 @@ readonly class CatalogFilterIndexRebuildService
                 ->where('is_enabled', true)
                 ->count();
 
-            $finished_at = now($this->stringValue(config('app.timezone')));
+            $finished_at = now(string_value(config('app.timezone')));
 
             $index_meta->forceFill([
                 'index_version' => $next_index_version,
@@ -145,7 +145,7 @@ readonly class CatalogFilterIndexRebuildService
             return true;
         }
 
-        $lock_acquired_at = Carbon::parse($this->stringValue($index_meta->getRawOriginal('rebuild_lock_acquired_at')));
+        $lock_acquired_at = Carbon::parse(string_value($index_meta->getRawOriginal('rebuild_lock_acquired_at')));
         $lock_expires_at = $lock_acquired_at->copy()->addSeconds($rebuild_lock_timeout_seconds);
 
         return $lock_expires_at->lte($started_at);
@@ -154,9 +154,9 @@ readonly class CatalogFilterIndexRebuildService
     private function resolveRebuildLockTimeoutSeconds(CatalogFilterSet $filter_set): int
     {
         $settings = (array) ($filter_set->settings ?? []);
-        $default_timeout_seconds = $this->integerValue(config('catalog-filter.defaults.rebuild_lock_timeout_seconds', 600));
+        $default_timeout_seconds = integer_value(config('catalog-filter.defaults.rebuild_lock_timeout_seconds', 600));
 
-        return max(1, $this->integerValue(Arr::get($settings, 'rebuild_lock_timeout_seconds', $default_timeout_seconds)));
+        return max(1, integer_value(Arr::get($settings, 'rebuild_lock_timeout_seconds', $default_timeout_seconds)));
     }
 
     /**
@@ -170,7 +170,7 @@ readonly class CatalogFilterIndexRebuildService
         $groups = $this->resolveEnabledGroups($filter_set);
 
         CatalogFilterProductIndex::query()
-            ->where('catalog_filter_set_id', $this->integerValue($filter_set->id))
+            ->where('catalog_filter_set_id', integer_value($filter_set->id))
             ->where('index_version', $index_version)
             ->delete();
 
@@ -180,20 +180,20 @@ readonly class CatalogFilterIndexRebuildService
 
         /** @var Collection<int, CatalogFilterGroup> $attribute_groups */
         $attribute_groups = $groups->filter(
-            fn (CatalogFilterGroup $group): bool => $this->stringValue($group->getRawOriginal('source_type')) === CatalogFilterGroupSourceTypeEnum::Attribute->value,
+            fn (CatalogFilterGroup $group): bool => string_value($group->getRawOriginal('source_type')) === CatalogFilterGroupSourceTypeEnum::Attribute->value,
         )->values();
 
         $attribute_ids = $attribute_groups
-            ->map(fn (CatalogFilterGroup $group): int => $this->integerValue($group->source_id))
+            ->map(fn (CatalogFilterGroup $group): int => integer_value($group->source_id))
             ->filter(fn (int $attribute_id): bool => $attribute_id > 0)
             ->unique()
             ->values()
             ->all();
 
         $value_lookup_by_attribute = $this->buildAttributeValueLookup($attribute_groups);
-        $minimum_stock_quantity = max(0, $this->integerValue($filter_set->min_stock_quantity));
+        $minimum_stock_quantity = max(0, integer_value($filter_set->min_stock_quantity));
 
-        $insert_chunk_size = max(1, $this->integerValue(config('catalog-filter.defaults.rebuild_chunk_size', 1000)));
+        $insert_chunk_size = max(1, integer_value(config('catalog-filter.defaults.rebuild_chunk_size', 1000)));
         $indexed_rows_total = 0;
 
         $this->buildProductsBaseQuery()->chunkById(200, function (Collection $products) use (
@@ -209,9 +209,9 @@ readonly class CatalogFilterIndexRebuildService
             $rows_to_insert = [];
 
             foreach ($products as $product) {
-                $product_id = $this->integerValue($product->id);
+                $product_id = integer_value($product->id);
                 $category_ids = collect($product->categories)
-                    ->map(fn (mixed $category): int => $this->integerValue(data_get($category, 'id', 0)))
+                    ->map(fn (mixed $category): int => integer_value(data_get($category, 'id', 0)))
                     ->filter(fn (int $category_id): bool => $category_id > 0)
                     ->unique()
                     ->values();
@@ -221,10 +221,10 @@ readonly class CatalogFilterIndexRebuildService
                 }
 
                 $base_price = is_numeric($product->getAttribute('default_variant_price'))
-                    ? $this->floatValue($product->getAttribute('default_variant_price'))
+                    ? float_value($product->getAttribute('default_variant_price'))
                     : null;
                 $discount_price = is_numeric($product->getAttribute('active_discount_price'))
-                    ? $this->floatValue($product->getAttribute('active_discount_price'))
+                    ? float_value($product->getAttribute('active_discount_price'))
                     : null;
                 $effective_price = $this->price_source_resolver_service->resolveEffectivePrice(
                     rrc_price: $base_price ?? 0.0,
@@ -233,7 +233,7 @@ readonly class CatalogFilterIndexRebuildService
                     discount_only_policy: $this->resolveDiscountOnlyPolicy($filter_set),
                 );
 
-                $stock_quantity = $this->integerValue($product->getAttribute('default_variant_quantity') ?? 0);
+                $stock_quantity = integer_value($product->getAttribute('default_variant_quantity') ?? 0);
                 $is_in_stock = $stock_quantity >= $minimum_stock_quantity;
 
                 foreach ($category_ids as $category_id) {
@@ -243,13 +243,13 @@ readonly class CatalogFilterIndexRebuildService
                         }
 
                         foreach (collect($variant->attributeValues) as $attribute_value) {
-                            $attribute_id = $this->integerValue($attribute_value->attribute_id);
+                            $attribute_id = integer_value($attribute_value->attribute_id);
 
                             if ($attribute_id <= 0 || ! in_array($attribute_id, $attribute_ids, true)) {
                                 continue;
                             }
 
-                            $normalized_value = $this->normalizeAttributeValue($this->stringValue($attribute_value->value_string));
+                            $normalized_value = $this->normalizeAttributeValue(string_value($attribute_value->value_string));
 
                             if (blank($normalized_value)) {
                                 continue;
@@ -268,12 +268,12 @@ readonly class CatalogFilterIndexRebuildService
                             }
 
                             $rows_to_insert[] = $this->buildIndexRowPayload(
-                                filter_set_id: $this->integerValue($filter_set->id),
+                                filter_set_id: integer_value($filter_set->id),
                                 index_version: $index_version,
                                 category_id: $category_id,
                                 product_id: $product_id,
-                                group_id: $this->integerValue($value_data['group_id']),
-                                value_id: $this->integerValue($value_data['value_id']),
+                                group_id: integer_value($value_data['group_id']),
+                                value_id: integer_value($value_data['value_id']),
                                 attribute_id: $attribute_id,
                                 base_price: $base_price,
                                 discount_price: $discount_price,
@@ -294,13 +294,13 @@ readonly class CatalogFilterIndexRebuildService
 
             $rows_to_insert = collect($rows_to_insert)
                 ->unique(fn (array $row): string => implode(':', [
-                    $this->stringValue($row['catalog_filter_set_id']),
-                    $this->stringValue($row['index_version']),
-                    $this->stringValue($row['category_id']),
-                    $this->stringValue($row['product_id']),
-                    $this->stringValue($row['catalog_filter_group_id']),
-                    $this->stringValue($row['catalog_filter_value_id'] ?? '0'),
-                    $this->stringValue($row['attribute_id'] ?? '0'),
+                    string_value($row['catalog_filter_set_id']),
+                    string_value($row['index_version']),
+                    string_value($row['category_id']),
+                    string_value($row['product_id']),
+                    string_value($row['catalog_filter_group_id']),
+                    string_value($row['catalog_filter_value_id'] ?? '0'),
+                    string_value($row['attribute_id'] ?? '0'),
                 ]))
                 ->values()
                 ->all();
@@ -320,7 +320,7 @@ readonly class CatalogFilterIndexRebuildService
     private function resolveEnabledGroups(CatalogFilterSet $filter_set): Collection
     {
         return CatalogFilterGroup::query()
-            ->where('catalog_filter_set_id', $this->integerValue($filter_set->id))
+            ->where('catalog_filter_set_id', integer_value($filter_set->id))
             ->where('is_enabled', true)
             ->whereIn('source_type', [
                 CatalogFilterGroupSourceTypeEnum::Price->value,
@@ -346,9 +346,9 @@ readonly class CatalogFilterIndexRebuildService
     private function buildProductsBaseQuery(): Builder
     {
         $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
-        $current_datetime = now($this->stringValue(config('app.timezone')));
+        $current_datetime = now(string_value(config('app.timezone')));
         /** @var literal-string $db_prefix */
-        $db_prefix = $this->stringValue(config('database.prefix'));
+        $db_prefix = string_value(config('database.prefix'));
 
         return Product::query()
             ->select('products.*')
@@ -363,7 +363,7 @@ readonly class CatalogFilterIndexRebuildService
             ->leftJoin('product_variant_discounts as active_product_discount', function (JoinClause $join) use ($app_settings, $current_datetime): void {
                 $join
                     ->on('active_product_discount.product_variant_id', '=', 'default_product_variant.id')
-                    ->where('active_product_discount.user_group_id', '=', $this->integerValue($app_settings->user_group_id))
+                    ->where('active_product_discount.user_group_id', '=', integer_value($app_settings->user_group_id))
                     ->where('active_product_discount.date_start', '<=', $current_datetime)
                     ->where('active_product_discount.date_end', '>=', $current_datetime);
             })
@@ -393,7 +393,7 @@ readonly class CatalogFilterIndexRebuildService
         $lookup = [];
 
         foreach ($attribute_groups as $group) {
-            $attribute_id = $this->integerValue($group->source_id);
+            $attribute_id = integer_value($group->source_id);
 
             if ($attribute_id <= 0) {
                 continue;
@@ -405,11 +405,11 @@ readonly class CatalogFilterIndexRebuildService
                  * attribute labels in different languages, so we index both
                  * canonical filter value and all translated labels.
                  */
-                $value_candidates = collect([$this->stringValue($value->value_string)])
+                $value_candidates = collect([string_value($value->value_string)])
                     ->merge(
                         $value->translations
                             ->pluck('label')
-                            ->map(fn (mixed $label): string => $this->stringValue($label)),
+                            ->map(fn (mixed $label): string => string_value($label)),
                     )
                     ->map(fn (string $label): string => $this->normalizeAttributeValue($label))
                     ->filter(fn (string $label): bool => filled($label))
@@ -422,8 +422,8 @@ readonly class CatalogFilterIndexRebuildService
                     }
 
                     $lookup[$attribute_id][$candidate] = [
-                        'group_id' => $this->integerValue($group->id),
-                        'value_id' => $this->integerValue($value->id),
+                        'group_id' => integer_value($group->id),
+                        'value_id' => integer_value($value->id),
                     ];
                 }
             }
@@ -489,20 +489,5 @@ readonly class CatalogFilterIndexRebuildService
             'created_at' => $indexed_at,
             'updated_at' => $indexed_at,
         ];
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function floatValue(mixed $value): float
-    {
-        return is_numeric($value) ? (float) $value : 0.0;
     }
 }

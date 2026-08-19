@@ -16,8 +16,8 @@ class CleanupExpiredCartItemsCommand extends Command
 
     public function handle(): int
     {
-        $ttl_days = max(1, $this->integerValue(config('cart-modal.item_ttl_days', 30)));
-        $chunk_size = max(100, $this->integerValue(config('cart-modal.cleanup_chunk_size', 500)));
+        $ttl_days = max(1, integer_value(config('cart-modal.item_ttl_days', 30)));
+        $chunk_size = max(100, integer_value(config('cart-modal.cleanup_chunk_size', 500)));
         $timezone = config('app.timezone');
         $threshold = now(is_scalar($timezone) ? (string) $timezone : null)->subDays($ttl_days);
         $deleted = 0;
@@ -57,10 +57,5 @@ class CleanupExpiredCartItemsCommand extends Command
 
             return self::FAILURE;
         }
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
     }
 }

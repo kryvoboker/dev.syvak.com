@@ -36,7 +36,7 @@ class CategoryController extends Controller
     ): View|Factory {
         $locale = normalize_locale($locale);
         $language = resolve_language_by_locale($locale);
-        $language_id = $language instanceof Language ? $this->integerValue($language->id) : null;
+        $language_id = $language instanceof Language ? integer_value($language->id) : null;
         $header_data = app(HeaderService::class)([
             'sluggable_type' => Category::class,
             'slug' => $slug,
@@ -44,9 +44,9 @@ class CategoryController extends Controller
         $page_type = try_detect_page_type($request);
         $page_setting = app(PageSettingsBootstrapService::class)->bootstrapCategoryPageSetting();
         $page_settings_arr = get_page_settings($page_setting);
-        $category_context = $this->resolveCategoryContext($this->stringValue($slug), $locale);
+        $category_context = $this->resolveCategoryContext(string_value($slug), $locale);
         $products_per_page_limit = ProductsLimitService::getProductsCategoryLimit($page_settings_arr);
-        $requested_sort_value = $this->normalizeSortValue($this->stringValue(Arr::get($request->validated(), 'sort', '')));
+        $requested_sort_value = $this->normalizeSortValue(string_value(Arr::get($request->validated(), 'sort', '')));
         $fallback_active_sort = resolve_sort_code($page_setting, $requested_sort_value);
 
         try {
@@ -86,8 +86,8 @@ class CategoryController extends Controller
             ]),
             'page_type' => $page_type,
             'sort_options' => $this->buildSortOptions($page_setting, $language_id),
-            'active_sort_code' => $this->stringValue(Arr::get($response_data, 'active_sort_code', $fallback_active_sort)),
-            'selected_sort_value' => $this->stringValue(Arr::get($response_data, 'selected_sort_value', $requested_sort_value)),
+            'active_sort_code' => string_value(Arr::get($response_data, 'active_sort_code', $fallback_active_sort)),
+            'selected_sort_value' => string_value(Arr::get($response_data, 'selected_sort_value', $requested_sort_value)),
             'is_has_more_pages' => $is_has_more_pages,
             'is_ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
             'next_page' => $current_page !== null ? ($current_page + 1) : null,
@@ -121,15 +121,15 @@ class CategoryController extends Controller
         return $sorting_items
             ->map(function (array $sorting_item) use ($request_url, $request_query, $sorting_keys, $language_id): array {
                 $item_get = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
-                $sort_key = trim($this->stringValue(Arr::get($item_get, 'key', config('page-settings.sort_get_keys.sort', 'sort'))));
-                $sort_key = $sort_key !== '' ? $sort_key : $this->stringValue(config('page-settings.sort_get_keys.sort', 'sort'));
-                $sort_value = $this->stringValue(Arr::get($item_get, 'value', $this->stringValue(Arr::get($sorting_item, 'code', ''))));
+                $sort_key = trim(string_value(Arr::get($item_get, 'key', config('page-settings.sort_get_keys.sort', 'sort'))));
+                $sort_key = $sort_key !== '' ? $sort_key : string_value(config('page-settings.sort_get_keys.sort', 'sort'));
+                $sort_value = string_value(Arr::get($item_get, 'value', string_value(Arr::get($sorting_item, 'code', ''))));
 
                 return [
-                    'code' => $this->stringValue(Arr::get($sorting_item, 'code', '')),
+                    'code' => string_value(Arr::get($sorting_item, 'code', '')),
                     'value' => $sort_value,
                     'label' => $this->resolveSortLabel(
-                        sort_code   : $this->stringValue(Arr::get($sorting_item, 'code', '')),
+                        sort_code   : string_value(Arr::get($sorting_item, 'code', '')),
                         sorting_item: $sorting_item,
                         language_id : $language_id,
                     ),
@@ -158,7 +158,7 @@ class CategoryController extends Controller
         $labels_map = is_array(Arr::get($config_payload, 'labels')) ? Arr::get($config_payload, 'labels') : [];
 
         if ($language_id !== null) {
-            $label_from_db = trim($this->stringValue(Arr::get($labels_map, $this->stringValue($language_id), '')));
+            $label_from_db = trim(string_value(Arr::get($labels_map, string_value($language_id), '')));
 
             if (filled($label_from_db)) {
                 return $label_from_db;
@@ -166,7 +166,7 @@ class CategoryController extends Controller
         }
 
         $first_available_label = collect($labels_map)
-            ->map(fn (mixed $value): string => trim($this->stringValue($value)))
+            ->map(fn (mixed $value): string => trim(string_value($value)))
             ->first(fn (string $label): bool => filled($label));
 
         if (is_string($first_available_label) && filled($first_available_label)) {
@@ -180,7 +180,7 @@ class CategoryController extends Controller
             return Str::headline(Str::replace(['_', '-'], ' ', $sort_code));
         }
 
-        return $this->stringValue($label);
+        return string_value($label);
     }
 
     /**
@@ -225,12 +225,12 @@ class CategoryController extends Controller
      */
     private function resolveSortingGetKeys(Collection $sorting_items): array
     {
-        $default_sort_key = $this->stringValue(config('page-settings.sort_get_keys.sort', 'sort'));
+        $default_sort_key = string_value(config('page-settings.sort_get_keys.sort', 'sort'));
 
         return $sorting_items
             ->map(function (array $sorting_item) use ($default_sort_key): string {
                 $item_get = is_array(Arr::get($sorting_item, 'get')) ? Arr::get($sorting_item, 'get') : [];
-                $sort_key = trim($this->stringValue(Arr::get($item_get, 'key', $default_sort_key)));
+                $sort_key = trim(string_value(Arr::get($item_get, 'key', $default_sort_key)));
 
                 return $sort_key !== '' ? $sort_key : $default_sort_key;
             })
@@ -310,11 +310,11 @@ class CategoryController extends Controller
      */
     private function resolveCategoryContext(string $slug, string $locale): array
     {
-        $fallback_title = $this->stringValue(__('storefront/default.texts.category_title_fallback'));
+        $fallback_title = string_value(__('storefront/default.texts.category_title_fallback'));
 
         $breadcrumbs = [
             breadcrumb(
-                title: $this->stringValue(__('storefront/default.links.home')),
+                title: string_value(__('storefront/default.links.home')),
                 url  : localized_route('localized.catalog.home'),
             ),
         ];
@@ -328,7 +328,7 @@ class CategoryController extends Controller
             ];
         }
 
-        $category = Category::findBySlug($slug, $this->integerValue($language->id));
+        $category = Category::findBySlug($slug, integer_value($language->id));
 
         if (! $category instanceof Category) {
             return [
@@ -338,23 +338,23 @@ class CategoryController extends Controller
         }
 
         $path_ids = (new CategoryPath())
-            ->getPathIdsByCategoryId($this->integerValue($category->id))
+            ->getPathIdsByCategoryId(integer_value($category->id))
             ->pluck('path_id')
-            ->map(fn (mixed $path_id): int => $this->integerValue($path_id))
+            ->map(fn (mixed $path_id): int => integer_value($path_id))
             ->values()
             ->all();
 
         if ($path_ids === []) {
-            $path_ids = [$this->integerValue($category->id)];
+            $path_ids = [integer_value($category->id)];
         }
 
         $path_categories = Category::query()
             ->with([
                 'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language): void {
-                    $query->where('language_id', $this->integerValue($language->id));
+                    $query->where('language_id', integer_value($language->id));
                 },
                 'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language): void {
-                    $query->where('language_id', $this->integerValue($language->id));
+                    $query->where('language_id', integer_value($language->id));
                 },
             ])
             ->whereIn('id', $path_ids)
@@ -375,12 +375,12 @@ class CategoryController extends Controller
                 continue;
             }
 
-            $path_title = $this->resolveCategoryTitle($path_category, $this->integerValue($language->id), $fallback_title);
+            $path_title = $this->resolveCategoryTitle($path_category, integer_value($language->id), $fallback_title);
             $resolved_title = $path_title;
 
             $is_last = $last_path_index === $index;
 
-            $slug = $this->stringValue(data_get($path_category->slugs->first(), 'slug'));
+            $slug = string_value(data_get($path_category->slugs->first(), 'slug'));
             $url = null;
 
             if (! $is_last && filled($slug)) {
@@ -409,22 +409,12 @@ class CategoryController extends Controller
             return $fallback_title;
         }
 
-        $title = $this->stringValue($description->name ?? '');
+        $title = string_value($description->name ?? '');
 
         if (blank($title)) {
             return $fallback_title;
         }
 
         return $title;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
     }
 }

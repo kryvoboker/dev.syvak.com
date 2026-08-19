@@ -112,8 +112,8 @@ class FilterValueGeneratorService
         $updated_count = 0;
 
         foreach ($value_options as $sort_index => $value_option) {
-            $canonical_key = $this->stringValue(Arr::get($value_option, 'canonical_key', ''));
-            $value_label = $this->stringValue(Arr::get($value_option, 'canonical_label', ''));
+            $canonical_key = string_value(Arr::get($value_option, 'canonical_key', ''));
+            $value_label = string_value(Arr::get($value_option, 'canonical_label', ''));
 
             if (blank($canonical_key) || blank($value_label)) {
                 continue;
@@ -205,7 +205,7 @@ class FilterValueGeneratorService
         array $labels_by_language,
     ): void {
         foreach ((new Language())->getActiveLanguages() as $language) {
-            $translated_label = trim($this->stringValue($labels_by_language[(int) $language->id] ?? ''));
+            $translated_label = trim(string_value($labels_by_language[(int) $language->id] ?? ''));
 
             CatalogFilterValueTranslation::query()->updateOrCreate(
                 [
@@ -361,7 +361,7 @@ class FilterValueGeneratorService
         return (new Language())
             ->getActiveLanguages()
             ->pluck('id')
-            ->map(fn (mixed $language_id): int => $this->integerValue($language_id))
+            ->map(fn (mixed $language_id): int => integer_value($language_id))
             ->values()
             ->all();
     }
@@ -405,20 +405,10 @@ class FilterValueGeneratorService
 
         foreach ($value as $language_id => $label) {
             if (is_numeric($language_id)) {
-                $labels[(int) $language_id] = $this->stringValue($label);
+                $labels[(int) $language_id] = string_value($label);
             }
         }
 
         return $labels;
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

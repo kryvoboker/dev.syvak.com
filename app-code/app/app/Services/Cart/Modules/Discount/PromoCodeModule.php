@@ -18,10 +18,10 @@ class PromoCodeModule
             return app(PromoCodeService::class)->applyToTotals(
                 totals_data: $totals_data,
                 cart_items: $this->arrayRows($context['cart_items'] ?? []),
-                code: filled($context['code'] ?? null) ? $this->stringValue($context['code']) : null,
+                code: filled($context['code'] ?? null) ? string_value($context['code']) : null,
                 user_id: is_numeric($context['user_id'] ?? null) ? (int) $context['user_id'] : null,
                 user_group_id: is_numeric($context['user_group_id'] ?? null) ? (int) $context['user_group_id'] : null,
-                locale: filled($context['locale'] ?? null) ? $this->stringValue($context['locale']) : null,
+                locale: filled($context['locale'] ?? null) ? string_value($context['locale']) : null,
             );
         };
     }
@@ -54,10 +54,5 @@ class PromoCodeModule
         }
 
         return $rows;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

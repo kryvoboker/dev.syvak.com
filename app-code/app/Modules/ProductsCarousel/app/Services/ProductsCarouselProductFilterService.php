@@ -30,7 +30,7 @@ final readonly class ProductsCarouselProductFilterService
             ->whereIn('id', $normalized_product_ids)
             ->orderBy('id')
             ->pluck('id')
-            ->map(fn (mixed $id): int => $this->integerValue($id))
+            ->map(fn (mixed $id): int => integer_value($id))
             ->all();
     }
 
@@ -56,7 +56,7 @@ final readonly class ProductsCarouselProductFilterService
             })
             ->orderBy('id')
             ->pluck('id')
-            ->map(fn (mixed $id): int => $this->integerValue($id))
+            ->map(fn (mixed $id): int => integer_value($id))
             ->all();
     }
 
@@ -80,7 +80,7 @@ final readonly class ProductsCarouselProductFilterService
             ->whereIn('id', $normalized_variant_ids)
             ->orderBy('id')
             ->pluck('id')
-            ->map(fn (mixed $id): int => $this->integerValue($id))
+            ->map(fn (mixed $id): int => integer_value($id))
             ->all();
     }
 
@@ -110,7 +110,7 @@ final readonly class ProductsCarouselProductFilterService
             })
             ->orderBy('id')
             ->pluck('id')
-            ->map(fn (mixed $id): int => $this->integerValue($id))
+            ->map(fn (mixed $id): int => integer_value($id))
             ->all();
     }
 
@@ -135,7 +135,7 @@ final readonly class ProductsCarouselProductFilterService
             })
             ->orderBy('id')
             ->pluck('id')
-            ->map(fn (mixed $id): int => $this->integerValue($id))
+            ->map(fn (mixed $id): int => integer_value($id))
             ->all();
     }
 
@@ -146,15 +146,10 @@ final readonly class ProductsCarouselProductFilterService
     private function normalizeIds(array $ids): array
     {
         return collect($ids)
-            ->map(fn (mixed $id): int => $this->integerValue($id))
+            ->map(fn (mixed $id): int => integer_value($id))
             ->filter(fn (int $id): bool => $id > 0)
             ->unique()
             ->values()
             ->all();
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
     }
 }

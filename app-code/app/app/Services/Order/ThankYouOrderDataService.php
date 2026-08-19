@@ -25,7 +25,7 @@ final readonly class ThankYouOrderDataService
     {
         try {
             $language = resolve_language_by_locale($locale);
-            $language_id = $language instanceof Language ? $this->integerValue($language->getKey()) : null;
+            $language_id = $language instanceof Language ? integer_value($language->getKey()) : null;
 
             $order = Orders::query()
                 ->with([
@@ -80,25 +80,25 @@ final readonly class ThankYouOrderDataService
      */
     private function mapOrder(Orders $order): array
     {
-        $currency_code = $this->stringValue($order->currency_code);
-        $exchange_rate = $this->floatValue($order->exchange_rate);
+        $currency_code = string_value($order->currency_code);
+        $exchange_rate = float_value($order->exchange_rate);
         $shipping = $order->shipping;
         $payment = $order->payments->first();
 
         return [
-            'order_number' => $this->stringValue($order->order_number),
-            'status' => $this->stringValue($order->order_status_name ?: $order->status?->code ?: '—'),
+            'order_number' => string_value($order->order_number),
+            'status' => string_value($order->order_status_name ?: $order->status?->code ?: '—'),
             'customer' => [
-                'name' => Str::squish(sprintf('%s %s', $this->stringValue(data_get($order->customer, 'first_name', '')), $this->stringValue(data_get($order->customer, 'last_name', '')))),
-                'email' => $this->stringValue(data_get($order->customer, 'email', '')),
-                'phone' => $this->stringValue(data_get($order->customer, 'telephone', '')),
+                'name' => Str::squish(sprintf('%s %s', string_value(data_get($order->customer, 'first_name', '')), string_value(data_get($order->customer, 'last_name', '')))),
+                'email' => string_value(data_get($order->customer, 'email', '')),
+                'phone' => string_value(data_get($order->customer, 'telephone', '')),
             ],
             'delivery' => [
-                'method' => $this->resolveDeliveryMethod($this->nullableString(data_get($shipping, 'code')), $this->nullableString(data_get($shipping, 'method'))),
+                'method' => $this->resolveDeliveryMethod(nullable_string(data_get($shipping, 'code')), nullable_string(data_get($shipping, 'method'))),
                 'address' => $this->resolveDeliveryAddress(
-                    $this->nullableString(data_get($shipping, 'city')),
-                    $this->nullableString(data_get($shipping, 'address')),
-                    $this->nullableString(data_get($shipping, 'delivery_point')),
+                    nullable_string(data_get($shipping, 'city')),
+                    nullable_string(data_get($shipping, 'address')),
+                    nullable_string(data_get($shipping, 'delivery_point')),
                 ),
             ],
             'products' => $order->products
@@ -107,26 +107,26 @@ final readonly class ThankYouOrderDataService
                 ->values()
                 ->all(),
             'summary' => [
-                'payment_method' => $this->stringValue(data_get($payment, 'method') ?: data_get($payment, 'code') ?: '—'),
-                'delivery_method' => $this->resolveDeliveryMethod($this->nullableString(data_get($shipping, 'code')), $this->nullableString(data_get($shipping, 'method'))),
+                'payment_method' => string_value(data_get($payment, 'method') ?: data_get($payment, 'code') ?: '—'),
+                'delivery_method' => $this->resolveDeliveryMethod(nullable_string(data_get($shipping, 'code')), nullable_string(data_get($shipping, 'method'))),
                 'delivery_address' => $this->resolveDeliveryAddress(
-                    $this->nullableString(data_get($shipping, 'city')),
-                    $this->nullableString(data_get($shipping, 'address')),
-                    $this->nullableString(data_get($shipping, 'delivery_point')),
+                    nullable_string(data_get($shipping, 'city')),
+                    nullable_string(data_get($shipping, 'address')),
+                    nullable_string(data_get($shipping, 'delivery_point')),
                 ),
                 'subtotal' => $this->formatTotal($order, TotalTypesEnum::Subtotal, $currency_code, $exchange_rate),
                 'packaging' => '—',
                 'delivery_cost' => $this->formatTotal($order, TotalTypesEnum::Shipping, $currency_code, $exchange_rate),
-                'total' => $this->formatMoney($this->floatValue($order->total), $currency_code, $exchange_rate),
-                'notes' => $this->stringValue($order->comment ?? ''),
+                'total' => $this->formatMoney(float_value($order->total), $currency_code, $exchange_rate),
+                'notes' => string_value($order->comment ?? ''),
             ],
         ];
     }
 
     /**
      * @return array<string, mixed>
+     * @psalm-suppress InvalidTemplateParam
      */
-    /** @psalm-suppress InvalidTemplateParam */
     private function mapProduct(OrderProducts $order_product, string $currency_code, float $exchange_rate): array
     {
         $variant = $order_product->productVariant;
@@ -148,12 +148,12 @@ final readonly class ThankYouOrderDataService
             ?? data_get($order_product->product, 'image');
 
         return [
-            'image_url' => filled($image_path) ? convert_img_and_get_url($this->stringValue($image_path), 220, 220) : null,
-            'name' => $this->stringValue($order_product->name),
-            'sku' => $this->stringValue($order_product->sku ?: $order_product->model ?: '—'),
+            'image_url' => filled($image_path) ? convert_img_and_get_url(string_value($image_path), 220, 220) : null,
+            'name' => string_value($order_product->name),
+            'sku' => string_value($order_product->sku ?: $order_product->model ?: '—'),
             'attributes' => $this->mapAttributes($variant?->attributeValues),
-            'quantity' => $this->integerValue($order_product->quantity),
-            'price_formatted' => $this->formatMoney($this->floatValue($order_product->line_total), $currency_code, $exchange_rate),
+            'quantity' => integer_value($order_product->quantity),
+            'price_formatted' => $this->formatMoney(float_value($order_product->line_total), $currency_code, $exchange_rate),
         ];
     }
 
@@ -170,8 +170,8 @@ final readonly class ThankYouOrderDataService
         return $attribute_values
             ->toBase()
             ->mapWithKeys(function (ProductVariantAttributeValue $attribute_value): array {
-                $name = Str::trim($this->stringValue($attribute_value->attribute?->attributeDescription->first()?->name));
-                $value = Str::trim($this->stringValue($attribute_value->value_string));
+                $name = Str::trim(string_value($attribute_value->attribute?->attributeDescription->first()?->name));
+                $value = Str::trim(string_value($attribute_value->value_string));
 
                 if ($name === '' || $value === '') {
                     return [];
@@ -185,7 +185,7 @@ final readonly class ThankYouOrderDataService
     private function resolveDeliveryMethod(?string $code, ?string $stored_method): string
     {
         if ($code === null || $code === '') {
-            return $this->stringValue($stored_method ?? '—');
+            return string_value($stored_method ?? '—');
         }
 
         $translation_key = match ($code) {
@@ -197,18 +197,18 @@ final readonly class ThankYouOrderDataService
         };
 
         if ($translation_key === null) {
-            return $this->stringValue($stored_method ?: $code);
+            return string_value($stored_method ?: $code);
         }
 
-        $localized_method = Str::trim($this->stringValue(Lang::get($translation_key)));
+        $localized_method = Str::trim(string_value(Lang::get($translation_key)));
 
-        return $localized_method !== $translation_key ? $localized_method : $this->stringValue($stored_method ?: $code);
+        return $localized_method !== $translation_key ? $localized_method : string_value($stored_method ?: $code);
     }
 
     private function resolveDeliveryAddress(?string $city, ?string $address, ?string $delivery_point): string
     {
         return collect([$city, $address, $delivery_point])
-            ->map(fn (?string $value): string => Str::trim($this->stringValue($value)))
+            ->map(fn (?string $value): string => Str::trim(string_value($value)))
             ->filter()
             ->implode(', ');
     }
@@ -229,27 +229,5 @@ final readonly class ThankYouOrderDataService
     private function formatMoney(float $amount, string $currency_code, float $exchange_rate): string
     {
         return replace_currency_symbol_to_code(format_price($amount, $currency_code, $exchange_rate));
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    private function nullableString(mixed $value): ?string
-    {
-        $value = $this->stringValue($value);
-
-        return $value !== '' ? $value : null;
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function floatValue(mixed $value): float
-    {
-        return is_numeric($value) ? (float) $value : 0.0;
     }
 }

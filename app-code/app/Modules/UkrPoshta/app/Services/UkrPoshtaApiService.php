@@ -91,7 +91,7 @@ readonly class UkrPoshtaApiService
 
     private function getApiUrl(): string
     {
-        return $this->stringValue($this->config->get('api.url', 'https://www.ukrposhta.ua/address-classifier-ws/'));
+        return string_value($this->config->get('api.url', 'https://www.ukrposhta.ua/address-classifier-ws/'));
     }
 
     private function getApiKey(): string
@@ -101,7 +101,7 @@ readonly class UkrPoshtaApiService
 
     private function getTimeout(): int
     {
-        return max(1, $this->integerValue($this->config->get('api.timeout', 30)));
+        return max(1, integer_value($this->config->get('api.timeout', 30)));
     }
 
     /**
@@ -109,7 +109,7 @@ readonly class UkrPoshtaApiService
      */
     private function getWaihtTimeout(): int
     {
-        return max(1, $this->integerValue($this->config->get('api.wait_timeout', 1)));
+        return max(1, integer_value($this->config->get('api.wait_timeout', 1)));
     }
 
     /**
@@ -149,7 +149,7 @@ readonly class UkrPoshtaApiService
                 'Ukr Poshta API returned warnings or errors for [%s]: %s',
                 $endpoint,
                 Str::squish(implode(' ', array_map(
-                    fn (mixed $message): string => $this->stringValue($message),
+                    fn (mixed $message): string => string_value($message),
                     array_merge($warnings, $errors),
                 ))),
             ));
@@ -166,15 +166,5 @@ readonly class UkrPoshtaApiService
             'data' => $data,
             'raw' => $payload,
         ];
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

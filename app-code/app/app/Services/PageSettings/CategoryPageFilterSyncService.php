@@ -82,7 +82,7 @@ class CategoryPageFilterSyncService
      */
     private function buildPriceFilterPayload(): array
     {
-        $timezone = $this->stringValue(config('app.timezone'));
+        $timezone = string_value(config('app.timezone'));
         $now = now($timezone !== '' ? $timezone : null);
 
         $base_price_stats = DB::table('product_variants')
@@ -185,7 +185,7 @@ class CategoryPageFilterSyncService
 
         return $attributes->toBase()->map(function (Attribute $attribute): array {
             $attribute_discription = $attribute->attributeDescription->first();
-            $attribute_name = $this->stringValue($attribute_discription?->name);
+            $attribute_name = string_value($attribute_discription?->name);
 
             return [
                 'code' => CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id,
@@ -216,15 +216,15 @@ class CategoryPageFilterSyncService
         $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
 
         $existing_filter_items = collect((array) Arr::get($settings, 'items.filters', []))
-            ->filter(fn (mixed $item): bool => is_array($item) && filled($this->stringValue(Arr::get($item, 'code'))))
-            ->mapWithKeys(fn (array $item): array => [$this->stringValue(Arr::get($item, 'code')) => $item]);
+            ->filter(fn (mixed $item): bool => is_array($item) && filled(string_value(Arr::get($item, 'code'))))
+            ->mapWithKeys(fn (array $item): array => [string_value(Arr::get($item, 'code')) => $item]);
 
         $created_count = 0;
         $updated_count = 0;
         $next_items = [];
 
         foreach ($payloads as $payload) {
-            $code = $this->stringValue(Arr::get($payload, 'code', ''));
+            $code = string_value(Arr::get($payload, 'code', ''));
 
             if ($code === '') {
                 continue;
@@ -235,12 +235,12 @@ class CategoryPageFilterSyncService
 
             $next_items[] = [
                 'code' => $code,
-                'source_type' => $this->stringValue(Arr::get($payload, 'source_type')),
-                'source_id' => $this->integerValue(Arr::get($payload, 'source_id')),
+                'source_type' => string_value(Arr::get($payload, 'source_type')),
+                'source_id' => integer_value(Arr::get($payload, 'source_id')),
                 'is_enabled' => (bool) Arr::get($existing_item ?? [], 'is_enabled', Arr::get($payload, 'is_enabled', true)),
-                'sort_order' => $this->integerValue(Arr::get($payload, 'sort_order', Arr::get($existing_item ?? [], 'sort_order', 0))),
+                'sort_order' => integer_value(Arr::get($payload, 'sort_order', Arr::get($existing_item ?? [], 'sort_order', 0))),
                 'get' => [
-                    'key' => $this->stringValue(Arr::get($payload, 'get.key', '')),
+                    'key' => string_value(Arr::get($payload, 'get.key', '')),
                     'value' => Arr::get($payload, 'get.value'),
                     'extra' => is_array(Arr::get($payload, 'get.extra')) ? Arr::get($payload, 'get.extra') : [],
                 ],
@@ -265,7 +265,7 @@ class CategoryPageFilterSyncService
                 ->all(),
         );
 
-        Arr::set($settings, 'meta.contract_version', max(2, $this->integerValue(Arr::get($settings, 'meta.contract_version', 1))));
+        Arr::set($settings, 'meta.contract_version', max(2, integer_value(Arr::get($settings, 'meta.contract_version', 1))));
 
         $page_setting->forceFill([
             'settings' => $settings,
@@ -276,15 +276,5 @@ class CategoryPageFilterSyncService
             'updated_count' => $updated_count,
             'removed_count' => $removed_count,
         ];
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

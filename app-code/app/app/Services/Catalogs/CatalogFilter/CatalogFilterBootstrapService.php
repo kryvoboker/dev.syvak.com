@@ -17,12 +17,12 @@ class CatalogFilterBootstrapService
     public function bootstrapDefaultCategorySet(): CatalogFilterSet
     {
         try {
-            $defaults = $this->stringKeyedArray(config('catalog-filter.defaults', []));
+            $defaults = string_keyed_array(config('catalog-filter.defaults', []));
             $selected_context_types = $this->normalizeContextTypes($defaults);
 
             $filter_set = CatalogFilterSet::query()->firstOrCreate(
                 [
-                    'code' => $this->stringValue($defaults['set_code'] ?? 'default_category'),
+                    'code' => string_value($defaults['set_code'] ?? 'default_category'),
                 ],
                 [
                     'context_type' => $selected_context_types[0] ?? 'category',
@@ -30,23 +30,23 @@ class CatalogFilterBootstrapService
                     'is_enabled' => (bool) ($defaults['is_enabled'] ?? true),
                     'is_price_filter_enabled' => (bool) ($defaults['is_price_filter_enabled'] ?? true),
                     'is_attribute_filtering_enabled' => (bool) ($defaults['is_attribute_filtering_enabled'] ?? true),
-                    'price_source_mode' => $this->stringValue($defaults['price_source_mode'] ?? 'both'),
-                    'facet_strategy' => $this->stringValue($defaults['facet_strategy'] ?? 'self_excluding'),
-                    'discount_only_policy' => $this->stringValue($defaults['discount_only_policy'] ?? 'exclude_without_discount'),
-                    'min_stock_quantity' => $this->integerValue($defaults['min_stock_quantity'] ?? 1),
+                    'price_source_mode' => string_value($defaults['price_source_mode'] ?? 'both'),
+                    'facet_strategy' => string_value($defaults['facet_strategy'] ?? 'self_excluding'),
+                    'discount_only_policy' => string_value($defaults['discount_only_policy'] ?? 'exclude_without_discount'),
+                    'min_stock_quantity' => integer_value($defaults['min_stock_quantity'] ?? 1),
                     'settings' => [],
                 ],
             );
 
             if (empty($filter_set->context_types)) {
                 $filter_set->forceFill([
-                    'context_types' => [$this->stringValue($filter_set->getRawOriginal('context_type'))],
+                    'context_types' => [string_value($filter_set->getRawOriginal('context_type'))],
                 ])->save();
             }
 
             CatalogFilterIndexMeta::query()->firstOrCreate(
                 [
-                    'catalog_filter_set_id' => $this->integerValue($filter_set->id),
+                    'catalog_filter_set_id' => integer_value($filter_set->id),
                 ],
                 [
                     'index_version' => 1,
@@ -84,7 +84,7 @@ class CatalogFilterBootstrapService
         }
 
         $normalized_context_types = collect($context_types)
-            ->map(fn (mixed $context_type): string => $this->stringValue($context_type))
+            ->map(fn (mixed $context_type): string => string_value($context_type))
             ->filter(fn (string $context_type): bool => filled($context_type))
             ->unique()
             ->values()
@@ -93,24 +93,7 @@ class CatalogFilterBootstrapService
         return $normalized_context_types !== [] ? $normalized_context_types : ['category'];
     }
 
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
 
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
 
     /** @return array<string, mixed> */
-    private function stringKeyedArray(mixed $value): array
-    {
-        if (! is_array($value)) {
-            return [];
-        }
-
-        /** @var array<string, mixed> $value */
-        return $value;
-    }
 }

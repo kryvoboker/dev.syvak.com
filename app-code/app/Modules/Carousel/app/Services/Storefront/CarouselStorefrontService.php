@@ -43,8 +43,8 @@ class CarouselStorefrontService
      *     open_links_in_new_tab: bool,
      *     slides: non-empty-array<int, non-empty-array<string, mixed>>
      * }>
+     * @psalm-suppress InvalidTemplateParam
      */
-    /** @psalm-suppress InvalidTemplateParam */
     private function mapDefinitionInstances(ModuleDefinition $definition, ?string $page_type): array
     {
         $instances = $definition->instances;

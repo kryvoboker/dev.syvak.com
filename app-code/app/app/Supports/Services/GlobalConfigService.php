@@ -56,7 +56,7 @@ final class GlobalConfigService
                 $selected = filter_var($global_config->getAttribute('selected'), FILTER_VALIDATE_BOOLEAN) === true;
 
                 return [
-                    'key' => $this->stringValue($global_config->key),
+                    'key' => string_value($global_config->key),
                     'value' => $global_config->value,
                     'is_active' => (bool) $global_config->is_active,
                     'selected' => $selected,
@@ -94,7 +94,7 @@ final class GlobalConfigService
                     $global_config_data['is_active'],
                 );
             })
-            ->keyBy(fn (GlobalConfig $global_config): string => $this->stringValue($global_config->key));
+            ->keyBy(fn (GlobalConfig $global_config): string => string_value($global_config->key));
     }
 
     /**
@@ -117,7 +117,7 @@ final class GlobalConfigService
                 ],
             );
 
-            $kept_keys[] = $this->stringValue($global_config->key);
+            $kept_keys[] = string_value($global_config->key);
 
             if ($global_config->wasRecentlyCreated) {
                 $created_count++;
@@ -205,7 +205,7 @@ final class GlobalConfigService
 
         $this->clearAppSettingsCache();
 
-        return $this->integerValue($deleted_count);
+        return integer_value($deleted_count);
     }
 
     /**
@@ -227,7 +227,7 @@ final class GlobalConfigService
             $this->clearAppSettingsCache();
         }
 
-        return $this->integerValue($deleted_count);
+        return integer_value($deleted_count);
     }
 
     /**
@@ -308,7 +308,7 @@ final class GlobalConfigService
             $this->clearAppSettingsCache();
         }
 
-        return $this->integerValue($deleted_count);
+        return integer_value($deleted_count);
     }
 
     /**
@@ -355,7 +355,7 @@ final class GlobalConfigService
         /** @var array<int, array{key: string, value: ?string, is_active: bool, selected: bool}> $normalized_configs */
         $normalized_configs = collect($global_configs)
             ->map(function (array $global_config): ?array {
-                $key = Str::trim($this->stringValue($global_config['key'] ?? ''));
+                $key = Str::trim(string_value($global_config['key'] ?? ''));
 
                 if ($key === '') {
                     return null;
@@ -387,7 +387,7 @@ final class GlobalConfigService
         $selected_keys = collect($global_configs)
             ->filter(fn (array $global_config): bool => $global_config['selected'])
             ->pluck('key')
-            ->map(fn (mixed $key): string => $this->stringValue($key))
+            ->map(fn (mixed $key): string => string_value($key))
             ->all();
 
         return $selected_keys;
@@ -408,8 +408,8 @@ final class GlobalConfigService
         $keys = Arr::isAssoc($key) ? array_keys($key) : $key;
 
         return collect($keys)
-            ->filter(fn (mixed $config_key): bool => Str::trim($this->stringValue($config_key)) !== '')
-            ->map(fn (mixed $config_key): string => Str::trim($this->stringValue($config_key)))
+            ->filter(fn (mixed $config_key): bool => Str::trim(string_value($config_key)) !== '')
+            ->map(fn (mixed $config_key): string => Str::trim(string_value($config_key)))
             ->values()
             ->all();
     }
@@ -443,7 +443,7 @@ final class GlobalConfigService
             return json_encode($value, JSON_UNESCAPED_UNICODE) ?: null;
         }
 
-        $string_value = $this->stringValue($value);
+        $string_value = string_value($value);
 
         return $string_value === '' ? null : $string_value;
     }
@@ -459,21 +459,11 @@ final class GlobalConfigService
             $query->whereNotIn('key', $kept_keys);
         }
 
-        return $this->integerValue($query->delete());
+        return integer_value($query->delete());
     }
 
     private function clearAppSettingsCache(): void
     {
         app(AppSettingsService::class)->removeSettings();
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
     }
 }

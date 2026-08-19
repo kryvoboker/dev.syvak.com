@@ -31,10 +31,10 @@ final class OrderAdminDeliveryService
     {
         return match ($method) {
             DeliveryMethodEnum::NovaPoshta->value, DeliveryMethodEnum::NovaPoshtaCourier->value, DeliveryMethodEnum::NovaPoshtaPoshtomat->value => $this->nova_poshta_config->isDeliveryCostEnabled()
-                ? $this->floatValue($this->nova_poshta_config->getDeliveryCost())
+                ? float_value($this->nova_poshta_config->getDeliveryCost())
                 : 0.0,
             DeliveryMethodEnum::UkrPoshta->value => $this->ukr_poshta_config->isDeliveryCostEnabled()
-                ? $this->floatValue($this->ukr_poshta_config->getDeliveryCost())
+                ? float_value($this->ukr_poshta_config->getDeliveryCost())
                 : 0.0,
             default => 0.0,
         };
@@ -95,7 +95,7 @@ final class OrderAdminDeliveryService
                 })
                 ->orderBy('description')->limit(self::SEARCH_LIMIT)->get()->toBase()
                 ->mapWithKeys(fn (NovaPoshtaCity $city): array => [
-                    $this->stringValue($city->getAttribute('ref')) => $this->cityLabel($this->stringValue($city->getAttribute('description') ?: $city->getAttribute('city_name'))),
+                    string_value($city->getAttribute('ref')) => $this->cityLabel(string_value($city->getAttribute('description') ?: $city->getAttribute('city_name'))),
                 ])->all(),
             DeliveryMethodEnum::UkrPoshta->value => UkrPoshtaCity::query()
                 ->where(function (Builder $query) use ($search): void {
@@ -105,7 +105,7 @@ final class OrderAdminDeliveryService
                 })
                 ->orderBy('city_ua')->limit(self::SEARCH_LIMIT)->get()->toBase()
                 ->mapWithKeys(fn (UkrPoshtaCity $city): array => [
-                    $this->stringValue($city->getAttribute('city_id')) => $this->cityLabel($this->stringValue($city->getAttribute('city_ua') ?: $city->getAttribute('description'))),
+                    string_value($city->getAttribute('city_id')) => $this->cityLabel(string_value($city->getAttribute('city_ua') ?: $city->getAttribute('description'))),
                 ])->all(),
             default => [],
         };
@@ -131,7 +131,7 @@ final class OrderAdminDeliveryService
                 })
                 ->orderBy('postcode')->limit(self::SEARCH_LIMIT)->get()->toBase()
                 ->mapWithKeys(fn (UkrPoshtaPostOffice $point): array => [
-                    $this->stringValue($point->getAttribute('postcode')) => $this->pointLabel($this->stringValue($point->getAttribute('description')), $this->stringValue($point->getAttribute('postcode'))),
+                    string_value($point->getAttribute('postcode')) => $this->pointLabel(string_value($point->getAttribute('description')), string_value($point->getAttribute('postcode'))),
                 ])->all(),
             default => [],
         };
@@ -151,11 +151,11 @@ final class OrderAdminDeliveryService
         };
 
         if ($city instanceof NovaPoshtaCity) {
-            return ['id' => $this->stringValue($city->getAttribute('ref')), 'name' => $this->stringValue($city->getAttribute('description') ?: $city->getAttribute('city_name')), 'provider_data' => $city->toArray()];
+            return ['id' => string_value($city->getAttribute('ref')), 'name' => string_value($city->getAttribute('description') ?: $city->getAttribute('city_name')), 'provider_data' => $city->toArray()];
         }
 
         if ($city instanceof UkrPoshtaCity) {
-            return ['id' => $this->stringValue($city->getAttribute('city_id')), 'name' => $this->stringValue($city->getAttribute('city_ua') ?: $city->getAttribute('description')), 'provider_data' => $city->toArray()];
+            return ['id' => string_value($city->getAttribute('city_id')), 'name' => string_value($city->getAttribute('city_ua') ?: $city->getAttribute('description')), 'provider_data' => $city->toArray()];
         }
 
         return null;
@@ -180,9 +180,9 @@ final class OrderAdminDeliveryService
         }
 
         return [
-            'id' => $point instanceof UkrPoshtaPostOffice ? $this->stringValue($point->getAttribute('postcode')) : $this->stringValue($point->getAttribute('ref')),
-            'name' => $this->stringValue($point->getAttribute('description')),
-            'postcode' => $point instanceof UkrPoshtaPostOffice ? $this->stringValue($point->getAttribute('postcode')) : null,
+            'id' => $point instanceof UkrPoshtaPostOffice ? string_value($point->getAttribute('postcode')) : string_value($point->getAttribute('ref')),
+            'name' => string_value($point->getAttribute('description')),
+            'postcode' => $point instanceof UkrPoshtaPostOffice ? string_value($point->getAttribute('postcode')) : null,
             'provider_data' => $point->toArray(),
         ];
     }
@@ -202,7 +202,7 @@ final class OrderAdminDeliveryService
             })
             ->orderBy('number')->limit(self::SEARCH_LIMIT)->get()->toBase()
             ->mapWithKeys(fn (NovaPoshtaPostOffice|NovaPoshtaPoshtomat $point): array => [
-                $this->stringValue($point->getAttribute('ref')) => $this->pointLabel($this->stringValue($point->getAttribute('description')), $this->stringValue($point->getAttribute('number'))),
+                string_value($point->getAttribute('ref')) => $this->pointLabel(string_value($point->getAttribute('description')), string_value($point->getAttribute('number'))),
             ])->all();
     }
 
@@ -214,15 +214,5 @@ final class OrderAdminDeliveryService
     private function pointLabel(string $name, ?string $secondary = null): string
     {
         return collect([$name, $secondary !== null && $secondary !== '0' ? $secondary : null])->filter()->implode(' — ');
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    private function floatValue(mixed $value): float
-    {
-        return is_numeric($value) ? (float) $value : 0.0;
     }
 }

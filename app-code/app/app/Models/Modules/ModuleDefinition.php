@@ -120,7 +120,7 @@ class ModuleDefinition extends Model
 
     public function getAdminModuleListActionUrl(): ?string
     {
-        $page_class = $this->stringValue(data_get($this->getAdminModuleConfig(), 'module_list_action.page', ''));
+        $page_class = string_value(data_get($this->getAdminModuleConfig(), 'module_list_action.page', ''));
 
         if (blank($page_class) || ! class_exists($page_class) || ! is_subclass_of($page_class, Page::class)) {
             return null;
@@ -186,10 +186,5 @@ class ModuleDefinition extends Model
         }
 
         return $result;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

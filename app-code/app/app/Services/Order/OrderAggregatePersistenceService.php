@@ -49,16 +49,16 @@ final readonly class OrderAggregatePersistenceService
     ): array {
         return DB::transaction(function () use ($validated_data, $cart_data, $locale, $request_context): array {
             $language = resolve_language_by_locale($locale);
-            $currency = $this->resolveCurrency($this->stringValue(Arr::get($cart_data, 'totals.currency_code', '')));
+            $currency = $this->resolveCurrency(string_value(Arr::get($cart_data, 'totals.currency_code', '')));
             $order_status = $this->order_lifecycle_service->getDefaultOrderStatus();
             $payment_status = $this->order_lifecycle_service->getDefaultPaymentStatus();
             $order_number = Str::ulid()->toString();
-            $totals = $this->stringKeyedArray(Arr::get($cart_data, 'totals', []));
+            $totals = string_keyed_array(Arr::get($cart_data, 'totals', []));
             $currency_code = $currency instanceof Currency ? $currency->code : '';
-            $exchange_rate = $this->floatValue(Arr::get($totals, 'exchange_rate', 0));
+            $exchange_rate = float_value(Arr::get($totals, 'exchange_rate', 0));
 
             if ($exchange_rate <= 0 && $currency instanceof Currency) {
-                $exchange_rate = $this->floatValue($currency->exchange_rate);
+                $exchange_rate = float_value($currency->exchange_rate);
             }
 
             $order_status_name = $order_status
@@ -70,22 +70,22 @@ final readonly class OrderAggregatePersistenceService
                 'order_status_id' => $order_status->getKey(),
                 'order_status_name' => $order_status_name,
                 'order_type' => Arr::get($validated_data, 'cart_mode', 'regular'),
-                'comment' => $this->nullableString(Arr::get($validated_data, 'comment')),
-                'total' => $this->floatValue(Arr::get($totals, 'grand_total', 0)),
+                'comment' => nullable_string(Arr::get($validated_data, 'comment')),
+                'total' => float_value(Arr::get($totals, 'grand_total', 0)),
                 'language_id' => $language instanceof Language ? $language->getKey() : null,
                 'language_code' => $locale,
                 'currency_id' => $currency?->getKey(),
-                'currency_code' => $this->stringValue(Arr::get($totals, 'currency_code', $currency_code)),
+                'currency_code' => string_value(Arr::get($totals, 'currency_code', $currency_code)),
                 'exchange_rate' => $exchange_rate,
-                'accept_language' => $this->nullableString(Arr::get($request_context, 'accept_language')),
-                'ip' => $this->stringValue(Arr::get($request_context, 'ip', '0.0.0.0')),
-                'forwarded_ip' => $this->nullableString(Arr::get($request_context, 'forwarded_ip')),
-                'user_agent' => $this->nullableString(Arr::get($request_context, 'user_agent')),
+                'accept_language' => nullable_string(Arr::get($request_context, 'accept_language')),
+                'ip' => string_value(Arr::get($request_context, 'ip', '0.0.0.0')),
+                'forwarded_ip' => nullable_string(Arr::get($request_context, 'forwarded_ip')),
+                'user_agent' => nullable_string(Arr::get($request_context, 'user_agent')),
                 'added_at' => now(),
             ]);
 
             $this->createCustomer($order, $validated_data);
-            $this->createProducts($order, $this->listValue(Arr::get($cart_data, 'items', [])));
+            $this->createProducts($order, list_value(Arr::get($cart_data, 'items', [])));
             $this->createTotals($order, $totals);
             $this->createShipping($order, $validated_data, $locale);
             $actor_label = (string) __('admin/orders/orders.history_data.actor');
@@ -102,13 +102,13 @@ final readonly class OrderAggregatePersistenceService
                 ],
             ]);
 
-            $payment_code = $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value));
+            $payment_code = nullable_string(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value));
 
             $payment = $order->payments()->create([
                 'method' => $this->resolvePaymentMethodName($payment_code, $locale),
                 'code' => $payment_code,
                 'payment_status_id' => $payment_status->getKey(),
-                'amount' => $this->floatValue(Arr::get($totals, 'grand_total', 0)),
+                'amount' => float_value(Arr::get($totals, 'grand_total', 0)),
             ]);
 
             $order->load('status');
@@ -144,10 +144,10 @@ final readonly class OrderAggregatePersistenceService
         $order->customer()->create([
             'user_id' => Auth::id(),
             'user_group_id' => $user instanceof User ? $user->user_group_id : null,
-            'first_name' => $this->stringValue(Arr::get($validated_data, 'first_name', '')),
-            'last_name' => $this->stringValue(Arr::get($validated_data, 'last_name', '')),
-            'email' => $this->nullableString(Arr::get($validated_data, 'email')),
-            'telephone' => clear_telephone($this->stringValue(Arr::get($validated_data, 'phone', ''))),
+            'first_name' => string_value(Arr::get($validated_data, 'first_name', '')),
+            'last_name' => string_value(Arr::get($validated_data, 'last_name', '')),
+            'email' => nullable_string(Arr::get($validated_data, 'email')),
+            'telephone' => clear_telephone(string_value(Arr::get($validated_data, 'phone', ''))),
         ]);
     }
 
@@ -162,14 +162,14 @@ final readonly class OrderAggregatePersistenceService
                 'product_id' => $this->nullableInteger(Arr::get($item, 'product_id')),
                 'product_variant_id' => $this->nullableInteger(Arr::get($item, 'variant_id')),
                 'is_default_variant' => (bool)Arr::get($item, 'is_default_variant', false),
-                'name' => $this->stringValue(Arr::get($item, 'name', '')),
-                'model' => $this->nullableString(Arr::get($item, 'model')),
-                'sku' => $this->nullableString(Arr::get($item, 'sku')),
-                'ean' => $this->nullableString(Arr::get($item, 'ean')),
-                'quantity' => max(1, $this->integerValue(Arr::get($item, 'quantity', 1))),
+                'name' => string_value(Arr::get($item, 'name', '')),
+                'model' => nullable_string(Arr::get($item, 'model')),
+                'sku' => nullable_string(Arr::get($item, 'sku')),
+                'ean' => nullable_string(Arr::get($item, 'ean')),
+                'quantity' => max(1, integer_value(Arr::get($item, 'quantity', 1))),
                 'discount' => $this->nullableFloat(Arr::get($item, 'discount')),
-                'unit_price' => $this->floatValue(Arr::get($item, 'unit_price', 0)),
-                'line_total' => $this->floatValue(Arr::get($item, 'line_total', 0)),
+                'unit_price' => float_value(Arr::get($item, 'unit_price', 0)),
+                'line_total' => float_value(Arr::get($item, 'line_total', 0)),
             ]);
         }
     }
@@ -182,9 +182,9 @@ final readonly class OrderAggregatePersistenceService
         $sort_order = 1;
         $created_total = false;
 
-        foreach ($this->listValue(Arr::get($totals, 'lines', [])) as $line) {
+        foreach (list_value(Arr::get($totals, 'lines', [])) as $line) {
             $line = is_array($line) ? $line : [];
-            $total_type = $this->resolveTotalType($this->stringValue(Arr::get($line, 'code', '')));
+            $total_type = $this->resolveTotalType(string_value(Arr::get($line, 'code', '')));
 
             if ($total_type === null) {
                 continue;
@@ -192,8 +192,8 @@ final readonly class OrderAggregatePersistenceService
 
             $order->totals()->create([
                 'total_type' => $total_type,
-                'name' => $this->stringValue(Arr::get($line, 'label', $total_type->value)),
-                'value' => $this->floatValue(Arr::get($line, 'amount', 0)),
+                'name' => string_value(Arr::get($line, 'label', $total_type->value)),
+                'value' => float_value(Arr::get($line, 'amount', 0)),
                 'sort_order' => $sort_order++,
             ]);
             $created_total = true;
@@ -206,7 +206,7 @@ final readonly class OrderAggregatePersistenceService
         $order->totals()->create([
             'total_type' => TotalTypesEnum::Total,
             'name' => TotalTypesEnum::Total->value,
-            'value' => $this->floatValue(Arr::get($totals, 'grand_total', 0)),
+            'value' => float_value(Arr::get($totals, 'grand_total', 0)),
             'sort_order' => 1,
         ]);
     }
@@ -216,22 +216,22 @@ final readonly class OrderAggregatePersistenceService
      */
     private function createShipping(Orders $order, array $validated_data, string $locale): void
     {
-        $city = $this->stringKeyedArray(Arr::get($validated_data, 'city', []));
-        $delivery_point = $this->stringKeyedArray(Arr::get($validated_data, OrderDataKeyEnum::DeliveryPoint->value, []));
+        $city = string_keyed_array(Arr::get($validated_data, 'city', []));
+        $delivery_point = string_keyed_array(Arr::get($validated_data, OrderDataKeyEnum::DeliveryPoint->value, []));
         $city_id = Arr::get($city, 'nova_poshta_city_id') ?: Arr::get($city, 'ukr_poshta_city_id');
         $delivery_point_id = Arr::get($delivery_point, 'ref') ?: Arr::get($delivery_point, 'id');
-        $code = $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value));
+        $code = nullable_string(Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value));
 
         $order->shipping()->create([
             'method' => $this->resolveDeliveryMethodName($code, $locale),
             'code' => $code,
             'is_cost_enabled' => $code !== DeliveryMethodEnum::PickupStore->value,
-            'city' => $this->nullableString(Arr::get($city, 'city_description')),
-            'city_id' => $this->nullableString($city_id),
-            'address' => $this->nullableString(Arr::get($validated_data, OrderDataKeyEnum::DeliveryAddress->value)),
-            'delivery_point' => $this->nullableString(Arr::get($delivery_point, 'description')),
-            'delivery_point_id' => $this->nullableString($delivery_point_id),
-            'postcode' => $this->nullableString(Arr::get($delivery_point, 'postcode')),
+            'city' => nullable_string(Arr::get($city, 'city_description')),
+            'city_id' => nullable_string($city_id),
+            'address' => nullable_string(Arr::get($validated_data, OrderDataKeyEnum::DeliveryAddress->value)),
+            'delivery_point' => nullable_string(Arr::get($delivery_point, 'description')),
+            'delivery_point_id' => nullable_string($delivery_point_id),
+            'postcode' => nullable_string(Arr::get($delivery_point, 'postcode')),
             'provider_data' => $delivery_point !== [] ? $delivery_point : null,
         ]);
     }
@@ -289,7 +289,7 @@ final readonly class OrderAggregatePersistenceService
             return $fallback;
         }
 
-        $localized_name = Str::trim($this->stringValue(Lang::get($translation_key, [], $locale)));
+        $localized_name = Str::trim(string_value(Lang::get($translation_key, [], $locale)));
 
         return $localized_name !== $translation_key ? $localized_name : $fallback;
     }
@@ -306,52 +306,14 @@ final readonly class OrderAggregatePersistenceService
         };
     }
 
-    private function nullableString(mixed $value): ?string
-    {
-        $value = Str::trim($this->stringValue($value));
-
-        return $value !== '' ? $value : null;
-    }
 
     private function nullableInteger(mixed $value): ?int
     {
-        return is_numeric($value) && $this->integerValue($value) > 0 ? $this->integerValue($value) : null;
+        return is_numeric($value) && integer_value($value) > 0 ? integer_value($value) : null;
     }
 
     private function nullableFloat(mixed $value): ?float
     {
-        return is_numeric($value) ? $this->floatValue($value) : null;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    /** @return array<string, mixed> */
-    private function stringKeyedArray(mixed $value): array
-    {
-        if (! is_array($value)) {
-            return [];
-        }
-
-        /** @var array<string, mixed> $value */
-        return $value;
-    }
-
-    /** @return array<int, mixed> */
-    private function listValue(mixed $value): array
-    {
-        return is_array($value) ? array_values($value) : [];
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function floatValue(mixed $value): float
-    {
-        return is_numeric($value) ? (float) $value : 0.0;
+        return is_numeric($value) ? float_value($value) : null;
     }
 }

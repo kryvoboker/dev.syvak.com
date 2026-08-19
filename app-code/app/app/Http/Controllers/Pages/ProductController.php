@@ -105,7 +105,7 @@ class ProductController extends Controller
         $app_settings = get_app_settings();
         $socials = $app_settings?->socials?->all() ?? [];
         $telegram_row = collect((array) Arr::get($socials, $locale, []))
-            ->first(fn (mixed $social_item): bool => $this->stringValue(data_get($social_item, 'social_type')) === 'telegram');
+            ->first(fn (mixed $social_item): bool => string_value(data_get($social_item, 'social_type')) === 'telegram');
         $telegram_link = $this->normalizeSocialUrl(data_get($telegram_row, 'url'), $locale);
 
         $data = [
@@ -275,7 +275,7 @@ class ProductController extends Controller
         $path_ids = $target_category->categoryPaths
             ->sortBy('level')
             ->pluck('path_id')
-            ->map(fn (mixed $path_id): int => $this->integerValue($path_id))
+            ->map(fn (mixed $path_id): int => integer_value($path_id))
             ->unique()
             ->values()
             ->all();
@@ -306,8 +306,8 @@ class ProductController extends Controller
                     return null;
                 }
 
-                $category_title = Str::trim($this->stringValue(data_get($category->categoryDescription->first(), 'name')));
-                $category_slug = Str::trim($this->stringValue(data_get($category->slugs->first(), 'slug')));
+                $category_title = Str::trim(string_value(data_get($category->categoryDescription->first(), 'name')));
+                $category_slug = Str::trim(string_value(data_get($category->slugs->first(), 'slug')));
 
                 if (blank($category_title)) {
                     return null;
@@ -343,21 +343,21 @@ class ProductController extends Controller
         array $page_settings_arr,
     ): array {
         $product_meta_data = $this->resolveProductMetaData($product, $variant, $language_id);
-        $product_title = $this->stringValue(Arr::get($product_meta_data, 'name', ''));
-        $product_sku = $this->stringValue($product->sku);
+        $product_title = string_value(Arr::get($product_meta_data, 'name', ''));
+        $product_sku = string_value($product->sku);
         $product_price_data = $this->resolveProductPriceData($product, $variant);
         $formatted_price = replace_currency_symbol_to_code(
             format_price(
                 $product_price_data['price'],
                 $this->nullableStringValue(config('app.currency.current_currency_code')),
-                $this->floatValue(config('app.currency.current_exchange_rate')),
+                float_value(config('app.currency.current_exchange_rate')),
             ),
         );
         $formatted_rrc_price = replace_currency_symbol_to_code(
             format_price(
                 $product_price_data['rrc_price'],
                 $this->nullableStringValue(config('app.currency.current_currency_code')),
-                $this->floatValue(config('app.currency.current_exchange_rate')),
+                float_value(config('app.currency.current_exchange_rate')),
             ),
         );
 
@@ -382,11 +382,11 @@ class ProductController extends Controller
 
         return [
             'title' => $product_title,
-            'description' => escape_special_html($this->stringValue(Arr::get($product_meta_data, 'description', ''))),
+            'description' => escape_special_html(string_value(Arr::get($product_meta_data, 'description', ''))),
             // In HTML the short_description is not decoded!
-            'meta_title' => Str::trim(strip_tags($this->stringValue(Arr::get($product_meta_data, 'meta_title', '')))),
-            'meta_description' => Str::trim(strip_tags($this->stringValue(Arr::get($product_meta_data, 'meta_description', '')))),
-            'meta_keywords' => Str::trim(strip_tags($this->stringValue(Arr::get($product_meta_data, 'meta_keywords', '')))),
+            'meta_title' => Str::trim(strip_tags(string_value(Arr::get($product_meta_data, 'meta_title', '')))),
+            'meta_description' => Str::trim(strip_tags(string_value(Arr::get($product_meta_data, 'meta_description', '')))),
+            'meta_keywords' => Str::trim(strip_tags(string_value(Arr::get($product_meta_data, 'meta_keywords', '')))),
             'sku' => $product_sku,
             'price_formatted' => $formatted_price,
             'rrc_price_formatted' => $formatted_rrc_price,
@@ -463,10 +463,10 @@ class ProductController extends Controller
         }
 
         $text_fields = [
-            Str::trim($this->stringValue(Arr::get($translation_data, 'title', ''))),
-            Str::trim($this->stringValue(Arr::get($translation_data, 'short_description', ''))),
-            Str::trim($this->stringValue(Arr::get($translation_data, 'full_description_title', ''))),
-            Str::trim($this->stringValue(Arr::get($translation_data, 'full_description', ''))),
+            Str::trim(string_value(Arr::get($translation_data, 'title', ''))),
+            Str::trim(string_value(Arr::get($translation_data, 'short_description', ''))),
+            Str::trim(string_value(Arr::get($translation_data, 'full_description_title', ''))),
+            Str::trim(string_value(Arr::get($translation_data, 'full_description', ''))),
         ];
 
         if (collect($text_fields)->contains(fn (string $value): bool => $value !== '')) {
@@ -479,7 +479,7 @@ class ProductController extends Controller
             return true;
         }
 
-        return Str::trim($this->stringValue(Arr::get($translation_data, 'image', ''))) !== '';
+        return Str::trim(string_value(Arr::get($translation_data, 'image', ''))) !== '';
     }
 
     private function hasSizeGuideTableValues(mixed $table_rows): bool
@@ -494,24 +494,24 @@ class ProductController extends Controller
      */
     private function normalizeSizeGuideTranslationPayload(array $translation_data): array
     {
-        $image_path = Str::trim($this->stringValue(Arr::get($translation_data, 'image', '')));
+        $image_path = Str::trim(string_value(Arr::get($translation_data, 'image', '')));
         $image_size = [
-            'width' => max(1, $this->integerValue(Arr::get($translation_data, 'image_width', 1))),
-            'height' => max(1, $this->integerValue(Arr::get($translation_data, 'image_height', 1))),
+            'width' => max(1, integer_value(Arr::get($translation_data, 'image_width', 1))),
+            'height' => max(1, integer_value(Arr::get($translation_data, 'image_height', 1))),
         ];
 
         return [
-            'title' => Str::trim($this->stringValue(Arr::get($translation_data, 'title', ''))),
+            'title' => Str::trim(string_value(Arr::get($translation_data, 'title', ''))),
             // In HTML the short_description is not decoded!
             'short_description' => escape_special_html(
-                Str::trim($this->stringValue(Arr::get($translation_data, 'short_description', ''))),
+                Str::trim(string_value(Arr::get($translation_data, 'short_description', ''))),
             ),
             'table_rows' => $this->normalizeSizeGuideTableRows(Arr::get($translation_data, 'table_rows')),
             'image' => $this->buildImageData($image_path, $image_size),
-            'full_description_title' => Str::trim($this->stringValue(Arr::get($translation_data, 'full_description_title', ''))),
+            'full_description_title' => Str::trim(string_value(Arr::get($translation_data, 'full_description_title', ''))),
             // In HTML the short_description is not decoded!
             'full_description' => escape_special_html(
-                Str::trim($this->stringValue(Arr::get($translation_data, 'full_description', ''))),
+                Str::trim(string_value(Arr::get($translation_data, 'full_description', ''))),
             ),
         ];
     }
@@ -538,7 +538,7 @@ class ProductController extends Controller
                 }
 
                 return collect($cells)
-                    ->map(fn (mixed $cell): string => Str::trim($this->stringValue(is_array($cell) ? Arr::get($cell, 'value', '') : $cell)))
+                    ->map(fn (mixed $cell): string => Str::trim(string_value(is_array($cell) ? Arr::get($cell, 'value', '') : $cell)))
                     ->filter(fn (string $value): bool => $value !== '')
                     ->values()
                     ->all();
@@ -550,7 +550,7 @@ class ProductController extends Controller
 
     private function resolveProductTitle(Product $product, ?ProductVariant $variant, int $language_id): string
     {
-        return $this->stringValue(Arr::get($this->resolveProductMetaData($product, $variant, $language_id), 'name', ''));
+        return string_value(Arr::get($this->resolveProductMetaData($product, $variant, $language_id), 'name', ''));
     }
 
     /**
@@ -573,11 +573,11 @@ class ProductController extends Controller
                 ->first();
 
             if ($variant_description !== null) {
-                $meta_data['name'] = Str::trim($this->stringValue(data_get($variant_description, 'name', '')));
-                $meta_data['description'] = Str::trim($this->stringValue(data_get($variant_description, 'description', '')));
-                $meta_data['meta_title'] = Str::trim($this->stringValue(data_get($variant_description, 'meta_title', '')));
-                $meta_data['meta_description'] = Str::trim($this->stringValue(data_get($variant_description, 'meta_description', '')));
-                $meta_data['meta_keywords'] = Str::trim($this->stringValue(data_get($variant_description, 'meta_keywords', '')));
+                $meta_data['name'] = Str::trim(string_value(data_get($variant_description, 'name', '')));
+                $meta_data['description'] = Str::trim(string_value(data_get($variant_description, 'description', '')));
+                $meta_data['meta_title'] = Str::trim(string_value(data_get($variant_description, 'meta_title', '')));
+                $meta_data['meta_description'] = Str::trim(string_value(data_get($variant_description, 'meta_description', '')));
+                $meta_data['meta_keywords'] = Str::trim(string_value(data_get($variant_description, 'meta_keywords', '')));
             }
         }
 
@@ -586,12 +586,12 @@ class ProductController extends Controller
             ->first();
 
         if ($product_description !== null) {
-            $meta_data['description'] = filled($meta_data['description']) ? $meta_data['description'] : Str::trim($this->stringValue(data_get($product_description, 'description', '')));
-            $meta_data['meta_title'] = filled($meta_data['meta_title']) ? $meta_data['meta_title'] : Str::trim($this->stringValue(data_get($product_description, 'meta_title', '')));
-            $meta_data['meta_description'] = filled($meta_data['meta_description']) ? $meta_data['meta_description'] : Str::trim($this->stringValue(data_get($product_description, 'meta_description', '')));
-            $meta_data['meta_keywords'] = filled($meta_data['meta_keywords']) ? $meta_data['meta_keywords'] : Str::trim($this->stringValue(data_get($product_description, 'meta_keywords', '')));
+            $meta_data['description'] = filled($meta_data['description']) ? $meta_data['description'] : Str::trim(string_value(data_get($product_description, 'description', '')));
+            $meta_data['meta_title'] = filled($meta_data['meta_title']) ? $meta_data['meta_title'] : Str::trim(string_value(data_get($product_description, 'meta_title', '')));
+            $meta_data['meta_description'] = filled($meta_data['meta_description']) ? $meta_data['meta_description'] : Str::trim(string_value(data_get($product_description, 'meta_description', '')));
+            $meta_data['meta_keywords'] = filled($meta_data['meta_keywords']) ? $meta_data['meta_keywords'] : Str::trim(string_value(data_get($product_description, 'meta_keywords', '')));
 
-            $product_name = Str::trim($this->stringValue(data_get($product_description, 'name', '')));
+            $product_name = Str::trim(string_value(data_get($product_description, 'name', '')));
             $meta_data['name'] = filled($meta_data['name']) ? $meta_data['name'] : $product_name;
         }
 
@@ -599,7 +599,7 @@ class ProductController extends Controller
             return $meta_data;
         }
 
-        $meta_data['name'] = Str::trim($this->stringValue($product->model));
+        $meta_data['name'] = Str::trim(string_value($product->model));
 
         return $meta_data;
     }
@@ -680,7 +680,7 @@ class ProductController extends Controller
             $image = Arr::get($image, 'image', Arr::first($image));
         }
 
-        return Str::trim($this->stringValue($image));
+        return Str::trim(string_value($image));
     }
 
     /**
@@ -693,25 +693,25 @@ class ProductController extends Controller
         return [
             'width' => max(
                 1,
-                $this->integerValue(Arr::get(
+                integer_value(Arr::get(
                     $page_settings_arr,
                     'customer.images.product.width',
-                    $this->integerValue(Arr::get(
+                    integer_value(Arr::get(
                         $page_settings_arr,
                         'images.product.width',
-                        $this->integerValue(config('app.page_settings.product.for_customer.image_width', $this->integerValue(config('app.page_settings.product.image_width', 500)))),
+                        integer_value(config('app.page_settings.product.for_customer.image_width', integer_value(config('app.page_settings.product.image_width', 500)))),
                     )),
                 )),
             ),
             'height' => max(
                 1,
-                $this->integerValue(Arr::get(
+                integer_value(Arr::get(
                     $page_settings_arr,
                     'customer.images.product.height',
-                    $this->integerValue(Arr::get(
+                    integer_value(Arr::get(
                         $page_settings_arr,
                         'images.product.height',
-                        $this->integerValue(config('app.page_settings.product.for_customer.image_height', $this->integerValue(config('app.page_settings.product.image_height', 500)))),
+                        integer_value(config('app.page_settings.product.for_customer.image_height', integer_value(config('app.page_settings.product.image_height', 500)))),
                     )),
                 )),
             ),
@@ -725,13 +725,13 @@ class ProductController extends Controller
     {
         return max(
             0,
-            $this->integerValue(Arr::get(
+            integer_value(Arr::get(
                 $page_settings_arr,
                 'customer.stock.minimum_stock_quantity',
-                $this->integerValue(Arr::get(
+                integer_value(Arr::get(
                     $page_settings_arr,
                     'stock.minimum_stock_quantity',
-                    $this->integerValue(config('app.page_settings.product.for_customer.minimum_stock_quantity', $this->integerValue(config('app.page_settings.product.minimum_stock_quantity', 1)))),
+                    integer_value(config('app.page_settings.product.for_customer.minimum_stock_quantity', integer_value(config('app.page_settings.product.minimum_stock_quantity', 1)))),
                 )),
             )),
         );
@@ -833,7 +833,7 @@ class ProductController extends Controller
         $selected_attributes = $selected_variant_data['attributes'];
         $variant_id_order = collect($variant_data)
             ->pluck('variant_id')
-            ->map(fn (mixed $variant_id): int => $this->integerValue($variant_id))
+            ->map(fn (mixed $variant_id): int => integer_value($variant_id))
             ->values()
             ->all();
         $group_data_map = $this->buildGroupValuesData($variant_data, $attribute_name_map);
@@ -850,7 +850,7 @@ class ProductController extends Controller
                 $product_slug,
                 $product
             ): array {
-                $selected_value_normalized = $this->stringValue(data_get($selected_attributes, "$attribute_id.value_normalized", ''));
+                $selected_value_normalized = string_value(data_get($selected_attributes, "$attribute_id.value_normalized", ''));
                 $attribute_name = $group_data['name'];
                 $values_data = $group_data['values'];
                 $values_data = collect($values_data)
@@ -1012,7 +1012,7 @@ class ProductController extends Controller
     ): ?array {
         $candidates = collect($variant_data)
             ->filter(function (array $item) use ($attribute_id, $candidate_value_normalized): bool {
-                $candidate_value = $this->stringValue(data_get($item, "attributes.$attribute_id.value_normalized", ''));
+                $candidate_value = string_value(data_get($item, "attributes.$attribute_id.value_normalized", ''));
 
                 return $candidate_value !== '' && $candidate_value === $candidate_value_normalized;
             })
@@ -1032,10 +1032,10 @@ class ProductController extends Controller
         $scored = $candidates
             ->map(function (array $item) use ($selected_attributes, $attribute_id, $variant_id_order): array {
                 $score = collect($selected_attributes)
-                    ->reject(fn (array $selected_data): bool => $this->integerValue(data_get($selected_data, 'value_id', 0)) === $attribute_id)
+                    ->reject(fn (array $selected_data): bool => integer_value(data_get($selected_data, 'value_id', 0)) === $attribute_id)
                     ->reduce(function (int $carry, array $selected_data, int $selected_attribute_id) use ($item): int {
-                        $selected_value = $this->stringValue($selected_data['value_normalized']);
-                        $candidate_value = $this->stringValue(data_get($item, "attributes.$selected_attribute_id.value_normalized", ''));
+                        $selected_value = string_value($selected_data['value_normalized']);
+                        $candidate_value = string_value(data_get($item, "attributes.$selected_attribute_id.value_normalized", ''));
 
                         if ($selected_value !== '' && $candidate_value !== '' && $selected_value === $candidate_value) {
                             return $carry + 1;
@@ -1047,10 +1047,10 @@ class ProductController extends Controller
                 $order = array_search((int)$item['variant_id'], $variant_id_order, true);
 
                 return [
-                    'variant_id' => $this->integerValue($item['variant_id']),
+                    'variant_id' => integer_value($item['variant_id']),
                     'attributes' => $item['attributes'],
                     'score' => $score,
-                    'order' => $order === false ? PHP_INT_MAX : $this->integerValue($order),
+                    'order' => $order === false ? PHP_INT_MAX : integer_value($order),
                 ];
             })
             ->sortBy([
@@ -1183,7 +1183,7 @@ class ProductController extends Controller
             ];
         }
 
-        $label = Str::trim($this->stringValue(Arr::get($section_data, 'title', '')));
+        $label = Str::trim(string_value(Arr::get($section_data, 'title', '')));
 
         if ($label === '') {
             $label = $default_label;
@@ -1195,10 +1195,10 @@ class ProductController extends Controller
         $items = collect(is_array($items_raw) ? $items_raw : [])
             ->map(function (mixed $item): string {
                 if (is_array($item)) {
-                    return Str::trim($this->stringValue(Arr::get($item, 'value', '')));
+                    return Str::trim(string_value(Arr::get($item, 'value', '')));
                 }
 
-                return Str::trim($this->stringValue($item));
+                return Str::trim(string_value($item));
             })
             ->filter(fn (string $value): bool => $value !== '')
             ->values()
@@ -1210,23 +1210,9 @@ class ProductController extends Controller
         ];
     }
 
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
 
     private function nullableStringValue(mixed $value): ?string
     {
         return is_scalar($value) && filled($value) ? (string) $value : null;
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function floatValue(mixed $value): float
-    {
-        return is_numeric($value) ? (float) $value : 0.0;
     }
 }

@@ -20,7 +20,7 @@ final class PromoCodePersistenceService
      */
     public function prepareForSave(array $data, ?PromoCode $ignore = null): array
     {
-        $code = Str::squish($this->stringValue(Arr::get($data, 'code', '')));
+        $code = Str::squish(string_value(Arr::get($data, 'code', '')));
         $normalized_code = PromoCode::normalizeCode($code);
         $ignore_id = $ignore?->getKey();
 
@@ -45,7 +45,7 @@ final class PromoCodePersistenceService
             ->map(fn (mixed $currency_id): int => (int) $currency_id)
             ->all();
 
-        if ($default_currency === null || ! in_array($this->integerValue($default_currency->getKey()), $discount_currency_ids, true)) {
+        if ($default_currency === null || ! in_array(integer_value($default_currency->getKey()), $discount_currency_ids, true)) {
             throw ValidationException::withMessages([
                 'data.discount_items' => __('admin/marketing/promo_codes.errors.default_currency_required'),
             ]);
@@ -85,7 +85,7 @@ final class PromoCodePersistenceService
             ])->all(),
             'error_messages' => $error_translations
                 ->mapWithKeys(fn (PromoCodeErrorTranslation $translation): array => [
-                    $this->stringValue($translation->language_id) => [
+                    string_value($translation->language_id) => [
                         'expired_message' => $translation->expired_message,
                         'minimum_order_message' => $translation->minimum_order_message,
                         'usage_limit_message' => $translation->usage_limit_message,
@@ -186,7 +186,7 @@ final class PromoCodePersistenceService
         return collect($items)
             ->filter(fn (array $item): bool => filled($item['currency_id'] ?? null))
             ->map(fn (array $item): array => [
-                'currency_id' => $this->integerValue($item['currency_id']),
+                'currency_id' => integer_value($item['currency_id']),
                 'value' => $item['value'] ?? 0,
             ])
             ->unique('currency_id')
@@ -210,13 +210,13 @@ final class PromoCodePersistenceService
                     'expired_message',
                     'minimum_order_message',
                     'usage_limit_message',
-                ])->map(fn (mixed $message): ?string => filled($message) ? Str::squish($this->stringValue($message)) : null)->all();
+                ])->map(fn (mixed $message): ?string => filled($message) ? Str::squish(string_value($message)) : null)->all();
 
                 if (collect($messages)->filter(fn (mixed $message): bool => filled($message))->isEmpty()) {
                     return null;
                 }
 
-                return ['language_id' => $this->integerValue($language_id), ...$messages];
+                return ['language_id' => integer_value($language_id), ...$messages];
             })
             ->filter()
             ->values()
@@ -254,15 +254,5 @@ final class PromoCodePersistenceService
         }
 
         return $rows;
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

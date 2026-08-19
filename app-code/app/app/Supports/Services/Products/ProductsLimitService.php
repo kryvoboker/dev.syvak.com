@@ -13,16 +13,11 @@ class ProductsLimitService
     {
         return max(
             1,
-            self::integerValue(Arr::get(
+            integer_value(Arr::get(
                 $page_setting_settings,
                 'pagination.products_per_page_limit',
-                self::integerValue(config('app.page_settings.category.products_per_page_limit', 20)),
+                integer_value(config('app.page_settings.category.products_per_page_limit', 20)),
             )),
         );
-    }
-
-    private static function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
     }
 }

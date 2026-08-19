@@ -23,9 +23,9 @@ final readonly class InquiryResponseService
     /** @param array<string, mixed> $data */
     public function createAndDeliver(Inquiry $inquiry, array $data): InquiryResponse
     {
-        $body_html = $this->sanitizeHtml($this->stringValue($data['body_html'] ?? ''));
-        $recipient_email = $this->resolveNullableString($inquiry->email);
-        $subject = $this->resolveNullableString($data['subject'] ?? null);
+        $body_html = $this->sanitizeHtml(string_value($data['body_html'] ?? ''));
+        $recipient_email = nullable_string($inquiry->email);
+        $subject = nullable_string($data['subject'] ?? null);
 
         if ($subject === null) {
             throw new InvalidArgumentException('Inquiry response subject is required.');
@@ -34,7 +34,7 @@ final readonly class InquiryResponseService
         $response = $inquiry->responses()->create([
             'subject' => $subject,
             'admin_user_id' => Auth::id(),
-            'admin_name' => $this->resolveNullableString($data['admin_name'] ?? null) ?? 'Адмін',
+            'admin_name' => nullable_string($data['admin_name'] ?? null) ?? 'Адмін',
             'body_html' => $body_html,
             'recipient_email' => $recipient_email,
             'delivery_status' => InquiryResponseDeliveryStatusEnum::NotSent,
@@ -103,20 +103,9 @@ final readonly class InquiryResponseService
         return (new HtmlSanitizer($config))->sanitize($body_html);
     }
 
-    private function resolveNullableString(mixed $value): ?string
-    {
-        $value = Str::trim($this->stringValue($value));
-
-        return $value === '' ? null : $value;
-    }
 
     private function resolveResponseDate(mixed $value): Carbon
     {
-        return filled($value) ? Carbon::parse($this->stringValue($value)) : now();
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
+        return filled($value) ? Carbon::parse(string_value($value)) : now();
     }
 }
