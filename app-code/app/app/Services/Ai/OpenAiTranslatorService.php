@@ -24,12 +24,12 @@ final readonly class OpenAiTranslatorService
     public function translate(string $prompt): string
     {
         $app_settings = get_app_settings();
-        $model = $this->stringValue(data_get($app_settings, 'ai_settings.api_model', $this->stringValue(config('open-ai.api_model'))));
-        $max_tokens = $this->integerValue(data_get($app_settings, 'ai_settings.api_max_tokens', $this->integerValue(config('open-ai.api_max_tokens'))));
-        $system = $this->stringValue(data_get($app_settings, 'ai_settings.system_prompt', $this->stringValue(config('open-ai.system_prompt'))));
-        $max_retries = $this->integerValue(data_get($app_settings, 'ai_settings.api_max_retries', $this->integerValue(config('open-ai.api_max_retries'))));
-        $max_retry_wait_time_seconds = $this->integerValue(data_get($app_settings, 'ai_settings.api_max_retry_wait_time_seconds', $this->integerValue(config('open-ai.api_max_retry_wait_time_seconds'))));
-        $fallback_wait = $this->integerValue(data_get($app_settings, 'ai_settings.api_wait_time_seconds', $this->integerValue(config('open-ai.api_wait_time_seconds'))));
+        $model = string_value(data_get($app_settings, 'ai_settings.api_model', string_value(config('open-ai.api_model'))));
+        $max_tokens = integer_value(data_get($app_settings, 'ai_settings.api_max_tokens', integer_value(config('open-ai.api_max_tokens'))));
+        $system = string_value(data_get($app_settings, 'ai_settings.system_prompt', string_value(config('open-ai.system_prompt'))));
+        $max_retries = integer_value(data_get($app_settings, 'ai_settings.api_max_retries', integer_value(config('open-ai.api_max_retries'))));
+        $max_retry_wait_time_seconds = integer_value(data_get($app_settings, 'ai_settings.api_max_retry_wait_time_seconds', integer_value(config('open-ai.api_max_retry_wait_time_seconds'))));
+        $fallback_wait = integer_value(data_get($app_settings, 'ai_settings.api_wait_time_seconds', integer_value(config('open-ai.api_wait_time_seconds'))));
 
         $attempts = 0;
 
@@ -113,15 +113,5 @@ final readonly class OpenAiTranslatorService
         }
 
         return null;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
     }
 }

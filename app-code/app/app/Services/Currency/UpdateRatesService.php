@@ -24,7 +24,7 @@ class UpdateRatesService
         $json_url = config('app.currency.json_url');
 
         try {
-            $response = Http::timeout(10)->get($this->stringValue($json_url));
+            $response = Http::timeout(10)->get(string_value($json_url));
 
             if ($response->failed()) {
                 Log::channel('stack')->error(__('admin/settings/currencies.error_failed_to_update_rates'), [
@@ -79,10 +79,5 @@ class UpdateRatesService
         });
 
         return null;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

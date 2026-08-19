@@ -14,7 +14,6 @@ use App\Models\Marketing\PromoCode;
 use App\Models\Marketing\PromoCodeDiscount;
 use App\Models\Marketing\PromoCodeUsage;
 use App\Models\Orders\Orders;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -36,7 +35,7 @@ final class PromoCodeService
         ?int $user_group_id = null,
         ?string $locale = null,
     ): array {
-        $code = Str::squish($this->stringValue($code));
+        $code = Str::squish(string_value($code));
 
         if ($code === '') {
             return $totals_data;
@@ -58,16 +57,16 @@ final class PromoCodeService
         );
 
         if (($result['is_valid'] ?? false) !== true) {
-            return $this->reject($totals_data, $this->stringValue($result['error_type'] ?? 'invalid'), $this->stringValue($result['message'] ?? ''));
+            return $this->reject($totals_data, string_value($result['error_type'] ?? 'invalid'), string_value($result['message'] ?? ''));
         }
 
-        $discount_amount = $this->floatValue($result['discount_amount'] ?? 0);
+        $discount_amount = float_value($result['discount_amount'] ?? 0);
 
         if ($discount_amount <= 0) {
             return $totals_data;
         }
 
-        $lines = $this->listValue(Arr::get($totals_data, 'lines', []));
+        $lines = list_value(Arr::get($totals_data, 'lines', []));
         $lines[] = [
             'code' => 'promo_code',
             'label' => __('storefront/default.cart.totals.promo_code', ['promo_code' => $promo_code->code]),
@@ -79,16 +78,16 @@ final class PromoCodeService
         $totals_data['lines'] = $lines;
         $totals_data['promo_code'] = [
             'code' => $promo_code->code,
-            'promo_code_id' => $this->integerValue($promo_code->getKey()),
+            'promo_code_id' => integer_value($promo_code->getKey()),
             'discount_amount' => $discount_amount,
             'discount_amount_formatted' => $this->formatMoney(
                 $discount_amount,
-                $this->stringValue(Arr::get($totals_data, 'currency_code', '')),
-                $this->floatValue(Arr::get($totals_data, 'exchange_rate', 0)),
+                string_value(Arr::get($totals_data, 'currency_code', '')),
+                float_value(Arr::get($totals_data, 'exchange_rate', 0)),
             ),
-            'base_amount' => $this->floatValue($result['base_amount'] ?? 0),
-            'eligible_items_subtotal' => $this->floatValue($result['eligible_items_subtotal'] ?? 0),
-            'rrc_items_subtotal' => $this->floatValue($result['rrc_items_subtotal'] ?? 0),
+            'base_amount' => float_value($result['base_amount'] ?? 0),
+            'eligible_items_subtotal' => float_value($result['eligible_items_subtotal'] ?? 0),
+            'rrc_items_subtotal' => float_value($result['rrc_items_subtotal'] ?? 0),
             'has_discounted_products' => (bool) ($result['has_discounted_products'] ?? false),
             'is_valid' => true,
         ];
@@ -144,16 +143,16 @@ final class PromoCodeService
             return $this->invalidResult('usage_limit', $this->resolveErrorMessage($promo_code, 'usage_limit', $locale));
         }
 
-        $current_total = $this->floatValue(Arr::get($totals_data, 'grand_total', 0));
+        $current_total = float_value(Arr::get($totals_data, 'grand_total', 0));
         $minimum_order_amount = (float) ($promo_code->minimum_order_amount ?? 0);
 
         if ($current_total < $minimum_order_amount) {
             return $this->invalidResult('minimum_order', $this->resolveErrorMessage($promo_code, 'minimum_order', $locale));
         }
 
-        $currency_code = $this->stringValue(Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code')));
+        $currency_code = string_value(Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code')));
         $item_totals = $this->resolveEligibleItemTotals($promo_code, $cart_items);
-        $non_product_total = max(0, $current_total - $this->floatValue(Arr::get($totals_data, 'items_subtotal', 0)));
+        $non_product_total = max(0, $current_total - float_value(Arr::get($totals_data, 'items_subtotal', 0)));
         $base_amount = (float) $item_totals['eligible_subtotal'] + (float) $non_product_total;
 
         if ($promo_code->promo_type !== PromoCodeTypeEnum::Super && $item_totals['has_discounted_products']) {
@@ -238,8 +237,8 @@ final class PromoCodeService
         $product_categories = $this->resolveProductCategories($cart_items, $category_ids);
 
         foreach ($cart_items as $item) {
-            $current_line_total = $this->floatValue(Arr::get($item, 'line_total', 0));
-            $product_id = $this->integerValue(Arr::get($item, 'product_id', 0));
+            $current_line_total = float_value(Arr::get($item, 'line_total', 0));
+            $product_id = integer_value(Arr::get($item, 'product_id', 0));
             $is_in_scope = ! $has_scope
                 || in_array($product_id, $product_ids, true)
                 || array_intersect($product_categories[$product_id] ?? [], $category_ids) !== [];
@@ -249,7 +248,7 @@ final class PromoCodeService
             }
 
             $is_discounted = (bool) Arr::get($item, 'is_discounted', false);
-            $rrc_line_total = $this->floatValue(Arr::get($item, 'rrc_line_total', $current_line_total));
+            $rrc_line_total = float_value(Arr::get($item, 'rrc_line_total', $current_line_total));
             $eligible_subtotal += $current_line_total;
             $rrc_subtotal += $rrc_line_total;
 
@@ -282,7 +281,7 @@ final class PromoCodeService
             ->get()
             ->toBase()
             ->mapWithKeys(fn (Product $product): array => [
-                $this->integerValue($product->getKey()) => $product->categories->modelKeys(),
+                integer_value($product->getKey()) => $product->categories->modelKeys(),
             ])
             ->all();
     }
@@ -380,10 +379,10 @@ final class PromoCodeService
             ?? (new Currency())->getDefaultActiveCurrency();
         $default_currency = (new Currency())->getDefaultActiveCurrency();
         $discounts = $promo_code->discounts;
-        $discount = $discounts->first(fn (PromoCodeDiscount $item): bool => $this->integerValue($item->currency_id) === $this->integerValue($target_currency?->getKey()));
+        $discount = $discounts->first(fn (PromoCodeDiscount $item): bool => integer_value($item->currency_id) === integer_value($target_currency?->getKey()));
 
         if ($discount === null) {
-            $discount = $discounts->first(fn (PromoCodeDiscount $item): bool => $this->integerValue($item->currency_id) === $this->integerValue($default_currency?->getKey()));
+            $discount = $discounts->first(fn (PromoCodeDiscount $item): bool => integer_value($item->currency_id) === integer_value($default_currency?->getKey()));
         }
 
         if ($discount === null) {
@@ -391,14 +390,14 @@ final class PromoCodeService
         }
 
         if ($promo_code->discount_type === PromoCodeDiscountTypeEnum::Percentage || $target_currency === null || $default_currency === null) {
-            return $this->floatValue($discount->value);
+            return float_value($discount->value);
         }
 
-        if ($this->integerValue($discount->currency_id) === $this->integerValue($target_currency->getKey())) {
-            return $this->floatValue($discount->value);
+        if (integer_value($discount->currency_id) === integer_value($target_currency->getKey())) {
+            return float_value($discount->value);
         }
 
-        return convert_price($this->floatValue($discount->value), $this->stringValue($default_currency->code), $this->stringValue($target_currency->code));
+        return convert_price(float_value($discount->value), string_value($default_currency->code), string_value($target_currency->code));
     }
 
     private function resolveErrorMessage(PromoCode $promo_code, string $error_type, ?string $locale): string
@@ -412,8 +411,8 @@ final class PromoCodeService
         };
 
         return filled($translation?->{$field})
-            ? $this->stringValue($translation->{$field})
-            : $this->stringValue(__('storefront/default.cart.errors.promo_' . $error_type));
+            ? string_value($translation->{$field})
+            : string_value(__('storefront/default.cart.errors.promo_' . $error_type));
     }
 
     /** @return array{is_valid:false,error_type:string,message:string} */
@@ -442,24 +441,6 @@ final class PromoCodeService
         return replace_currency_symbol_to_code(format_price($amount, $currency_code, $exchange_rate));
     }
 
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
 
     /** @return array<int, mixed> */
-    private function listValue(mixed $value): array
-    {
-        return is_array($value) ? array_values($value) : [];
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function floatValue(mixed $value): float
-    {
-        return is_numeric($value) ? (float) $value : 0.0;
-    }
 }

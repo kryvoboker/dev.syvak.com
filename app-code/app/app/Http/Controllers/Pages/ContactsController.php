@@ -215,12 +215,12 @@ class ContactsController extends Controller
                 'categories' => $header_data['categories'],
             ]),
             'page_type' => config('page-settings.page_type.contacts', 'contacts'),
-            'page_title' => $this->stringValue(data_get($contacts_data, 'title')),
+            'page_title' => string_value(data_get($contacts_data, 'title')),
             'contacts_data' => $contacts_data,
             'form_action' => localized_route($form_route_name, $form_route_params),
             'breadcrumbs' => [
                 breadcrumb(__('storefront/default.links.home'), localized_route('catalog.home')),
-                breadcrumb($this->stringValue(data_get($contacts_data, 'title', __('storefront/contacts.fallbacks.title')))),
+                breadcrumb(string_value(data_get($contacts_data, 'title', __('storefront/contacts.fallbacks.title')))),
             ],
         ];
 
@@ -307,10 +307,5 @@ class ContactsController extends Controller
                 ->withErrors(['contact_form' => __('storefront/contacts.errors.delivery_failed')])
                 ->withInput($request->except('file'));
         }
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

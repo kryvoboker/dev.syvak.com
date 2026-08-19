@@ -35,13 +35,13 @@ final readonly class ImageUrlBuilderService
     {
         $total_sizes_for_generate = max(
             1,
-            $this->integerValue(data_get(
+            integer_value(data_get(
                 get_app_settings(),
                 'system_settings.images.total_sizes_for_generate',
-                $this->integerValue(config('app.images.total_sizes_for_generate', 4)),
+                integer_value(config('app.images.total_sizes_for_generate', 4)),
             )),
         );
-        $path = $this->stringValue($path);
+        $path = string_value($path);
         $height ??= $width;
 
         $this->checkSourceImage($path);
@@ -67,7 +67,7 @@ final readonly class ImageUrlBuilderService
      */
     public function url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): string
     {
-        $path = $this->stringValue($path);
+        $path = string_value($path);
         $height ??= $width;
         $path = Str::ltrim($path, '/');
 
@@ -75,8 +75,8 @@ final readonly class ImageUrlBuilderService
 
         if (
             Storage::fileExists($path) === false ||
-            $width > $this->integerValue(data_get(get_app_settings(), 'system_settings.images.max_image_width_for_convert', $this->integerValue(config('app.images.max_image_width_for_convert', 2500)))) ||
-            $height > $this->integerValue(data_get(get_app_settings(), 'system_settings.images.max_image_height_for_convert', $this->integerValue(config('app.images.max_image_height_for_convert', 2500))))
+            $width > integer_value(data_get(get_app_settings(), 'system_settings.images.max_image_width_for_convert', integer_value(config('app.images.max_image_width_for_convert', 2500)))) ||
+            $height > integer_value(data_get(get_app_settings(), 'system_settings.images.max_image_height_for_convert', integer_value(config('app.images.max_image_height_for_convert', 2500))))
         ) {
             return $this->assetVersioned($path);
         }
@@ -173,10 +173,10 @@ final readonly class ImageUrlBuilderService
     private function checkSourceImage(string &$path): void
     {
         if (Storage::fileExists($path) === false) {
-            $path = $this->stringValue(data_get(
+            $path = string_value(data_get(
                 get_app_settings(),
                 'system_settings.images.default_no_image',
-                $this->stringValue(config('app.images.default_no_image', 'images/no-image.png')),
+                string_value(config('app.images.default_no_image', 'images/no-image.png')),
             ));
         }
     }
@@ -185,16 +185,16 @@ final readonly class ImageUrlBuilderService
     {
         $supported_formats = $this->request->header('X-Supported-Image-Formats', '');
         $formats_array = explode(',', $supported_formats);
-        $accept = $this->stringValue($this->request->header('Accept', ''));
+        $accept = string_value($this->request->header('Accept', ''));
 
         return Str::contains($accept, $mime) || Arr::some($formats_array, function (mixed $format) use ($mime): bool {
-            return Str::contains($mime, $this->stringValue($format));
+            return Str::contains($mime, string_value($format));
         });
     }
 
     private function assetVersioned(string $public_relative): string
     {
-        $v = $this->stringValue(config('app.images.image_version'));
+        $v = string_value(config('app.images.image_version'));
         $url = asset("storage/$public_relative");
 
         // Add version to query string
@@ -291,7 +291,7 @@ final readonly class ImageUrlBuilderService
                     $image_obj->resizeCanvas($w, $h, $bg_color);
                 }
 
-                $image_obj->save($dst, $this->integerValue(data_get(get_app_settings(), 'system_settings.images.prototype_quality', $this->integerValue(config('app.images.prototype_quality', 100)))));
+                $image_obj->save($dst, integer_value(data_get(get_app_settings(), 'system_settings.images.prototype_quality', integer_value(config('app.images.prototype_quality', 100)))));
 
                 return;
             }
@@ -299,7 +299,7 @@ final readonly class ImageUrlBuilderService
             // Non-square: use cover to fill the dimensions
             $image_obj
                 ->cover($w, $h)
-                ->save($dst, $this->integerValue(data_get(get_app_settings(), 'system_settings.images.prototype_quality', $this->integerValue(config('app.images.prototype_quality', 100)))));
+                ->save($dst, integer_value(data_get(get_app_settings(), 'system_settings.images.prototype_quality', integer_value(config('app.images.prototype_quality', 100)))));
         } catch (Exception $e) {
             Log::channel('images')->error($e->getMessage(), [
                 'line' => $e->getLine(),
@@ -307,15 +307,5 @@ final readonly class ImageUrlBuilderService
                 'code' => $e->getCode(),
             ]);
         }
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

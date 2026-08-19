@@ -49,11 +49,11 @@ class FastOrderValidateRequest extends FormRequest
     {
         $normalized_data = $this->all();
 
-        Arr::set($normalized_data, 'first_name', Str::trim($this->stringValue($this->input('first_name', ''))));
-        Arr::set($normalized_data, 'last_name', Str::trim($this->stringValue($this->input('last_name', ''))));
-        Arr::set($normalized_data, 'phone', Str::trim($this->stringValue($this->input('phone', ''))));
+        Arr::set($normalized_data, 'first_name', Str::trim(string_value($this->input('first_name', ''))));
+        Arr::set($normalized_data, 'last_name', Str::trim(string_value($this->input('last_name', ''))));
+        Arr::set($normalized_data, 'phone', Str::trim(string_value($this->input('phone', ''))));
         Arr::set($normalized_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value);
-        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower($this->stringValue($this->input(OrderDataKeyEnum::PaymentMethod->value, ''))));
+        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower(string_value($this->input(OrderDataKeyEnum::PaymentMethod->value, ''))));
 
         $this->replace($normalized_data);
     }
@@ -61,7 +61,7 @@ class FastOrderValidateRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            $payment_method = $this->stringValue($this->input(OrderDataKeyEnum::PaymentMethod->value, ''));
+            $payment_method = string_value($this->input(OrderDataKeyEnum::PaymentMethod->value, ''));
 
             $is_supported_payment_method = in_array(
                 $payment_method,
@@ -89,10 +89,5 @@ class FastOrderValidateRequest extends FormRequest
                 );
             }
         });
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

@@ -49,7 +49,7 @@ final readonly class FailureOrderRecoveryService
         $this->request->session()->put(self::SESSION_KEY, [
             'order_number' => (string) $order->order_number,
             'order_type' => $order->order_type->value,
-            'retry_count' => $this->integerValue($this->request->session()->get(self::SESSION_KEY . '.retry_count', 0)),
+            'retry_count' => integer_value($this->request->session()->get(self::SESSION_KEY . '.retry_count', 0)),
         ]);
     }
 
@@ -77,7 +77,7 @@ final readonly class FailureOrderRecoveryService
 
     public function resolveOrder(): ?Orders
     {
-        $order_number = $this->stringValue(Arr::get($this->getState(), 'order_number', ''));
+        $order_number = string_value(Arr::get($this->getState(), 'order_number', ''));
 
         if ($order_number === '') {
             return null;
@@ -91,7 +91,7 @@ final readonly class FailureOrderRecoveryService
 
     public function getRetryPaymentMethod(): string
     {
-        return $this->stringValue($this->resolveOrder()?->payments->sortByDesc('id')->first()?->code);
+        return string_value($this->resolveOrder()?->payments->sortByDesc('id')->first()?->code);
     }
 
     /** @return array<string, mixed> */
@@ -159,7 +159,7 @@ final readonly class FailureOrderRecoveryService
             $this->order_lifecycle_service->transitionOrderForPayment($order, OrderLifecycleService::PAYMENT_STATUS_PAID, [
                 'payment_id' => $payment->getKey(),
             ]);
-            $this->cart_service->clearCart($this->stringValue(Arr::get($this->getState(), 'order_type', CartModeEnum::Regular->value)));
+            $this->cart_service->clearCart(string_value(Arr::get($this->getState(), 'order_type', CartModeEnum::Regular->value)));
             $this->forget();
 
             return [
@@ -198,7 +198,7 @@ final readonly class FailureOrderRecoveryService
     private function incrementRetryCount(): void
     {
         if ($this->request->hasSession()) {
-            $retry_count = $this->integerValue($this->request->session()->get(self::SESSION_KEY . '.retry_count', 0));
+            $retry_count = integer_value($this->request->session()->get(self::SESSION_KEY . '.retry_count', 0));
             $this->request->session()->put(self::SESSION_KEY . '.retry_count', $retry_count + 1);
         }
     }
@@ -221,44 +221,46 @@ final readonly class FailureOrderRecoveryService
         return collect($methods)->contains(
             fn (array $method): bool =>
             (bool) Arr::get($method, 'is_available', false)
-            && $this->stringValue(Arr::get($method, 'payment_method')) === $payment_method,
+            && string_value(Arr::get($method, 'payment_method')) === $payment_method,
         );
     }
 
-    /** @return array<string, mixed> */
-    /** @psalm-suppress InvalidTemplateParam */
+    /**
+     * @return array<string, mixed>
+     * @psalm-suppress InvalidTemplateParam
+     */
     private function buildOrderPayload(Orders $order, string $payment_method, string $locale): array
     {
         $items = $order->products->map(fn (mixed $product): array => [
-            'name' => $this->stringValue($product->name),
+            'name' => string_value($product->name),
             'unit_price' => (float) $product->unit_price,
             'quantity' => (int) $product->quantity,
             'line_total' => (float) $product->line_total,
         ])->values()->all();
         $totals = $order->totals->map(fn (mixed $total): array => [
-            'code' => $this->stringValue(data_get($total, 'total_type.value', $total->total_type)),
-            'label' => $this->stringValue($total->name),
+            'code' => string_value(data_get($total, 'total_type.value', $total->total_type)),
+            'label' => string_value($total->name),
             'amount' => (float) $total->value,
         ])->values()->all();
 
         return [
-            'order_number' => $this->stringValue($order->order_number),
+            'order_number' => string_value($order->order_number),
             'customer' => [
-                'first_name' => $this->stringValue($order->customer?->first_name),
-                'last_name' => $this->stringValue($order->customer?->last_name),
-                'email' => $this->stringValue($order->customer?->email),
-                'phone' => $this->stringValue($order->customer?->telephone),
+                'first_name' => string_value($order->customer?->first_name),
+                'last_name' => string_value($order->customer?->last_name),
+                'email' => string_value($order->customer?->email),
+                'phone' => string_value($order->customer?->telephone),
             ],
             'delivery' => [
-                'method' => $this->stringValue($order->shipping?->code),
-                'address' => $this->stringValue($order->shipping?->address),
+                'method' => string_value($order->shipping?->code),
+                'address' => string_value($order->shipping?->address),
             ],
             'cart' => [
                 'items' => $items,
                 'totals' => [
                     'lines' => $totals,
                     'grand_total' => (float) $order->total,
-                    'currency_code' => $this->stringValue($order->currency_code),
+                    'currency_code' => string_value($order->currency_code),
                 ],
             ],
             'locale' => $locale,
@@ -295,15 +297,5 @@ final readonly class FailureOrderRecoveryService
         }
 
         return $errors;
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

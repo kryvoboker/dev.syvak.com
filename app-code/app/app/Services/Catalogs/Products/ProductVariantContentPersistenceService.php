@@ -92,14 +92,14 @@ final class ProductVariantContentPersistenceService
 
                 $row = [
                     'language_id' => (int) $language_id,
-                    'short_title' => $this->stringValue($translation['title'] ?? null),
-                    'short_description' => $this->stringValue($translation['short_description'] ?? null),
-                    'table_rows' => $this->stringValue($translation['table_rows'] ?? null),
-                    'image' => $this->stringValue($translation['image'] ?? null),
+                    'short_title' => string_value($translation['title'] ?? null),
+                    'short_description' => string_value($translation['short_description'] ?? null),
+                    'table_rows' => string_value($translation['table_rows'] ?? null),
+                    'image' => string_value($translation['image'] ?? null),
                     'image_width' => $this->nullableInteger($translation['image_width'] ?? null),
                     'image_height' => $this->nullableInteger($translation['image_height'] ?? null),
-                    'full_description_title' => $this->stringValue($translation['full_description_title'] ?? null),
-                    'full_description' => $this->stringValue($translation['full_description'] ?? null),
+                    'full_description_title' => string_value($translation['full_description_title'] ?? null),
+                    'full_description' => string_value($translation['full_description'] ?? null),
                 ];
 
                 return collect($row)
@@ -131,10 +131,10 @@ final class ProductVariantContentPersistenceService
                 $section_data = Arr::get($translation, $section, []);
                 $items = collect((array) (is_array($section_data) ? ($section_data['items'] ?? []) : []))
                     ->filter(fn (mixed $item): bool => is_array($item) && filled($item['value'] ?? null))
-                    ->map(fn (array $item): array => ['value' => Str::trim($this->stringValue($item['value']))])
+                    ->map(fn (array $item): array => ['value' => Str::trim(string_value($item['value']))])
                     ->values()
                     ->all();
-                $title = $this->stringValue(is_array($section_data) ? ($section_data['title'] ?? null) : null);
+                $title = string_value(is_array($section_data) ? ($section_data['title'] ?? null) : null);
 
                 if ($title === '' && $items === []) {
                     return null;
@@ -179,10 +179,6 @@ final class ProductVariantContentPersistenceService
         return $translations;
     }
 
-    private function stringValue(mixed $value): string
-    {
-        return Str::trim(is_scalar($value) ? (string) $value : '');
-    }
 
     private function nullableInteger(mixed $value): ?int
     {

@@ -49,7 +49,7 @@ readonly class OrderCreationService
      */
     public function validateFastOrderData(array $validated_data, string $locale): array
     {
-        $cart_mode = $this->stringValue(Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value));
+        $cart_mode = string_value(Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value));
         $cart_data = $this->cart_service->getSnapshot($locale, $cart_mode);
 
         if ((bool) Arr::get($cart_data, 'is_empty', true) === true) {
@@ -81,22 +81,22 @@ readonly class OrderCreationService
                 'success' => false,
                 'order_number' => null,
                 'redirect_url' => localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
-                'errors' => $this->stringKeyedArray(Arr::get($validation_result, 'errors', [])),
+                'errors' => string_keyed_array(Arr::get($validation_result, 'errors', [])),
             ];
         }
 
-        $payment_method = $this->stringValue(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, PaymentMethodEnum::CashOnDelivery->value));
+        $payment_method = string_value(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, PaymentMethodEnum::CashOnDelivery->value));
 
         try {
             $persisted_order = $this->order_aggregate_persistence_service->createSimpleOrder(
                 $validated_data,
-                $this->stringKeyedArray(Arr::get($validation_result, 'cart', [])),
+                string_keyed_array(Arr::get($validation_result, 'cart', [])),
                 $locale,
                 $this->resolveRequestContext(),
             );
             $order = $persisted_order['order'];
             $payment = $persisted_order['payment'];
-            $order_number = $this->stringValue($order->order_number);
+            $order_number = string_value($order->order_number);
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[OrderCreationService.createFastOrder] order persistence failed', [
                 'flow' => CartModeEnum::FastOrder->value,
@@ -117,11 +117,11 @@ readonly class OrderCreationService
         $order_payload = [
             'order_number' => $order_number,
             'customer' => [
-                'first_name' => $this->stringValue(Arr::get($validated_data, 'first_name', '')),
-                'last_name' => $this->stringValue(Arr::get($validated_data, 'last_name', '')),
-                'phone' => clear_telephone($this->stringValue(Arr::get($validated_data, 'phone', ''))),
+                'first_name' => string_value(Arr::get($validated_data, 'first_name', '')),
+                'last_name' => string_value(Arr::get($validated_data, 'last_name', '')),
+                'phone' => clear_telephone(string_value(Arr::get($validated_data, 'phone', ''))),
             ],
-            'cart' => $this->stringKeyedArray(Arr::get($validation_result, 'cart', [])),
+            'cart' => string_keyed_array(Arr::get($validation_result, 'cart', [])),
             'locale' => $locale,
             OrderDataKeyEnum::PaymentMethod->value => $payment_method,
         ];
@@ -135,8 +135,8 @@ readonly class OrderCreationService
         $is_success = (bool) Arr::get($payment_result, 'is_success', false);
 
         if ($is_success === true) {
-            $this->cart_service->clearCart($this->stringValue(Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value)));
-            $this->consumePromoCode($this->stringKeyedArray(Arr::get($validation_result, 'cart', [])), $order);
+            $this->cart_service->clearCart(string_value(Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value)));
+            $this->consumePromoCode(string_keyed_array(Arr::get($validation_result, 'cart', [])), $order);
 
             return [
                 'success' => true,
@@ -150,7 +150,7 @@ readonly class OrderCreationService
             ];
         }
 
-        $this->markPaymentFailed($payment, $this->stringKeyedArray(Arr::get($payment_result, 'errors', [])));
+        $this->markPaymentFailed($payment, string_keyed_array(Arr::get($payment_result, 'errors', [])));
         $this->failure_order_recovery_service?->remember($order);
 
         // Keep cart untouched for failed payment flow.
@@ -221,29 +221,29 @@ readonly class OrderCreationService
             return [
                 'success' => false,
                 'status' => 'failed',
-                'errors' => $this->stringKeyedArray(Arr::get($validation_result, 'errors', [])),
+                'errors' => string_keyed_array(Arr::get($validation_result, 'errors', [])),
             ];
         }
 
-        $payment_method = $this->stringValue(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, ''));
+        $payment_method = string_value(Arr::get($validated_data, OrderDataKeyEnum::PaymentMethod->value, ''));
 
         if (Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value) === PickupConfig::DELIVERY_METHOD) {
             $pickup_data = $this->pickup_checkout_data_service->getCheckoutData($locale);
             $validated_data['city'] = [];
             $validated_data[OrderDataKeyEnum::DeliveryPoint->value] = [];
-            $validated_data[OrderDataKeyEnum::DeliveryAddress->value] = $this->stringValue(Arr::get($pickup_data, 'store_address', ''));
+            $validated_data[OrderDataKeyEnum::DeliveryAddress->value] = string_value(Arr::get($pickup_data, 'store_address', ''));
         }
 
         try {
             $persisted_order = $this->order_aggregate_persistence_service->createSimpleOrder(
                 $validated_data,
-                $this->stringKeyedArray(Arr::get($validation_result, 'cart', [])),
+                string_keyed_array(Arr::get($validation_result, 'cart', [])),
                 $locale,
                 $this->resolveRequestContext(),
             );
             $order = $persisted_order['order'];
             $payment = $persisted_order['payment'];
-            $order_number = $this->stringValue($order->order_number);
+            $order_number = string_value($order->order_number);
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[OrderCreationService.createSimpleOrder] order persistence failed', [
                 'flow' => CartModeEnum::Regular->value,
@@ -264,16 +264,16 @@ readonly class OrderCreationService
         $order_payload = [
             'order_number' => $order_number,
             'customer' => [
-                'first_name' => $this->stringValue(Arr::get($validated_data, 'first_name', '')),
-                'last_name' => $this->stringValue(Arr::get($validated_data, 'last_name', '')),
-                'email' => $this->stringValue(Arr::get($validated_data, 'email', '')),
-                'phone' => clear_telephone($this->stringValue(Arr::get($validated_data, 'phone', ''))),
+                'first_name' => string_value(Arr::get($validated_data, 'first_name', '')),
+                'last_name' => string_value(Arr::get($validated_data, 'last_name', '')),
+                'email' => string_value(Arr::get($validated_data, 'email', '')),
+                'phone' => clear_telephone(string_value(Arr::get($validated_data, 'phone', ''))),
             ],
             'delivery' => [
-                'method' => $this->stringValue(Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value, '')),
-                'address' => $this->stringValue(Arr::get($validated_data, OrderDataKeyEnum::DeliveryAddress->value, '')),
+                'method' => string_value(Arr::get($validated_data, OrderDataKeyEnum::DeliveryMethod->value, '')),
+                'address' => string_value(Arr::get($validated_data, OrderDataKeyEnum::DeliveryAddress->value, '')),
             ],
-            'cart' => $this->stringKeyedArray(Arr::get($validation_result, 'cart', [])),
+            'cart' => string_keyed_array(Arr::get($validation_result, 'cart', [])),
             'locale' => $locale,
                 OrderDataKeyEnum::PaymentMethod->value => $payment_method,
             'return_url' => route($this->wayforpay_config->getReturnRouteName(), ['locale' => $locale]),
@@ -284,7 +284,7 @@ readonly class OrderCreationService
             $payment_result = $this->wayforpay_payment_module->prepare($order_payload);
 
             if ($payment_result['success'] !== true) {
-                $this->markPaymentFailed($payment, $this->stringKeyedArray(Arr::get($payment_result, 'errors', [])));
+                $this->markPaymentFailed($payment, string_keyed_array(Arr::get($payment_result, 'errors', [])));
                 $this->failure_order_recovery_service?->remember($order);
 
                 return [
@@ -292,7 +292,7 @@ readonly class OrderCreationService
                     'order_number' => $order_number,
                     'redirect_url' => localized_route('localized.catalog.failure-order.index', ['locale' => $locale]),
                     'status' => 'failed',
-                    'errors' => $this->stringKeyedArray(Arr::get($payment_result, 'errors', [])),
+                    'errors' => string_keyed_array(Arr::get($payment_result, 'errors', [])),
                 ];
             }
 
@@ -314,7 +314,7 @@ readonly class OrderCreationService
 
         if ((bool) Arr::get($payment_result, 'is_success', false) === true) {
             $this->cart_service->clearCart(CartModeEnum::Regular->value);
-            $this->consumePromoCode($this->stringKeyedArray(Arr::get($validation_result, 'cart', [])), $order);
+            $this->consumePromoCode(string_keyed_array(Arr::get($validation_result, 'cart', [])), $order);
 
             return [
                 'success' => true,
@@ -329,7 +329,7 @@ readonly class OrderCreationService
             ];
         }
 
-        $this->markPaymentFailed($payment, $this->stringKeyedArray(Arr::get($payment_result, 'errors', [])));
+        $this->markPaymentFailed($payment, string_keyed_array(Arr::get($payment_result, 'errors', [])));
         $this->failure_order_recovery_service?->remember($order);
 
         return [
@@ -396,9 +396,9 @@ readonly class OrderCreationService
             return;
         }
 
-        $promo_code = $this->promo_code_service->resolve($this->stringValue(Arr::get($cart_data, 'totals.promo_code.code', '')));
+        $promo_code = $this->promo_code_service->resolve(string_value(Arr::get($cart_data, 'totals.promo_code.code', '')));
 
-        if ($promo_code === null || $this->integerValue($promo_code->getKey()) !== $this->integerValue($promo_code_id)) {
+        if ($promo_code === null || integer_value($promo_code->getKey()) !== integer_value($promo_code_id)) {
             return;
         }
 
@@ -421,24 +421,6 @@ readonly class OrderCreationService
         }
     }
 
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
 
     /** @return array<string, mixed> */
-    private function stringKeyedArray(mixed $value): array
-    {
-        if (! is_array($value)) {
-            return [];
-        }
-
-        /** @var array<string, mixed> $value */
-        return $value;
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
 }

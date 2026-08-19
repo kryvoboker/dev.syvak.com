@@ -27,7 +27,7 @@ final class PromoCodeAdminOptionsService
             ->get()
             ->toBase()
             ->mapWithKeys(fn (Currency $currency): array => [
-                $this->stringValue($currency->getKey()) => sprintf(
+                string_value($currency->getKey()) => sprintf(
                     '%s — %s%s',
                     $currency->code,
                     $currency->name,
@@ -64,7 +64,7 @@ final class PromoCodeAdminOptionsService
             ->limit(50)
             ->get()
             ->mapWithKeys(fn (User $user): array => [
-                $this->stringValue($user->getKey()) => Str::squish(sprintf('%s %s — %s', $user->name, $user->lastname, $user->email)),
+                string_value($user->getKey()) => Str::squish(sprintf('%s %s — %s', $user->name, $user->lastname, $user->email)),
             ])
             ->all();
     }
@@ -75,7 +75,7 @@ final class PromoCodeAdminOptionsService
             return null;
         }
 
-        $user = User::query()->find($this->integerValue($id));
+        $user = User::query()->find(integer_value($id));
 
         return $user instanceof User
             ? Str::squish(sprintf('%s (%s)', $user->name, $user->email ?? ''))
@@ -91,7 +91,7 @@ final class PromoCodeAdminOptionsService
             ->where('is_active', true)
             ->orderBy('name')
             ->pluck('name', 'id')
-            ->mapWithKeys(fn (mixed $name, mixed $id): array => [$this->stringValue($id) => $this->stringValue($name)])
+            ->mapWithKeys(fn (mixed $name, mixed $id): array => [string_value($id) => string_value($name)])
             ->all();
     }
 
@@ -111,7 +111,7 @@ final class PromoCodeAdminOptionsService
             ->orderBy('name')
             ->limit(50)
             ->pluck('name', 'id')
-            ->mapWithKeys(fn (mixed $name, mixed $id): array => [$this->stringValue($id) => $this->stringValue($name)])
+            ->mapWithKeys(fn (mixed $name, mixed $id): array => [string_value($id) => string_value($name)])
             ->all();
     }
 
@@ -123,14 +123,14 @@ final class PromoCodeAdminOptionsService
 
         $name = UserGroup::query()->whereKey((int) $id)->value('name');
 
-        return $name === null ? null : $this->stringValue($name);
+        return $name === null ? null : string_value($name);
     }
 
     public function defaultCurrencyId(): ?int
     {
         $currency = (new Currency())->getDefaultActiveCurrency();
 
-        return $currency === null ? null : $this->integerValue($currency->getKey());
+        return $currency === null ? null : integer_value($currency->getKey());
     }
 
     /**
@@ -142,7 +142,7 @@ final class PromoCodeAdminOptionsService
      */
     public function productSearchOptions(string $search, array $excluded_ids = []): array
     {
-        $language_id = $this->integerValue(resolve_language_by_locale(app()->getLocale())?->id);
+        $language_id = integer_value(resolve_language_by_locale(app()->getLocale())?->id);
         $active_language_ids = Language::query()->where('is_active', true)->pluck('id');
 
         return Product::query()
@@ -163,13 +163,13 @@ final class PromoCodeAdminOptionsService
             ->orderBy('id')
             ->limit(50)
             ->get()
-            ->mapWithKeys(fn (Product $product): array => [$this->stringValue($product->getKey()) => $this->productLabel($product)])
+            ->mapWithKeys(fn (Product $product): array => [string_value($product->getKey()) => $this->productLabel($product)])
             ->all();
     }
 
     public function productLabel(Product $product): string
     {
-        $name = Str::trim($this->stringValue($product->productDescription->first()?->name));
+        $name = Str::trim(string_value($product->productDescription->first()?->name));
         $identifiers = collect([$product->sku, $product->model, $product->ean])
             ->filter(fn (mixed $value): bool => filled($value))
             ->implode(' / ');
@@ -186,7 +186,7 @@ final class PromoCodeAdminOptionsService
      */
     public function categorySearchOptions(string $search, array $excluded_ids = []): array
     {
-        $language_id = $this->integerValue(resolve_language_by_locale(app()->getLocale())?->id);
+        $language_id = integer_value(resolve_language_by_locale(app()->getLocale())?->id);
         $active_language_ids = Language::query()->where('is_active', true)->pluck('id');
 
         return Category::query()
@@ -203,7 +203,7 @@ final class PromoCodeAdminOptionsService
             ->limit(50)
             ->get()
             ->mapWithKeys(fn (Category $category): array => [
-                $this->stringValue($category->getKey()) => Str::trim($this->stringValue($category->categoryDescription->first()?->name)),
+                string_value($category->getKey()) => Str::trim(string_value($category->categoryDescription->first()?->name)),
             ])
             ->all();
     }
@@ -218,7 +218,7 @@ final class PromoCodeAdminOptionsService
             ->with(['productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                 $query->where('language_id', resolve_language_by_locale(app()->getLocale())?->id);
             }])
-            ->find($this->integerValue($id));
+            ->find(integer_value($id));
 
         return $product instanceof Product ? $this->productLabel($product) : null;
     }
@@ -233,20 +233,10 @@ final class PromoCodeAdminOptionsService
             ->with(['categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                 $query->where('language_id', resolve_language_by_locale(app()->getLocale())?->id);
             }])
-            ->find($this->integerValue($id));
+            ->find(integer_value($id));
 
         return $category instanceof Category
-            ? Str::trim($this->stringValue($category->categoryDescription->first()?->name))
+            ? Str::trim(string_value($category->categoryDescription->first()?->name))
             : null;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
     }
 }

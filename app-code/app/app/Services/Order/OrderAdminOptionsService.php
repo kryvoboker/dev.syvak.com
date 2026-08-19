@@ -79,7 +79,7 @@ final class OrderAdminOptionsService
                     ->where('code', app()->getLocale()))
                 ->value('name');
 
-        return $this->stringValue($name)
+        return string_value($name)
             ?: $this->translate('admin/orders/orders.statuses.unnamed', 'Unnamed status');
     }
 
@@ -217,7 +217,7 @@ final class OrderAdminOptionsService
             ->get(['id', 'name'])
             ->toBase()
             ->mapWithKeys(fn (UserGroup $group): array => [
-                $this->stringValue($group->getKey()) => $this->stringValue($group->name),
+                string_value($group->getKey()) => string_value($group->name),
             ])
             ->all();
     }
@@ -234,10 +234,10 @@ final class OrderAdminOptionsService
             ->get(['id', 'code', 'name'])
             ->toBase()
             ->mapWithKeys(fn (Currency $currency): array => [
-                $this->stringValue($currency->getKey()) => sprintf(
+                string_value($currency->getKey()) => sprintf(
                     '%s — %s',
-                    $this->stringValue($currency->code),
-                    $this->stringValue($currency->name),
+                    string_value($currency->code),
+                    string_value($currency->name),
                 ),
             ])
             ->all();
@@ -277,7 +277,7 @@ final class OrderAdminOptionsService
                 $description = $status->descriptions->first();
 
                 return [
-                    $this->stringValue($status->getKey()) => $this->stringValue($description?->name)
+                    string_value($status->getKey()) => string_value($description?->name)
                         ?: $this->translate('admin/orders/orders.statuses.unnamed', 'Unnamed status'),
                 ];
             })
@@ -301,11 +301,6 @@ final class OrderAdminOptionsService
     {
         $translation = __($key);
 
-        return $translation === $key ? $fallback : $this->stringValue($translation);
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
+        return $translation === $key ? $fallback : string_value($translation);
     }
 }

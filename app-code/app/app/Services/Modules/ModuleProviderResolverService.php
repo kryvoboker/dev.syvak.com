@@ -133,7 +133,7 @@ readonly class ModuleProviderResolverService
      */
     private function loadModuleConfig(ModuleDefinition $definition): array
     {
-        $module_path = Str::trim($this->stringValue($definition->module_path));
+        $module_path = Str::trim(string_value($definition->module_path));
 
         if ($module_path === '') {
             return [];
@@ -162,10 +162,10 @@ readonly class ModuleProviderResolverService
             $allowed_strategies = ['eager', 'route_matched', 'middleware_after_session'];
         }
 
-        $default_strategy = $this->stringValue(config('modules-runtime.default_strategy', 'route_matched'));
+        $default_strategy = string_value(config('modules-runtime.default_strategy', 'route_matched'));
 
         if (! in_array($default_strategy, $allowed_strategies, true)) {
-            $default_strategy = $this->stringValue(array_first($allowed_strategies));
+            $default_strategy = string_value(array_first($allowed_strategies));
         }
 
         if (is_string($strategy) && in_array($strategy, $allowed_strategies, true)) {
@@ -184,10 +184,6 @@ readonly class ModuleProviderResolverService
         return $default_strategy;
     }
 
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
-    }
 
     private function isModulesAdminRequest(Request $request): bool
     {

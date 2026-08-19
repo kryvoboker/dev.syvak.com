@@ -64,12 +64,12 @@ final readonly class ContactsFormDeliveryService
     {
         $settings = $this->contacts_page_service->getSettings($page_setting);
         $placeholders = [
-            '{name}' => $this->stringValue(Arr::get($data, 'name', '')),
-            '{email}' => $this->stringValue(Arr::get($data, 'email', '')),
-            '{phone}' => $this->stringValue(Arr::get($data, 'phone', '')),
-            '{text}' => $this->stringValue(Arr::get($data, 'text', '')),
+            '{name}' => string_value(Arr::get($data, 'name', '')),
+            '{email}' => string_value(Arr::get($data, 'email', '')),
+            '{phone}' => string_value(Arr::get($data, 'phone', '')),
+            '{text}' => string_value(Arr::get($data, 'text', '')),
         ];
-        $destinations = $this->arrayValue(Arr::get($settings, 'contact_form.destinations', []));
+        $destinations = array_value(Arr::get($settings, 'contact_form.destinations', []));
         $delivery_attempted = false;
 
         if (Arr::get($destinations, 'email.enabled', false)) {
@@ -94,7 +94,7 @@ final readonly class ContactsFormDeliveryService
         }
 
         $telegram_enabled = (bool) Arr::get($destinations, 'telegram.enabled', false);
-        $telegram_token = Str::trim($this->stringValue(Arr::get($destinations, 'telegram.bot_token', '')));
+        $telegram_token = Str::trim(string_value(Arr::get($destinations, 'telegram.bot_token', '')));
 
         if ($telegram_enabled && $telegram_token === '') {
             Log::channel('stack')->critical('Contacts Telegram delivery skipped because the bot token is not configured.', [
@@ -136,7 +136,7 @@ final readonly class ContactsFormDeliveryService
     /** @param array<string, mixed> $settings */
     private function ensureDestinationIsConfigured(array $settings): void
     {
-        $destinations = $this->arrayValue(Arr::get($settings, 'contact_form.destinations', []));
+        $destinations = array_value(Arr::get($settings, 'contact_form.destinations', []));
         $email_enabled = (bool)Arr::get($destinations, 'email.enabled', false);
         $telegram_enabled = (bool)Arr::get($destinations, 'telegram.enabled', false);
 
@@ -151,7 +151,7 @@ final readonly class ContactsFormDeliveryService
      */
     private function sendEmail(array $settings, int $language_id, array $placeholders, ?string $file_path, bool $send_file): void
     {
-        $recipient = Str::trim($this->stringValue(Arr::get($settings, 'contact_form.destinations.email.address', '')));
+        $recipient = Str::trim(string_value(Arr::get($settings, 'contact_form.destinations.email.address', '')));
 
         if ($recipient === '') {
             throw new RuntimeException('Contacts email recipient is not configured.');
@@ -160,9 +160,9 @@ final readonly class ContactsFormDeliveryService
         $file_url = $send_file ? $this->resolveFileUrl($file_path) : '';
         $placeholders['{file}'] = $file_url;
         $template = $this->resolveLocalizedTemplate(Arr::get($settings, 'email.templates', []), $language_id);
-        $subject = $this->replacePlaceholders($this->stringValue(Arr::get($template, 'subject', '')), $placeholders);
-        $body = $this->replacePlaceholders($this->stringValue(Arr::get($template, 'body', '')), $placeholders);
-        $body = $this->appendFileUrlIfMissing($body, $file_url, $send_file, $this->stringValue(Arr::get($template, 'body', '')));
+        $subject = $this->replacePlaceholders(string_value(Arr::get($template, 'subject', '')), $placeholders);
+        $body = $this->replacePlaceholders(string_value(Arr::get($template, 'body', '')), $placeholders);
+        $body = $this->appendFileUrlIfMissing($body, $file_url, $send_file, string_value(Arr::get($template, 'body', '')));
 
         Mail::raw($body, function (Message $message) use ($recipient, $subject, $file_path, $send_file): void {
             $message->to($recipient)->subject($subject);
@@ -196,7 +196,7 @@ final readonly class ContactsFormDeliveryService
      */
     private function sendTelegram(array $settings, int $language_id, array $placeholders, ?string $file_path, bool $send_file, string $bot_token): void
     {
-        $chat_id = Str::trim($this->stringValue(Arr::get($settings, 'contact_form.destinations.telegram.chat_id', '')));
+        $chat_id = Str::trim(string_value(Arr::get($settings, 'contact_form.destinations.telegram.chat_id', '')));
 
         if ($chat_id === '') {
             throw new RuntimeException('Contacts Telegram chat ID is not configured.');
@@ -205,8 +205,8 @@ final readonly class ContactsFormDeliveryService
         $file_url = $send_file ? $this->resolveFileUrl($file_path) : '';
         $placeholders['{file}'] = $file_url;
         $template = $this->resolveLocalizedTemplate(Arr::get($settings, 'telegram.templates', []), $language_id);
-        $body = $this->replacePlaceholders($this->stringValue(Arr::get($template, 'body', '')), $placeholders);
-        $body = $this->appendFileUrlIfMissing($body, $file_url, $send_file, $this->stringValue(Arr::get($template, 'body', '')));
+        $body = $this->replacePlaceholders(string_value(Arr::get($template, 'body', '')), $placeholders);
+        $body = $this->appendFileUrlIfMissing($body, $file_url, $send_file, string_value(Arr::get($template, 'body', '')));
         $response = Http::asForm()
             ->timeout(10)
             ->post("https://api.telegram.org/bot$bot_token/sendMessage", [
@@ -248,7 +248,7 @@ final readonly class ContactsFormDeliveryService
             return null;
         }
 
-        $upload_path = resolve_upload_path_placeholders($this->stringValue(Arr::get(
+        $upload_path = resolve_upload_path_placeholders(string_value(Arr::get(
             $settings,
             'contact_form.fields.file.upload_path',
             'images/contacts/{year}/{month}',
@@ -308,10 +308,6 @@ final readonly class ContactsFormDeliveryService
     /**
      * @return array<string|int, mixed>
      */
-    private function arrayValue(mixed $value): array
-    {
-        return is_array($value) ? $value : [];
-    }
 
     /**
      * @param array<mixed, mixed> $value
@@ -323,15 +319,10 @@ final readonly class ContactsFormDeliveryService
 
         foreach ($value as $key => $item) {
             if (is_string($key)) {
-                $result[$key] = $this->stringValue($item);
+                $result[$key] = string_value($item);
             }
         }
 
         return $result;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

@@ -99,9 +99,9 @@ class CheckoutController extends Controller
                 'items_count' => count($cart_items),
                 'visible_items' => $visible_cart_items,
                 'hidden_items' => $hidden_cart_items,
-                'subtotal_formatted' => $this->stringValue(data_get($cart_data, 'totals.items_subtotal_formatted', '')),
+                'subtotal_formatted' => string_value(data_get($cart_data, 'totals.items_subtotal_formatted', '')),
                 'delivery_formatted' => '—',
-                'grand_total_formatted' => $this->stringValue(data_get($cart_data, 'totals.grand_total_formatted', '')),
+                'grand_total_formatted' => string_value(data_get($cart_data, 'totals.grand_total_formatted', '')),
             ],
             'checkout_selection_state' => $checkout_selection_state,
             'checkout_map_data' => $this->buildCheckoutMapData($checkout_selection_state),
@@ -138,7 +138,7 @@ class CheckoutController extends Controller
         ?string $locale,
     ): JsonResponse {
         $locale = normalize_locale($locale);
-        $data = $checkout_city_search_service->searchCities($this->stringValue($request->validated('city_keyword')));
+        $data = $checkout_city_search_service->searchCities(string_value($request->validated('city_keyword')));
 
         return response()->json([
             'success' => $data['success'],
@@ -156,8 +156,8 @@ class CheckoutController extends Controller
         $validated = $request->validated();
 
         $data = $checkout_branch_search_service->loadBranches(
-            $this->stringValue($validated['delivery_method'] ?? ''),
-            $this->stringKeyedArray($validated['city'] ?? []),
+            string_value($validated['delivery_method'] ?? ''),
+            string_keyed_array($validated['city'] ?? []),
         );
 
         return response()->json([
@@ -207,7 +207,7 @@ class CheckoutController extends Controller
         $current_state = $this->checkout_selection_state_service->getState();
 
         if ($current_state !== []) {
-            $current_payment_method = $this->stringValue(Arr::get($current_state, 'payment_method', ''));
+            $current_payment_method = string_value(Arr::get($current_state, 'payment_method', ''));
 
             $current_state['payment_method'] = $current_payment_method !== ''
                 ? $current_payment_method
@@ -245,7 +245,7 @@ class CheckoutController extends Controller
     {
         foreach ($payment_checkout_data as $payment_data) {
             if (($payment_data['is_available'] ?? false) === true) {
-                return $this->stringValue($payment_data['payment_method'] ?? '');
+                return string_value($payment_data['payment_method'] ?? '');
             }
         }
 
@@ -262,13 +262,13 @@ class CheckoutController extends Controller
         array $nova_poshta_checkout_data,
         array $ukr_poshta_checkout_data,
     ): array {
-        $nova_state = $this->stringKeyedArray(Arr::get($nova_poshta_checkout_data, 'state', []));
-        $nova_selected_city = $this->stringKeyedArray(Arr::get($nova_poshta_checkout_data, 'selected_city', []));
-        $nova_selected_delivery_point = $this->stringKeyedArray(Arr::get($nova_poshta_checkout_data, 'selected_delivery_point', []));
-        $ukr_selected_city = $this->stringKeyedArray(Arr::get($ukr_poshta_checkout_data, 'selected_city', []));
-        $ukr_selected_delivery_point = $this->stringKeyedArray(Arr::get($ukr_poshta_checkout_data, 'selected_delivery_point', []));
-        $nova_delivery_method = $this->stringValue(Arr::get($nova_state, 'delivery_method', ''));
-        $nova_delivery_address = $this->stringValue(Arr::get($nova_state, 'delivery_address', ''));
+        $nova_state = string_keyed_array(Arr::get($nova_poshta_checkout_data, 'state', []));
+        $nova_selected_city = string_keyed_array(Arr::get($nova_poshta_checkout_data, 'selected_city', []));
+        $nova_selected_delivery_point = string_keyed_array(Arr::get($nova_poshta_checkout_data, 'selected_delivery_point', []));
+        $ukr_selected_city = string_keyed_array(Arr::get($ukr_poshta_checkout_data, 'selected_city', []));
+        $ukr_selected_delivery_point = string_keyed_array(Arr::get($ukr_poshta_checkout_data, 'selected_delivery_point', []));
+        $nova_delivery_method = string_value(Arr::get($nova_state, 'delivery_method', ''));
+        $nova_delivery_address = string_value(Arr::get($nova_state, 'delivery_address', ''));
 
         if ($nova_selected_city !== [] || $nova_selected_delivery_point !== []) {
             return [
@@ -277,8 +277,8 @@ class CheckoutController extends Controller
                     $nova_selected_delivery_point,
                 ),
                 'city' => $this->normalizeCheckoutCityState(
-                    city_description   : $this->stringValue(Arr::get($nova_selected_city, 'description', Arr::get($nova_selected_city, 'city_name', ''))),
-                    nova_poshta_city_id: $this->stringValue(Arr::get($nova_selected_city, 'ref', '')),
+                    city_description   : string_value(Arr::get($nova_selected_city, 'description', Arr::get($nova_selected_city, 'city_name', ''))),
+                    nova_poshta_city_id: string_value(Arr::get($nova_selected_city, 'ref', '')),
                     ukr_poshta_city_id : null,
                     city_lat           : Arr::get($nova_selected_city, 'latitude'),
                     city_lng           : Arr::get($nova_selected_city, 'longitude'),
@@ -292,9 +292,9 @@ class CheckoutController extends Controller
             return [
                 'delivery_method' => 'ukr_poshta',
                 'city' => $this->normalizeCheckoutCityState(
-                    city_description   : $this->stringValue(Arr::get($ukr_selected_city, 'description', Arr::get($ukr_selected_city, 'city_ua', ''))),
+                    city_description   : string_value(Arr::get($ukr_selected_city, 'description', Arr::get($ukr_selected_city, 'city_ua', ''))),
                     nova_poshta_city_id: null,
-                    ukr_poshta_city_id : $this->integerValue(Arr::get($ukr_selected_city, 'city_id', 0)),
+                    ukr_poshta_city_id : integer_value(Arr::get($ukr_selected_city, 'city_id', 0)),
                     city_lat           : Arr::get($ukr_selected_city, 'latitude'),
                     city_lng           : Arr::get($ukr_selected_city, 'longitude'),
                 ),
@@ -313,17 +313,17 @@ class CheckoutController extends Controller
      */
     private function buildCheckoutMapData(array $checkout_selection_state): array
     {
-        $selected_city = $this->stringKeyedArray(Arr::get($checkout_selection_state, 'city', []));
+        $selected_city = string_keyed_array(Arr::get($checkout_selection_state, 'city', []));
 
         return [
             'selected_city' => [
-                'city_description' => $this->stringValue(Arr::get($selected_city, 'city_description', '')),
-                'nova_poshta_city_id' => $this->stringValue(Arr::get($selected_city, 'nova_poshta_city_id', '')),
-                'ukr_poshta_city_id' => $this->integerValue(Arr::get($selected_city, 'ukr_poshta_city_id', 0)),
+                'city_description' => string_value(Arr::get($selected_city, 'city_description', '')),
+                'nova_poshta_city_id' => string_value(Arr::get($selected_city, 'nova_poshta_city_id', '')),
+                'ukr_poshta_city_id' => integer_value(Arr::get($selected_city, 'ukr_poshta_city_id', 0)),
                 'city_lat' => Arr::get($selected_city, 'city_lat'),
                 'city_lng' => Arr::get($selected_city, 'city_lng'),
             ],
-            'selected_delivery_method' => $this->stringValue(Arr::get($checkout_selection_state, 'delivery_method', '')),
+            'selected_delivery_method' => string_value(Arr::get($checkout_selection_state, 'delivery_method', '')),
             'marker_icons' => [
                 'nova_poshta' => asset('storage/images/icons/nova-poshta-marker.svg'),
                 'ukr_poshta' => asset('storage/images/icons/ukr-poshta-marker.svg'),
@@ -367,11 +367,11 @@ class CheckoutController extends Controller
             return false;
         }
 
-        $delivery_method = $this->stringValue(Arr::get($selected_delivery_point, 'delivery_method', ''));
+        $delivery_method = string_value(Arr::get($selected_delivery_point, 'delivery_method', ''));
 
         return $delivery_method === 'nova_poshta_poshtomat'
             || Str::contains(
-                Str::lower($this->stringValue(Arr::get($selected_delivery_point, 'description', ''))),
+                Str::lower(string_value(Arr::get($selected_delivery_point, 'description', ''))),
                 'поштомат',
             );
     }
@@ -400,10 +400,10 @@ class CheckoutController extends Controller
      */
     private function syncModuleStates(array $state): void
     {
-        $city = $this->stringKeyedArray(Arr::get($state, 'city', []));
-        $delivery_method = $this->stringValue(Arr::get($state, 'delivery_method', ''));
-        $delivery_point = $this->stringKeyedArray(Arr::get($state, 'delivery_point', []));
-        $delivery_address = $this->stringValue(Arr::get($state, 'delivery_address', ''));
+        $city = string_keyed_array(Arr::get($state, 'city', []));
+        $delivery_method = string_value(Arr::get($state, 'delivery_method', ''));
+        $delivery_point = string_keyed_array(Arr::get($state, 'delivery_point', []));
+        $delivery_address = string_value(Arr::get($state, 'delivery_address', ''));
 
         if ($city === []) {
             $this->nova_poshta_checkout_state_service->clear();
@@ -412,14 +412,14 @@ class CheckoutController extends Controller
             return;
         }
 
-        $nova_poshta_city_id = $this->stringValue(Arr::get($city, 'nova_poshta_city_id', ''));
-        $ukr_poshta_city_id = $this->integerValue(Arr::get($city, 'ukr_poshta_city_id', 0));
+        $nova_poshta_city_id = string_value(Arr::get($city, 'nova_poshta_city_id', ''));
+        $ukr_poshta_city_id = integer_value(Arr::get($city, 'ukr_poshta_city_id', 0));
 
         if (filled($nova_poshta_city_id) && Str::startsWith($delivery_method, 'nova_poshta')) {
             $this->nova_poshta_checkout_state_service->setCity([
                 'ref' => $nova_poshta_city_id,
-                'description' => $this->stringValue(Arr::get($city, 'city_description', '')),
-                'city_name' => $this->stringValue(Arr::get($city, 'city_description', '')),
+                'description' => string_value(Arr::get($city, 'city_description', '')),
+                'city_name' => string_value(Arr::get($city, 'city_description', '')),
                 'latitude' => Arr::get($city, 'city_lat'),
                 'longitude' => Arr::get($city, 'city_lng'),
             ]);
@@ -442,8 +442,8 @@ class CheckoutController extends Controller
         if ($ukr_poshta_city_id > 0 && $delivery_method === 'ukr_poshta') {
             $this->ukr_poshta_checkout_state_service->setCity([
                 'city_id' => $ukr_poshta_city_id,
-                'description' => $this->stringValue(Arr::get($city, 'city_description', '')),
-                'city_ua' => $this->stringValue(Arr::get($city, 'city_description', '')),
+                'description' => string_value(Arr::get($city, 'city_description', '')),
+                'city_ua' => string_value(Arr::get($city, 'city_description', '')),
                 'latitude' => Arr::get($city, 'city_lat'),
                 'longitude' => Arr::get($city, 'city_lng'),
             ]);
@@ -457,28 +457,5 @@ class CheckoutController extends Controller
         } else {
             $this->ukr_poshta_checkout_state_service->clear();
         }
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function stringKeyedArray(mixed $value): array
-    {
-        if (! is_array($value)) {
-            return [];
-        }
-
-        /** @var array<string, mixed> $value */
-        return $value;
-    }
-
-    private function integerValue(mixed $value): int
-    {
-        return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

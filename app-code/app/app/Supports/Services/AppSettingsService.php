@@ -105,12 +105,12 @@ final class AppSettingsService
     {
         $localized_settings = Arr::get($contacts_settings, 'localized', []);
         $localized_settings = is_array($localized_settings) ? $localized_settings : [];
-        $language_key = $this->stringValue($language_id);
+        $language_key = string_value($language_id);
         $localized_content = is_array(Arr::get($localized_settings, $language_key))
             ? Arr::get($localized_settings, $language_key)
             : [];
 
-        $working_hours_content = $this->stringValue(Arr::get($localized_content, 'working_hours.content', ''));
+        $working_hours_content = string_value(Arr::get($localized_content, 'working_hours.content', ''));
         $work_time = $working_hours_content === '' ? [] : [$locale => $working_hours_content];
 
         $coordinates = null;
@@ -127,19 +127,7 @@ final class AppSettingsService
             'work_time' => $work_time,
             'contact_addresses' => Arr::get($contacts_settings, 'addresses', []),
             'coordinates' => $coordinates,
-            'iframe_map' => $this->resolveNullableString(Arr::get($contacts_settings, 'map.iframe')),
+            'iframe_map' => nullable_string(Arr::get($contacts_settings, 'map.iframe')),
         ];
-    }
-
-    private function resolveNullableString(mixed $value): ?string
-    {
-        $value = Str::trim($this->stringValue($value));
-
-        return filled($value) ? $value : null;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

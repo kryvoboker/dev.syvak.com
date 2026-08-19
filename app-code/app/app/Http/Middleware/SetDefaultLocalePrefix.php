@@ -26,7 +26,7 @@ class SetDefaultLocalePrefix
         $allowed_locales = get_allowed_locales();
         $path_info = Str::ltrim($request->getPathInfo(), '/');
         $is_livewire_request = Str::startsWith($path_info, ['livewire-', 'livewire/']);
-        $locale_key = $this->stringValue(config('localization.locale_parameter'));
+        $locale_key = string_value(config('localization.locale_parameter'));
         $fallback_locale = $this->resolveFallbackLocale($allowed_locales);
         $session_locale = session($locale_key);
         $normalized_session_locale = is_string($session_locale) && in_array($session_locale, $allowed_locales, true)
@@ -100,7 +100,7 @@ class SetDefaultLocalePrefix
 
     private function applyLocale(Request $request, string $resolved_locale): void
     {
-        $locale_key = $this->stringValue(config('localization.locale_parameter'));
+        $locale_key = string_value(config('localization.locale_parameter'));
         $language = resolve_language_by_locale($resolved_locale);
 
         if ($language === null) {
@@ -130,10 +130,5 @@ class SetDefaultLocalePrefix
         }
 
         return Arr::first($allowed_locales, default: 'en');
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }

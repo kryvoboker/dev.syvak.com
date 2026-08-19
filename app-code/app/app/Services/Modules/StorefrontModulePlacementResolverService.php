@@ -94,7 +94,7 @@ class StorefrontModulePlacementResolverService
             return [];
         }
 
-        $view = Str::trim($this->stringValue(Arr::get($module_config, 'runtime.storefront.view', '')));
+        $view = Str::trim(string_value(Arr::get($module_config, 'runtime.storefront.view', '')));
 
         if (blank($view) || View::exists($view) === false) {
             Log::channel('stack')->warning('Storefront module view is missing or invalid.', [
@@ -122,13 +122,13 @@ class StorefrontModulePlacementResolverService
         /** @var array<int, array<string, mixed>> $module_items */
         $module_items = $data_service->resolveForPlacement($placement, $page_type);
 
-        $view_data_key = Str::trim($this->stringValue(Arr::get($module_config, 'runtime.storefront.view_data_key', 'module_data')));
+        $view_data_key = Str::trim(string_value(Arr::get($module_config, 'runtime.storefront.view_data_key', 'module_data')));
 
         return collect($module_items)
             ->map(function (array $item) use ($definition, $view, $view_data_key, $page_type): array {
                 return [
                     'module_definition_id' => (int) $definition->id,
-                    'module_name' => $this->stringValue($definition->nwidart_name),
+                    'module_name' => string_value($definition->nwidart_name),
                     'view' => $view,
                     'view_data' => [
                         $view_data_key => $item,
@@ -159,7 +159,7 @@ class StorefrontModulePlacementResolverService
      */
     private function loadModuleConfig(ModuleDefinition $definition): array
     {
-        $module_path = Str::trim($this->stringValue($definition->module_path));
+        $module_path = Str::trim(string_value($definition->module_path));
 
         if ($module_path === '') {
             return [];
@@ -178,10 +178,5 @@ class StorefrontModulePlacementResolverService
         $config_data = is_array($config_data) ? $config_data : [];
 
         return $config_data;
-    }
-
-    private function stringValue(mixed $value): string
-    {
-        return is_scalar($value) ? (string) $value : '';
     }
 }
