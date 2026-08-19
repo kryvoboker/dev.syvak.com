@@ -268,7 +268,6 @@ readonly class FilterProductsAction
      */
     private function resolveEnabledFilterGroups(CatalogFilterSet $filter_set): Collection
     {
-        /** @var Collection<int, CatalogFilterGroup> $groups */
         $groups = $filter_set->groups;
 
         return $groups
@@ -352,6 +351,7 @@ readonly class FilterProductsAction
     /**
      * @param  array<string, mixed>  $validated_data
      * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @psalm-param Collection<int, CatalogFilterGroup> $filter_groups
      * @param Builder<Product> $query
      * @return Builder<Product>
      */
@@ -404,6 +404,7 @@ readonly class FilterProductsAction
              * to avoid locale mismatch that causes false-zero results.
              */
             $attribute_values = $attribute_group->values
+                ->toBase()
                 ->filter(fn (CatalogFilterValue $value): bool => $selected_codes->contains((string) $value->code))
                 ->flatMap(function (CatalogFilterValue $value): array {
                     $value_candidates = [(string) $value->value_string];
@@ -670,8 +671,10 @@ readonly class FilterProductsAction
 
     /**
      * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @psalm-param Collection<int, CatalogFilterGroup> $filter_groups
      * @param array<string, mixed> $validated_data
      * @return array<int|string, array<string, mixed>>
+     * @psalm-suppress InvalidTemplateParam
      */
     private function buildFiltersData(
         ?CatalogFilterSet $filter_set,
@@ -750,7 +753,6 @@ readonly class FilterProductsAction
                 continue;
             }
 
-            /** @var Collection<int, CatalogFilterValue> $group_values */
             $group_values = $group->values;
 
             foreach ($group_values as $value) {

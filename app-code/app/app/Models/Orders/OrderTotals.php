@@ -8,7 +8,14 @@ use App\Enums\Order\TotalTypesEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** @property TotalTypesEnum $total_type */
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property TotalTypesEnum $total_type
+ * @property string $name
+ * @property float|string $value
+ * @property int $sort_order
+ */
 class OrderTotals extends Model
 {
     protected $fillable = [

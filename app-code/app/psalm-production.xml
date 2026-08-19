@@ -55,8 +55,6 @@
     </stubs>
     <issueHandlers>
         <!-- Laravel's Eloquent and container APIs resolve these members dynamically. -->
-        <UndefinedMagicPropertyFetch errorLevel="suppress"/>
-        <UndefinedMagicPropertyAssignment errorLevel="suppress"/>
         <UndefinedMagicMethod errorLevel="suppress"/>
 
         <!-- Framework entry points are resolved by routes, the container, and queues. -->

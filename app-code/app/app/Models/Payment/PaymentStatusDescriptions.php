@@ -8,6 +8,12 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $payment_status_id
+ * @property int $language_id
+ * @property string $name
+ */
 class PaymentStatusDescriptions extends Model
 {
     protected $fillable = [

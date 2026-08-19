@@ -8,6 +8,19 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $product_id
+ * @property int $language_id
+ * @property string|null $short_title
+ * @property string|null $short_description
+ * @property array<int, mixed>|null $table_rows
+ * @property string|null $image
+ * @property int|null $image_width
+ * @property int|null $image_height
+ * @property string|null $full_description_title
+ * @property string|null $full_description
+ */
 class ProductSizeGuide extends Model
 {
     protected $fillable = [

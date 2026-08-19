@@ -15,6 +15,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $id
  * @property int|null $parent_id
+ * @property int $sort_order
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CategoryDescription> $categoryDescription
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CategoryImage> $categoryImage
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CategoryPath> $categoryPaths
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Slug> $slugs
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
  */
 class Category extends Model
 {

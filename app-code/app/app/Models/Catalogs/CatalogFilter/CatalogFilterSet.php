@@ -16,6 +16,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property CatalogFilterPriceSourceModeEnum $price_source_mode
  * @property CatalogFilterDiscountOnlyPolicyEnum $discount_only_policy
  * @property array<int, string>|null $context_types
+ * @property int $id
+ * @property bool $is_enabled
+ * @property bool $is_price_filter_enabled
+ * @property bool $is_attribute_filtering_enabled
+ * @property int|null $min_stock_quantity
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CatalogFilterGroup> $groups
+ * @property-read CatalogFilterIndexMeta|null $indexMeta
  */
 class CatalogFilterSet extends Model
 {

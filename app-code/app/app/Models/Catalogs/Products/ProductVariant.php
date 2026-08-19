@@ -9,6 +9,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $product_id
+ * @property bool $is_default
+ * @property bool $is_active
+ * @property int $quantity
+ * @property int $minimum
+ * @property float $price
+ * @property string|null $image
+ * @property-read Product|null $product
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantDescription> $descriptions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantImage> $images
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantDiscount> $discounts
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantAttributeValue> $attributeValues
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantSizeGuide> $sizeGuides
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantComposition> $compositions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantCare> $cares
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Slug> $slugs
+ */
 class ProductVariant extends Model
 {
     use HasSlugsTrait;

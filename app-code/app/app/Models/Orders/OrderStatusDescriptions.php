@@ -8,6 +8,12 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $order_status_id
+ * @property int $language_id
+ * @property string $name
+ */
 class OrderStatusDescriptions extends Model
 {
     protected $fillable = [

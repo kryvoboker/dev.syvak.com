@@ -8,6 +8,12 @@ use App\Models\ApplicationSettings\Currency;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $promo_code_id
+ * @property int $currency_id
+ * @property string $value
+ */
 class PromoCodeDiscount extends Model
 {
     protected $fillable = [

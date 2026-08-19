@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property CartModeEnum $cart_mode
  * @property array<int|string, mixed>|null $chosen_attributes
+ * @property int $id
+ * @property int|null $user_id
+ * @property int $product_variant_id
+ * @property int $quantity
  */
 class Cart extends Model
 {

@@ -32,6 +32,7 @@ final class ProductVariantContentPersistenceService
 
     /**
      * @return array<string, mixed>
+     * @psalm-suppress InvalidTemplateParam
      */
     public function hydrateFormData(Product|ProductVariant $product): array
     {
@@ -40,6 +41,7 @@ final class ProductVariantContentPersistenceService
         return [
             'size_guide_data' => [
                 'translations' => $product->sizeGuides
+                    ->toBase()
                     ->mapWithKeys(fn ($guide): array => [
                         (string) $guide->language_id => [
                             'title' => $guide->short_title,
@@ -154,6 +156,7 @@ final class ProductVariantContentPersistenceService
 
     /**
      * @return array<int|string, array<string, mixed>>
+     * @psalm-suppress InvalidTemplateParam
      */
     private function buildDetailsTranslations(Product|ProductVariant $product): array
     {

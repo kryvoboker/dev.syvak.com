@@ -110,7 +110,7 @@ final class ConvertPrice
             }
         }
 
-        return $price * ($code_to / $code_from);
+        return $price * ((float) $code_to / (float) $code_from);
     }
 
     public function convertUsingExchangeRates(

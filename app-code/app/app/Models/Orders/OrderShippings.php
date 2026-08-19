@@ -8,6 +8,26 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property string $method
+ * @property string $code
+ * @property int|null $city_id
+ * @property int|null $delivery_point_id
+ * @property string|null $address
+ * @property bool $is_cost_enabled
+ */
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property string $method
+ * @property string $code
+ * @property int|null $city_id
+ * @property int|null $delivery_point_id
+ * @property string|null $address
+ * @property bool $is_cost_enabled
+ */
 class OrderShippings extends Model
 {
     protected $fillable = [

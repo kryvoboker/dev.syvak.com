@@ -9,6 +9,14 @@ use App\Models\Orders\OrderPayments;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property bool $is_default
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PaymentStatusDescriptions> $descriptions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderPayments> $payments
+ */
 class PaymentStatuses extends Model
 {
     protected $fillable = [

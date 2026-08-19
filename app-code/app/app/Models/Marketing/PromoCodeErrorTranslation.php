@@ -8,6 +8,14 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $promo_code_id
+ * @property int $language_id
+ * @property string|null $expired_message
+ * @property string|null $minimum_order_message
+ * @property string|null $usage_limit_message
+ */
 class PromoCodeErrorTranslation extends Model
 {
     protected $fillable = [

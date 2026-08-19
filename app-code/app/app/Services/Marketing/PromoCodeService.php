@@ -12,7 +12,6 @@ use App\Models\ApplicationSettings\Currency;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Marketing\PromoCode;
 use App\Models\Marketing\PromoCodeDiscount;
-use App\Models\Marketing\PromoCodeErrorTranslation;
 use App\Models\Marketing\PromoCodeUsage;
 use App\Models\Orders\Orders;
 use Illuminate\Database\Eloquent\Collection;
@@ -380,7 +379,6 @@ final class PromoCodeService
         $target_currency = Currency::query()->where('code', $currency_code)->where('is_active', true)->first()
             ?? (new Currency())->getDefaultActiveCurrency();
         $default_currency = (new Currency())->getDefaultActiveCurrency();
-        /** @var Collection<int, PromoCodeDiscount> $discounts */
         $discounts = $promo_code->discounts;
         $discount = $discounts->first(fn (PromoCodeDiscount $item): bool => $this->integerValue($item->currency_id) === $this->integerValue($target_currency?->getKey()));
 
@@ -406,7 +404,6 @@ final class PromoCodeService
     private function resolveErrorMessage(PromoCode $promo_code, string $error_type, ?string $locale): string
     {
         $language_id = resolve_language_by_locale($locale ?? app()->getLocale())?->id;
-        /** @var PromoCodeErrorTranslation|null $translation */
         $translation = $promo_code->errorTranslations->firstWhere('language_id', $language_id);
         $field = match ($error_type) {
             'expired' => 'expired_message',

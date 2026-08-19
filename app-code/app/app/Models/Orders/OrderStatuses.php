@@ -8,6 +8,13 @@ use App\Exceptions\OrderStatusInvariantException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property bool $is_default
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderStatusDescriptions> $descriptions
+ */
 class OrderStatuses extends Model
 {
     protected $fillable = [

@@ -13,7 +13,26 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/** @property CartModeEnum $order_type */
+/**
+ * @property int $id
+ * @property string $order_number
+ * @property int $order_status_id
+ * @property string|null $order_status_name
+ * @property CartModeEnum $order_type
+ * @property string|null $comment
+ * @property float|string $total
+ * @property int $language_id
+ * @property string $language_code
+ * @property int|null $currency_id
+ * @property string $currency_code
+ * @property float|string $exchange_rate
+ * @property-read OrderStatuses|null $status
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderPayments> $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderProducts> $products
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderTotals> $totals
+ * @property-read OrderCustomers|null $customer
+ * @property-read OrderShippings|null $shipping
+ */
 class Orders extends Model
 {
     use SoftDeletes;

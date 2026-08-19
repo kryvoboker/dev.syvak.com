@@ -27,6 +27,19 @@ use Illuminate\Support\Str;
  * @property bool $is_active
  * @property \Illuminate\Support\Carbon|null $starts_at
  * @property \Illuminate\Support\Carbon|null $ends_at
+ * @property string $code
+ * @property int|null $user_usage_limit
+ * @property int|null $group_usage_limit
+ * @property int|null $global_usage_limit
+ * @property int|null $all_users_usage_limit
+ * @property int|null $all_groups_usage_limit
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PromoCodeDiscount> $discounts
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Category> $categories
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, User> $users
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, UserGroup> $userGroups
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PromoCodeErrorTranslation> $errorTranslations
+ * @property-read \Illuminate\Support\Collection<int, PromoCodeErrorTranslation> $errorTranslations
  */
 class PromoCode extends Model
 {

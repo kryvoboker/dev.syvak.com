@@ -17,6 +17,10 @@ use Throwable;
  * @property array<string, mixed>|null $meta
  * @property int $id
  * @property string $nwidart_name
+ * @property string $name
+ * @property string $slug
+ * @property string $module_path
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModuleInstance> $instances
  */
 class ModuleDefinition extends Model
 {

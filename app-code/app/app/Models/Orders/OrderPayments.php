@@ -9,6 +9,21 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property string $method
+ * @property string $code
+ * @property int $payment_status_id
+ * @property string|null $transaction_id
+ * @property float|string $amount
+ * @property string|null $failure_reason
+ * @property array<string, mixed>|null $provider_data
+ * @property \DateTimeInterface|string|null $paid_at
+ * @property \DateTimeInterface|string|null $failed_at
+ * @property-read Orders|null $order
+ * @property-read PaymentStatuses|null $paymentStatus
+ */
 class OrderPayments extends Model
 {
     protected $fillable = [

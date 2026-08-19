@@ -8,6 +8,18 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property string|null $format_locale
+ * @property string|null $symbol_left
+ * @property string|null $symbol_right
+ * @property int $decimal_places
+ * @property float|string $exchange_rate
+ * @property bool $is_active
+ * @property bool $is_default
+ */
 class Currency extends Model
 {
     protected $fillable = [

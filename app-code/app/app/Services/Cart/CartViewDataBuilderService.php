@@ -213,6 +213,7 @@ readonly class CartViewDataBuilderService
      * @param array<int|string, mixed> $chosen_attributes
      *
      * @return array<int, array{label: string, value: string}>
+     * @psalm-suppress InvalidTemplateParam
      */
     private function resolveItemAttributes(ProductVariant $variant, array $chosen_attributes): array
     {
@@ -277,7 +278,8 @@ readonly class CartViewDataBuilderService
             return $resolved_attributes->all();
         }
 
-        return $variant->attributeValues
+        /** @var array<int, array{label: string, value: string}> $attributes */
+        $attributes = $variant->attributeValues
             ->map(function ($attribute_value): ?array {
                 $value_string = Str::trim($this->stringValue($attribute_value->value_string));
 
@@ -295,6 +297,8 @@ readonly class CartViewDataBuilderService
             ->filter(fn (?array $attribute): bool => is_array($attribute))
             ->values()
             ->all();
+
+        return $attributes;
     }
 
     /**
