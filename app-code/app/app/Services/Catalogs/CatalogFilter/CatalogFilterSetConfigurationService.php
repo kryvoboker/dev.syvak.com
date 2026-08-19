@@ -177,7 +177,6 @@ class CatalogFilterSetConfigurationService
                 : [],
         ];
 
-        /** @var array<string, mixed> $next_config */
         $next_config = (array) ($group->config ?? []);
         $next_config['mode'] = $this->stringValue(Arr::get($config_data, 'mode', $this->getDefaultFilterMode()));
         $next_config['get'] = $get_data;

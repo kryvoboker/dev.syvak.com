@@ -25,6 +25,19 @@ use Throwable;
  * @property string|null $image
  * @property float|null $price
  * @property string|null $sku
+ * @property string|null $model
+ * @property string|null $ean
+ * @property int $quantity
+ * @property int $minimum
+ * @property bool $is_active
+ * @property int|null $default_category_id
+ * @property int|null $default_category_id
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariant> $variants
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductDescription> $descriptions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductComposition> $compositions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductCare> $cares
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductSizeGuide> $sizeGuides
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Category> $categories
  * @property-read ProductVariant|null $defaultVariant
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Slug> $slugs
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductDescription> $productDescription

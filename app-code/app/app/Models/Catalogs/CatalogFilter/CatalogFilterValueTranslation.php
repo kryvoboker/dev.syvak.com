@@ -8,6 +8,12 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $catalog_filter_value_id
+ * @property int $language_id
+ * @property string $label
+ */
 class CatalogFilterValueTranslation extends Model
 {
     protected $fillable = [

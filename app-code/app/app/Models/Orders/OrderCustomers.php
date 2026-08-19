@@ -9,6 +9,16 @@ use App\Models\Users\UserGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property int|null $user_id
+ * @property int|null $user_group_id
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $email
+ * @property string|null $telephone
+ */
 class OrderCustomers extends Model
 {
     protected $fillable = [

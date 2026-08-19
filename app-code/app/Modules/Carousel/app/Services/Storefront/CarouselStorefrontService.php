@@ -7,7 +7,6 @@ namespace Modules\Carousel\Services\Storefront;
 use App\Models\Modules\ModuleDefinition;
 use App\Models\Modules\ModuleInstance;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -45,9 +44,9 @@ class CarouselStorefrontService
      *     slides: non-empty-array<int, non-empty-array<string, mixed>>
      * }>
      */
+    /** @psalm-suppress InvalidTemplateParam */
     private function mapDefinitionInstances(ModuleDefinition $definition, ?string $page_type): array
     {
-        /** @var Collection<int, ModuleInstance> $instances */
         $instances = $definition->instances;
 
         return $instances

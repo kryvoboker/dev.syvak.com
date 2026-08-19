@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $key
+ * @property string|null $value
+ * @property bool $is_active
+ */
 class GlobalConfig extends Model
 {
     protected $fillable = [

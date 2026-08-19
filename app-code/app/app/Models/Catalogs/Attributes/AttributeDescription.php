@@ -7,6 +7,18 @@ namespace App\Models\Catalogs\Attributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $attribute_id
+ * @property int $language_id
+ * @property string $name
+ */
+/**
+ * @property int $id
+ * @property int $attribute_id
+ * @property int $language_id
+ * @property string $name
+ */
 class AttributeDescription extends Model
 {
     protected $fillable = [

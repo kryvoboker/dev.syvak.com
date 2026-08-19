@@ -226,6 +226,7 @@ final readonly class FailureOrderRecoveryService
     }
 
     /** @return array<string, mixed> */
+    /** @psalm-suppress InvalidTemplateParam */
     private function buildOrderPayload(Orders $order, string $payment_method, string $locale): array
     {
         $items = $order->products->map(fn (mixed $product): array => [

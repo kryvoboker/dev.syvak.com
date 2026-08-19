@@ -83,9 +83,9 @@ readonly class ProductsCarouselStorefrontService
     /**
      * @return array<int, array<string, mixed>>
      */
+    /** @psalm-suppress InvalidTemplateParam */
     private function mapDefinitionInstances(ModuleDefinition $definition, ?string $page_type): array
     {
-        /** @var Collection<int, ModuleInstance> $instances */
         $instances = $definition->instances;
 
         return $instances
@@ -752,6 +752,7 @@ readonly class ProductsCarouselStorefrontService
      * @param  array<int>  $selected_variant_ids
      * @return array<int, array<string, mixed>>
      */
+    /** @psalm-suppress InvalidTemplateParam */
     private function mapProductCards(
         Product $product,
         int $product_image_width,

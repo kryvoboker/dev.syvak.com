@@ -8,6 +8,13 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $product_variant_id
+ * @property int $language_id
+ * @property string|null $title
+ * @property array<int, mixed>|null $items
+ */
 class ProductVariantComposition extends Model
 {
     protected $fillable = [

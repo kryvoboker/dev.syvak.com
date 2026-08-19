@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $inquiry_id
+ * @property string $disk
+ * @property string $path
+ * @property string $original_name
+ * @property string $mime_type
+ * @property int $size
+ * @property int $sort_order
+ * @property-read Inquiry|null $inquiry
+ */
 class InquiryAttachment extends Model
 {
     /** @use HasFactory<\Database\Factories\Inquiries\InquiryAttachmentFactory> */

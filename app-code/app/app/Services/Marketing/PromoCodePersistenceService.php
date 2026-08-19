@@ -9,7 +9,6 @@ use App\Models\Marketing\PromoCode;
 use App\Models\Marketing\PromoCodeDiscount;
 use App\Models\Marketing\PromoCodeErrorTranslation;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -57,6 +56,7 @@ final class PromoCodePersistenceService
 
     /**
      * @return array<string, mixed>
+     * @psalm-suppress InvalidTemplateParam
      */
     public function hydrateFormData(PromoCode $promo_code): array
     {
@@ -69,9 +69,7 @@ final class PromoCodePersistenceService
             'errorTranslations',
         ]);
 
-        /** @var Collection<int, PromoCodeDiscount> $discounts */
         $discounts = $promo_code->discounts;
-        /** @var Collection<int, PromoCodeErrorTranslation> $error_translations */
         $error_translations = $promo_code->errorTranslations;
 
         return [

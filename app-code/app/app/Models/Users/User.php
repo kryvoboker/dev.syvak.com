@@ -22,6 +22,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @property bool $is_active
  * @property string $name
  * @property string|null $lastname
+ * @property int|null $user_group_id
+ * @property string $email
+ * @property int|null $user_group_id
+ * @property string $email
  */
 class User extends Authenticatable implements FilamentUser
 {

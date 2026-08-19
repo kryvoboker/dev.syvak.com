@@ -11,6 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property string|null $value_string
+ * @property int $id
+ * @property int $attribute_id
+ * @property int $language_id
+ * @property-read Attribute|null $attribute
  */
 class ProductVariantAttributeValue extends Model
 {

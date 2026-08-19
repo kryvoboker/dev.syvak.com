@@ -8,6 +8,13 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property bool $is_active
+ * @property bool $is_default
+ */
 class UserGroup extends Model
 {
     protected $fillable = [

@@ -102,6 +102,7 @@ final readonly class ThankYouOrderDataService
                 ),
             ],
             'products' => $order->products
+                ->toBase()
                 ->map(fn (OrderProducts $product): array => $this->mapProduct($product, $currency_code, $exchange_rate))
                 ->values()
                 ->all(),
@@ -125,6 +126,7 @@ final readonly class ThankYouOrderDataService
     /**
      * @return array<string, mixed>
      */
+    /** @psalm-suppress InvalidTemplateParam */
     private function mapProduct(OrderProducts $order_product, string $currency_code, float $exchange_rate): array
     {
         $variant = $order_product->productVariant;

@@ -9,6 +9,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $catalog_filter_group_id
+ * @property string $code
+ * @property CatalogFilterValueTypeEnum $value_type
+ * @property string|null $value_string
+ * @property string|null $value_number
+ * @property string|null $range_from
+ * @property string|null $range_to
+ * @property bool $is_enabled
+ * @property int $sort_order
+ * @property int $products_count_cached
+ * @property array<string, mixed>|null $meta
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CatalogFilterValueTranslation> $translations
+ */
 class CatalogFilterValue extends Model
 {
     protected $fillable = [

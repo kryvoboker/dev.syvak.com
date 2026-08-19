@@ -18,7 +18,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/** @property InquiryTypeEnum $type */
+/**
+ * @property int $id
+ * @property InquiryTypeEnum $type
+ * @property InquiryStatusEnum $status
+ * @property string $name
+ * @property string $email
+ * @property string|null $phone
+ * @property string $locale
+ * @property int $language_id
+ * @property int|null $user_id
+ * @property array<string, mixed> $payload
+ */
 class Inquiry extends Model
 {
     /** @use HasFactory<InquiryFactory> */

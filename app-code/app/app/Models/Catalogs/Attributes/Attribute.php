@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $sort_order
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, AttributeDescription> $attributeDescription
+ */
 class Attribute extends Model
 {
     protected $fillable = [

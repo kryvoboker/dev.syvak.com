@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $product_id
+ * @property int $language_id
+ * @property string $name
+ * @property string|null $description
+ */
 class ProductDescription extends Model
 {
     /** @use HasFactory<ProductDescriptionFactory> */

@@ -7,6 +7,9 @@ namespace App\Models\Ai;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property string|null $answer
+ */
 class AiAnswerCache extends Model
 {
     protected $fillable = [

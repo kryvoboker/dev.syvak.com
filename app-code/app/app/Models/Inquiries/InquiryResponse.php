@@ -10,7 +10,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** @property InquiryResponseDeliveryStatusEnum $delivery_status */
+/**
+ * @property int $id
+ * @property int $inquiry_id
+ * @property string $subject
+ * @property int|null $admin_user_id
+ * @property string|null $admin_name
+ * @property string $body_html
+ * @property string $recipient_email
+ * @property InquiryResponseDeliveryStatusEnum $delivery_status
+ * @property string|null $delivery_error
+ * @property-read Inquiry|null $inquiry
+ */
 class InquiryResponse extends Model
 {
     /** @use HasFactory<\Database\Factories\Inquiries\InquiryResponseFactory> */

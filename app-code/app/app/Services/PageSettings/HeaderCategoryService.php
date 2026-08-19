@@ -272,7 +272,7 @@ class HeaderCategoryService
             ->firstWhere('language_id', $current_language_id)
             ?? $category->categoryDescription->first();
 
-        return (string) ($description?->name ?: "Category #$category->id");
+        return $description?->name ?: "Category #$category->id";
     }
 
     private function resolveCurrentLanguageId(): ?int

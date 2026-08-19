@@ -11,6 +11,7 @@ use Illuminate\Support\Arr;
 
 /**
  * @property array<string, mixed>|null $settings
+ * @property int $id
  */
 class PageSetting extends Model
 {

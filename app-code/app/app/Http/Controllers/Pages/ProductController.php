@@ -912,6 +912,8 @@ class ProductController extends Controller
 
     /**
      * @param Collection<int, ProductVariant> $variants
+     * @psalm-param Collection<int, ProductVariant> $variants
+     * @psalm-suppress InvalidTemplateParam
      *
      * @return array<int, array{
      *     variant_id:int,

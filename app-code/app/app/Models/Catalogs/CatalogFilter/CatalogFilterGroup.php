@@ -9,7 +9,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** @property CatalogFilterGroupSourceTypeEnum $source_type */
+/**
+ * @property int $id
+ * @property int $catalog_filter_set_id
+ * @property string $code
+ * @property CatalogFilterGroupSourceTypeEnum $source_type
+ * @property int|null $source_id
+ * @property bool $is_enabled
+ * @property int $sort_order
+ * @property string|null $get_key
+ * @property array<string, mixed>|null $config
+ * @property-read CatalogFilterSet|null $filterSet
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CatalogFilterGroupTranslation> $translations
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CatalogFilterValue> $values
+ */
 class CatalogFilterGroup extends Model
 {
     protected $fillable = [

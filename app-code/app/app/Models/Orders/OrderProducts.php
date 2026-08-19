@@ -9,6 +9,23 @@ use App\Models\Catalogs\Products\ProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property int $product_id
+ * @property int $product_variant_id
+ * @property bool $is_default_variant
+ * @property string $name
+ * @property string|null $model
+ * @property string|null $sku
+ * @property string|null $ean
+ * @property int $quantity
+ * @property float|string $discount
+ * @property float|string $unit_price
+ * @property float|string $line_total
+ * @property-read Product|null $product
+ * @property-read ProductVariant|null $productVariant
+ */
 class OrderProducts extends Model
 {
     protected $fillable = [

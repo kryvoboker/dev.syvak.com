@@ -12,6 +12,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\Rule;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property bool $is_active
+ * @property bool $is_default
+ */
 class Language extends Model
 {
     protected $fillable = [
