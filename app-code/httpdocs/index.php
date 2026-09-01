@@ -40,22 +40,25 @@ if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php'
 
 define('LARAVEL_START', microtime(true));
 
-// Determine if the application is in maintenance mode...
-if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php')) {
-	require $maintenance;
-}
-
-// Register the Composer autoloader...
-require './../app/vendor/autoload.php';
-
-// Bootstrap Laravel and handle the request...
-/** @var Application $app */
-$app = require './../app/bootstrap/app.php';
-
 try {
+	// Determine if the application is in maintenance mode...
+	if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php')) {
+		require $maintenance;
+	}
+
+	// Register the Composer autoloader...
+	require './../app/vendor/autoload.php';
+
+	// Bootstrap Laravel and handle the request...
+	/** @var Application $app */
+	$app = require './../app/bootstrap/app.php';
+
 	$app->handleRequest(Request::capture());
-} catch (Exception $e) {
-	file_put_contents('error.log', $e->getMessage());
+} catch (Throwable $e) {
+	file_put_contents(
+		'error.log', '[' . date('Y-m-d H:i:s') . '] production.ERROR: ' . $e->getMessage() . PHP_EOL,
+		FILE_APPEND
+	);
 } finally {
 	if ($is_enable_xhprof && isset($XHPROF_ROOT) && isset($dir_xhprof_stored_runs_links) && isset($xhprof_source)) {
 		// stop profiler
