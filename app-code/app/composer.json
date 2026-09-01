@@ -31,7 +31,8 @@
         "openai-php/client": "^v0.20",
         "spatie/laravel-data": "^4.23",
         "spatie/laravel-permission": "^8.3",
-        "wayforpay/php-sdk": "^1.0"
+        "wayforpay/php-sdk": "^1.0",
+        "ext-xhprof": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^v4.4",
@@ -85,10 +86,19 @@
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
+        "post-install-cmd": [
+            "if [ -f config/filament.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament configuration...'; @php artisan vendor:publish --tag=filament-config --no-interaction; fi",
+            "if [ -f config/filament-shield.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament Shield configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament Shield configuration...'; @php artisan vendor:publish --tag=filament-shield-config --no-interaction; fi",
+            "if [ -f config/livewire.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Livewire configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Livewire configuration...'; @php artisan vendor:publish --tag=livewire:config --no-interaction; fi",
+            "@php artisan livewire:publish --assets"
+        ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan lang:update",
-            "@php artisan boost:update --ansi"
+            "if [ -f config/filament.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament configuration...'; @php artisan vendor:publish --tag=filament-config --no-interaction; fi",
+            "if [ -f config/filament-shield.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament Shield configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament Shield configuration...'; @php artisan vendor:publish --tag=filament-shield-config --no-interaction; fi",
+            "if [ -f config/livewire.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Livewire configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Livewire configuration...'; @php artisan vendor:publish --tag=livewire:config --no-interaction; fi",
+            "@php artisan livewire:publish --assets"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -101,6 +111,7 @@
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
+        "boost:update": "@php artisan boost:update --ansi",
         "pint": "pint",
         "phpcs": "phpcs --standard=phpcs.xml --runtime-set ignore_warnings_on_exit 1 app routes config database tests Modules",
         "phpcs:fix": "phpcbf --standard=phpcs.xml app routes config database tests Modules",

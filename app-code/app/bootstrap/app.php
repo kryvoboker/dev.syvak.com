@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-if (! function_exists('string_to_array')) {
+if (!function_exists('string_to_array')) {
     function string_to_array(?string $string, string $separator = ','): array
     {
         if ($string === null || Str::trim($string) === '') {
@@ -22,7 +22,7 @@ if (! function_exists('string_to_array')) {
         }
 
         $values = array_map(
-            static fn (string $value): string => Str::trim($value),
+            static fn(string $value): string => Str::trim($value),
             explode($separator, $string),
         );
 
@@ -58,7 +58,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
             if (
                 $request->expectsJson() ||
-                ! $request->acceptsHtml() ||
+                !$request->acceptsHtml() ||
                 $request->is('api/*') ||
                 $path_segments->contains('alyo-admin')
             ) {
@@ -75,7 +75,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 );
             } catch (Throwable $throwable) {
                 Log::channel('stack')->error('Public 404 page rendering failed.', [
-                    'path' => $request->path(),
+                    'path'      => $request->path(),
                     'exception' => $throwable,
                 ]);
 
@@ -89,7 +89,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 // Only render custom view for 500 errors
                 if ($e->getStatusCode() === Response::HTTP_INTERNAL_SERVER_ERROR) {
                     return response()->view('errors.500', [], Response::HTTP_INTERNAL_SERVER_ERROR);
-                } elseif ($e->getStatusCode() === Response::HTTP_SERVICE_UNAVAILABLE) {
+                } else if ($e->getStatusCode() === Response::HTTP_SERVICE_UNAVAILABLE) {
                     return response()->view('errors.503', [], Response::HTTP_SERVICE_UNAVAILABLE);
                 }
             }
@@ -99,33 +99,52 @@ $app = Application::configure(basePath: dirname(__DIR__))
         });
     })->create();
 
+$app_env = getenv('APP_ENV');
+
 /**
- * WARNING: The following code block is commented out. Uncomment and modify for PRODUCTION!!!
+ * WARNING: That is code in the below IF condition for PRODUCTION!!!
  */
+if (empty($app_env)) {
+    $app_env          = 'production';
+    $time_zone        = 'Europe/Bucharest';
+    $new_storage_path = '/var/webroot/sites/ttter.syvak.com/storage';
+    $new_public_path  = '/var/webroot/sites/ttter.syvak.com/httpdocs';
+    // DB
+    $db_host     = 'dev-syvak-mariadb';
+//    $db_host     = 'localhost';
+    $db_port     = 3306;
+    $db_database = 'syvverttt';
+    $db_username = 'ttesyr77';
+    $db_password = 'lsoI#9844ukcjJDJDh7hf';
+    $db_prefix   = 'sdby_';
 
-/*$app_env      = 'production';
-$time_zone     = 'Europe/Kiev';
-$new_storage_path = '/var/webroot/sites/syvak.com/app/storage';
-$new_public_path  = '/var/webroot/sites/syvak.com/app/httpdocs';
+    $_ENV['APP_ENV']          = $app_env;
+    $_ENV['TZ']               = $time_zone;
+    $_ENV['NEW_STORAGE_PATH'] = $new_storage_path;
+    $_ENV['NEW_PUBLIC_PATH']  = $new_public_path;
+    // DB
+    $_ENV['COMMON_DB_HOSTNAME'] = $db_host;
+    $_ENV['COMMON_DB_PORT']     = $db_port;
+    $_ENV['MYSQL_DATABASE']     = $db_database;
+    $_ENV['MYSQL_USER']         = $db_username;
+    $_ENV['MYSQL_PASSWORD']     = $db_password;
+    $_ENV['COMMON_DB_PREFIX']   = $db_prefix;
 
-$_ENV['APP_ENV']          = $app_env;
-$_ENV['TZ']          = $time_zone;
-$_ENV['NEW_STORAGE_PATH'] = $new_storage_path;
-$_ENV['NEW_PUBLIC_PATH']  = $new_public_path;
-
-putenv("APP_ENV=$app_env");
-putenv("TZ=$time_zone");
-putenv("NEW_STORAGE_PATH=$new_storage_path");
-putenv("NEW_PUBLIC_PATH=$new_public_path");
-
-// Override storage path immediately after app creation
-$app->useStoragePath($new_storage_path);
-
-// Override public path
-$app->usePublicPath($new_public_path);*/
-
-$new_storage_path = getenv('NEW_STORAGE_PATH');
-$new_public_path = getenv('NEW_PUBLIC_PATH');
+    putenv("APP_ENV=$app_env");
+    putenv("TZ=$time_zone");
+    putenv("NEW_STORAGE_PATH=$new_storage_path");
+    putenv("NEW_PUBLIC_PATH=$new_public_path");
+    // DB
+    putenv("COMMON_DB_HOSTNAME=$db_host");
+    putenv("COMMON_DB_PORT=$db_port");
+    putenv("MYSQL_DATABASE=$db_database");
+    putenv("MYSQL_USER=$db_username");
+    putenv("MYSQL_PASSWORD=$db_password");
+    putenv("COMMON_DB_PREFIX=$db_prefix");
+} else {
+    $new_storage_path = getenv('NEW_STORAGE_PATH');
+    $new_public_path  = getenv('NEW_PUBLIC_PATH');
+}
 
 if (empty($new_storage_path) || empty($new_public_path)) {
     exit('NEW_STORAGE_PATH and NEW_PUBLIC_PATH environment variables must be set!');

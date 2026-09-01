@@ -1,2 +1,2 @@
 # Run every day at 4 AM
-* * * * * timeout 600 /usr/local/bin/php -f /var/webroot/sites/syvak.com/app/artisan schedule:run >> /var/log/cron.log 2>&1
+* * * * * timeout 600 /usr/local/bin/php -f /var/webroot/sites/ttter.syvak.com/app/artisan schedule:run >> /var/log/cron.log 2>&1
