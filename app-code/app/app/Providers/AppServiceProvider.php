@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\Cart\CartModeEnum;
+use App\Filament\Auth\Http\Responses\LoginResponse;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Services\Cart\CartService;
@@ -28,6 +29,7 @@ use App\Supports\Services\RequestLookupContext;
 use App\Supports\Services\StorefrontCacheService;
 use Detection\Exception\MobileDetectException;
 use Detection\MobileDetect;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as LoginResponseContract;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -36,13 +38,14 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View as LaravelView;
+use Override;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
-    #[\Override]
+    #[Override]
     public function register(): void
     {
         $new_storage_path = string_value(config('filesystems.new_storage_path'));
@@ -68,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(FooterService::class);
         $this->app->singleton(ImageUrlBuilderService::class);
         $this->app->scoped(AppSettingsService::class);
+        $this->app->bind(LoginResponseContract::class, LoginResponse::class);
         $this->app->scoped(CacheInvalidationService::class);
         $this->app->scoped(RequestLookupContext::class);
         $this->app->singleton(StorefrontCacheService::class);

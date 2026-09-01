@@ -6,6 +6,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
 $is_enable_xhprof = false;
+$time_zone        = getenv('TZ') ?: 'Europe/Bucharest';
+
+date_default_timezone_set($time_zone);
 
 if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php') === false && $is_enable_xhprof) {
 	$dir_storage = __DIR__ . '/../storage/';
