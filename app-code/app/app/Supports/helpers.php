@@ -1090,15 +1090,9 @@ if (!function_exists('string_keyed_array')) {
             return [];
         }
 
-        $result = [];
-
-        foreach ($value as $key => $item) {
-            if (is_string($key)) {
-                $result[$key] = $item;
-            }
-        }
-
-        return $result;
+        return array_filter($value, function ($key) {
+            return is_string($key);
+        }, ARRAY_FILTER_USE_KEY);
     }
 }
 

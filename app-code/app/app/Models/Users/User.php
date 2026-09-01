@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Override;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -24,22 +25,18 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $lastname
  * @property int|null $user_group_id
  * @property string $email
- * @property int|null $user_group_id
- * @property string $email
  */
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
-    use HasPanelShield {
-        HasPanelShield::canAccessPanel as shieldCanAccessPanel;
-    }
+    use HasPanelShield;
     use HasRoles;
     use Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass-assignable.
      *
      * @var list<string>
      */
@@ -71,7 +68,7 @@ class User extends Authenticatable implements FilamentUser
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -82,17 +79,19 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    #[\Override]
+    #[Override]
     public function canAccessPanel(Panel $panel): bool
     {
         if ($this->is_active === false) {
             return false;
         }
 
-        return $this->shieldCanAccessPanel($panel);
+        return $this->hasAnyRole(
+            ...$this->getRoleNames()->toArray()
+        );
     }
 
-    #[\Override]
+    #[Override]
     protected static function booted(): void
     {
         static::saving(function (User $user) {
