@@ -6,6 +6,8 @@
 
 @extends('storefront.layouts.main')
 
+@section('title', '404')
+
 @section('content')
     <section class="section not-found-page"
              id="not-found-page">

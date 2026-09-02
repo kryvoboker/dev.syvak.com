@@ -1,5 +1,7 @@
 @extends('storefront.layouts.main')
 
+@section('title', strip_tags(__('storefront/pages/checkout.title')))
+
 @prepend('styles')
     @vite([
         'node_modules/choices.js/src/styles/choices.scss',

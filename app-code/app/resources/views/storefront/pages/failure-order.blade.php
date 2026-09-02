@@ -11,6 +11,8 @@
 
 @extends('storefront.layouts.main')
 
+@section('title', strip_tags($title ?? __('storefront/failure.fallbacks.title')))
+
 @section('content')
     <section class="section failure-order"
              id="failure-order" data-failure-page

@@ -2,6 +2,8 @@
     $page_type = $page_type ?? try_detect_page_type();
     $top_entrypoint_for_module = 'top';
     $bottom_entrypoint_for_module = 'bottom';
+    $app_env = config('app.env', '');
+    $app_name = str_replace('(' . $app_env . ')', '', config('app.name', ''));
 @endphp
 
 <!doctype html>
@@ -13,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $page_title ?? config('app.name') }}</title>
+    <title>@yield('title', strip_tags($page_title ?? $app_name))</title>
 
     <!-- Preconnect to speed up font handshake -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

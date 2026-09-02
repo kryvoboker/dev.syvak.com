@@ -1,4 +1,10 @@
+@php
+    $page_title_without_html = strip_tags((string) $product_view_data['title']);
+@endphp
+
 @extends('storefront.layouts.main')
+
+@section('title', $page_title_without_html)
 
 @push('styles')
     @vite(['node_modules/@fancyapps/ui/dist/fancybox/fancybox.css'])
@@ -33,7 +39,7 @@
                                                     sizes="100vw"
                                                     width="{{ $gallery_image_data['width'] }}"
                                                     height="{{ $gallery_image_data['height'] }}"
-                                                    alt="{{ strip_tags((string) $product_view_data['title']) }}"
+                                                    alt="{{ $page_title_without_html }}"
                                                 />
                                             </a>
                                         </div>
@@ -50,7 +56,7 @@
                                             sizes="100vw"
                                             width="{{ $product_view_data['main_image']['width'] }}"
                                             height="{{ $product_view_data['main_image']['height'] }}"
-                                            alt="{{ strip_tags((string) $product_view_data['title']) }}"
+                                            alt="{{ $page_title_without_html }}"
                                         />
                                     </a>
                                 @endif
@@ -88,7 +94,7 @@
                                     sizes="100vw"
                                     width="{{ $gallery_image_data['width'] }}"
                                     height="{{ $gallery_image_data['height'] }}"
-                                    alt="{{ strip_tags((string) $product_view_data['title']) }}"
+                                    alt="{{ $page_title_without_html }}"
                                 />
                             </button>
                         @endforeach

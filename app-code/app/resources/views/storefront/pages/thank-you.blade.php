@@ -6,10 +6,16 @@
     $summary = $thank_you_data['summary'] ?? [];
     $visible_products = array_slice($products, 0, 1);
     $hidden_products = array_slice($products, 1);
-
 @endphp
 
 @extends('storefront.layouts.main')
+
+@if(($order_found ?? false) === false)
+    @section('title', strip_tags(__('storefront/pages/thank-you.not_found.heading')))
+@else
+    @section('title', strip_tags(__('storefront/pages/thank-you.heading')))
+@endif
+
 
 @section('content')
     <x-storefront::common.breadcrumbs :breadcrumbs="$breadcrumbs ?? []"/>
