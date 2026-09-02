@@ -1,5 +1,7 @@
 @extends('storefront.layouts.main')
 
+@section('title', strip_tags($category_title))
+
 @section('content')
     <x-storefront::common.breadcrumbs
         :breadcrumbs="$breadcrumbs"

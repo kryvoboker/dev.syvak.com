@@ -10,6 +10,8 @@
 
 @extends('storefront.layouts.main')
 
+@section('title', strip_tags($contacts_data['title'] ?? __('storefront/contacts.fallbacks.title')))
+
 @section('content')
     <section class="section contacts-page" id="contacts-page">
         <div class="container">
