@@ -351,8 +351,8 @@ readonly class FilterProductsAction
     /**
      * @param  array<string, mixed>  $validated_data
      * @param Collection<int, CatalogFilterGroup> $filter_groups
-     * @psalm-param Collection<int, CatalogFilterGroup> $filter_groups
      * @param Builder<Product> $query
+     * @psalm-param Collection<int, CatalogFilterGroup> $filter_groups
      * @return Builder<Product>
      */
     private function applyAttributeFilters(
@@ -671,8 +671,8 @@ readonly class FilterProductsAction
 
     /**
      * @param Collection<int, CatalogFilterGroup> $filter_groups
-     * @psalm-param Collection<int, CatalogFilterGroup> $filter_groups
      * @param array<string, mixed> $validated_data
+     * @psalm-param Collection<int, CatalogFilterGroup> $filter_groups
      * @return array<int|string, array<string, mixed>>
      * @psalm-suppress InvalidTemplateParam
      */

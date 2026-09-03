@@ -79,6 +79,12 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    /**
+     * @param Panel $panel
+     *
+     * @return bool
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     #[Override]
     public function canAccessPanel(Panel $panel): bool
     {
@@ -86,9 +92,10 @@ class User extends Authenticatable implements FilamentUser
             return false;
         }
 
-        return $this->hasAnyRole(
-            ...$this->getRoleNames()->toArray()
-        );
+        /** @var array<int, string> $role_names */
+        $role_names = $this->getRoleNames()->toArray();
+
+        return $this->hasAnyRole($role_names);
     }
 
     #[Override]
