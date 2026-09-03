@@ -39,7 +39,7 @@
                     <div class="min-w-0">
                         <div class="flex flex-col gap-6">
                             <p class="text-lg text-light-gray md:text-2xl">
-                                {{ __('storefront/pages/thank-you.labels.order_number', ['number' => $thank_you_data['order_number'] ?? '—']) }}
+                                {{ __('storefront/pages/thank-you.labels.order_number', ['number' => $thank_you_data['order_id'] ?? '—']) }}
                             </p>
 
                             <div class="grid gap-4 text-base text-white md:grid-cols-2 md:text-lg">
