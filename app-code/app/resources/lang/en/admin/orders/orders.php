@@ -13,6 +13,7 @@ return [
         'order_status' => 'Order Status',
         'payment_status' => 'Payment Status',
         'shipping_method' => 'Shipping Method',
+        'no_call' => 'Do not call to confirm the order',
         'added_at' => 'Added At',
         'deleted_at' => 'Deleted At',
     ],
@@ -34,6 +35,16 @@ return [
     ],
     'placeholders' => [
         'not_deleted' => 'Not deleted',
+    ],
+    'options' => [
+        'no_call' => [
+            'yes' => 'Yes',
+            'no' => 'No',
+        ],
+        'promo_product' => [
+            'active' => 'Active',
+            'inactive' => 'Inactive',
+        ],
     ],
     'actions' => [
         'soft_delete' => 'Delete',
@@ -152,6 +163,7 @@ return [
     ],
     'tabs' => [
         'general' => 'General',
+        'promo_code' => 'Promo Code',
         'customer' => 'Customer',
         'shipping' => 'Shipping',
         'payments' => 'Payments',
@@ -163,6 +175,7 @@ return [
     ],
     'sections' => [
         'general' => 'General Information',
+        'promo_code' => 'Promo Code Information',
         'customer' => 'Customer Information',
         'shipping' => 'Shipping Information',
         'currency' => 'Currency Information',
@@ -184,6 +197,14 @@ return [
         'last_name' => 'Last Name',
         'email' => 'Email',
         'telephone' => 'Telephone',
+        'no_call' => 'Do not call to confirm the order',
+        'promo_code' => 'Promo Code',
+        'promo_type' => 'Promo Code Type',
+        'discount_type' => 'Discount Type',
+        'promo_discount_amount' => 'Promo Code Discount Amount',
+        'promo_products' => 'Products covered by promo code',
+        'promo_product_status' => 'Promo code status',
+        'force_promo_product' => 'Apply promo code forcibly',
         'shipping_method' => 'Shipping Method',
         'shipping_cost' => 'Shipping Cost',
         'shipping_cost_enabled' => 'Include shipping cost in order total',

@@ -34,6 +34,7 @@ final class PromoCodeService
         ?int $user_id = null,
         ?int $user_group_id = null,
         ?string $locale = null,
+        ?int $ignore_order_id = null,
     ): array {
         $code = Str::squish(string_value($code));
 
@@ -128,6 +129,8 @@ final class PromoCodeService
         ?int $user_id = null,
         ?int $user_group_id = null,
         ?string $locale = null,
+        ?int $ignore_order_id = null,
+        array $forced_product_ids = [],
     ): array {
         if (! $promo_code->isWithinActivePeriod()) {
             return $this->invalidResult('expired', $this->resolveErrorMessage($promo_code, 'expired', $locale));
@@ -139,7 +142,7 @@ final class PromoCodeService
 
         $consumer_key = $this->resolveConsumerKey($user_id);
 
-        if (! $this->hasAvailableUsage($promo_code, $user_id, $user_group_id, $consumer_key)) {
+        if (! $this->hasAvailableUsage($promo_code, $user_id, $user_group_id, $consumer_key, $ignore_order_id)) {
             return $this->invalidResult('usage_limit', $this->resolveErrorMessage($promo_code, 'usage_limit', $locale));
         }
 
@@ -151,7 +154,7 @@ final class PromoCodeService
         }
 
         $currency_code = string_value(Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code')));
-        $item_totals = $this->resolveEligibleItemTotals($promo_code, $cart_items);
+        $item_totals = $this->resolveEligibleItemTotals($promo_code, $cart_items, $forced_product_ids);
         $non_product_total = max(0, $current_total - float_value(Arr::get($totals_data, 'items_subtotal', 0)));
         $base_amount = (float) $item_totals['eligible_subtotal'] + (float) $non_product_total;
 
@@ -210,9 +213,11 @@ final class PromoCodeService
             );
 
             Log::channel('daily')->info('[PromoCodeService] promo code consumed', [
-                'promo_code_id' => $promo_code->getKey(),
-                'order_id' => $order->getKey(),
-                'user_id' => $user_id,
+                    'promo_code_id' => $promo_code->getKey(),
+                    'order_id' => $order->getKey(),
+                    'discount_type' => $promo_code->discount_type,
+                    'promo_type' => $promo_code->promo_type,
+                    'user_id' => $user_id,
                 'user_group_id' => $user_group_id,
             ]);
 
@@ -224,10 +229,34 @@ final class PromoCodeService
      * @param array<int, array<string, mixed>> $cart_items
      * @return array{eligible_subtotal:float, non_discounted_subtotal:float, rrc_subtotal:float, has_discounted_products:bool}
      */
-    private function resolveEligibleItemTotals(PromoCode $promo_code, array $cart_items): array
+    public function isProductEligible(PromoCode $promo_code, int $product_id): bool
     {
-        $product_ids = $promo_code->products->modelKeys();
-        $category_ids = $promo_code->categories->modelKeys();
+        $product_ids = array_map('integer_value', $promo_code->products->modelKeys());
+        $category_ids = array_map('integer_value', $promo_code->categories->modelKeys());
+
+        if ($product_ids === [] && $category_ids === []) {
+            return true;
+        }
+
+        if (in_array($product_id, $product_ids, true)) {
+            return true;
+        }
+
+        return Product::query()
+            ->whereKey($product_id)
+            ->whereHas('categories', fn ($query) => $query->whereIn('categories.id', $category_ids))
+            ->exists();
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $cart_items
+     * @param array<int, bool> $forced_product_ids
+     * @return array{eligible_subtotal:float, non_discounted_subtotal:float, rrc_subtotal:float, has_discounted_products:bool}
+     */
+    private function resolveEligibleItemTotals(PromoCode $promo_code, array $cart_items, array $forced_product_ids = []): array
+    {
+        $product_ids = array_map('integer_value', $promo_code->products->modelKeys());
+        $category_ids = array_map('integer_value', $promo_code->categories->modelKeys());
         $has_scope = $product_ids !== [] || $category_ids !== [];
         $eligible_subtotal = 0.0;
         $non_discounted_subtotal = 0.0;
@@ -243,7 +272,7 @@ final class PromoCodeService
                 || in_array($product_id, $product_ids, true)
                 || array_intersect($product_categories[$product_id] ?? [], $category_ids) !== [];
 
-            if (! $is_in_scope) {
+            if (! $is_in_scope && ! ($forced_product_ids[$product_id] ?? false)) {
                 continue;
             }
 
@@ -299,9 +328,16 @@ final class PromoCodeService
             || ($user_group_id !== null && in_array($user_group_id, $selected_group_ids, true));
     }
 
-    private function hasAvailableUsage(PromoCode $promo_code, ?int $user_id, ?int $user_group_id, string $consumer_key): bool
-    {
-        $usage_query = PromoCodeUsage::query()->where('promo_code_id', $promo_code->getKey());
+    private function hasAvailableUsage(
+        PromoCode $promo_code,
+        ?int $user_id,
+        ?int $user_group_id,
+        string $consumer_key,
+        ?int $ignore_order_id = null,
+    ): bool {
+        $usage_query = PromoCodeUsage::query()
+            ->where('promo_code_id', $promo_code->getKey())
+            ->when($ignore_order_id !== null, fn ($query) => $query->where('order_id', '!=', $ignore_order_id));
 
         if (
             $promo_code->global_usage_limit !== null

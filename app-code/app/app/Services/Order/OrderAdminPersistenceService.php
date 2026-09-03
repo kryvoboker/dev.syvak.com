@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Services\Order;
 
+use App\Enums\Marketing\PromoCodeProductOverrideEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
+use App\Models\Marketing\PromoCode;
 use App\Models\Orders\OrderPayments;
+use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
+use App\Services\Marketing\PromoCodeService;
 use App\Supports\Services\CacheInvalidationService;
 use App\Supports\Services\Currency\ConvertPrice;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -30,6 +34,7 @@ final readonly class OrderAdminPersistenceService
         private OrderAdminOptionsService $order_admin_options_service,
         private ConvertPrice $convert_price,
         private CacheInvalidationService $cache_invalidation_service,
+        private PromoCodeService $promo_code_service,
     ) {
     }
 
@@ -62,7 +67,13 @@ final readonly class OrderAdminPersistenceService
             $this->updateCustomer($order, string_keyed_array($data['customer'] ?? []), $changed_sections);
             $this->updateShipping($order, string_keyed_array($data['shipping'] ?? []), $changed_sections);
             $this->updateShippingCost($order, $data, $changed_sections);
-            $this->updateProducts($order, $this->listArray($data['products'] ?? []), $changed_sections, $currency_changed);
+            $promo_code_data = string_keyed_array($data['promo_code'] ?? []);
+            $products = $this->mergePromoProducts(
+                $this->listArray($data['products'] ?? []),
+                $this->listArray($promo_code_data['products'] ?? []),
+            );
+            $this->updateProducts($order, $products, $changed_sections, $currency_changed);
+            $this->updatePromoCode($order, $promo_code_data, $changed_sections);
             $this->updatePayments($order, $this->listArray($data['payments'] ?? []), $changed_sections);
 
             $this->recalculateOrderTotal($order);
@@ -224,12 +235,201 @@ final readonly class OrderAdminPersistenceService
             'last_name' => string_value(Arr::get($data, 'last_name', $customer->last_name)),
             'email' => nullable_string(Arr::get($data, 'email', $customer->email)),
             'telephone' => string_value(Arr::get($data, 'telephone', $customer->telephone)),
+            'no_call' => (bool) Arr::get($data, 'no_call', $customer->no_call),
         ]);
 
         if ($customer->isDirty()) {
             $customer->save();
             $changed_sections[] = 'customer';
         }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<int, string> $changed_sections
+     */
+    private function updatePromoCode(Orders $order, array $data, array &$changed_sections): void
+    {
+        $promo_code_id = $this->nullableInteger(Arr::get($data, 'id'));
+        $usage = $order->promoCodeUsages()->latest('id')->first();
+        $promo_total = $order->totals()->where('total_type', 'promo_code')->first();
+
+        if ($promo_code_id === null) {
+            if ($usage !== null) {
+                $usage->delete();
+                $changed_sections[] = 'promo_code';
+            }
+
+            if ($promo_total !== null) {
+                $promo_total->delete();
+                $changed_sections[] = 'totals';
+            }
+
+            return;
+        }
+
+        $promo_code = PromoCode::query()
+            ->with(['products:id', 'categories:id'])
+            ->find($promo_code_id);
+
+        if (! $promo_code instanceof PromoCode) {
+            return;
+        }
+
+        $order->loadMissing(['products', 'customer']);
+        $items_subtotal = (float) $order->products->sum('line_total');
+        $cart_items = $order->products->map(fn ($product): array => [
+            'product_id' => $product->product_id,
+            'line_total' => (float) $product->line_total,
+            'rrc_line_total' => (float) $product->line_total + (float) ($product->discount ?? 0),
+            'is_discounted' => (float) ($product->discount ?? 0) > 0,
+        ])->all();
+        $forced_product_ids = collect($this->listArray($data['products'] ?? []))
+            ->filter(fn (mixed $item): bool => is_array($item) && (bool) ($item['force_apply'] ?? false))
+            ->map(fn (array $item): ?int => $this->nullableInteger($item['product_id'] ?? null))
+            ->filter()
+            ->values()
+            ->all();
+        $base_total = (float) $order->total - (float) ($promo_total?->value ?? 0);
+        $calculation = $this->promo_code_service->validateAndCalculate(
+            $promo_code,
+            [
+                'grand_total' => $base_total,
+                'items_subtotal' => $items_subtotal,
+                'currency_code' => $order->currency_code,
+            ],
+            $cart_items,
+            $order->customer?->user_id,
+            $order->customer?->user_group_id,
+            $order->language_code,
+            $order->getKey(),
+            $forced_product_ids,
+        );
+
+        if (($calculation['is_valid'] ?? false) !== true) {
+            $usage?->delete();
+            $promo_total?->delete();
+            $changed_sections[] = 'promo_code';
+            $changed_sections[] = 'totals';
+
+            return;
+        }
+
+        if ($usage === null || integer_value($usage->promo_code_id) !== $promo_code_id) {
+            $usage?->delete();
+            $usage = $order->promoCodeUsages()->create([
+                'promo_code_id' => $promo_code->getKey(),
+                'discount_type' => $promo_code->discount_type,
+                'promo_type' => $promo_code->promo_type,
+                'user_id' => $order->customer?->user_id,
+                'user_group_id' => $order->customer?->user_group_id,
+                'consumer_key' => null,
+                'used_at' => now(),
+            ]);
+            $changed_sections[] = 'promo_code';
+        }
+
+        $this->syncPromoCodeProducts(
+            $order,
+            $usage,
+            $promo_code,
+            $this->listArray($data['products'] ?? []),
+            $changed_sections,
+        );
+
+        $discount_value = -float_value($calculation['discount_amount'] ?? 0);
+
+        if ($promo_total === null) {
+            $order->totals()->create([
+                'total_type' => 'promo_code',
+                'name' => __('storefront/default.cart.totals.promo_code', ['promo_code' => $promo_code->code]),
+                'value' => $discount_value,
+                'sort_order' => integer_value($order->totals()->max('sort_order')) + 1,
+            ]);
+            $changed_sections[] = 'totals';
+        } elseif ((float) $promo_total->value !== $discount_value) {
+            $promo_total->value = $discount_value;
+            $promo_total->name = __('storefront/default.cart.totals.promo_code', ['promo_code' => $promo_code->code]);
+            $promo_total->save();
+            $changed_sections[] = 'totals';
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $products
+     * @param array<int, mixed> $promo_products
+     * @return array<int, mixed>
+     */
+    private function mergePromoProducts(array $products, array $promo_products): array
+    {
+        foreach ($promo_products as $promo_product) {
+            if (! is_array($promo_product)) {
+                continue;
+            }
+
+            $order_product_id = $this->nullableInteger($promo_product['order_product_id'] ?? null);
+            $product_id = $this->nullableInteger($promo_product['product_id'] ?? null);
+            $index = collect($products)->search(fn (mixed $product): bool => is_array($product)
+                && $order_product_id !== null
+                && $this->nullableInteger($product['id'] ?? null) === $order_product_id);
+
+            $values = array_filter([
+                'id' => $order_product_id,
+                'product_id' => $product_id,
+                'quantity' => $promo_product['quantity'] ?? null,
+                'unit_price' => $promo_product['unit_price'] ?? null,
+                'discount' => $promo_product['discount'] ?? null,
+            ], static fn (mixed $value): bool => $value !== null);
+
+            if ($index !== false) {
+                $products[$index] = [...string_keyed_array($products[$index]), ...$values];
+            } elseif ($product_id !== null) {
+                $products[] = $values;
+            }
+        }
+
+        return array_values($products);
+    }
+
+    /**
+     * @param array<int, mixed> $promo_products
+     * @param array<int, string> $changed_sections
+     */
+    private function syncPromoCodeProducts(
+        Orders $order,
+        \App\Models\Marketing\PromoCodeUsage $usage,
+        PromoCode $promo_code,
+        array $promo_products,
+        array &$changed_sections,
+    ): void {
+        $submitted = collect($promo_products)
+            ->filter('is_array')
+            ->keyBy(fn (array $item): string => (string) $this->nullableInteger($item['order_product_id'] ?? null));
+
+        foreach ($order->products as $order_product) {
+            $state = $submitted->get((string) $order_product->getKey(), []);
+            $is_eligible = $this->promo_code_service->isProductEligible($promo_code, (int) $order_product->product_id);
+            $force_apply = is_array($state) && (bool) ($state['force_apply'] ?? false);
+            $promo_product = OrderPromoCodeProducts::query()->firstOrNew([
+                'promo_code_usage_id' => $usage->getKey(),
+                'order_product_id' => $order_product->getKey(),
+            ]);
+            $promo_product->fill([
+                'order_id' => $order->getKey(),
+                'product_id' => $order_product->product_id,
+                'product_variant_id' => $order_product->product_variant_id,
+                'is_eligible' => $is_eligible,
+                'override' => $force_apply ? PromoCodeProductOverrideEnum::Force : null,
+                'discount_amount' => 0,
+            ]);
+
+            if ($promo_product->isDirty()) {
+                $promo_product->save();
+                $changed_sections[] = 'promo_code';
+            }
+        }
+
+        $changed_sections[] = 'promo_code';
     }
 
     /**
@@ -632,6 +832,7 @@ final readonly class OrderAdminPersistenceService
                 'last_name',
                 'email',
                 'telephone',
+                'no_call',
             ]),
             'shipping' => $order->shipping?->only([
                 'method',
@@ -722,6 +923,7 @@ final readonly class OrderAdminPersistenceService
                 'last_name' => 'last_name',
                 'email' => 'email',
                 'telephone' => 'telephone',
+                'no_call' => 'no_call',
             ],
         );
 

@@ -6,6 +6,8 @@ namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
 use App\Models\ApplicationSettings\Currency;
+use App\Models\Marketing\PromoCode;
+use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
 use App\Services\Order\OrderAdminDeliveryService;
 use App\Services\Order\OrderAdminOptionsService;
@@ -57,6 +59,8 @@ class EditOrder extends EditRecord
                     ->orderByDesc('created_at')
                     ->orderByDesc('id');
             },
+            'promoCodeUsages.promoCode',
+            'promoCodeUsages.products.orderProduct',
             'status.descriptions' => function ($query) use ($language_id): void {
                 $query
                     ->select(['id', 'order_status_id', 'language_id', 'name'])
@@ -99,8 +103,58 @@ class EditOrder extends EditRecord
             $shipping_has_cost,
         );
         $data['histories'] = $record->histories->toArray();
+        $promo_code_usage = $record->promoCodeUsages->sortByDesc('id')->first();
+        $promo_code_total = $record->totals->firstWhere('total_type', 'promo_code');
+        $data['promo_code'] = $promo_code_usage === null ? [] : [
+            'id' => $promo_code_usage->promo_code_id,
+            'usage_id' => $promo_code_usage->getKey(),
+            'code' => $promo_code_usage->promoCode?->code,
+            'promo_type' => nullable_string($promo_code_usage->getRawOriginal('promo_type')),
+            'discount_type' => nullable_string($promo_code_usage->getRawOriginal('discount_type')),
+            'discount_amount' => $promo_code_total === null ? 0 : abs((float) $promo_code_total->value),
+            'products' => self::preparePromoProducts($record->products, $promo_code_usage),
+        ];
 
         return $data;
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Collection<int, \App\Models\Orders\OrderProducts> $order_products
+     * @return array<int, array<string, mixed>>
+     */
+    private static function preparePromoProducts(
+        \Illuminate\Database\Eloquent\Collection $order_products,
+        \App\Models\Marketing\PromoCodeUsage $usage,
+    ): array {
+        $snapshots = $usage->products->keyBy('order_product_id');
+        $promo_code = $usage->promoCode;
+
+        return $order_products
+            ->map(function ($order_product) use ($snapshots, $promo_code): array {
+                $snapshot = $snapshots->get($order_product->getKey());
+
+                return [
+                    'id' => $snapshot instanceof OrderPromoCodeProducts ? $snapshot->getKey() : null,
+                    'order_product_id' => $order_product->getKey(),
+                    'product_id' => $order_product->product_id,
+                    'is_eligible' => $snapshot instanceof OrderPromoCodeProducts
+                        ? $snapshot->is_eligible
+                        : $promo_code instanceof PromoCode
+                            && app(\App\Services\Marketing\PromoCodeService::class)->isProductEligible(
+                                $promo_code,
+                                (int) $order_product->product_id,
+                            ),
+                    'force_apply' => $snapshot instanceof OrderPromoCodeProducts
+                        && $snapshot->override?->value === 'force',
+                    'name' => $order_product->name,
+                    'quantity' => $order_product->quantity,
+                    'unit_price' => $order_product->unit_price,
+                    'discount' => $order_product->discount,
+                    'line_total' => $order_product->line_total,
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**

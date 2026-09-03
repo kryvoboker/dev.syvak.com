@@ -4,17 +4,27 @@ declare(strict_types=1);
 
 namespace App\Models\Marketing;
 
+use App\Enums\Marketing\PromoCodeDiscountTypeEnum;
+use App\Enums\Marketing\PromoCodeTypeEnum;
+use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
 use App\Models\Users\User;
 use App\Models\Users\UserGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property PromoCodeDiscountTypeEnum $discount_type
+ * @property PromoCodeTypeEnum $promo_type
+ */
 class PromoCodeUsage extends Model
 {
     protected $fillable = [
         'promo_code_id',
         'order_id',
+        'discount_type',
+        'promo_type',
         'user_id',
         'user_group_id',
         'consumer_key',
@@ -24,7 +34,11 @@ class PromoCodeUsage extends Model
     #[\Override]
     protected function casts(): array
     {
-        return ['used_at' => 'datetime'];
+        return [
+            'discount_type' => PromoCodeDiscountTypeEnum::class,
+            'promo_type' => PromoCodeTypeEnum::class,
+            'used_at' => 'datetime',
+        ];
     }
 
     /** @phpstan-return BelongsTo<PromoCode, $this>
@@ -57,5 +71,13 @@ class PromoCodeUsage extends Model
     public function userGroup(): BelongsTo
     {
         return $this->belongsTo(UserGroup::class);
+    }
+
+    /** @phpstan-return HasMany<OrderPromoCodeProducts, $this>
+     * @psalm-return HasMany<OrderPromoCodeProducts, self>
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(OrderPromoCodeProducts::class, 'promo_code_usage_id');
     }
 }

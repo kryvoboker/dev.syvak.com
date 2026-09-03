@@ -148,6 +148,7 @@ final readonly class OrderAggregatePersistenceService
             'last_name' => string_value(Arr::get($validated_data, 'last_name', '')),
             'email' => nullable_string(Arr::get($validated_data, 'email')),
             'telephone' => clear_telephone(string_value(Arr::get($validated_data, 'phone', ''))),
+            'no_call' => (bool) Arr::get($validated_data, OrderDataKeyEnum::NoCall->value, false),
         ]);
     }
 

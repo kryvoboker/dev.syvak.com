@@ -12,6 +12,7 @@ use App\Models\Orders\Orders;
 use App\Models\Orders\OrderStatuses;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
+use App\Services\Marketing\PromoCodeAdminOptionsService;
 use App\Services\Order\OrderAdminDeliveryService;
 use App\Services\Order\OrderAdminOptionsService;
 use App\Supports\Services\Currency\ConvertPrice;
@@ -45,6 +46,7 @@ class OrderForm
                 Tabs::make('OrderTabs')
                     ->tabs([
                         self::generalTab(),
+                        self::promoCodeTab(),
                         self::customerTab(),
                         self::shippingTab(),
                         self::paymentsTab(),
@@ -88,6 +90,14 @@ class OrderForm
                             })
                             ->disabled()
                             ->dehydrated(false),
+                        Select::make('customer.no_call')
+                            ->label(__('admin/orders/orders.labels.no_call'))
+                            ->options([
+                                '0' => __('admin/orders/orders.options.no_call.no'),
+                                '1' => __('admin/orders/orders.options.no_call.yes'),
+                            ])
+                            ->required()
+                            ->native(false),
                         SchemaActions::make([
                             RestoreAction::make('restoreOrder')
                                 ->label(__('admin/orders/orders.actions.restore'))
@@ -143,6 +153,137 @@ class OrderForm
                             ->required(),
                     ])
                     ->columns(),
+            ]);
+    }
+
+    private static function promoCodeTab(): Tabs\Tab
+    {
+        return Tabs\Tab::make(__('admin/orders/orders.tabs.promo_code'))
+            ->schema([
+                Section::make(__('admin/orders/orders.sections.promo_code'))
+                    ->schema([
+                        Select::make('promo_code.id')
+                            ->label(__('admin/orders/orders.labels.promo_code'))
+                            ->getSearchResultsUsing(fn (string $search): array => app(PromoCodeAdminOptionsService::class)
+                                ->promoCodeSearchOptions($search))
+                            ->getOptionLabelUsing(fn (int|string|null $value): ?string => app(PromoCodeAdminOptionsService::class)
+                                ->promoCodeLabelById($value))
+                            ->searchable()
+                            ->searchDebounce(1000)
+                            ->optionsLimit(OrderAdminDeliveryService::SEARCH_LIMIT)
+                            ->live()
+                            ->nullable(),
+                        TextInput::make('promo_code.code')
+                            ->label(__('admin/orders/orders.labels.promo_code'))
+                            ->disabled()
+                            ->dehydrated(false),
+                        TextInput::make('promo_code.promo_type')
+                            ->label(__('admin/orders/orders.labels.promo_type'))
+                            ->disabled()
+                            ->dehydrated(false),
+                        TextInput::make('promo_code.discount_type')
+                            ->label(__('admin/orders/orders.labels.discount_type'))
+                            ->disabled()
+                            ->dehydrated(false),
+                        TextInput::make('promo_code.discount_amount')
+                            ->label(__('admin/orders/orders.labels.promo_discount_amount'))
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->suffix(fn (Get $get): string => (string) $get('../../currency_code')),
+                        Repeater::make('promo_code.products')
+                            ->label(__('admin/orders/orders.labels.promo_products'))
+                            ->table([
+                                TableColumn::make(__('admin/orders/orders.labels.product')),
+                                TableColumn::make(__('admin/orders/orders.labels.promo_product_status')),
+                                TableColumn::make(__('admin/orders/orders.labels.force_promo_product')),
+                                TableColumn::make(__('admin/orders/orders.labels.quantity'))->width(120),
+                                TableColumn::make(__('admin/orders/orders.labels.unit_price'))->width(170),
+                                TableColumn::make(__('admin/orders/orders.labels.discount'))->width(170),
+                                TableColumn::make(__('admin/orders/orders.labels.line_total'))->width(170),
+                            ])
+                            ->schema([
+                                Hidden::make('id'),
+                                Hidden::make('order_product_id'),
+                                Hidden::make('is_eligible'),
+                                Select::make('product_id')
+                                    ->label(__('admin/orders/orders.labels.product'))
+                                    ->getSearchResultsUsing(fn (string $search): array => self::searchProducts($search))
+                                    ->getOptionLabelUsing(fn (int|string|null $value): ?string => self::getProductLabel($value))
+                                    ->searchable()
+                                    ->searchDebounce(1000)
+                                    ->optionsLimit(OrderAdminDeliveryService::SEARCH_LIMIT)
+                                    ->live()
+                                    ->afterStateUpdated(function (Get $get, Set $set, int|string|null $state): void {
+                                        self::fillProductSnapshot($set, $state);
+                                        self::recalculateLineAndTotals($get, $set);
+                                    })
+                                    ->disabled(fn (Get $get): bool => ! (bool) $get('is_eligible')
+                                        && ! (bool) $get('force_apply')),
+                                TextInput::make('promo_status')
+                                    ->label(__('admin/orders/orders.labels.promo_product_status'))
+                                    ->formatStateUsing(fn (Get $get): string => (bool) $get('is_eligible')
+                                        || (bool) $get('force_apply')
+                                        ? __('admin/orders/orders.options.promo_product.active')
+                                        : __('admin/orders/orders.options.promo_product.inactive'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                Toggle::make('force_apply')
+                                    ->label(__('admin/orders/orders.labels.force_promo_product'))
+                                    ->live()
+                                    ->visible(fn (Get $get): bool => ! (bool) $get('is_eligible')),
+                                Hidden::make('name'),
+                                Hidden::make('model'),
+                                Hidden::make('sku'),
+                                Hidden::make('ean'),
+                                TextInput::make('quantity')
+                                    ->label(__('admin/orders/orders.labels.quantity'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Get $get, Set $set): void {
+                                        self::recalculateLineAndTotals($get, $set);
+                                    })
+                                    ->disabled(fn (Get $get): bool => ! (bool) $get('is_eligible')
+                                        && ! (bool) $get('force_apply')),
+                                TextInput::make('unit_price')
+                                    ->label(__('admin/orders/orders.labels.unit_price'))
+                                    ->numeric()
+                                    ->required()
+                                    ->suffix(fn (Get $get): string => (string) $get('../../../../currency_code'))
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Get $get, Set $set): void {
+                                        self::recalculateLineAndTotals($get, $set);
+                                    })
+                                    ->disabled(fn (Get $get): bool => ! (bool) $get('is_eligible')
+                                        && ! (bool) $get('force_apply')),
+                                TextInput::make('discount')
+                                    ->label(__('admin/orders/orders.labels.discount'))
+                                    ->numeric()
+                                    ->nullable()
+                                    ->suffix(fn (Get $get): string => (string) $get('../../../../currency_code'))
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Get $get, Set $set): void {
+                                        self::recalculateLineAndTotals($get, $set);
+                                    })
+                                    ->disabled(fn (Get $get): bool => ! (bool) $get('is_eligible')
+                                        && ! (bool) $get('force_apply')),
+                                TextInput::make('line_total')
+                                    ->label(__('admin/orders/orders.labels.line_total'))
+                                    ->numeric()
+                                    ->suffix(fn (Get $get): string => (string) $get('../../../../currency_code'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ])
+                            ->defaultItems(0)
+                            ->addable()
+                            ->deletable()
+                            ->reorderable(false)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->visible(fn (Get $get): bool => filled($get('promo_code.id'))),
             ]);
     }
 

@@ -8,6 +8,7 @@ use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Products\Product;
+use App\Models\Marketing\PromoCode;
 use App\Models\Users\User;
 use App\Models\Users\UserGroup;
 use Illuminate\Database\Eloquent\Builder;
@@ -131,6 +132,44 @@ final class PromoCodeAdminOptionsService
         $currency = (new Currency())->getDefaultActiveCurrency();
 
         return $currency === null ? null : integer_value($currency->getKey());
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function promoCodeSearchOptions(string $search = ''): array
+    {
+        $search = Str::trim($search);
+
+        return PromoCode::query()
+            ->where('is_active', true)
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $nested_query) use ($search): void {
+                    $nested_query
+                        ->whereLike('code', "%{$search}%")
+                        ->orWhereLike('name', "%{$search}%");
+                });
+            })
+            ->orderBy('code')
+            ->limit(50)
+            ->get()
+            ->mapWithKeys(fn (PromoCode $promo_code): array => [
+                string_value($promo_code->getKey()) => sprintf('%s — %s', $promo_code->code, $promo_code->name),
+            ])
+            ->all();
+    }
+
+    public function promoCodeLabelById(int|string|null $id): ?string
+    {
+        if (! is_numeric($id)) {
+            return null;
+        }
+
+        $promo_code = PromoCode::query()->find(integer_value($id));
+
+        return $promo_code instanceof PromoCode
+            ? sprintf('%s — %s', $promo_code->code, $promo_code->name)
+            : null;
     }
 
     /**

@@ -13,6 +13,8 @@ return new class () extends Migration {
             $table->id();
             $table->foreignId('promo_code_id')->constrained('promo_codes')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('order_id')->constrained('orders')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('discount_type', 20);
+            $table->string('promo_type', 20);
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('user_group_id')->nullable()->constrained('user_groups')->nullOnDelete();
             $table->string('consumer_key', 255)->nullable();
