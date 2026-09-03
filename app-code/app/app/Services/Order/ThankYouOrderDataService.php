@@ -19,6 +19,10 @@ use Throwable;
 final readonly class ThankYouOrderDataService
 {
     /**
+     * @param string $order_number
+     * @param string $locale
+     *
+     * @throws Throwable
      * @return array<string, mixed>|null
      */
     public function getByOrderNumber(string $order_number, string $locale): ?array
@@ -76,6 +80,8 @@ final readonly class ThankYouOrderDataService
     }
 
     /**
+     * @param Orders $order
+     *
      * @return array<string, mixed>
      */
     private function mapOrder(Orders $order): array
@@ -86,6 +92,7 @@ final readonly class ThankYouOrderDataService
         $payment = $order->payments->first();
 
         return [
+            'order_id' => integer_value($order->id),
             'order_number' => string_value($order->order_number),
             'status' => string_value($order->order_status_name ?: $order->status?->code ?: '—'),
             'customer' => [
@@ -124,6 +131,10 @@ final readonly class ThankYouOrderDataService
     }
 
     /**
+     * @param OrderProducts $order_product
+     * @param string        $currency_code
+     * @param float         $exchange_rate
+     *
      * @return array<string, mixed>
      * @psalm-suppress InvalidTemplateParam
      */
@@ -182,6 +193,12 @@ final readonly class ThankYouOrderDataService
             ->all();
     }
 
+    /**
+     * @param string|null $code
+     * @param string|null $stored_method
+     *
+     * @return string
+     */
     private function resolveDeliveryMethod(?string $code, ?string $stored_method): string
     {
         if ($code === null || $code === '') {
@@ -205,6 +222,13 @@ final readonly class ThankYouOrderDataService
         return $localized_method !== $translation_key ? $localized_method : string_value($stored_method ?: $code);
     }
 
+    /**
+     * @param string|null $city
+     * @param string|null $address
+     * @param string|null $delivery_point
+     *
+     * @return string
+     */
     private function resolveDeliveryAddress(?string $city, ?string $address, ?string $delivery_point): string
     {
         return collect([$city, $address, $delivery_point])
@@ -213,6 +237,14 @@ final readonly class ThankYouOrderDataService
             ->implode(', ');
     }
 
+    /**
+     * @param Orders         $order
+     * @param TotalTypesEnum $type
+     * @param string         $currency_code
+     * @param float          $exchange_rate
+     *
+     * @return string
+     */
     private function formatTotal(Orders $order, TotalTypesEnum $type, string $currency_code, float $exchange_rate): string
     {
         $total = $order->totals->first(function ($item) use ($type): bool {
@@ -226,6 +258,13 @@ final readonly class ThankYouOrderDataService
             : '—';
     }
 
+    /**
+     * @param float  $amount
+     * @param string $currency_code
+     * @param float  $exchange_rate
+     *
+     * @return string
+     */
     private function formatMoney(float $amount, string $currency_code, float $exchange_rate): string
     {
         return replace_currency_symbol_to_code(format_price($amount, $currency_code, $exchange_rate));
