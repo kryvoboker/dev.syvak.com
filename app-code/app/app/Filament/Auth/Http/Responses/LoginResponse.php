@@ -11,23 +11,23 @@ use Filament\Pages\Dashboard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
-use Livewire\Features\SupportRedirects\Redirector;
 
 class LoginResponse implements LoginResponseContract
 {
     /**
      * @param $request
      *
-     * @return RedirectResponse|Redirector
      * @throws NoDefaultPanelSetException
+     * @return RedirectResponse
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function toResponse($request): RedirectResponse|Redirector
+    public function toResponse($request): RedirectResponse
     {
         $locale = $this->resolveLocale();
         $panel = Filament::getCurrentOrDefaultPanel();
         $dashboard_url = Dashboard::getUrl(
             parameters: ['locale' => $locale],
-            panel: $panel->getId(),
+            panel: $panel?->getId(),
         );
 
         return redirect()->intended($dashboard_url);
