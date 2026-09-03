@@ -26,3 +26,7 @@ parameters:
             - Modules/*/tests/**
     level: 8
     treatPhpDocTypesAsCertain: true
+    ignoreErrors:
+        -
+            message: '#PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\):.*#'
+            path: app/Filament/Auth/Http/Responses/LoginResponse.php
