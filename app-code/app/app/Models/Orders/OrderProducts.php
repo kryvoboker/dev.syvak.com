@@ -8,6 +8,7 @@ use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -86,5 +87,13 @@ class OrderProducts extends Model
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
+    }
+
+    /** @phpstan-return HasOne<OrderPromoCodeProducts, $this>
+     * @psalm-return HasOne<OrderPromoCodeProducts, self>
+     */
+    public function promoCodeProduct(): HasOne
+    {
+        return $this->hasOne(OrderPromoCodeProducts::class, 'order_product_id');
     }
 }

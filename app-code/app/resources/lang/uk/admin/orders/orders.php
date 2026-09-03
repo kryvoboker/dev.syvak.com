@@ -13,6 +13,7 @@ return [
         'order_status' => 'Статус замовлення',
         'payment_status' => 'Статус оплати',
         'shipping_method' => 'Спосіб доставки',
+        'no_call' => 'Не дзвонити для підтвердження замовлення',
         'added_at' => 'Додано',
         'deleted_at' => 'Видалено',
     ],
@@ -34,6 +35,16 @@ return [
     ],
     'placeholders' => [
         'not_deleted' => 'Не видалено',
+    ],
+    'options' => [
+        'no_call' => [
+            'yes' => 'Так',
+            'no' => 'Ні',
+        ],
+        'promo_product' => [
+            'active' => 'Активний',
+            'inactive' => 'Неактивний',
+        ],
     ],
     'actions' => [
         'soft_delete' => 'Видалити',
@@ -152,6 +163,7 @@ return [
     ],
     'tabs' => [
         'general' => 'Загальні дані',
+        'promo_code' => 'Промокод',
         'customer' => 'Покупець',
         'shipping' => 'Доставка',
         'payments' => 'Оплати',
@@ -163,6 +175,7 @@ return [
     ],
     'sections' => [
         'general' => 'Загальна інформація',
+        'promo_code' => 'Інформація про промокод',
         'customer' => 'Інформація про покупця',
         'shipping' => 'Інформація про доставку',
         'currency' => 'Інформація про валюту',
@@ -184,6 +197,14 @@ return [
         'last_name' => 'Прізвище',
         'email' => 'Електронна пошта',
         'telephone' => 'Телефон',
+        'no_call' => 'Не дзвонити для підтвердження замовлення',
+        'promo_code' => 'Промокод',
+        'promo_type' => 'Тип промокоду',
+        'discount_type' => 'Тип знижки',
+        'promo_discount_amount' => 'Сума знижки за промокодом',
+        'promo_products' => 'Товари, до яких застосовано промокод',
+        'promo_product_status' => 'Статус промокоду',
+        'force_promo_product' => 'Примусово застосувати промокод',
         'shipping_method' => 'Спосіб доставки',
         'shipping_cost' => 'Вартість доставки',
         'shipping_cost_enabled' => 'Включати вартість доставки в суму замовлення',

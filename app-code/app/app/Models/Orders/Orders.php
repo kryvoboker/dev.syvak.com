@@ -7,6 +7,7 @@ namespace App\Models\Orders;
 use App\Enums\Cart\CartModeEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Marketing\PromoCodeUsage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -32,6 +33,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderTotals> $totals
  * @property-read OrderCustomers|null $customer
  * @property-read OrderShippings|null $shipping
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PromoCodeUsage> $promoCodeUsages
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderPromoCodeProducts> $promoCodeProducts
  */
 class Orders extends Model
 {
@@ -152,5 +155,22 @@ class Orders extends Model
     public function histories(): HasMany
     {
         return $this->hasMany(OrderHistories::class, 'order_id');
+    }
+
+    /**
+     * @phpstan-return HasMany<PromoCodeUsage, $this>
+     * @psalm-return HasMany<PromoCodeUsage, self>
+     */
+    public function promoCodeUsages(): HasMany
+    {
+        return $this->hasMany(PromoCodeUsage::class, 'order_id');
+    }
+
+    /** @phpstan-return HasMany<OrderPromoCodeProducts, $this>
+     * @psalm-return HasMany<OrderPromoCodeProducts, self>
+     */
+    public function promoCodeProducts(): HasMany
+    {
+        return $this->hasMany(OrderPromoCodeProducts::class, 'order_id');
     }
 }

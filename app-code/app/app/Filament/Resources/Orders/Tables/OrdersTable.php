@@ -15,6 +15,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -36,7 +37,7 @@ class OrdersTable
                 $query
                     ->with([
                         'customer' => function ($customer_query): void {
-                            $customer_query->select(['id', 'order_id', 'first_name', 'last_name']);
+                            $customer_query->select(['id', 'order_id', 'first_name', 'last_name', 'no_call']);
                         },
                         'shipping' => function ($shipping_query): void {
                             $shipping_query->select(['id', 'order_id', 'method']);
@@ -135,6 +136,13 @@ class OrdersTable
                 TextColumn::make('shipping.method')
                     ->label(__('admin/orders/orders.columns.shipping_method'))
                     ->toggleable(),
+
+                IconColumn::make('customer.no_call')
+                    ->label(__('admin/orders/orders.columns.no_call'))
+                    ->state(fn (Orders $record): bool => (bool) $record->customer?->no_call)
+                    ->boolean()
+                    ->trueIcon(\Filament\Support\Icons\Heroicon::OutlinedCheck)
+                    ->falseIcon(\Filament\Support\Icons\Heroicon::OutlinedXMark),
 
                 TextColumn::make('added_at')
                     ->label(__('admin/orders/orders.columns.added_at'))

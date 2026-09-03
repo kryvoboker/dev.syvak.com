@@ -239,6 +239,7 @@ class ThankYouControllerTest extends TestCase
             $table->string('last_name')->nullable();
             $table->string('email')->nullable();
             $table->string('telephone')->nullable();
+            $table->boolean('no_call')->default(false);
             $table->timestamps();
         });
         Schema::create('order_shippings', function (Blueprint $table): void {

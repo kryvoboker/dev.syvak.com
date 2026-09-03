@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $last_name
  * @property string $email
  * @property string|null $telephone
+ * @property bool $no_call
  */
 class OrderCustomers extends Model
 {
@@ -29,6 +30,7 @@ class OrderCustomers extends Model
         'last_name',
         'email',
         'telephone',
+        'no_call',
     ];
 
     /**
@@ -41,6 +43,7 @@ class OrderCustomers extends Model
             'order_id' => 'integer',
             'user_id' => 'integer',
             'user_group_id' => 'integer',
+            'no_call' => 'boolean',
         ];
     }
 
