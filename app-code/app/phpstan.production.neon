@@ -23,3 +23,6 @@ parameters:
         -
             message: "#Called 'env' outside of the config directory which returns null when the config is cached, use 'config'.#"
             path: Modules/*/config/*.php
+        -
+            message: '#PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\):.*#'
+            path: app/Models/Users/User.php
