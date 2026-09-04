@@ -52,7 +52,7 @@ final readonly class OrderAggregatePersistenceService
             $currency = $this->resolveCurrency(string_value(Arr::get($cart_data, 'totals.currency_code', '')));
             $order_status = $this->order_lifecycle_service->getDefaultOrderStatus();
             $payment_status = $this->order_lifecycle_service->getDefaultPaymentStatus();
-            $order_number = Str::ulid()->toString();
+            $order_number = Str::lower(Str::ulid()->toString());
             $totals = string_keyed_array(Arr::get($cart_data, 'totals', []));
             $currency_code = $currency instanceof Currency ? $currency->code : '';
             $exchange_rate = float_value(Arr::get($totals, 'exchange_rate', 0));
