@@ -101,7 +101,18 @@ Transforms stored cart items into view/AJAX data. `build()` is the main entry po
 
 ### `App\Services\Marketing\PromoCodeService`
 
-`resolve()` loads a promo code by its normalized Unicode-safe code. `applyToTotals()` validates the active period, identity/usage limits, minimum order, product/category scope, discount mode, and currency fallback, then adds the discount line and metadata to cart totals. `validateAndCalculate()` exposes the calculation contract for server-side revalidation. `consume()` records one successful order usage after payment confirmation.
+`resolve()` loads a promo code by its normalized Unicode-safe code. Promo-code types have different storefront rules:
+
+| Type | Storefront behavior |
+|------|---------------------|
+| `regular` | Applies to eligible products with their regular price. Products with an active product discount are excluded from the storefront calculation. |
+| `super` | May apply to eligible products using either their regular price or active discount price. |
+
+`applyToTotals()` validates the active period, identity/usage limits, minimum order, product/category scope, discount mode, and currency fallback, then adds the discount line and metadata to cart totals. The same calculation is used by the cart modal, cart page, and checkout. `validateAndCalculate()` exposes the calculation contract for server-side revalidation. `consume()` records one successful order usage after payment confirmation.
+
+The regular-promo exclusion is a storefront rule. During admin order editing, `OrderAdminPersistenceService` can pass explicitly forced product IDs to `validateAndCalculate()`. A forced product bypasses the regular-promo discounted-product exclusion for that order only; it does not change the promo-code configuration.
+
+`isProductEligible()` checks the configured product/category scope. Product and category matches use OR semantics, and empty product/category scopes match the whole order. `resolveDiscountValue()` resolves the configured value for the order currency and falls back to the default-currency value when required.
 
 ### `App\Services\Marketing\PromoCodePersistenceService`
 
