@@ -205,6 +205,7 @@ return [
         'promo_discount_value' => 'Значення знижки за промокодом',
         'promo_products' => 'Товари, до яких застосовано промокод',
         'promo_product_status' => 'Статус промокоду',
+        'promo_product_is_applying' => 'Застосовується',
         'force_promo_product' => 'Примусово застосувати промокод',
         'shipping_method' => 'Спосіб доставки',
         'shipping_cost' => 'Вартість доставки',

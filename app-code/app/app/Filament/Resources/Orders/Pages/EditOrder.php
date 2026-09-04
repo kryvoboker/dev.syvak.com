@@ -147,17 +147,20 @@ class EditOrder extends EditRecord
         return $order_products
             ->map(function ($order_product) use ($snapshots, $promo_code): array {
                 $snapshot = $snapshots->get($order_product->getKey());
+                $is_eligible = app(PromoCodeService::class)->isProductEligible(
+                    $promo_code,
+                    (int) $order_product->product_id,
+                );
+                $force_apply = $snapshot instanceof OrderPromoCodeProducts
+                    && $snapshot->override?->value === 'force';
 
                 return [
                     'id' => $snapshot instanceof OrderPromoCodeProducts ? $snapshot->getKey() : null,
                     'order_product_id' => $order_product->getKey(),
                     'product_id' => $order_product->product_id,
-                    'is_eligible' => app(PromoCodeService::class)->isProductEligible(
-                        $promo_code,
-                        (int) $order_product->product_id,
-                    ),
-                    'force_apply' => $snapshot instanceof OrderPromoCodeProducts
-                        && $snapshot->override?->value === 'force',
+                    'is_eligible' => $is_eligible,
+                    'force_apply' => $force_apply,
+                    'is_applying' => $is_eligible || $force_apply,
                     'name' => $order_product->name,
                     'model' => $order_product->model,
                     'sku' => $order_product->sku,
