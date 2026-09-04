@@ -87,7 +87,7 @@ Route::prefix('{' . $locale_key . '}')
         Route::post('/order-validate/simple', [OrderConfirmController::class, 'validateSimpleOrder'])->name('order-confirm.simple.validate');
 
         Route::get('/thank-you/{order_number}', [ThankYouController::class, 'index'])
-            ->where('order_number', '[0-9A-HJKMNP-TV-Z]{26}')
+            ->where('order_number', '[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}')
             ->name('thank-you.index');
 
         Route::get('/failure', [FailureOrderController::class, 'index'])->name('failure-order.index');
