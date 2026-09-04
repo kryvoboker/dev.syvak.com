@@ -7,8 +7,11 @@ namespace App\Filament\Resources\Orders\Pages;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\Marketing\PromoCode;
+use App\Models\Marketing\PromoCodeUsage;
+use App\Models\Orders\OrderProducts;
 use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
+use App\Services\Marketing\PromoCodeService;
 use App\Services\Order\OrderAdminDeliveryService;
 use App\Services\Order\OrderAdminOptionsService;
 use App\Services\Order\OrderAdminPersistenceService;
@@ -20,6 +23,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use LogicException;
@@ -119,12 +123,12 @@ class EditOrder extends EditRecord
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Collection<int, \App\Models\Orders\OrderProducts> $order_products
+     * @param Collection<int, OrderProducts> $order_products
      * @return array<int, array<string, mixed>>
      */
     private static function preparePromoProducts(
-        \Illuminate\Database\Eloquent\Collection $order_products,
-        \App\Models\Marketing\PromoCodeUsage $usage,
+        Collection $order_products,
+        PromoCodeUsage $usage,
     ): array {
         $snapshots = $usage->products->keyBy('order_product_id');
         $promo_code = $usage->promoCode;
@@ -140,7 +144,7 @@ class EditOrder extends EditRecord
                     'is_eligible' => $snapshot instanceof OrderPromoCodeProducts
                         ? $snapshot->is_eligible
                         : $promo_code instanceof PromoCode
-                            && app(\App\Services\Marketing\PromoCodeService::class)->isProductEligible(
+                            && app(PromoCodeService::class)->isProductEligible(
                                 $promo_code,
                                 (int) $order_product->product_id,
                             ),
@@ -254,12 +258,11 @@ class EditOrder extends EditRecord
 
     /**
      * @param Model $record
-     * @param array $data
+     * @param array<string, mixed> $data
      *
      * @throws Halt
      * @return Model
      */
-    /** @param array<string, mixed> $data */
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         if (!$record instanceof Orders) {
@@ -278,7 +281,6 @@ class EditOrder extends EditRecord
                 ->send();
 
             $this->halt();
-            throw $throwable;
         }
     }
 

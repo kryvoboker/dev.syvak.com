@@ -28,6 +28,7 @@ use Illuminate\Support\Str;
  * @property \Illuminate\Support\Carbon|null $starts_at
  * @property \Illuminate\Support\Carbon|null $ends_at
  * @property string $code
+ * @property string $name
  * @property int|null $user_usage_limit
  * @property int|null $group_usage_limit
  * @property int|null $global_usage_limit

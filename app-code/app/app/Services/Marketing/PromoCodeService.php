@@ -55,6 +55,7 @@ final class PromoCodeService
             $user_id,
             $user_group_id,
             $locale,
+            $ignore_order_id,
         );
 
         if (($result['is_valid'] ?? false) !== true) {
@@ -120,6 +121,7 @@ final class PromoCodeService
     /**
      * @param array<string, mixed> $totals_data
      * @param array<int, array<string, mixed>> $cart_items
+     * @param array<int, int> $forced_product_ids
      * @return array<string, mixed>
      */
     public function validateAndCalculate(
@@ -226,8 +228,7 @@ final class PromoCodeService
     }
 
     /**
-     * @param array<int, array<string, mixed>> $cart_items
-     * @return array{eligible_subtotal:float, non_discounted_subtotal:float, rrc_subtotal:float, has_discounted_products:bool}
+     * Determine whether a product matches the promo code product/category scope.
      */
     public function isProductEligible(PromoCode $promo_code, int $product_id): bool
     {
@@ -250,7 +251,7 @@ final class PromoCodeService
 
     /**
      * @param array<int, array<string, mixed>> $cart_items
-     * @param array<int, bool> $forced_product_ids
+     * @param array<int, int> $forced_product_ids
      * @return array{eligible_subtotal:float, non_discounted_subtotal:float, rrc_subtotal:float, has_discounted_products:bool}
      */
     private function resolveEligibleItemTotals(PromoCode $promo_code, array $cart_items, array $forced_product_ids = []): array
@@ -272,7 +273,7 @@ final class PromoCodeService
                 || in_array($product_id, $product_ids, true)
                 || array_intersect($product_categories[$product_id] ?? [], $category_ids) !== [];
 
-            if (! $is_in_scope && ! ($forced_product_ids[$product_id] ?? false)) {
+            if (! $is_in_scope && ! in_array($product_id, $forced_product_ids, true)) {
                 continue;
             }
 
