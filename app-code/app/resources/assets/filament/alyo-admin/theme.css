@@ -24,6 +24,14 @@
         @apply gap-y-1;
     }
 
+    .promo-code-products-repeater {
+        @apply w-full overflow-x-auto;
+
+        & > table {
+            @apply w-max min-w-full;
+        }
+    }
+
     .total-row input.fi-input {
         @apply font-semibold text-lg lg:text-xl disabled:text-primary-600 dark:disabled:text-primary-400;
         -webkit-text-fill-color: inherit;

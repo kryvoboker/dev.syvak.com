@@ -9,6 +9,7 @@ use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Marketing\PromoCode;
+use App\Models\Marketing\PromoCodeDiscount;
 use App\Models\Marketing\PromoCodeUsage;
 use App\Models\Orders\OrderCustomers;
 use App\Models\Orders\OrderProducts;
@@ -20,6 +21,7 @@ use App\Models\Orders\OrderStatuses;
 use App\Models\Orders\OrderTotals;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
+use App\Services\Marketing\PromoCodeService;
 use Filament\Facades\Filament;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Hashing\HashManager;
@@ -124,6 +126,11 @@ class OrdersResourceTest extends TestCase
             'discount_type' => 'fixed',
             'is_active' => true,
         ]);
+        PromoCodeDiscount::query()->create([
+            'promo_code_id' => $promo_code->getKey(),
+            'currency_id' => $order->currency_id,
+            'value' => 25,
+        ]);
         $promo_code_usage = PromoCodeUsage::query()->create([
             'promo_code_id' => $promo_code->getKey(),
             'order_id' => $order->getKey(),
@@ -147,7 +154,30 @@ class OrdersResourceTest extends TestCase
                 'promo_code.code' => 'SPRING10',
                 'promo_code.promo_type' => 'super',
                 'promo_code.discount_type' => 'fixed',
+                'promo_code.discount_value' => '25.0000',
             ]);
+    }
+
+    public function test_promo_code_consumption_persists_discount_and_promo_types(): void
+    {
+        $order = $this->createOrder();
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Spring sale',
+            'code' => 'SPRING10',
+            'normalized_code' => 'spring10',
+            'promo_type' => 'super',
+            'discount_type' => 'fixed',
+            'is_active' => true,
+        ]);
+
+        app(PromoCodeService::class)->consume($promo_code, $order);
+
+        $this->assertDatabaseHas('promo_code_usages', [
+            'order_id' => $order->getKey(),
+            'promo_code_id' => $promo_code->getKey(),
+            'discount_type' => 'fixed',
+            'promo_type' => 'super',
+        ]);
     }
 
     /**
@@ -437,6 +467,20 @@ class OrdersResourceTest extends TestCase
             $table->text('comment')->nullable();
             $table->timestamps();
         });
+        Schema::create('products', function (Blueprint $table): void {
+            $table->id();
+        });
+        Schema::create('promo_code_product', function (Blueprint $table): void {
+            $table->foreignId('promo_code_id');
+            $table->foreignId('product_id');
+        });
+        Schema::create('categories', function (Blueprint $table): void {
+            $table->id();
+        });
+        Schema::create('promo_code_category', function (Blueprint $table): void {
+            $table->foreignId('promo_code_id');
+            $table->foreignId('category_id');
+        });
         Schema::create('promo_codes', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
@@ -445,6 +489,13 @@ class OrdersResourceTest extends TestCase
             $table->string('promo_type')->default('regular');
             $table->string('discount_type')->default('percentage');
             $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+        Schema::create('promo_code_discounts', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('promo_code_id');
+            $table->foreignId('currency_id');
+            $table->decimal('value', 15, 4);
             $table->timestamps();
         });
         Schema::create('promo_code_usages', function (Blueprint $table): void {

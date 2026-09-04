@@ -26,6 +26,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use LogicException;
 use Throwable;
 
@@ -107,16 +108,26 @@ class EditOrder extends EditRecord
             $shipping_has_cost,
         );
         $data['histories'] = $record->histories->toArray();
-        $promo_code_usage = $record->promoCodeUsages->sortByDesc('id')->first();
         $promo_code_total = $record->totals->firstWhere('total_type', 'promo_code');
-        $data['promo_code'] = $promo_code_usage === null ? [] : [
-            'id' => $promo_code_usage->promo_code_id,
-            'usage_id' => $promo_code_usage->getKey(),
-            'code' => $promo_code_usage->promoCode?->code,
-            'promo_type' => nullable_string($promo_code_usage->getRawOriginal('promo_type')),
-            'discount_type' => nullable_string($promo_code_usage->getRawOriginal('discount_type')),
+        $promo_code_usage = $record->promoCodeUsages->sortByDesc('id')->first();
+        $promo_code = $promo_code_usage?->promoCode;
+
+        if ($promo_code === null && $promo_code_total !== null) {
+            $promo_code = self::resolvePromoCodeFromTotal($promo_code_total->name);
+        }
+
+        $data['promo_code'] = $promo_code === null ? [] : [
+            'id' => $promo_code->getKey(),
+            'usage_id' => $promo_code_usage?->getKey(),
+            'code' => $promo_code->code,
+            'promo_type' => $promo_code_usage?->getRawOriginal('promo_type') ?? $promo_code->promo_type,
+            'discount_type' => $promo_code_usage?->getRawOriginal('discount_type') ?? $promo_code->discount_type,
             'discount_amount' => $promo_code_total === null ? 0 : abs((float) $promo_code_total->value),
-            'products' => self::preparePromoProducts($record->products, $promo_code_usage),
+            'discount_value' => app(PromoCodeService::class)->resolveDiscountValue(
+                $promo_code,
+                (string) $record->currency_code,
+            ),
+            'products' => self::preparePromoProducts($record->products, $promo_code_usage, $promo_code),
         ];
 
         return $data;
@@ -128,10 +139,10 @@ class EditOrder extends EditRecord
      */
     private static function preparePromoProducts(
         Collection $order_products,
-        PromoCodeUsage $usage,
+        ?PromoCodeUsage $usage,
+        PromoCode $promo_code,
     ): array {
-        $snapshots = $usage->products->keyBy('order_product_id');
-        $promo_code = $usage->promoCode;
+        $snapshots = $usage?->products->keyBy('order_product_id') ?? collect();
 
         return $order_products
             ->map(function ($order_product) use ($snapshots, $promo_code): array {
@@ -141,16 +152,16 @@ class EditOrder extends EditRecord
                     'id' => $snapshot instanceof OrderPromoCodeProducts ? $snapshot->getKey() : null,
                     'order_product_id' => $order_product->getKey(),
                     'product_id' => $order_product->product_id,
-                    'is_eligible' => $snapshot instanceof OrderPromoCodeProducts
-                        ? $snapshot->is_eligible
-                        : $promo_code instanceof PromoCode
-                            && app(PromoCodeService::class)->isProductEligible(
-                                $promo_code,
-                                (int) $order_product->product_id,
-                            ),
+                    'is_eligible' => app(PromoCodeService::class)->isProductEligible(
+                        $promo_code,
+                        (int) $order_product->product_id,
+                    ),
                     'force_apply' => $snapshot instanceof OrderPromoCodeProducts
                         && $snapshot->override?->value === 'force',
                     'name' => $order_product->name,
+                    'model' => $order_product->model,
+                    'sku' => $order_product->sku,
+                    'ean' => $order_product->ean,
                     'quantity' => $order_product->quantity,
                     'unit_price' => $order_product->unit_price,
                     'discount' => $order_product->discount,
@@ -159,6 +170,20 @@ class EditOrder extends EditRecord
             })
             ->values()
             ->all();
+    }
+
+    private static function resolvePromoCodeFromTotal(?string $total_name): ?PromoCode
+    {
+        if ($total_name === null) {
+            return null;
+        }
+
+        return PromoCode::query()
+            ->get()
+            ->first(fn (PromoCode $promo_code): bool => Str::contains(
+                $total_name,
+                '(' . $promo_code->code . ')',
+            ));
     }
 
     /**
@@ -281,6 +306,8 @@ class EditOrder extends EditRecord
                 ->send();
 
             $this->halt();
+
+            return $record;
         }
     }
 

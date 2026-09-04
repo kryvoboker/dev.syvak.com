@@ -207,6 +207,8 @@ final class PromoCodeService
                     'order_id' => $order->getKey(),
                 ],
                 [
+                    'discount_type' => $promo_code->discount_type,
+                    'promo_type' => $promo_code->promo_type,
                     'user_id' => $user_id,
                     'user_group_id' => $user_group_id,
                     'consumer_key' => $consumer_key,
@@ -410,7 +412,7 @@ final class PromoCodeService
         return 'session:' . session()->getId();
     }
 
-    private function resolveDiscountValue(PromoCode $promo_code, string $currency_code): float
+    public function resolveDiscountValue(PromoCode $promo_code, string $currency_code): float
     {
         $target_currency = Currency::query()->where('code', $currency_code)->where('is_active', true)->first()
             ?? (new Currency())->getDefaultActiveCurrency();

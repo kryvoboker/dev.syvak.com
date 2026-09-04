@@ -202,6 +202,7 @@ return [
         'promo_type' => 'Тип промокоду',
         'discount_type' => 'Тип знижки',
         'promo_discount_amount' => 'Сума знижки за промокодом',
+        'promo_discount_value' => 'Значення знижки за промокодом',
         'promo_products' => 'Товари, до яких застосовано промокод',
         'promo_product_status' => 'Статус промокоду',
         'force_promo_product' => 'Примусово застосувати промокод',
