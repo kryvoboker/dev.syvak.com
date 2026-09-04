@@ -27,6 +27,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Schemas\Components\Actions as SchemaActions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -224,6 +225,7 @@ class OrderForm
                                 TableColumn::make(__('admin/orders/orders.labels.product')),
                                 TableColumn::make(__('admin/orders/orders.labels.identifier'))->width(200),
                                 TableColumn::make(__('admin/orders/orders.labels.promo_product_status'))->width(50),
+                                TableColumn::make(__('admin/orders/orders.labels.promo_product_is_applying'))->width(50),
                                 TableColumn::make(__('admin/orders/orders.labels.force_promo_product')),
                                 TableColumn::make(__('admin/orders/orders.labels.quantity'))->width(50),
                                 TableColumn::make(__('admin/orders/orders.labels.unit_price'))->width(170),
@@ -262,9 +264,18 @@ class OrderForm
                                         : __('admin/orders/orders.options.promo_product.inactive'))
                                     ->disabled()
                                     ->dehydrated(false),
+                                IconEntry::make('is_applying')
+                                    ->label(__('admin/orders/orders.labels.promo_product_is_applying'))
+                                    ->state(fn (Get $get): bool => self::isPromoProductEnabled($get('is_eligible'))
+                                        || self::isPromoProductEnabled($get('force_apply')))
+                                    ->boolean(),
                                 Toggle::make('force_apply')
                                     ->label(__('admin/orders/orders.labels.force_promo_product'))
-                                    ->live(),
+                                    ->live()
+                                    ->afterStateUpdated(function (Get $get, Set $set): void {
+                                        $set('is_applying', self::isPromoProductEnabled($get('is_eligible'))
+                                            || self::isPromoProductEnabled($get('force_apply')));
+                                    }),
                                 Hidden::make('name'),
                                 Hidden::make('model'),
                                 Hidden::make('sku'),

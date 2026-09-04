@@ -205,6 +205,7 @@ return [
         'promo_discount_value' => 'Promo Code Discount Value',
         'promo_products' => 'Products covered by promo code',
         'promo_product_status' => 'Promo code status',
+        'promo_product_is_applying' => 'Is applying',
         'force_promo_product' => 'Apply promo code forcibly',
         'shipping_method' => 'Shipping Method',
         'shipping_cost' => 'Shipping Cost',
