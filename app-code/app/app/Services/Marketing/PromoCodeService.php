@@ -280,6 +280,16 @@ final class PromoCodeService
             }
 
             $is_discounted = (bool) Arr::get($item, 'is_discounted', false);
+
+            if ($promo_code->promo_type !== PromoCodeTypeEnum::Super && $is_discounted && ! in_array($product_id, $forced_product_ids, true)) {
+                Log::channel('daily')->info('[PromoCodeService] regular promo code skipped discounted product', [
+                    'promo_code_id' => $promo_code->getKey(),
+                    'product_id' => $product_id,
+                ]);
+
+                continue;
+            }
+
             $rrc_line_total = float_value(Arr::get($item, 'rrc_line_total', $current_line_total));
             $eligible_subtotal += $current_line_total;
             $rrc_subtotal += $rrc_line_total;
