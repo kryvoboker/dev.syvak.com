@@ -140,9 +140,7 @@ class OrdersTable
                 IconColumn::make('customer.no_call')
                     ->label(__('admin/orders/orders.columns.no_call'))
                     ->state(fn (Orders $record): bool => (bool) $record->customer?->no_call)
-                    ->boolean()
-                    ->trueIcon(\Filament\Support\Icons\Heroicon::OutlinedCheck)
-                    ->falseIcon(\Filament\Support\Icons\Heroicon::OutlinedXMark),
+                    ->boolean(),
 
                 TextColumn::make('added_at')
                     ->label(__('admin/orders/orders.columns.added_at'))
@@ -255,8 +253,9 @@ class OrdersTable
     }
 
     /**
-     * @param Builder<\App\Models\Orders\Orders> $query
-     * @return Builder<\App\Models\Orders\Orders>
+     * @param Builder<Orders> $query
+     *
+     * @return Builder<Orders>
      */
     private static function whereLike(Builder $query, string $column, mixed $value): Builder
     {
@@ -266,8 +265,9 @@ class OrdersTable
     }
 
     /**
-     * @param Builder<\App\Models\Orders\Orders> $query
-     * @return Builder<\App\Models\Orders\Orders>
+     * @param Builder<Orders> $query
+     *
+     * @return Builder<Orders>
      */
     private static function whereCustomerLike(Builder $query, string $column, mixed $value): Builder
     {
@@ -280,8 +280,9 @@ class OrdersTable
     }
 
     /**
-     * @param Builder<\App\Models\Orders\Orders> $query
-     * @return Builder<\App\Models\Orders\Orders>
+     * @param Builder<Orders> $query
+     *
+     * @return Builder<Orders>
      */
     private static function whereProductLike(Builder $query, string $column, mixed $value): Builder
     {

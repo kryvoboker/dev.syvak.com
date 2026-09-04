@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property PromoCodeDiscountTypeEnum $discount_type
  * @property PromoCodeTypeEnum $promo_type
+ * @property int $promo_code_id
  */
 class PromoCodeUsage extends Model
 {

@@ -13,6 +13,7 @@ use App\Models\Marketing\PromoCode;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
+use App\Models\Orders\OrderTotals;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
 use App\Services\Marketing\PromoCodeService;
@@ -277,20 +278,31 @@ final readonly class OrderAdminPersistenceService
         }
 
         $order->loadMissing(['products', 'customer']);
-        $items_subtotal = (float) $order->products->sum('line_total');
-        $cart_items = $order->products->map(fn ($product): array => [
-            'product_id' => $product->product_id,
-            'line_total' => (float) $product->line_total,
-            'rrc_line_total' => (float) $product->line_total + (float) ($product->discount ?? 0),
-            'is_discounted' => (float) ($product->discount ?? 0) > 0,
-        ])->all();
-        $forced_product_ids = collect($this->listArray($data['products'] ?? []))
-            ->filter(fn (mixed $item): bool => is_array($item) && (bool) ($item['force_apply'] ?? false))
-            ->map(fn (array $item): ?int => $this->nullableInteger($item['product_id'] ?? null))
-            ->filter()
-            ->values()
-            ->all();
-        $base_total = (float) $order->total - (float) ($promo_total?->value ?? 0);
+        $items_subtotal = float_value($order->products->sum('line_total'));
+        /** @var array<int, array<string, mixed>> $cart_items */
+        $cart_items = [];
+        foreach ($order->products as $product) {
+            $cart_items[] = [
+                'product_id' => (int) $product->product_id,
+                'line_total' => float_value($product->line_total),
+                'rrc_line_total' => float_value($product->line_total) + float_value($product->discount ?? 0),
+                'is_discounted' => float_value($product->discount ?? 0) > 0,
+            ];
+        }
+        /** @var array<int, int> $forced_product_ids */
+        $forced_product_ids = [];
+        foreach ($this->listArray($data['products'] ?? []) as $item) {
+            if (! is_array($item) || ! (bool) ($item['force_apply'] ?? false)) {
+                continue;
+            }
+
+            $product_id = $this->nullableInteger($item['product_id'] ?? null);
+
+            if ($product_id !== null) {
+                $forced_product_ids[] = $product_id;
+            }
+        }
+        $base_total = (float) $order->total - ($promo_total instanceof OrderTotals ? (float) $promo_total->value : 0.0);
         $calculation = $this->promo_code_service->validateAndCalculate(
             $promo_code,
             [
@@ -302,7 +314,7 @@ final readonly class OrderAdminPersistenceService
             $order->customer?->user_id,
             $order->customer?->user_group_id,
             $order->language_code,
-            $order->getKey(),
+            integer_value($order->getKey()),
             $forced_product_ids,
         );
 
@@ -402,14 +414,24 @@ final readonly class OrderAdminPersistenceService
         array $promo_products,
         array &$changed_sections,
     ): void {
-        $submitted = collect($promo_products)
-            ->filter('is_array')
-            ->keyBy(fn (array $item): string => (string) $this->nullableInteger($item['order_product_id'] ?? null));
+        /** @var array<string, array<string, mixed>> $submitted */
+        $submitted = [];
+        foreach ($promo_products as $promo_product) {
+            if (! is_array($promo_product)) {
+                continue;
+            }
+
+            $order_product_id = $this->nullableInteger($promo_product['order_product_id'] ?? null);
+
+            if ($order_product_id !== null) {
+                $submitted[(string) $order_product_id] = $promo_product;
+            }
+        }
 
         foreach ($order->products as $order_product) {
-            $state = $submitted->get((string) $order_product->getKey(), []);
+            $state = $submitted[(string) integer_value($order_product->getKey())] ?? [];
             $is_eligible = $this->promo_code_service->isProductEligible($promo_code, (int) $order_product->product_id);
-            $force_apply = is_array($state) && (bool) ($state['force_apply'] ?? false);
+            $force_apply = (bool) ($state['force_apply'] ?? false);
             $promo_product = OrderPromoCodeProducts::query()->firstOrNew([
                 'promo_code_usage_id' => $usage->getKey(),
                 'order_product_id' => $order_product->getKey(),

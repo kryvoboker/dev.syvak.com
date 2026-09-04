@@ -218,12 +218,12 @@ class OrderForm
                                         self::fillProductSnapshot($set, $state);
                                         self::recalculateLineAndTotals($get, $set);
                                     })
-                                    ->disabled(fn (Get $get): bool => ! (bool) $get('is_eligible')
-                                        && ! (bool) $get('force_apply')),
+                                    ->disabled(fn (Get $get): bool => ! $get('is_eligible')
+                                        && ! $get('force_apply')),
                                 TextInput::make('promo_status')
                                     ->label(__('admin/orders/orders.labels.promo_product_status'))
-                                    ->formatStateUsing(fn (Get $get): string => (bool) $get('is_eligible')
-                                        || (bool) $get('force_apply')
+                                    ->formatStateUsing(fn (Get $get): string => $get('is_eligible')
+                                        || $get('force_apply')
                                         ? __('admin/orders/orders.options.promo_product.active')
                                         : __('admin/orders/orders.options.promo_product.inactive'))
                                     ->disabled()
@@ -231,7 +231,7 @@ class OrderForm
                                 Toggle::make('force_apply')
                                     ->label(__('admin/orders/orders.labels.force_promo_product'))
                                     ->live()
-                                    ->visible(fn (Get $get): bool => ! (bool) $get('is_eligible')),
+                                    ->visible(fn (Get $get): bool => ! $get('is_eligible')),
                                 Hidden::make('name'),
                                 Hidden::make('model'),
                                 Hidden::make('sku'),
@@ -245,8 +245,8 @@ class OrderForm
                                     ->afterStateUpdated(function (Get $get, Set $set): void {
                                         self::recalculateLineAndTotals($get, $set);
                                     })
-                                    ->disabled(fn (Get $get): bool => ! (bool) $get('is_eligible')
-                                        && ! (bool) $get('force_apply')),
+                                    ->disabled(fn (Get $get): bool => ! $get('is_eligible')
+                                        && ! $get('force_apply')),
                                 TextInput::make('unit_price')
                                     ->label(__('admin/orders/orders.labels.unit_price'))
                                     ->numeric()
@@ -256,8 +256,8 @@ class OrderForm
                                     ->afterStateUpdated(function (Get $get, Set $set): void {
                                         self::recalculateLineAndTotals($get, $set);
                                     })
-                                    ->disabled(fn (Get $get): bool => ! (bool) $get('is_eligible')
-                                        && ! (bool) $get('force_apply')),
+                                    ->disabled(fn (Get $get): bool => ! $get('is_eligible')
+                                        && ! $get('force_apply')),
                                 TextInput::make('discount')
                                     ->label(__('admin/orders/orders.labels.discount'))
                                     ->numeric()
@@ -267,8 +267,8 @@ class OrderForm
                                     ->afterStateUpdated(function (Get $get, Set $set): void {
                                         self::recalculateLineAndTotals($get, $set);
                                     })
-                                    ->disabled(fn (Get $get): bool => ! (bool) $get('is_eligible')
-                                        && ! (bool) $get('force_apply')),
+                                    ->disabled(fn (Get $get): bool => ! $get('is_eligible')
+                                        && ! $get('force_apply')),
                                 TextInput::make('line_total')
                                     ->label(__('admin/orders/orders.labels.line_total'))
                                     ->numeric()
@@ -282,8 +282,7 @@ class OrderForm
                             ->reorderable(false)
                             ->columnSpanFull(),
                     ])
-                    ->columns(2)
-                    ->visible(fn (Get $get): bool => filled($get('promo_code.id'))),
+                    ->columns(),
             ]);
     }
 
@@ -937,7 +936,7 @@ class OrderForm
         if ($variant instanceof ProductVariant) {
             $variant_id = $variant->getKey();
             $is_default_variant = $variant->is_default;
-            $unit_price = (float)$variant->price;
+            $unit_price = $variant->price;
         }
 
         $set('product_variant_id', $variant_id);
