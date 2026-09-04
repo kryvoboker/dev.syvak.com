@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Orders\Schemas;
 
 use App\Enums\Cart\CartModeEnum;
+use App\Enums\Marketing\PromoCodeDiscountTypeEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
@@ -190,18 +191,48 @@ class OrderForm
                             ->numeric()
                             ->disabled()
                             ->dehydrated(false)
-                            ->suffix(fn (Get $get): string => (string) $get('../../currency_code')),
+                            ->suffix(function (Get $get): string {
+                                $discount_type = $get('../discount_type');
+
+                                if ($discount_type instanceof PromoCodeDiscountTypeEnum) {
+                                    $discount_type = $discount_type->value;
+                                }
+
+                                return $discount_type === PromoCodeDiscountTypeEnum::Percentage->value
+                                    ? '%'
+                                    : (string) $get('../../currency_code');
+                            }),
+                        TextInput::make('promo_code.discount_value')
+                            ->label(__('admin/orders/orders.labels.promo_discount_value'))
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->suffix(function (Get $get): string {
+                                $discount_type = $get('../discount_type');
+
+                                if ($discount_type instanceof PromoCodeDiscountTypeEnum) {
+                                    $discount_type = $discount_type->value;
+                                }
+
+                                return $discount_type === PromoCodeDiscountTypeEnum::Percentage->value
+                                    ? '%'
+                                    : (string) $get('../../currency_code');
+                            }),
                         Repeater::make('promo_code.products')
                             ->label(__('admin/orders/orders.labels.promo_products'))
                             ->table([
                                 TableColumn::make(__('admin/orders/orders.labels.product')),
-                                TableColumn::make(__('admin/orders/orders.labels.promo_product_status')),
+                                TableColumn::make(__('admin/orders/orders.labels.identifier'))->width(200),
+                                TableColumn::make(__('admin/orders/orders.labels.promo_product_status'))->width(50),
                                 TableColumn::make(__('admin/orders/orders.labels.force_promo_product')),
-                                TableColumn::make(__('admin/orders/orders.labels.quantity'))->width(120),
+                                TableColumn::make(__('admin/orders/orders.labels.quantity'))->width(50),
                                 TableColumn::make(__('admin/orders/orders.labels.unit_price'))->width(170),
                                 TableColumn::make(__('admin/orders/orders.labels.discount'))->width(170),
                                 TableColumn::make(__('admin/orders/orders.labels.line_total'))->width(170),
                             ])
+                            ->extraAttributes([
+                                'class' => 'promo-code-products-repeater',
+                            ], true)
                             ->schema([
                                 Hidden::make('id'),
                                 Hidden::make('order_product_id'),
@@ -213,25 +244,27 @@ class OrderForm
                                     ->searchable()
                                     ->searchDebounce(1000)
                                     ->optionsLimit(OrderAdminDeliveryService::SEARCH_LIMIT)
-                                    ->live()
-                                    ->afterStateUpdated(function (Get $get, Set $set, int|string|null $state): void {
-                                        self::fillProductSnapshot($set, $state);
-                                        self::recalculateLineAndTotals($get, $set);
-                                    })
-                                    ->disabled(fn (Get $get): bool => ! $get('is_eligible')
-                                        && ! $get('force_apply')),
+                                    ->disabled(),
+                                TextInput::make('identifier')
+                                    ->label(__('admin/orders/orders.labels.identifier'))
+                                    ->formatStateUsing(fn (Get $get): string => self::formatProductIdentifier(
+                                        (string) $get('model'),
+                                        (string) $get('sku'),
+                                        (string) $get('ean'),
+                                    ))
+                                    ->disabled()
+                                    ->dehydrated(false),
                                 TextInput::make('promo_status')
                                     ->label(__('admin/orders/orders.labels.promo_product_status'))
-                                    ->formatStateUsing(fn (Get $get): string => $get('is_eligible')
-                                        || $get('force_apply')
+                                    ->formatStateUsing(fn (Get $get): string => self::isPromoProductEnabled($get('is_eligible'))
+                                        || self::isPromoProductEnabled($get('force_apply'))
                                         ? __('admin/orders/orders.options.promo_product.active')
                                         : __('admin/orders/orders.options.promo_product.inactive'))
                                     ->disabled()
                                     ->dehydrated(false),
                                 Toggle::make('force_apply')
                                     ->label(__('admin/orders/orders.labels.force_promo_product'))
-                                    ->live()
-                                    ->visible(fn (Get $get): bool => ! $get('is_eligible')),
+                                    ->live(),
                                 Hidden::make('name'),
                                 Hidden::make('model'),
                                 Hidden::make('sku'),
@@ -241,44 +274,29 @@ class OrderForm
                                     ->numeric()
                                     ->minValue(1)
                                     ->required()
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function (Get $get, Set $set): void {
-                                        self::recalculateLineAndTotals($get, $set);
-                                    })
-                                    ->disabled(fn (Get $get): bool => ! $get('is_eligible')
-                                        && ! $get('force_apply')),
+                                    ->disabled(),
                                 TextInput::make('unit_price')
                                     ->label(__('admin/orders/orders.labels.unit_price'))
                                     ->numeric()
                                     ->required()
-                                    ->suffix(fn (Get $get): string => (string) $get('../../../../currency_code'))
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function (Get $get, Set $set): void {
-                                        self::recalculateLineAndTotals($get, $set);
-                                    })
-                                    ->disabled(fn (Get $get): bool => ! $get('is_eligible')
-                                        && ! $get('force_apply')),
+                                    ->suffix(fn (Get $get): string => (string) $get('../../../currency_code'))
+                                    ->disabled(),
                                 TextInput::make('discount')
                                     ->label(__('admin/orders/orders.labels.discount'))
                                     ->numeric()
                                     ->nullable()
-                                    ->suffix(fn (Get $get): string => (string) $get('../../../../currency_code'))
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function (Get $get, Set $set): void {
-                                        self::recalculateLineAndTotals($get, $set);
-                                    })
-                                    ->disabled(fn (Get $get): bool => ! $get('is_eligible')
-                                        && ! $get('force_apply')),
+                                    ->suffix(fn (Get $get): string => (string) $get('../../../currency_code'))
+                                    ->disabled(),
                                 TextInput::make('line_total')
                                     ->label(__('admin/orders/orders.labels.line_total'))
                                     ->numeric()
-                                    ->suffix(fn (Get $get): string => (string) $get('../../../../currency_code'))
+                                    ->suffix(fn (Get $get): string => (string) $get('../../../currency_code'))
                                     ->disabled()
                                     ->dehydrated(false),
                             ])
                             ->defaultItems(0)
-                            ->addable()
-                            ->deletable()
+                            ->addable(false)
+                            ->deletable(false)
                             ->reorderable(false)
                             ->columnSpanFull(),
                     ])
@@ -873,6 +891,11 @@ class OrderForm
     private static function formatProductIdentifier(string $model, string $sku, string $ean): string
     {
         return $ean ?: $model ?: $sku;
+    }
+
+    private static function isPromoProductEnabled(mixed $state): bool
+    {
+        return boolean_value($state);
     }
 
     private static function fillCustomerFromUser(Set $set, int|string|null $state): void

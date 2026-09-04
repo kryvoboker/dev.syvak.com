@@ -202,6 +202,7 @@ return [
         'promo_type' => 'Promo Code Type',
         'discount_type' => 'Discount Type',
         'promo_discount_amount' => 'Promo Code Discount Amount',
+        'promo_discount_value' => 'Promo Code Discount Value',
         'promo_products' => 'Products covered by promo code',
         'promo_product_status' => 'Promo code status',
         'force_promo_product' => 'Apply promo code forcibly',

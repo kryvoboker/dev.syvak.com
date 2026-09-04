@@ -292,7 +292,7 @@ final readonly class OrderAdminPersistenceService
         /** @var array<int, int> $forced_product_ids */
         $forced_product_ids = [];
         foreach ($this->listArray($data['products'] ?? []) as $item) {
-            if (! is_array($item) || ! (bool) ($item['force_apply'] ?? false)) {
+            if (! is_array($item) || ! boolean_value($item['force_apply'] ?? false)) {
                 continue;
             }
 
@@ -431,7 +431,7 @@ final readonly class OrderAdminPersistenceService
         foreach ($order->products as $order_product) {
             $state = $submitted[(string) integer_value($order_product->getKey())] ?? [];
             $is_eligible = $this->promo_code_service->isProductEligible($promo_code, (int) $order_product->product_id);
-            $force_apply = (bool) ($state['force_apply'] ?? false);
+            $force_apply = boolean_value($state['force_apply'] ?? false);
             $promo_product = OrderPromoCodeProducts::query()->firstOrNew([
                 'promo_code_usage_id' => $usage->getKey(),
                 'order_product_id' => $order_product->getKey(),
