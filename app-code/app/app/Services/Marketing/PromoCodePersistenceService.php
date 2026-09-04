@@ -8,6 +8,8 @@ use App\Models\ApplicationSettings\Currency;
 use App\Models\Marketing\PromoCode;
 use App\Models\Marketing\PromoCodeDiscount;
 use App\Models\Marketing\PromoCodeErrorTranslation;
+use App\Models\Marketing\PromoCodeUsage;
+use App\Models\Orders\OrderPromoCodeProducts;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -67,6 +69,8 @@ final class PromoCodePersistenceService
             'products',
             'categories',
             'errorTranslations',
+            'usages.order',
+            'usages.products.orderProduct',
         ]);
 
         $discounts = $promo_code->discounts;
@@ -92,7 +96,40 @@ final class PromoCodePersistenceService
                     ],
                 ])
                 ->all(),
+            'history_products' => $this->historyProducts($promo_code),
         ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function historyProducts(PromoCode $promo_code): array
+    {
+        return $promo_code->usages
+            ->flatMap(function (PromoCodeUsage $usage): array {
+                return $usage->products
+                    ->filter(fn (OrderPromoCodeProducts $product): bool => $product->is_eligible
+                        || $product->override?->value === 'force')
+                    ->map(function (OrderPromoCodeProducts $product) use ($usage): array {
+                        $order_product = $product->orderProduct;
+
+                        return [
+                            'order_id' => $usage->order?->getKey(),
+                            'product' => $order_product?->name,
+                            'identifier' => $order_product?->ean
+                                ?? $order_product?->model
+                                ?? $order_product?->sku,
+                            'quantity' => $order_product?->quantity,
+                            'price' => $order_product?->unit_price,
+                            'discount_amount' => $product->discount_amount,
+                            'currency' => $usage->order?->currency_code,
+                            'used_at' => $usage->used_at?->format('Y-m-d H:i:s'),
+                        ];
+                    })
+                    ->all();
+            })
+            ->values()
+            ->all();
     }
 
     /** @param array<string, mixed> $data @return array<string, mixed> */
