@@ -111,6 +111,12 @@
                                 <dt>{{ __('storefront/pages/thank-you.labels.subtotal') }}</dt>
                                 <dd class="wrap-break-word">{{ $summary['subtotal'] ?? '—' }}</dd>
                             </div>
+                            @if(($summary['promo_code_discount'] ?? null) !== null)
+                                <div class="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:gap-6">
+                                    <dt>{{ __('storefront/pages/thank-you.labels.promo_code_discount') }}</dt>
+                                    <dd class="wrap-break-word">-{{ $summary['promo_code_discount'] }}</dd>
+                                </div>
+                            @endif
                             <div class="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:gap-6">
                                 <dt>{{ __('storefront/pages/thank-you.labels.packaging') }}</dt>
                                 <dd class="wrap-break-word">{{ $summary['packaging'] ?? '—' }}</dd>

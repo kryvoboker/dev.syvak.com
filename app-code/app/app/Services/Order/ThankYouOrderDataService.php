@@ -122,6 +122,7 @@ final readonly class ThankYouOrderDataService
                     nullable_string(data_get($shipping, 'delivery_point')),
                 ),
                 'subtotal' => $this->formatTotal($order, TotalTypesEnum::Subtotal, $currency_code, $exchange_rate),
+                'promo_code_discount' => $this->formatPromoCodeDiscount($order, $currency_code, $exchange_rate),
                 'packaging' => '—',
                 'delivery_cost' => $this->formatTotal($order, TotalTypesEnum::Shipping, $currency_code, $exchange_rate),
                 'total' => $this->formatMoney(float_value($order->total), $currency_code, $exchange_rate),
@@ -256,6 +257,26 @@ final readonly class ThankYouOrderDataService
         return $total instanceof OrderTotals
             ? $this->formatMoney((float) $total->value, $currency_code, $exchange_rate)
             : '—';
+    }
+
+    /**
+     * @param Orders $order
+     * @param string $currency_code
+     * @param float  $exchange_rate
+     *
+     * @return string|null
+     */
+    private function formatPromoCodeDiscount(Orders $order, string $currency_code, float $exchange_rate): ?string
+    {
+        $total = $order->totals->first(function ($item): bool {
+            return $item->total_type === TotalTypesEnum::PromoCode;
+        });
+
+        if (! $total instanceof OrderTotals || (float) $total->value === 0.0) {
+            return null;
+        }
+
+        return $this->formatMoney(abs((float) $total->value), $currency_code, $exchange_rate);
     }
 
     /**

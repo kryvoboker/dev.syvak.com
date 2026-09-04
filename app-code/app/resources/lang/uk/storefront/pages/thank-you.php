@@ -16,6 +16,7 @@ return [
         'delivery_method' => 'Спосіб доставки',
         'delivery_address' => 'Адреса доставки',
         'subtotal' => 'Сума товарів',
+        'promo_code_discount' => 'Знижка за промокодом',
         'packaging' => 'Подарункова упаковка',
         'delivery_cost' => 'Доставка',
         'total' => 'Підсумок',
