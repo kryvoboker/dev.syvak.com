@@ -123,6 +123,20 @@ class CheckoutSelectionStateService
         }
     }
 
+    public function resetAfterOrder(): void
+    {
+        $state = $this->getState();
+
+        $this->clear();
+
+        $this->replaceState([
+            'first_name' => Arr::get($state, 'first_name', ''),
+            'last_name' => Arr::get($state, 'last_name', ''),
+            'phone' => Arr::get($state, 'phone', ''),
+            'email' => Arr::get($state, 'email', ''),
+        ]);
+    }
+
     /**
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>

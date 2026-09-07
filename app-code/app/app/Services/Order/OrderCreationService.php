@@ -11,6 +11,7 @@ use App\Enums\Order\PaymentMethodEnum;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
 use App\Services\Cart\CartService;
+use App\Services\Checkout\CheckoutStateResetService;
 use App\Services\Marketing\PromoCodeService;
 use App\Services\Order\Payment\CashOnDeliveryPaymentModule;
 use Illuminate\Support\Arr;
@@ -38,6 +39,7 @@ readonly class OrderCreationService
         private OrderAggregatePersistenceService $order_aggregate_persistence_service,
         private OrderLifecycleService $order_lifecycle_service,
         private PickupCheckoutDataService $pickup_checkout_data_service,
+        private CheckoutStateResetService $checkout_state_reset_service,
         private ?PromoCodeService $promo_code_service = null,
         private ?FailureOrderRecoveryService $failure_order_recovery_service = null,
     ) {
@@ -137,6 +139,7 @@ readonly class OrderCreationService
         if ($is_success === true) {
             $this->cart_service->clearCart(string_value(Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value)));
             $this->consumePromoCode(string_keyed_array(Arr::get($validation_result, 'cart', [])), $order);
+            $this->checkout_state_reset_service->resetAfterOrder();
 
             return [
                 'success' => true,
@@ -296,6 +299,8 @@ readonly class OrderCreationService
                 ];
             }
 
+            $this->checkout_state_reset_service->resetAfterOrder();
+
             return [
                 'success' => true,
                 'order_number' => $order_number,
@@ -315,6 +320,7 @@ readonly class OrderCreationService
         if ((bool) Arr::get($payment_result, 'is_success', false) === true) {
             $this->cart_service->clearCart(CartModeEnum::Regular->value);
             $this->consumePromoCode(string_keyed_array(Arr::get($validation_result, 'cart', [])), $order);
+            $this->checkout_state_reset_service->resetAfterOrder();
 
             return [
                 'success' => true,
