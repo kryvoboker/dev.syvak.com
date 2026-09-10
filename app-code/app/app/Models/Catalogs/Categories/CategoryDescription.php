@@ -7,6 +7,14 @@ namespace App\Models\Catalogs\Categories;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $category_id
+ * @property int $language_id
+ * @property string $name
+ * @property string|null $description
+ * @property string|null $h1_title
+ */
 class CategoryDescription extends Model
 {
     protected $fillable = [
@@ -21,8 +29,9 @@ class CategoryDescription extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -32,7 +41,8 @@ class CategoryDescription extends Model
     }
 
     /**
-     * @return BelongsTo<Category, $this>
+     * @phpstan-return BelongsTo<Category, $this>
+     * @psalm-return BelongsTo<Category, self>
      */
     public function category(): BelongsTo
     {

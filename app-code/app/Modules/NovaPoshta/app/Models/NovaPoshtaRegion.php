@@ -19,7 +19,8 @@ class NovaPoshtaRegion extends Model
     ];
 
     /**
-     * @return HasMany<NovaPoshtaCity, $this>
+     * @phpstan-return HasMany<NovaPoshtaCity, $this>
+     * @psalm-return HasMany<NovaPoshtaCity, self>
      */
     public function novaPoshtaCities(): HasMany
     {

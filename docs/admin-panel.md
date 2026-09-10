@@ -46,6 +46,37 @@ localized addresses.
 - Settings changes are normalized by `PageSettingsBootstrapService`; localized
   slugs are persisted in the shared `slugs` table.
 
+## Promo Codes and Order Overrides
+
+Promo codes are managed in
+`Filament/Resources/Marketing/PromoCodes/`. The `General` tab contains the
+promo-code type:
+
+| Type | Meaning |
+|------|---------|
+| `regular` | Applies to eligible products at their regular price in the storefront. Products with an active product discount are not included. |
+| `super` | May apply to eligible products at both regular and active discount prices. |
+
+When an order contains a promo code, its `Promo Code` tab shows the product
+snapshot used for the order. The `Apply promo code forcibly` switch is the
+per-order administrator override:
+
+- `is_eligible` records whether the current product matches the promo code's
+  configured product/category scope.
+- `force_apply` records the administrator's explicit decision to include the
+  product in this order's promo calculation.
+- For a regular promo code, enabling `force_apply` allows an otherwise
+  discounted product to participate in this order. It does not modify the
+  promo-code configuration or other orders.
+- Other product-row values in this table are a synchronized read-only snapshot;
+  the force switch is the only editable product-level promo setting.
+
+Product and category restrictions are combined with OR semantics. If both
+lists are empty, the promo code applies to the whole order subject to its
+other limits and conditions. The storefront calculation is shared by the
+cart modal, cart page, and checkout, while forced products are available only
+through the admin order-editing workflow.
+
 ## See Also
 
 - [Project README](../README.md) — project landing page and navigation hub.

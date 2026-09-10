@@ -35,15 +35,16 @@ class CheckoutBranchSearchRequest extends FormRequest
         ];
     }
 
+    #[\Override]
     protected function prepareForValidation(): void
     {
         $normalized_data = $this->all();
 
-        $delivery_method = Str::lower(Str::squish((string) $this->input(OrderDataKeyEnum::DeliveryMethod->value, '')));
+        $delivery_method = Str::lower(Str::squish(string_value($this->input(OrderDataKeyEnum::DeliveryMethod->value, ''))));
         Arr::set($normalized_data, OrderDataKeyEnum::DeliveryMethod->value, $delivery_method !== '' ? $delivery_method : null);
 
         $city = (array) $this->input('city', []);
-        Arr::set($normalized_data, 'city.nova_poshta_city_id', Str::squish((string) Arr::get($city, 'nova_poshta_city_id', '')));
+        Arr::set($normalized_data, 'city.nova_poshta_city_id', Str::squish(string_value(Arr::get($city, 'nova_poshta_city_id', ''))));
 
         $ukr_poshta_city_id = Arr::get($city, 'ukr_poshta_city_id');
         Arr::set($normalized_data, 'city.ukr_poshta_city_id', is_numeric($ukr_poshta_city_id) ? (int) $ukr_poshta_city_id : null);

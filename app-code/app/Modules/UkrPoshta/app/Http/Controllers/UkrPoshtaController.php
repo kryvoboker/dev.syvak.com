@@ -40,8 +40,9 @@ class UkrPoshtaController extends Controller
         $validated = $request->validate([
             'region_id' => ['required', 'integer', 'min:1'],
         ]);
+        /** @var array<string, mixed> $validated */
 
-        $districts = $this->checkout_data_service->getDistrictRows((int) $validated['region_id']);
+        $districts = $this->checkout_data_service->getDistrictRows(is_numeric($validated['region_id']) ? (int) $validated['region_id'] : 0);
 
         return response()->json([
             'items' => $districts->toArray(),
@@ -54,8 +55,9 @@ class UkrPoshtaController extends Controller
         $validated = $request->validate([
             'district_id' => ['required', 'integer', 'min:1'],
         ]);
+        /** @var array<string, mixed> $validated */
 
-        $cities = $this->checkout_data_service->getCityRows((int) $validated['district_id']);
+        $cities = $this->checkout_data_service->getCityRows(is_numeric($validated['district_id']) ? (int) $validated['district_id'] : 0);
 
         return response()->json([
             'items' => $cities->toArray(),
@@ -69,10 +71,11 @@ class UkrPoshtaController extends Controller
             'district_id' => ['nullable', 'integer', 'min:1'],
             'city_id' => ['nullable', 'integer', 'min:1'],
         ]);
+        /** @var array<string, mixed> $validated */
 
         $post_offices = $this->checkout_data_service->getPostOfficeRows(
-            isset($validated['district_id']) ? (int) $validated['district_id'] : null,
-            isset($validated['city_id']) ? (int) $validated['city_id'] : null,
+            isset($validated['district_id']) && is_numeric($validated['district_id']) ? (int) $validated['district_id'] : null,
+            isset($validated['city_id']) && is_numeric($validated['city_id']) ? (int) $validated['city_id'] : null,
         );
 
         return response()->json([
@@ -90,6 +93,7 @@ class UkrPoshtaController extends Controller
             'city' => ['nullable', 'array'],
             'delivery_point' => ['nullable', 'array'],
         ]);
+        /** @var array<string, mixed> $validated */
 
         $state = $this->checkout_state_service->replaceState($validated);
 

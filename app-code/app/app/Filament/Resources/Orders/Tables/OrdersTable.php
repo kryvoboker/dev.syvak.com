@@ -15,6 +15,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -29,14 +30,14 @@ class OrdersTable
 {
     public static function configure(Table $table): Table
     {
-        $language_id = app(Language::class)->getLanguageByCode(app()->getLocale())->id;
+        $language_id = app(Language::class)->getLanguageByCode(app()->getLocale())?->id;
 
         return $table
             ->modifyQueryUsing(function (Builder $query) use ($language_id): void {
                 $query
                     ->with([
                         'customer' => function ($customer_query): void {
-                            $customer_query->select(['id', 'order_id', 'first_name', 'last_name']);
+                            $customer_query->select(['id', 'order_id', 'first_name', 'last_name', 'no_call']);
                         },
                         'shipping' => function ($shipping_query): void {
                             $shipping_query->select(['id', 'order_id', 'method']);
@@ -135,6 +136,11 @@ class OrdersTable
                 TextColumn::make('shipping.method')
                     ->label(__('admin/orders/orders.columns.shipping_method'))
                     ->toggleable(),
+
+                IconColumn::make('customer.no_call')
+                    ->label(__('admin/orders/orders.columns.no_call'))
+                    ->state(fn (Orders $record): bool => (bool) $record->customer?->no_call)
+                    ->boolean(),
 
                 TextColumn::make('added_at')
                     ->label(__('admin/orders/orders.columns.added_at'))
@@ -246,6 +252,11 @@ class OrdersTable
             ->defaultSort('added_at', 'desc');
     }
 
+    /**
+     * @param Builder<Orders> $query
+     *
+     * @return Builder<Orders>
+     */
     private static function whereLike(Builder $query, string $column, mixed $value): Builder
     {
         $value = trim((string) $value);
@@ -253,6 +264,11 @@ class OrdersTable
         return $value === '' ? $query : $query->where($column, 'like', "%$value%");
     }
 
+    /**
+     * @param Builder<Orders> $query
+     *
+     * @return Builder<Orders>
+     */
     private static function whereCustomerLike(Builder $query, string $column, mixed $value): Builder
     {
         $value = trim((string) $value);
@@ -263,6 +279,11 @@ class OrdersTable
         );
     }
 
+    /**
+     * @param Builder<Orders> $query
+     *
+     * @return Builder<Orders>
+     */
     private static function whereProductLike(Builder $query, string $column, mixed $value): Builder
     {
         $value = trim((string) $value);

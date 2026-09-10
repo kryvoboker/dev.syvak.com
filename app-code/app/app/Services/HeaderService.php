@@ -16,33 +16,34 @@ use Throwable;
 
 class HeaderService
 {
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
     public function __invoke(array $params = []): array
     {
         $category = new Category();
-        $app_settings = get_app_settings();
-        $logo_sizes = $app_settings->image_sizes?->firstWhere('name', 'logo') ?? [];
-        $logo_path = (string)data_get(
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
+        $logo_sizes = array_value($app_settings->image_sizes?->firstWhere('name', 'logo'));
+        $logo_path = string_value(data_get(
             $app_settings,
             'system_settings.images.path_to_logo',
-            (string)config('app.images.path_to_logo', 'images/logo.png'),
-        );
+            string_value(config('app.images.path_to_logo', 'images/logo.png')),
+        ));
         $categories = $category->getActiveCategoriesWithDescriptionsAndSlugsByLanguageId(
-            $app_settings->language_id,
+            $app_settings->language_id ?? 0,
         );
         $categories->load('categoryImage');
 
-        $current_device_type = config('devices.current_device_type');
-        $is_desktop_device = (string)($current_device_type ?? config('devices.types.desktop'))
-            === (string)config('devices.types.desktop');
+        $current_device_type = string_value(config('devices.current_device_type', config('devices.types.desktop')));
+        $is_desktop_device = $current_device_type === string_value(config('devices.types.desktop'));
 
-        $categories = $categories->map(function ($category_item) use ($is_desktop_device): array {
-            /** @var Category $category */
-            $category = $category_item;
+        $categories = $categories->toBase()->map(function (Category $category) use ($is_desktop_device): array {
 
             $category_data = [
-                'id' => (int)$category->id,
-                'descriptions' => $category->categoryDescription->first()->toArray(),
-                'slug' => $category->slugs->first()->slug,
+                'id' => integer_value($category->id),
+                'descriptions' => array_value($category->categoryDescription->first()?->toArray() ?? []),
+                'slug' => string_value($category->slugs->first()?->slug),
             ];
 
             if ($is_desktop_device) {
@@ -53,15 +54,16 @@ class HeaderService
         });
         $header_categories = $this->resolveHeaderCategories((int)$app_settings->language_id);
         $languages = (new Language())->getActiveLanguages();
-        $logo_width = (int)($logo_sizes['width'] ?? config('app.images.logo_width'));
-        $logo_height = (int)($logo_sizes['height'] ?? config('app.images.logo_height'));
-        $socials = array_map(function ($item) {
+        $logo_width = integer_value($logo_sizes['width'] ?? config('app.images.logo_width'));
+        $logo_height = integer_value($logo_sizes['height'] ?? config('app.images.logo_height'));
+        $socials = array_map(function (mixed $item): array {
+            $item = array_value($item);
             if (isset($item['svg_icon'])) {
-                $item['svg_icon'] = escape_special_html($item['svg_icon']);
+                $item['svg_icon'] = escape_special_html(string_value($item['svg_icon']));
             }
 
             return $item;
-        }, $app_settings->socials[app()->getLocale()] ?? []);
+        }, array_value(Arr::get($app_settings->socials?->all() ?? [], app()->getLocale(), [])));
 
         return [
             'logo_data' => [
@@ -98,8 +100,9 @@ class HeaderService
                 Arr::get($settings, 'header.categories', []),
             );
 
-            return app(HeaderCategoryService::class)
+            $resolved_categories = app(HeaderCategoryService::class)
                 ->getActiveCategories($category_ids, $language_id)
+                ->toBase()
                 ->map(function (Category $category): ?array {
                     $description = $category->categoryDescription->first();
                     $slug = $category->slugs->first()?->slug;
@@ -108,15 +111,21 @@ class HeaderService
                         return null;
                     }
 
+                    $description_data = $description->toArray();
+                    /** @var array<string, mixed> $description_data */
+
                     return [
-                        'id' => (int)$category->id,
-                        'descriptions' => $description->toArray(),
-                        'slug' => (string)$slug,
+                        'id' => integer_value($category->id),
+                        'descriptions' => $description_data,
+                        'slug' => string_value($slug),
                     ];
                 })
-                ->filter()
+                ->filter(fn (?array $category): bool => $category !== null)
                 ->values()
                 ->all();
+
+            /** @var array<int, array{id: int, descriptions: array<string, mixed>, slug: string}> $resolved_categories */
+            return $resolved_categories;
         } catch (Throwable $throwable) {
             Log::channel('stack')->warning('Header categories payload resolution failed.', [
                 'language_id' => $language_id,
@@ -128,14 +137,16 @@ class HeaderService
     }
 
     /**
-     * @param Collection<Language> $languages
+     * @param \Illuminate\Support\Collection<int, array{id: int, descriptions: array<mixed>, slug: string, preview_image?: array{urls: array<string, string>, width: int, height: int, alt: string}}> $categories
+     * @param Collection<int, Language> $languages
+     * @return array<string, mixed>
      */
     private function processCreateMainMenu(\Illuminate\Support\Collection $categories, Collection $languages): array
     {
         return [
             'categories' => $categories,
             'languages' => $languages,
-            'socials' => get_app_settings()->socials,
+            'socials' => get_app_settings()?->socials,
             'current_language' => app()->getLocale(),
         ];
     }
@@ -146,19 +157,24 @@ class HeaderService
     private function resolveCategoryPreviewImage(Category $category): array
     {
         $category_image = $category->categoryImage->first();
-        $preview_image_path = (string)($category_image !== null ? $category_image->preview_image : '');
-        $preview_image_width = $category_image?->preview_image_width;
-        $preview_image_height = $category_image?->preview_image_height;
-        $fallback_image_path = (string)(config('app.images.default_no_image') ?: 'images/no-image.png');
+        $preview_image_path = string_value($category_image?->preview_image);
+        $preview_image_width = integer_value(data_get(
+            $category_image,
+            'preview_image_width',
+            config('app.images.category.preview_in_page_in_catalog_menu.width', 0),
+        ));
+        $preview_image_height = integer_value(data_get(
+            $category_image,
+            'preview_image_height',
+            config('app.images.category.preview_in_page_in_catalog_menu.height', 0),
+        ));
+        $fallback_image_path = string_value(config('app.images.default_no_image') ?: 'images/no-image.png');
 
         if (blank($preview_image_path) || Storage::fileExists($preview_image_path) === false) {
             $preview_image_path = $fallback_image_path;
         }
 
         try {
-            $preview_image_width ??= (int)config('app.images.category.preview_in_page_in_catalog_menu.width', 0);
-            $preview_image_height ??= (int)config('app.images.category.preview_in_page_in_catalog_menu.height', 0);
-
             return [
                 'urls' => multiple_convert_img_and_get_url(
                     $preview_image_path,
@@ -169,7 +185,7 @@ class HeaderService
                 ),
                 'width' => $preview_image_width,
                 'height' => $preview_image_height,
-                'alt' => (string)data_get($category->categoryDescription->first(), 'name', ''),
+                'alt' => string_value(data_get($category->categoryDescription->first(), 'name', '')),
             ];
         } catch (Throwable $throwable) {
             Log::channel('stack')->warning('Category preview image resolution failed.', [
@@ -188,7 +204,7 @@ class HeaderService
                 ),
                 'width' => $preview_image_width,
                 'height' => $preview_image_height,
-                'alt' => (string)data_get($category->categoryDescription->first(), 'name', ''),
+                'alt' => string_value(data_get($category->categoryDescription->first(), 'name', '')),
             ];
         }
     }

@@ -37,12 +37,15 @@ final class AsyncTelegramBotHandler extends AbstractProcessingHandler
      *
      * @return void
      */
+    #[\Override]
     protected function write(LogRecord $record): void
     {
+        $formatted_message = $record->formatted;
+
         SendTelegramLogJob::dispatch(
             api_key: $this->api_key,
             channel: $this->channel,
-            message: $record->formatted,
+            message: is_scalar($formatted_message) ? (string) $formatted_message : '',
             split_long_messages: $this->split_long_messages,
             delay_between_messages: $this->delay_between_messages,
             parse_mode: $this->parse_mode,

@@ -25,6 +25,7 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     protected function findCached(string $hash): ?string
     {
         $product_attribute_text_hash = ProductAttributeTextHash::getAttributeTextHash(
@@ -35,6 +36,10 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
 
         $this->setProductAttributeTextHash($product_attribute_text_hash);
 
+        if ($product_attribute_text_hash === null) {
+            return null;
+        }
+
         $ai_answer_cache = $product_attribute_text_hash->aiAnswerCache()->first();
 
         return $ai_answer_cache?->answer;
@@ -43,6 +48,7 @@ class ProductAttributeTextAiTranslatorService extends AiDbCachedTranslatorAbstra
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model
     {
         $product_attribute_text_hash = $this->getProductAttributeTextHash();

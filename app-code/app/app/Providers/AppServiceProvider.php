@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\Cart\CartModeEnum;
+use App\Filament\Auth\Http\Responses\LoginResponse;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Services\Cart\CartService;
@@ -28,6 +29,7 @@ use App\Supports\Services\RequestLookupContext;
 use App\Supports\Services\StorefrontCacheService;
 use Detection\Exception\MobileDetectException;
 use Detection\MobileDetect;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as LoginResponseContract;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -36,15 +38,17 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View as LaravelView;
+use Override;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
+    #[Override]
     public function register(): void
     {
-        $new_storage_path = config('filesystems.new_storage_path');
+        $new_storage_path = string_value(config('filesystems.new_storage_path'));
 
         if ($new_storage_path) {
             config([
@@ -67,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(FooterService::class);
         $this->app->singleton(ImageUrlBuilderService::class);
         $this->app->scoped(AppSettingsService::class);
+        $this->app->bind(LoginResponseContract::class, LoginResponse::class);
         $this->app->scoped(CacheInvalidationService::class);
         $this->app->scoped(RequestLookupContext::class);
         $this->app->singleton(StorefrontCacheService::class);
@@ -94,8 +99,8 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by($request->ip() ?? 'unknown');
         });
 
-        $new_storage_path = config('filesystems.new_storage_path');
-        $new_public_path = config('filesystems.new_public_path');
+        $new_storage_path = string_value(config('filesystems.new_storage_path'));
+        $new_public_path = string_value(config('filesystems.new_public_path'));
 
         if ($new_storage_path && $new_public_path) {
             // Override symbolic links configuration
@@ -113,7 +118,7 @@ class AppServiceProvider extends ServiceProvider
          * locale-aware routes and stabilizes URL matching for storefront/admin routes.
          */
         $allowed_locales = get_allowed_locales();
-        $locale_key = config('localization.locale_parameter', 'locale');
+        $locale_key = string_value(config('localization.locale_parameter', 'locale'));
 
         if ($allowed_locales !== []) {
             $allowed_locales_pattern = implode('|', array_map('preg_quote', $allowed_locales));
@@ -129,10 +134,10 @@ class AppServiceProvider extends ServiceProvider
             View::addNamespace('storefront', $storefront_path);
         }
 
-        $default_no_image_path = (string) config('app.images.default_no_image', 'images/no-image.png');
+        $default_no_image_path = string_value(config('app.images.default_no_image', 'images/no-image.png'));
         $app_settings_service = null;
-        $device_type = config('devices.types.desktop');
-        $max_viewport_width = (int) config('app.frontend.max_viewport_width', 1920);
+        $device_type = string_value(config('devices.types.desktop'));
+        $max_viewport_width = integer_value(config('app.frontend.max_viewport_width', 1920));
 
         if (! $this->app->runningUnitTests()) {
             $currency = (new Currency())->getDefaultActiveCurrency();
@@ -141,22 +146,24 @@ class AppServiceProvider extends ServiceProvider
             $detect = new MobileDetect();
 
             if ($detect->isMobile()) {
-                $device_type = $detect->isTablet() ? config('devices.types.tablet') : config('devices.types.mobile');
+                $device_type = $detect->isTablet()
+                    ? string_value(config('devices.types.tablet'))
+                    : string_value(config('devices.types.mobile'));
             }
 
             $max_viewport_width = max(
                 1,
-                (int) data_get(
+                integer_value(data_get(
                     $app_settings_service->getSettings(),
                     'system_settings.frontend.max_viewport_width',
-                    (int) config('app.frontend.max_viewport_width', 1920),
-                ),
+                    integer_value(config('app.frontend.max_viewport_width', 1920)),
+                )),
             );
-            $default_no_image_path = (string) data_get(
+            $default_no_image_path = string_value(data_get(
                 $app_settings_service->getSettings(),
                 'system_settings.images.default_no_image',
-                (string) config('app.images.default_no_image', 'images/no-image.png'),
-            );
+                string_value(config('app.images.default_no_image', 'images/no-image.png')),
+            ));
 
             if ($currency !== null) {
                 config([

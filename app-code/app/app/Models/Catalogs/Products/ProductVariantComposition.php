@@ -8,6 +8,13 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $product_variant_id
+ * @property int $language_id
+ * @property string|null $title
+ * @property array<int, mixed>|null $items
+ */
 class ProductVariantComposition extends Model
 {
     protected $fillable = [
@@ -17,6 +24,7 @@ class ProductVariantComposition extends Model
         'items',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -27,7 +35,8 @@ class ProductVariantComposition extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function productVariant(): BelongsTo
     {
@@ -35,7 +44,8 @@ class ProductVariantComposition extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

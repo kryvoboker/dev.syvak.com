@@ -12,6 +12,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int|null $parent_id
+ * @property int $sort_order
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CategoryDescription> $categoryDescription
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CategoryImage> $categoryImage
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CategoryPath> $categoryPaths
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Slug> $slugs
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
+ */
 class Category extends Model
 {
     use HasSlugsTrait;
@@ -24,8 +35,9 @@ class Category extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -36,7 +48,8 @@ class Category extends Model
     }
 
     /**
-     * @return HasMany<CategoryDescription, $this>
+     * @phpstan-return HasMany<CategoryDescription, $this>
+     * @psalm-return HasMany<CategoryDescription, self>
      */
     public function categoryDescription(): HasMany
     {
@@ -44,7 +57,8 @@ class Category extends Model
     }
 
     /**
-     * @return HasMany<CategoryImage, $this>
+     * @phpstan-return HasMany<CategoryImage, $this>
+     * @psalm-return HasMany<CategoryImage, self>
      */
     public function categoryImage(): HasMany
     {
@@ -52,7 +66,8 @@ class Category extends Model
     }
 
     /**
-     * @return HasMany<CategoryPath, $this>
+     * @phpstan-return HasMany<CategoryPath, $this>
+     * @psalm-return HasMany<CategoryPath, self>
      */
     public function categoryPaths(): HasMany
     {
@@ -76,6 +91,9 @@ class Category extends Model
      * $product = Product::with('categories')->find(1);
      * ```
      */
+    /** @phpstan-return BelongsToMany<Product, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<Product, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -94,7 +112,7 @@ class Category extends Model
         /** @var Collection<int, Category> $categories */
         $categories = self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -113,10 +131,10 @@ class Category extends Model
         /** @var Collection<int, Category> $categories */
         $categories = self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'slugs' => function ($query) use ($language_id) {
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -131,7 +149,7 @@ class Category extends Model
     {
         return self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -173,9 +191,11 @@ class Category extends Model
      */
     public function getLevel(): int
     {
-        return $this->categoryPaths()
+        $level = $this->categoryPaths()
             ->where('category_id', $this->id)
             ->max('level') ?? 0;
+
+        return is_numeric($level) ? (int) $level : 0;
     }
 
     /**
@@ -191,11 +211,16 @@ class Category extends Model
         return $categories;
     }
 
+    /** @param array<int, int> $path_ids
+     * @return Collection<int, Category>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds(int $language_id, array $path_ids): Collection
     {
         return self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -211,10 +236,10 @@ class Category extends Model
         /** @var Collection<int, Category> $categories */
         $categories = self::query()
             ->with([
-                'categoryDescription' => function ($query) use ($language_id) {
+                'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'categoryPaths' => function ($query) {
+                'categoryPaths' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                     $query->orderBy('level', 'desc');
                 },
             ])

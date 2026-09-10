@@ -118,19 +118,19 @@ class ConvertImagePrototypeJob implements ShouldBeUnique, ShouldQueue
             $target_abs = Storage::path($target_abs);
             $webp_quality = max(
                 1,
-                (int) data_get(
+                integer_value(data_get(
                     get_app_settings(),
                     'system_settings.images.webp_quality',
-                    (int) config('app.images.webp_quality', 80),
-                ),
+                    integer_value(config('app.images.webp_quality', 80)),
+                )),
             );
             $avif_quality = max(
                 1,
-                (int) data_get(
+                integer_value(data_get(
                     get_app_settings(),
                     'system_settings.images.avif_quality',
-                    (int) config('app.images.avif_quality', 50),
-                ),
+                    integer_value(config('app.images.avif_quality', 50)),
+                )),
             );
 
             if ($format === 'webp') {

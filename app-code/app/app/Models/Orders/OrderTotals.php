@@ -8,6 +8,14 @@ use App\Enums\Order\TotalTypesEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property TotalTypesEnum $total_type
+ * @property string $name
+ * @property float|string $value
+ * @property int $sort_order
+ */
 class OrderTotals extends Model
 {
     protected $fillable = [
@@ -21,6 +29,7 @@ class OrderTotals extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -32,7 +41,8 @@ class OrderTotals extends Model
     }
 
     /**
-     * @return BelongsTo<Orders, $this>
+     * @phpstan-return BelongsTo<Orders, $this>
+     * @psalm-return BelongsTo<Orders, self>
      */
     public function order(): BelongsTo
     {

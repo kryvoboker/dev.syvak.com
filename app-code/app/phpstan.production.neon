@@ -1,5 +1,5 @@
 includes:
-    - vendor/larastan/larastan/extension.neon
+    - phpstan.base.neon
 
 parameters:
     paths:
@@ -11,10 +11,17 @@ parameters:
         analyse:
             - database
             - tests
-            - Modules/*/tests
-    level: 7
-    treatPhpDocTypesAsCertain: true
+            - Modules/*/tests/**
+            - app/Filament/**
+            - app/Providers/Filament/**
+            - Modules/*/app/Filament/**
+            - Modules/*/app/Services/Filament/**
+            - Modules/*/app/Livewire/**
+    level: 10
     ignoreErrors:
         -
             message: "#Called 'env' outside of the config directory which returns null when the config is cached, use 'config'.#"
             path: Modules/*/config/*.php
+        -
+            message: '#PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\):.*#'
+            path: app/Models/Users/User.php

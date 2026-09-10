@@ -7,6 +7,15 @@ namespace App\Models\Catalogs\Categories;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $category_id
+ * @property string|null $preview_image
+ * @property int|null $preview_image_width
+ * @property int|null $preview_image_height
+ * @property string|null $icon
+ * @property int $sort_order
+ */
 class CategoryImage extends Model
 {
     protected $fillable = [
@@ -19,8 +28,9 @@ class CategoryImage extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -32,7 +42,8 @@ class CategoryImage extends Model
     }
 
     /**
-     * @return BelongsTo<Category, $this>
+     * @phpstan-return BelongsTo<Category, $this>
+     * @psalm-return BelongsTo<Category, self>
      */
     public function category(): BelongsTo
     {

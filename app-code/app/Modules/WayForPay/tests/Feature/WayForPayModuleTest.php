@@ -108,6 +108,9 @@ final class WayForPayModuleTest extends TestCase
 
         $this->assertTrue($payment_result['success']);
         $this->assertSame('wayforpay', $payment_result['payment_method']);
+        if (! array_key_exists('use_widget', $payment_result) || ! array_key_exists('redirect_data', $payment_result) || ! array_key_exists('widget_data', $payment_result)) {
+            self::fail('WayForPay response does not contain payment data.');
+        }
         $this->assertTrue($payment_result['use_widget']);
         $this->assertSame('POST', $payment_result['redirect_data']['method']);
         $this->assertSame('https://secure.wayforpay.com/pay', $payment_result['redirect_data']['action']);

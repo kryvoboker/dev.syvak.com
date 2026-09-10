@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property array<string, mixed>|null $settings
+ * @property array<string, mixed>|null $meta
+ * @property int $id
+ * @property int $module_definition_id
+ * @property string $name
+ * @property string $placement
+ * @property string|null $context_key
+ * @property bool $is_enabled
+ * @property int $sort_order
+ * @property-read ModuleDefinition|null $definition
+ */
 class ModuleInstance extends Model
 {
     /**
@@ -27,6 +39,7 @@ class ModuleInstance extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -39,7 +52,8 @@ class ModuleInstance extends Model
     }
 
     /**
-     * @return BelongsTo<ModuleDefinition, $this>
+     * @phpstan-return BelongsTo<ModuleDefinition, $this>
+     * @psalm-return BelongsTo<ModuleDefinition, self>
      */
     public function definition(): BelongsTo
     {

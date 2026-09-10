@@ -9,8 +9,9 @@ use App\Models\Catalogs\Products\Product;
 use App\Supports\Services\Ai\AiTranslationService;
 use App\Supports\Services\SeoSlug\EnSeoSlugService;
 use App\Supports\Services\SeoSlug\UaSeoSlugService;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Throwable;
 
 class ProductImportSeeder extends Seeder
@@ -32,7 +33,8 @@ class ProductImportSeeder extends Seeder
         $language = new Language();
 
         // Get current locale language ID (adjust based on your logic)
-        $current_language_id = $language->getLanguageByCode($default_locale)->id;
+        /** @var int|null $current_language_id */
+        $current_language_id = $language->getLanguageByCode($default_locale)?->id;
 
         if ($current_language_id === null) {
             $this->command->error("$default_locale language not found in the database!");
@@ -40,6 +42,7 @@ class ProductImportSeeder extends Seeder
             return;
         }
 
+        /** @var Collection<int, Language> $languages */
         $languages = $language->getActiveLanguagesWithoutExceptCode($default_locale);
         $ai_translation_service = app(AiTranslationService::class);
 
@@ -47,7 +50,7 @@ class ProductImportSeeder extends Seeder
         $items = json_decode(file_get_contents($path), true) ?? [];
 
         foreach ($items as $item) {
-            $sku = trim((string) ($item['sku'] ?? ''));
+            $sku = Str::trim($item['sku']);
 
             if ($sku === '') {
                 continue;
@@ -69,7 +72,7 @@ class ProductImportSeeder extends Seeder
                 ],
             );
 
-            $product_name = html_entity_decode((string) ($item['name'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+            $product_name = decode_html_entities($item['name']);
 
             $product->productDescription()->updateOrCreate(
                 [
@@ -84,14 +87,10 @@ class ProductImportSeeder extends Seeder
 
             $product->slugs()->updateOrCreate(
                 ['language_id' => $current_language_id],
-                ['slug' => UaSeoSlugService::make($item['name'] ?? '', 500)],
+                ['slug' => UaSeoSlugService::make($item['name'], 500)],
             );
 
-            $languages->each(function (Model $lang) use ($ai_translation_service, $product, $product_name, $default_locale): void {
-                if (! $lang instanceof Language) {
-                    return;
-                }
-
+            $languages->each(function (Language $lang) use ($ai_translation_service, $product, $product_name, $default_locale): void {
                 $prompt = "Translate the product name from $default_locale to $lang->code. The product name is: $product_name.";
 
                 $translated_name = $ai_translation_service->productName($product->id, $prompt);

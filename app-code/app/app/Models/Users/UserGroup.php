@@ -8,6 +8,13 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property bool $is_active
+ * @property bool $is_default
+ */
 class UserGroup extends Model
 {
     protected $fillable = [
@@ -18,8 +25,9 @@ class UserGroup extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -28,6 +36,7 @@ class UserGroup extends Model
         ];
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         // Ensure only one default user group
@@ -66,6 +75,11 @@ class UserGroup extends Model
         });
     }
 
+    /**
+     * @return Collection<int, UserGroup>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getAllActiveUserGroups(): Collection
     {
         return self::query()
@@ -76,10 +90,12 @@ class UserGroup extends Model
 
     public function getDefaultUserGroupId(): ?int
     {
-        return self::query()
+        $group_id = self::query()
             ->where('is_active', true)
             ->where('is_default', true)
             ->value('id');
+
+        return is_numeric($group_id) ? (int) $group_id : null;
     }
 
     public function getDefaultUserGroup(): ?self
@@ -90,6 +106,7 @@ class UserGroup extends Model
             ->first();
     }
 
+    /** @return Collection<int, self> */
     public function getActiveUserGroups(): Collection
     {
         return self::where('is_active', true)

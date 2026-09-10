@@ -24,6 +24,7 @@ class OrderHistories extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -34,9 +35,9 @@ class OrderHistories extends Model
             'json' => 'array',
         ];
     }
-
     /**
-     * @return Attribute
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
      */
     public function json(): Attribute
     {
@@ -46,7 +47,8 @@ class OrderHistories extends Model
     }
 
     /**
-     * @return BelongsTo<Orders, $this>
+     * @phpstan-return BelongsTo<Orders, $this>
+     * @psalm-return BelongsTo<Orders, self>
      */
     public function order(): BelongsTo
     {
@@ -54,7 +56,8 @@ class OrderHistories extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @phpstan-return BelongsTo<User, $this>
+     * @psalm-return BelongsTo<User, self>
      */
     public function user(): BelongsTo
     {
@@ -62,7 +65,8 @@ class OrderHistories extends Model
     }
 
     /**
-     * @return BelongsTo<OrderStatuses, $this>
+     * @phpstan-return BelongsTo<OrderStatuses, $this>
+     * @psalm-return BelongsTo<OrderStatuses, self>
      */
     public function oldStatus(): BelongsTo
     {
@@ -70,7 +74,8 @@ class OrderHistories extends Model
     }
 
     /**
-     * @return BelongsTo<OrderStatuses, $this>
+     * @phpstan-return BelongsTo<OrderStatuses, $this>
+     * @psalm-return BelongsTo<OrderStatuses, self>
      */
     public function status(): BelongsTo
     {

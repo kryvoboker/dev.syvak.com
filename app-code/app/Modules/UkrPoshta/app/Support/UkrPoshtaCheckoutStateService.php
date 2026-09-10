@@ -24,10 +24,16 @@ class UkrPoshtaCheckoutStateService
     {
         $state = $this->request->session()->get(self::SESSION_KEY, []);
 
-        return is_array($state) ? $state : [];
+        if (! is_array($state)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $state */
+        return $state;
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
@@ -41,6 +47,7 @@ class UkrPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $region
      * @return array<string, mixed>
      */
@@ -56,6 +63,7 @@ class UkrPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $district
      * @return array<string, mixed>
      */
@@ -70,6 +78,7 @@ class UkrPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $city
      * @return array<string, mixed>
      */
@@ -82,6 +91,10 @@ class UkrPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     * @return array<string, mixed>
+     */
     public function setDeliveryMethod(string $delivery_method): array
     {
         $state = $this->getState();
@@ -91,6 +104,7 @@ class UkrPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $delivery_point
      * @return array<string, mixed>
      */
@@ -102,6 +116,10 @@ class UkrPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     * @return array<string, mixed>
+     */
     public function clearDeliveryPoint(): array
     {
         $state = $this->getState();
@@ -122,11 +140,11 @@ class UkrPoshtaCheckoutStateService
     private function normalizeState(array $payload): array
     {
         return [
-            'delivery_method' => Str::lower(Str::squish((string) Arr::get($payload, 'delivery_method', ''))),
-            'region' => $this->normalizeRow((array) Arr::get($payload, 'region', [])),
-            'district' => $this->normalizeRow((array) Arr::get($payload, 'district', [])),
-            'city' => $this->normalizeRow((array) Arr::get($payload, 'city', [])),
-            'delivery_point' => $this->normalizeRow((array) Arr::get($payload, 'delivery_point', [])),
+            'delivery_method' => Str::lower(Str::squish(string_value(Arr::get($payload, 'delivery_method', '')))),
+            'region' => $this->normalizeRow(string_keyed_array(Arr::get($payload, 'region', []))),
+            'district' => $this->normalizeRow(string_keyed_array(Arr::get($payload, 'district', []))),
+            'city' => $this->normalizeRow(string_keyed_array(Arr::get($payload, 'city', []))),
+            'delivery_point' => $this->normalizeRow(string_keyed_array(Arr::get($payload, 'delivery_point', []))),
         ];
     }
 

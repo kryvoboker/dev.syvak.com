@@ -37,6 +37,7 @@ return new class () extends Migration {
             $table->string('last_name')->nullable(false);
             $table->string('email')->nullable();
             $table->string('telephone')->nullable(false);
+            $table->boolean('no_call')->default(false);
 
             $table->timestamps();
         });

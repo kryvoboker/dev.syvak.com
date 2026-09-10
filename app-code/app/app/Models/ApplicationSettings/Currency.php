@@ -8,6 +8,18 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property string|null $format_locale
+ * @property string|null $symbol_left
+ * @property string|null $symbol_right
+ * @property int $decimal_places
+ * @property float|string $exchange_rate
+ * @property bool $is_active
+ * @property bool $is_default
+ */
 class Currency extends Model
 {
     protected $fillable = [
@@ -23,8 +35,9 @@ class Currency extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -38,6 +51,7 @@ class Currency extends Model
     /**
      * Boot the model.
      */
+    #[\Override]
     protected static function booted(): void
     {
         // Ensure only one default currency
@@ -76,6 +90,7 @@ class Currency extends Model
         });
     }
 
+    /** @return Collection<int, self> */
     public function getAllActiveCurrencies(): Collection
     {
         return self::query()
@@ -101,6 +116,7 @@ class Currency extends Model
             ->first();
     }
 
+    /** @return Collection<int, self> */
     public function getAllCurrencies(): Collection
     {
         return self::query()

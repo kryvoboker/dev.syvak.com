@@ -6,6 +6,7 @@ namespace App\Services\PageSettings;
 
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -74,6 +75,8 @@ class HeaderCategoryService
     /**
      * @param  array<int|string, mixed>  $selected_category_ids
      * @return array<int, string>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
      */
     public function searchOptions(string $search, array $selected_category_ids = []): array
     {
@@ -93,13 +96,15 @@ class HeaderCategoryService
             $excluded_ids = $this->normalizeCategoryIds($selected_category_ids);
             $categories = Category::query()
                 ->with([
-                    'categoryDescription' => fn ($query) => $query->whereIn('language_id', $active_language_ids),
+                    'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($active_language_ids): void {
+                        $query->whereIn('language_id', $active_language_ids);
+                    },
                 ])
                 ->where('is_active', true)
                 ->whereNotIn('id', $excluded_ids)
                 ->whereHas(
                     'categoryDescription',
-                    fn ($query) => $query
+                    fn (Builder $query): Builder => $query
                         ->whereIn('language_id', $active_language_ids)
                         ->where('name', 'like', "%$search%"),
                 )
@@ -109,6 +114,7 @@ class HeaderCategoryService
                 ->get();
 
             return $categories
+                ->toBase()
                 ->mapWithKeys(fn (Category $category): array => [
                     (string) $category->id => $this->resolveCategoryLabel($category),
                 ])
@@ -162,16 +168,16 @@ class HeaderCategoryService
         }
 
         return collect($category_ids)
-            ->map(function (mixed $category_id): ?int {
+            ->map(function (mixed $category_id): int {
                 if (! is_int($category_id) && ! is_string($category_id) && ! is_numeric($category_id)) {
-                    return null;
+                    return 0;
                 }
 
                 $normalized_id = (int) $category_id;
 
-                return $normalized_id > 0 ? $normalized_id : null;
+                return $normalized_id > 0 ? $normalized_id : 0;
             })
-            ->filter(fn (?int $category_id): bool => $category_id !== null)
+            ->filter(fn (int $category_id): bool => $category_id > 0)
             ->unique()
             ->values()
             ->all();
@@ -194,7 +200,7 @@ class HeaderCategoryService
                 ->where('is_active', true)
                 ->whereIn('id', $normalized_ids)
                 ->pluck('id')
-                ->map(fn (int|string $category_id): int => (int) $category_id)
+                ->map(fn (mixed $category_id): int => is_numeric($category_id) ? (int) $category_id : 0)
                 ->all();
 
             return collect($normalized_ids)
@@ -226,8 +232,12 @@ class HeaderCategoryService
         try {
             $categories = Category::query()
                 ->with([
-                    'categoryDescription' => fn ($query) => $query->where('language_id', $language_id),
-                    'slugs' => fn ($query) => $query->where('language_id', $language_id),
+                    'categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                        $query->where('language_id', $language_id);
+                    },
+                    'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                        $query->where('language_id', $language_id);
+                    },
                 ])
                 ->where('is_active', true)
                 ->whereIn('id', $normalized_ids)
@@ -262,7 +272,7 @@ class HeaderCategoryService
             ->firstWhere('language_id', $current_language_id)
             ?? $category->categoryDescription->first();
 
-        return (string) ($description?->name ?: "Category #$category->id");
+        return $description?->name ?: "Category #$category->id";
     }
 
     private function resolveCurrentLanguageId(): ?int

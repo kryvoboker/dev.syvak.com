@@ -7,6 +7,7 @@ namespace Tests\Feature\Pages;
 use App\Http\Controllers\Pages\CheckoutController;
 use App\Services\Cart\CartService;
 use App\Services\Checkout\CheckoutSelectionStateService;
+use App\Services\Checkout\CheckoutStateResetService;
 use App\Services\FooterService;
 use App\Services\HeaderService;
 use Illuminate\Database\Schema\Blueprint;
@@ -235,5 +236,40 @@ class CheckoutControllerTest extends TestCase
         $this->assertSame('branch-123', $state['delivery_point']['id']);
         $this->assertSame('01001', $state['delivery_point']['postcode']);
         $this->assertSame('Street 1, building 2', $state['delivery_address']);
+    }
+
+    public function test_checkout_state_is_reset_after_successful_order(): void
+    {
+        $session = $this->app['session']->driver();
+        $session->put('checkout.selection_state', [
+            'payment_method' => 'bank_transfer',
+            'promo_code' => 'WELCOME10',
+            'comment' => 'Please call before delivery.',
+            'first_name' => 'Lesya',
+            'last_name' => 'Ukrainka',
+            'phone' => '+380501234567',
+            'email' => 'lesya@example.com',
+        ]);
+        $session->put('nova_poshta.checkout_state', ['delivery_method' => 'nova_poshta']);
+        $session->put('ukr_poshta.checkout_state', ['delivery_method' => 'ukr_poshta']);
+
+        app(CheckoutStateResetService::class)->resetAfterOrder();
+
+        $this->assertSame([
+            'delivery_method' => '',
+            'payment_method' => '',
+            'city' => [],
+            'delivery_point' => [],
+            'delivery_address' => '',
+            'first_name' => 'Lesya',
+            'last_name' => 'Ukrainka',
+            'phone' => '+380501234567',
+            'email' => 'lesya@example.com',
+            'comment' => '',
+            'promo_code' => '',
+            'no_call' => false,
+        ], $session->get('checkout.selection_state'));
+        $this->assertFalse($session->has('nova_poshta.checkout_state'));
+        $this->assertFalse($session->has('ukr_poshta.checkout_state'));
     }
 }

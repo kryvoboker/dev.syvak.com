@@ -8,6 +8,12 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $payment_status_id
+ * @property int $language_id
+ * @property string $name
+ */
 class PaymentStatusDescriptions extends Model
 {
     protected $fillable = [
@@ -19,6 +25,7 @@ class PaymentStatusDescriptions extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -28,7 +35,8 @@ class PaymentStatusDescriptions extends Model
     }
 
     /**
-     * @return BelongsTo<PaymentStatuses, $this>
+     * @phpstan-return BelongsTo<PaymentStatuses, $this>
+     * @psalm-return BelongsTo<PaymentStatuses, self>
      */
     public function paymentStatus(): BelongsTo
     {
@@ -36,7 +44,8 @@ class PaymentStatusDescriptions extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

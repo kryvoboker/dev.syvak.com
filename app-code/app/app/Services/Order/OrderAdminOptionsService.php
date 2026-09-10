@@ -79,7 +79,7 @@ final class OrderAdminOptionsService
                     ->where('code', app()->getLocale()))
                 ->value('name');
 
-        return $name
+        return string_value($name)
             ?: $this->translate('admin/orders/orders.statuses.unnamed', 'Unnamed status');
     }
 
@@ -214,7 +214,11 @@ final class OrderAdminOptionsService
     {
         return $this->user_group_options ??= UserGroup::query()
             ->orderBy('name')
-            ->pluck('name', 'id')
+            ->get(['id', 'name'])
+            ->toBase()
+            ->mapWithKeys(fn (UserGroup $group): array => [
+                string_value($group->getKey()) => string_value($group->name),
+            ])
             ->all();
     }
 
@@ -228,11 +232,12 @@ final class OrderAdminOptionsService
             ->orderByDesc('is_default')
             ->orderByDesc('name')
             ->get(['id', 'code', 'name'])
+            ->toBase()
             ->mapWithKeys(fn (Currency $currency): array => [
-                (string) $currency->getKey() => sprintf(
+                string_value($currency->getKey()) => sprintf(
                     '%s — %s',
-                    $currency->code,
-                    $currency->name,
+                    string_value($currency->code),
+                    string_value($currency->name),
                 ),
             ])
             ->all();
@@ -254,7 +259,7 @@ final class OrderAdminOptionsService
 
         $query = $model::query()
             ->with([
-                'descriptions' => function ($description_query) use ($language_id): void {
+                'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $description_query) use ($language_id): void {
                     $description_query->where('language_id', $language_id);
                 },
             ])
@@ -267,12 +272,12 @@ final class OrderAdminOptionsService
             })
             ->orderBy('sort_order');
 
-        return $this->status_options[$cache_key] = $query->get()
+        return $this->status_options[$cache_key] = $query->get()->toBase()
             ->mapWithKeys(function (OrderStatuses|PaymentStatuses $status): array {
                 $description = $status->descriptions->first();
 
                 return [
-                    (string) $status->getKey() => $description?->name
+                    string_value($status->getKey()) => string_value($description?->name)
                         ?: $this->translate('admin/orders/orders.statuses.unnamed', 'Unnamed status'),
                 ];
             })
@@ -282,9 +287,10 @@ final class OrderAdminOptionsService
     public function getCurrentLanguageId(): ?int
     {
         if (! $this->language_id_resolved) {
-            $this->language_id = $this->request_lookup_context
+            $language_id = $this->request_lookup_context
                 ->getLanguageByCode(app()->getLocale())
                 ?->getKey();
+            $this->language_id = is_numeric($language_id) ? (int) $language_id : null;
             $this->language_id_resolved = true;
         }
 
@@ -295,6 +301,6 @@ final class OrderAdminOptionsService
     {
         $translation = __($key);
 
-        return $translation === $key ? $fallback : (string) $translation;
+        return $translation === $key ? $fallback : string_value($translation);
     }
 }

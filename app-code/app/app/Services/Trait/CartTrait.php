@@ -25,8 +25,8 @@ trait CartTrait
         $mode = $this->resolveCartMode($request->validated());
 
         $result_data = app(CartService::class)->addItem(
-            product_variant_id: (int) Arr::get($request->validated(), 'product_variant_id', 0),
-            quantity          : (int) Arr::get($request->validated(), 'quantity', 1),
+            product_variant_id: integer_value(Arr::get($request->validated(), 'product_variant_id', 0)),
+            quantity          : integer_value(Arr::get($request->validated(), 'quantity', 1)),
             locale            : $locale,
             mode              : $mode,
             chosen_attributes : (array) Arr::get($request->validated(), 'chosen_attributes', []),
@@ -44,8 +44,8 @@ trait CartTrait
         $mode = $this->resolveCartMode($request->validated());
 
         $result_data = app(CartService::class)->updateItem(
-            cart_id : (int) Arr::get($request->validated(), 'cart_id', 0),
-            quantity: (int) Arr::get($request->validated(), 'quantity', 1),
+            cart_id : integer_value(Arr::get($request->validated(), 'cart_id', 0)),
+            quantity: integer_value(Arr::get($request->validated(), 'quantity', 1)),
             locale  : $locale,
             mode    : $mode,
         );
@@ -62,7 +62,7 @@ trait CartTrait
         $mode = $this->resolveCartMode($request->validated());
 
         $result_data = app(CartService::class)->removeItem(
-            cart_id: (int) Arr::get($request->validated(), 'cart_id', 0),
+            cart_id: integer_value(Arr::get($request->validated(), 'cart_id', 0)),
             locale : $locale,
             mode   : $mode,
         );
@@ -81,7 +81,7 @@ trait CartTrait
 
         return response()->json([
             'success' => (bool) Arr::get($result_data, 'success', false),
-            'message' => (string) Arr::get($result_data, 'message', ''),
+            'message' => string_value(Arr::get($result_data, 'message', '')),
             'mode' => $mode,
             'cart' => $cart_data,
             'rendered' => [
@@ -102,7 +102,7 @@ trait CartTrait
      */
     private function resolveCartMode(array $validated_data): string
     {
-        $mode = (string) Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
+        $mode = string_value(Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value));
 
         return in_array($mode, array_column(CartModeEnum::cases(), 'value'), true)
             ? $mode

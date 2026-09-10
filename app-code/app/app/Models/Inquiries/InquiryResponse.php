@@ -10,6 +10,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $inquiry_id
+ * @property string $subject
+ * @property int|null $admin_user_id
+ * @property string|null $admin_name
+ * @property string $body_html
+ * @property string $recipient_email
+ * @property InquiryResponseDeliveryStatusEnum $delivery_status
+ * @property string|null $delivery_error
+ * @property-read Inquiry|null $inquiry
+ */
 class InquiryResponse extends Model
 {
     /** @use HasFactory<\Database\Factories\Inquiries\InquiryResponseFactory> */
@@ -28,6 +40,7 @@ class InquiryResponse extends Model
         'sent_at',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -39,13 +52,17 @@ class InquiryResponse extends Model
         ];
     }
 
-    /** @return BelongsTo<Inquiry, $this> */
+    /** @phpstan-return BelongsTo<Inquiry, $this>
+     * @psalm-return BelongsTo<Inquiry, self>
+     */
     public function inquiry(): BelongsTo
     {
         return $this->belongsTo(Inquiry::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @phpstan-return BelongsTo<User, $this>
+     * @psalm-return BelongsTo<User, self>
+     */
     public function adminUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'admin_user_id');

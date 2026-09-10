@@ -9,6 +9,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $catalog_filter_group_id
+ * @property string $code
+ * @property CatalogFilterValueTypeEnum $value_type
+ * @property string|null $value_string
+ * @property string|null $value_number
+ * @property string|null $range_from
+ * @property string|null $range_to
+ * @property bool $is_enabled
+ * @property int $sort_order
+ * @property int $products_count_cached
+ * @property array<string, mixed>|null $meta
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CatalogFilterValueTranslation> $translations
+ */
 class CatalogFilterValue extends Model
 {
     protected $fillable = [
@@ -28,6 +43,7 @@ class CatalogFilterValue extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -44,7 +60,8 @@ class CatalogFilterValue extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterGroup, $this>
+     * @phpstan-return BelongsTo<CatalogFilterGroup, $this>
+     * @psalm-return BelongsTo<CatalogFilterGroup, self>
      */
     public function filterGroup(): BelongsTo
     {
@@ -52,7 +69,8 @@ class CatalogFilterValue extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterValueTranslation, $this>
+     * @phpstan-return HasMany<CatalogFilterValueTranslation, $this>
+     * @psalm-return HasMany<CatalogFilterValueTranslation, self>
      */
     public function translations(): HasMany
     {
@@ -60,7 +78,8 @@ class CatalogFilterValue extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterProductIndex, $this>
+     * @phpstan-return HasMany<CatalogFilterProductIndex, $this>
+     * @psalm-return HasMany<CatalogFilterProductIndex, self>
      */
     public function indexRows(): HasMany
     {

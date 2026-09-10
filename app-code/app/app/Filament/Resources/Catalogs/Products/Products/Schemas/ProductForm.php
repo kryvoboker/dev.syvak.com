@@ -31,6 +31,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
+use RuntimeException;
 use Throwable;
 
 class ProductForm
@@ -214,7 +215,7 @@ class ProductForm
     /**
      * Create categories tab
      *
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      */
     protected static function createCategoriesTabs(Collection $active_languages): Tab
     {
@@ -295,11 +296,11 @@ class ProductForm
             ->pluck('path_id')
             ->toArray();
 
-        throw_if(
-            empty($path_ids),
-            'Exception',
-            __('admin/default.errors.category_path_not_found', ['id' => $category_id]),
-        );
+        if (empty($path_ids)) {
+            throw new RuntimeException(
+                (string) __('admin/default.errors.category_path_not_found', ['id' => $category_id]),
+            );
+        }
 
         // Get all categories in the path with descriptions
         $categories = (new Category())->getActiveCategoriesWithDescriptionsByLanguageIdAndPathIds($language_id, $path_ids)
@@ -312,17 +313,15 @@ class ProductForm
             /** @var Category $category */
             $category = $categories->get($path_id);
 
-            if ($category === null) {
-                continue;
-            }
-
             $description = $category->categoryDescription
                 ->firstWhere('language_id', $language_id);
+            $description_name = $description?->name;
+            $fallback_description_name = $category->categoryDescription->first()?->name;
 
-            $name = is_string($description->name ?? null) && filled($description->name)
-                ? $description->name
-                : (is_string($category->categoryDescription->first()->name ?? null) && filled($category->categoryDescription->first()->name)
-                    ? $category->categoryDescription->first()->name
+            $name = is_string($description_name) && filled($description_name)
+                ? $description_name
+                : (filled($fallback_description_name)
+                    ? $fallback_description_name
                     : "Category #$category->id");
 
             $path[] = $name;
@@ -419,10 +418,9 @@ class ProductForm
         try {
             $service_settings = app(PageSettingsBootstrapService::class)->getProductSettings();
 
-            if (is_array($service_settings)) {
-                $settings_cache = array_replace_recursive(
-                    $settings_cache,
-                    [
+            $settings_cache = array_replace_recursive(
+                $settings_cache,
+                [
                         'upload' => [
                             'max_size_kb' => (int) data_get($service_settings, 'admin.upload.max_size_kb', (int) config('app.images.product.upload.max_size_kb', 5120)),
                             'directory' => (string) data_get($service_settings, 'admin.upload.directory', (string) config('app.images.product.image_path', 'images/products/' . date('Y/m'))),
@@ -434,8 +432,7 @@ class ProductForm
                             ],
                         ],
                     ],
-                );
-            }
+            );
         } catch (Throwable) {
             // Keep config fallback when page settings are not available.
         }
@@ -458,7 +455,6 @@ class ProductForm
                                         return (new UserGroup())
                                             ->getActiveUserGroups()
                                             ->mapWithKeys(function ($user_group) {
-                                                /** @var UserGroup $user_group */
                                                 $name = $user_group->name ?: "User Group #$user_group->id";
 
                                                 return [$user_group->id => $name];
@@ -521,7 +517,7 @@ class ProductForm
     /**
      * Create attributes tab
      *
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      */
     protected static function createAttributesTabs(Collection $active_languages): Tab
     {
@@ -545,14 +541,15 @@ class ProductForm
                                         return (new Attribute())
                                             ->getActiveAttributesWithDescriptionsByLanguageId($current_language_id)
                                             ->mapWithKeys(function ($attribute) use ($current_language_id) {
-                                                /** @var Attribute $attribute */
                                                 $description = $attribute->attributeDescription
                                                     ->firstWhere('language_id', $current_language_id);
+                                                $description_name = $description?->name;
+                                                $fallback_description_name = $attribute->attributeDescription->first()?->name;
 
-                                                $name = is_string($description->name ?? null) && filled($description->name)
-                                                    ? $description->name
-                                                    : (is_string($attribute->attributeDescription->first()->name ?? null) && filled($attribute->attributeDescription->first()->name)
-                                                        ? $attribute->attributeDescription->first()->name
+                                                $name = is_string($description_name) && filled($description_name)
+                                                    ? $description_name
+                                                    : (filled($fallback_description_name)
+                                                        ? $fallback_description_name
                                                         : "Attribute #$attribute->id");
 
                                                 return [$attribute->id => $name];
@@ -574,14 +571,16 @@ class ProductForm
 
                                         $description = $attribute->attributeDescription
                                             ->firstWhere('language_id', $current_language_id);
+                                        $description_name = $description?->name;
+                                        $fallback_description_name = $attribute->attributeDescription->first()?->name;
 
-                                        return is_string($description->name ?? null) && filled($description->name)
-                                            ? $description->name
-                                            : (is_string($attribute->attributeDescription->first()->name ?? null) && filled($attribute->attributeDescription->first()->name)
-                                                ? $attribute->attributeDescription->first()->name
+                                        return is_string($description_name) && filled($description_name)
+                                            ? $description_name
+                                            : (filled($fallback_description_name)
+                                                ? $fallback_description_name
                                                 : "Attribute #$attribute->id");
                                     })
-                                    ->afterStateUpdated(function ($state, $set, $get): void {
+                                    ->afterStateUpdated(function (): void {
                                         // Auto-validate uniqueness on change
                                     })
                                     ->searchable()
@@ -594,7 +593,7 @@ class ProductForm
                                 Select::make('language_id')
                                     ->label(__('admin/default.labels.language'))
                                     ->options($active_languages->pluck('name', 'id'))
-                                    ->afterStateUpdated(function ($state, $set, $get): void {
+                                    ->afterStateUpdated(function (): void {
                                         // Auto-validate uniqueness on change
                                     })
                                     ->searchable()

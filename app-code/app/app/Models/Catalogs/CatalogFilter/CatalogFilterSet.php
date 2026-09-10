@@ -12,6 +12,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property CatalogFilterPriceSourceModeEnum $price_source_mode
+ * @property CatalogFilterDiscountOnlyPolicyEnum $discount_only_policy
+ * @property array<int, string>|null $context_types
+ * @property int $id
+ * @property bool $is_enabled
+ * @property bool $is_price_filter_enabled
+ * @property bool $is_attribute_filtering_enabled
+ * @property int|null $min_stock_quantity
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CatalogFilterGroup> $groups
+ * @property-read CatalogFilterIndexMeta|null $indexMeta
+ */
 class CatalogFilterSet extends Model
 {
     protected $fillable = [
@@ -31,6 +43,7 @@ class CatalogFilterSet extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -48,7 +61,8 @@ class CatalogFilterSet extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterGroup, $this>
+     * @phpstan-return HasMany<CatalogFilterGroup, $this>
+     * @psalm-return HasMany<CatalogFilterGroup, self>
      */
     public function groups(): HasMany
     {
@@ -56,7 +70,8 @@ class CatalogFilterSet extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterProductIndex, $this>
+     * @phpstan-return HasMany<CatalogFilterProductIndex, $this>
+     * @psalm-return HasMany<CatalogFilterProductIndex, self>
      */
     public function indexRows(): HasMany
     {
@@ -64,7 +79,8 @@ class CatalogFilterSet extends Model
     }
 
     /**
-     * @return HasOne<CatalogFilterIndexMeta, $this>
+     * @phpstan-return HasOne<CatalogFilterIndexMeta, $this>
+     * @psalm-return HasOne<CatalogFilterIndexMeta, self>
      */
     public function indexMeta(): HasOne
     {

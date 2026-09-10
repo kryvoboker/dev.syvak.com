@@ -19,8 +19,10 @@ class CreateInfoPage extends CreateRecord
 
     protected static string $resource = InfoPageResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $descriptions = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
     public ?Model $record = null;
@@ -47,7 +49,7 @@ class CreateInfoPage extends CreateRecord
 
             $this->createDescriptions();
 
-            return $this->record;
+            return $this->getInfoPageRecord();
         });
     }
 

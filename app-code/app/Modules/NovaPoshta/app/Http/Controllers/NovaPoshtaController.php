@@ -40,8 +40,9 @@ class NovaPoshtaController extends Controller
         $validated = $request->validate([
             'region_ref' => ['required', 'string', 'max:255'],
         ]);
+        /** @var array<string, mixed> $validated */
 
-        $cities = $this->checkout_data_service->getCityRows((string) $validated['region_ref']);
+        $cities = $this->checkout_data_service->getCityRows(is_scalar($validated['region_ref']) ? (string) $validated['region_ref'] : '');
 
         return response()->json([
             'items' => $cities->toArray(),
@@ -54,8 +55,9 @@ class NovaPoshtaController extends Controller
         $validated = $request->validate([
             'city_ref' => ['required', 'string', 'max:255'],
         ]);
+        /** @var array<string, mixed> $validated */
 
-        $post_offices = $this->checkout_data_service->getPostOfficeRows((string) $validated['city_ref']);
+        $post_offices = $this->checkout_data_service->getPostOfficeRows(is_scalar($validated['city_ref']) ? (string) $validated['city_ref'] : '');
 
         return response()->json([
             'items' => $post_offices->toArray(),
@@ -68,8 +70,9 @@ class NovaPoshtaController extends Controller
         $validated = $request->validate([
             'city_ref' => ['required', 'string', 'max:255'],
         ]);
+        /** @var array<string, mixed> $validated */
 
-        $poshtomats = $this->checkout_data_service->getPoshtomatRows((string) $validated['city_ref']);
+        $poshtomats = $this->checkout_data_service->getPoshtomatRows(is_scalar($validated['city_ref']) ? (string) $validated['city_ref'] : '');
 
         return response()->json([
             'items' => $poshtomats->toArray(),
@@ -85,6 +88,7 @@ class NovaPoshtaController extends Controller
             'city' => ['nullable', 'array'],
             'delivery_point' => ['nullable', 'array'],
         ]);
+        /** @var array<string, mixed> $validated */
 
         $state = $this->checkout_state_service->replaceState($validated);
 

@@ -20,6 +20,28 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Throwable;
 
+/**
+ * @property int $id
+ * @property string|null $image
+ * @property float|null $price
+ * @property string|null $sku
+ * @property string|null $model
+ * @property string|null $ean
+ * @property int $quantity
+ * @property int $minimum
+ * @property bool $is_active
+ * @property int|null $default_category_id
+ * @property int|null $default_category_id
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariant> $variants
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductDescription> $descriptions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductComposition> $compositions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductCare> $cares
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductSizeGuide> $sizeGuides
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Category> $categories
+ * @property-read ProductVariant|null $defaultVariant
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Slug> $slugs
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductDescription> $productDescription
+ */
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -45,8 +67,9 @@ class Product extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -63,7 +86,8 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductNameHash, $this>
+     * @phpstan-return HasMany<ProductNameHash, $this>
+     * @psalm-return HasMany<ProductNameHash, self>
      */
     public function productNameHash(): HasMany
     {
@@ -71,7 +95,8 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductDescriptionHash, $this>
+     * @phpstan-return HasMany<ProductDescriptionHash, $this>
+     * @psalm-return HasMany<ProductDescriptionHash, self>
      */
     public function productDescriptionHash(): HasMany
     {
@@ -79,7 +104,8 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductAttributeTextHash, $this>
+     * @phpstan-return HasMany<ProductAttributeTextHash, $this>
+     * @psalm-return HasMany<ProductAttributeTextHash, self>
      */
     public function productAttributeTextHash(): HasMany
     {
@@ -87,20 +113,25 @@ class Product extends Model
     }
 
     /**
-     * @return HasOne<ProductNameHash, $this>
+     * @phpstan-return HasOne<ProductNameHash, $this>
+     * @psalm-return HasOne<ProductNameHash, self>
      */
     public function latestProductNameHash(): HasOne
     {
         return $this->hasOne(ProductNameHash::class)->latestOfMany('updated_at');
     }
 
+    /** @phpstan-return HasOne<ProductDescriptionHash, $this>
+     * @psalm-return HasOne<ProductDescriptionHash, self>
+     */
     public function lagestProductDescriptionHash(): HasOne
     {
         return $this->hasOne(ProductDescriptionHash::class)->latestOfMany('updated_at');
     }
 
     /**
-     * @return HasOne<ProductAttributeTextHash, $this>
+     * @phpstan-return HasOne<ProductAttributeTextHash, $this>
+     * @psalm-return HasOne<ProductAttributeTextHash, self>
      */
     public function latestProductAttributeTextHash(): HasOne
     {
@@ -108,7 +139,8 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductDescription, $this>
+     * @phpstan-return HasMany<ProductDescription, $this>
+     * @psalm-return HasMany<ProductDescription, self>
      */
     public function productDescription(): HasMany
     {
@@ -118,7 +150,8 @@ class Product extends Model
     /**
      * Compatibility relation for legacy code paths.
      *
-     * @return HasManyThrough<ProductVariantDiscount, ProductVariant, $this>
+     * @phpstan-return HasManyThrough<ProductVariantDiscount, ProductVariant, $this>
+     * @psalm-return HasManyThrough<ProductVariantDiscount, ProductVariant, self>
      */
     public function productDiscount(): HasManyThrough
     {
@@ -135,7 +168,8 @@ class Product extends Model
     /**
      * Compatibility relation for legacy code paths.
      *
-     * @return HasManyThrough<ProductVariantImage, ProductVariant, $this>
+     * @phpstan-return HasManyThrough<ProductVariantImage, ProductVariant, $this>
+     * @psalm-return HasManyThrough<ProductVariantImage, ProductVariant, self>
      */
     public function productImage(): HasManyThrough
     {
@@ -152,7 +186,8 @@ class Product extends Model
     /**
      * Compatibility relation for legacy code paths.
      *
-     * @return HasManyThrough<ProductVariantAttributeValue, ProductVariant, $this>
+     * @phpstan-return HasManyThrough<ProductVariantAttributeValue, ProductVariant, $this>
+     * @psalm-return HasManyThrough<ProductVariantAttributeValue, ProductVariant, self>
      */
     public function productToAttribute(): HasManyThrough
     {
@@ -167,7 +202,8 @@ class Product extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function defaultVariant(): BelongsTo
     {
@@ -175,7 +211,8 @@ class Product extends Model
     }
 
     /**
-     * @return BelongsTo<Category, $this>
+     * @phpstan-return BelongsTo<Category, $this>
+     * @psalm-return BelongsTo<Category, self>
      */
     public function defaultCategory(): BelongsTo
     {
@@ -183,33 +220,41 @@ class Product extends Model
     }
 
     /**
-     * @return HasMany<ProductVariant, $this>
+     * @phpstan-return HasMany<ProductVariant, $this>
+     * @psalm-return HasMany<ProductVariant, self>
      */
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
     }
 
-    /** @return HasMany<ProductSizeGuide, $this> */
+    /** @phpstan-return HasMany<ProductSizeGuide, $this>
+     * @psalm-return HasMany<ProductSizeGuide, self>
+     */
     public function sizeGuides(): HasMany
     {
         return $this->hasMany(ProductSizeGuide::class);
     }
 
-    /** @return HasMany<ProductComposition, $this> */
+    /** @phpstan-return HasMany<ProductComposition, $this>
+     * @psalm-return HasMany<ProductComposition, self>
+     */
     public function compositions(): HasMany
     {
         return $this->hasMany(ProductComposition::class);
     }
 
-    /** @return HasMany<ProductCare, $this> */
+    /** @phpstan-return HasMany<ProductCare, $this>
+     * @psalm-return HasMany<ProductCare, self>
+     */
     public function cares(): HasMany
     {
         return $this->hasMany(ProductCare::class);
     }
 
     /**
-     * @return HasMany<ProductVariant, $this>
+     * @phpstan-return HasMany<ProductVariant, $this>
+     * @psalm-return HasMany<ProductVariant, self>
      */
     public function activeVariants(): HasMany
     {
@@ -217,6 +262,9 @@ class Product extends Model
             ->where('is_active', true);
     }
 
+    /** @phpstan-return BelongsToMany<Category, $this, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     * @psalm-return BelongsToMany<Category, self, \Illuminate\Database\Eloquent\Relations\Pivot, 'pivot'>
+     */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -236,7 +284,7 @@ class Product extends Model
 
     public function getLastActualAndLastModifiedDiscountFromModel(self $product): ?ProductVariantDiscount
     {
-        $app_settings = get_app_settings();
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
         $variant = $product->defaultVariant;
 
         if (! $variant instanceof ProductVariant) {
@@ -246,10 +294,11 @@ class Product extends Model
         return $variant->getLastActualAndLastModifiedDiscountForUserGroup((int) $app_settings->user_group_id);
     }
 
+    /** @return LengthAwarePaginator<int, self> */
     public function search(string $keyword, int $per_page): LengthAwarePaginator
     {
-        $app_settings = get_app_settings();
-        $minimum_stock_quantity = (int) config('app.products.minimum_stock_quantity', 1);
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
+        $minimum_stock_quantity = integer_value(config('app.products.minimum_stock_quantity', 1));
 
         try {
             $minimum_stock_quantity = app(PageSettingsBootstrapService::class)->getProductMinimumStockQuantity();
@@ -259,14 +308,15 @@ class Product extends Model
 
         return self::query()
             ->with([
-                'slugs' => function ($query) use ($app_settings): void {
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($app_settings): void {
                     $query->where('language_id', $app_settings->language_id);
                 },
-                'productDescription' => function ($query) use ($app_settings): void {
+                'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($app_settings): void {
                     $query->where('language_id', $app_settings->language_id);
                 },
-                'defaultVariant.discounts' => function ($query) use ($app_settings): void {
-                    $current_date_time = now(config('app.timezone'));
+                'defaultVariant.discounts' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($app_settings): void {
+                    $timezone = config('app.timezone');
+                    $current_date_time = now(is_scalar($timezone) ? (string) $timezone : null);
 
                     $query
                         ->where('user_group_id', $app_settings->user_group_id)

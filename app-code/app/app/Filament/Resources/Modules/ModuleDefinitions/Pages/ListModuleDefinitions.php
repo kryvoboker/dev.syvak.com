@@ -35,6 +35,7 @@ class ListModuleDefinitions extends ListRecords
 
     public string $status_filter = 'all';
 
+    /** @var array<string, mixed>|null */
     public ?array $last_sync_summary = null;
 
     public function getTitle(): string
@@ -47,6 +48,7 @@ class ListModuleDefinitions extends ListRecords
         return __('admin/modules/module_definitions.navigation_label');
     }
 
+    /** @return \Illuminate\Support\Collection<int, \App\Models\Modules\ModuleDefinition> */
     public function getDefinitions(): \Illuminate\Support\Collection
     {
         $search_value = Str::lower(Str::squish($this->search));
@@ -154,6 +156,7 @@ class ListModuleDefinitions extends ListRecords
         return $definition->getAdminModuleListActionUrl();
     }
 
+    /** @return array<string, mixed> */
     public function getLastSyncSummary(): array
     {
         return $this->last_sync_summary ?? [];

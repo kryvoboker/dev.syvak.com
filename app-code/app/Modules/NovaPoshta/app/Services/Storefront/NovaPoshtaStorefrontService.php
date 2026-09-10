@@ -16,7 +16,7 @@ class NovaPoshtaStorefrontService
      */
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
-        if ($page_type !== (string) config('page-settings.page_type.checkout', 'checkout')) {
+        if ($page_type !== string_value(config('page-settings.page_type.checkout', 'checkout'))) {
             return [];
         }
 

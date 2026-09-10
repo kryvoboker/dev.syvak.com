@@ -7,7 +7,7 @@ namespace App\Enums;
 trait EnumValuesTrait
 {
     /**
-     * @return array
+     * @return list<int|string>
      */
     public static function values(): array
     {

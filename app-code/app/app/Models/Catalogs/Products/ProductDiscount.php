@@ -20,8 +20,9 @@ class ProductDiscount extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -36,7 +37,8 @@ class ProductDiscount extends Model
     }
 
     /**
-     * @return BelongsTo<Product, $this>
+     * @phpstan-return BelongsTo<Product, $this>
+     * @psalm-return BelongsTo<Product, self>
      */
     public function product(): BelongsTo
     {

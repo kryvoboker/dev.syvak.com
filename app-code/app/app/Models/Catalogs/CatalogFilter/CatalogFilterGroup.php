@@ -9,6 +9,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $catalog_filter_set_id
+ * @property string $code
+ * @property CatalogFilterGroupSourceTypeEnum $source_type
+ * @property int|null $source_id
+ * @property bool $is_enabled
+ * @property int $sort_order
+ * @property string|null $get_key
+ * @property array<string, mixed>|null $config
+ * @property-read CatalogFilterSet|null $filterSet
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CatalogFilterGroupTranslation> $translations
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CatalogFilterValue> $values
+ */
 class CatalogFilterGroup extends Model
 {
     protected $fillable = [
@@ -25,6 +39,7 @@ class CatalogFilterGroup extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -38,7 +53,8 @@ class CatalogFilterGroup extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterSet, $this>
+     * @phpstan-return BelongsTo<CatalogFilterSet, $this>
+     * @psalm-return BelongsTo<CatalogFilterSet, self>
      */
     public function filterSet(): BelongsTo
     {
@@ -46,7 +62,8 @@ class CatalogFilterGroup extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterGroupTranslation, $this>
+     * @phpstan-return HasMany<CatalogFilterGroupTranslation, $this>
+     * @psalm-return HasMany<CatalogFilterGroupTranslation, self>
      */
     public function translations(): HasMany
     {
@@ -54,7 +71,8 @@ class CatalogFilterGroup extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterValue, $this>
+     * @phpstan-return HasMany<CatalogFilterValue, $this>
+     * @psalm-return HasMany<CatalogFilterValue, self>
      */
     public function values(): HasMany
     {
@@ -62,7 +80,8 @@ class CatalogFilterGroup extends Model
     }
 
     /**
-     * @return HasMany<CatalogFilterProductIndex, $this>
+     * @phpstan-return HasMany<CatalogFilterProductIndex, $this>
+     * @psalm-return HasMany<CatalogFilterProductIndex, self>
      */
     public function indexRows(): HasMany
     {

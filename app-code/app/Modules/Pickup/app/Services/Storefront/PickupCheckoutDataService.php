@@ -33,7 +33,8 @@ final class PickupCheckoutDataService
         $active_language_codes = (new Language())
             ->getActiveLanguages()
             ->pluck('code')
-            ->map(fn (mixed $code): string => strtolower((string) $code))
+            ->map(fn (mixed $code): string => is_scalar($code) ? strtolower((string) $code) : '')
+            ->filter(fn (string $code): bool => $code !== '')
             ->values()
             ->all();
         $safe_map_iframe = $this->pickup_config->getSafeMapIframe();

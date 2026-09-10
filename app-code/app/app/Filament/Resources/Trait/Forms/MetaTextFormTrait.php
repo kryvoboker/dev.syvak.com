@@ -15,12 +15,14 @@ use Illuminate\Database\Eloquent\Collection;
 
 trait MetaTextFormTrait
 {
+    /** @param Collection<int, Language> $active_languages
+     * @return array<int, Tabs\Tab>
+     */
     protected static function createMetaTextsLanguageFormTabs(Collection $active_languages): array
     {
         $tabs = [];
 
         foreach ($active_languages as $language) {
-            /** @var Language $language */
             $tabs[] = Tabs\Tab::make($language->name)
                 ->schema([
                     Hidden::make("descriptions.$language->id.language_id")
@@ -52,6 +54,7 @@ trait MetaTextFormTrait
         return $tabs;
     }
 
+    /** @param \Illuminate\Database\Eloquent\Collection<int, \App\Models\ApplicationSettings\Language> $active_languages */
     protected static function createMetaTextsFormTabs(Collection $active_languages): Tabs\Tab
     {
         return Tabs\Tab::make(__('admin/default.tabs.meta_texts'))
@@ -71,8 +74,8 @@ trait MetaTextFormTrait
     /**
      * Create language tabs for translations
      *
-     * @param  Collection<Language>  $active_languages
-     * @return array<Tabs\Tab>
+     * @param  Collection<int, Language>  $active_languages
+     * @return array<int, Tabs\Tab>
      */
     protected static function processCreateTranslationsFormTabs(Collection $active_languages): array
     {
@@ -80,7 +83,6 @@ trait MetaTextFormTrait
         $total_languages = $active_languages->count();
 
         foreach ($active_languages as $language) {
-            /** @var Language $language */
             $tabs[] = Tabs\Tab::make($language->name)
                 ->schema([
                     Hidden::make("descriptions.$language->id.language_id")
@@ -115,7 +117,7 @@ trait MetaTextFormTrait
     /**
      * Create translations tab with language tabs
      *
-     * @param  Collection<Language>  $active_languages
+     * @param  Collection<int, Language>  $active_languages
      */
     protected static function createTranslationsFormTabs(Collection $active_languages): Tabs\Tab
     {

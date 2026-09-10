@@ -20,14 +20,15 @@ class SearchProductResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function toArray(Request $request): array
     {
         static $search_product_sizes_cache = null;
 
         if (! is_array($search_product_sizes_cache)) {
             $search_product_sizes_cache = [
-                'width' => (int) config('app.page_settings.search.images.search_product.width', 219),
-                'height' => (int) config('app.page_settings.search.images.search_product.height', 219),
+                'width' => integer_value(config('app.page_settings.search.images.search_product.width', 219)),
+                'height' => integer_value(config('app.page_settings.search.images.search_product.height', 219)),
             ];
 
             try {
@@ -43,9 +44,9 @@ class SearchProductResource extends JsonResource
         $variant_discount = $variant?->discounts?->first();
 
         $price = format_price(
-            $price_source,
-            config('app.currency.current_currency_code'),
-            (float) config('app.currency.current_exchange_rate'),
+            float_value($price_source),
+            nullable_string(config('app.currency.current_currency_code')),
+            float_value(config('app.currency.current_exchange_rate')),
         );
 
         return [
@@ -55,11 +56,11 @@ class SearchProductResource extends JsonResource
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
                     $image_source,
-                    (int) $search_product_sizes_cache['width'],
-                    (int) $search_product_sizes_cache['height'],
+                    integer_value($search_product_sizes_cache['width']),
+                    integer_value($search_product_sizes_cache['height']),
                 ),
-                'width' => (int) $search_product_sizes_cache['width'],
-                'height' => (int) $search_product_sizes_cache['height'],
+                'width' => integer_value($search_product_sizes_cache['width']),
+                'height' => integer_value($search_product_sizes_cache['height']),
             ],
             'link' => $this->whenLoaded('slugs', function () {
                 $slug = $this->slugs->first()?->slug;
@@ -79,13 +80,13 @@ class SearchProductResource extends JsonResource
                 if ($variant_discount !== null) {
                     $discounted_price = format_price(
                         $variant_discount->price,
-                        config('app.currency.current_currency_code'),
-                        (float) config('app.currency.current_exchange_rate'),
+                        nullable_string(config('app.currency.current_currency_code')),
+                        float_value(config('app.currency.current_exchange_rate')),
                     );
 
                     return [
                         'id' => $variant_discount->id,
-                        'discounted_price' => replace_currency_symbol_to_code($discounted_price),
+                        'discounted_price' => replace_currency_symbol_to_code((string) $discounted_price),
                         'start_date' => $variant_discount->date_start,
                         'end_date' => $variant_discount->date_end,
                     ];
@@ -95,4 +96,6 @@ class SearchProductResource extends JsonResource
             }),
         ];
     }
+
+
 }

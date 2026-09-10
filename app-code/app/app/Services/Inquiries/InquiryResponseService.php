@@ -9,6 +9,7 @@ use App\Mail\InquiryResponseMail;
 use App\Models\Inquiries\Inquiry;
 use App\Models\Inquiries\InquiryResponse;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -22,9 +23,9 @@ final readonly class InquiryResponseService
     /** @param array<string, mixed> $data */
     public function createAndDeliver(Inquiry $inquiry, array $data): InquiryResponse
     {
-        $body_html = $this->sanitizeHtml((string) ($data['body_html'] ?? ''));
-        $recipient_email = $this->resolveNullableString($inquiry->email);
-        $subject = $this->resolveNullableString($data['subject'] ?? null);
+        $body_html = $this->sanitizeHtml(string_value($data['body_html'] ?? ''));
+        $recipient_email = nullable_string($inquiry->email);
+        $subject = nullable_string($data['subject'] ?? null);
 
         if ($subject === null) {
             throw new InvalidArgumentException('Inquiry response subject is required.');
@@ -32,8 +33,8 @@ final readonly class InquiryResponseService
 
         $response = $inquiry->responses()->create([
             'subject' => $subject,
-            'admin_user_id' => auth()->id(),
-            'admin_name' => $this->resolveNullableString($data['admin_name'] ?? null) ?? 'Адмін',
+            'admin_user_id' => Auth::id(),
+            'admin_name' => nullable_string($data['admin_name'] ?? null) ?? 'Адмін',
             'body_html' => $body_html,
             'recipient_email' => $recipient_email,
             'delivery_status' => InquiryResponseDeliveryStatusEnum::NotSent,
@@ -102,15 +103,9 @@ final readonly class InquiryResponseService
         return (new HtmlSanitizer($config))->sanitize($body_html);
     }
 
-    private function resolveNullableString(mixed $value): ?string
-    {
-        $value = Str::trim((string) $value);
-
-        return $value === '' ? null : $value;
-    }
 
     private function resolveResponseDate(mixed $value): Carbon
     {
-        return filled($value) ? Carbon::parse((string) $value) : now();
+        return filled($value) ? Carbon::parse(string_value($value)) : now();
     }
 }

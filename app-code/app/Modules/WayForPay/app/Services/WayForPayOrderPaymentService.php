@@ -34,7 +34,7 @@ final class WayForPayOrderPaymentService
      */
     private function applyProviderResponseInTransaction(array $provider_data): Orders
     {
-        $order_reference = trim((string) Arr::get($provider_data, 'orderReference', ''));
+        $order_reference = trim(string_value(Arr::get($provider_data, 'orderReference', '')));
 
         if ($order_reference === '') {
             throw new RuntimeException('WayForPay response does not contain an order reference.');
@@ -54,8 +54,8 @@ final class WayForPayOrderPaymentService
         }
 
         $payment = $this->resolvePayment($order, $provider_data);
-        $payment_status = $this->resolvePaymentStatus((string) Arr::get($provider_data, 'transactionStatus', ''));
-        $transaction_id = trim((string) Arr::get($provider_data, 'transactionId', ''));
+        $payment_status = $this->resolvePaymentStatus(string_value(Arr::get($provider_data, 'transactionStatus', '')));
+        $transaction_id = trim(string_value(Arr::get($provider_data, 'transactionId', '')));
 
         if ($transaction_id !== '') {
             $payment->transaction_id = $transaction_id;
@@ -74,7 +74,13 @@ final class WayForPayOrderPaymentService
             'provider_reason_code' => Arr::get($provider_data, 'reasonCode'),
         ]);
 
-        return $order->fresh(['status', 'payments.paymentStatus']);
+        $fresh_order = $order->fresh(['status', 'payments.paymentStatus']);
+
+        if (! $fresh_order instanceof Orders) {
+            throw new RuntimeException('WayForPay order could not be refreshed after payment update.');
+        }
+
+        return $fresh_order;
     }
 
     /**
@@ -82,7 +88,7 @@ final class WayForPayOrderPaymentService
      */
     private function resolvePayment(Orders $order, array $provider_data): OrderPayments
     {
-        $transaction_id = trim((string) Arr::get($provider_data, 'transactionId', ''));
+        $transaction_id = trim(string_value(Arr::get($provider_data, 'transactionId', '')));
 
         if ($transaction_id !== '') {
             $payment = $order->payments->first(
@@ -122,7 +128,7 @@ final class WayForPayOrderPaymentService
      */
     private function resolveFailureReason(array $provider_data): ?string
     {
-        $reason = trim((string) Arr::get($provider_data, 'reason', ''));
+        $reason = trim(string_value(Arr::get($provider_data, 'reason', '')));
 
         return $reason !== '' ? $reason : null;
     }
@@ -133,7 +139,7 @@ final class WayForPayOrderPaymentService
      */
     private function filterProviderData(array $provider_data): array
     {
-        return Arr::only($provider_data, [
+        $filtered_data = Arr::only($provider_data, [
             'orderReference',
             'transactionStatus',
             'transactionId',
@@ -143,5 +149,8 @@ final class WayForPayOrderPaymentService
             'currency',
             'authCode',
         ]);
+
+        /** @var array<string, mixed> $filtered_data */
+        return $filtered_data;
     }
 }

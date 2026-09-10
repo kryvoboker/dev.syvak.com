@@ -11,6 +11,7 @@ class ModuleCacheService
 {
     public const VERSION_CACHE_KEY = 'modules:cache:version';
 
+    /** @param Closure(): mixed $callback */
     public function remember(string $key, Closure $callback, int $ttl_seconds = 3600): mixed
     {
         return Cache::remember(

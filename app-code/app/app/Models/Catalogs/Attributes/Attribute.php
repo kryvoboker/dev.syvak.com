@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $sort_order
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, AttributeDescription> $attributeDescription
+ */
 class Attribute extends Model
 {
     protected $fillable = [
@@ -18,8 +24,9 @@ class Attribute extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -29,7 +36,8 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<ProductAttributeTextHash, $this>
+     * @phpstan-return HasMany<ProductAttributeTextHash, $this>
+     * @psalm-return HasMany<ProductAttributeTextHash, self>
      */
     public function productAttributeTextHash(): HasMany
     {
@@ -37,7 +45,8 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<AttributeDescription, $this>
+     * @phpstan-return HasMany<AttributeDescription, $this>
+     * @psalm-return HasMany<AttributeDescription, self>
      */
     public function attributeDescription(): HasMany
     {
@@ -47,7 +56,8 @@ class Attribute extends Model
     /**
      * Compatibility relation for legacy naming in services.
      *
-     * @return HasMany<ProductVariantAttributeValue, $this>
+     * @phpstan-return HasMany<ProductVariantAttributeValue, $this>
+     * @psalm-return HasMany<ProductVariantAttributeValue, self>
      */
     public function productToAttribute(): HasMany
     {
@@ -55,13 +65,15 @@ class Attribute extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantAttributeValue, $this>
+     * @phpstan-return HasMany<ProductVariantAttributeValue, $this>
+     * @psalm-return HasMany<ProductVariantAttributeValue, self>
      */
     public function productVariantAttributeValues(): HasMany
     {
         return $this->hasMany(ProductVariantAttributeValue::class, 'attribute_id');
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::deleting(function (Attribute $attribute): void {
@@ -69,12 +81,17 @@ class Attribute extends Model
         });
     }
 
+    /**
+     * @return Collection<int, Attribute>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getActiveAttributesWithDescriptionsByLanguageId(int $language_id): Collection
     {
         return self::query()
             ->where('is_active', true)
             ->with([
-                'attributeDescription' => function ($query) use ($language_id): void {
+                'attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -84,7 +101,7 @@ class Attribute extends Model
     public function getActiveAttributeWithDescriptionByAttributeIdAndLanguageId(int $attribute_id, int $language_id): ?self
     {
         return self::with([
-            'attributeDescription' => function ($query) use ($language_id): void {
+            'attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                 $query->where('language_id', $language_id);
             },
         ])

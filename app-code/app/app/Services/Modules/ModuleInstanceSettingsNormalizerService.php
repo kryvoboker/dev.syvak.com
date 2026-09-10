@@ -35,9 +35,11 @@ readonly class ModuleInstanceSettingsNormalizerService
             'nwidart_name' => $definition->nwidart_name,
         ]);
 
-        /** @var object{normalize: callable} $normalizer */
+        /** @var object $normalizer */
         $normalizer = app($normalizer_class);
-        $attributes['settings'] = $normalizer->normalize(is_array($settings) ? $settings : []);
+        /** @var callable $normalizer_callable */
+        $normalizer_callable = [$normalizer, 'normalize'];
+        $attributes['settings'] = $normalizer_callable(is_array($settings) ? $settings : []);
 
         return $attributes;
     }

@@ -31,8 +31,9 @@ final class WayForPayReturnController
             ));
 
             $request_data = $request->all();
-            $transaction_status = (string)($request_data['transactionStatus'] ?? '');
-            $merchant_signature = trim((string)($request_data['merchantSignature'] ?? ''));
+            /** @var array<string, mixed> $request_data */
+            $transaction_status = is_scalar($request_data['transactionStatus'] ?? null) ? (string) $request_data['transactionStatus'] : '';
+            $merchant_signature = trim(is_scalar($request_data['merchantSignature'] ?? null) ? (string) $request_data['merchantSignature'] : '');
 
             if ($transaction_status !== 'Approved' && $merchant_signature === '') {
                 Log::channel('stack')->error('[WayForPayReturnController] incomplete declined response received', [
@@ -44,7 +45,7 @@ final class WayForPayReturnController
                 return redirect()->to(localized_route('localized.catalog.failure-order.index', ['locale' => $locale]));
             }
 
-            $failure_order_recovery_service->rememberByOrderNumber((string) ($request_data['orderReference'] ?? ''));
+            $failure_order_recovery_service->rememberByOrderNumber(is_scalar($request_data['orderReference'] ?? null) ? (string) $request_data['orderReference'] : '');
 
             $service_response = $handler->parseRequestFromArray($request_data);
             $transaction = $service_response->getTransaction();

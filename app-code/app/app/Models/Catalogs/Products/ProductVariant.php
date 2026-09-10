@@ -9,6 +9,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $product_id
+ * @property bool $is_default
+ * @property bool $is_active
+ * @property int $quantity
+ * @property int $minimum
+ * @property float $price
+ * @property string|null $image
+ * @property-read Product|null $product
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantDescription> $descriptions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantImage> $images
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantDiscount> $discounts
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantAttributeValue> $attributeValues
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantSizeGuide> $sizeGuides
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantComposition> $compositions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariantCare> $cares
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Slug> $slugs
+ */
 class ProductVariant extends Model
 {
     use HasSlugsTrait;
@@ -26,8 +45,9 @@ class ProductVariant extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -43,7 +63,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return BelongsTo<Product, $this>
+     * @phpstan-return BelongsTo<Product, $this>
+     * @psalm-return BelongsTo<Product, self>
      */
     public function product(): BelongsTo
     {
@@ -51,7 +72,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantDescription, $this>
+     * @phpstan-return HasMany<ProductVariantDescription, $this>
+     * @psalm-return HasMany<ProductVariantDescription, self>
      */
     public function descriptions(): HasMany
     {
@@ -59,7 +81,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantImage, $this>
+     * @phpstan-return HasMany<ProductVariantImage, $this>
+     * @psalm-return HasMany<ProductVariantImage, self>
      */
     public function images(): HasMany
     {
@@ -67,7 +90,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantDiscount, $this>
+     * @phpstan-return HasMany<ProductVariantDiscount, $this>
+     * @psalm-return HasMany<ProductVariantDiscount, self>
      */
     public function discounts(): HasMany
     {
@@ -75,7 +99,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantAttributeValue, $this>
+     * @phpstan-return HasMany<ProductVariantAttributeValue, $this>
+     * @psalm-return HasMany<ProductVariantAttributeValue, self>
      */
     public function attributeValues(): HasMany
     {
@@ -83,7 +108,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantSizeGuide, $this>
+     * @phpstan-return HasMany<ProductVariantSizeGuide, $this>
+     * @psalm-return HasMany<ProductVariantSizeGuide, self>
      */
     public function sizeGuides(): HasMany
     {
@@ -91,7 +117,8 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantComposition, $this>
+     * @phpstan-return HasMany<ProductVariantComposition, $this>
+     * @psalm-return HasMany<ProductVariantComposition, self>
      */
     public function compositions(): HasMany
     {
@@ -99,13 +126,15 @@ class ProductVariant extends Model
     }
 
     /**
-     * @return HasMany<ProductVariantCare, $this>
+     * @phpstan-return HasMany<ProductVariantCare, $this>
+     * @psalm-return HasMany<ProductVariantCare, self>
      */
     public function cares(): HasMany
     {
         return $this->hasMany(ProductVariantCare::class);
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::saved(function (ProductVariant $variant): void {
@@ -125,7 +154,8 @@ class ProductVariant extends Model
 
     public function getLastActualAndLastModifiedDiscountForUserGroup(?int $user_group_id): ?ProductVariantDiscount
     {
-        $current_date_time = now(config('app.timezone'));
+        $timezone = config('app.timezone');
+        $current_date_time = now(is_scalar($timezone) ? (string) $timezone : null);
 
         /** @var ProductVariantDiscount|null $discount */
         $discount = $this->discounts()

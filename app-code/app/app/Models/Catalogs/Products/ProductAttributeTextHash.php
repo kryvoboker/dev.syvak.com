@@ -20,8 +20,9 @@ class ProductAttributeTextHash extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -32,7 +33,8 @@ class ProductAttributeTextHash extends Model
     }
 
     /**
-     * @return BelongsTo<Product, $this>
+     * @phpstan-return BelongsTo<Product, $this>
+     * @psalm-return BelongsTo<Product, self>
      */
     public function product(): BelongsTo
     {
@@ -40,7 +42,8 @@ class ProductAttributeTextHash extends Model
     }
 
     /**
-     * @return BelongsTo<Attribute, $this>
+     * @phpstan-return BelongsTo<Attribute, $this>
+     * @psalm-return BelongsTo<Attribute, self>
      */
     public function attribute(): BelongsTo
     {

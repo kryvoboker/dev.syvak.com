@@ -24,8 +24,9 @@ class InfoPage extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -36,35 +37,60 @@ class InfoPage extends Model
         ];
     }
 
+    /** @phpstan-return HasMany<InfoPageDescription, $this>
+     * @psalm-return HasMany<InfoPageDescription, self>
+     */
     public function infoPageDescription(): HasMany
     {
         return $this->hasMany(InfoPageDescription::class);
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function positions(): Attribute
     {
         return Attribute::make(
-            get: function (?string $positions) {
-                if (empty($positions)) {
+            get: function (mixed $positions): array {
+                if (is_string($positions)) {
+                    $positions = json_decode($positions, true);
+                }
+
+                if (! is_array($positions)) {
                     return [];
                 }
 
-                return array_map(function (string $position) {
-                    return PositionInPageEnum::tryFrom($position);
-                }, json_decode($positions, true));
+                return array_map(
+                    fn (string $position): ?PositionInPageEnum => PositionInPageEnum::tryFrom($position),
+                    array_values(array_filter($positions, is_string(...))),
+                );
             },
-            set: function (null|array|string $positions) {
-                if (empty($positions)) {
-                    return;
+            set: function (mixed $positions): ?string {
+                if ($positions === null || $positions === '') {
+                    return null;
                 }
 
-                $res = array_map(function (string $position) {
-                    return PositionInPageEnum::tryFrom($position)?->value;
-                }, is_string($positions) ? [$positions] : $positions);
+                $positions = is_string($positions) ? [$positions] : $positions;
+
+                if (! is_array($positions)) {
+                    return null;
+                }
+
+                $res = array_map(
+                    fn (string $position): ?string => PositionInPageEnum::tryFrom($position)?->value,
+                    array_values(array_filter($positions, is_string(...))),
+                );
 
                 $res = array_filter($res);
 
-                return $res ? json_encode($res) : null;
+                if ($res === []) {
+                    return null;
+                }
+
+                $encoded = json_encode($res);
+
+                return is_string($encoded) ? $encoded : null;
             },
         );
     }

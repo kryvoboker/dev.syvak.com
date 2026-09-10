@@ -189,7 +189,7 @@ class ContactsController extends Controller
      * @param int                 $language_id
      * @param string|null         $slug
      * @param string              $form_route_name
-     * @param array               $form_route_params
+     * @param array<string, mixed> $form_route_params
      *
      * @throws Throwable
      * @return View
@@ -215,12 +215,12 @@ class ContactsController extends Controller
                 'categories' => $header_data['categories'],
             ]),
             'page_type' => config('page-settings.page_type.contacts', 'contacts'),
-            'page_title' => (string)data_get($contacts_data, 'title'),
+            'page_title' => string_value(data_get($contacts_data, 'title')),
             'contacts_data' => $contacts_data,
             'form_action' => localized_route($form_route_name, $form_route_params),
             'breadcrumbs' => [
                 breadcrumb(__('storefront/default.links.home'), localized_route('catalog.home')),
-                breadcrumb((string)data_get($contacts_data, 'title', __('storefront/contacts.fallbacks.title'))),
+                breadcrumb(string_value(data_get($contacts_data, 'title', __('storefront/contacts.fallbacks.title')))),
             ],
         ];
 

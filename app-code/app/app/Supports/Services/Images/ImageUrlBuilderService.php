@@ -29,24 +29,19 @@ final readonly class ImageUrlBuilderService
      * @param bool        $is_square
      * @param string      $bg_color HEX or transparent color
      *
-     * @return array{
-     *     thumb_1x: string,
-     *     thumb_2x: string,
-     *     thumb_3x: string,
-     *     thumb_4x?: string
-     * }
+     * @return array<string, string>
      */
     public function multipleUrl(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): array
     {
         $total_sizes_for_generate = max(
             1,
-            (int) data_get(
+            integer_value(data_get(
                 get_app_settings(),
                 'system_settings.images.total_sizes_for_generate',
-                (int) config('app.images.total_sizes_for_generate', 4),
-            ),
+                integer_value(config('app.images.total_sizes_for_generate', 4)),
+            )),
         );
-        $path = (string) $path;
+        $path = string_value($path);
         $height ??= $width;
 
         $this->checkSourceImage($path);
@@ -72,7 +67,7 @@ final readonly class ImageUrlBuilderService
      */
     public function url(?string $path, int $width, ?int $height = null, bool $is_square = true, string $bg_color = '000000'): string
     {
-        $path = (string) $path;
+        $path = string_value($path);
         $height ??= $width;
         $path = Str::ltrim($path, '/');
 
@@ -80,8 +75,8 @@ final readonly class ImageUrlBuilderService
 
         if (
             Storage::fileExists($path) === false ||
-            $width > (int) data_get(get_app_settings(), 'system_settings.images.max_image_width_for_convert', (int) config('app.images.max_image_width_for_convert', 2500)) ||
-            $height > (int) data_get(get_app_settings(), 'system_settings.images.max_image_height_for_convert', (int) config('app.images.max_image_height_for_convert', 2500))
+            $width > integer_value(data_get(get_app_settings(), 'system_settings.images.max_image_width_for_convert', integer_value(config('app.images.max_image_width_for_convert', 2500)))) ||
+            $height > integer_value(data_get(get_app_settings(), 'system_settings.images.max_image_height_for_convert', integer_value(config('app.images.max_image_height_for_convert', 2500))))
         ) {
             return $this->assetVersioned($path);
         }
@@ -154,10 +149,10 @@ final readonly class ImageUrlBuilderService
 
         if ($original_width > $original_height) {
             $k = min($original_width, $target_width) / max($original_width, $target_width);
-            $target_height = (int) round($original_height * $k);
+            $target_height = (int) round((float) $original_height * (float) $k);
         } else {
             $k = min($original_height, $target_height) / max($original_height, $target_height);
-            $target_width = (int) round($original_width * $k);
+            $target_width = (int) round((float) $original_width * (float) $k);
         }
     }
 
@@ -178,11 +173,11 @@ final readonly class ImageUrlBuilderService
     private function checkSourceImage(string &$path): void
     {
         if (Storage::fileExists($path) === false) {
-            $path = (string) data_get(
+            $path = string_value(data_get(
                 get_app_settings(),
                 'system_settings.images.default_no_image',
-                (string) config('app.images.default_no_image', 'images/no-image.png'),
-            );
+                string_value(config('app.images.default_no_image', 'images/no-image.png')),
+            ));
         }
     }
 
@@ -190,16 +185,16 @@ final readonly class ImageUrlBuilderService
     {
         $supported_formats = $this->request->header('X-Supported-Image-Formats', '');
         $formats_array = explode(',', $supported_formats);
-        $accept = (string) $this->request->header('Accept', '');
+        $accept = string_value($this->request->header('Accept', ''));
 
-        return Str::contains($accept, $mime) || Arr::some($formats_array, function (string $format) use ($mime) {
-            return Str::contains($mime, $format);
+        return Str::contains($accept, $mime) || Arr::some($formats_array, function (mixed $format) use ($mime): bool {
+            return Str::contains($mime, string_value($format));
         });
     }
 
     private function assetVersioned(string $public_relative): string
     {
-        $v = (string) config('app.images.image_version');
+        $v = string_value(config('app.images.image_version'));
         $url = asset("storage/$public_relative");
 
         // Add version to query string
@@ -222,6 +217,7 @@ final readonly class ImageUrlBuilderService
         }
     }
 
+    /** @return array{0: string, 1: string, 2: string} */
     private function splitPath(string $path): array
     {
         // "images/products/2025/12/ABC.jpg" -> ["images/products/2025/12", "ABC", "jpg"]
@@ -295,7 +291,7 @@ final readonly class ImageUrlBuilderService
                     $image_obj->resizeCanvas($w, $h, $bg_color);
                 }
 
-                $image_obj->save($dst, (int) data_get(get_app_settings(), 'system_settings.images.prototype_quality', (int) config('app.images.prototype_quality', 100)));
+                $image_obj->save($dst, integer_value(data_get(get_app_settings(), 'system_settings.images.prototype_quality', integer_value(config('app.images.prototype_quality', 100)))));
 
                 return;
             }
@@ -303,7 +299,7 @@ final readonly class ImageUrlBuilderService
             // Non-square: use cover to fill the dimensions
             $image_obj
                 ->cover($w, $h)
-                ->save($dst, (int) data_get(get_app_settings(), 'system_settings.images.prototype_quality', (int) config('app.images.prototype_quality', 100)));
+                ->save($dst, integer_value(data_get(get_app_settings(), 'system_settings.images.prototype_quality', integer_value(config('app.images.prototype_quality', 100)))));
         } catch (Exception $e) {
             Log::channel('images')->error($e->getMessage(), [
                 'line' => $e->getLine(),

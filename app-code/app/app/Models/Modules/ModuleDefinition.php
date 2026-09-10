@@ -12,8 +12,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
+/**
+ * @property array<string, mixed>|null $settings_schema
+ * @property array<string, mixed>|null $meta
+ * @property int $id
+ * @property string $nwidart_name
+ * @property string $name
+ * @property string $slug
+ * @property string $module_path
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ModuleInstance> $instances
+ */
 class ModuleDefinition extends Model
 {
+    #[\Override]
     protected static function booted(): void
     {
         static::saved(function (): void {
@@ -49,6 +60,7 @@ class ModuleDefinition extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -62,7 +74,8 @@ class ModuleDefinition extends Model
     }
 
     /**
-     * @return HasMany<ModuleInstance, $this>
+     * @phpstan-return HasMany<ModuleInstance, $this>
+     * @psalm-return HasMany<ModuleInstance, self>
      */
     public function instances(): HasMany
     {
@@ -95,7 +108,6 @@ class ModuleDefinition extends Model
      */
     public function getEnabledInstances(): Collection
     {
-        /** @var Collection<int, ModuleInstance> $instances */
         $instances = $this->instances()->where('is_enabled', true)->get();
 
         return $instances;
@@ -108,7 +120,7 @@ class ModuleDefinition extends Model
 
     public function getAdminModuleListActionUrl(): ?string
     {
-        $page_class = (string) data_get($this->getAdminModuleConfig(), 'module_list_action.page', '');
+        $page_class = string_value(data_get($this->getAdminModuleConfig(), 'module_list_action.page', ''));
 
         if (blank($page_class) || ! class_exists($page_class) || ! is_subclass_of($page_class, Page::class)) {
             return null;
@@ -137,7 +149,7 @@ class ModuleDefinition extends Model
         $admin_config = data_get($this->meta, 'admin', []);
 
         if (is_array($admin_config) && $admin_config !== []) {
-            return $admin_config;
+            return $this->stringKeyedArray($admin_config);
         }
 
         $module_config_path = base_path(
@@ -156,6 +168,23 @@ class ModuleDefinition extends Model
 
         $admin_config = data_get($module_config, 'admin', []);
 
-        return is_array($admin_config) ? $admin_config : [];
+        return is_array($admin_config) ? $this->stringKeyedArray($admin_config) : [];
+    }
+
+    /**
+     * @param array<int|string, mixed> $value
+     * @return array<string, mixed>
+     */
+    private function stringKeyedArray(array $value): array
+    {
+        $result = [];
+
+        foreach ($value as $key => $item) {
+            if (is_string($key)) {
+                $result[$key] = $item;
+            }
+        }
+
+        return $result;
     }
 }

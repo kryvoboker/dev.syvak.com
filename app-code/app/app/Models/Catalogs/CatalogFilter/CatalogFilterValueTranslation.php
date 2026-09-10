@@ -8,6 +8,12 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $catalog_filter_value_id
+ * @property int $language_id
+ * @property string $label
+ */
 class CatalogFilterValueTranslation extends Model
 {
     protected $fillable = [
@@ -20,6 +26,7 @@ class CatalogFilterValueTranslation extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -29,7 +36,8 @@ class CatalogFilterValueTranslation extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterValue, $this>
+     * @phpstan-return BelongsTo<CatalogFilterValue, $this>
+     * @psalm-return BelongsTo<CatalogFilterValue, self>
      */
     public function filterValue(): BelongsTo
     {
@@ -37,7 +45,8 @@ class CatalogFilterValueTranslation extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

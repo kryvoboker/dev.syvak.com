@@ -16,6 +16,7 @@ return [
         'delivery_method' => 'Delivery method',
         'delivery_address' => 'Delivery address',
         'subtotal' => 'Items subtotal',
+        'promo_code_discount' => 'Promo code discount',
         'packaging' => 'Gift packaging',
         'delivery_cost' => 'Delivery',
         'total' => 'Total',

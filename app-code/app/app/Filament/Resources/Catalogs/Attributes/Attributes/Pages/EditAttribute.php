@@ -19,6 +19,7 @@ class EditAttribute extends EditRecord
 {
     protected static string $resource = AttributeResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $descriptions = [];
 
     #[Locked]
@@ -61,7 +62,7 @@ class EditAttribute extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->descriptions = trim_strs_in_arr((array) ($data['descriptions'] ?? []));
 
         unset($data['descriptions']);
 

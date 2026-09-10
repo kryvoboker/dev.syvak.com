@@ -6,10 +6,16 @@
     $summary = $thank_you_data['summary'] ?? [];
     $visible_products = array_slice($products, 0, 1);
     $hidden_products = array_slice($products, 1);
-
 @endphp
 
 @extends('storefront.layouts.main')
+
+@if(($order_found ?? false) === false)
+    @section('title', strip_tags(__('storefront/pages/thank-you.not_found.heading')))
+@else
+    @section('title', strip_tags(__('storefront/pages/thank-you.heading')))
+@endif
+
 
 @section('content')
     <x-storefront::common.breadcrumbs :breadcrumbs="$breadcrumbs ?? []"/>
@@ -33,7 +39,7 @@
                     <div class="min-w-0">
                         <div class="flex flex-col gap-6">
                             <p class="text-lg text-light-gray md:text-2xl">
-                                {{ __('storefront/pages/thank-you.labels.order_number', ['number' => $thank_you_data['order_number'] ?? '—']) }}
+                                {{ __('storefront/pages/thank-you.labels.order_number', ['number' => $thank_you_data['order_id'] ?? '—']) }}
                             </p>
 
                             <div class="grid gap-4 text-base text-white md:grid-cols-2 md:text-lg">
@@ -105,6 +111,12 @@
                                 <dt>{{ __('storefront/pages/thank-you.labels.subtotal') }}</dt>
                                 <dd class="wrap-break-word">{{ $summary['subtotal'] ?? '—' }}</dd>
                             </div>
+                            @if(($summary['promo_code_discount'] ?? null) !== null)
+                                <div class="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:gap-6">
+                                    <dt>{{ __('storefront/pages/thank-you.labels.promo_code_discount') }}</dt>
+                                    <dd class="wrap-break-word">-{{ $summary['promo_code_discount'] }}</dd>
+                                </div>
+                            @endif
                             <div class="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:gap-6">
                                 <dt>{{ __('storefront/pages/thank-you.labels.packaging') }}</dt>
                                 <dd class="wrap-break-word">{{ $summary['packaging'] ?? '—' }}</dd>

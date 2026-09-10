@@ -6,7 +6,12 @@ namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
 use App\Models\ApplicationSettings\Currency;
+use App\Models\Marketing\PromoCode;
+use App\Models\Marketing\PromoCodeUsage;
+use App\Models\Orders\OrderProducts;
+use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
+use App\Services\Marketing\PromoCodeService;
 use App\Services\Order\OrderAdminDeliveryService;
 use App\Services\Order\OrderAdminOptionsService;
 use App\Services\Order\OrderAdminPersistenceService;
@@ -18,8 +23,10 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use LogicException;
 use Throwable;
 
@@ -57,6 +64,8 @@ class EditOrder extends EditRecord
                     ->orderByDesc('created_at')
                     ->orderByDesc('id');
             },
+            'promoCodeUsages.promoCode',
+            'promoCodeUsages.products.orderProduct',
             'status.descriptions' => function ($query) use ($language_id): void {
                 $query
                     ->select(['id', 'order_status_id', 'language_id', 'name'])
@@ -99,8 +108,85 @@ class EditOrder extends EditRecord
             $shipping_has_cost,
         );
         $data['histories'] = $record->histories->toArray();
+        $promo_code_total = $record->totals->firstWhere('total_type', 'promo_code');
+        $promo_code_usage = $record->promoCodeUsages->sortByDesc('id')->first();
+        $promo_code = $promo_code_usage?->promoCode;
+
+        if ($promo_code === null && $promo_code_total !== null) {
+            $promo_code = self::resolvePromoCodeFromTotal($promo_code_total->name);
+        }
+
+        $data['promo_code'] = $promo_code === null ? [] : [
+            'id' => $promo_code->getKey(),
+            'usage_id' => $promo_code_usage?->getKey(),
+            'code' => $promo_code->code,
+            'promo_type' => $promo_code_usage?->getRawOriginal('promo_type') ?? $promo_code->promo_type,
+            'discount_type' => $promo_code_usage?->getRawOriginal('discount_type') ?? $promo_code->discount_type,
+            'discount_amount' => $promo_code_total === null ? 0 : abs((float) $promo_code_total->value),
+            'discount_value' => app(PromoCodeService::class)->resolveDiscountValue(
+                $promo_code,
+                (string) $record->currency_code,
+            ),
+            'products' => self::preparePromoProducts($record->products, $promo_code_usage, $promo_code),
+        ];
 
         return $data;
+    }
+
+    /**
+     * @param Collection<int, OrderProducts> $order_products
+     * @return array<int, array<string, mixed>>
+     */
+    private static function preparePromoProducts(
+        Collection $order_products,
+        ?PromoCodeUsage $usage,
+        PromoCode $promo_code,
+    ): array {
+        $snapshots = $usage?->products->keyBy('order_product_id') ?? collect();
+
+        return $order_products
+            ->map(function ($order_product) use ($snapshots, $promo_code): array {
+                $snapshot = $snapshots->get($order_product->getKey());
+                $is_eligible = app(PromoCodeService::class)->isProductEligible(
+                    $promo_code,
+                    (int) $order_product->product_id,
+                );
+                $force_apply = $snapshot instanceof OrderPromoCodeProducts
+                    && $snapshot->override?->value === 'force';
+
+                return [
+                    'id' => $snapshot instanceof OrderPromoCodeProducts ? $snapshot->getKey() : null,
+                    'order_product_id' => $order_product->getKey(),
+                    'product_id' => $order_product->product_id,
+                    'is_eligible' => $is_eligible,
+                    'force_apply' => $force_apply,
+                    'is_applying' => $is_eligible || $force_apply,
+                    'name' => $order_product->name,
+                    'model' => $order_product->model,
+                    'sku' => $order_product->sku,
+                    'ean' => $order_product->ean,
+                    'quantity' => $order_product->quantity,
+                    'unit_price' => $order_product->unit_price,
+                    'discount' => $order_product->discount,
+                    'line_total' => $order_product->line_total,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private static function resolvePromoCodeFromTotal(?string $total_name): ?PromoCode
+    {
+        if ($total_name === null) {
+            return null;
+        }
+
+        return PromoCode::query()
+            ->get()
+            ->first(fn (PromoCode $promo_code): bool => Str::contains(
+                $total_name,
+                '(' . $promo_code->code . ')',
+            ));
     }
 
     /**
@@ -115,7 +201,8 @@ class EditOrder extends EditRecord
                 $quantity = max(1, (int)($product['quantity'] ?? 1));
                 $unit_price = max(0, (float)($product['unit_price'] ?? 0));
                 $discount = max(0, (float)($product['discount'] ?? 0));
-                $product['line_total'] = max(0, round($quantity * $unit_price - $discount, 4));
+                $line_total = ((float) $quantity * (float) $unit_price) - (float) $discount;
+                $product['line_total'] = max(0.0, round($line_total, 4));
 
                 return $product;
             })
@@ -178,7 +265,7 @@ class EditOrder extends EditRecord
                 }
 
                 if ($total_type !== 'total') {
-                    $grand_total += $value;
+                    $grand_total = $grand_total + (float) $value;
                 }
 
                 $total['value'] = round($value, 4);
@@ -199,7 +286,7 @@ class EditOrder extends EditRecord
 
     /**
      * @param Model $record
-     * @param array $data
+     * @param array<string, mixed> $data
      *
      * @throws Halt
      * @return Model
@@ -222,7 +309,8 @@ class EditOrder extends EditRecord
                 ->send();
 
             $this->halt();
-            throw $throwable;
+
+            return $record;
         }
     }
 

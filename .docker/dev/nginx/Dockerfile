@@ -31,7 +31,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 80
 
-WORKDIR /var/webroot/sites/syvak.com/app
+WORKDIR /var/webroot/sites/ttter.syvak.com/app
 
 USER ${USERNAME}
 

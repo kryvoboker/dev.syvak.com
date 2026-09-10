@@ -45,24 +45,26 @@ class StorefrontModulePlacementResolverService
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
         $cache_key = $placement . '|' . ($page_type ?? 'null');
-        $definitions = collect();
+        /** @var Collection<int, ModuleDefinition> $definitions */
+        $definitions = new Collection();
 
         if (array_key_exists($cache_key, $this->resolved_placements_cache)) {
             return $this->resolved_placements_cache[$cache_key];
         }
 
         try {
-            /** @var Collection<int, ModuleDefinition> $definitions */
             $definitions = resolve_modules_for_context($placement);
         } catch (BindingResolutionException | CircularDependencyException $e) {
             report($e);
         }
 
-        $resolved_items = $definitions
-            ->map(fn (ModuleDefinition $definition): array => $this->resolveDefinitionEntries($definition, $placement, $page_type))
-            ->collapse()
-            ->values()
-            ->all();
+        $resolved_items = [];
+
+        foreach ($definitions as $definition) {
+            foreach ($this->resolveDefinitionEntries($definition, $placement, $page_type) as $item) {
+                $resolved_items[] = $item;
+            }
+        }
 
         $this->resolved_placements_cache[$cache_key] = $resolved_items;
 
@@ -92,7 +94,7 @@ class StorefrontModulePlacementResolverService
             return [];
         }
 
-        $view = Str::trim((string) Arr::get($module_config, 'runtime.storefront.view', ''));
+        $view = Str::trim(string_value(Arr::get($module_config, 'runtime.storefront.view', '')));
 
         if (blank($view) || View::exists($view) === false) {
             Log::channel('stack')->warning('Storefront module view is missing or invalid.', [
@@ -120,13 +122,13 @@ class StorefrontModulePlacementResolverService
         /** @var array<int, array<string, mixed>> $module_items */
         $module_items = $data_service->resolveForPlacement($placement, $page_type);
 
-        $view_data_key = Str::trim((string) Arr::get($module_config, 'runtime.storefront.view_data_key', 'module_data'));
+        $view_data_key = Str::trim(string_value(Arr::get($module_config, 'runtime.storefront.view_data_key', 'module_data')));
 
         return collect($module_items)
             ->map(function (array $item) use ($definition, $view, $view_data_key, $page_type): array {
                 return [
                     'module_definition_id' => (int) $definition->id,
-                    'module_name' => (string) $definition->nwidart_name,
+                    'module_name' => string_value($definition->nwidart_name),
                     'view' => $view,
                     'view_data' => [
                         $view_data_key => $item,
@@ -157,7 +159,7 @@ class StorefrontModulePlacementResolverService
      */
     private function loadModuleConfig(ModuleDefinition $definition): array
     {
-        $module_path = Str::trim((string) $definition->module_path);
+        $module_path = Str::trim(string_value($definition->module_path));
 
         if ($module_path === '') {
             return [];
@@ -169,8 +171,12 @@ class StorefrontModulePlacementResolverService
             return [];
         }
 
+        /** @var mixed $config_data */
         $config_data = require $config_path;
 
-        return is_array($config_data) ? $config_data : [];
+        /** @var array<string, mixed> $config_data */
+        $config_data = is_array($config_data) ? $config_data : [];
+
+        return $config_data;
     }
 }

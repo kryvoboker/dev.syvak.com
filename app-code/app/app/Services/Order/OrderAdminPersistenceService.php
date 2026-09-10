@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace App\Services\Order;
 
+use App\Enums\Marketing\PromoCodeProductOverrideEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
+use App\Models\Marketing\PromoCode;
 use App\Models\Orders\OrderPayments;
+use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
+use App\Models\Orders\OrderTotals;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
+use App\Services\Marketing\PromoCodeService;
 use App\Supports\Services\CacheInvalidationService;
 use App\Supports\Services\Currency\ConvertPrice;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -29,6 +35,7 @@ final readonly class OrderAdminPersistenceService
         private OrderAdminOptionsService $order_admin_options_service,
         private ConvertPrice $convert_price,
         private CacheInvalidationService $cache_invalidation_service,
+        private PromoCodeService $promo_code_service,
     ) {
     }
 
@@ -54,15 +61,21 @@ final readonly class OrderAdminPersistenceService
             $currency_changed = $this->updateCurrency($order, $data, $changed_sections);
 
             if (array_key_exists('comment', $data) && $order->comment !== $data['comment']) {
-                $order->comment = $this->nullableString($data['comment']);
+                $order->comment = nullable_string($data['comment']);
                 $changed_sections[] = 'order';
             }
 
-            $this->updateCustomer($order, (array) ($data['customer'] ?? []), $changed_sections);
-            $this->updateShipping($order, (array) ($data['shipping'] ?? []), $changed_sections);
+            $this->updateCustomer($order, string_keyed_array($data['customer'] ?? []), $changed_sections);
+            $this->updateShipping($order, string_keyed_array($data['shipping'] ?? []), $changed_sections);
             $this->updateShippingCost($order, $data, $changed_sections);
-            $this->updateProducts($order, (array) ($data['products'] ?? []), $changed_sections, $currency_changed);
-            $this->updatePayments($order, (array) ($data['payments'] ?? []), $changed_sections);
+            $promo_code_data = string_keyed_array($data['promo_code'] ?? []);
+            $products = $this->mergePromoProducts(
+                $this->listArray($data['products'] ?? []),
+                $this->listArray($promo_code_data['products'] ?? []),
+            );
+            $this->updateProducts($order, $products, $changed_sections, $currency_changed);
+            $this->updatePromoCode($order, $promo_code_data, $changed_sections);
+            $this->updatePayments($order, $this->listArray($data['payments'] ?? []), $changed_sections);
 
             $this->recalculateOrderTotal($order);
 
@@ -80,7 +93,7 @@ final readonly class OrderAdminPersistenceService
                 Log::channel('daily')->info('[OrderAdminPersistenceService] order updated by admin', [
                     'order_id' => $order->getKey(),
                     'order_number' => $order->order_number,
-                    'admin_user_id' => auth()->id(),
+                    'admin_user_id' => Auth::id(),
                     'changed_sections' => $changed_sections,
                     'order_status_id' => $order->order_status_id,
                 ]);
@@ -219,16 +232,226 @@ final readonly class OrderAdminPersistenceService
         $customer->fill([
             'user_id' => $user_id,
             'user_group_id' => $user_group_id,
-            'first_name' => (string) Arr::get($data, 'first_name', $customer->first_name),
-            'last_name' => (string) Arr::get($data, 'last_name', $customer->last_name),
-            'email' => $this->nullableString(Arr::get($data, 'email', $customer->email)),
-            'telephone' => (string) Arr::get($data, 'telephone', $customer->telephone),
+            'first_name' => string_value(Arr::get($data, 'first_name', $customer->first_name)),
+            'last_name' => string_value(Arr::get($data, 'last_name', $customer->last_name)),
+            'email' => nullable_string(Arr::get($data, 'email', $customer->email)),
+            'telephone' => string_value(Arr::get($data, 'telephone', $customer->telephone)),
+            'no_call' => (bool) Arr::get($data, 'no_call', $customer->no_call),
         ]);
 
         if ($customer->isDirty()) {
             $customer->save();
             $changed_sections[] = 'customer';
         }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<int, string> $changed_sections
+     */
+    private function updatePromoCode(Orders $order, array $data, array &$changed_sections): void
+    {
+        $promo_code_id = $this->nullableInteger(Arr::get($data, 'id'));
+        $usage = $order->promoCodeUsages()->latest('id')->first();
+        $promo_total = $order->totals()->where('total_type', 'promo_code')->first();
+
+        if ($promo_code_id === null) {
+            if ($usage !== null) {
+                $usage->delete();
+                $changed_sections[] = 'promo_code';
+            }
+
+            if ($promo_total !== null) {
+                $promo_total->delete();
+                $changed_sections[] = 'totals';
+            }
+
+            return;
+        }
+
+        $promo_code = PromoCode::query()
+            ->with(['products:id', 'categories:id'])
+            ->find($promo_code_id);
+
+        if (! $promo_code instanceof PromoCode) {
+            return;
+        }
+
+        $order->loadMissing(['products', 'customer']);
+        $items_subtotal = float_value($order->products->sum('line_total'));
+        /** @var array<int, array<string, mixed>> $cart_items */
+        $cart_items = [];
+        foreach ($order->products as $product) {
+            $cart_items[] = [
+                'product_id' => (int) $product->product_id,
+                'line_total' => float_value($product->line_total),
+                'rrc_line_total' => float_value($product->line_total) + float_value($product->discount ?? 0),
+                'is_discounted' => float_value($product->discount ?? 0) > 0,
+            ];
+        }
+        /** @var array<int, int> $forced_product_ids */
+        $forced_product_ids = [];
+        foreach ($this->listArray($data['products'] ?? []) as $item) {
+            if (! is_array($item) || ! boolean_value($item['force_apply'] ?? false)) {
+                continue;
+            }
+
+            $product_id = $this->nullableInteger($item['product_id'] ?? null);
+
+            if ($product_id !== null) {
+                $forced_product_ids[] = $product_id;
+            }
+        }
+        $base_total = (float) $order->total - ($promo_total instanceof OrderTotals ? (float) $promo_total->value : 0.0);
+        $calculation = $this->promo_code_service->validateAndCalculate(
+            $promo_code,
+            [
+                'grand_total' => $base_total,
+                'items_subtotal' => $items_subtotal,
+                'currency_code' => $order->currency_code,
+            ],
+            $cart_items,
+            $order->customer?->user_id,
+            $order->customer?->user_group_id,
+            $order->language_code,
+            integer_value($order->getKey()),
+            $forced_product_ids,
+        );
+
+        if (($calculation['is_valid'] ?? false) !== true) {
+            $usage?->delete();
+            $promo_total?->delete();
+            $changed_sections[] = 'promo_code';
+            $changed_sections[] = 'totals';
+
+            return;
+        }
+
+        if ($usage === null || integer_value($usage->promo_code_id) !== $promo_code_id) {
+            $usage?->delete();
+            $usage = $order->promoCodeUsages()->create([
+                'promo_code_id' => $promo_code->getKey(),
+                'discount_type' => $promo_code->discount_type,
+                'promo_type' => $promo_code->promo_type,
+                'user_id' => $order->customer?->user_id,
+                'user_group_id' => $order->customer?->user_group_id,
+                'consumer_key' => null,
+                'used_at' => now(),
+            ]);
+            $changed_sections[] = 'promo_code';
+        }
+
+        $this->syncPromoCodeProducts(
+            $order,
+            $usage,
+            $promo_code,
+            $this->listArray($data['products'] ?? []),
+            $changed_sections,
+        );
+
+        $discount_value = -float_value($calculation['discount_amount'] ?? 0);
+
+        if ($promo_total === null) {
+            $order->totals()->create([
+                'total_type' => 'promo_code',
+                'name' => __('storefront/default.cart.totals.promo_code', ['promo_code' => $promo_code->code]),
+                'value' => $discount_value,
+                'sort_order' => integer_value($order->totals()->max('sort_order')) + 1,
+            ]);
+            $changed_sections[] = 'totals';
+        } elseif ((float) $promo_total->value !== $discount_value) {
+            $promo_total->value = $discount_value;
+            $promo_total->name = __('storefront/default.cart.totals.promo_code', ['promo_code' => $promo_code->code]);
+            $promo_total->save();
+            $changed_sections[] = 'totals';
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $products
+     * @param array<int, mixed> $promo_products
+     * @return array<int, mixed>
+     */
+    private function mergePromoProducts(array $products, array $promo_products): array
+    {
+        foreach ($promo_products as $promo_product) {
+            if (! is_array($promo_product)) {
+                continue;
+            }
+
+            $order_product_id = $this->nullableInteger($promo_product['order_product_id'] ?? null);
+            $product_id = $this->nullableInteger($promo_product['product_id'] ?? null);
+            $index = collect($products)->search(fn (mixed $product): bool => is_array($product)
+                && $order_product_id !== null
+                && $this->nullableInteger($product['id'] ?? null) === $order_product_id);
+
+            $values = array_filter([
+                'id' => $order_product_id,
+                'product_id' => $product_id,
+                'quantity' => $promo_product['quantity'] ?? null,
+                'unit_price' => $promo_product['unit_price'] ?? null,
+                'discount' => $promo_product['discount'] ?? null,
+            ], static fn (mixed $value): bool => $value !== null);
+
+            if ($index !== false) {
+                $products[$index] = [...string_keyed_array($products[$index]), ...$values];
+            } elseif ($product_id !== null) {
+                $products[] = $values;
+            }
+        }
+
+        return array_values($products);
+    }
+
+    /**
+     * @param array<int, mixed> $promo_products
+     * @param array<int, string> $changed_sections
+     */
+    private function syncPromoCodeProducts(
+        Orders $order,
+        \App\Models\Marketing\PromoCodeUsage $usage,
+        PromoCode $promo_code,
+        array $promo_products,
+        array &$changed_sections,
+    ): void {
+        /** @var array<string, array<string, mixed>> $submitted */
+        $submitted = [];
+        foreach ($promo_products as $promo_product) {
+            if (! is_array($promo_product)) {
+                continue;
+            }
+
+            $order_product_id = $this->nullableInteger($promo_product['order_product_id'] ?? null);
+
+            if ($order_product_id !== null) {
+                $submitted[(string) $order_product_id] = $promo_product;
+            }
+        }
+
+        foreach ($order->products as $order_product) {
+            $state = $submitted[(string) integer_value($order_product->getKey())] ?? [];
+            $is_eligible = $this->promo_code_service->isProductEligible($promo_code, (int) $order_product->product_id);
+            $force_apply = boolean_value($state['force_apply'] ?? false);
+            $promo_product = OrderPromoCodeProducts::query()->firstOrNew([
+                'promo_code_usage_id' => $usage->getKey(),
+                'order_product_id' => $order_product->getKey(),
+            ]);
+            $promo_product->fill([
+                'order_id' => $order->getKey(),
+                'product_id' => $order_product->product_id,
+                'product_variant_id' => $order_product->product_variant_id,
+                'is_eligible' => $is_eligible,
+                'override' => $force_apply ? PromoCodeProductOverrideEnum::Force : null,
+                'discount_amount' => 0,
+            ]);
+
+            if ($promo_product->isDirty()) {
+                $promo_product->save();
+                $changed_sections[] = 'promo_code';
+            }
+        }
+
+        $changed_sections[] = 'promo_code';
     }
 
     /**
@@ -242,17 +465,17 @@ final readonly class OrderAdminPersistenceService
         }
 
         $shipping = $order->shipping;
-        $method_code = $this->nullableString(Arr::get($data, 'code', $shipping->code));
+        $method_code = nullable_string(Arr::get($data, 'code', $shipping->code));
         $method_options = $this->order_admin_options_service->getDeliveryMethodOptions();
         $capabilities = $this->order_admin_delivery_service->getCapabilities($method_code);
         $city_id = $capabilities['city']
-            ? $this->nullableString(Arr::get($data, 'city_id', $shipping->city_id))
+            ? nullable_string(Arr::get($data, 'city_id', $shipping->city_id))
             : null;
         $city = $city_id !== null
             ? $this->order_admin_delivery_service->findCity($method_code ?? '', $city_id)
             : null;
         $delivery_point_id = $capabilities['delivery_point']
-            ? $this->nullableString(Arr::get($data, 'delivery_point_id', $shipping->delivery_point_id))
+            ? nullable_string(Arr::get($data, 'delivery_point_id', $shipping->delivery_point_id))
             : null;
         $delivery_point = $delivery_point_id !== null && $city_id !== null
             ? $this->order_admin_delivery_service->findDeliveryPoint($method_code ?? '', $city_id, $delivery_point_id)
@@ -275,7 +498,7 @@ final readonly class OrderAdminPersistenceService
             'city' => $city['name'] ?? null,
             'city_id' => $city !== null ? $city_id : null,
             'address' => $capabilities['courier_address']
-                ? $this->nullableString(Arr::get($data, 'address'))
+                ? nullable_string(Arr::get($data, 'address'))
                 : null,
             'delivery_point' => $delivery_point['name'] ?? null,
             'delivery_point_id' => $delivery_point !== null ? $delivery_point_id : null,
@@ -327,7 +550,7 @@ final readonly class OrderAdminPersistenceService
                 'total_type' => 'shipping',
                 'name' => __('admin/orders/orders.labels.shipping_cost'),
                 'value' => $shipping_cost,
-                'sort_order' => ((int) $order->totals()->max('sort_order')) + 1,
+                'sort_order' => integer_value($order->totals()->max('sort_order')) + 1,
             ]);
             $changed_sections[] = 'shipping';
 
@@ -353,6 +576,7 @@ final readonly class OrderAdminPersistenceService
         array &$changed_sections,
         bool $currency_changed = false,
     ): void {
+        /** @var array<int, int> $submitted_product_ids */
         $submitted_product_ids = [];
 
         foreach ($products as $product_data) {
@@ -373,16 +597,16 @@ final readonly class OrderAdminPersistenceService
 
             if (! $order_product && $product_id !== null) {
                 $snapshot = $this->resolveProductSnapshot($product_id);
-                $quantity = max(1, (int) ($product_data['quantity'] ?? 1));
+                $quantity = max(1, integer_value($product_data['quantity'] ?? 1));
                 $discount = $this->nullableFloat($product_data['discount'] ?? 0) ?? 0;
-                $unit_price = (float) ($snapshot['unit_price'] ?? 0);
+                $unit_price = float_value($snapshot['unit_price'] ?? 0);
 
                 $new_order_product = $order->products()->create([
                     ...$snapshot,
                     'quantity' => $quantity,
                     'discount' => $discount,
                     'unit_price' => $unit_price,
-                    'line_total' => max(0, round($quantity * $unit_price - $discount, 4)),
+                    'line_total' => max(0, round((float) $quantity * $unit_price - (float) $discount, 4)),
                 ]);
                 $submitted_product_ids[] = $new_order_product->getKey();
                 $changed_sections[] = 'products';
@@ -394,7 +618,7 @@ final readonly class OrderAdminPersistenceService
                 continue;
             }
 
-            $is_product_replaced = $product_id !== null && (int) $product_id !== (int) $order_product->product_id;
+            $is_product_replaced = $product_id !== null && $product_id !== (int) $order_product->product_id;
             $snapshot = $is_product_replaced
                 ? $this->resolveProductSnapshot($product_id)
                 : [
@@ -408,19 +632,19 @@ final readonly class OrderAdminPersistenceService
                     'unit_price' => $order_product->unit_price,
                 ];
 
-            $quantity = max(1, (int) ($product_data['quantity'] ?? $order_product->quantity));
+            $quantity = max(1, integer_value($product_data['quantity'] ?? $order_product->quantity));
             $discount = $this->nullableFloat($product_data['discount'] ?? $order_product->discount) ?? 0;
             $unit_price = ($currency_changed || ! $is_product_replaced)
                 && is_numeric($product_data['unit_price'] ?? null)
-                ? (float) $product_data['unit_price']
-                : (float) ($snapshot['unit_price'] ?? $order_product->unit_price);
+                ? float_value($product_data['unit_price'])
+                : float_value($snapshot['unit_price'] ?? $order_product->unit_price);
 
             $order_product->fill([
                 ...$snapshot,
                 'quantity' => $quantity,
                 'discount' => $discount,
                 'unit_price' => $unit_price,
-                'line_total' => max(0, round($quantity * $unit_price - $discount, 4)),
+                'line_total' => max(0, round((float) $quantity * $unit_price - (float) $discount, 4)),
             ]);
 
             if ($order_product->isDirty()) {
@@ -430,7 +654,10 @@ final readonly class OrderAdminPersistenceService
         }
 
         $existing_product_ids = $order->products()->pluck('id')->all();
-        $removed_product_ids = array_diff($existing_product_ids, $submitted_product_ids);
+        $removed_product_ids = array_diff(
+            array_map(fn (mixed $id): int => integer_value($id), $existing_product_ids),
+            array_map(fn (mixed $id): int => integer_value($id), $submitted_product_ids),
+        );
 
         if ($removed_product_ids !== []) {
             $order->products()->whereKey($removed_product_ids)->delete();
@@ -457,13 +684,13 @@ final readonly class OrderAdminPersistenceService
 
             $payment->fill([
                 'method' => $this->resolvePaymentMethodName(
-                    $this->nullableString(Arr::get($payment_data, 'code', $payment->code)),
+                    nullable_string(Arr::get($payment_data, 'code', $payment->code)),
                     $payment->method,
                 ),
-                'code' => $this->nullableString(Arr::get($payment_data, 'code', $payment->code)),
-                'transaction_id' => $this->nullableString(Arr::get($payment_data, 'transaction_id', $payment->transaction_id)),
+                'code' => nullable_string(Arr::get($payment_data, 'code', $payment->code)),
+                'transaction_id' => nullable_string(Arr::get($payment_data, 'transaction_id', $payment->transaction_id)),
                 'amount' => $this->nullableFloat(Arr::get($payment_data, 'amount', $payment->amount)) ?? 0,
-                'failure_reason' => $this->nullableString(Arr::get($payment_data, 'failure_reason', $payment->failure_reason)),
+                'failure_reason' => nullable_string(Arr::get($payment_data, 'failure_reason', $payment->failure_reason)),
             ]);
 
             $payment->save();
@@ -515,7 +742,7 @@ final readonly class OrderAdminPersistenceService
                 'total_type' => 'total',
                 'name' => __('admin/orders/orders.labels.order_total'),
                 'value' => $grand_total,
-                'sort_order' => ((int)$order->totals()->max('sort_order')) + 1,
+                'sort_order' => integer_value($order->totals()->max('sort_order')) + 1,
             ]);
         } else {
             $total->value = $grand_total;
@@ -536,7 +763,9 @@ final readonly class OrderAdminPersistenceService
         $product = Product::query()
             ->with([
                 'defaultVariant',
-                'productDescription' => fn ($query) => $query->where('language_id', $language_id),
+                'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
             ])
             ->find($product_id);
 
@@ -560,7 +789,7 @@ final readonly class OrderAdminPersistenceService
             'product_id' => $product->getKey(),
             'product_variant_id' => $variant_id,
             'is_default_variant' => $is_default_variant,
-            'name' => $description?->name ?: $product->model ?: $product->sku ?: (string) $product->getKey(),
+            'name' => $description?->name ?: $product->model ?: $product->sku ?: string_value($product->getKey()),
             'model' => $product->model,
             'sku' => $product->sku,
             'ean' => $product->ean,
@@ -580,22 +809,31 @@ final readonly class OrderAdminPersistenceService
         )[$payment_code] ?? $fallback;
     }
 
-    private function nullableString(mixed $value): ?string
-    {
-        $value = Str::trim((string) $value);
-
-        return $value !== '' ? $value : null;
-    }
 
     private function nullableInteger(mixed $value): ?int
     {
-        return is_numeric($value) && (int) $value > 0 ? (int) $value : null;
+        return is_numeric($value) && integer_value($value) > 0 ? integer_value($value) : null;
     }
 
     private function nullableFloat(mixed $value): ?float
     {
         return is_numeric($value) ? (float) $value : null;
     }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private function listArray(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        return array_values($value);
+    }
+
+
+
 
     /**
      * @return array<string, mixed>
@@ -616,6 +854,7 @@ final readonly class OrderAdminPersistenceService
                 'last_name',
                 'email',
                 'telephone',
+                'no_call',
             ]),
             'shipping' => $order->shipping?->only([
                 'method',
@@ -626,8 +865,8 @@ final readonly class OrderAdminPersistenceService
                 'delivery_point',
                 'postcode',
             ]),
-            'payments' => $order->payments()->with('paymentStatus')->get()->mapWithKeys(fn (OrderPayments $payment): array => [
-                (string) $payment->getKey() => [
+            'payments' => $order->payments()->with('paymentStatus')->get()->toBase()->mapWithKeys(fn (OrderPayments $payment): array => [
+                string_value($payment->getKey()) => [
                     'method' => $payment->method,
                     'code' => $payment->code,
                     'payment_status_id' => $payment->payment_status_id,
@@ -637,8 +876,8 @@ final readonly class OrderAdminPersistenceService
                     'failure_reason' => $payment->failure_reason,
                 ],
             ])->all(),
-            'products' => $order->products()->get()->mapWithKeys(fn ($product): array => [
-                (string) $product->getKey() => $product->only([
+            'products' => $order->products()->get()->toBase()->mapWithKeys(fn ($product): array => [
+                string_value($product->getKey()) => $product->only([
                     'id',
                     'product_id',
                     'product_variant_id',
@@ -652,9 +891,9 @@ final readonly class OrderAdminPersistenceService
                     'line_total',
                 ]),
             ])->all(),
-            'totals' => $order->totals()->get()->mapWithKeys(fn ($total): array => [
-                (string) $total->getKey() => [
-                    'total_type' => (string) $total->getRawOriginal('total_type'),
+            'totals' => $order->totals()->get()->toBase()->mapWithKeys(fn ($total): array => [
+                string_value($total->getKey()) => [
+                    'total_type' => string_value($total->getRawOriginal('total_type')),
                     'name' => $total->name,
                     'value' => (float) $total->value,
                 ],
@@ -699,13 +938,14 @@ final readonly class OrderAdminPersistenceService
         $this->appendEntityChange(
             $entries,
             'admin_order_customer_updated',
-            (array) $before['customer'],
-            (array) $after['customer'],
+            string_keyed_array($before['customer'] ?? []),
+            string_keyed_array($after['customer'] ?? []),
             [
                 'first_name' => 'first_name',
                 'last_name' => 'last_name',
                 'email' => 'email',
                 'telephone' => 'telephone',
+                'no_call' => 'no_call',
             ],
         );
 
@@ -728,8 +968,8 @@ final readonly class OrderAdminPersistenceService
         $this->appendEntityChange(
             $entries,
             'admin_order_shipping_updated',
-            $before_shipping,
-            $after_shipping,
+            string_keyed_array($before_shipping),
+            string_keyed_array($after_shipping),
             [
                 'city' => 'city',
                 'address' => 'address',
@@ -759,12 +999,12 @@ final readonly class OrderAdminPersistenceService
         $after_payments = (array) $after['payments'];
 
         foreach ($after_payments as $payment_id => $payment) {
-            $old_payment = (array) ($before_payments[$payment_id] ?? []);
+            $old_payment = string_keyed_array($before_payments[$payment_id] ?? []);
 
             if ($old_payment === []) {
                 $entries[] = [
                     'event' => 'admin_order_payment_added',
-                    'json' => $this->historyData($payment),
+                    'json' => $this->historyData(string_keyed_array($payment)),
                 ];
 
                 continue;
@@ -774,7 +1014,7 @@ final readonly class OrderAdminPersistenceService
                 $entries,
                 'admin_order_payment_updated',
                 $old_payment,
-                (array) $payment,
+                string_keyed_array($payment),
                 [
                     'method' => 'method',
                     'code' => 'code',
@@ -789,7 +1029,7 @@ final readonly class OrderAdminPersistenceService
         foreach (array_diff_key($before_payments, $after_payments) as $payment) {
             $entries[] = [
                 'event' => 'admin_order_payment_removed',
-                'json' => $this->historyData((array) $payment),
+                'json' => $this->historyData(string_keyed_array($payment)),
             ];
         }
 
@@ -800,7 +1040,7 @@ final readonly class OrderAdminPersistenceService
             if (! isset($before_products[$product_id])) {
                 $entries[] = [
                     'event' => 'admin_order_product_added',
-                    'json' => $this->historyData((array) $product),
+                    'json' => $this->historyData(string_keyed_array($product)),
                 ];
 
                 continue;
@@ -809,8 +1049,8 @@ final readonly class OrderAdminPersistenceService
             $this->appendEntityChange(
                 $entries,
                 'admin_order_product_updated',
-                (array) $before_products[$product_id],
-                (array) $product,
+                string_keyed_array($before_products[$product_id]),
+                string_keyed_array($product),
                 [
                     'name' => 'name',
                     'model' => 'model',
@@ -822,13 +1062,13 @@ final readonly class OrderAdminPersistenceService
                     'line_total' => 'line_total',
                 ],
                 [
-                    'id' => $product['id'] ?? $product_id,
-                    'product_id' => $product['product_id'] ?? null,
-                    'product_variant_id' => $product['product_variant_id'] ?? null,
-                    'model' => $product['model'] ?? null,
-                    'sku' => $product['sku'] ?? null,
-                    'ean' => $product['ean'] ?? null,
-                    'name' => $product['name'] ?? null,
+                    'id' => string_keyed_array($product)['id'] ?? $product_id,
+                    'product_id' => string_keyed_array($product)['product_id'] ?? null,
+                    'product_variant_id' => string_keyed_array($product)['product_variant_id'] ?? null,
+                    'model' => string_keyed_array($product)['model'] ?? null,
+                    'sku' => string_keyed_array($product)['sku'] ?? null,
+                    'ean' => string_keyed_array($product)['ean'] ?? null,
+                    'name' => string_keyed_array($product)['name'] ?? null,
                 ],
             );
         }
@@ -836,7 +1076,7 @@ final readonly class OrderAdminPersistenceService
         foreach (array_diff_key($before_products, $after_products) as $product) {
             $entries[] = [
                 'event' => 'admin_order_product_removed',
-                'json' => $this->historyData((array) $product),
+                'json' => $this->historyData(string_keyed_array($product)),
             ];
         }
 
@@ -844,8 +1084,8 @@ final readonly class OrderAdminPersistenceService
             $entries[] = [
                 'event' => 'admin_order_totals_recalculated',
                 'json' => $this->historyData([
-                    'old_totals' => $this->formatHistoryTotals((array) $before['totals']),
-                    'new_totals' => $this->formatHistoryTotals((array) $after['totals']),
+                    'old_totals' => $this->formatHistoryTotals(string_keyed_array($before['totals'] ?? [])),
+                    'new_totals' => $this->formatHistoryTotals(string_keyed_array($after['totals'] ?? [])),
                     'old_order_total' => $before_order['total'],
                     'new_order_total' => $after_order['total'],
                 ]),
@@ -854,7 +1094,7 @@ final readonly class OrderAdminPersistenceService
 
         foreach ($entries as $entry) {
             $order->histories()->create([
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'old_order_status_id' => $old_order_status_id,
                 'order_status_id' => $order->order_status_id,
                 'event' => $entry['event'],
@@ -931,7 +1171,7 @@ final readonly class OrderAdminPersistenceService
 
         foreach ($data as $key => $value) {
             $translation_key = 'admin/orders/orders.history_data.' . Str::snake((string) $key);
-            $translated_label = __($translation_key);
+            $translated_label = (string) __($translation_key);
             $label = $translated_label !== $translation_key
                 ? $translated_label
                 : Str::headline((string) $key);
@@ -945,8 +1185,8 @@ final readonly class OrderAdminPersistenceService
     {
         if (is_bool($value)) {
             return $value
-                ? __('admin/orders/orders.history_data.yes')
-                : __('admin/orders/orders.history_data.no');
+                ? (string) __('admin/orders/orders.history_data.yes')
+                : (string) __('admin/orders/orders.history_data.no');
         }
 
         if ($value === null || $value === '') {
@@ -954,10 +1194,10 @@ final readonly class OrderAdminPersistenceService
         }
 
         if (is_array($value)) {
-            return (string) json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            return string_value(json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
 
-        return (string) $value;
+        return string_value($value);
     }
 
     /**
@@ -965,9 +1205,10 @@ final readonly class OrderAdminPersistenceService
      */
     private function getHistoryTotalValue(array $snapshot, string $type): ?float
     {
-        foreach ((array) $snapshot['totals'] as $total) {
+        foreach (string_keyed_array($snapshot['totals'] ?? []) as $total) {
+            $total = string_keyed_array($total);
             if (($total['total_type'] ?? null) === $type) {
-                return (float) $total['value'];
+                return float_value($total['value'] ?? null);
             }
         }
 
@@ -980,12 +1221,19 @@ final readonly class OrderAdminPersistenceService
     private function formatHistoryTotals(array $totals): string
     {
         return collect($totals)
-            ->map(fn (array $total): string => sprintf(
-                '%s: %s',
-                $total['name'] ?? $total['total_type'] ?? '',
-                format_price((float) ($total['value'] ?? 0)),
-            ))
+            ->map(fn (mixed $total): string => $this->formatHistoryTotal($total))
             ->implode('; ');
+    }
+
+    private function formatHistoryTotal(mixed $total): string
+    {
+        $total = string_keyed_array($total);
+
+        return sprintf(
+            '%s: %s',
+            string_value($total['name'] ?? $total['total_type'] ?? ''),
+            format_price(float_value($total['value'] ?? 0)),
+        );
     }
 
     /**
@@ -993,14 +1241,14 @@ final readonly class OrderAdminPersistenceService
      */
     private function getHistoryActorData(): array
     {
-        $user = auth()->user();
-        $roles = $user?->getRoleNames()->implode(', ');
+        $user = Auth::user();
+        $roles = $user instanceof User ? $user->getRoleNames()->implode(', ') : null;
 
         return [
-            __('admin/orders/orders.history_data.actor') => $user !== null
-                ? __('admin/orders/orders.history_data.administrator')
-                : __('admin/orders/orders.history_data.system'),
-            __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
+            (string) __('admin/orders/orders.history_data.actor') => $user !== null
+                ? (string) __('admin/orders/orders.history_data.administrator')
+                : (string) __('admin/orders/orders.history_data.system'),
+            (string) __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
         ];
     }
 }

@@ -8,7 +8,6 @@ use App\Supports\Services\StorefrontCacheService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use stdClass;
 use Throwable;
 
 class CheckoutCitySearchService
@@ -38,11 +37,14 @@ class CheckoutCitySearchService
             is_enabled_singleton_module('UkrPoshta') ? 'ukr' : 'no-ukr',
         );
 
-        return $this->storefront_cache_service->remember(
+        $result = $this->storefront_cache_service->remember(
             $cache_key,
             fn (): array => $this->searchCitiesUncached($city_keyword),
             300,
         );
+
+        /** @var array<string, mixed> $result */
+        return $result;
     }
 
     /**
@@ -113,8 +115,12 @@ class CheckoutCitySearchService
             ';
 
             try {
-                $ukr_poshta_cities_data = $this->normalizeResults($connection->select($ukr_poshta_sql, [$search_like]));
-                $nova_poshta_cities_data = $this->normalizeResults($connection->select($nova_poshta_sql, [$search_like]));
+                $ukr_poshta_results = array_values($connection->select($ukr_poshta_sql, [$search_like]));
+                /** @var array<int, object> $ukr_poshta_results */
+                $nova_poshta_results = array_values($connection->select($nova_poshta_sql, [$search_like]));
+                /** @var array<int, object> $nova_poshta_results */
+                $ukr_poshta_cities_data = $this->normalizeResults($ukr_poshta_results);
+                $nova_poshta_cities_data = $this->normalizeResults($nova_poshta_results);
 
                 if (count($ukr_poshta_cities_data) > count($nova_poshta_cities_data)) {
                     $this->matchAndMergeCities($nova_poshta_cities_data, $ukr_poshta_cities_data, $cities_data);
@@ -135,7 +141,7 @@ class CheckoutCitySearchService
 
                 return [
                     'success' => empty($cities_data) === false,
-                    'cities_data' => $cities_data,
+                    'cities_data' => $this->normalizeCityResponse($cities_data),
                 ];
             } catch (Throwable $throwable) {
                 Log::channel('stack')->error('[CheckoutCitySearchService.searchCities] query failed', [
@@ -192,13 +198,15 @@ class CheckoutCitySearchService
         }
 
         try {
-            $cities_data = $this->normalizeResults($connection->select($sql, [$search_like]));
+            $city_results = array_values($connection->select($sql, [$search_like]));
+            /** @var array<int, object> $city_results */
+            $cities_data = $this->normalizeResults($city_results);
 
             $this->sortCities($cities_data);
 
             return [
                 'success' => empty($cities_data) === false,
-                'cities_data' => $cities_data,
+                'cities_data' => $this->normalizeCityResponse($cities_data),
             ];
         } catch (Throwable $throwable) {
             Log::channel('stack')->error('[CheckoutCitySearchService.searchCities] query failed', [
@@ -216,7 +224,7 @@ class CheckoutCitySearchService
     }
 
     /**
-     * @param array $cities_data
+     * @param array<int, array<string, mixed>> $cities_data
      *
      * @return void
      */
@@ -225,14 +233,14 @@ class CheckoutCitySearchService
         usort(
             $cities_data,
             fn ($city_one, $city_two) => strcmp(
-                (string)$city_one['city_description'],
-                (string)$city_two['city_description'],
+                $this->toString($city_one['city_description'] ?? ''),
+                $this->toString($city_two['city_description'] ?? ''),
             ),
         );
     }
 
     /**
-     * @param array $results
+     * @param array<int, object> $results
      *
      * @return array<int, array{
      *     city_name: string,
@@ -246,25 +254,43 @@ class CheckoutCitySearchService
      */
     private function normalizeResults(array $results): array
     {
-        return array_map(function (stdClass $result): array {
+        return array_map(function (object $result): array {
             return [
-                'city_name' => (string) $result->city_name,
-                'region_name' => (string) $result->region_name,
-                'nova_poshta_city_id' => isset($result->nova_poshta_city_id)
-                    ? (string) $result->nova_poshta_city_id
+                'city_name' => $this->toString(data_get($result, 'city_name', '')),
+                'region_name' => $this->toString(data_get($result, 'region_name', '')),
+                'nova_poshta_city_id' => data_get($result, 'nova_poshta_city_id') !== null
+                    ? $this->toString(data_get($result, 'nova_poshta_city_id'))
                     : null,
-                'ukr_poshta_city_id' => isset($result->ukr_poshta_city_id) ? (int) $result->ukr_poshta_city_id : null,
-                'latitude' => isset($result->latitude) ? (float) $result->latitude : null,
-                'longitude' => isset($result->longitude) ? (float) $result->longitude : null,
-                'city_description' => (string) $result->city_description,
+                'ukr_poshta_city_id' => data_get($result, 'ukr_poshta_city_id') !== null ? $this->toInt(data_get($result, 'ukr_poshta_city_id')) : null,
+                'latitude' => data_get($result, 'latitude') !== null ? $this->toFloat(data_get($result, 'latitude')) : null,
+                'longitude' => data_get($result, 'longitude') !== null ? $this->toFloat(data_get($result, 'longitude')) : null,
+                'city_description' => $this->toString(data_get($result, 'city_description', '')),
             ];
         }, $results);
     }
 
     /**
-     * @param array $primary_cities
-     * @param array $secondary_cities
-     * @param array $cities_data
+     * @param array<int, array<string, mixed>> $cities_data
+     * @return array<int, array{nova_poshta_city_id: string|null, city_description: string, ukr_poshta_city_id: int|null, city_lat: float|null, city_lng: float|null}>
+     */
+    private function normalizeCityResponse(array $cities_data): array
+    {
+        /** @var array<int, array{nova_poshta_city_id: string|null, city_description: string, ukr_poshta_city_id: int|null, city_lat: float|null, city_lng: float|null}> $response */
+        $response = array_map(static fn (array $city): array => [
+            'nova_poshta_city_id' => isset($city['nova_poshta_city_id']) ? self::scalarString($city['nova_poshta_city_id']) : null,
+            'city_description' => self::scalarString($city['city_description'] ?? ''),
+            'ukr_poshta_city_id' => isset($city['ukr_poshta_city_id']) ? self::scalarInt($city['ukr_poshta_city_id']) : null,
+            'city_lat' => isset($city['city_lat']) ? self::scalarFloat($city['city_lat']) : (isset($city['latitude']) ? self::scalarFloat($city['latitude']) : null),
+            'city_lng' => isset($city['city_lng']) ? self::scalarFloat($city['city_lng']) : (isset($city['longitude']) ? self::scalarFloat($city['longitude']) : null),
+        ], array_values($cities_data));
+
+        return $response;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $primary_cities
+     * @param array<int, array<string, mixed>> $secondary_cities
+     * @param array<int, array<string, mixed>> $cities_data
      *
      * @return void
      */
@@ -275,16 +301,16 @@ class CheckoutCitySearchService
                 break;
             }
 
-            $primary_city_name = Str::trim(Str::lower((string)$primary_city['city_name']));
-            $primary_region_name = Str::trim(Str::lower((string)$primary_city['region_name']));
+            $primary_city_name = Str::trim(Str::lower($this->toString($primary_city['city_name'] ?? '')));
+            $primary_region_name = Str::trim(Str::lower($this->toString($primary_city['region_name'] ?? '')));
 
             foreach ($secondary_cities as $secondary_index => $secondary_city_data) {
-                $secondary_city_name = Str::trim(Str::lower((string)$secondary_city_data['city_name']));
-                $secondary_region_name = Str::trim(Str::lower((string)$secondary_city_data['region_name']));
+                $secondary_city_name = Str::trim(Str::lower($this->toString($secondary_city_data['city_name'] ?? '')));
+                $secondary_region_name = Str::trim(Str::lower($this->toString($secondary_city_data['region_name'] ?? '')));
 
                 $cities_match = $primary_city_name === $secondary_city_name;
                 $regions_match = $secondary_region_name === $primary_region_name
-                    || $secondary_region_name === Str::lower(config('shipping.ukraine_capital_uk_name'));
+                    || $secondary_region_name === Str::lower($this->toString(config('shipping.ukraine_capital_uk_name')));
 
                 if ($cities_match && $regions_match) {
                     // Determine which data is Nova Poshta and which is Ukr Poshta
@@ -313,5 +339,35 @@ class CheckoutCitySearchService
                 }
             }
         }
+    }
+
+    private function toString(mixed $value): string
+    {
+        return self::scalarString($value);
+    }
+
+    private static function scalarString(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function toInt(mixed $value): int
+    {
+        return self::scalarInt($value);
+    }
+
+    private static function scalarInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function toFloat(mixed $value): float
+    {
+        return self::scalarFloat($value);
+    }
+
+    private static function scalarFloat(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
     }
 }

@@ -34,19 +34,19 @@ readonly class ModuleSettingsNormalizerService
      */
     public function normalize(array $settings): array
     {
-        $allowed_source_modes = collect($this->products_carousel_config->get('settings.allowed_source_modes', []))
+        $allowed_source_modes = collect((array) $this->products_carousel_config->get('settings.allowed_source_modes', []))
             ->filter(fn (mixed $mode): bool => is_string($mode) && filled($mode))
             ->values()
             ->all();
-        $allowed_sort_modes = collect($this->products_carousel_config->get('settings.allowed_sort_modes', []))
+        $allowed_sort_modes = collect((array) $this->products_carousel_config->get('settings.allowed_sort_modes', []))
             ->filter(fn (mixed $mode): bool => is_string($mode) && filled($mode))
             ->values()
             ->all();
-        $allowed_sort_options = collect($this->products_carousel_config->get('settings.allowed_sort_options', []))
+        $allowed_sort_options = collect((array) $this->products_carousel_config->get('settings.allowed_sort_options', []))
             ->filter(fn (mixed $option): bool => is_string($option) && filled($option))
             ->values()
             ->all();
-        $allowed_page_types = collect(config('page-settings.page_type', []))->values()->all();
+        $allowed_page_types = collect((array) config('page-settings.page_type', []))->values()->all();
         $active_languages = (new Language())->getActiveLanguages();
         $shared_settings = Arr::get($settings, 'shared', []);
 
@@ -293,6 +293,7 @@ readonly class ModuleSettingsNormalizerService
             ->all();
     }
 
+    /** @param array<string, mixed> $shared_settings */
     private function resolveLegacySharedValue(array $shared_settings, string $field): string
     {
         $legacy_scalar = Str::squish((string) Arr::get($shared_settings, $field));

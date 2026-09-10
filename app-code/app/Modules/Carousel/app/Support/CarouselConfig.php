@@ -41,9 +41,13 @@ class CarouselConfig
             return $this->config;
         }
 
+        /** @var mixed $config_data */
         $config_data = require $config_path;
 
-        $this->config = is_array($config_data) ? $config_data : [];
+        /** @var array<string, mixed> $config_data */
+        $config_data = is_array($config_data) ? $config_data : [];
+
+        $this->config = $config_data;
 
         return $this->config;
     }

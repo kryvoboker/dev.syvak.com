@@ -26,14 +26,19 @@ class CreateProduct extends CreateRecord
 
     protected static string $resource = ProductResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $descriptions = [];
 
+    /** @var array<int, int> */
     protected array $category_ids = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $images = [];
 
+    /** @var array<string, mixed> */
     protected array $variant_relationship_data = [];
 
     public ?Model $record = null;
@@ -43,10 +48,10 @@ class CreateProduct extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->descriptions = trim_strs_in_arr((array) ($data['descriptions'] ?? []));
         $this->category_ids = app(ProductCategorySyncService::class)->normalizeCategoryIds($data['categories'] ?? []);
-        $this->slugs = trim_strs_in_arr($data['slugs'] ?? []);
-        $this->images = trim_strs_in_arr($data['images'] ?? []);
+        $this->slugs = trim_strs_in_arr((array) ($data['slugs'] ?? []));
+        $this->images = trim_strs_in_arr((array) ($data['images'] ?? []));
         $prepared_variant_data = app(ProductVariantContentPersistenceService::class)->prepareForSave($data);
         $this->variant_relationship_data = $prepared_variant_data['relationships'];
         $this->validateProductSlugsUniqueness();
@@ -62,7 +67,7 @@ class CreateProduct extends CreateRecord
      */
     protected function handleRecordCreation(array $data): Model
     {
-        $record = DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data) {
             $this->record = static::getModel()::create($data);
 
             $this->createDescriptions();
@@ -84,7 +89,7 @@ class CreateProduct extends CreateRecord
             $this->category_ids,
         );
 
-        return $record;
+        return $this->getProductRecord();
     }
 
     protected function createDescriptions(): void
@@ -114,7 +119,6 @@ class CreateProduct extends CreateRecord
         $default_variant = $this->resolveDefaultVariant();
 
         $prepared_images = collect($this->images)
-            ->filter(fn (mixed $image): bool => is_array($image))
             ->map(function (array $image_data): array {
                 return [
                     'image' => (string) ($image_data['image'] ?? ''),
@@ -159,7 +163,11 @@ class CreateProduct extends CreateRecord
             'sort_order' => 1,
         ]);
 
-        $product->default_variant_id = (int) $default_variant->id;
+        $default_variant_id = (int) $default_variant->id;
+
+        if ($default_variant_id > 0) {
+            $product->default_variant_id = $default_variant_id;
+        }
         $product->save();
 
         return $default_variant;

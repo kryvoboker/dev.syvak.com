@@ -101,13 +101,15 @@ class UserForm
                     ->label(__('admin/default.labels.password'))
                     ->helperText(__('admin/users/users.helpers.password'))
                     ->password()
+                    ->revealable()
                     ->rules(['nullable', 'string', 'min:3', 'confirmed', 'regex:' . config('app.regex_validate_conditions.password')])
                     ->default(null),
 
                 TextInput::make('password_confirmation')
                     ->label(__('admin/default.labels.password_confirmation'))
                     ->password()
-                    ->rules(['nullable', 'required_with:password', 'confirmed'])
+                    ->revealable()
+                    ->rules(['nullable', 'required_with:password'])
                     ->default(null),
 
                 Toggle::make('is_active')
@@ -126,6 +128,16 @@ class UserForm
                     ->preload()
                     ->live()
                     ->rules([Rule::exists('user_groups', 'id')]),
+
+                Select::make('roles')
+                    ->label(__('admin/users/users.labels.role'))
+                    ->helperText(__('admin/users/users.helpers.role'))
+                    ->relationship('roles', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->placeholder(__('admin/users/users.options.no_role'))
+                    ->rules(['nullable', Rule::exists('roles', 'id')]),
             ]);
     }
 

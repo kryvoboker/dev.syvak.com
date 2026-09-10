@@ -48,10 +48,8 @@ final readonly class FailureOrderRecoveryService
 
         $this->request->session()->put(self::SESSION_KEY, [
             'order_number' => (string) $order->order_number,
-            'order_type' => $order->order_type instanceof CartModeEnum
-                ? $order->order_type->value
-                : (string) $order->order_type,
-            'retry_count' => (int) $this->request->session()->get(self::SESSION_KEY . '.retry_count', 0),
+            'order_type' => $order->order_type->value,
+            'retry_count' => integer_value($this->request->session()->get(self::SESSION_KEY . '.retry_count', 0)),
         ]);
     }
 
@@ -69,12 +67,17 @@ final readonly class FailureOrderRecoveryService
     {
         $state = $this->request->hasSession() ? $this->request->session()->get(self::SESSION_KEY, []) : [];
 
-        return is_array($state) ? $state : [];
+        if (! is_array($state)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $state */
+        return $state;
     }
 
     public function resolveOrder(): ?Orders
     {
-        $order_number = (string) Arr::get($this->getState(), 'order_number', '');
+        $order_number = string_value(Arr::get($this->getState(), 'order_number', ''));
 
         if ($order_number === '') {
             return null;
@@ -88,7 +91,7 @@ final readonly class FailureOrderRecoveryService
 
     public function getRetryPaymentMethod(): string
     {
-        return (string) $this->resolveOrder()?->payments->sortByDesc('id')->first()?->code;
+        return string_value($this->resolveOrder()?->payments->sortByDesc('id')->first()?->code);
     }
 
     /** @return array<string, mixed> */
@@ -115,8 +118,8 @@ final readonly class FailureOrderRecoveryService
             if ($payment_method === $this->wayforpay_config->getPaymentMethod()) {
                 $payment_result = $this->wayforpay_payment_module->prepare($payload);
 
-                if (($payment_result['success'] ?? false) !== true) {
-                    $this->markFailed($payment, (array) Arr::get($payment_result, 'errors', []));
+                if ($payment_result['success'] !== true) {
+                    $this->markFailed($payment, $this->errorData(Arr::get($payment_result, 'errors', [])));
                     $this->incrementRetryCount();
 
                     return ['success' => false, 'errors' => (array) Arr::get($payment_result, 'errors', [])];
@@ -144,7 +147,7 @@ final readonly class FailureOrderRecoveryService
             };
 
             if (! (bool) Arr::get($payment_result, 'is_success', false)) {
-                $this->markFailed($payment, (array) Arr::get($payment_result, 'errors', []));
+                $this->markFailed($payment, $this->errorData(Arr::get($payment_result, 'errors', [])));
                 $this->incrementRetryCount();
 
                 return ['success' => false, 'errors' => (array) Arr::get($payment_result, 'errors', [])];
@@ -156,7 +159,7 @@ final readonly class FailureOrderRecoveryService
             $this->order_lifecycle_service->transitionOrderForPayment($order, OrderLifecycleService::PAYMENT_STATUS_PAID, [
                 'payment_id' => $payment->getKey(),
             ]);
-            $this->cart_service->clearCart((string) Arr::get($this->getState(), 'order_type', CartModeEnum::Regular->value));
+            $this->cart_service->clearCart(string_value(Arr::get($this->getState(), 'order_type', CartModeEnum::Regular->value)));
             $this->forget();
 
             return [
@@ -195,7 +198,8 @@ final readonly class FailureOrderRecoveryService
     private function incrementRetryCount(): void
     {
         if ($this->request->hasSession()) {
-            $this->request->session()->increment(self::SESSION_KEY . '.retry_count');
+            $retry_count = integer_value($this->request->session()->get(self::SESSION_KEY . '.retry_count', 0));
+            $this->request->session()->put(self::SESSION_KEY . '.retry_count', $retry_count + 1);
         }
     }
 
@@ -217,43 +221,46 @@ final readonly class FailureOrderRecoveryService
         return collect($methods)->contains(
             fn (array $method): bool =>
             (bool) Arr::get($method, 'is_available', false)
-            && (string) Arr::get($method, 'payment_method') === $payment_method,
+            && string_value(Arr::get($method, 'payment_method')) === $payment_method,
         );
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @return array<string, mixed>
+     * @psalm-suppress InvalidTemplateParam
+     */
     private function buildOrderPayload(Orders $order, string $payment_method, string $locale): array
     {
         $items = $order->products->map(fn (mixed $product): array => [
-            'name' => (string) $product->name,
+            'name' => string_value($product->name),
             'unit_price' => (float) $product->unit_price,
             'quantity' => (int) $product->quantity,
             'line_total' => (float) $product->line_total,
         ])->values()->all();
         $totals = $order->totals->map(fn (mixed $total): array => [
-            'code' => (string) data_get($total, 'total_type.value', $total->total_type),
-            'label' => (string) $total->name,
+            'code' => string_value(data_get($total, 'total_type.value', $total->total_type)),
+            'label' => string_value($total->name),
             'amount' => (float) $total->value,
         ])->values()->all();
 
         return [
-            'order_number' => (string) $order->order_number,
+            'order_number' => string_value($order->order_number),
             'customer' => [
-                'first_name' => (string) $order->customer?->first_name,
-                'last_name' => (string) $order->customer?->last_name,
-                'email' => (string) $order->customer?->email,
-                'phone' => (string) $order->customer?->telephone,
+                'first_name' => string_value($order->customer?->first_name),
+                'last_name' => string_value($order->customer?->last_name),
+                'email' => string_value($order->customer?->email),
+                'phone' => string_value($order->customer?->telephone),
             ],
             'delivery' => [
-                'method' => (string) $order->shipping?->code,
-                'address' => (string) $order->shipping?->address,
+                'method' => string_value($order->shipping?->code),
+                'address' => string_value($order->shipping?->address),
             ],
             'cart' => [
                 'items' => $items,
                 'totals' => [
                     'lines' => $totals,
                     'grand_total' => (float) $order->total,
-                    'currency_code' => (string) $order->currency_code,
+                    'currency_code' => string_value($order->currency_code),
                 ],
             ],
             'locale' => $locale,
@@ -270,7 +277,25 @@ final readonly class FailureOrderRecoveryService
             $payment,
             OrderLifecycleService::PAYMENT_STATUS_FAILED,
             ['source' => 'failure_page_retry'],
-            Arr::flatten($errors)[0] ?? null,
+            is_scalar(Arr::flatten($errors)[0] ?? null) ? (string) Arr::flatten($errors)[0] : null,
         );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function errorData(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $errors = [];
+
+        foreach ($value as $key => $error) {
+            $errors[(string) $key] = $error;
+        }
+
+        return $errors;
     }
 }

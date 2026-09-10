@@ -12,7 +12,6 @@ use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValue;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterValueTranslation;
 use App\Models\Catalogs\Products\ProductVariantAttributeValue;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -32,7 +31,6 @@ class FilterValueGeneratorService
             $updated_count = 0;
             $removed_count = 0;
 
-            /** @var Collection<CatalogFilterGroup> $groups */
             $groups = CatalogFilterGroup::query()
                 ->where('catalog_filter_set_id', (int) $filter_set->id)
                 ->where('is_enabled', true)
@@ -114,8 +112,8 @@ class FilterValueGeneratorService
         $updated_count = 0;
 
         foreach ($value_options as $sort_index => $value_option) {
-            $canonical_key = (string) Arr::get($value_option, 'canonical_key', '');
-            $value_label = (string) Arr::get($value_option, 'canonical_label', '');
+            $canonical_key = string_value(Arr::get($value_option, 'canonical_key', ''));
+            $value_label = string_value(Arr::get($value_option, 'canonical_label', ''));
 
             if (blank($canonical_key) || blank($value_label)) {
                 continue;
@@ -146,7 +144,7 @@ class FilterValueGeneratorService
             $this->syncAttributeValueTranslations(
                 value: $value,
                 fallback_label: $value_label,
-                labels_by_language: (array) Arr::get($value_option, 'labels_by_language', []),
+                labels_by_language: $this->stringLabels(Arr::get($value_option, 'labels_by_language', [])),
             );
 
             if ($was_existing_value) {
@@ -156,10 +154,11 @@ class FilterValueGeneratorService
             }
         }
 
-        $removed_count = CatalogFilterValue::query()
+        $removed_result = CatalogFilterValue::query()
             ->where('catalog_filter_group_id', (int) $group->id)
             ->whereNotIn('code', $active_codes)
             ->delete();
+        $removed_count = is_numeric($removed_result) ? (int) $removed_result : 0;
 
         return [
             'created_count' => $created_count,
@@ -192,18 +191,21 @@ class FilterValueGeneratorService
             ->whereIn('catalog_filter_value_id', $value_ids)
             ->delete();
 
-        return CatalogFilterValue::query()
+        $removed_result = CatalogFilterValue::query()
             ->whereIn('id', $value_ids)
             ->delete();
+
+        return is_numeric($removed_result) ? (int) $removed_result : 0;
     }
 
+    /** @param array<int, string> $labels_by_language */
     private function syncAttributeValueTranslations(
         CatalogFilterValue $value,
         string $fallback_label,
         array $labels_by_language,
     ): void {
         foreach ((new Language())->getActiveLanguages() as $language) {
-            $translated_label = trim((string) ($labels_by_language[(int) $language->id] ?? ''));
+            $translated_label = trim(string_value($labels_by_language[(int) $language->id] ?? ''));
 
             CatalogFilterValueTranslation::query()->updateOrCreate(
                 [
@@ -222,7 +224,6 @@ class FilterValueGeneratorService
      */
     private function resolveAttributeValueOptions(int $attribute_id): array
     {
-        /** @var array<int, ProductVariantAttributeValue> $attribute_rows */
         $attribute_rows = ProductVariantAttributeValue::query()
             ->where('attribute_id', $attribute_id)
             ->whereNotNull('value_string')
@@ -233,7 +234,7 @@ class FilterValueGeneratorService
                         $product_query->where('is_active', true);
                     });
             })
-            ->select('product_variant_id', 'language_id', 'value_string')
+            ->select(['product_variant_id', 'language_id', 'value_string'])
             ->orderBy('product_variant_id')
             ->orderBy('language_id')
             ->get()
@@ -360,7 +361,7 @@ class FilterValueGeneratorService
         return (new Language())
             ->getActiveLanguages()
             ->pluck('id')
-            ->map(fn (mixed $language_id): int => (int) $language_id)
+            ->map(fn (mixed $language_id): int => integer_value($language_id))
             ->values()
             ->all();
     }
@@ -389,5 +390,25 @@ class FilterValueGeneratorService
         }
 
         return 'value_' . sha1($value_label);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function stringLabels(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $labels = [];
+
+        foreach ($value as $language_id => $label) {
+            if (is_numeric($language_id)) {
+                $labels[(int) $language_id] = string_value($label);
+            }
+        }
+
+        return $labels;
     }
 }

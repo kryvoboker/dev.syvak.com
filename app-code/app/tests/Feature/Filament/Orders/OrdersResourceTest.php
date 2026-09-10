@@ -8,8 +8,12 @@ use App\Filament\Resources\Orders\Pages\EditOrder;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
+use App\Models\Marketing\PromoCode;
+use App\Models\Marketing\PromoCodeDiscount;
+use App\Models\Marketing\PromoCodeUsage;
 use App\Models\Orders\OrderCustomers;
 use App\Models\Orders\OrderProducts;
+use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
 use App\Models\Orders\OrderShippings;
 use App\Models\Orders\OrderStatusDescriptions;
@@ -17,6 +21,8 @@ use App\Models\Orders\OrderStatuses;
 use App\Models\Orders\OrderTotals;
 use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
+use App\Services\Marketing\PromoCodePersistenceService;
+use App\Services\Marketing\PromoCodeService;
 use Filament\Facades\Filament;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Hashing\HashManager;
@@ -49,6 +55,17 @@ class OrdersResourceTest extends TestCase
             ->assertTableColumnStateSet('total', (string) $order->total, $order);
     }
 
+    public function test_orders_table_displays_the_no_call_preference(): void
+    {
+        $admin = $this->createAdmin(['ViewAny:Orders']);
+        $order = $this->createOrder(true);
+
+        $this->actingAs($admin);
+
+        Livewire::test(ListOrders::class)
+            ->assertTableColumnStateSet('customer.no_call', true, $order);
+    }
+
     public function test_admin_can_open_order_edit_page_with_current_order_data(): void
     {
         $admin = $this->createAdmin(['View:Orders', 'Update:Orders']);
@@ -63,6 +80,7 @@ class OrdersResourceTest extends TestCase
                 'comment' => $order->comment,
                 'customer.first_name' => 'Ada',
                 'customer.last_name' => 'Lovelace',
+                'customer.no_call' => false,
                 'shipping.code' => 'pickup_store',
             ]);
     }
@@ -78,6 +96,131 @@ class OrdersResourceTest extends TestCase
             ->fillForm(['comment' => 'Updated by admin'])
             ->assertFormSet(['comment' => 'Updated by admin'])
             ->assertActionVisible('save');
+    }
+
+    public function test_admin_can_update_the_customer_callback_preference(): void
+    {
+        $admin = $this->createAdmin(['View:Orders', 'Update:Orders']);
+        $order = $this->createOrder();
+
+        $this->actingAs($admin);
+
+        Livewire::test(EditOrder::class, ['record' => $order->getKey()])
+            ->fillForm(['customer.no_call' => true])
+            ->call('save');
+
+        $this->assertDatabaseHas('order_customers', [
+            'order_id' => $order->getKey(),
+            'no_call' => true,
+        ]);
+    }
+
+    public function test_admin_can_view_the_promo_code_snapshot_on_the_order(): void
+    {
+        $admin = $this->createAdmin(['View:Orders', 'Update:Orders']);
+        $order = $this->createOrder();
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Spring sale',
+            'code' => 'SPRING10',
+            'normalized_code' => 'spring10',
+            'promo_type' => 'super',
+            'discount_type' => 'fixed',
+            'is_active' => true,
+        ]);
+        PromoCodeDiscount::query()->create([
+            'promo_code_id' => $promo_code->getKey(),
+            'currency_id' => $order->currency_id,
+            'value' => 25,
+        ]);
+        $promo_code_usage = PromoCodeUsage::query()->create([
+            'promo_code_id' => $promo_code->getKey(),
+            'order_id' => $order->getKey(),
+            'discount_type' => 'fixed',
+            'promo_type' => 'super',
+            'used_at' => now(),
+        ]);
+        OrderPromoCodeProducts::query()->create([
+            'order_id' => $order->getKey(),
+            'promo_code_usage_id' => $promo_code_usage->getKey(),
+            'order_product_id' => $order->products()->firstOrFail()->getKey(),
+            'is_eligible' => true,
+            'discount_amount' => 0,
+        ]);
+
+        $this->actingAs($admin);
+
+        Livewire::test(EditOrder::class, ['record' => $order->getKey()])
+            ->assertFormSet([
+                'promo_code.id' => $promo_code->getKey(),
+                'promo_code.code' => 'SPRING10',
+                'promo_code.promo_type' => 'super',
+                'promo_code.discount_type' => 'fixed',
+                'promo_code.discount_value' => '25.0000',
+            ]);
+    }
+
+    public function test_promo_code_consumption_persists_discount_and_promo_types(): void
+    {
+        $order = $this->createOrder();
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Spring sale',
+            'code' => 'SPRING10',
+            'normalized_code' => 'spring10',
+            'promo_type' => 'super',
+            'discount_type' => 'fixed',
+            'is_active' => true,
+        ]);
+
+        app(PromoCodeService::class)->consume($promo_code, $order);
+
+        $this->assertDatabaseHas('promo_code_usages', [
+            'order_id' => $order->getKey(),
+            'promo_code_id' => $promo_code->getKey(),
+            'discount_type' => 'fixed',
+            'promo_type' => 'super',
+        ]);
+    }
+
+    public function test_promo_code_history_contains_applied_products(): void
+    {
+        $order = $this->createOrder();
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Spring sale',
+            'code' => 'SPRING10',
+            'normalized_code' => 'spring10',
+            'promo_type' => 'super',
+            'discount_type' => 'fixed',
+            'is_active' => true,
+        ]);
+        $promo_code_usage = PromoCodeUsage::query()->create([
+            'promo_code_id' => $promo_code->getKey(),
+            'order_id' => $order->getKey(),
+            'discount_type' => 'fixed',
+            'promo_type' => 'super',
+            'used_at' => now(),
+        ]);
+        $order_product = $order->products()->firstOrFail();
+
+        OrderPromoCodeProducts::query()->create([
+            'order_id' => $order->getKey(),
+            'promo_code_usage_id' => $promo_code_usage->getKey(),
+            'order_product_id' => $order_product->getKey(),
+            'is_eligible' => true,
+            'discount_amount' => 10,
+        ]);
+
+        $form_data = app(PromoCodePersistenceService::class)->hydrateFormData($promo_code);
+
+        $this->assertSame([
+            'order_id' => $order->getKey(),
+            'product' => 'Garden Guardian T-Shirt',
+            'identifier' => 'EAN-1',
+            'quantity' => 1,
+            'price' => '50.0000',
+            'discount_amount' => '10.0000',
+            'currency' => 'USD',
+        ], collect($form_data['history_products'][0])->except('used_at')->all());
+        $this->assertNotEmpty($form_data['history_products'][0]['used_at']);
     }
 
     /**
@@ -115,7 +258,7 @@ class OrdersResourceTest extends TestCase
         return $admin;
     }
 
-    private function createOrder(): Orders
+    private function createOrder(bool $no_call = false): Orders
     {
         $language = Language::query()->create([
             'code' => 'en',
@@ -171,6 +314,7 @@ class OrdersResourceTest extends TestCase
             'last_name' => 'Lovelace',
             'email' => 'ada@example.com',
             'telephone' => '+380501234567',
+            'no_call' => $no_call,
         ]);
         OrderShippings::query()->create([
             'order_id' => $order->getKey(),
@@ -181,6 +325,9 @@ class OrdersResourceTest extends TestCase
             'order_id' => $order->getKey(),
             'is_default_variant' => true,
             'name' => 'Garden Guardian T-Shirt',
+            'model' => 'MODEL-1',
+            'sku' => 'SKU-1',
+            'ean' => 'EAN-1',
             'quantity' => 1,
             'unit_price' => 50,
             'discount' => 0,
@@ -298,6 +445,7 @@ class OrdersResourceTest extends TestCase
             $table->string('last_name');
             $table->string('email')->nullable();
             $table->string('telephone');
+            $table->boolean('no_call')->default(false);
             $table->timestamps();
         });
         Schema::create('order_shippings', function (Blueprint $table): void {
@@ -363,6 +511,77 @@ class OrdersResourceTest extends TestCase
             $table->string('event');
             $table->json('json')->nullable();
             $table->text('comment')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('products', function (Blueprint $table): void {
+            $table->id();
+        });
+        Schema::create('promo_code_product', function (Blueprint $table): void {
+            $table->foreignId('promo_code_id');
+            $table->foreignId('product_id');
+        });
+        Schema::create('categories', function (Blueprint $table): void {
+            $table->id();
+        });
+        Schema::create('promo_code_category', function (Blueprint $table): void {
+            $table->foreignId('promo_code_id');
+            $table->foreignId('category_id');
+        });
+        Schema::create('promo_codes', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('code');
+            $table->string('normalized_code');
+            $table->string('promo_type')->default('regular');
+            $table->string('discount_type')->default('percentage');
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+        Schema::create('promo_code_user', function (Blueprint $table): void {
+            $table->foreignId('promo_code_id');
+            $table->foreignId('user_id');
+        });
+        Schema::create('promo_code_user_group', function (Blueprint $table): void {
+            $table->foreignId('promo_code_id');
+            $table->foreignId('user_group_id');
+        });
+        Schema::create('promo_code_error_translations', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('promo_code_id');
+            $table->foreignId('language_id');
+            $table->text('expired_message')->nullable();
+            $table->text('minimum_order_message')->nullable();
+            $table->text('usage_limit_message')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('promo_code_discounts', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('promo_code_id');
+            $table->foreignId('currency_id');
+            $table->decimal('value', 15, 4);
+            $table->timestamps();
+        });
+        Schema::create('promo_code_usages', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('promo_code_id');
+            $table->foreignId('order_id');
+            $table->string('discount_type');
+            $table->string('promo_type');
+            $table->foreignId('user_id')->nullable();
+            $table->foreignId('user_group_id')->nullable();
+            $table->string('consumer_key')->nullable();
+            $table->dateTime('used_at');
+            $table->timestamps();
+        });
+        Schema::create('order_promo_code_products', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('order_id');
+            $table->foreignId('promo_code_usage_id');
+            $table->foreignId('order_product_id');
+            $table->foreignId('product_id')->nullable();
+            $table->boolean('is_eligible')->default(false);
+            $table->string('override', 20)->nullable();
+            $table->decimal('discount_amount', 15, 4)->default(0);
             $table->timestamps();
         });
         Schema::create('module_definitions', function (Blueprint $table): void {

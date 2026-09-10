@@ -8,6 +8,13 @@ use App\Exceptions\OrderStatusInvariantException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property bool $is_default
+ * @property bool $is_active
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderStatusDescriptions> $descriptions
+ */
 class OrderStatuses extends Model
 {
     protected $fillable = [
@@ -20,6 +27,7 @@ class OrderStatuses extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -29,6 +37,7 @@ class OrderStatuses extends Model
         ];
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::saving(function (OrderStatuses $order_status): void {
@@ -83,7 +92,7 @@ class OrderStatuses extends Model
 
         return self::query()
             ->with([
-                'descriptions' => function ($query) use ($locale): void {
+                'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($locale): void {
                     $query
                         ->select([
                             'id',
@@ -103,7 +112,8 @@ class OrderStatuses extends Model
     }
 
     /**
-     * @return HasMany<OrderStatusDescriptions, $this>
+     * @phpstan-return HasMany<OrderStatusDescriptions, $this>
+     * @psalm-return HasMany<OrderStatusDescriptions, self>
      */
     public function descriptions(): HasMany
     {
@@ -111,7 +121,8 @@ class OrderStatuses extends Model
     }
 
     /**
-     * @return HasMany<Orders, $this>
+     * @phpstan-return HasMany<Orders, $this>
+     * @psalm-return HasMany<Orders, self>
      */
     public function orders(): HasMany
     {
@@ -119,7 +130,8 @@ class OrderStatuses extends Model
     }
 
     /**
-     * @return HasMany<OrderHistories, $this>
+     * @phpstan-return HasMany<OrderHistories, $this>
+     * @psalm-return HasMany<OrderHistories, self>
      */
     public function histories(): HasMany
     {
@@ -127,7 +139,8 @@ class OrderStatuses extends Model
     }
 
     /**
-     * @return HasMany<OrderHistories, $this>
+     * @phpstan-return HasMany<OrderHistories, $this>
+     * @psalm-return HasMany<OrderHistories, self>
      */
     public function previousHistories(): HasMany
     {

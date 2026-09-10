@@ -358,7 +358,8 @@ class CatalogFilterSetForm
             ]);
     }
 
-    private static function buildOptionLabelTabs($active_languages, string $tabs_name): Tabs
+    /** @param \Illuminate\Database\Eloquent\Collection<int, \App\Models\ApplicationSettings\Language> $active_languages */
+    private static function buildOptionLabelTabs(\Illuminate\Database\Eloquent\Collection $active_languages, string $tabs_name): Tabs
     {
         $tabs = [];
 

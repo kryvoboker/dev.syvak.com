@@ -24,10 +24,16 @@ class NovaPoshtaCheckoutStateService
     {
         $state = $this->request->session()->get(self::SESSION_KEY, []);
 
-        return is_array($state) ? $state : [];
+        if (! is_array($state)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $state */
+        return $state;
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
@@ -41,6 +47,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $region
      * @return array<string, mixed>
      */
@@ -55,6 +62,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $city
      * @return array<string, mixed>
      */
@@ -67,6 +75,10 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     * @return array<string, mixed>
+     */
     public function setDeliveryMethod(string $delivery_method): array
     {
         $state = $this->getState();
@@ -76,6 +88,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  mixed  $delivery_address
      * @return array<string, mixed>
      */
@@ -88,6 +101,7 @@ class NovaPoshtaCheckoutStateService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param  array<string, mixed>  $delivery_point
      * @return array<string, mixed>
      */
@@ -99,6 +113,10 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     * @return array<string, mixed>
+     */
     public function clearDeliveryPoint(): array
     {
         $state = $this->getState();
@@ -107,6 +125,10 @@ class NovaPoshtaCheckoutStateService
         return $this->replaceState($state);
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     * @return array<string, mixed>
+     */
     public function clearDeliveryAddress(): array
     {
         $state = $this->getState();
@@ -127,10 +149,10 @@ class NovaPoshtaCheckoutStateService
     private function normalizeState(array $payload): array
     {
         return [
-            'delivery_method' => Str::lower(Str::squish((string) Arr::get($payload, 'delivery_method', ''))),
-            'region' => $this->normalizeRow((array) Arr::get($payload, 'region', [])),
-            'city' => $this->normalizeRow((array) Arr::get($payload, 'city', [])),
-            'delivery_point' => $this->normalizeRow((array) Arr::get($payload, 'delivery_point', [])),
+            'delivery_method' => Str::lower(Str::squish($this->toString(Arr::get($payload, 'delivery_method', '')))),
+            'region' => $this->normalizeRow($this->toArray(Arr::get($payload, 'region', []))),
+            'city' => $this->normalizeRow($this->toArray(Arr::get($payload, 'city', []))),
+            'delivery_point' => $this->normalizeRow($this->toArray(Arr::get($payload, 'delivery_point', []))),
             'delivery_address' => $this->normalizeDeliveryAddress(Arr::get($payload, 'delivery_address', '')),
         ];
     }
@@ -144,11 +166,11 @@ class NovaPoshtaCheckoutStateService
             return '';
         }
 
-        return Str::squish((string) $delivery_address);
+        return Str::squish($this->toString($delivery_address));
     }
 
     /**
-     * @param  array<string, mixed>  $row
+     * @param  array<int|string, mixed>  $row
      * @return array<string, mixed>
      */
     private function normalizeRow(array $row): array
@@ -157,7 +179,8 @@ class NovaPoshtaCheckoutStateService
             return [];
         }
 
-        return collect($row)
+        /** @var array<string, mixed> $normalized_row */
+        $normalized_row = collect($row)
             ->only([
                 'id',
                 'ref',
@@ -177,5 +200,25 @@ class NovaPoshtaCheckoutStateService
             ])
             ->filter(fn (mixed $value): bool => ! is_null($value) && $value !== '')
             ->all();
+
+        return $normalized_row;
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    private function toArray(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        /** @var array<int|string, mixed> $value */
+        return $value;
+    }
+
+    private function toString(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

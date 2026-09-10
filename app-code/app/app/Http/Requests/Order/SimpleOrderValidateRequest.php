@@ -68,6 +68,7 @@ class SimpleOrderValidateRequest extends FormRequest
         ];
     }
 
+    #[\Override]
     protected function prepareForValidation(): void
     {
         $normalized_data = $this->all();
@@ -79,7 +80,7 @@ class SimpleOrderValidateRequest extends FormRequest
             Arr::set($normalized_data, 'city', $selection_city);
         } else {
             Arr::set($normalized_data, 'city', [
-                'city_description' => Str::squish((string) $this->input('city', '')),
+                'city_description' => Str::squish(string_value($this->input('city', ''))),
             ]);
         }
 
@@ -95,11 +96,11 @@ class SimpleOrderValidateRequest extends FormRequest
         }
 
         foreach (['first_name', 'last_name', 'phone', 'email', OrderDataKeyEnum::DeliveryMethod->value, OrderDataKeyEnum::DeliveryAddress->value, OrderDataKeyEnum::Comment->value, OrderDataKeyEnum::PromoCode->value] as $key) {
-            Arr::set($normalized_data, $key, Str::squish((string) $this->input($key, '')));
+            Arr::set($normalized_data, $key, Str::squish(string_value($this->input($key, ''))));
         }
 
         Arr::set($normalized_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::Regular->value);
-        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower(Str::squish((string) $this->input(OrderDataKeyEnum::PaymentMethod->value, ''))));
+        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower(Str::squish(string_value($this->input(OrderDataKeyEnum::PaymentMethod->value, '')))));
         Arr::set(
             $normalized_data,
             OrderDataKeyEnum::DeliveryPoint->value,
@@ -113,7 +114,7 @@ class SimpleOrderValidateRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            $payment_method = (string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '');
+            $payment_method = string_value($this->input(OrderDataKeyEnum::PaymentMethod->value, ''));
 
             if ($payment_method === '') {
                 return;
@@ -126,7 +127,7 @@ class SimpleOrderValidateRequest extends FormRequest
                 default => ['is_available' => true],
             };
 
-            if (($payment_data['is_available'] ?? false) !== true) {
+            if ($payment_data['is_available'] !== true) {
                 $message = match ($payment_method) {
                     app(WayForPayConfig::class)->getPaymentMethod() => __('wayforpay::storefront/checkout.validation.payment_method_unavailable'),
                     BankTransferConfig::PAYMENT_METHOD => __('banktransfer::storefront/checkout.validation.payment_method_unavailable'),
@@ -140,9 +141,9 @@ class SimpleOrderValidateRequest extends FormRequest
                 );
             }
 
-            $delivery_method = (string) $this->input(OrderDataKeyEnum::DeliveryMethod->value, '');
+            $delivery_method = string_value($this->input(OrderDataKeyEnum::DeliveryMethod->value, ''));
             $delivery_point = (array) $this->input(OrderDataKeyEnum::DeliveryPoint->value, []);
-            $delivery_address = (string) $this->input(OrderDataKeyEnum::DeliveryAddress->value, '');
+            $delivery_address = string_value($this->input(OrderDataKeyEnum::DeliveryAddress->value, ''));
 
             if ($delivery_method === DeliveryMethodEnum::NovaPoshtaCourier->value && $delivery_address === '') {
                 $validator->errors()->add(OrderDataKeyEnum::DeliveryAddress->value, 'A delivery address is required.');

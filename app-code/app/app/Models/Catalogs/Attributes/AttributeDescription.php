@@ -7,6 +7,18 @@ namespace App\Models\Catalogs\Attributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $attribute_id
+ * @property int $language_id
+ * @property string $name
+ */
+/**
+ * @property int $id
+ * @property int $attribute_id
+ * @property int $language_id
+ * @property string $name
+ */
 class AttributeDescription extends Model
 {
     protected $fillable = [
@@ -16,8 +28,9 @@ class AttributeDescription extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -27,7 +40,8 @@ class AttributeDescription extends Model
     }
 
     /**
-     * @return BelongsTo<Attribute, $this>
+     * @phpstan-return BelongsTo<Attribute, $this>
+     * @psalm-return BelongsTo<Attribute, self>
      */
     public function attribute(): BelongsTo
     {

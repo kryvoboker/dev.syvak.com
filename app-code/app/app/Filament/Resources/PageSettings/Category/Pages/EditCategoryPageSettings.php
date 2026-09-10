@@ -383,6 +383,11 @@ class EditCategoryPageSettings extends EditRecord
      * @param  array<string, mixed>  $config_payload
      * @return array<string, mixed>
      */
+    /**
+     * @param array<string, mixed> $config_payload
+     * @param array<string, mixed> $persisted_config
+     * @return array<string, mixed>
+     */
     private function normalizeItemConfigFromForm(array $config_payload, array $persisted_config = []): array
     {
         $normalized_config = [];
@@ -558,6 +563,7 @@ class EditCategoryPageSettings extends EditRecord
             ->all();
     }
 
+    /** @param array<int|string, mixed> $allowed_values */
     private function resolveSortingSelectValue(
         mixed $value,
         array $allowed_values,

@@ -41,7 +41,8 @@ Route::post('/frontend-errors', FrontendErrorController::class)
     ->withoutMiddleware(SetDefaultLocalePrefix::class)
     ->name('frontend.errors.store');
 
-$locale_key = config('localization.locale_parameter', 'locale');
+$locale_key_value = config('localization.locale_parameter', 'locale');
+$locale_key = is_scalar($locale_key_value) ? (string) $locale_key_value : 'locale';
 $allowed_locales = get_allowed_locales();
 
 require base_path('Modules/WayForPay/routes/web.php');
@@ -86,7 +87,7 @@ Route::prefix('{' . $locale_key . '}')
         Route::post('/order-validate/simple', [OrderConfirmController::class, 'validateSimpleOrder'])->name('order-confirm.simple.validate');
 
         Route::get('/thank-you/{order_number}', [ThankYouController::class, 'index'])
-            ->where('order_number', '[0-9A-HJKMNP-TV-Z]{26}')
+            ->where('order_number', '[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}')
             ->name('thank-you.index');
 
         Route::get('/failure', [FailureOrderController::class, 'index'])->name('failure-order.index');

@@ -8,8 +8,10 @@ use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
 use App\Models\Orders\OrderStatuses;
 use App\Models\Payment\PaymentStatuses;
+use App\Models\Users\User;
 use App\Supports\Services\CacheInvalidationService;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
@@ -101,6 +103,7 @@ final class OrderLifecycleService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param array<string, mixed> $context
      */
     public function transitionOrderForPayment(Orders $order, string $payment_status, array $context = []): bool
@@ -142,9 +145,9 @@ final class OrderLifecycleService
         string $event,
         array $context = [],
     ): bool {
-        $old_status = $order->status;
+        $old_status = $order->getRelationValue('status');
 
-        if ($old_status?->is($new_status) === true) {
+        if ($old_status instanceof OrderStatuses && $old_status->is($new_status)) {
             return false;
         }
 
@@ -153,7 +156,7 @@ final class OrderLifecycleService
 
         $order->histories()->create([
             'user_id' => null,
-            'old_order_status_id' => $old_status?->getKey(),
+            'old_order_status_id' => $old_status instanceof OrderStatuses ? $old_status->getKey() : null,
             'order_status_id' => $new_status->getKey(),
             'event' => $event,
             'json' => [
@@ -164,7 +167,7 @@ final class OrderLifecycleService
 
         Log::channel('daily')->info('[OrderLifecycleService] order status changed', [
             'order_number' => $order->order_number,
-            'old_status' => $old_status?->code,
+            'old_status' => $old_status instanceof OrderStatuses ? $old_status->code : null,
             'new_status' => $new_status->code,
             'event' => $event,
         ]);
@@ -174,6 +177,7 @@ final class OrderLifecycleService
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @param array<string, mixed> $provider_data
      */
     public function transitionPayment(
@@ -183,9 +187,9 @@ final class OrderLifecycleService
         ?string $failure_reason = null,
     ): bool {
         $new_status = $this->getPaymentStatusByCode($status_code);
-        $old_status = $payment->paymentStatus;
+        $old_status = $payment->getRelationValue('paymentStatus');
 
-        if ($old_status?->code === self::PAYMENT_STATUS_PAID && $status_code !== self::PAYMENT_STATUS_PAID) {
+        if ($old_status instanceof PaymentStatuses && $old_status->code === self::PAYMENT_STATUS_PAID && $status_code !== self::PAYMENT_STATUS_PAID) {
             Log::channel('stack')->error('[OrderLifecycleService] paid payment transition rejected', [
                 'payment_id' => $payment->getKey(),
                 'requested_status' => $status_code,
@@ -194,12 +198,12 @@ final class OrderLifecycleService
             return false;
         }
 
-        if ($old_status?->is($new_status) === true) {
+        if ($old_status instanceof PaymentStatuses && $old_status->is($new_status)) {
             return false;
         }
 
         $payment->paymentStatus()->associate($new_status);
-        $payment->provider_data = $provider_data !== [] ? $provider_data : $payment->provider_data;
+        $payment->setAttribute('provider_data', $provider_data !== [] ? $provider_data : $payment->provider_data);
         $payment->failure_reason = $failure_reason;
         $payment->paid_at = $status_code === self::PAYMENT_STATUS_PAID ? now()->toDateTimeString() : null;
         $payment->failed_at = in_array($status_code, [
@@ -212,7 +216,7 @@ final class OrderLifecycleService
 
         Log::channel('daily')->info('[OrderLifecycleService] payment status changed', [
             'payment_id' => $payment->getKey(),
-            'old_status' => $old_status?->code,
+            'old_status' => $old_status instanceof PaymentStatuses ? $old_status->code : null,
             'new_status' => $new_status->code,
         ]);
         $this->cache_invalidation_service->flushAfterCommit('payment_status_changed');
@@ -226,12 +230,15 @@ final class OrderLifecycleService
      */
     private function filterContext(array $context): array
     {
-        return Arr::only($context, [
+        $filtered_context = Arr::only($context, [
             'payment_id',
             'payment_status',
             'provider_status',
             'provider_reason_code',
         ]);
+
+        /** @var array<string, mixed> $filtered_context */
+        return $filtered_context;
     }
 
     private function logMissingDefaultStatus(string $table): void
@@ -246,14 +253,14 @@ final class OrderLifecycleService
      */
     private function getHistoryActorData(): array
     {
-        $user = auth()->user();
-        $roles = $user?->getRoleNames()->implode(', ');
+        $user = Auth::user();
+        $roles = $user instanceof User ? $user->getRoleNames()->implode(', ') : null;
 
         return [
-            __('admin/orders/orders.history_data.actor') => $user !== null
-                ? __('admin/orders/orders.history_data.administrator')
-                : __('admin/orders/orders.history_data.system'),
-            __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
+            (string) __('admin/orders/orders.history_data.actor') => $user !== null
+                ? (string) __('admin/orders/orders.history_data.administrator')
+                : (string) __('admin/orders/orders.history_data.system'),
+            (string) __('admin/orders/orders.history_data.roles') => is_string($roles) && $roles !== '' ? $roles : '—',
         ];
     }
 }

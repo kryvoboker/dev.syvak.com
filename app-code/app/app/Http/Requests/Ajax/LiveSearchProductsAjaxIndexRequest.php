@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class LiveSearchProductsAjaxIndexRequest extends FormRequest
 {
     /**
-     * @return array<string, array>
+     * @return array<string, list<string>>
      */
     public function rules(): array
     {

@@ -11,6 +11,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property int $id
+ * @property int $sluggable_id
+ * @property string $sluggable_type
+ * @property int $language_id
+ * @property string $slug
+ * @property-read Model $sluggable
+ */
 class Slug extends Model
 {
     /** @use HasFactory<SlugFactory> */
@@ -23,13 +31,17 @@ class Slug extends Model
         'slug',
     ];
 
+    /** @phpstan-return MorphTo<Model, $this>
+     * @psalm-return MorphTo<Model, self>
+     */
     public function sluggable(): MorphTo
     {
         return $this->morphTo();
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

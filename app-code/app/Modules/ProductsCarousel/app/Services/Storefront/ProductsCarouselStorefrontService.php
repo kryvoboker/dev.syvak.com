@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\ProductsCarousel\Services\ProductsCarouselProductFilterService;
@@ -57,7 +58,8 @@ readonly class ProductsCarouselStorefrontService
     public function resolveForPlacement(string $placement, ?string $page_type = null): array
     {
         try {
-            $definitions = resolve_modules_for_context($placement)
+            $definitions = resolve_modules_for_context($placement);
+            $definitions = $definitions
                 ->filter(fn (ModuleDefinition $definition): bool => $definition->nwidart_name === 'ProductsCarousel');
         } catch (Throwable $e) {
             Log::channel('stack')->error($e->getMessage(), $e->getTrace());
@@ -72,7 +74,7 @@ readonly class ProductsCarouselStorefrontService
             ->collapse()
             ->values();
 
-        /** @var array<int, array<string, mixed>> $resolved_modules */
+        /** @var array<int, array{instance_id: int, name: string, module_name_for_user: string, short_description_for_user: string, page_types: array<int, string>, placement: string|null, source_mode: string, products: array<int, array{id: int, name: string, model: string, sku: string, price: string|float, rrc_price: string|float, is_discounted: bool, image_data: array{urls: array<string, string>, width: int, height: int}, url: string|null}>}> $resolved_modules */
         $resolved_modules = $products_carousel_modules->all();
 
         return $resolved_modules;
@@ -80,20 +82,21 @@ readonly class ProductsCarouselStorefrontService
 
     /**
      * @return array<int, array<string, mixed>>
+     * @psalm-suppress InvalidTemplateParam
      */
     private function mapDefinitionInstances(ModuleDefinition $definition, ?string $page_type): array
     {
-        /** @var Collection<int, ModuleInstance> $instances */
         $instances = $definition->instances;
 
         return $instances
             ->filter(fn (ModuleInstance $instance): bool => $this->matchesPageType($instance, $page_type))
             ->map(function (ModuleInstance $instance): array {
                 $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-                $source_mode = (string) Arr::get($instance_settings, 'source_mode', 'category_based');
+                $source_mode = $this->toString(Arr::get($instance_settings, 'source_mode', 'category_based'), 'category_based');
                 $runtime_shared_settings = $this->resolveRuntimeSharedSettings($instance_settings);
                 $localized_shared_content = $this->resolveLocalizedSharedContent($instance_settings);
                 $selected_variant_ids = $this->resolveSelectedVariantIdsForInstance($source_mode, $instance_settings);
+                /** @var array<int, int> $selected_variant_ids */
                 $products = $this->resolveProductsForInstance(
                     $source_mode,
                     $instance_settings,
@@ -118,7 +121,7 @@ readonly class ProductsCarouselStorefrontService
                     'name' => $instance->name,
                     'module_name_for_user' => $localized_shared_content['module_name_for_user'],
                     'short_description_for_user' => $localized_shared_content['short_description_for_user'],
-                    'page_types' => collect(Arr::get($instance_settings, 'shared.page_types', []))
+                    'page_types' => collect((array) Arr::get($instance_settings, 'shared.page_types', []))
                         ->filter(fn (mixed $page_type): bool => is_string($page_type) && filled($page_type))
                         ->values()
                         ->all(),
@@ -154,18 +157,18 @@ readonly class ProductsCarouselStorefrontService
             ->filter(fn (mixed $translation): bool => is_array($translation))
             ->map(function (array $translation): array {
                 return [
-                    'module_name_for_user' => Str::squish((string) Arr::get($translation, 'module_name_for_user')),
-                    'short_description_for_user' => Str::squish((string) Arr::get($translation, 'short_description_for_user')),
+                    'module_name_for_user' => Str::squish($this->toString(Arr::get($translation, 'module_name_for_user'))),
+                    'short_description_for_user' => Str::squish($this->toString(Arr::get($translation, 'short_description_for_user'))),
                 ];
             });
 
         $resolved_locale = $requested_locale;
         $fallback_used = false;
         $resolved_translation = $translations_by_locale->get($requested_locale, []);
-        $resolved_translation = is_array($resolved_translation) ? $resolved_translation : [];
+        $resolved_translation = (array) $resolved_translation;
 
-        $requested_has_values = filled((string) Arr::get($resolved_translation, 'module_name_for_user'))
-            || filled((string) Arr::get($resolved_translation, 'short_description_for_user'));
+        $requested_has_values = filled($this->toString(Arr::get($resolved_translation, 'module_name_for_user')))
+            || filled($this->toString(Arr::get($resolved_translation, 'short_description_for_user')));
 
         if ($requested_has_values === false) {
             $default_locale = Language::query()
@@ -177,30 +180,30 @@ readonly class ProductsCarouselStorefrontService
             $default_translation = is_string($default_locale)
                 ? $translations_by_locale->get($default_locale, [])
                 : [];
-            $default_translation = is_array($default_translation) ? $default_translation : [];
+            $default_translation = (array) $default_translation;
 
-            $default_has_values = filled((string) Arr::get($default_translation, 'module_name_for_user'))
-                || filled((string) Arr::get($default_translation, 'short_description_for_user'));
+            $default_has_values = filled($this->toString(Arr::get($default_translation, 'module_name_for_user')))
+                || filled($this->toString(Arr::get($default_translation, 'short_description_for_user')));
 
             if ($default_has_values) {
                 $resolved_translation = $default_translation;
-                $resolved_locale = (string) $default_locale;
+                $resolved_locale = $this->toString($default_locale);
                 $fallback_used = true;
             }
         }
 
-        $resolved_has_values = filled((string) Arr::get($resolved_translation, 'module_name_for_user'))
-            || filled((string) Arr::get($resolved_translation, 'short_description_for_user'));
+        $resolved_has_values = filled($this->toString(Arr::get($resolved_translation, 'module_name_for_user')))
+            || filled($this->toString(Arr::get($resolved_translation, 'short_description_for_user')));
 
         if ($resolved_has_values === false) {
             $first_filled_locale = null;
 
             foreach ($translations_by_locale as $locale_code => $translation) {
                 if (
-                    filled((string) Arr::get($translation, 'module_name_for_user'))
-                    || filled((string) Arr::get($translation, 'short_description_for_user'))
+                    filled($this->toString(Arr::get($translation, 'module_name_for_user')))
+                    || filled($this->toString(Arr::get($translation, 'short_description_for_user')))
                 ) {
-                    $first_filled_locale = (string) $locale_code;
+                    $first_filled_locale = $this->toString($locale_code);
                     $resolved_translation = $translation;
                     $fallback_used = true;
 
@@ -213,12 +216,12 @@ readonly class ProductsCarouselStorefrontService
             }
         }
 
-        $resolved_has_values = filled((string) Arr::get($resolved_translation, 'module_name_for_user'))
-            || filled((string) Arr::get($resolved_translation, 'short_description_for_user'));
+        $resolved_has_values = filled($this->toString(Arr::get($resolved_translation, 'module_name_for_user')))
+            || filled($this->toString(Arr::get($resolved_translation, 'short_description_for_user')));
 
         if ($resolved_has_values === false) {
-            $legacy_module_name = Str::squish((string) Arr::get($shared_settings, 'module_name_for_user', ''));
-            $legacy_description = Str::squish((string) Arr::get($shared_settings, 'short_description_for_user', ''));
+            $legacy_module_name = Str::squish($this->toString(Arr::get($shared_settings, 'module_name_for_user', '')));
+            $legacy_description = Str::squish($this->toString(Arr::get($shared_settings, 'short_description_for_user', '')));
 
             if (filled($legacy_module_name) || filled($legacy_description)) {
                 $resolved_translation = [
@@ -230,8 +233,8 @@ readonly class ProductsCarouselStorefrontService
         }
 
         return [
-            'module_name_for_user' => (string) Arr::get($resolved_translation, 'module_name_for_user', ''),
-            'short_description_for_user' => (string) Arr::get($resolved_translation, 'short_description_for_user', ''),
+            'module_name_for_user' => $this->toString(Arr::get($resolved_translation, 'module_name_for_user', '')),
+            'short_description_for_user' => $this->toString(Arr::get($resolved_translation, 'short_description_for_user', '')),
             'requested_locale' => $requested_locale,
             'resolved_locale' => $resolved_locale,
             'fallback_used' => $fallback_used,
@@ -248,6 +251,7 @@ readonly class ProductsCarouselStorefrontService
      *      sort_sequence: array<int, string>
      * }                            $runtime_shared_settings
      * @param  array<string, mixed>  $instance_settings
+     * @param array<int, int> $selected_variant_ids
      * @return EloquentCollection<int, Product>
      */
     private function resolveProductsForInstance(
@@ -272,6 +276,7 @@ readonly class ProductsCarouselStorefrontService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }                           $runtime_shared_settings
+     * @param array<int, int>       $selected_variant_ids
      * @return EloquentCollection<int, Product>
      */
     private function resolveCategoryBasedProducts(
@@ -291,6 +296,7 @@ readonly class ProductsCarouselStorefrontService
             $selected_variant_ids,
             $category_ids,
         );
+        /** @var array<int, int> $selected_variant_ids */
 
         $products_query = $this->buildBaseProductsQuery(
             $runtime_shared_settings['min_quantity'],
@@ -305,16 +311,20 @@ readonly class ProductsCarouselStorefrontService
                 return new EloquentCollection();
             }
 
+            $variant_order_sql = 'FIELD(id, ' . implode(',', $selected_variant_ids) . ')';
             $selected_product_ids = ProductVariant::query()
                 ->whereIn('id', $selected_variant_ids)
-                ->orderByRaw('FIELD(id, ' . implode(',', $selected_variant_ids) . ')')
+                // @phpstan-ignore argument.type (The IDs are normalized integers before interpolation.)
+                ->orderBy(DB::raw($variant_order_sql))
                 ->pluck('product_id')
-                ->map(fn (mixed $id): int => (int) $id)
+                ->map(fn (mixed $id): int => $this->toInt($id))
                 ->all();
 
+            $product_order_sql = 'FIELD(id, ' . implode(',', $selected_product_ids) . ')';
             $products_query
                 ->whereIn('id', $selected_product_ids)
-                ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')');
+                // @phpstan-ignore argument.type (The IDs are normalized integers before interpolation.)
+                ->orderBy(DB::raw($product_order_sql));
         } else {
             $this->applySortPipeline(
                 $products_query,
@@ -326,7 +336,6 @@ readonly class ProductsCarouselStorefrontService
         $products = $products_query
             ->limit($runtime_shared_settings['products_limit'])
             ->get()
-            ->filter(fn (mixed $product): bool => $product instanceof Product)
             ->values();
 
         return new EloquentCollection($products->all());
@@ -342,6 +351,7 @@ readonly class ProductsCarouselStorefrontService
      *      sort_mode: string,
      *      sort_sequence: array<int, string>
      * }                           $runtime_shared_settings
+     * @param array<int, int>       $selected_variant_ids
      * @return EloquentCollection<int, Product>
      */
     private function resolveManualOnlyProducts(
@@ -351,50 +361,58 @@ readonly class ProductsCarouselStorefrontService
     ): EloquentCollection {
         if ($selected_variant_ids === []) {
             $selected_product_ids = $this->products_carousel_product_filter_service->filterActiveProductIds(
-                Arr::get($instance_settings, 'manual_only.selected_product_ids', []),
+                $this->normalizeIds(Arr::get($instance_settings, 'manual_only.selected_product_ids', [])),
             );
 
             if ($selected_product_ids === []) {
                 return new EloquentCollection();
             }
 
+            $product_order_sql = 'FIELD(id, ' . implode(',', $selected_product_ids) . ')';
             return $this->buildBaseProductsQuery($runtime_shared_settings['min_quantity'])
                 ->whereIn('id', $selected_product_ids)
-                ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')')
+                // @phpstan-ignore argument.type (The IDs are normalized integers before interpolation.)
+                ->orderBy(DB::raw($product_order_sql))
                 ->limit($runtime_shared_settings['products_limit'])
                 ->get()
-                ->filter(fn (mixed $product): bool => $product instanceof Product)
                 ->values();
         }
 
+        $variant_order_sql = 'FIELD(id, ' . implode(',', $selected_variant_ids) . ')';
         $selected_product_ids = ProductVariant::query()
             ->whereIn('id', $selected_variant_ids)
-            ->orderByRaw('FIELD(id, ' . implode(',', $selected_variant_ids) . ')')
+            // @phpstan-ignore argument.type (The IDs are normalized integers before interpolation.)
+            ->orderBy(DB::raw($variant_order_sql))
             ->pluck('product_id')
-            ->map(fn (mixed $id): int => (int) $id)
+            ->map(fn (mixed $id): int => $this->toInt($id))
             ->all();
 
+        $product_order_sql = 'FIELD(id, ' . implode(',', $selected_product_ids) . ')';
         $products = $this->buildBaseProductsQuery(
             $runtime_shared_settings['min_quantity'],
             $selected_variant_ids,
         )
             ->whereIn('id', $selected_product_ids)
-            ->orderByRaw('FIELD(id, ' . implode(',', $selected_product_ids) . ')')
+            // @phpstan-ignore argument.type (The IDs are normalized integers before interpolation.)
+            ->orderBy(DB::raw($product_order_sql))
             ->limit($runtime_shared_settings['products_limit'])
             ->get()
-            ->filter(fn (mixed $product): bool => $product instanceof Product)
             ->values();
 
         return new EloquentCollection($products->all());
     }
 
+    /**
+     * @param array<int, int> $selected_variant_ids
+     * @return Builder<Product>
+     */
     private function buildBaseProductsQuery(int $min_quantity, array $selected_variant_ids = []): Builder
     {
         $language_id = $this->resolveLanguageId();
-        $discount_scope = function ($query): void {
+        $discount_scope = function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
             $query
-                ->where('date_start', '<=', now(config('app.timezone')))
-                ->where('date_end', '>=', now(config('app.timezone')))
+                ->where('date_start', '<=', now($this->toString(config('app.timezone'))))
+                ->where('date_end', '>=', now($this->toString(config('app.timezone'))))
                 ->orderBy('priority')
                 ->orderByDesc('updated_at');
 
@@ -406,22 +424,22 @@ readonly class ProductsCarouselStorefrontService
                 return;
             }
 
-            $query->where('user_group_id', (int) $user_group_id);
+            $query->where('user_group_id', $user_group_id);
         };
         $relations = [
-            'productDescription' => function ($query) use ($language_id): void {
+            'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                 $query->where('language_id', $language_id);
             },
-            'slugs' => function ($query) use ($language_id): void {
+            'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                 $query->where('language_id', $language_id);
             },
-            'defaultVariant' => function ($query) use ($language_id, $discount_scope): void {
+            'defaultVariant' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id, $discount_scope): void {
                 $query->where('is_active', true)
                     ->with([
-                        'descriptions' => function ($description_query) use ($language_id): void {
+                        'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $description_query) use ($language_id): void {
                             $description_query->where('language_id', $language_id);
                         },
-                        'slugs' => function ($slug_query) use ($language_id): void {
+                        'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $slug_query) use ($language_id): void {
                             $slug_query->where('language_id', $language_id);
                         },
                         'discounts' => $discount_scope,
@@ -430,15 +448,15 @@ readonly class ProductsCarouselStorefrontService
         ];
 
         if ($selected_variant_ids !== []) {
-            $relations['variants'] = function ($query) use ($language_id, $selected_variant_ids, $discount_scope): void {
+            $relations['variants'] = function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id, $selected_variant_ids, $discount_scope): void {
                 $query
                     ->where('is_active', true)
                     ->whereIn('id', $selected_variant_ids)
                     ->with([
-                        'descriptions' => function ($description_query) use ($language_id): void {
+                        'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $description_query) use ($language_id): void {
                             $description_query->where('language_id', $language_id);
                         },
-                        'slugs' => function ($slug_query) use ($language_id): void {
+                        'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $slug_query) use ($language_id): void {
                             $slug_query->where('language_id', $language_id);
                         },
                         'discounts' => $discount_scope,
@@ -455,7 +473,8 @@ readonly class ProductsCarouselStorefrontService
     }
 
     /**
-     * @param  array<int, string>  $sort_sequence
+     * @param Builder<Product> $products_query
+     * @param array<int, string> $sort_sequence
      */
     private function applySortPipeline(Builder $products_query, array $sort_sequence, int $language_id): void
     {
@@ -468,6 +487,7 @@ readonly class ProductsCarouselStorefrontService
             if ($sort_option === 'name_asc' || $sort_option === 'name_desc') {
                 if ($name_sort_join_applied === false) {
                     $products_query->leftJoin('product_descriptions as products_carousel_sort_description', function ($join) use ($language_id, $product_table): void {
+                        /** @var \Illuminate\Database\Query\JoinClause $join */
                         $join->on('products_carousel_sort_description.product_id', '=', $product_table . '.id')
                             ->where('products_carousel_sort_description.language_id', '=', $language_id);
                     });
@@ -529,32 +549,32 @@ readonly class ProductsCarouselStorefrontService
             $shared_settings = [];
         }
 
-        $sort_mode = (string) Arr::get(
+        $sort_mode = $this->toString(Arr::get(
             $shared_settings,
             'sort_mode',
             $this->products_carousel_config->get('settings.default_sort_mode', 'custom'),
-        );
+        ), 'custom');
 
         $allowed_sort_modes = $this->getAllowedSortModes();
 
         if (! in_array($sort_mode, $allowed_sort_modes, true)) {
-            $sort_mode = (string) $this->products_carousel_config->get('settings.default_sort_mode', 'custom');
+            $sort_mode = $this->toString($this->products_carousel_config->get('settings.default_sort_mode', 'custom'), 'custom');
         }
 
         $min_quantity = max(
-            (int) Arr::get($shared_settings, 'min_quantity', $this->products_carousel_config->get('settings.default_min_quantity', 1)),
+            $this->toInt(Arr::get($shared_settings, 'min_quantity', $this->products_carousel_config->get('settings.default_min_quantity', 1))),
             1,
         );
         $products_limit = max(
-            (int) Arr::get($shared_settings, 'products_limit', $this->products_carousel_config->get('settings.default_products_limit', 15)),
+            $this->toInt(Arr::get($shared_settings, 'products_limit', $this->products_carousel_config->get('settings.default_products_limit', 15))),
             1,
         );
         $product_image_width = max(
-            (int) Arr::get($shared_settings, 'product_image_width', $this->products_carousel_config->get('settings.default_image_width', 420)),
+            $this->toInt(Arr::get($shared_settings, 'product_image_width', $this->products_carousel_config->get('settings.default_image_width', 420))),
             1,
         );
         $product_image_height = max(
-            (int) Arr::get($shared_settings, 'product_image_height', $this->products_carousel_config->get('settings.default_image_height', 420)),
+            $this->toInt(Arr::get($shared_settings, 'product_image_height', $this->products_carousel_config->get('settings.default_image_height', 420))),
             1,
         );
 
@@ -573,13 +593,14 @@ readonly class ProductsCarouselStorefrontService
     }
 
     /**
+     * @param array<string, mixed> $instance_settings
      * @return array<int, string>
      */
     private function resolveCustomSortSequence(array $instance_settings): array
     {
         $allowed_sort_options = $this->getAllowedSortOptions();
 
-        $custom_sort_options = collect(Arr::get($instance_settings, 'shared.custom_sort', []))
+        $custom_sort_options = collect((array) Arr::get($instance_settings, 'shared.custom_sort', []))
             ->filter(function (mixed $option, mixed $key) use ($allowed_sort_options): bool {
                 if (! is_string($option) || ! is_string($key)) {
                     return false;
@@ -659,7 +680,7 @@ readonly class ProductsCarouselStorefrontService
      */
     private function getAllowedSortModes(): array
     {
-        return collect($this->products_carousel_config->get('settings.allowed_sort_modes', []))
+        return collect((array) $this->products_carousel_config->get('settings.allowed_sort_modes', []))
             ->filter(fn (mixed $mode): bool => is_string($mode) && filled($mode))
             ->values()
             ->all();
@@ -676,7 +697,7 @@ readonly class ProductsCarouselStorefrontService
             return [];
         }
 
-        return collect($sort_options)
+        return collect((array) $sort_options)
             ->filter(fn (mixed $sort_option): bool => filled($sort_option) && is_string($sort_option))
             ->values()
             ->all();
@@ -723,12 +744,14 @@ readonly class ProductsCarouselStorefrontService
             })
             ->orderBy('id')
             ->pluck('id')
-            ->map(fn (mixed $id): int => (int) $id)
+            ->map(fn (mixed $id): int => $this->toInt($id))
             ->all();
     }
 
     /**
      * @param  array<int>  $selected_variant_ids
+     * @return array<int, array<string, mixed>>
+     * @psalm-suppress InvalidTemplateParam
      */
     private function mapProductCards(
         Product $product,
@@ -787,7 +810,7 @@ readonly class ProductsCarouselStorefrontService
         $image = $product_variant instanceof ProductVariant && filled($product_variant->image)
             ? $product_variant->image
             : $product->image;
-        $rrc_price = (float) ($product_variant instanceof ProductVariant ? $product_variant->price : $product->price);
+        $rrc_price = $this->toFloat($product_variant instanceof ProductVariant ? $product_variant->price : $product->price);
         $discount_price = $product_variant?->discounts->first()?->price;
         $discount_price = is_numeric($discount_price) ? (float) $discount_price : null;
         $price = $discount_price ?? $rrc_price;
@@ -802,18 +825,18 @@ readonly class ProductsCarouselStorefrontService
             'sku' => escape_special_html((string) $product->sku),
             'price' => format_price(
                 $price,
-                config('app.currency.current_currency_code'),
-                (float) config('app.currency.current_exchange_rate'),
+                $this->toString(config('app.currency.current_currency_code')),
+                $this->toFloat(config('app.currency.current_exchange_rate')),
             ),
             'rrc_price' => format_price(
                 $rrc_price,
-                config('app.currency.current_currency_code'),
-                (float) config('app.currency.current_exchange_rate'),
+                $this->toString(config('app.currency.current_currency_code')),
+                $this->toFloat(config('app.currency.current_exchange_rate')),
             ),
             'is_discounted' => $discount_price !== null && $discount_price < $rrc_price,
             'image_data' => [
                 'urls' => multiple_convert_img_and_get_url(
-                    (string) $image,
+                    $this->toString($image),
                     $product_image_width,
                     $product_image_height,
                     is_square: false,
@@ -839,7 +862,7 @@ readonly class ProductsCarouselStorefrontService
         }
 
         $instance_settings = is_array($instance->settings) ? $instance->settings : [];
-        $page_types = collect(Arr::get($instance_settings, 'shared.page_types', []));
+        $page_types = collect((array) Arr::get($instance_settings, 'shared.page_types', []));
 
         if ($page_types->isEmpty()) {
             return true;
@@ -859,7 +882,7 @@ readonly class ProductsCarouselStorefrontService
         }
 
         return collect($ids)
-            ->map(fn (mixed $id): int => (int) $id)
+            ->map(fn (mixed $id): int => $this->toInt($id))
             ->filter(fn (int $id): bool => $id > 0)
             ->unique()
             ->values()
@@ -876,19 +899,34 @@ readonly class ProductsCarouselStorefrontService
             ->first();
 
         if ($language_by_locale !== null) {
-            return (int) $language_by_locale->id;
+            return $this->toInt($language_by_locale->id);
         }
 
         $default_language = (new Language())->getDefaultLanguage();
 
         if ($default_language !== null) {
-            return (int) $default_language->id;
+            return $this->toInt($default_language->id);
         }
 
-        return (int) Language::query()
+        return $this->toInt(Language::query()
             ->where('is_active', true)
             ->orderByDesc('is_default')
             ->orderBy('id')
-            ->value('id');
+            ->value('id'));
+    }
+
+    private function toInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function toFloat(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
+    }
+
+    private function toString(mixed $value, string $default = ''): string
+    {
+        return is_scalar($value) ? (string) $value : $default;
     }
 }

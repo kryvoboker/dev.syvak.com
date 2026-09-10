@@ -6,6 +6,7 @@ namespace App\Supports\Services;
 
 use App\Data\AppSettingsData;
 use App\Models\ApplicationSettings\AppSetting;
+use App\Models\Users\User;
 use App\Models\Users\UserGroup;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use Illuminate\Support\Arr;
@@ -26,13 +27,9 @@ final class AppSettingsService
     {
         $locale = app()->getLocale();
 
-        if ($locale === null) {
-            return;
-        }
-
         $language_id = $this->resolveLanguageId($locale);
         $user = Auth::user();
-        $user_group_id = $user?->user_group_id;
+        $user_group_id = $user instanceof User ? $user->user_group_id : null;
 
         if ($user_group_id === null) {
             $user_group_id = (new UserGroup())->getDefaultUserGroupId();
@@ -49,6 +46,8 @@ final class AppSettingsService
         $contacts_settings = app(PageSettingsBootstrapService::class)->getContactsSettings();
         $global_configs = app(GlobalConfigService::class)->getActiveGlobalConfigs();
 
+        /** @var array<string, mixed> $app_settings */
+        /** @var array<string, mixed> $global_configs */
         $this->app_settings_data = AppSettingsData::fromArray(array_merge(
             $app_settings,
             $this->resolveContactsRuntimeSettings($contacts_settings, $locale, $language_id),
@@ -106,11 +105,12 @@ final class AppSettingsService
     {
         $localized_settings = Arr::get($contacts_settings, 'localized', []);
         $localized_settings = is_array($localized_settings) ? $localized_settings : [];
-        $localized_content = is_array(Arr::get($localized_settings, (string) $language_id))
-            ? Arr::get($localized_settings, (string) $language_id)
+        $language_key = string_value($language_id);
+        $localized_content = is_array(Arr::get($localized_settings, $language_key))
+            ? Arr::get($localized_settings, $language_key)
             : [];
 
-        $working_hours_content = (string) Arr::get($localized_content, 'working_hours.content', '');
+        $working_hours_content = string_value(Arr::get($localized_content, 'working_hours.content', ''));
         $work_time = $working_hours_content === '' ? [] : [$locale => $working_hours_content];
 
         $coordinates = null;
@@ -127,14 +127,7 @@ final class AppSettingsService
             'work_time' => $work_time,
             'contact_addresses' => Arr::get($contacts_settings, 'addresses', []),
             'coordinates' => $coordinates,
-            'iframe_map' => $this->resolveNullableString(Arr::get($contacts_settings, 'map.iframe')),
+            'iframe_map' => nullable_string(Arr::get($contacts_settings, 'map.iframe')),
         ];
-    }
-
-    private function resolveNullableString(mixed $value): ?string
-    {
-        $value = Str::trim((string) $value);
-
-        return filled($value) ? $value : null;
     }
 }
