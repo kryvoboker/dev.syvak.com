@@ -35,14 +35,15 @@ class ContactsFormRequest extends FormRequest
     }
 
     /** @return array<string, string> */
+    #[\Override]
     public function attributes(): array
     {
         return [
-            'name' => __('storefront/contacts.fields.name'),
-            'email' => __('storefront/contacts.fields.email'),
-            'phone' => __('storefront/contacts.fields.phone'),
-            'text' => __('storefront/contacts.fields.text'),
-            'file' => __('storefront/contacts.fields.file'),
+            'name' => (string) __('storefront/contacts.fields.name'),
+            'email' => (string) __('storefront/contacts.fields.email'),
+            'phone' => (string) __('storefront/contacts.fields.phone'),
+            'text' => (string) __('storefront/contacts.fields.text'),
+            'file' => (string) __('storefront/contacts.fields.file'),
         ];
     }
 }

@@ -13,6 +13,7 @@ use App\Services\Marketing\PromoCodeAdminOptionsService;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -39,6 +40,7 @@ class PromoCodeForm
                         self::usersTab(),
                         self::productsAndCategoriesTab(),
                         self::errorsTab($active_languages),
+                        self::historyTab(),
                     ])
                     ->activeTab(1)
                     ->contained(false)
@@ -308,6 +310,67 @@ class PromoCodeForm
             ]);
     }
 
+    private static function historyTab(): Tabs\Tab
+    {
+        return Tabs\Tab::make(__('admin/marketing/promo_codes.tabs.history'))
+            ->schema([
+                Section::make(__('admin/marketing/promo_codes.labels.history_products'))
+                    ->schema([
+                        Repeater::make('history_products')
+                            ->label(__('admin/marketing/promo_codes.labels.history_products'))
+                            ->table([
+                                TableColumn::make(__('admin/marketing/promo_codes.labels.order_id'))->width(100),
+                                TableColumn::make(__('admin/marketing/promo_codes.labels.product'))->width(240),
+                                TableColumn::make(__('admin/marketing/promo_codes.labels.identifier'))->width(220),
+                                TableColumn::make(__('admin/marketing/promo_codes.labels.quantity'))->width(100),
+                                TableColumn::make(__('admin/marketing/promo_codes.labels.price'))->width(150),
+                                TableColumn::make(__('admin/marketing/promo_codes.labels.discount_amount'))->width(170),
+                                TableColumn::make(__('admin/marketing/promo_codes.labels.currency'))->width(100),
+                                TableColumn::make(__('admin/marketing/promo_codes.labels.used_at'))->width(180),
+                            ])
+                            ->schema([
+                                TextInput::make('order_id')
+                                    ->label(__('admin/marketing/promo_codes.labels.order_id'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('product')
+                                    ->label(__('admin/marketing/promo_codes.labels.product'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('identifier')
+                                    ->label(__('admin/marketing/promo_codes.labels.identifier'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('quantity')
+                                    ->label(__('admin/marketing/promo_codes.labels.quantity'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('price')
+                                    ->label(__('admin/marketing/promo_codes.labels.price'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('discount_amount')
+                                    ->label(__('admin/marketing/promo_codes.labels.discount_amount'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('currency')
+                                    ->label(__('admin/marketing/promo_codes.labels.currency'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('used_at')
+                                    ->label(__('admin/marketing/promo_codes.labels.used_at'))
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ])
+                            ->defaultItems(0)
+                            ->addable(false)
+                            ->deletable(false)
+                            ->reorderable(false)
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
     /**
      * @param Collection<int, Language> $active_languages
      */
@@ -394,6 +457,7 @@ class PromoCodeForm
         ];
     }
 
+    /** @return array<string, string> */
     private static function searchUserOptions(string $search, Get $get, string $field): array
     {
         if (Str::length($search) < 3) {
@@ -407,7 +471,7 @@ class PromoCodeForm
         }
 
         $repeater_name = $field === 'user_id' ? 'selected_users' : 'selected_user_groups';
-        $selected_ids = collect($get('../../' . $repeater_name))
+        $selected_ids = collect((array) $get('../../' . $repeater_name))
             ->pluck($field)
             ->filter()
             ->map(fn (mixed $id): int => (int) $id)
@@ -418,6 +482,7 @@ class PromoCodeForm
             : app(PromoCodeAdminOptionsService::class)->userGroupSearchOptions($search, $selected_ids);
     }
 
+    /** @return array<string, string> */
     private static function searchCatalogOptions(string $search, Get $get, string $field): array
     {
         if (Str::length($search) < 3) {
@@ -430,7 +495,7 @@ class PromoCodeForm
             return [];
         }
 
-        $selected_ids = collect($get('../../' . ($field === 'product_id' ? 'product_items' : 'category_items')))
+        $selected_ids = collect((array) $get('../../' . ($field === 'product_id' ? 'product_items' : 'category_items')))
             ->pluck($field)
             ->filter()
             ->map(fn (mixed $id): int => (int) $id)

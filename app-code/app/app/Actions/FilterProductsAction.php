@@ -18,9 +18,10 @@ use App\Services\Catalogs\CatalogFilter\CatalogFilterBootstrapService;
 use App\Services\Catalogs\CatalogFilter\PriceSourceResolverService;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\Products\ProductsLimitService;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -45,13 +46,14 @@ readonly class FilterProductsAction
     public function handle(array $params, ?string $locale = null): array
     {
         $validated_data = Arr::get($params, 'validated_data', []);
-        $category_slug = (string) Arr::get($params, 'category_slug', '');
+        $category_slug = $this->toString(Arr::get($params, 'category_slug', ''));
         $is_get_filters_data = (bool) Arr::get($params, 'is_get_filters_data', false);
-        $page_path = (string) Arr::get($params, 'page_path', '');
+        $page_path = $this->toString(Arr::get($params, 'page_path', ''));
 
         if (! is_array($validated_data)) {
             $validated_data = [];
         }
+        /** @var array<string, mixed> $validated_data */
 
         $query_context = $this->buildProductsQueryContext(
             validated_data: $validated_data,
@@ -72,6 +74,7 @@ readonly class FilterProductsAction
         $products->setPath($this->resolvePaginatorPath($page_path));
 
         $available_keys_for_show_clear_btn = config('catalog-filter.available_keys_for_show_clear_btn', []);
+        $available_keys_for_show_clear_btn = is_array($available_keys_for_show_clear_btn) ? $available_keys_for_show_clear_btn : [];
         $validated_keys = array_keys(array_filter($validated_data, fn (mixed $value): bool => filled($value)));
         $is_show_clear_filters_link = array_any(
             $validated_keys,
@@ -129,11 +132,10 @@ readonly class FilterProductsAction
     }
 
     /**
-     * @param  array<string, mixed>  $validated_data
-     *
+     * @param array<string, mixed> $validated_data
      * @throws Throwable
      * @return array{
-     *     query: Builder,
+     *     query: Builder<Product>,
      *     category_id: int,
      *     language_id: int,
      *     filter_set: ?CatalogFilterSet,
@@ -231,7 +233,7 @@ readonly class FilterProductsAction
         if (
             ! $filter_set->is_enabled
             || (
-                (string) $filter_set->getRawOriginal('context_type') !== 'category'
+                $this->toString($filter_set->getRawOriginal('context_type')) !== 'category'
                 && ! in_array('category', (array) $filter_set->context_types, true)
             )
         ) {
@@ -240,14 +242,14 @@ readonly class FilterProductsAction
 
         $filter_set->loadMissing([
             'indexMeta',
-            'groups' => function ($query): void {
+            'groups' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                 $query
                     ->where('is_enabled', true)
                     ->orderBy('sort_order')
                     ->orderBy('id')
                     ->with([
                         'translations',
-                        'values' => function ($values_query): void {
+                        'values' => function (\Illuminate\Database\Eloquent\Relations\Relation $values_query): void {
                             $values_query
                                 ->where('is_enabled', true)
                                 ->orderBy('sort_order')
@@ -266,12 +268,11 @@ readonly class FilterProductsAction
      */
     private function resolveEnabledFilterGroups(CatalogFilterSet $filter_set): Collection
     {
-        /** @var Collection<int, CatalogFilterGroup> $groups */
         $groups = $filter_set->groups;
 
         return $groups
             ->filter(function (CatalogFilterGroup $group) use ($filter_set): bool {
-                return match ((string) $group->getRawOriginal('source_type')) {
+                return match ($this->toString($group->getRawOriginal('source_type'))) {
                     CatalogFilterGroupSourceTypeEnum::Price->value => (bool) $filter_set->is_price_filter_enabled,
                     CatalogFilterGroupSourceTypeEnum::Attribute->value => (bool) $filter_set->is_attribute_filtering_enabled,
                     default => false,
@@ -280,15 +281,17 @@ readonly class FilterProductsAction
             ->values();
     }
 
+    /** @return Builder<Product> */
     private function buildBaseProductsQuery(
         ?CatalogFilterSet $filter_set,
         int $category_id,
         int $language_id,
         int $minimum_stock_quantity,
     ): Builder {
-        $app_settings = get_app_settings();
-        $current_datetime = now(config('app.timezone'));
-        $db_prefix = config('database.prefix');
+        $app_settings = get_app_settings() ?? throw new \LogicException('Application settings are not initialized.');
+        $current_datetime = now($this->toString(config('app.timezone')));
+        /** @var literal-string $db_prefix */
+        $db_prefix = $this->toString(config('database.prefix'));
         $query = Product::query()
             ->select('products.*')
             ->selectRaw($db_prefix . 'default_product_variant.id as default_variant_id_selected')
@@ -298,18 +301,18 @@ readonly class FilterProductsAction
             ->selectRaw($db_prefix . 'default_product_variant.image as default_variant_image')
             ->selectRaw($db_prefix . 'active_product_discount.price as active_discount_price')
             ->with([
-                'slugs' => function ($query) use ($language_id): void {
+                'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'productDescription' => function ($query) use ($language_id): void {
+                'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
-                'defaultVariant' => function ($query) use ($language_id): void {
+                'defaultVariant' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->with([
-                        'slugs' => function ($slug_query) use ($language_id): void {
+                        'slugs' => function (\Illuminate\Database\Eloquent\Relations\Relation $slug_query) use ($language_id): void {
                             $slug_query->where('language_id', $language_id);
                         },
-                        'descriptions' => function ($description_query) use ($language_id): void {
+                        'descriptions' => function (\Illuminate\Database\Eloquent\Relations\Relation $description_query) use ($language_id): void {
                             $description_query->where('language_id', $language_id);
                         },
                     ]);
@@ -347,6 +350,10 @@ readonly class FilterProductsAction
 
     /**
      * @param  array<string, mixed>  $validated_data
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param Builder<Product> $query
+     * @psalm-param Collection<int, CatalogFilterGroup> $filter_groups
+     * @return Builder<Product>
      */
     private function applyAttributeFilters(
         Builder $query,
@@ -365,17 +372,16 @@ readonly class FilterProductsAction
         }
 
         $attribute_groups_by_id = $filter_groups
-            ->where(fn (CatalogFilterGroup $group): bool => (string) $group->getRawOriginal('source_type') === CatalogFilterGroupSourceTypeEnum::Attribute->value)
-            ->keyBy(fn (CatalogFilterGroup $group): int => (int) $group->source_id);
+            ->where(fn (CatalogFilterGroup $group): bool => $this->toString($group->getRawOriginal('source_type')) === CatalogFilterGroupSourceTypeEnum::Attribute->value)
+            ->keyBy(fn (CatalogFilterGroup $group): int => $this->toInt($group->source_id));
 
         foreach ($attribute_filters as $attribute_id => $selected_codes) {
-            $attribute_id = (int) $attribute_id;
+            $attribute_id = $this->toInt($attribute_id);
 
             if ($attribute_id <= 0) {
                 continue;
             }
 
-            /** @var CatalogFilterGroup|null $attribute_group */
             $attribute_group = $attribute_groups_by_id->get($attribute_id);
 
             if (! $attribute_group instanceof CatalogFilterGroup) {
@@ -383,7 +389,7 @@ readonly class FilterProductsAction
             }
 
             $selected_codes = collect(is_array($selected_codes) ? $selected_codes : [$selected_codes])
-                ->map(fn (mixed $code): string => (string) $code)
+                ->map(fn (mixed $code): string => $this->toString($code))
                 ->filter(fn (string $code): bool => filled($code))
                 ->unique()
                 ->values();
@@ -398,17 +404,22 @@ readonly class FilterProductsAction
              * to avoid locale mismatch that causes false-zero results.
              */
             $attribute_values = $attribute_group->values
+                ->toBase()
                 ->filter(fn (CatalogFilterValue $value): bool => $selected_codes->contains((string) $value->code))
                 ->flatMap(function (CatalogFilterValue $value): array {
                     $value_candidates = [(string) $value->value_string];
                     $translation_labels = $value->translations
                         ->pluck('label')
-                        ->map(fn (mixed $label): string => (string) $label)
+                        ->map(fn (mixed $label): string => $this->toString($label))
                         ->all();
+                    /** @var array<int, string> $translation_labels */
 
-                    return [...$value_candidates, ...$translation_labels];
+                    return [
+                        ...$value_candidates,
+                        ...$translation_labels,
+                    ];
                 })
-                ->map(fn (mixed $value): string => $this->normalizeAttributeValue((string) $value))
+                ->map(fn (mixed $value): string => $this->normalizeAttributeValue($this->toString($value)))
                 ->filter(fn (string $value): bool => filled($value))
                 ->unique()
                 ->values();
@@ -435,6 +446,9 @@ readonly class FilterProductsAction
 
     /**
      * @param  array<string, mixed>  $validated_data
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param Builder<Product> $query
+     * @return Builder<Product>
      */
     private function applyPriceRangeFilter(
         Builder $query,
@@ -447,7 +461,6 @@ readonly class FilterProductsAction
             return $query;
         }
 
-        /** @var CatalogFilterGroup|null $price_group */
         $price_group = $filter_groups
             ->first(fn (CatalogFilterGroup $group): bool => (string) $group->code === CatalogFilterGroupSourceTypeEnum::Price->value);
 
@@ -459,16 +472,19 @@ readonly class FilterProductsAction
         $price_to = Arr::get($validated_data, 'price_to');
 
         if (is_numeric($price_from)) {
-            $query->whereRaw($effective_price_expression . ' >= ?', [(float) $price_from]);
+            // @phpstan-ignore argument.type (The expression is built only from trusted table names.)
+            $query->whereRaw(new Expression($effective_price_expression . ' >= ?'), [(float) $price_from]);
         }
 
         if (is_numeric($price_to)) {
-            $query->whereRaw($effective_price_expression . ' <= ?', [(float) $price_to]);
+            // @phpstan-ignore argument.type (The expression is built only from trusted table names.)
+            $query->whereRaw(new Expression($effective_price_expression . ' <= ?'), [(float) $price_to]);
         }
 
         return $query;
     }
 
+    /** @param Builder<Product> $query */
     private function applySorting(Builder $query, string $resolved_sort_code, string $effective_price_expression): void
     {
         /**
@@ -481,11 +497,13 @@ readonly class FilterProductsAction
                 ->orderByDesc('products.id'),
 
             'price-asc' => $query
-                ->orderByRaw($effective_price_expression . ' ASC')
+                // @phpstan-ignore argument.type (The expression is built only from trusted table names.)
+                ->orderBy(new Expression($effective_price_expression . ' ASC'))
                 ->orderByDesc('products.id'),
 
             'price-desc' => $query
-                ->orderByRaw($effective_price_expression . ' DESC')
+                // @phpstan-ignore argument.type (The expression is built only from trusted table names.)
+                ->orderBy(new Expression($effective_price_expression . ' DESC'))
                 ->orderByDesc('products.id'),
 
             default => $query
@@ -504,18 +522,23 @@ readonly class FilterProductsAction
         return resolve_sort_code($page_setting, $requested_sort_value);
     }
 
+    /** @return non-falsy-string */
     private function resolveEffectivePriceSqlExpression(?CatalogFilterSet $filter_set): string
     {
         $price_source_mode = $this->resolvePriceSourceMode($filter_set);
         $discount_only_policy = $this->resolveDiscountOnlyPolicy($filter_set);
-        $db_prefix = config('database.prefix');
+        /** @var non-falsy-string $db_prefix */
+        $db_prefix = $this->toString(config('database.prefix'));
 
-        return match (true) {
+        /** @var non-falsy-string $expression */
+        $expression = match (true) {
             $price_source_mode === CatalogFilterPriceSourceModeEnum::RrcOnly => $db_prefix . 'default_product_variant.price',
             $price_source_mode === CatalogFilterPriceSourceModeEnum::Both => "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)",
             $discount_only_policy === CatalogFilterDiscountOnlyPolicyEnum::FallbackToBase => "COALESCE({$db_prefix}active_product_discount.price, {$db_prefix}default_product_variant.price)",
             default => $db_prefix . 'active_product_discount.price',
         };
+
+        return $expression;
     }
 
     private function resolvePriceSourceMode(?CatalogFilterSet $filter_set): CatalogFilterPriceSourceModeEnum
@@ -526,12 +549,7 @@ readonly class FilterProductsAction
 
         $price_source_mode = $filter_set->price_source_mode;
 
-        if ($price_source_mode instanceof CatalogFilterPriceSourceModeEnum) {
-            return $price_source_mode;
-        }
-
-        return CatalogFilterPriceSourceModeEnum::tryFrom((string) $price_source_mode)
-            ?? CatalogFilterPriceSourceModeEnum::Both;
+        return $price_source_mode;
     }
 
     private function resolveDiscountOnlyPolicy(?CatalogFilterSet $filter_set): CatalogFilterDiscountOnlyPolicyEnum
@@ -542,15 +560,11 @@ readonly class FilterProductsAction
 
         $discount_only_policy = $filter_set->discount_only_policy;
 
-        if ($discount_only_policy instanceof CatalogFilterDiscountOnlyPolicyEnum) {
-            return $discount_only_policy;
-        }
-
-        return CatalogFilterDiscountOnlyPolicyEnum::tryFrom((string) $discount_only_policy)
-            ?? CatalogFilterDiscountOnlyPolicyEnum::ExcludeWithoutDiscount;
+        return $discount_only_policy;
     }
 
     /**
+     * @param LengthAwarePaginator<int, Product> $products
      * @throws Throwable
      *
      * @return array<int, array<string, mixed>>
@@ -562,9 +576,11 @@ readonly class FilterProductsAction
         int $minimum_stock_quantity,
     ): array {
         $catalog_image_sizes = $this->page_settings_bootstrap_service->getCategoryProductImageSize();
-        $locale_key = config('localization.locale_parameter');
+        $locale_key = $this->toString(config('localization.locale_parameter'), 'locale');
 
-        return collect($products->items())
+        $product_items = $products->items();
+
+        return collect($product_items)
             ->map(function (Product $product) use ($language_id, $filter_set, $catalog_image_sizes, $minimum_stock_quantity, $locale_key): array {
                 $variant_price = $product->getAttribute('default_variant_price');
                 $variant_stock = $product->getAttribute('default_variant_quantity');
@@ -585,19 +601,24 @@ readonly class FilterProductsAction
 
                 $formatted_effective_price = format_price(
                     $effective_price,
-                    config('app.currency.current_currency_code'),
-                    (float) config('app.currency.current_exchange_rate'),
+                    $this->toString(config('app.currency.current_currency_code')),
+                    $this->toFloat(config('app.currency.current_exchange_rate')),
                 );
 
                 $formatted_rrc_price = format_price(
                     $rrc_price,
-                    config('app.currency.current_currency_code'),
-                    (float) config('app.currency.current_exchange_rate'),
+                    $this->toString(config('app.currency.current_currency_code')),
+                    $this->toFloat(config('app.currency.current_exchange_rate')),
                 );
 
-                $product_slug = (string) optional($product->slugs->first())->slug;
-                $variant_slug = (string) optional(optional($product->defaultVariant)->slugs->first())->slug;
-                $variant_description = optional($product->defaultVariant)->descriptions->first();
+                $product_slug = $this->toString($product->slugs->first()?->slug);
+                $default_variant = $product->defaultVariant;
+                $variant_slug = $default_variant instanceof \App\Models\Catalogs\Products\ProductVariant
+                    ? $this->toString($default_variant->slugs->first()?->slug)
+                    : '';
+                $variant_description = $default_variant instanceof \App\Models\Catalogs\Products\ProductVariant
+                    ? $default_variant->descriptions->first()
+                    : null;
                 $fallback_description = $product->productDescription->first();
 
                 if (filled($product_slug) && filled($variant_slug)) {
@@ -612,21 +633,21 @@ readonly class FilterProductsAction
                 }
 
                 return [
-                    'id' => (int) $product->id,
-                    'variant_id' => (int) $product->getAttribute('default_variant_id_selected'),
-                    'name' => (string) ($variant_description->name ?? $fallback_description->name ?? ''),
-                    'sku' => (string) $product->sku,
-                    'quantity' => (int) $variant_stock,
-                    'is_in_stock' => (int) $variant_stock >= $minimum_stock_quantity,
+                    'id' => $this->toInt($product->id),
+                    'variant_id' => $this->toInt($product->getAttribute('default_variant_id_selected')),
+                    'name' => $this->toString($variant_description->name ?? $fallback_description->name ?? ''),
+                    'sku' => $this->toString($product->sku),
+                    'quantity' => $this->toInt($variant_stock),
+                    'is_in_stock' => $this->toInt($variant_stock) >= $minimum_stock_quantity,
                     'url' => $product_url,
                     'image_data' => [
                         'urls' => multiple_convert_img_and_get_url(
-                            $variant_image,
-                            (int) ($catalog_image_sizes['width'] ?? 420),
-                            (int) ($catalog_image_sizes['height'] ?? 420),
+                            $this->toString($variant_image),
+                            $this->toInt($catalog_image_sizes['width']),
+                            $this->toInt($catalog_image_sizes['height']),
                         ),
-                        'width' => (int) ($catalog_image_sizes['width'] ?? 420),
-                        'height' => (int) ($catalog_image_sizes['height'] ?? 420),
+                        'width' => $this->toInt($catalog_image_sizes['width']),
+                        'height' => $this->toInt($catalog_image_sizes['height']),
                     ],
                     'price' => [
                         'value' => $effective_price,
@@ -637,8 +658,8 @@ readonly class FilterProductsAction
                         'discount_formatted' => $discount_price !== null
                             ? (string) format_price(
                                 $discount_price,
-                                config('app.currency.current_currency_code'),
-                                (float) config('app.currency.current_exchange_rate'),
+                                $this->toString(config('app.currency.current_currency_code')),
+                                $this->toFloat(config('app.currency.current_exchange_rate')),
                             )
                             : null,
                     ],
@@ -649,9 +670,11 @@ readonly class FilterProductsAction
     }
 
     /**
-     * @param  Collection<int, CatalogFilterGroup>  $filter_groups
-     * @param  array<string, mixed>  $validated_data
-     * @return array<string, array<string, mixed>>
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param array<string, mixed> $validated_data
+     * @psalm-param Collection<int, CatalogFilterGroup> $filter_groups
+     * @return array<int|string, array<string, mixed>>
+     * @psalm-suppress InvalidTemplateParam
      */
     private function buildFiltersData(
         ?CatalogFilterSet $filter_set,
@@ -665,7 +688,7 @@ readonly class FilterProductsAction
             return [];
         }
 
-        $active_index_version = (int) optional($filter_set->indexMeta)->active_index_version;
+        $active_index_version = $this->toInt($filter_set->indexMeta?->active_index_version);
         $dynamic_price_max = $this->resolveDynamicPriceRangeMax(
             filter_set            : $filter_set,
             filter_groups         : $filter_groups,
@@ -675,33 +698,31 @@ readonly class FilterProductsAction
             validated_data        : $validated_data,
         );
 
-        /** @var array<string, array<string, mixed>> $filters_data */
+        /** @var array<int|string, array<string, mixed>> $filters_data */
         $filters_data = [];
 
         foreach ($filter_groups as $group) {
-            $group_key = (string) $group->id;
-            $group_source_type = (string) $group->getRawOriginal('source_type');
+            $group_key = $this->toString($group->id);
+            $group_source_type = $this->toString($group->getRawOriginal('source_type'));
 
             $group_payload = [
                 'group_id' => $group_key,
-                'group_code' => (string) $group->code,
+                'group_code' => $this->toString($group->code),
                 'group_name' => $this->resolveGroupLabel($group, $language_id),
                 'source_type' => $group_source_type,
-                'source_id' => (int) $group->source_id,
-                'get_key' => (string) $group->get_key,
-                'get_value' => (string) Arr::get((array) ($group->config ?? []), 'get.value', ''),
-                'get_extra' => is_array(Arr::get((array) ($group->config ?? []), 'get.extra'))
-                    ? (array) Arr::get((array) ($group->config ?? []), 'get.extra')
-                    : [],
+                'source_id' => $this->toInt($group->source_id),
+                'get_key' => $this->toString($group->get_key),
+                'get_value' => $this->toString(Arr::get((array) ($group->config ?? []), 'get.value', '')),
+                'get_extra' => (array) Arr::get((array) ($group->config ?? []), 'get.extra', []),
                 'items' => [],
             ];
 
             if ($group_source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
-                $group_config = is_array($group->config) ? $group->config : [];
+                $group_config = (array) $group->config;
                 $selected_from = Arr::get($validated_data, 'price_from');
                 $selected_to = Arr::get($validated_data, 'price_to');
-                $price_from_key = trim((string) Arr::get($group_config, 'get.extra.from_key', 'price_from'));
-                $price_to_key = trim((string) Arr::get($group_config, 'get.extra.to_key', 'price_to'));
+                $price_from_key = $this->toString(Arr::get($group_config, 'get.extra.from_key', 'price_from'));
+                $price_to_key = $this->toString(Arr::get($group_config, 'get.extra.to_key', 'price_to'));
 
                 if (blank($price_from_key)) {
                     $price_from_key = 'price_from';
@@ -714,7 +735,7 @@ readonly class FilterProductsAction
                 $group_payload['range'] = [
                     'min' => Arr::get($group_config, 'min_price'),
                     'max' => is_numeric($dynamic_price_max)
-                        ? (float) $dynamic_price_max
+                        ? $dynamic_price_max
                         : Arr::get($group_config, 'max_price'),
                     'step' => Arr::get($group_config, 'step'),
                     'selected_from' => $selected_from,
@@ -732,7 +753,6 @@ readonly class FilterProductsAction
                 continue;
             }
 
-            /** @var Collection<int, CatalogFilterValue> $group_values */
             $group_values = $group->values;
 
             foreach ($group_values as $value) {
@@ -778,6 +798,8 @@ readonly class FilterProductsAction
      * category + stock threshold + selected attribute options.
      * Price bounds from request are intentionally not applied here, because this
      * value is used as a price-filter upper bound candidate.
+     * @param Collection<int, CatalogFilterGroup> $filter_groups
+     * @param array<string, mixed> $validated_data
      */
     private function resolveDynamicPriceRangeMax(
         CatalogFilterSet $filter_set,
@@ -806,6 +828,7 @@ readonly class FilterProductsAction
         $query_base->columns = [];
 
         $max_price = $query_base
+            // @phpstan-ignore argument.type (The expression is built only from trusted table names.)
             ->selectRaw('MAX(' . $effective_price_expression . ') as max_effective_price')
             ->value('max_effective_price');
 
@@ -814,7 +837,7 @@ readonly class FilterProductsAction
 
     private function buildCancelLinkForCheckedValue(CatalogFilterGroup $group, CatalogFilterValue $value): ?string
     {
-        $get_key = trim((string) $group->get_key);
+        $get_key = $this->toString($group->get_key);
 
         if (blank($get_key) || ! app()->bound('request')) {
             return null;
@@ -822,6 +845,7 @@ readonly class FilterProductsAction
 
         $request = request();
         $query_parameters = (array) $request->query();
+        /** @var array<string, mixed> $query_parameters */
         $query_value = $this->extractQueryValueByGetKey($query_parameters, $get_key);
 
         if ($query_value === null) {
@@ -867,8 +891,11 @@ readonly class FilterProductsAction
 
         $request = request();
         $next_query_parameters = (array) $request->query();
+        /** @var array<string, mixed> $next_query_parameters */
+        /** @var array<string, mixed> $typed_query_parameters */
+        $typed_query_parameters = $next_query_parameters;
         $next_query_parameters = $this->replaceQueryValueByGetKey(
-            query_parameters: $next_query_parameters,
+            query_parameters: $typed_query_parameters,
             get_key         : $price_from_get_key,
             next_value      : null,
         );
@@ -886,6 +913,7 @@ readonly class FilterProductsAction
             : $request->url();
     }
 
+    /** @param array<string, mixed> $query_parameters */
     private function extractQueryValueByGetKey(array $query_parameters, string $get_key): mixed
     {
         if (Str::contains($get_key, '[') && Str::endsWith($get_key, ']')) {
@@ -914,22 +942,26 @@ readonly class FilterProductsAction
                     Arr::forget($query_parameters, $root_key);
                 }
 
+                /** @var array<string, mixed> $query_parameters */
                 return $query_parameters;
             }
 
             Arr::set($query_parameters, $normalized_get_key, $next_value);
 
+            /** @var array<string, mixed> $query_parameters */
             return $query_parameters;
         }
 
         if ($next_value === null) {
             Arr::forget($query_parameters, $get_key);
 
+            /** @var array<string, mixed> $query_parameters */
             return $query_parameters;
         }
 
         Arr::set($query_parameters, $get_key, $next_value);
 
+        /** @var array<string, mixed> $query_parameters */
         return $query_parameters;
     }
 
@@ -945,7 +977,7 @@ readonly class FilterProductsAction
         return collect($raw_value)
             ->flatten(1)
             ->flatMap(function (mixed $item): array {
-                $string_value = trim((string) $item);
+                $string_value = $this->toString($item);
 
                 if (blank($string_value)) {
                     return [];
@@ -973,13 +1005,13 @@ readonly class FilterProductsAction
             ->firstWhere('language_id', $language_id)
             ?? $group->translations->first();
 
-        $label = (string) ($translation ? $translation->label : '');
+        $label = $this->toString($translation?->label);
 
         if (filled($label)) {
             return $label;
         }
 
-        return (string) $group->code;
+        return $this->toString($group->code);
     }
 
     private function resolveValueLabel(CatalogFilterValue $value, int $language_id): string
@@ -988,17 +1020,17 @@ readonly class FilterProductsAction
             ->firstWhere('language_id', $language_id)
             ?? $value->translations->first();
 
-        $label = (string) ($translation ? $translation->label : '');
+        $label = $this->toString($translation?->label);
 
         if (filled($label)) {
             return $label;
         }
 
-        if (filled((string) $value->value_string)) {
-            return (string) $value->value_string;
+        if (filled($this->toString($value->value_string))) {
+            return $this->toString($value->value_string);
         }
 
-        return (string) $value->code;
+        return $this->toString($value->code);
     }
 
     /**
@@ -1006,16 +1038,14 @@ readonly class FilterProductsAction
      */
     private function resolveValueCheckedState(CatalogFilterGroup $group, CatalogFilterValue $value, array $validated_data): bool
     {
-        $source_type = (string) $group->getRawOriginal('source_type');
-        $value_code = (string) $value->code;
+        $source_type = $this->toString($group->getRawOriginal('source_type'));
+        $value_code = $this->toString($value->code);
 
         if ($source_type === CatalogFilterGroupSourceTypeEnum::Attribute->value) {
             $attribute_id = (int) $group->source_id;
-            $selected_codes = (array) Arr::get($validated_data, 'attributes.' . $attribute_id, []);
+            $selected_codes = $this->normalizeFilterQueryValues(Arr::get($validated_data, 'attributes.' . $attribute_id, []));
 
-            return collect($selected_codes)
-                ->map(fn (mixed $code): string => (string) $code)
-                ->contains($value_code);
+            return in_array($value_code, $selected_codes, true);
         }
 
         return false;
@@ -1081,10 +1111,10 @@ readonly class FilterProductsAction
         CatalogFilterSet $filter_set,
         int $fallback_count,
     ): int {
-        $attribute_id = (int) $group->source_id;
-        $value_candidates = collect([(string) $value->value_string])
+        $attribute_id = $this->toInt($group->source_id);
+        $value_candidates = collect([$this->toString($value->value_string)])
             ->merge($value->translations->pluck('label'))
-            ->map(fn (mixed $candidate): string => $this->normalizeAttributeValue((string) $candidate))
+            ->map(fn (mixed $candidate): string => $this->normalizeAttributeValue($this->toString($candidate)))
             ->filter(fn (string $candidate): bool => filled($candidate))
             ->unique()
             ->values();
@@ -1147,7 +1177,22 @@ readonly class FilterProductsAction
 
     private function normalizeRequestedSortValue(mixed $sort_value): string
     {
-        return Str::lower(trim((string) $sort_value));
+        return Str::lower($this->toString($sort_value));
+    }
+
+    private function toInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function toFloat(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
+    }
+
+    private function toString(mixed $value, string $default = ''): string
+    {
+        return is_scalar($value) ? (string) $value : $default;
     }
 
     private function resolvePaginatorPath(string $page_path): string

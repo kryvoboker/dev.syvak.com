@@ -20,8 +20,10 @@ class CreateCategory extends CreateRecord
 
     protected static string $resource = CategoryResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $descriptions = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
     protected ?string $preview_image = null;
@@ -61,7 +63,7 @@ class CreateCategory extends CreateRecord
             $this->getCategoryRecord()->rebuildPaths();
             app(HeaderCategoryService::class)->setCategoryVisibility((int) $this->getCategoryRecord()->id, $this->show_in_header);
 
-            return $this->record;
+            return $this->getCategoryRecord();
         });
     }
 

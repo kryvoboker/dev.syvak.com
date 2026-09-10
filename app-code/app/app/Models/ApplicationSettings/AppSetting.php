@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class AppSetting extends Model
 {
+    /** @var array<string, mixed>|null */
+    protected $user_settings;
+
+    /** @var array<string, mixed>|null */
+    protected $system_settings;
+
+    /** @var array<string, mixed>|null */
+    protected $ai_settings;
+
     protected $fillable = [
         'titles',
         'meta_titles',
@@ -23,8 +32,9 @@ class AppSetting extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -40,6 +50,10 @@ class AppSetting extends Model
         ];
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function titles(): Attribute
     {
         return Attribute::make(
@@ -47,6 +61,10 @@ class AppSetting extends Model
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function metaTitles(): Attribute
     {
         return Attribute::make(
@@ -54,6 +72,10 @@ class AppSetting extends Model
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function metaDescriptions(): Attribute
     {
         return Attribute::make(
@@ -61,6 +83,10 @@ class AppSetting extends Model
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function metaKeywords(): Attribute
     {
         return Attribute::make(
@@ -68,6 +94,10 @@ class AppSetting extends Model
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function workTime(): Attribute
     {
         return Attribute::make(
@@ -75,6 +105,10 @@ class AppSetting extends Model
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function contactAddresses(): Attribute
     {
         return Attribute::make(
@@ -82,6 +116,10 @@ class AppSetting extends Model
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function aiSettings(): Attribute
     {
         return Attribute::make(
@@ -89,6 +127,10 @@ class AppSetting extends Model
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function systemSettings(): Attribute
     {
         return Attribute::make(
@@ -96,6 +138,10 @@ class AppSetting extends Model
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function userSettings(): Attribute
     {
         return Attribute::make(

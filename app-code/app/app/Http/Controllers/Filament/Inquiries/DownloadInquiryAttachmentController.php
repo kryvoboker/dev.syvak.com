@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Filament\Inquiries;
 use App\Enums\Inquiries\InquiryTypeEnum;
 use App\Models\Inquiries\InquiryAttachment;
 use Filament\Facades\Filament;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -24,6 +25,7 @@ class DownloadInquiryAttachmentController
         }
 
         $disk = Storage::disk($attachment->disk);
+        /** @var FilesystemAdapter $disk */
 
         if (! $disk->exists($attachment->path)) {
             Log::channel('stack')->error('Inquiry attachment is unavailable.', [

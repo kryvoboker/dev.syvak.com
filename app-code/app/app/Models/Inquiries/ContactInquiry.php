@@ -18,6 +18,7 @@ class ContactInquiry extends Model
         'submitted_fields',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -25,7 +26,9 @@ class ContactInquiry extends Model
         ];
     }
 
-    /** @return MorphOne<Inquiry, $this> */
+    /** @phpstan-return MorphOne<Inquiry, $this>
+     * @psalm-return MorphOne<Inquiry, self>
+     */
     public function inquiry(): MorphOne
     {
         return $this->morphOne(Inquiry::class, 'inquiryable');

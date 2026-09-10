@@ -18,7 +18,7 @@ class CartTotalsPipelineService
     public function calculate(array $cart_items, array $callbacks = []): array
     {
         $subtotal = collect($cart_items)
-            ->sum(fn (array $item_data): float => (float) Arr::get($item_data, 'line_total', 0));
+            ->sum(fn (array $item_data): float => float_value(Arr::get($item_data, 'line_total', 0)));
 
         $totals_data = [
             'lines' => [[
@@ -30,21 +30,14 @@ class CartTotalsPipelineService
             ]],
             'items_subtotal' => $subtotal,
             'grand_total' => $subtotal,
-            'currency_code' => (string) config('app.currency.current_currency_code'),
-            'exchange_rate' => (float) config('app.currency.current_exchange_rate'),
+            'currency_code' => string_value(config('app.currency.current_currency_code')),
+            'exchange_rate' => float_value(config('app.currency.current_exchange_rate')),
         ];
 
         foreach ($callbacks as $callback) {
-            if (! is_callable($callback)) {
-                continue;
-            }
-
             try {
                 $result_data = $callback($totals_data);
-
-                if (is_array($result_data)) {
-                    $totals_data = $result_data;
-                }
+                $totals_data = $result_data;
             } catch (Throwable $exception) {
                 Log::channel('stack')->error($exception->getMessage(), [
                     'file' => $exception->getFile(),
@@ -58,9 +51,9 @@ class CartTotalsPipelineService
                 $line_data = is_array($line_data) ? $line_data : [];
 
                 return [
-                    'code' => (string) Arr::get($line_data, 'code', ''),
-                    'label' => (string) Arr::get($line_data, 'label', ''),
-                    'amount' => (float) Arr::get($line_data, 'amount', 0),
+                    'code' => string_value(Arr::get($line_data, 'code', '')),
+                    'label' => string_value(Arr::get($line_data, 'label', '')),
+                    'amount' => float_value(Arr::get($line_data, 'amount', 0)),
                     'is_visible' => (bool) Arr::get($line_data, 'is_visible', true),
                     'include_in_grand_total' => (bool) Arr::get($line_data, 'include_in_grand_total', true),
                 ];
@@ -70,15 +63,15 @@ class CartTotalsPipelineService
 
         $grand_total = $lines
             ->filter(fn (array $line_data): bool => $line_data['is_visible'] === true && $line_data['include_in_grand_total'] === true)
-            ->sum(fn (array $line_data): float => (float) $line_data['amount']);
+            ->sum(fn (array $line_data): float => float_value($line_data['amount']));
 
-        $currency_code = (string) Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code'));
-        $exchange_rate = (float) Arr::get($totals_data, 'exchange_rate', config('app.currency.current_exchange_rate'));
+        $currency_code = string_value(Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code')));
+        $exchange_rate = float_value(Arr::get($totals_data, 'exchange_rate', config('app.currency.current_exchange_rate')));
 
         $normalized_lines = $lines
             ->map(function (array $line_data) use ($currency_code, $exchange_rate): array {
                 $line_data['formatted'] = $this->formatMoney(
-                    (float) $line_data['amount'],
+                    float_value($line_data['amount']),
                     $currency_code,
                     $exchange_rate,
                 );
@@ -89,9 +82,9 @@ class CartTotalsPipelineService
 
         $result_data = [
             'lines' => $normalized_lines,
-            'items_subtotal' => (float) Arr::get($totals_data, 'items_subtotal', 0),
+            'items_subtotal' => float_value(Arr::get($totals_data, 'items_subtotal', 0)),
             'items_subtotal_formatted' => $this->formatMoney(
-                (float) Arr::get($totals_data, 'items_subtotal', 0),
+                float_value(Arr::get($totals_data, 'items_subtotal', 0)),
                 $currency_code,
                 $exchange_rate,
             ),

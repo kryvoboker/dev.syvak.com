@@ -1,0 +1,31 @@
+includes:
+    - phpstan.base.neon
+
+parameters:
+    paths:
+        - app/Filament
+        - app/Providers/Filament
+        - Modules/BankTransfer/app/Filament
+        - Modules/BankTransfer/app/Services/Filament
+        - Modules/Carousel/app/Filament
+        - Modules/Carousel/app/Services/Filament
+        - Modules/NovaPoshta/app/Filament
+        - Modules/NovaPoshta/app/Services/Filament
+        - Modules/PaymentUponDelivery/app/Filament
+        - Modules/Pickup/app/Filament
+        - Modules/Pickup/app/Services/Filament
+        - Modules/ProductsCarousel/app/Filament
+        - Modules/ProductsCarousel/app/Services/Filament
+        - Modules/UkrPoshta/app/Filament
+        - Modules/UkrPoshta/app/Services/Filament
+        - Modules/WayForPay/app/Filament
+        - Modules/WayForPay/app/Services/Filament
+    excludePaths:
+        analyse:
+            - tests
+            - Modules/*/tests/**
+    level: 8
+    ignoreErrors:
+        -
+            message: '#PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\):.*#'
+            path: app/Filament/Auth/Http/Responses/LoginResponse.php

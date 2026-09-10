@@ -20,7 +20,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
@@ -44,7 +43,6 @@ class ContactInquiryResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        /** @var Builder<Model> $query */
         $query = parent::getEloquentQuery();
 
         return $query

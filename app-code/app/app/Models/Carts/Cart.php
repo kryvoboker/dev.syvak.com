@@ -10,6 +10,14 @@ use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property CartModeEnum $cart_mode
+ * @property array<int|string, mixed>|null $chosen_attributes
+ * @property int $id
+ * @property int|null $user_id
+ * @property int $product_variant_id
+ * @property int $quantity
+ */
 class Cart extends Model
 {
     protected $fillable = [
@@ -24,6 +32,7 @@ class Cart extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -36,7 +45,8 @@ class Cart extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @phpstan-return BelongsTo<User, $this>
+     * @psalm-return BelongsTo<User, self>
      */
     public function user(): BelongsTo
     {
@@ -44,7 +54,8 @@ class Cart extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function productVariant(): BelongsTo
     {

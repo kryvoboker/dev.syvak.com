@@ -466,7 +466,10 @@ class ProductsCarouselModuleServicesTest extends TestCase
         );
 
         $this->assertCount(1, $products);
-        $this->assertSame(20, (int) $products->first()->id);
+        $product = $products->first();
+
+        $this->assertNotNull($product);
+        $this->assertSame(20, (int) $product->id);
     }
 
     public function test_storefront_card_uses_discount_from_selected_variant(): void

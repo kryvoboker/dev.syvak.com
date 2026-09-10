@@ -7,6 +7,7 @@ namespace App\Services\PageSettings;
 use App\Jobs\DeliverContactsFormJob;
 use App\Models\PageSettings\PageSetting;
 use App\Services\Inquiries\InquiryPersistenceService;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Message;
@@ -34,6 +35,7 @@ final readonly class ContactsFormDeliveryService
         $this->ensureDestinationIsConfigured($settings);
         $file_path = $this->storeFile($settings, $file);
         $queue_data = Arr::except($data, ['file']);
+        /** @var array<string, mixed> $queue_data */
         $inquiry = $this->inquiry_persistence_service->persistContact(
             locale      : $locale,
             language_id : $language_id,
@@ -43,8 +45,8 @@ final readonly class ContactsFormDeliveryService
         );
 
         DeliverContactsFormJob::dispatch(
-            page_setting_id: (int)$page_setting->id,
-            inquiry_id     : (int)$inquiry->id,
+            page_setting_id: (int) $page_setting->id,
+            inquiry_id     : (int) $inquiry->id,
             locale         : $locale,
             language_id    : $language_id,
             data           : $queue_data,
@@ -62,12 +64,12 @@ final readonly class ContactsFormDeliveryService
     {
         $settings = $this->contacts_page_service->getSettings($page_setting);
         $placeholders = [
-            '{name}' => (string)Arr::get($data, 'name', ''),
-            '{email}' => (string)Arr::get($data, 'email', ''),
-            '{phone}' => (string)Arr::get($data, 'phone', ''),
-            '{text}' => (string)Arr::get($data, 'text', ''),
+            '{name}' => string_value(Arr::get($data, 'name', '')),
+            '{email}' => string_value(Arr::get($data, 'email', '')),
+            '{phone}' => string_value(Arr::get($data, 'phone', '')),
+            '{text}' => string_value(Arr::get($data, 'text', '')),
         ];
-        $destinations = Arr::get($settings, 'contact_form.destinations', []);
+        $destinations = array_value(Arr::get($settings, 'contact_form.destinations', []));
         $delivery_attempted = false;
 
         if (Arr::get($destinations, 'email.enabled', false)) {
@@ -92,7 +94,7 @@ final readonly class ContactsFormDeliveryService
         }
 
         $telegram_enabled = (bool) Arr::get($destinations, 'telegram.enabled', false);
-        $telegram_token = Str::trim((string) Arr::get($destinations, 'telegram.bot_token', ''));
+        $telegram_token = Str::trim(string_value(Arr::get($destinations, 'telegram.bot_token', '')));
 
         if ($telegram_enabled && $telegram_token === '') {
             Log::channel('stack')->critical('Contacts Telegram delivery skipped because the bot token is not configured.', [
@@ -134,7 +136,7 @@ final readonly class ContactsFormDeliveryService
     /** @param array<string, mixed> $settings */
     private function ensureDestinationIsConfigured(array $settings): void
     {
-        $destinations = Arr::get($settings, 'contact_form.destinations', []);
+        $destinations = array_value(Arr::get($settings, 'contact_form.destinations', []));
         $email_enabled = (bool)Arr::get($destinations, 'email.enabled', false);
         $telegram_enabled = (bool)Arr::get($destinations, 'telegram.enabled', false);
 
@@ -143,10 +145,13 @@ final readonly class ContactsFormDeliveryService
         }
     }
 
-    /** @param array<string, mixed> $settings @param array<string, string> $placeholders */
+    /**
+     * @param array<string, mixed> $settings
+     * @param array<string, string> $placeholders
+     */
     private function sendEmail(array $settings, int $language_id, array $placeholders, ?string $file_path, bool $send_file): void
     {
-        $recipient = Str::trim((string)Arr::get($settings, 'contact_form.destinations.email.address', ''));
+        $recipient = Str::trim(string_value(Arr::get($settings, 'contact_form.destinations.email.address', '')));
 
         if ($recipient === '') {
             throw new RuntimeException('Contacts email recipient is not configured.');
@@ -155,27 +160,33 @@ final readonly class ContactsFormDeliveryService
         $file_url = $send_file ? $this->resolveFileUrl($file_path) : '';
         $placeholders['{file}'] = $file_url;
         $template = $this->resolveLocalizedTemplate(Arr::get($settings, 'email.templates', []), $language_id);
-        $subject = $this->replacePlaceholders((string)Arr::get($template, 'subject', ''), $placeholders);
-        $body = $this->replacePlaceholders((string)Arr::get($template, 'body', ''), $placeholders);
-        $body = $this->appendFileUrlIfMissing($body, $file_url, $send_file, (string)Arr::get($template, 'body', ''));
+        $subject = $this->replacePlaceholders(string_value(Arr::get($template, 'subject', '')), $placeholders);
+        $body = $this->replacePlaceholders(string_value(Arr::get($template, 'body', '')), $placeholders);
+        $body = $this->appendFileUrlIfMissing($body, $file_url, $send_file, string_value(Arr::get($template, 'body', '')));
 
         Mail::raw($body, function (Message $message) use ($recipient, $subject, $file_path, $send_file): void {
             $message->to($recipient)->subject($subject);
 
             if ($send_file && $this->publicFileExists($file_path)) {
+                $file_contents = $this->publicDisk()->get($file_path ?? '');
+
+                if (! is_string($file_contents)) {
+                    return;
+                }
+
                 $message->attachData(
-                    Storage::disk('public')->get((string)$file_path),
-                    basename((string)$file_path),
-                    ['mime' => Storage::disk('public')->mimeType((string)$file_path)],
+                    $file_contents,
+                    basename($file_path ?? ''),
+                    ['mime' => $this->publicDisk()->mimeType($file_path ?? '')],
                 );
             }
         });
     }
 
     /**
-     * @param array<string, mixed> $settings @param array<string, string> $placeholders
+     * @param array<string, mixed>  $settings
+     * @param array<string, string> $placeholders
      * @param int                  $language_id
-     * @param array                $placeholders
      * @param string|null          $file_path
      * @param bool                 $send_file
      * @param string               $bot_token
@@ -185,7 +196,7 @@ final readonly class ContactsFormDeliveryService
      */
     private function sendTelegram(array $settings, int $language_id, array $placeholders, ?string $file_path, bool $send_file, string $bot_token): void
     {
-        $chat_id = Str::trim((string)Arr::get($settings, 'contact_form.destinations.telegram.chat_id', ''));
+        $chat_id = Str::trim(string_value(Arr::get($settings, 'contact_form.destinations.telegram.chat_id', '')));
 
         if ($chat_id === '') {
             throw new RuntimeException('Contacts Telegram chat ID is not configured.');
@@ -194,8 +205,8 @@ final readonly class ContactsFormDeliveryService
         $file_url = $send_file ? $this->resolveFileUrl($file_path) : '';
         $placeholders['{file}'] = $file_url;
         $template = $this->resolveLocalizedTemplate(Arr::get($settings, 'telegram.templates', []), $language_id);
-        $body = $this->replacePlaceholders((string)Arr::get($template, 'body', ''), $placeholders);
-        $body = $this->appendFileUrlIfMissing($body, $file_url, $send_file, (string)Arr::get($template, 'body', ''));
+        $body = $this->replacePlaceholders(string_value(Arr::get($template, 'body', '')), $placeholders);
+        $body = $this->appendFileUrlIfMissing($body, $file_url, $send_file, string_value(Arr::get($template, 'body', '')));
         $response = Http::asForm()
             ->timeout(10)
             ->post("https://api.telegram.org/bot$bot_token/sendMessage", [
@@ -208,10 +219,16 @@ final readonly class ContactsFormDeliveryService
         }
 
         if ($send_file && $this->publicFileExists($file_path)) {
+            $file_contents = $this->publicDisk()->get($file_path ?? '');
+
+            if (! is_string($file_contents)) {
+                throw new RuntimeException('Contacts Telegram file could not be read.');
+            }
+
             $file_response = Http::attach(
                 'document',
-                Storage::disk('public')->get((string)$file_path),
-                basename((string)$file_path),
+                $file_contents,
+                basename($file_path ?? ''),
             )
                 ->timeout(30)
                 ->post("https://api.telegram.org/bot$bot_token/sendDocument", [
@@ -231,40 +248,46 @@ final readonly class ContactsFormDeliveryService
             return null;
         }
 
-        $upload_path = resolve_upload_path_placeholders((string)Arr::get(
+        $upload_path = resolve_upload_path_placeholders(string_value(Arr::get(
             $settings,
             'contact_form.fields.file.upload_path',
             'images/contacts/{year}/{month}',
-        ));
+        )));
 
-        return $file->store($upload_path, 'public');
+        return $file->store($upload_path, 'public') ?: null;
     }
 
     private function publicFileExists(?string $file_path): bool
     {
-        return filled($file_path) && Storage::disk('public')->exists((string)$file_path);
+        return filled($file_path) && $this->publicDisk()->exists($file_path);
     }
 
     private function resolveFileUrl(?string $file_path): string
     {
         return $this->publicFileExists($file_path)
-            ? Storage::disk('public')->url((string)$file_path)
+            ? $this->publicDisk()->url($file_path ?? '')
             : '';
     }
 
+    private function publicDisk(): FilesystemAdapter
+    {
+        return Storage::disk('public');
+    }
+
     /** @param mixed $templates @return array<string, string> */
+    /** @return array<string, string> */
     private function resolveLocalizedTemplate(mixed $templates, int $language_id): array
     {
         $templates = is_array($templates) ? $templates : [];
         $template = Arr::get($templates, (string)$language_id);
 
         if (is_array($template)) {
-            return $template;
+            return $this->stringTemplate($template);
         }
 
         $first_template = Arr::first($templates);
 
-        return is_array($first_template) ? $first_template : [];
+        return is_array($first_template) ? $this->stringTemplate($first_template) : [];
     }
 
     /** @param array<string, string> $placeholders */
@@ -280,5 +303,26 @@ final readonly class ContactsFormDeliveryService
         }
 
         return Str::finish($body, PHP_EOL) . $file_url;
+    }
+
+    /**
+     * @return array<string|int, mixed>
+     */
+
+    /**
+     * @param array<mixed, mixed> $value
+     * @return array<string, string>
+     */
+    private function stringTemplate(array $value): array
+    {
+        $result = [];
+
+        foreach ($value as $key => $item) {
+            if (is_string($key)) {
+                $result[$key] = string_value($item);
+            }
+        }
+
+        return $result;
     }
 }

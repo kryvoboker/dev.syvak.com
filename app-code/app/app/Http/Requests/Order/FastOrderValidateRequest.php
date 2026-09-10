@@ -44,15 +44,16 @@ class FastOrderValidateRequest extends FormRequest
         ];
     }
 
+    #[\Override]
     protected function prepareForValidation(): void
     {
         $normalized_data = $this->all();
 
-        Arr::set($normalized_data, 'first_name', Str::trim((string) $this->input('first_name', '')));
-        Arr::set($normalized_data, 'last_name', Str::trim((string) $this->input('last_name', '')));
-        Arr::set($normalized_data, 'phone', Str::trim((string) $this->input('phone', '')));
+        Arr::set($normalized_data, 'first_name', Str::trim(string_value($this->input('first_name', ''))));
+        Arr::set($normalized_data, 'last_name', Str::trim(string_value($this->input('last_name', ''))));
+        Arr::set($normalized_data, 'phone', Str::trim(string_value($this->input('phone', ''))));
         Arr::set($normalized_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value);
-        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower((string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '')));
+        Arr::set($normalized_data, OrderDataKeyEnum::PaymentMethod->value, Str::lower(string_value($this->input(OrderDataKeyEnum::PaymentMethod->value, ''))));
 
         $this->replace($normalized_data);
     }
@@ -60,7 +61,7 @@ class FastOrderValidateRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
-            $payment_method = (string) $this->input(OrderDataKeyEnum::PaymentMethod->value, '');
+            $payment_method = string_value($this->input(OrderDataKeyEnum::PaymentMethod->value, ''));
 
             $is_supported_payment_method = in_array(
                 $payment_method,
@@ -79,7 +80,7 @@ class FastOrderValidateRequest extends FormRequest
                 ? app(BankTransferModuleDataService::class)->getCheckoutData(normalize_locale(null))
                 : app(PaymentUponDeliveryModuleDataService::class)->getCheckoutData();
 
-            if (($payment_data['is_available'] ?? false) !== true) {
+            if ($payment_data['is_available'] !== true) {
                 $validator->errors()->add(
                     OrderDataKeyEnum::PaymentMethod->value,
                     $payment_method === BankTransferConfig::PAYMENT_METHOD

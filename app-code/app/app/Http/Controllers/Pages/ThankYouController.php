@@ -9,9 +9,20 @@ use App\Services\FooterService;
 use App\Services\HeaderService;
 use App\Services\Order\ThankYouOrderDataService;
 use Illuminate\View\View;
+use Throwable;
 
 class ThankYouController extends Controller
 {
+    /**
+     * @param HeaderService            $header_service
+     * @param FooterService            $footer_service
+     * @param ThankYouOrderDataService $thank_you_order_data_service
+     * @param string                   $locale
+     * @param string                   $order_number
+     *
+     * @throws Throwable
+     * @return View
+     */
     public function index(
         HeaderService $header_service,
         FooterService $footer_service,

@@ -7,6 +7,9 @@ namespace App\Models\Ai;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property string|null $answer
+ */
 class AiAnswerCache extends Model
 {
     protected $fillable = [
@@ -16,14 +19,18 @@ class AiAnswerCache extends Model
         'answer',
     ];
 
+    /** @phpstan-return MorphTo<Model, $this>
+     * @psalm-return MorphTo<Model, self>
+     */
     public function hashable(): MorphTo
     {
         return $this->morphTo();
     }
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

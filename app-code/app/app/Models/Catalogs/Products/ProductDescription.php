@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $product_id
+ * @property int $language_id
+ * @property string $name
+ * @property string|null $description
+ */
 class ProductDescription extends Model
 {
     /** @use HasFactory<ProductDescriptionFactory> */
@@ -25,8 +32,9 @@ class ProductDescription extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -36,7 +44,8 @@ class ProductDescription extends Model
     }
 
     /**
-     * @return BelongsTo<Product, $this>
+     * @phpstan-return BelongsTo<Product, $this>
+     * @psalm-return BelongsTo<Product, self>
      */
     public function product(): BelongsTo
     {

@@ -134,7 +134,7 @@ class ReplyContactInquiry extends Page implements HasForms, HasTable
                             ->default($this->getInquiryRecord()->name),
                         TextInput::make('recipient_email')
                             ->label(__('admin/inquiries/contacts.labels.email'))
-                            ->default(fn (): ?string => $this->getInquiryRecord()->email),
+                            ->default(fn (): string => $this->getInquiryRecord()->email),
                     ])
                     ->columns(),
                 Section::make(__('admin/inquiries/contacts.reply.title'))

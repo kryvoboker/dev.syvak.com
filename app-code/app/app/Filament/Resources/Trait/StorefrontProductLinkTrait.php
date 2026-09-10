@@ -23,6 +23,11 @@ trait StorefrontProductLinkTrait
     protected static function getStorefrontVariantUrl(ProductVariant $variant, ?int $language_id = null): ?string
     {
         $product = $variant->product;
+
+        if (! $product instanceof Product) {
+            return null;
+        }
+
         $product_slug = self::getLocalizedSlug($product, $language_id);
         $variant_slug = self::getLocalizedSlug($variant, $language_id);
 

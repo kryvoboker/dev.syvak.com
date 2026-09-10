@@ -23,7 +23,8 @@ final class BankTransferModuleDataService
         $active_language_codes = (new Language())
             ->getActiveLanguages()
             ->pluck('code')
-            ->map(fn (mixed $code): string => strtolower((string) $code))
+            ->map(fn (mixed $code): string => is_scalar($code) ? strtolower((string) $code) : '')
+            ->filter(fn (string $code): bool => $code !== '')
             ->values()
             ->all();
         $is_available = is_enabled_singleton_module('BankTransfer')

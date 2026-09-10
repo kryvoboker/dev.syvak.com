@@ -26,8 +26,9 @@ class NovaPoshtaCity extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -37,7 +38,8 @@ class NovaPoshtaCity extends Model
     }
 
     /**
-     * @return BelongsTo<NovaPoshtaRegion, $this>
+     * @phpstan-return BelongsTo<NovaPoshtaRegion, $this>
+     * @psalm-return BelongsTo<NovaPoshtaRegion, self>
      */
     public function novaPoshtaRegion(): BelongsTo
     {
@@ -45,7 +47,8 @@ class NovaPoshtaCity extends Model
     }
 
     /**
-     * @return HasMany<NovaPoshtaPostOffice, $this>
+     * @phpstan-return HasMany<NovaPoshtaPostOffice, $this>
+     * @psalm-return HasMany<NovaPoshtaPostOffice, self>
      */
     public function novaPoshtaPostOffices(): HasMany
     {
@@ -53,7 +56,8 @@ class NovaPoshtaCity extends Model
     }
 
     /**
-     * @return HasMany<NovaPoshtaPoshtomat, $this>
+     * @phpstan-return HasMany<NovaPoshtaPoshtomat, $this>
+     * @psalm-return HasMany<NovaPoshtaPoshtomat, self>
      */
     public function novaPoshtaPoshtomats(): HasMany
     {

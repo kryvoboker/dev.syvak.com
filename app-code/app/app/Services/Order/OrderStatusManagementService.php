@@ -18,6 +18,7 @@ final class OrderStatusManagementService
     {
         return DB::transaction(function () use ($data): OrderStatuses {
             $descriptions = (array) Arr::pull($data, 'descriptions', []);
+            /** @var array<string, mixed> $data */
             $status = OrderStatuses::query()->create($data);
 
             $this->syncDescriptions($status, $descriptions);
@@ -33,11 +34,12 @@ final class OrderStatusManagementService
     {
         return DB::transaction(function () use ($status, $data): OrderStatuses {
             $descriptions = (array) Arr::pull($data, 'descriptions', []);
+            /** @var array<string, mixed> $data */
             $status->update($data);
 
             $this->syncDescriptions($status, $descriptions);
 
-            return $status->fresh(['descriptions']);
+            return $status->fresh(['descriptions']) ?? $status;
         });
     }
 
@@ -83,7 +85,8 @@ final class OrderStatusManagementService
     private function syncDescriptions(OrderStatuses $status, array $descriptions): void
     {
         foreach ($descriptions as $language_id => $description) {
-            $name = trim((string) Arr::get((array) $description, 'name', ''));
+            $name_value = Arr::get((array) $description, 'name', '');
+            $name = trim(is_scalar($name_value) ? (string) $name_value : '');
 
             if ($name === '') {
                 continue;

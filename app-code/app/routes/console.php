@@ -20,7 +20,8 @@ Schedule::call(function (): void {
     }
 
     $max_files = 20;
-    $debugbar_path = config('debugbar.storage.path');
+    $configured_debugbar_path = config('debugbar.storage.path');
+    $debugbar_path = is_scalar($configured_debugbar_path) ? (string) $configured_debugbar_path : '';
     $files = glob($debugbar_path . '/*.json');
 
     if (! $files || count($files) <= $max_files) {

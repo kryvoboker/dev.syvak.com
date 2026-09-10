@@ -8,6 +8,12 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $catalog_filter_group_id
+ * @property int $language_id
+ * @property string $label
+ */
 class CatalogFilterGroupTranslation extends Model
 {
     protected $fillable = [
@@ -20,6 +26,7 @@ class CatalogFilterGroupTranslation extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -29,7 +36,8 @@ class CatalogFilterGroupTranslation extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterGroup, $this>
+     * @phpstan-return BelongsTo<CatalogFilterGroup, $this>
+     * @psalm-return BelongsTo<CatalogFilterGroup, self>
      */
     public function filterGroup(): BelongsTo
     {
@@ -37,7 +45,8 @@ class CatalogFilterGroupTranslation extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

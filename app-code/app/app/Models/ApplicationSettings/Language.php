@@ -12,6 +12,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\Rule;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property bool $is_active
+ * @property bool $is_default
+ */
 class Language extends Model
 {
     protected $fillable = [
@@ -22,8 +29,9 @@ class Language extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -33,7 +41,8 @@ class Language extends Model
     }
 
     /**
-     * @return HasMany<Slug, $this>
+     * @phpstan-return HasMany<Slug, $this>
+     * @psalm-return HasMany<Slug, self>
      */
     public function slug(): HasMany
     {
@@ -43,6 +52,7 @@ class Language extends Model
     /**
      * Boot the model.
      */
+    #[\Override]
     protected static function booted(): void
     {
         // Ensure only one default language
@@ -96,6 +106,7 @@ class Language extends Model
     /**
      * Get validation rules for the model.
      */
+    /** @return array<string, list<mixed>> */
     public static function validationRules(?int $id = null): array
     {
         return [
@@ -150,6 +161,11 @@ class Language extends Model
             ->first();
     }
 
+    /**
+     * @return Collection<int, Language>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getActiveLanguagesWithoutExceptCode(string $code): Collection
     {
         return self::query()

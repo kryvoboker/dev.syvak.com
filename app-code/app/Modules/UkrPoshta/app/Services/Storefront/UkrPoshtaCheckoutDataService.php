@@ -25,10 +25,10 @@ class UkrPoshtaCheckoutDataService
     public function getCheckoutData(): array
     {
         $state = $this->checkout_state_service->getState();
-        $selected_region_id = (int) Arr::get($state, 'region.region_id', Arr::get($state, 'region.id', 0));
-        $selected_district_id = (int) Arr::get($state, 'district.district_id', Arr::get($state, 'district.id', 0));
-        $selected_city_id = (int) Arr::get($state, 'city.city_id', Arr::get($state, 'city.id', 0));
-        $delivery_method = (string) Arr::get($state, 'delivery_method', '');
+        $selected_region_id = $this->toInt(Arr::get($state, 'region.region_id', Arr::get($state, 'region.id', 0)));
+        $selected_district_id = $this->toInt(Arr::get($state, 'district.district_id', Arr::get($state, 'district.id', 0)));
+        $selected_city_id = $this->toInt(Arr::get($state, 'city.city_id', Arr::get($state, 'city.id', 0)));
+        $delivery_method = $this->toString(Arr::get($state, 'delivery_method', ''));
         $has_saved_selection = $selected_region_id > 0 || $selected_district_id > 0 || $selected_city_id > 0 || filled($delivery_method);
 
         return [
@@ -109,20 +109,29 @@ class UkrPoshtaCheckoutDataService
     {
         $checkout_data = $this->getCheckoutData();
 
+        /** @var Collection<int, UkrPoshtaRegion> $regions */
+        $regions = $checkout_data['regions'];
+        /** @var Collection<int, UkrPoshtaDistrict> $districts */
+        $districts = $checkout_data['districts'];
+        /** @var Collection<int, UkrPoshtaCity> $cities */
+        $cities = $checkout_data['cities'];
+        /** @var Collection<int, UkrPoshtaPostOffice> $post_offices */
+        $post_offices = $checkout_data['post_offices'];
+
         return [
             'placement' => $placement,
             'page_type' => $page_type,
             'state' => $checkout_data['state'],
             'is_prefilled' => (bool) $checkout_data['is_prefilled'],
-            'delivery_method' => (string) $checkout_data['delivery_method'],
+            'delivery_method' => $this->toString($checkout_data['delivery_method']),
             'selected_region' => $checkout_data['selected_region'],
             'selected_district' => $checkout_data['selected_district'],
             'selected_city' => $checkout_data['selected_city'],
             'selected_delivery_point' => $checkout_data['selected_delivery_point'],
-            'regions_html' => $this->renderRegionsHtml($checkout_data['regions']),
-            'districts_html' => $this->renderDistrictsHtml($checkout_data['districts']),
-            'cities_html' => $this->renderCitiesHtml($checkout_data['cities']),
-            'post_offices_html' => $this->renderPostOfficesHtml($checkout_data['post_offices']),
+            'regions_html' => $this->renderRegionsHtml($regions),
+            'districts_html' => $this->renderDistrictsHtml($districts),
+            'cities_html' => $this->renderCitiesHtml($cities),
+            'post_offices_html' => $this->renderPostOfficesHtml($post_offices),
         ];
     }
 
@@ -133,7 +142,7 @@ class UkrPoshtaCheckoutDataService
     {
         return view('ukrposhta::storefront.partials.regions', [
             'regions' => $rows,
-            'selected_region_id' => (int) Arr::get($this->checkout_state_service->getState(), 'region.region_id', 0),
+            'selected_region_id' => $this->toInt(Arr::get($this->checkout_state_service->getState(), 'region.region_id', 0)),
         ])->render();
     }
 
@@ -144,7 +153,7 @@ class UkrPoshtaCheckoutDataService
     {
         return view('ukrposhta::storefront.partials.districts', [
             'districts' => $rows,
-            'selected_district_id' => (int) Arr::get($this->checkout_state_service->getState(), 'district.district_id', 0),
+            'selected_district_id' => $this->toInt(Arr::get($this->checkout_state_service->getState(), 'district.district_id', 0)),
         ])->render();
     }
 
@@ -155,7 +164,7 @@ class UkrPoshtaCheckoutDataService
     {
         return view('ukrposhta::storefront.partials.cities', [
             'cities' => $rows,
-            'selected_city_id' => (int) Arr::get($this->checkout_state_service->getState(), 'city.city_id', 0),
+            'selected_city_id' => $this->toInt(Arr::get($this->checkout_state_service->getState(), 'city.city_id', 0)),
         ])->render();
     }
 
@@ -166,7 +175,7 @@ class UkrPoshtaCheckoutDataService
     {
         return view('ukrposhta::storefront.partials.post-offices', [
             'post_offices' => $rows,
-            'selected_delivery_point_postcode' => (int) Arr::get($this->checkout_state_service->getState(), 'delivery_point.postcode', 0),
+            'selected_delivery_point_postcode' => $this->toInt(Arr::get($this->checkout_state_service->getState(), 'delivery_point.postcode', 0)),
         ])->render();
     }
 
@@ -179,10 +188,13 @@ class UkrPoshtaCheckoutDataService
             return [];
         }
 
-        return UkrPoshtaRegion::query()
+        $region_data = UkrPoshtaRegion::query()
             ->where('region_id', $region_id)
             ->first()
             ?->toArray() ?? [];
+
+        /** @var array<string, mixed> $region_data */
+        return $region_data;
     }
 
     /**
@@ -203,6 +215,7 @@ class UkrPoshtaCheckoutDataService
             return [];
         }
 
+        /** @var array<string, mixed> $district_data */
         $district_data = $district->toArray();
         $district_data['region'] = $district->ukrPoshtaRegion?->toArray() ?? [];
 
@@ -227,10 +240,21 @@ class UkrPoshtaCheckoutDataService
             return [];
         }
 
+        /** @var array<string, mixed> $city_data */
         $city_data = $city->toArray();
         $city_data['region'] = $city->ukrPoshtaRegion?->toArray() ?? [];
         $city_data['district'] = $city->ukrPoshtaDistrict?->toArray() ?? [];
 
         return $city_data;
+    }
+
+    private function toInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function toString(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

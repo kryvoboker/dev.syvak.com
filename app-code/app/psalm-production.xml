@@ -25,13 +25,19 @@
             <directory name="app/Providers/Filament"/>
             <file name="routes/console.php"/>
             <directory name="Modules/BankTransfer/tests"/>
+            <directory name="Modules/BankTransfer/database"/>
             <directory name="Modules/Carousel/tests"/>
             <directory name="Modules/NovaPoshta/tests"/>
+            <directory name="Modules/NovaPoshta/database"/>
             <directory name="Modules/PaymentUponDelivery/tests"/>
+            <directory name="Modules/PaymentUponDelivery/database"/>
             <directory name="Modules/Pickup/tests"/>
+            <directory name="Modules/Pickup/database"/>
             <directory name="Modules/ProductsCarousel/tests"/>
             <directory name="Modules/UkrPoshta/tests"/>
+            <directory name="Modules/UkrPoshta/database"/>
             <directory name="Modules/WayForPay/tests"/>
+            <directory name="Modules/WayForPay/database"/>
             <directory name="Modules/BankTransfer/app/Filament"/>
             <directory name="Modules/Carousel/app/Filament"/>
             <directory name="Modules/NovaPoshta/app/Filament"/>
@@ -54,10 +60,13 @@
         <file name="bootstrap/app.php"/>
     </stubs>
     <issueHandlers>
-        <!-- These diagnostics are caused by Laravel and Filament dynamic APIs. -->
-        <MissingOverrideAttribute errorLevel="suppress"/>
-        <InvalidTemplateParam errorLevel="suppress"/>
-        <MissingTemplateParam errorLevel="suppress"/>
-        <UndefinedThisPropertyFetch errorLevel="suppress"/>
+        <!-- Laravel's Eloquent and container APIs resolve these members dynamically. -->
+        <UndefinedMagicMethod errorLevel="suppress"/>
+
+        <!-- Framework entry points are resolved by routes, the container, and queues. -->
+        <UnusedClass errorLevel="suppress"/>
+        <PossiblyUnusedMethod errorLevel="suppress"/>
+        <PossiblyUnusedProperty errorLevel="suppress"/>
+
     </issueHandlers>
 </psalm>

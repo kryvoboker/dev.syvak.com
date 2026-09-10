@@ -329,6 +329,7 @@ class NovaPoshtaSyncService
 
     /**
      * @param  array<string, mixed>  $state
+     * @param  class-string<NovaPoshtaCity|NovaPoshtaPoshtomat|NovaPoshtaPostOffice|NovaPoshtaRegion>  $model_class
      * @return array<string, mixed>
      */
     private function processWarehousesStage(array $state, string $model_class, bool $is_poshtomat): array
@@ -458,6 +459,7 @@ class NovaPoshtaSyncService
 
     /**
      * @param class-string<NovaPoshtaRegion|NovaPoshtaCity|NovaPoshtaPostOffice|NovaPoshtaPoshtomat> $model_class
+     * @param array<int, array<string, mixed>> $normalized_rows
      *
      * @throws Throwable
      */
@@ -479,6 +481,7 @@ class NovaPoshtaSyncService
     }
 
     /**
+     * @param array<int, array<string, mixed>>                 $normalized_rows
      * @param Closure(): void                                 $reset_table
      * @param Closure(array<int, array<string, mixed>>): void $insert_rows
      *

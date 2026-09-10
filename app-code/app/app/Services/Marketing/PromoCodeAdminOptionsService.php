@@ -8,6 +8,7 @@ use App\Models\ApplicationSettings\Currency;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Categories\Category;
 use App\Models\Catalogs\Products\Product;
+use App\Models\Marketing\PromoCode;
 use App\Models\Users\User;
 use App\Models\Users\UserGroup;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,8 +26,9 @@ final class PromoCodeAdminOptionsService
             ->orderByDesc('is_default')
             ->orderBy('name')
             ->get()
+            ->toBase()
             ->mapWithKeys(fn (Currency $currency): array => [
-                (string) $currency->getKey() => sprintf(
+                string_value($currency->getKey()) => sprintf(
                     '%s — %s%s',
                     $currency->code,
                     $currency->name,
@@ -37,6 +39,10 @@ final class PromoCodeAdminOptionsService
     }
 
     /**
+     * @return array<string, string>
+     */
+    /**
+     * @param array<int, int> $excluded_ids
      * @return array<string, string>
      */
     public function userOptions(string $search = '', array $excluded_ids = []): array
@@ -59,7 +65,7 @@ final class PromoCodeAdminOptionsService
             ->limit(50)
             ->get()
             ->mapWithKeys(fn (User $user): array => [
-                (string) $user->getKey() => Str::squish(sprintf('%s %s — %s', $user->name, $user->lastname, $user->email)),
+                string_value($user->getKey()) => Str::squish(sprintf('%s %s — %s', $user->name, $user->lastname, $user->email)),
             ])
             ->all();
     }
@@ -70,7 +76,7 @@ final class PromoCodeAdminOptionsService
             return null;
         }
 
-        $user = User::query()->find((int) $id);
+        $user = User::query()->find(integer_value($id));
 
         return $user instanceof User
             ? Str::squish(sprintf('%s (%s)', $user->name, $user->email ?? ''))
@@ -86,11 +92,15 @@ final class PromoCodeAdminOptionsService
             ->where('is_active', true)
             ->orderBy('name')
             ->pluck('name', 'id')
-            ->mapWithKeys(fn (mixed $name, mixed $id): array => [(string) $id => (string) $name])
+            ->mapWithKeys(fn (mixed $name, mixed $id): array => [string_value($id) => string_value($name)])
             ->all();
     }
 
     /**
+     * @return array<string, string>
+     */
+    /**
+     * @param array<int, int> $excluded_ids
      * @return array<string, string>
      */
     public function userGroupSearchOptions(string $search, array $excluded_ids = []): array
@@ -102,7 +112,7 @@ final class PromoCodeAdminOptionsService
             ->orderBy('name')
             ->limit(50)
             ->pluck('name', 'id')
-            ->mapWithKeys(fn (mixed $name, mixed $id): array => [(string) $id => (string) $name])
+            ->mapWithKeys(fn (mixed $name, mixed $id): array => [string_value($id) => string_value($name)])
             ->all();
     }
 
@@ -114,22 +124,64 @@ final class PromoCodeAdminOptionsService
 
         $name = UserGroup::query()->whereKey((int) $id)->value('name');
 
-        return $name === null ? null : (string) $name;
+        return $name === null ? null : string_value($name);
     }
 
     public function defaultCurrencyId(): ?int
     {
         $currency = (new Currency())->getDefaultActiveCurrency();
 
-        return $currency === null ? null : (int) $currency->getKey();
+        return $currency === null ? null : integer_value($currency->getKey());
     }
 
     /**
      * @return array<string, string>
      */
+    public function promoCodeSearchOptions(string $search = ''): array
+    {
+        $search = Str::trim($search);
+
+        return PromoCode::query()
+            ->where('is_active', true)
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $nested_query) use ($search): void {
+                    $nested_query
+                        ->whereLike('code', "%{$search}%")
+                        ->orWhereLike('name', "%{$search}%");
+                });
+            })
+            ->orderBy('code')
+            ->limit(50)
+            ->get()
+            ->mapWithKeys(fn (PromoCode $promo_code): array => [
+                string_value($promo_code->getKey()) => sprintf('%s — %s', $promo_code->code, $promo_code->name),
+            ])
+            ->all();
+    }
+
+    public function promoCodeLabelById(int|string|null $id): ?string
+    {
+        if (! is_numeric($id)) {
+            return null;
+        }
+
+        $promo_code = PromoCode::query()->find(integer_value($id));
+
+        return $promo_code instanceof PromoCode
+            ? sprintf('%s — %s', $promo_code->code, $promo_code->name)
+            : null;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    /**
+     * @param array<int, int> $excluded_ids
+     * @return array<string, string>
+     */
     public function productSearchOptions(string $search, array $excluded_ids = []): array
     {
-        $language_id = (int) (resolve_language_by_locale(app()->getLocale())->id ?? 0);
+        $language_id = integer_value(resolve_language_by_locale(app()->getLocale())?->id);
         $active_language_ids = Language::query()->where('is_active', true)->pluck('id');
 
         return Product::query()
@@ -144,17 +196,19 @@ final class PromoCodeAdminOptionsService
                     ->orWhereLike('ean', "%{$search}%");
             })
             ->when($excluded_ids !== [], fn (Builder $query): Builder => $query->whereNotIn('id', $excluded_ids))
-            ->with(['productDescription' => fn ($query) => $query->where('language_id', $language_id)])
+            ->with(['productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                $query->where('language_id', $language_id);
+            }])
             ->orderBy('id')
             ->limit(50)
             ->get()
-            ->mapWithKeys(fn (Product $product): array => [(string) $product->getKey() => $this->productLabel($product)])
+            ->mapWithKeys(fn (Product $product): array => [string_value($product->getKey()) => $this->productLabel($product)])
             ->all();
     }
 
     public function productLabel(Product $product): string
     {
-        $name = Str::trim((string) $product->productDescription->first()?->name);
+        $name = Str::trim(string_value($product->productDescription->first()?->name));
         $identifiers = collect([$product->sku, $product->model, $product->ean])
             ->filter(fn (mixed $value): bool => filled($value))
             ->implode(' / ');
@@ -165,9 +219,13 @@ final class PromoCodeAdminOptionsService
     /**
      * @return array<string, string>
      */
+    /**
+     * @param array<int, int> $excluded_ids
+     * @return array<string, string>
+     */
     public function categorySearchOptions(string $search, array $excluded_ids = []): array
     {
-        $language_id = (int) (resolve_language_by_locale(app()->getLocale())->id ?? 0);
+        $language_id = integer_value(resolve_language_by_locale(app()->getLocale())?->id);
         $active_language_ids = Language::query()->where('is_active', true)->pluck('id');
 
         return Category::query()
@@ -176,13 +234,15 @@ final class PromoCodeAdminOptionsService
                 ->whereIn('language_id', $active_language_ids)
                 ->whereLike('name', "%{$search}%"))
             ->when($excluded_ids !== [], fn (Builder $query): Builder => $query->whereNotIn('id', $excluded_ids))
-            ->with(['categoryDescription' => fn ($query) => $query->where('language_id', $language_id)])
+            ->with(['categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                $query->where('language_id', $language_id);
+            }])
             ->orderBy('sort_order')
             ->orderBy('id')
             ->limit(50)
             ->get()
             ->mapWithKeys(fn (Category $category): array => [
-                (string) $category->getKey() => Str::trim((string) $category->categoryDescription->first()?->name),
+                string_value($category->getKey()) => Str::trim(string_value($category->categoryDescription->first()?->name)),
             ])
             ->all();
     }
@@ -194,10 +254,10 @@ final class PromoCodeAdminOptionsService
         }
 
         $product = Product::query()
-            ->with(['productDescription' => function ($query): void {
+            ->with(['productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                 $query->where('language_id', resolve_language_by_locale(app()->getLocale())?->id);
             }])
-            ->find((int) $id);
+            ->find(integer_value($id));
 
         return $product instanceof Product ? $this->productLabel($product) : null;
     }
@@ -209,13 +269,13 @@ final class PromoCodeAdminOptionsService
         }
 
         $category = Category::query()
-            ->with(['categoryDescription' => function ($query): void {
+            ->with(['categoryDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query): void {
                 $query->where('language_id', resolve_language_by_locale(app()->getLocale())?->id);
             }])
-            ->find((int) $id);
+            ->find(integer_value($id));
 
         return $category instanceof Category
-            ? Str::trim((string) $category->categoryDescription->first()?->name)
+            ? Str::trim(string_value($category->categoryDescription->first()?->name))
             : null;
     }
 }

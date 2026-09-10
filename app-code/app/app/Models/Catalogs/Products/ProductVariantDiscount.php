@@ -8,6 +8,18 @@ use App\Models\Users\UserGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $product_variant_id
+ * @property int|null $user_group_id
+ * @property int|null $quantity
+ * @property int $priority
+ * @property float $price
+ * @property \DateTimeInterface|null $date_start
+ * @property \DateTimeInterface|null $date_end
+ * @property \Illuminate\Support\Carbon|null $date_start
+ * @property \Illuminate\Support\Carbon|null $date_end
+ */
 class ProductVariantDiscount extends Model
 {
     protected $fillable = [
@@ -21,8 +33,9 @@ class ProductVariantDiscount extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -37,7 +50,8 @@ class ProductVariantDiscount extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function variant(): BelongsTo
     {
@@ -45,7 +59,8 @@ class ProductVariantDiscount extends Model
     }
 
     /**
-     * @return BelongsTo<UserGroup, $this>
+     * @phpstan-return BelongsTo<UserGroup, $this>
+     * @psalm-return BelongsTo<UserGroup, self>
      */
     public function userGroup(): BelongsTo
     {

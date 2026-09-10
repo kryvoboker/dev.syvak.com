@@ -83,21 +83,21 @@ final readonly class FailurePageService
             ]);
 
             return [
-                'page_type' => (string) config('page-settings.page_type.failure', 'failure'),
-                'page_title' => (string) Arr::get($localized, 'title', __('storefront/failure.fallbacks.title', [], $locale)),
-                'title' => (string) Arr::get($localized, 'title', ''),
+                'page_type' => string_value(config('page-settings.page_type.failure', 'failure')),
+                'page_title' => string_value(Arr::get($localized, 'title', __('storefront/failure.fallbacks.title', [], $locale))),
+                'title' => string_value(Arr::get($localized, 'title', '')),
                 'description' => Arr::get($localized, 'description'),
                 'images' => $this->resolveImages(Arr::get($settings, 'images', [])),
                 'buttons' => [
                     'retry' => [
-                        ...((array) Arr::get($settings, 'buttons.retry', [])),
-                        'label' => (string) Arr::get($localized, 'retry_button.label', __('storefront/failure.buttons.retry', [], $locale)),
+                        ...array_value(Arr::get($settings, 'buttons.retry', [])),
+                        'label' => string_value(Arr::get($localized, 'retry_button.label', __('storefront/failure.buttons.retry', [], $locale))),
                     ],
                     'alternative_payment' => [
-                        ...((array) Arr::get($settings, 'buttons.alternative_payment', [])),
-                        'label' => (string) Arr::get($localized, 'alternative_payment_button.label', __('storefront/failure.buttons.alternative_payment', [], $locale)),
+                        ...array_value(Arr::get($settings, 'buttons.alternative_payment', [])),
+                        'label' => string_value(Arr::get($localized, 'alternative_payment_button.label', __('storefront/failure.buttons.alternative_payment', [], $locale))),
                     ],
-                    'available_payment_methods' => (array) Arr::get($settings, 'buttons.available_payment_methods', []),
+                    'available_payment_methods' => array_value(Arr::get($settings, 'buttons.available_payment_methods', [])),
                 ],
                 'support' => $support,
                 'payment_methods' => $this->resolvePaymentMethods($locale),
@@ -105,7 +105,7 @@ final readonly class FailurePageService
                     'retry_url' => localized_route('localized.catalog.failure-order.retry', ['locale' => $locale]),
                     'payment_url' => localized_route('localized.catalog.failure-order.payment', ['locale' => $locale]),
                     'payment_method' => $this->failure_order_recovery_service->getRetryPaymentMethod(),
-                    'retry_count' => (int) Arr::get($this->failure_order_recovery_service->getState(), 'retry_count', 0),
+                    'retry_count' => integer_value(Arr::get($this->failure_order_recovery_service->getState(), 'retry_count', 0)),
                 ],
                 'header_data' => $header_data,
                 'footer_data' => ($this->footer_service)(['categories' => $header_data['categories']]),
@@ -122,25 +122,31 @@ final readonly class FailurePageService
         }
     }
 
-    /** @param array<string, mixed> $settings @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $settings
+     * @return array<string, mixed>
+     */
     private function resolveLocalized(array $settings, int $language_id): array
     {
-        $localized = (array) Arr::get($settings, 'localized', []);
+        $localized = array_value(Arr::get($settings, 'localized', []));
         $content = Arr::get($localized, (string) $language_id);
 
         if (is_array($content)) {
-            return $content;
+            return string_keyed_array($content);
         }
 
         $first = Arr::first($localized);
 
-        return is_array($first) ? $first : [];
+        return is_array($first) ? string_keyed_array($first) : [];
     }
 
-    /** @param array<string, mixed> $settings @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $settings
+     * @return array<string, mixed>
+     */
     private function resolveSupportContacts(array $settings, int $language_id, string $locale): array
     {
-        $support = (array) Arr::get($settings, 'support_contacts', []);
+        $support = array_value(Arr::get($settings, 'support_contacts', []));
         $contacts = $this->contacts_page_service->getViewData(
             $this->contacts_page_service->getStaticPageSetting() ?? new PageSetting(),
             $language_id,
@@ -149,7 +155,7 @@ final readonly class FailurePageService
         return [
             'working_hours' => (bool) Arr::get($support, 'use_contacts_working_hours', true)
                 ? (array) Arr::get($contacts, 'working_hours', [])
-                : (array) Arr::get($support, "working_hours.$language_id", []),
+                : array_value(Arr::get($support, "working_hours.$language_id", [])),
             'phones' => (bool) Arr::get($support, 'use_contacts_phones', true)
                 ? $this->normalizeSupportItems(Arr::get($contacts, 'phones', []), $locale)
                 : $this->normalizeSupportItems(Arr::get($support, 'phones', []), $locale),
@@ -159,41 +165,47 @@ final readonly class FailurePageService
         ];
     }
 
-    /** @param mixed $items @return array<int, array<string, mixed>> */
+    /**
+     * @param mixed $items
+     * @return array<int, array<string, mixed>>
+     */
     private function normalizeSupportItems(mixed $items, string $locale): array
     {
         return collect(is_array($items) ? $items : [])
             ->map(fn (mixed $item): array => is_array($item)
                 ? $item
-                : ['value' => (string) $item])
+                : ['value' => string_value($item)])
             ->filter(fn (array $item): bool => filled(Arr::get($item, 'value')))
-            ->sortBy(fn (array $item): int => (int) Arr::get($item, 'sort_order', 0))
+            ->sortBy(fn (array $item): int => integer_value(Arr::get($item, 'sort_order', 0)))
             ->map(fn (array $item): array => [
-                    'value' => Str::trim((string) Arr::get($item, 'value')),
-                    'type' => (string) Arr::get($item, 'type', 'mobile'),
-                    'custom_css_classes' => Str::squish((string) Arr::get($item, 'custom_css_classes', '')),
-                    'label' => (string) Arr::get($item, 'value'),
+                    'value' => Str::trim(string_value(Arr::get($item, 'value'))),
+                    'type' => string_value(Arr::get($item, 'type', 'mobile')),
+                    'custom_css_classes' => Str::squish(string_value(Arr::get($item, 'custom_css_classes', ''))),
+                    'label' => string_value(Arr::get($item, 'value')),
                     'locale' => $locale,
                 ])
             ->values()
             ->all();
     }
 
-    /** @param mixed $rows @return array<int, array<string, mixed>> */
+    /**
+     * @param mixed $rows
+     * @return array<int, array{urls: array<string, string>, width: int, height: int, custom_css_classes: string}>
+     */
     private function resolveImages(mixed $rows): array
     {
-        return collect(is_array($rows) ? $rows : [])
+        $resolved_images = collect(is_array($rows) ? $rows : [])
             ->filter(fn (mixed $row): bool => is_array($row) && filled(Arr::get($row, 'path')))
-            ->sortBy(fn (array $row): int => (int) Arr::get($row, 'sort_order', 0))
+            ->sortBy(fn (array $row): int => integer_value(Arr::get($row, 'sort_order', 0)))
             ->map(function (array $row): ?array {
-                $path = Str::ltrim((string) Arr::get($row, 'path'), '/');
+                $path = Str::ltrim(string_value(Arr::get($row, 'path')), '/');
 
                 if (! Storage::disk('public')->exists($path)) {
                     return null;
                 }
 
-                $width = max(1, (int) Arr::get($row, 'width', 600));
-                $height = max(1, (int) Arr::get($row, 'height', 600));
+                $width = max(1, integer_value(Arr::get($row, 'width', 600)));
+                $height = max(1, integer_value(Arr::get($row, 'height', 600)));
 
                 return [
                     'urls' => multiple_convert_img_and_get_url(
@@ -201,16 +213,19 @@ final readonly class FailurePageService
                         $width,
                         $height,
                         (bool) Arr::get($row, 'is_square', true),
-                        (string) Arr::get($row, 'background', 'transparent'),
+                        string_value(Arr::get($row, 'background', 'transparent')),
                     ),
                     'width' => $width,
                     'height' => $height,
-                    'custom_css_classes' => Str::squish((string) Arr::get($row, 'custom_css_classes', '')),
+                    'custom_css_classes' => Str::squish(string_value(Arr::get($row, 'custom_css_classes', ''))),
                 ];
             })
-            ->filter()
+            ->filter(fn (?array $image): bool => $image !== null)
             ->values()
             ->all();
+
+        /** @var array<int, array{urls: array<string, string>, width: int, height: int, custom_css_classes: string}> $resolved_images */
+        return $resolved_images;
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -219,7 +234,7 @@ final readonly class FailurePageService
         $methods = [
             [
                 'payment_method' => 'cash_on_delivery',
-                'payment_name' => (string) __('storefront/pages/checkout.payment_methods.cash_on_delivery', [], $locale),
+                'payment_name' => string_value(__('storefront/pages/checkout.payment_methods.cash_on_delivery', [], $locale)),
                 'is_available' => true,
             ],
             $this->payment_upon_delivery_data_service->getCheckoutData(),
@@ -229,15 +244,15 @@ final readonly class FailurePageService
         return collect($methods)
             ->filter(fn (array $method): bool => (bool) Arr::get($method, 'is_available', false))
             ->map(function (array $method) use ($locale): array {
-                $payment_name = (string) Arr::get($method, 'payment_name', '');
-                $translation_key = (string) Arr::get($method, 'label_translation_key', '');
+                $payment_name = string_value(Arr::get($method, 'payment_name', ''));
+                $translation_key = string_value(Arr::get($method, 'label_translation_key', ''));
 
                 if ($payment_name === '' && $translation_key !== '') {
-                    $payment_name = (string) Lang::get($translation_key, [], $locale);
+                    $payment_name = string_value(Lang::get($translation_key, [], $locale));
                 }
 
                 return [
-                    'payment_method' => (string) Arr::get($method, 'payment_method', ''),
+                    'payment_method' => string_value(Arr::get($method, 'payment_method', '')),
                     'payment_name' => $payment_name,
                 ];
             })

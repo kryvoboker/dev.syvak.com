@@ -33,6 +33,7 @@ class EditProductVariant extends EditRecord
     #[Locked]
     public ?int $product_id = null;
 
+    /** @var array<string, mixed> */
     private array $relationship_data = [];
 
     public function mount(int|string $record): void
@@ -42,7 +43,7 @@ class EditProductVariant extends EditRecord
         $query_product_id = request()->integer('product');
         $record_product_id = (int) data_get($this->getRecord(), 'product_id');
 
-        if ($query_product_id !== null && $query_product_id > 0 && $query_product_id !== $record_product_id) {
+        if ($query_product_id > 0 && $query_product_id !== $record_product_id) {
             abort(404);
         }
 

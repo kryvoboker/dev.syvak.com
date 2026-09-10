@@ -35,7 +35,7 @@ final readonly class NotFoundPageService
         ]);
 
         return [
-            'page_type' => (string)config('page-settings.page_type.not_found', 'not_found'),
+            'page_type' => string_value(config('page-settings.page_type.not_found', 'not_found')),
             'page_title' => $not_found_data['title'],
             'not_found_data' => $not_found_data,
             'header_data' => $header_data,
@@ -48,24 +48,18 @@ final readonly class NotFoundPageService
     /**
      *
      * @throws Throwable
-     * @return array{
-     *     title:string,
-     *     description?:string,
-     *          link:array{
-     *              label:string,
-     *              url:string
-     *          },
-     *      images:array<int,array<string,mixed>>
-     * }
+     * @return array<string, mixed>
      */
     public function getNotFoundData(): array
     {
         $settings = $this->page_settings_bootstrap_service->getNotFoundSettings();
         $localized_settings = $this->resolveLocalizedSettings($settings);
 
+        $description = $this->resolveDescription($localized_settings);
+
         return [
             'title' => $this->resolveTitle($localized_settings),
-            'description' => $this->resolveDescription($localized_settings),
+            ...($description !== null ? ['description' => $description] : []),
             'link' => [
                 'label' => $this->resolveLinkLabel($localized_settings),
                 'url' => $this->resolveLinkUrl($localized_settings),
@@ -97,17 +91,17 @@ final readonly class NotFoundPageService
             $language_id = $app_settings->language_id;
         }
 
-        $language_id = (string)($language_id ?? '');
+        $language_id = string_value($language_id);
 
         $localized_content = Arr::get($localized_settings, $language_id, []);
 
         if (is_array($localized_content)) {
-            return $localized_content;
+            return string_keyed_array($localized_content);
         }
 
         $first_content = Arr::first($localized_settings);
 
-        return is_array($first_content) ? $first_content : [];
+        return is_array($first_content) ? string_keyed_array($first_content) : [];
     }
 
     /**
@@ -115,9 +109,9 @@ final readonly class NotFoundPageService
      */
     private function resolveTitle(array $localized_settings): string
     {
-        $title = Str::trim((string)Arr::get($localized_settings, 'title', ''));
+        $title = Str::trim(string_value(Arr::get($localized_settings, 'title', '')));
 
-        return filled($title) ? $title : (string)__('http-statuses.404');
+        return filled($title) ? $title : string_value(__('http-statuses.404'));
     }
 
     /**
@@ -125,7 +119,7 @@ final readonly class NotFoundPageService
      */
     private function resolveDescription(array $localized_settings): ?string
     {
-        $description = Str::trim((string)Arr::get($localized_settings, 'description', ''));
+        $description = Str::trim(string_value(Arr::get($localized_settings, 'description', '')));
 
         return filled($description) ? $description : null;
     }
@@ -135,11 +129,11 @@ final readonly class NotFoundPageService
      */
     private function resolveLinkLabel(array $localized_settings): string
     {
-        $label = Str::trim((string)Arr::get($localized_settings, 'link.label', ''));
+        $label = Str::trim(string_value(Arr::get($localized_settings, 'link.label', '')));
 
         return filled($label)
             ? $label
-            : (string)__('storefront/pages/not-found.buttons.go_home');
+            : string_value(__('storefront/pages/not-found.buttons.go_home'));
     }
 
     /**
@@ -147,7 +141,7 @@ final readonly class NotFoundPageService
      */
     private function resolveLinkUrl(array $localized_settings): string
     {
-        $url = Str::trim((string)Arr::get($localized_settings, 'link.url', ''));
+        $url = Str::trim(string_value(Arr::get($localized_settings, 'link.url', '')));
 
         if (
             Str::startsWith($url, ['http://', 'https://']) ||
@@ -172,20 +166,20 @@ final readonly class NotFoundPageService
             return [];
         }
 
-        return collect($images)
+        $resolved_images = collect($images)
             ->filter(fn (mixed $image): bool => is_array($image) && filled(Arr::get($image, 'path')))
-            ->sortBy(fn (array $image): int => (int)Arr::get($image, 'sort_order', 0))
+            ->sortBy(fn (array $image): int => integer_value(Arr::get($image, 'sort_order', 0)))
             ->values()
             ->map(function (array $image): ?array {
-                $path = Str::ltrim((string)Arr::get($image, 'path'), '/');
+                $path = Str::ltrim(string_value(Arr::get($image, 'path')), '/');
 
                 if (blank($path) || Storage::fileExists($path) === false) {
                     return null;
                 }
 
                 try {
-                    $width = max(1, (int)Arr::get($image, 'width', 600));
-                    $height = max(1, (int)Arr::get($image, 'height', $width));
+                    $width = max(1, integer_value(Arr::get($image, 'width', 600)));
+                    $height = max(1, integer_value(Arr::get($image, 'height', $width)));
 
                     return [
                         'urls' => multiple_convert_img_and_get_url(
@@ -193,13 +187,13 @@ final readonly class NotFoundPageService
                             $width,
                             $height,
                             (bool)Arr::get($image, 'is_square', true),
-                            (string)Arr::get($image, 'background', 'transparent'),
+                            string_value(Arr::get($image, 'background', 'transparent')),
                         ),
                         'width' => $width,
                         'height' => $height,
                         'is_square' => (bool)Arr::get($image, 'is_square', true),
-                        'custom_css_classes' => Str::squish((string)Arr::get($image, 'custom_css_classes', '')),
-                        'sort_order' => (int)Arr::get($image, 'sort_order', 0),
+                        'custom_css_classes' => Str::squish(string_value(Arr::get($image, 'custom_css_classes', ''))),
+                        'sort_order' => integer_value(Arr::get($image, 'sort_order', 0)),
                     ];
                 } catch (Throwable $throwable) {
                     Log::channel('stack')->warning('Public 404 image resolution failed.', [
@@ -210,7 +204,12 @@ final readonly class NotFoundPageService
                     return null;
                 }
             })
-            ->filter()
+            ->filter(fn (?array $image): bool => $image !== null)
             ->all();
+
+        /** @var array<int, array{urls: array<string, string>, width: int, height: int, is_square: bool, custom_css_classes: string, sort_order: int}> $resolved_images */
+        return $resolved_images;
     }
+
+    /** @return array<string, mixed> */
 }

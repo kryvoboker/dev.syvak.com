@@ -8,6 +8,12 @@ use App\Models\ApplicationSettings\Currency;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $promo_code_id
+ * @property int $currency_id
+ * @property string $value
+ */
 class PromoCodeDiscount extends Model
 {
     protected $fillable = [
@@ -16,16 +22,23 @@ class PromoCodeDiscount extends Model
         'value',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return ['value' => 'decimal:4'];
     }
 
+    /** @phpstan-return BelongsTo<PromoCode, $this>
+     * @psalm-return BelongsTo<PromoCode, self>
+     */
     public function promoCode(): BelongsTo
     {
         return $this->belongsTo(PromoCode::class);
     }
 
+    /** @phpstan-return BelongsTo<Currency, $this>
+     * @psalm-return BelongsTo<Currency, self>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);

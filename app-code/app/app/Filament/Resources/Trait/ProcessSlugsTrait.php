@@ -51,6 +51,7 @@ trait ProcessSlugsTrait
         return true;
     }
 
+    /** @param array<string, mixed> $data */
     protected function getSlugs(array &$data): void
     {
         $record = $this->getSluggableRecord();

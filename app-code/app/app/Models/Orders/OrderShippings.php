@@ -8,6 +8,26 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property string $method
+ * @property string $code
+ * @property int|null $city_id
+ * @property int|null $delivery_point_id
+ * @property string|null $address
+ * @property bool $is_cost_enabled
+ */
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property string $method
+ * @property string $code
+ * @property int|null $city_id
+ * @property int|null $delivery_point_id
+ * @property string|null $address
+ * @property bool $is_cost_enabled
+ */
 class OrderShippings extends Model
 {
     protected $fillable = [
@@ -27,6 +47,7 @@ class OrderShippings extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -35,9 +56,9 @@ class OrderShippings extends Model
             'provider_data' => 'array',
         ];
     }
-
     /**
-     * @return Attribute
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
      */
     public function providerData(): Attribute
     {
@@ -47,7 +68,8 @@ class OrderShippings extends Model
     }
 
     /**
-     * @return BelongsTo<Orders, $this>
+     * @phpstan-return BelongsTo<Orders, $this>
+     * @psalm-return BelongsTo<Orders, self>
      */
     public function order(): BelongsTo
     {

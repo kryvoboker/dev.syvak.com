@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Marketing;
 
 use App\Enums\Marketing\PromoCodeDiscountTypeEnum;
+use App\Enums\Marketing\PromoCodeTypeEnum;
 use App\Models\ApplicationSettings\Currency;
 use App\Models\Marketing\PromoCode;
 use App\Services\Marketing\PromoCodeService;
@@ -195,5 +196,94 @@ class PromoCodeServiceTest extends TestCase
 
         $this->assertFalse($totals['promo_code']['is_valid']);
         $this->assertSame('Custom expired message', $totals['promo_code']['message']);
+    }
+
+    public function testRegularPromoCodeDoesNotApplyToDiscountedCartProducts(): void
+    {
+        config()->set('app.currency.current_currency_code', 'UAH');
+        config()->set('app.currency.current_exchange_rate', 1);
+
+        $currency = Currency::query()->create([
+            'code' => 'UAH',
+            'name' => 'Ukrainian Hryvnia',
+            'format_locale' => 'uk_UA',
+            'is_active' => true,
+            'is_default' => true,
+            'exchange_rate' => 1,
+            'decimal_places' => 2,
+        ]);
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Regular',
+            'code' => 'TEST',
+            'normalized_code' => 'test',
+            'promo_type' => PromoCodeTypeEnum::Regular,
+            'discount_type' => PromoCodeDiscountTypeEnum::Percentage,
+            'is_active' => true,
+        ]);
+        $promo_code->discounts()->create(['currency_id' => $currency->getKey(), 'value' => 10]);
+
+        $totals = app(PromoCodeService::class)->applyToTotals(
+            totals_data: [
+                'lines' => [],
+                'items_subtotal' => 40,
+                'grand_total' => 40,
+                'currency_code' => 'UAH',
+                'exchange_rate' => 1,
+            ],
+            cart_items: [[
+                'product_id' => 171,
+                'line_total' => 40,
+                'rrc_line_total' => 100,
+                'is_discounted' => true,
+            ]],
+            code: 'test',
+        );
+
+        $this->assertArrayNotHasKey('promo_code', $totals);
+        $this->assertSame([], $totals['lines']);
+    }
+
+    public function testSuperPromoCodeAppliesToDiscountedCartProducts(): void
+    {
+        config()->set('app.currency.current_currency_code', 'UAH');
+        config()->set('app.currency.current_exchange_rate', 1);
+
+        $currency = Currency::query()->create([
+            'code' => 'UAH',
+            'name' => 'Ukrainian Hryvnia',
+            'format_locale' => 'uk_UA',
+            'is_active' => true,
+            'is_default' => true,
+            'exchange_rate' => 1,
+            'decimal_places' => 2,
+        ]);
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Super',
+            'code' => 'TEST-SUPER',
+            'normalized_code' => 'test-super',
+            'promo_type' => PromoCodeTypeEnum::Super,
+            'discount_type' => PromoCodeDiscountTypeEnum::Percentage,
+            'is_active' => true,
+        ]);
+        $promo_code->discounts()->create(['currency_id' => $currency->getKey(), 'value' => 10]);
+
+        $totals = app(PromoCodeService::class)->applyToTotals(
+            totals_data: [
+                'lines' => [],
+                'items_subtotal' => 40,
+                'grand_total' => 40,
+                'currency_code' => 'UAH',
+                'exchange_rate' => 1,
+            ],
+            cart_items: [[
+                'product_id' => 171,
+                'line_total' => 40,
+                'rrc_line_total' => 100,
+                'is_discounted' => true,
+            ]],
+            code: 'test-super',
+        );
+
+        $this->assertSame(4.0, $totals['promo_code']['discount_amount']);
     }
 }

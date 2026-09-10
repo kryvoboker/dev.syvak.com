@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 final class ProductVariantContentPersistenceService
 {
     /**
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     public function prepareForSave(array $data): array
@@ -31,6 +32,7 @@ final class ProductVariantContentPersistenceService
 
     /**
      * @return array<string, mixed>
+     * @psalm-suppress InvalidTemplateParam
      */
     public function hydrateFormData(Product|ProductVariant $product): array
     {
@@ -39,6 +41,7 @@ final class ProductVariantContentPersistenceService
         return [
             'size_guide_data' => [
                 'translations' => $product->sizeGuides
+                    ->toBase()
                     ->mapWithKeys(fn ($guide): array => [
                         (string) $guide->language_id => [
                             'title' => $guide->short_title,
@@ -81,7 +84,7 @@ final class ProductVariantContentPersistenceService
     {
         $translations = Arr::get(is_array($data) ? $data : [], 'translations', []);
 
-        return collect(is_array($translations) ? $translations : [])
+        $normalized_guides = collect(is_array($translations) ? $translations : [])
             ->map(function (mixed $translation, int|string $language_id): ?array {
                 if (! is_array($translation) || ! is_numeric($language_id)) {
                     return null;
@@ -89,14 +92,14 @@ final class ProductVariantContentPersistenceService
 
                 $row = [
                     'language_id' => (int) $language_id,
-                    'short_title' => $this->stringValue($translation['title'] ?? null),
-                    'short_description' => $this->stringValue($translation['short_description'] ?? null),
-                    'table_rows' => $this->stringValue($translation['table_rows'] ?? null),
-                    'image' => $this->stringValue($translation['image'] ?? null),
+                    'short_title' => string_value($translation['title'] ?? null),
+                    'short_description' => string_value($translation['short_description'] ?? null),
+                    'table_rows' => string_value($translation['table_rows'] ?? null),
+                    'image' => string_value($translation['image'] ?? null),
                     'image_width' => $this->nullableInteger($translation['image_width'] ?? null),
                     'image_height' => $this->nullableInteger($translation['image_height'] ?? null),
-                    'full_description_title' => $this->stringValue($translation['full_description_title'] ?? null),
-                    'full_description' => $this->stringValue($translation['full_description'] ?? null),
+                    'full_description_title' => string_value($translation['full_description_title'] ?? null),
+                    'full_description' => string_value($translation['full_description'] ?? null),
                 ];
 
                 return collect($row)
@@ -107,6 +110,9 @@ final class ProductVariantContentPersistenceService
             ->filter()
             ->values()
             ->all();
+
+        /** @var array<int, array<string, mixed>> $normalized_guides */
+        return $normalized_guides;
     }
 
     /**
@@ -116,19 +122,19 @@ final class ProductVariantContentPersistenceService
     {
         $translations = Arr::get(is_array($data) ? $data : [], 'translations', []);
 
-        return collect(is_array($translations) ? $translations : [])
+        $normalized_details = collect(is_array($translations) ? $translations : [])
             ->map(function (mixed $translation, int|string $language_id) use ($section): ?array {
                 if (! is_array($translation) || ! is_numeric($language_id)) {
                     return null;
                 }
 
                 $section_data = Arr::get($translation, $section, []);
-                $items = collect(is_array($section_data) ? ($section_data['items'] ?? []) : [])
+                $items = collect((array) (is_array($section_data) ? ($section_data['items'] ?? []) : []))
                     ->filter(fn (mixed $item): bool => is_array($item) && filled($item['value'] ?? null))
-                    ->map(fn (array $item): array => ['value' => Str::trim((string) $item['value'])])
+                    ->map(fn (array $item): array => ['value' => Str::trim(string_value($item['value']))])
                     ->values()
                     ->all();
-                $title = $this->stringValue(is_array($section_data) ? ($section_data['title'] ?? null) : null);
+                $title = string_value(is_array($section_data) ? ($section_data['title'] ?? null) : null);
 
                 if ($title === '' && $items === []) {
                     return null;
@@ -143,10 +149,14 @@ final class ProductVariantContentPersistenceService
             ->filter()
             ->values()
             ->all();
+
+        /** @var array<int, array<string, mixed>> $normalized_details */
+        return $normalized_details;
     }
 
     /**
      * @return array<int|string, array<string, mixed>>
+     * @psalm-suppress InvalidTemplateParam
      */
     private function buildDetailsTranslations(Product|ProductVariant $product): array
     {
@@ -169,10 +179,6 @@ final class ProductVariantContentPersistenceService
         return $translations;
     }
 
-    private function stringValue(mixed $value): string
-    {
-        return Str::trim((string) $value);
-    }
 
     private function nullableInteger(mixed $value): ?int
     {

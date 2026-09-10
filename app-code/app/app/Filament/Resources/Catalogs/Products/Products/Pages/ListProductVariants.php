@@ -38,7 +38,7 @@ class ListProductVariants extends ListRecords
     {
         $this->product_id = request()->integer('product');
 
-        abort_if($this->product_id === null || $this->product_id < 1, 404);
+        abort_if($this->product_id < 1, 404);
 
         parent::mount();
     }
@@ -85,9 +85,13 @@ class ListProductVariants extends ListRecords
             ]);
     }
 
+    /** @return Builder<ProductVariant>|Relation<ProductVariant, ProductVariant, mixed>|null */
     protected function getTableQuery(): Builder|Relation|null
     {
-        return ProductVariantResource::getEloquentQuery()
+        /** @var Builder<ProductVariant> $query */
+        $query = ProductVariantResource::getEloquentQuery();
+
+        return $query
             ->where('product_id', $this->product_id)
             ->orderByDesc('is_default')
             ->orderBy('sort_order')

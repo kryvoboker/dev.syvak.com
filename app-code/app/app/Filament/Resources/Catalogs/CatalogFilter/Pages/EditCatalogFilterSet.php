@@ -70,9 +70,9 @@ class EditCatalogFilterSet extends EditRecord
                                     ? 'admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_rebuild_queued'
                                     : 'admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_rebuilt',
                                 [
-                                'rows_total' => (int) ($summary['rows_total'] ?? 0),
-                                'index_version' => (int) ($summary['index_version'] ?? 0),
-                                'status' => (string) ($summary['status'] ?? 'ok'),
+                                'rows_total' => (int) $summary['rows_total'],
+                                'index_version' => (int) $summary['index_version'],
+                                'status' => (string) $summary['status'],
                                 ],
                             ),
                         )
@@ -167,9 +167,9 @@ class EditCatalogFilterSet extends EditRecord
                                     ? 'admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_rebuild_queued'
                                     : 'admin/catalogs/catalog-filter/catalog-filter-set.notifications.index_rebuilt',
                                 [
-                                    'rows_total' => (int) ($index_summary['rows_total'] ?? 0),
-                                    'index_version' => (int) ($index_summary['index_version'] ?? 0),
-                                    'status' => (string) ($index_summary['status'] ?? 'ok'),
+                                    'rows_total' => (int) $index_summary['rows_total'],
+                                    'index_version' => (int) $index_summary['index_version'],
+                                    'status' => (string) $index_summary['status'],
                                 ],
                             ),
                         )
@@ -191,7 +191,7 @@ class EditCatalogFilterSet extends EditRecord
         $record = $this->getRecord();
         $record->loadMissing('indexMeta', 'groups.translations.language');
 
-        $selected_context_types = is_array($record->context_types) && $record->context_types !== []
+        $selected_context_types = $record->context_types !== null && $record->context_types !== []
             ? $record->context_types
             : [(string) $record->getRawOriginal('context_type')];
 
@@ -217,7 +217,7 @@ class EditCatalogFilterSet extends EditRecord
             ->reject(fn (CatalogFilterGroup $group): bool => (string) $group->code === 'stock')
             ->map(function (CatalogFilterGroup $group): array {
                 $config_data = (array) ($group->config ?? []);
-                $get_data = (array) ($config_data['get'] ?? []);
+                $get_data = (array) Arr::get($config_data, 'get', []);
 
                 $labels = $group->translations
                     ->mapWithKeys(function (CatalogFilterGroupTranslation $translation): array {
@@ -241,14 +241,14 @@ class EditCatalogFilterSet extends EditRecord
                     'sort_order' => (int) $group->sort_order,
                     'get' => [
                         'key' => (string) ($group->get_key ?? ''),
-                        'value' => (string) ($get_data['value'] ?? ''),
-                        'extra' => is_array($get_data['extra'] ?? null) ? (array) $get_data['extra'] : [],
+                        'value' => (string) Arr::get($get_data, 'value', ''),
+                        'extra' => (array) Arr::get($get_data, 'extra', []),
                     ],
                     'config' => [
-                        'mode' => (string) ($config_data['mode'] ?? app(CatalogFilterSetConfigurationService::class)->getDefaultFilterMode()),
-                        'min_price' => $config_data['min_price'] ?? null,
-                        'max_price' => $config_data['max_price'] ?? null,
-                        'step' => $config_data['step'] ?? null,
+                        'mode' => (string) Arr::get($config_data, 'mode', app(CatalogFilterSetConfigurationService::class)->getDefaultFilterMode()),
+                        'min_price' => Arr::get($config_data, 'min_price'),
+                        'max_price' => Arr::get($config_data, 'max_price'),
+                        'step' => Arr::get($config_data, 'step'),
                         'labels' => $labels,
                     ],
                 ];

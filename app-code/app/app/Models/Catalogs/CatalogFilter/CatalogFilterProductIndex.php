@@ -36,6 +36,7 @@ class CatalogFilterProductIndex extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -58,7 +59,8 @@ class CatalogFilterProductIndex extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterSet, $this>
+     * @phpstan-return BelongsTo<CatalogFilterSet, $this>
+     * @psalm-return BelongsTo<CatalogFilterSet, self>
      */
     public function filterSet(): BelongsTo
     {
@@ -66,7 +68,8 @@ class CatalogFilterProductIndex extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterGroup, $this>
+     * @phpstan-return BelongsTo<CatalogFilterGroup, $this>
+     * @psalm-return BelongsTo<CatalogFilterGroup, self>
      */
     public function filterGroup(): BelongsTo
     {
@@ -74,7 +77,8 @@ class CatalogFilterProductIndex extends Model
     }
 
     /**
-     * @return BelongsTo<CatalogFilterValue, $this>
+     * @phpstan-return BelongsTo<CatalogFilterValue, $this>
+     * @psalm-return BelongsTo<CatalogFilterValue, self>
      */
     public function filterValue(): BelongsTo
     {
@@ -82,7 +86,8 @@ class CatalogFilterProductIndex extends Model
     }
 
     /**
-     * @return BelongsTo<Category, $this>
+     * @phpstan-return BelongsTo<Category, $this>
+     * @psalm-return BelongsTo<Category, self>
      */
     public function category(): BelongsTo
     {
@@ -90,7 +95,8 @@ class CatalogFilterProductIndex extends Model
     }
 
     /**
-     * @return BelongsTo<Product, $this>
+     * @phpstan-return BelongsTo<Product, $this>
+     * @psalm-return BelongsTo<Product, self>
      */
     public function product(): BelongsTo
     {
@@ -98,7 +104,8 @@ class CatalogFilterProductIndex extends Model
     }
 
     /**
-     * @return BelongsTo<Attribute, $this>
+     * @phpstan-return BelongsTo<Attribute, $this>
+     * @psalm-return BelongsTo<Attribute, self>
      */
     public function attribute(): BelongsTo
     {

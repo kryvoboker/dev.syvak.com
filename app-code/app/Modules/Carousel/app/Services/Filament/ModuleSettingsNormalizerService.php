@@ -32,7 +32,7 @@ class ModuleSettingsNormalizerService
     public function normalize(array $settings): array
     {
         $active_languages = (new Language())->getActiveLanguages();
-        $allowed_page_types = collect(config('page-settings.page_type', []))->values()->all();
+        $allowed_page_types = collect((array) config('page-settings.page_type', []))->values()->all();
         $shared_settings = Arr::get($settings, 'shared', []);
         $slides = Arr::get($settings, 'slides', []);
 

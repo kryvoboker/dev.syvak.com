@@ -24,12 +24,12 @@ final readonly class OpenAiTranslatorService
     public function translate(string $prompt): string
     {
         $app_settings = get_app_settings();
-        $model = (string) data_get($app_settings, 'ai_settings.api_model', (string) config('open-ai.api_model'));
-        $max_tokens = (int) data_get($app_settings, 'ai_settings.api_max_tokens', (int) config('open-ai.api_max_tokens'));
-        $system = (string) data_get($app_settings, 'ai_settings.system_prompt', (string) config('open-ai.system_prompt'));
-        $max_retries = (int) data_get($app_settings, 'ai_settings.api_max_retries', (int) config('open-ai.api_max_retries'));
-        $max_retry_wait_time_seconds = (int) data_get($app_settings, 'ai_settings.api_max_retry_wait_time_seconds', (int) config('open-ai.api_max_retry_wait_time_seconds'));
-        $fallback_wait = (int) data_get($app_settings, 'ai_settings.api_wait_time_seconds', (int) config('open-ai.api_wait_time_seconds'));
+        $model = string_value(data_get($app_settings, 'ai_settings.api_model', string_value(config('open-ai.api_model'))));
+        $max_tokens = integer_value(data_get($app_settings, 'ai_settings.api_max_tokens', integer_value(config('open-ai.api_max_tokens'))));
+        $system = string_value(data_get($app_settings, 'ai_settings.system_prompt', string_value(config('open-ai.system_prompt'))));
+        $max_retries = integer_value(data_get($app_settings, 'ai_settings.api_max_retries', integer_value(config('open-ai.api_max_retries'))));
+        $max_retry_wait_time_seconds = integer_value(data_get($app_settings, 'ai_settings.api_max_retry_wait_time_seconds', integer_value(config('open-ai.api_max_retry_wait_time_seconds'))));
+        $fallback_wait = integer_value(data_get($app_settings, 'ai_settings.api_wait_time_seconds', integer_value(config('open-ai.api_wait_time_seconds'))));
 
         $attempts = 0;
 
@@ -94,8 +94,9 @@ final readonly class OpenAiTranslatorService
         if (method_exists($e, 'getResponse')) {
             $resp = $e->getResponse();
 
-            if ($resp && method_exists($resp, 'getHeaderLine')) {
-                $ra = (string) $resp->getHeaderLine('Retry-After');
+            if (is_object($resp) && method_exists($resp, 'getHeaderLine')) {
+                $header_value = $resp->getHeaderLine('Retry-After');
+                $ra = is_scalar($header_value) ? (string) $header_value : '';
 
                 if ($ra !== '' && ctype_digit($ra)) {
                     return (int) $ra;

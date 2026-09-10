@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Catalogs\CatalogFilter;
 
 use App\Enums\CatalogFilter\CatalogFilterIndexStatusEnum;
-use App\Models\Catalogs\CatalogFilter\CatalogFilterIndexMeta;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +12,6 @@ class CatalogFilterIndexFreshnessService
 {
     public function markStale(CatalogFilterSet $filter_set): void
     {
-        /** @var CatalogFilterIndexMeta $index_meta */
         $index_meta = $filter_set->indexMeta()->firstOrCreate(
             ['catalog_filter_set_id' => (int) $filter_set->id],
             [

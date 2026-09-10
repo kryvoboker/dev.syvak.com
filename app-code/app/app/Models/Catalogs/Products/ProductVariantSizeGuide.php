@@ -8,6 +8,19 @@ use App\Models\ApplicationSettings\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $product_variant_id
+ * @property int $language_id
+ * @property string|null $short_title
+ * @property string|null $short_description
+ * @property array<int, mixed>|null $table_rows
+ * @property string|null $image
+ * @property int|null $image_width
+ * @property int|null $image_height
+ * @property string|null $full_description_title
+ * @property string|null $full_description
+ */
 class ProductVariantSizeGuide extends Model
 {
     protected $fillable = [
@@ -23,6 +36,7 @@ class ProductVariantSizeGuide extends Model
         'full_description',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -34,7 +48,8 @@ class ProductVariantSizeGuide extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function productVariant(): BelongsTo
     {
@@ -42,7 +57,8 @@ class ProductVariantSizeGuide extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

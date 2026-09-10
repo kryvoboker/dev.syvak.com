@@ -8,6 +8,7 @@ use App\Enums\CatalogFilter\CatalogFilterGroupSourceTypeEnum;
 use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\PageSettings\PageSetting;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -69,7 +70,7 @@ class CategoryPageFilterSyncService
         ];
 
         foreach ($payloads as $index => &$payload) {
-            $payload['sort_order'] = (int) (($index + 1) * 10);
+            $payload['sort_order'] = ($index + 1) * 10;
         }
         unset($payload);
 
@@ -81,7 +82,8 @@ class CategoryPageFilterSyncService
      */
     private function buildPriceFilterPayload(): array
     {
-        $now = now(config('app.timezone'));
+        $timezone = string_value(config('app.timezone'));
+        $now = now($timezone !== '' ? $timezone : null);
 
         $base_price_stats = DB::table('product_variants')
             ->join('products', 'products.id', '=', 'product_variants.product_id')
@@ -93,7 +95,7 @@ class CategoryPageFilterSyncService
         $discount_price_stats = DB::table('product_variant_discounts')
             ->where('date_start', '<=', $now)
             ->where('date_end', '>=', $now)
-            ->whereExists(function ($query): void {
+            ->whereExists(function (\Illuminate\Database\Query\Builder $query): void {
                 $query->selectRaw('1')
                     ->from('product_variants')
                     ->join('products', 'products.id', '=', 'product_variants.product_id')
@@ -169,11 +171,11 @@ class CategoryPageFilterSyncService
     {
         $attributes = Attribute::query()
             ->where('is_active', true)
-            ->whereHas('productVariantAttributeValues.variant.product', function ($query): void {
+            ->whereHas('productVariantAttributeValues.variant.product', function (Builder $query): void {
                 $query->where('products.is_active', true);
             })
             ->with([
-                'attributeDescription' => function ($query) use ($language_id): void {
+                'attributeDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -181,9 +183,9 @@ class CategoryPageFilterSyncService
             ->orderBy('id')
             ->get();
 
-        return $attributes->map(function (Attribute $attribute): array {
+        return $attributes->toBase()->map(function (Attribute $attribute): array {
             $attribute_discription = $attribute->attributeDescription->first();
-            $attribute_name = (string) $attribute_discription?->name;
+            $attribute_name = string_value($attribute_discription?->name);
 
             return [
                 'code' => CatalogFilterGroupSourceTypeEnum::Attribute->value . '_' . (int) $attribute->id,
@@ -214,15 +216,15 @@ class CategoryPageFilterSyncService
         $settings = is_array($page_setting->settings) ? $page_setting->settings : [];
 
         $existing_filter_items = collect((array) Arr::get($settings, 'items.filters', []))
-            ->filter(fn (mixed $item): bool => is_array($item) && filled((string) Arr::get($item, 'code')))
-            ->keyBy(fn (array $item): string => (string) Arr::get($item, 'code'));
+            ->filter(fn (mixed $item): bool => is_array($item) && filled(string_value(Arr::get($item, 'code'))))
+            ->mapWithKeys(fn (array $item): array => [string_value(Arr::get($item, 'code')) => $item]);
 
         $created_count = 0;
         $updated_count = 0;
         $next_items = [];
 
         foreach ($payloads as $payload) {
-            $code = (string) Arr::get($payload, 'code', '');
+            $code = string_value(Arr::get($payload, 'code', ''));
 
             if ($code === '') {
                 continue;
@@ -233,12 +235,12 @@ class CategoryPageFilterSyncService
 
             $next_items[] = [
                 'code' => $code,
-                'source_type' => Arr::get($payload, 'source_type'),
-                'source_id' => Arr::get($payload, 'source_id'),
-                'is_enabled' => (bool) Arr::get($existing_item, 'is_enabled', Arr::get($payload, 'is_enabled', true)),
-                'sort_order' => (int) Arr::get($payload, 'sort_order', Arr::get($existing_item, 'sort_order', 0)),
+                'source_type' => string_value(Arr::get($payload, 'source_type')),
+                'source_id' => integer_value(Arr::get($payload, 'source_id')),
+                'is_enabled' => (bool) Arr::get($existing_item ?? [], 'is_enabled', Arr::get($payload, 'is_enabled', true)),
+                'sort_order' => integer_value(Arr::get($payload, 'sort_order', Arr::get($existing_item ?? [], 'sort_order', 0))),
                 'get' => [
-                    'key' => (string) Arr::get($payload, 'get.key', ''),
+                    'key' => string_value(Arr::get($payload, 'get.key', '')),
                     'value' => Arr::get($payload, 'get.value'),
                     'extra' => is_array(Arr::get($payload, 'get.extra')) ? Arr::get($payload, 'get.extra') : [],
                 ],
@@ -263,7 +265,7 @@ class CategoryPageFilterSyncService
                 ->all(),
         );
 
-        Arr::set($settings, 'meta.contract_version', max(2, (int) Arr::get($settings, 'meta.contract_version', 1)));
+        Arr::set($settings, 'meta.contract_version', max(2, integer_value(Arr::get($settings, 'meta.contract_version', 1))));
 
         $page_setting->forceFill([
             'settings' => $settings,

@@ -44,7 +44,7 @@ readonly class ModuleProviderResolverService
     }
 
     /**
-     * @return iterable<ModuleDefinition>
+     * @return iterable<int, ModuleDefinition>
      */
     private function resolveRelevantDefinitions(Request $request): iterable
     {
@@ -86,8 +86,14 @@ readonly class ModuleProviderResolverService
      */
     private function resolveProvidersForDefinitions(iterable $definitions, string $strategy): array
     {
+        $definition_list = [];
+
+        foreach ($definitions as $definition) {
+            $definition_list[] = $definition;
+        }
+
         /** @var list<class-string> $providers */
-        $providers = collect($definitions)
+        $providers = collect($definition_list)
             ->filter(fn (ModuleDefinition $definition): bool => $this->resolveModuleStrategy($definition) === $strategy)
             ->map(function (ModuleDefinition $definition): ?string {
                 $provider_class = $this->module_class_resolver_service->resolve(
@@ -127,7 +133,7 @@ readonly class ModuleProviderResolverService
      */
     private function loadModuleConfig(ModuleDefinition $definition): array
     {
-        $module_path = Str::trim((string) $definition->module_path);
+        $module_path = Str::trim(string_value($definition->module_path));
 
         if ($module_path === '') {
             return [];
@@ -139,9 +145,13 @@ readonly class ModuleProviderResolverService
             return [];
         }
 
+        /** @var mixed $config_data */
         $config_data = require $config_path;
 
-        return is_array($config_data) ? $config_data : [];
+        /** @var array<string, mixed> $config_data */
+        $config_data = is_array($config_data) ? $config_data : [];
+
+        return $config_data;
     }
 
     private function normalizeStrategy(mixed $strategy, ?ModuleDefinition $definition = null): string
@@ -152,10 +162,10 @@ readonly class ModuleProviderResolverService
             $allowed_strategies = ['eager', 'route_matched', 'middleware_after_session'];
         }
 
-        $default_strategy = (string) config('modules-runtime.default_strategy', 'route_matched');
+        $default_strategy = string_value(config('modules-runtime.default_strategy', 'route_matched'));
 
         if (! in_array($default_strategy, $allowed_strategies, true)) {
-            $default_strategy = (string) array_first($allowed_strategies);
+            $default_strategy = string_value(array_first($allowed_strategies));
         }
 
         if (is_string($strategy) && in_array($strategy, $allowed_strategies, true)) {
@@ -173,6 +183,7 @@ readonly class ModuleProviderResolverService
 
         return $default_strategy;
     }
+
 
     private function isModulesAdminRequest(Request $request): bool
     {

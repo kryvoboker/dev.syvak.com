@@ -29,8 +29,10 @@ class EditContacts extends EditRecord
 
     protected static string $resource = ContactsResource::class;
 
+    /** @var array<string, mixed> */
     protected array $normalized_settings = [];
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $slugs = [];
 
     public function getTitle(): string

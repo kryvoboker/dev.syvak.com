@@ -47,6 +47,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
         });
     }
 
+    #[\Override]
     protected function prepareForValidation(): void
     {
         $normalized_data = [
@@ -86,10 +87,13 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
      */
     private function normalizeGroupInput(CatalogFilterGroup $group, array &$normalized_data): void
     {
-        $source_type = (string) $group->getRawOriginal('source_type');
-        $group_get_key = (string) $group->get_key;
-        $group_config = is_array($group->config) ? $group->config : [];
-        $group_get_value = trim((string) Arr::get($group_config, 'get.value', ''));
+        $source_type = string_value($group->getRawOriginal('source_type'));
+        $group_get_key = string_value($group->get_key);
+        /** @var mixed $raw_group_config */
+        $raw_group_config = $group->config;
+        /** @var array<string, mixed> $group_config */
+        $group_config = is_array($raw_group_config) ? $raw_group_config : [];
+        $group_get_value = trim(string_value(Arr::get($group_config, 'get.value', '')));
 
         if ($source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
             $this->normalizePriceGroupInput($group_config, $normalized_data);
@@ -129,7 +133,12 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
         $attribute_id = (int) $group->source_id;
 
         if ($attribute_id > 0) {
-            $normalized_data['attributes'][$attribute_id] = $group_input_values;
+            $attributes = $normalized_data['attributes'] ?? [];
+
+            if (is_array($attributes)) {
+                $attributes[$attribute_id] = $group_input_values;
+                $normalized_data['attributes'] = $attributes;
+            }
         }
     }
 
@@ -139,8 +148,8 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
      */
     private function normalizePriceGroupInput(array $group_config, array &$normalized_data): void
     {
-        $from_key = (string) Arr::get($group_config, 'get.extra.from_key', 'price_from');
-        $to_key = (string) Arr::get($group_config, 'get.extra.to_key', 'price_to');
+        $from_key = string_value(Arr::get($group_config, 'get.extra.from_key', 'price_from'));
+        $to_key = string_value(Arr::get($group_config, 'get.extra.to_key', 'price_to'));
 
         $normalized_data['price_from'] = $this->extractByGetKey($from_key) ?? $normalized_data['price_from'];
         $normalized_data['price_to'] = $this->extractByGetKey($to_key) ?? $normalized_data['price_to'];
@@ -152,7 +161,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
             return true;
         }
 
-        $source_type = (string) $group->getRawOriginal('source_type');
+        $source_type = string_value($group->getRawOriginal('source_type'));
 
         if (
             $source_type === CatalogFilterGroupSourceTypeEnum::Price->value
@@ -206,7 +215,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
                 // Support both query styles:
                 // - ?weight[]=light&weight[]=medium
                 // - ?weight=light,medium
-                $string_item = trim((string) $item);
+                $string_item = trim(string_value($item));
 
                 if (blank($string_item)) {
                     return [];
@@ -230,7 +239,7 @@ class CatalogFilterAjaxIndexRequest extends FormRequest
         if (
             ! $filter_set->is_enabled
             || (
-                (string) $filter_set->getRawOriginal('context_type') !== 'category'
+                string_value($filter_set->getRawOriginal('context_type')) !== 'category'
                 && ! in_array('category', (array) $filter_set->context_types, true)
             )
         ) {

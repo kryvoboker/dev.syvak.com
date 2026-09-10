@@ -56,6 +56,9 @@ abstract class AiDbCachedTranslatorAbstract
 
     abstract protected function findCached(string $hash): ?string;
 
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     */
     abstract protected function storeTranslation(string $hash, string $prompt, string $translated_text): Model;
 
     public function getProductNameHash(): ?ProductNameHash
@@ -64,6 +67,7 @@ abstract class AiDbCachedTranslatorAbstract
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @return $this
      */
     public function setProductNameHash(?ProductNameHash $product_name_hash): AiDbCachedTranslatorAbstract
@@ -79,6 +83,7 @@ abstract class AiDbCachedTranslatorAbstract
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @return $this
      */
     public function setProductDescriptionHash(?ProductDescriptionHash $product_description_hash): AiDbCachedTranslatorAbstract
@@ -94,6 +99,7 @@ abstract class AiDbCachedTranslatorAbstract
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedReturnValue
      * @return $this
      */
     public function setProductAttributeTextHash(?ProductAttributeTextHash $product_attribute_text_hash): AiDbCachedTranslatorAbstract

@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\WayForPay\Http\Controllers\WayForPayCallbackController;
 use Modules\WayForPay\Http\Controllers\WayForPayReturnController;
 
-$locale_key = config('localization.locale_parameter', 'locale');
+$locale_key_value = config('localization.locale_parameter', 'locale');
+$locale_key = is_scalar($locale_key_value) ? (string) $locale_key_value : 'locale';
 $allowed_locales = get_allowed_locales();
 
 Route::prefix('{' . $locale_key . '}')

@@ -27,9 +27,10 @@ class CatalogFilterSetConfigurationService
         try {
             return DB::transaction(function () use ($filter_set, $data): array {
                 $normalized_data = $this->normalizeFilterSetData($data);
-                $filter_items = (array) Arr::pull($normalized_data, 'filter_items', []);
+                $filter_items = $this->listOfArrays(Arr::pull($normalized_data, 'filter_items', []));
                 Arr::forget($normalized_data, 'index_meta');
 
+                /** @var array<string, mixed> $normalized_data */
                 $filter_set->update($normalized_data);
                 $sync_summary = $this->syncFilterItems($filter_set, $filter_items);
                 app(CatalogFilterIndexFreshnessService::class)->markStale($filter_set);
@@ -60,7 +61,7 @@ class CatalogFilterSetConfigurationService
     private function normalizeFilterSetData(array $data): array
     {
         $selected_context_types = collect((array) Arr::get($data, 'context_types', []))
-            ->map(fn (mixed $context_type): string => (string) $context_type)
+            ->map(fn (mixed $context_type): string => string_value($context_type))
             ->filter(fn (string $context_type): bool => filled($context_type))
             ->unique()
             ->values()
@@ -73,6 +74,7 @@ class CatalogFilterSetConfigurationService
         Arr::set($data, 'context_types', $selected_context_types);
         Arr::set($data, 'context_type', $selected_context_types[0]);
 
+        /** @var array<string, mixed> $data */
         return $data;
     }
 
@@ -83,7 +85,7 @@ class CatalogFilterSetConfigurationService
     private function syncFilterItems(CatalogFilterSet $filter_set, array $filter_items): array
     {
         $existing_groups_by_code = CatalogFilterGroup::query()
-            ->where('catalog_filter_set_id', (int) $filter_set->id)
+            ->where('catalog_filter_set_id', integer_value($filter_set->id))
             ->with('translations.language')
             ->get()
             ->keyBy('code');
@@ -92,14 +94,14 @@ class CatalogFilterSetConfigurationService
         $languages_by_code = [];
 
         foreach ((new Language())->getActiveLanguages() as $language) {
-            $languages_by_code[(string) $language->code] = $language;
+            $languages_by_code[string_value($language->code)] = $language;
         }
 
         $groups_updated = 0;
         $translations_updated = 0;
 
         foreach ($filter_items as $filter_item) {
-            $group_code = (string) Arr::get($filter_item, 'code', '');
+            $group_code = string_value(Arr::get($filter_item, 'code', ''));
 
             if (blank($group_code)) {
                 continue;
@@ -110,34 +112,38 @@ class CatalogFilterSetConfigurationService
 
             if (! $group instanceof CatalogFilterGroup) {
                 $group = new CatalogFilterGroup();
-                $group->catalog_filter_set_id = (int) $filter_set->id;
+                $catalog_filter_set_id = integer_value($filter_set->id);
+
+                if ($catalog_filter_set_id > 0) {
+                    $group->catalog_filter_set_id = $catalog_filter_set_id;
+                }
                 $group->code = $group_code;
             }
 
-            $config_data = (array) Arr::get($filter_item, 'config', []);
+            $config_data = string_keyed_array(Arr::get($filter_item, 'config', []));
             $group->fill([
-                'source_type' => (string) Arr::get($filter_item, 'source_type', $group->getRawOriginal('source_type') ?? 'system'),
+                'source_type' => string_value(Arr::get($filter_item, 'source_type', $group->getRawOriginal('source_type') ?? 'system')),
                 'source_id' => filled(Arr::get($filter_item, 'source_id'))
-                    ? (int) Arr::get($filter_item, 'source_id')
+                    ? integer_value(Arr::get($filter_item, 'source_id'))
                     : null,
                 'is_enabled' => (bool) Arr::get($filter_item, 'is_enabled', true),
-                'sort_order' => (int) Arr::get($filter_item, 'sort_order', 0),
+                'sort_order' => integer_value(Arr::get($filter_item, 'sort_order', 0)),
                 'get_key' => $this->resolveGetKey($group, $filter_item, $group_code),
                 'config' => $this->buildGroupConfig($group, $filter_item, $config_data, $group_code),
             ]);
             $group->save();
             $groups_updated++;
 
-            $labels = (array) Arr::get($config_data, 'labels', []);
+            $labels = string_keyed_array(Arr::get($config_data, 'labels', []));
 
             foreach ($languages_by_code as $language_code => $language) {
                 CatalogFilterGroupTranslation::query()->updateOrCreate(
                     [
-                        'catalog_filter_group_id' => (int) $group->id,
-                        'language_id' => (int) $language->id,
+                        'catalog_filter_group_id' => integer_value($group->id),
+                        'language_id' => integer_value($language->id),
                     ],
                     [
-                        'label' => (string) ($labels[$language_code] ?? ''),
+                        'label' => string_value($labels[$language_code] ?? ''),
                         'description' => null,
                     ],
                 );
@@ -165,15 +171,14 @@ class CatalogFilterSetConfigurationService
     ): array {
         $price_filter_group_name = CatalogFilterGroupSourceTypeEnum::Price->value;
         $get_data = [
-            'value' => (string) Arr::get($filter_item, 'get.value', ''),
+            'value' => string_value(Arr::get($filter_item, 'get.value', '')),
             'extra' => is_array(Arr::get($filter_item, 'get.extra', []))
                 ? (array) Arr::get($filter_item, 'get.extra', [])
                 : [],
         ];
 
-        /** @var array<string, mixed> $next_config */
         $next_config = (array) ($group->config ?? []);
-        $next_config['mode'] = (string) Arr::get($config_data, 'mode', $this->getDefaultFilterMode());
+        $next_config['mode'] = string_value(Arr::get($config_data, 'mode', $this->getDefaultFilterMode()));
         $next_config['get'] = $get_data;
         $next_config['min_price'] = $group_code === $price_filter_group_name ? Arr::get($config_data, 'min_price') : null;
         $next_config['max_price'] = $group_code === $price_filter_group_name ? Arr::get($config_data, 'max_price') : null;
@@ -187,23 +192,23 @@ class CatalogFilterSetConfigurationService
      */
     private function resolveGetKey(CatalogFilterGroup $group, array $filter_item, string $group_code): string
     {
-        $next_get_key = Str::of((string) Arr::get($filter_item, 'get.key', ''))->trim()->toString();
+        $next_get_key = Str::of(string_value(Arr::get($filter_item, 'get.key', '')))->trim()->toString();
 
         if (filled($next_get_key)) {
             return $next_get_key;
         }
 
-        if (filled((string) $group->get_key)) {
-            return (string) $group->get_key;
+        if (filled(string_value($group->get_key))) {
+            return string_value($group->get_key);
         }
 
-        $source_type = (string) Arr::get(
+        $source_type = string_value(Arr::get(
             $filter_item,
             'source_type',
             $group->getRawOriginal('source_type') ?? 'system',
-        );
+        ));
         $source_id = filled(Arr::get($filter_item, 'source_id'))
-            ? (int) Arr::get($filter_item, 'source_id')
+            ? integer_value(Arr::get($filter_item, 'source_id'))
             : null;
 
         if ($source_type === CatalogFilterGroupSourceTypeEnum::Price->value) {
@@ -224,4 +229,24 @@ class CatalogFilterSetConfigurationService
 
         return is_string($default_mode) && filled($default_mode) ? $default_mode : 'multiple';
     }
+
+    /** @return array<int, array<string, mixed>> */
+    private function listOfArrays(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($value as $item) {
+            if (is_array($item)) {
+                $result[] = string_keyed_array($item);
+            }
+        }
+
+        return $result;
+    }
+
+    /** @return array<string, mixed> */
 }

@@ -36,8 +36,10 @@ class UkrPoshtaSyncPage extends Page
 
     protected static string|null|UnitEnum $navigationGroup = null;
 
+    /** @var array<string, mixed> */
     public array $settings_form = [];
 
+    /** @var array<string, mixed> */
     public array $sync_state = [];
 
     public function mount(UkrPoshtaConfig $ukr_poshta_config): void

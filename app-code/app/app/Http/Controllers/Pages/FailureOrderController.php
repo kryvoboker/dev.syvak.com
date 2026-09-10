@@ -43,7 +43,8 @@ class FailureOrderController extends Controller
         string $locale,
     ): JsonResponse {
         $locale = normalize_locale($locale);
-        $result = $recovery_service->retry((string) $request->validated('payment_method'), $locale);
+        $payment_method = $request->validated('payment_method');
+        $result = $recovery_service->retry(is_scalar($payment_method) ? (string) $payment_method : '', $locale);
 
         return response()->json($result);
     }

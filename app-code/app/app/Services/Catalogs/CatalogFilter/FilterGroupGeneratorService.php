@@ -10,7 +10,6 @@ use App\Models\Catalogs\Attributes\Attribute;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroup;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterGroupTranslation;
 use App\Models\Catalogs\CatalogFilter\CatalogFilterSet;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -26,8 +25,6 @@ class FilterGroupGeneratorService
         try {
             $created_count = 0;
             $updated_count = 0;
-            $canonical_group_codes = [];
-
             [$created_count, $updated_count, $canonical_group_codes] = $this->syncSystemGroups(
                 $filter_set,
                 $created_count,
@@ -98,27 +95,23 @@ class FilterGroupGeneratorService
         foreach ($system_groups as $payload) {
             $group = CatalogFilterGroup::query()->firstOrNew([
                 'catalog_filter_set_id' => (int) $filter_set->id,
-                'code' => (string) $payload['code'],
+                'code' => $payload['code'],
             ]);
 
             $was_existing_group = $group->exists;
 
-            $group->source_type = (string) $payload['source_type'];
+            $group->source_type = CatalogFilterGroupSourceTypeEnum::from($payload['source_type']);
             $group->source_id = null;
 
             if (! $was_existing_group) {
                 $group->is_enabled = true;
-                $group->sort_order = (int) $payload['sort_order'];
-                $group->get_key = (string) $payload['get_key'];
+                $group->sort_order = $payload['sort_order'];
+                $group->get_key = $payload['get_key'];
                 $group->setAttribute('config', []);
             }
 
             if (blank((string) $group->get_key)) {
-                $group->get_key = (string) $payload['get_key'];
-            }
-
-            if (! is_array($group->config)) {
-                $group->setAttribute('config', []);
+                $group->get_key = $payload['get_key'];
             }
 
             $group->save();
@@ -145,7 +138,6 @@ class FilterGroupGeneratorService
         int $updated_count,
         array $canonical_group_codes,
     ): array {
-        /** @var Collection<Attribute> $active_attributes */
         $active_attributes = Attribute::query()
             ->where('is_active', true)
             ->whereHas('productToAttribute.variant.product', function ($query): void {
@@ -169,8 +161,12 @@ class FilterGroupGeneratorService
 
             $was_existing_group = $group->exists;
 
-            $group->source_type = CatalogFilterGroupSourceTypeEnum::Attribute->value;
-            $group->source_id = (int) $attribute->id;
+            $group->source_type = CatalogFilterGroupSourceTypeEnum::Attribute;
+            $source_id = (int) $attribute->id;
+
+            if ($source_id > 0) {
+                $group->source_id = $source_id;
+            }
 
             if (! $was_existing_group) {
                 $group->is_enabled = true;
@@ -181,10 +177,6 @@ class FilterGroupGeneratorService
 
             if (blank((string) $group->get_key)) {
                 $group->get_key = 'filters[' . (int) $attribute->id . ']';
-            }
-
-            if (! is_array($group->config)) {
-                $group->setAttribute('config', []);
             }
 
             $group->save();
@@ -230,7 +222,7 @@ class FilterGroupGeneratorService
                     'language_id' => (int) $language->id,
                 ],
                 [
-                    'label' => (string) ($translate ?? ucfirst($group->code)),
+                    'label' => (string) $translate,
                 ],
             );
         }
@@ -239,10 +231,12 @@ class FilterGroupGeneratorService
     private function syncAttributeGroupTranslations(CatalogFilterGroup $group, Attribute $attribute): void
     {
         foreach ((new Language())->getActiveLanguages() as $language) {
-            $attribute_name = (string) optional(
+            $attribute_description = optional(
                 $attribute->attributeDescription
                     ->firstWhere('language_id', (int) $language->id),
-            )->name;
+            );
+            $attribute_name_value = data_get($attribute_description, 'name');
+            $attribute_name = is_scalar($attribute_name_value) ? (string) $attribute_name_value : '';
 
             CatalogFilterGroupTranslation::query()->updateOrCreate(
                 [

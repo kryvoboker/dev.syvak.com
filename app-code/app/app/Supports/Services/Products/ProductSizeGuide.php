@@ -38,7 +38,7 @@ class ProductSizeGuide
                 }
 
                 return collect($cells)
-                    ->map(fn (string $cell): string => Str::trim($cell))
+                    ->map(fn (string|null $cell): string => Str::trim((string) $cell))
                     ->values()
                     ->all();
             })

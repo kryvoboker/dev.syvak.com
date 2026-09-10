@@ -14,6 +14,7 @@ class CreateAttribute extends CreateRecord
 {
     protected static string $resource = AttributeResource::class;
 
+    /** @var array<int|string, array<string, mixed>> */
     protected array $descriptions = [];
 
     public ?Model $record = null;
@@ -24,7 +25,7 @@ class CreateAttribute extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Store descriptions temporarily
-        $this->descriptions = trim_strs_in_arr($data['descriptions'] ?? []);
+        $this->descriptions = trim_strs_in_arr((array) ($data['descriptions'] ?? []));
 
         unset($data['descriptions']);
 

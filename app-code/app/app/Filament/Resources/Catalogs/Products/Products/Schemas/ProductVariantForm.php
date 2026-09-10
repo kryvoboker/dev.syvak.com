@@ -215,7 +215,7 @@ class ProductVariantForm
     }
 
     /**
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      * @return array<Tab>
      */
     private static function buildTranslationTabs(Collection $active_languages): array
@@ -223,7 +223,6 @@ class ProductVariantForm
         $tabs = [];
 
         foreach ($active_languages as $language) {
-            /** @var Language $language */
             $tabs[] = Tab::make((string) $language->name)
                 ->badge((string) $language->code)
                 ->schema([
@@ -278,7 +277,7 @@ class ProductVariantForm
     }
 
     /**
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      * @return array<Tab>
      */
     private static function buildAttributeTabs(Collection $active_languages): array
@@ -286,7 +285,6 @@ class ProductVariantForm
         $tabs = [];
 
         foreach ($active_languages as $language) {
-            /** @var Language $language */
             $tabs[] = Tab::make((string) $language->name)
                 ->badge((string) $language->code)
                 ->schema([

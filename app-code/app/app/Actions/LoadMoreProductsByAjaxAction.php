@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Http\Requests\Ajax\LoadMoreProductsByAjaxIndexRequest;
+use App\Models\Catalogs\Products\Product;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\Products\ProductsLimitService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -50,7 +51,7 @@ readonly class LoadMoreProductsByAjaxAction
             'page_path' => $page_path,
         ], locale: $locale);
 
-        /** @var LengthAwarePaginator|null $paginator */
+        /** @var LengthAwarePaginator<int, Product>|null $paginator */
         $paginator = Arr::get($response_data, 'paginator');
         $current_page = $paginator instanceof LengthAwarePaginator ? $paginator->currentPage() : null;
         $is_has_more_pages = $paginator instanceof LengthAwarePaginator && $paginator->hasMorePages();
@@ -65,8 +66,8 @@ readonly class LoadMoreProductsByAjaxAction
             'is_ajax_products_loading_enabled' => $is_ajax_products_loading_enabled,
             'paginator' => $paginator,
             'applied_filters' => (array) Arr::get($response_data, 'applied_filters', []),
-            'active_sort_code' => (string) Arr::get($response_data, 'active_sort_code', 'default'),
-            'selected_sort_value' => (string) Arr::get($response_data, 'selected_sort_value', ''),
+            'active_sort_code' => string_value(Arr::get($response_data, 'active_sort_code', 'default')),
+            'selected_sort_value' => string_value(Arr::get($response_data, 'selected_sort_value', '')),
             'is_filter_enabled' => (bool) Arr::get($response_data, 'is_filter_enabled', false),
         ];
     }

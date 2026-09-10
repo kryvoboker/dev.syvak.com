@@ -17,8 +17,9 @@ class CategoryPath extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -28,11 +29,19 @@ class CategoryPath extends Model
         ];
     }
 
+    /** @phpstan-return BelongsTo<Category, $this>
+     * @psalm-return BelongsTo<Category, self>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
 
+    /**
+     * @return Collection<int, CategoryPath>
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
+     */
     public function getPathIdsByCategoryId(int $category_id): Collection
     {
         return self::query()

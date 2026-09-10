@@ -9,6 +9,7 @@ use App\Models\Catalogs\Products\ProductVariant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\ProductsCarousel\Services\ProductsCarouselProductFilterService;
 use Modules\ProductsCarousel\Support\ProductsCarouselConfig;
@@ -140,9 +141,12 @@ readonly class ProductsCarouselProductSearchService
             return [];
         }
 
+        $order_sql = 'FIELD(product_variants.id, ' . implode(',', $normalized_variant_ids) . ')';
+
         $variants = $this->buildBaseVariantQuery('', null)
             ->whereIn('product_variants.id', $normalized_variant_ids)
-            ->orderByRaw('FIELD(product_variants.id, ' . implode(',', $normalized_variant_ids) . ')')
+            // @phpstan-ignore argument.type (The IDs are normalized integers before interpolation.)
+            ->orderBy(DB::raw($order_sql))
             ->get();
 
         return $this->mapVariantsToOptions($variants);
@@ -168,12 +172,13 @@ readonly class ProductsCarouselProductSearchService
             return [$search_query, null];
         }
 
-        $search_term = Str::trim((string) $matches[1]);
-        $price = (float) Str::replace(',', '.', (string) $matches[2]);
+        $search_term = Str::trim($matches[1]);
+        $price = (float) Str::replace(',', '.', $matches[2]);
 
         return [$search_term, $price];
     }
 
+    /** @return Builder<ProductVariant> */
     private function buildBaseVariantQuery(string $search_term, ?float $search_price): Builder
     {
         $language_id = $this->resolveLanguageId();
@@ -235,6 +240,7 @@ readonly class ProductsCarouselProductSearchService
             ->orderBy('product_variants.id');
     }
 
+    /** @param Builder<\Illuminate\Database\Eloquent\Model>|Relation<\Illuminate\Database\Eloquent\Model, \Illuminate\Database\Eloquent\Model, mixed> $query */
     private function applyCurrentDiscountScope(Builder|Relation $query): void
     {
         $current_date_time = now(config('app.timezone'));

@@ -397,7 +397,7 @@ readonly class UkrPoshtaSyncService
             );
         }
 
-        $current_id = (int)array_shift($queue);
+        $current_id = array_shift($queue);
         try {
             $imported_rows = $batch_callback($current_id);
         } catch (Throwable $throwable) {
@@ -1020,7 +1020,7 @@ readonly class UkrPoshtaSyncService
             return $stage_weight;
         }
 
-        $stage_progress = (int)round(($processed_rows / $total_rows) * 25);
+        $stage_progress = (int) round((((float) $processed_rows / (float) $total_rows) * (float) 25));
 
         return min(100, $stage_weight + $stage_progress);
     }

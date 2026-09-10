@@ -96,6 +96,12 @@ class ThankYouControllerTest extends TestCase
             'value' => 100,
             'sort_order' => 1,
         ]);
+        OrderTotals::query()->create([
+            'order_id' => $order->id,
+            'total_type' => 'promo_code',
+            'value' => -25,
+            'sort_order' => 2,
+        ]);
 
         $view = app(ThankYouController::class)->index(
             app(HeaderService::class),
@@ -114,6 +120,7 @@ class ThankYouControllerTest extends TestCase
         $this->assertSame('Jane Doe', $thank_you_data['customer']['name']);
         $this->assertSame('Kyiv, Street 1, Branch 10', $thank_you_data['delivery']['address']);
         $this->assertSame('Long product name', $thank_you_data['products'][0]['name']);
+        $this->assertSame('UAH 25.00', $thank_you_data['summary']['promo_code_discount']);
         $this->assertSame('images/thank-you/pc-bg-1.png', $data['background_image_data']['path']);
     }
 
@@ -239,6 +246,7 @@ class ThankYouControllerTest extends TestCase
             $table->string('last_name')->nullable();
             $table->string('email')->nullable();
             $table->string('telephone')->nullable();
+            $table->boolean('no_call')->default(false);
             $table->timestamps();
         });
         Schema::create('order_shippings', function (Blueprint $table): void {

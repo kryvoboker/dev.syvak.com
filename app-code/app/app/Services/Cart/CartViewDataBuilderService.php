@@ -11,9 +11,13 @@ use App\Services\Cart\Modules\Delivery\NovaPoshtaDeliveryModule;
 use App\Services\Cart\Modules\Delivery\UkrPoshtaDeliveryModule;
 use App\Services\Cart\Modules\Discount\GiftCertificateModule;
 use App\Services\Cart\Modules\Discount\PromoCodeModule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 readonly class CartViewDataBuilderService
 {
@@ -30,7 +34,7 @@ readonly class CartViewDataBuilderService
     public function build(array $cart_items, string $locale, string $mode = CartModeEnum::Regular->value): array
     {
         $language = resolve_language_by_locale($locale);
-        $language_id = $language instanceof Language ? (int)$language->id : 0;
+        $language_id = $language instanceof Language ? integer_value($language->id) : 0;
 
         if ($cart_items === []) {
             return $this->emptyPayload($mode);
@@ -38,7 +42,7 @@ readonly class CartViewDataBuilderService
 
         $variant_ids = collect($cart_items)
             ->pluck('product_variant_id')
-            ->map(fn (mixed $variant_id): int => (int)$variant_id)
+            ->map(fn (mixed $variant_id): int => integer_value($variant_id))
             ->filter(fn (int $variant_id): bool => $variant_id > 0)
             ->unique()
             ->values()
@@ -59,10 +63,16 @@ readonly class CartViewDataBuilderService
                 'minimum',
             ])
             ->with([
-                'descriptions' => fn ($query) => $query->where('language_id', $language_id),
-                'slugs' => fn ($query) => $query->where('language_id', $language_id),
-                'images' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
-                'product' => function ($query): void {
+                'descriptions' => function (Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'slugs' => function (Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'images' => function (Relation $query): void {
+                    $query->orderBy('sort_order')->orderBy('id');
+                },
+                'product' => function (Relation $query): void {
                     $query->select([
                         'id',
                         'price',
@@ -72,24 +82,30 @@ readonly class CartViewDataBuilderService
                         'ean',
                     ])->with('categories:id');
                 },
-                'product.productDescription' => fn ($query) => $query->where('language_id', $language_id),
-                'product.slugs' => fn ($query) => $query->where('language_id', $language_id),
-                'attributeValues' => function ($query) use ($language_id) {
-                    return $query
+                'product.productDescription' => function (Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'product.slugs' => function (Relation $query) use ($language_id): void {
+                    $query->where('language_id', $language_id);
+                },
+                'attributeValues' => function (Relation $query) use ($language_id): void {
+                    $query
                         ->with([
-                            'attribute' => function ($query) use ($language_id) {
-                                return $query
+                            'attribute' => function (Relation $query) use ($language_id): void {
+                                $query
                                     ->where('is_active', true)
                                     ->with([
-                                        'attributeDescription' => fn ($query) => $query->where('language_id', $language_id),
+                                        'attributeDescription' => function (Relation $query) use ($language_id): void {
+                                            $query->where('language_id', $language_id);
+                                        },
                                     ]);
                             },
                         ])
                         ->where('language_id', $language_id);
                 },
-                'discounts' => function ($query): void {
+                'discounts' => function (Relation $query): void {
                     $query
-                        ->where('user_group_id', (int) (get_app_settings()->user_group_id ?? 0))
+                        ->where('user_group_id', get_app_settings()->user_group_id ?? 0)
                         ->where('date_start', '<=', now())
                         ->where('date_end', '>=', now())
                         ->orderBy('priority')
@@ -102,25 +118,24 @@ readonly class CartViewDataBuilderService
 
         $resolved_items = collect($cart_items)
             ->map(function (array $item_data) use ($variants, $language_id): ?array {
-                /** @var ProductVariant|null $variant */
-                $variant = $variants->get((int)$item_data['product_variant_id']);
+                $variant = $variants->get(integer_value($item_data['product_variant_id']));
 
                 if (!$variant instanceof ProductVariant || !$variant->product) {
                     return null;
                 }
 
-                $quantity = max(1, (int)Arr::get($item_data, 'quantity', 1));
-                $rrc_price = max(0, (float) ($variant->price ?? $variant->product->price ?? 0));
+                $quantity = max(1, integer_value(Arr::get($item_data, 'quantity', 1)));
+                $rrc_price = max(0, float_value($variant->price ?? $variant->product->price ?? 0));
                 $active_discount = $variant->discounts->first();
-                $price = max(0, (float) ($active_discount->price ?? $rrc_price));
+                $price = max(0, float_value($active_discount->price ?? $rrc_price));
                 $is_discounted = $active_discount !== null && $price < $rrc_price;
 
-                $variant_name = Str::trim((string)$variant->descriptions->first()?->name);
-                $product_name = Str::trim((string)$variant->product->productDescription->first()?->name);
+                $variant_name = Str::trim(string_value($variant->descriptions->first()?->name));
+                $product_name = Str::trim(string_value($variant->product->productDescription->first()?->name));
                 $item_name = filled($variant_name) ? $variant_name : $product_name;
 
-                $product_slug = Str::trim((string)$variant->product->slugs->first()?->slug);
-                $variant_slug = Str::trim((string)$variant->slugs->first()?->slug);
+                $product_slug = Str::trim(string_value($variant->product->slugs->first()?->slug));
+                $variant_slug = Str::trim(string_value($variant->slugs->first()?->slug));
 
                 if (filled($product_slug)) {
                     if (filled($variant_slug)) {
@@ -143,53 +158,54 @@ readonly class CartViewDataBuilderService
                     'height' => 220,
                 ];
 
-                $line_total = $price * $quantity;
+                $line_total = (float) $price * (float) $quantity;
 
                 $selected_attributes = $this->resolveItemAttributes(
                     $variant,
-                    (array)Arr::get($item_data, 'chosen_attributes', []),
+                    array_value(Arr::get($item_data, 'chosen_attributes', [])),
                 );
 
                 return [
-                    'cart_id' => (int)Arr::get($item_data, 'cart_id', 0),
-                    'variant_id' => (int)$variant->id,
-                    'product_id' => (int)$variant->product_id,
+                    'cart_id' => integer_value(Arr::get($item_data, 'cart_id', 0)),
+                    'variant_id' => integer_value($variant->id),
+                    'product_id' => integer_value($variant->product_id),
                     'language_id' => $language_id,
                     'model' => $variant->product->model,
-                    'sku' => (string)$variant->product->sku,
+                    'sku' => string_value($variant->product->sku),
                     'ean' => $variant->product->ean,
                     'name' => $item_name,
                     'url' => $item_url,
                     'quantity' => $quantity,
-                    'minimum_quantity' => max(1, (int)($variant->minimum ?: $variant->product->minimum ?: 1)),
-                    'available_quantity' => max(0, (int)$variant->quantity),
-                    'is_in_stock' => (int)$variant->quantity >= max(1, (int)($variant->minimum ?: $variant->product->minimum ?: 1)),
+                    'minimum_quantity' => max(1, integer_value($variant->minimum ?: $variant->product->minimum ?: 1)),
+                    'available_quantity' => max(0, integer_value($variant->quantity)),
+                    'is_in_stock' => integer_value($variant->quantity) >= max(1, integer_value($variant->minimum ?: $variant->product->minimum ?: 1)),
                     'unit_price' => $price,
-                    'unit_price_formatted' => replace_currency_symbol_to_code(format_price(
+                    'unit_price_formatted' => replace_currency_symbol_to_code((string) format_price(
                         $price,
-                        config('app.currency.current_currency_code'),
-                        (float)config('app.currency.current_exchange_rate'),
+                        nullable_string(config('app.currency.current_currency_code')),
+                        float_value(config('app.currency.current_exchange_rate')),
                     )),
                     'line_total' => $line_total,
                     'rrc_unit_price' => $rrc_price,
-                    'rrc_line_total' => $rrc_price * $quantity,
+                    'rrc_line_total' => (float) $rrc_price * (float) $quantity,
                     'is_discounted' => $is_discounted,
                     'active_discount_id' => $active_discount?->getKey(),
                     'category_ids' => $variant->product->categories->modelKeys(),
-                    'line_total_formatted' => replace_currency_symbol_to_code(format_price(
+                    'line_total_formatted' => replace_currency_symbol_to_code((string) format_price(
                         $line_total,
-                        config('app.currency.current_currency_code'),
-                        (float)config('app.currency.current_exchange_rate'),
+                        nullable_string(config('app.currency.current_currency_code')),
+                        float_value(config('app.currency.current_exchange_rate')),
                     )),
                     'attributes' => $selected_attributes,
                     'selected_attributes' => $selected_attributes,
-                    'chosen_attributes_raw' => (array)Arr::get($item_data, 'chosen_attributes', []),
+                    'chosen_attributes_raw' => array_value(Arr::get($item_data, 'chosen_attributes', [])),
                     'image_data' => $image_data,
                 ];
             })
             ->filter(fn (?array $item_data): bool => is_array($item_data))
             ->values();
 
+        /** @var Collection<int, array<string, mixed>> $resolved_items */
         return $this->collectCartData($resolved_items, $mode, $locale);
     }
 
@@ -197,6 +213,7 @@ readonly class CartViewDataBuilderService
      * @param array<int|string, mixed> $chosen_attributes
      *
      * @return array<int, array{label: string, value: string}>
+     * @psalm-suppress InvalidTemplateParam
      */
     private function resolveItemAttributes(ProductVariant $variant, array $chosen_attributes): array
     {
@@ -206,21 +223,21 @@ readonly class CartViewDataBuilderService
             ->map(function (mixed $value, int|string $key): ?array {
                 if (is_array($value)) {
                     $raw_attribute_id = Arr::get($value, 'attribute_id');
-                    $attribute_id = is_numeric($raw_attribute_id) ? (int)$raw_attribute_id : null;
-                    $label = Str::trim((string)Arr::get(
+                    $attribute_id = is_numeric($raw_attribute_id) ? integer_value($raw_attribute_id) : null;
+                    $label = Str::trim(string_value(Arr::get(
                         $value,
                         'label',
                         Arr::get($value, 'attribute_name', Arr::get($value, 'name', $key)),
-                    ));
-                    $text = Str::trim((string)Arr::get(
+                    )));
+                    $text = Str::trim(string_value(Arr::get(
                         $value,
                         'value',
                         Arr::get($value, 'text', Arr::get($value, 'attribute_value', '')),
-                    ));
+                    )));
                 } else {
-                    $attribute_id = is_int($key) || ctype_digit($key) ? (int)$key : null;
-                    $label = Str::trim((string)$key);
-                    $text = Str::trim((string)$value);
+                    $attribute_id = is_int($key) || ctype_digit($key) ? integer_value($key) : null;
+                    $label = Str::trim(string_value($key));
+                    $text = Str::trim(string_value($value));
                 }
 
                 if ($text === '') {
@@ -233,10 +250,17 @@ readonly class CartViewDataBuilderService
                     'value' => $text,
                 ];
             })
-            ->filter(fn (?array $attribute): bool => is_array($attribute))
-            ->map(static function (array $attribute) use ($attribute_label_map): array {
+            ->filter(fn (array|null $attribute): bool => $attribute !== null)
+            ->map(function (array|null $attribute) use ($attribute_label_map): array {
+                if ($attribute === null) {
+                    return [
+                        'label' => '',
+                        'value' => '',
+                    ];
+                }
+
                 $attribute_id = Arr::get($attribute, 'attribute_id');
-                $label = Str::trim((string)Arr::get($attribute, 'label', ''));
+                $label = Str::trim(string_value(Arr::get($attribute, 'label', '')));
 
                 if (is_int($attribute_id) && filled($attribute_label_map[$attribute_id] ?? null)) {
                     $label = $attribute_label_map[$attribute_id];
@@ -244,25 +268,26 @@ readonly class CartViewDataBuilderService
 
                 return [
                     'label' => $label,
-                    'value' => Str::trim((string)Arr::get($attribute, 'value', '')),
+                    'value' => Str::trim(string_value(Arr::get($attribute, 'value', ''))),
                 ];
             })
-            ->filter(static fn (array $attribute): bool => $attribute['value'] !== '')
+            ->filter(fn (array $attribute): bool => $attribute['value'] !== '')
             ->values();
 
         if ($resolved_attributes->isNotEmpty()) {
             return $resolved_attributes->all();
         }
 
-        return $variant->attributeValues
+        /** @var array<int, array{label: string, value: string}> $attributes */
+        $attributes = $variant->attributeValues
             ->map(function ($attribute_value): ?array {
-                $value_string = Str::trim((string)$attribute_value->value_string);
+                $value_string = Str::trim(string_value($attribute_value->value_string));
 
                 if ($value_string === '') {
                     return null;
                 }
 
-                $attribute_label = Str::trim((string)$attribute_value->attribute?->attributeDescription->first()?->name);
+                $attribute_label = Str::trim(string_value($attribute_value->attribute?->attributeDescription->first()?->name));
 
                 return [
                     'label' => $attribute_label,
@@ -272,6 +297,8 @@ readonly class CartViewDataBuilderService
             ->filter(fn (?array $attribute): bool => is_array($attribute))
             ->values()
             ->all();
+
+        return $attributes;
     }
 
     /**
@@ -282,13 +309,13 @@ readonly class CartViewDataBuilderService
         $label_map = [];
 
         foreach ($variant->attributeValues as $attribute_value) {
-            $attribute_id = (int)($attribute_value->attribute_id ?? 0);
+            $attribute_id = integer_value($attribute_value->attribute_id ?? 0);
 
             if ($attribute_id <= 0) {
                 continue;
             }
 
-            $attribute_label = Str::trim((string)$attribute_value->attribute?->attributeDescription->first()?->name);
+            $attribute_label = Str::trim(string_value($attribute_value->attribute?->attributeDescription->first()?->name));
 
             if ($attribute_label === '') {
                 continue;
@@ -302,43 +329,50 @@ readonly class CartViewDataBuilderService
 
     private function resolveVariantImagePath(ProductVariant $variant): ?string
     {
-        $variant_image = Str::trim((string)$variant->image);
+        $variant_image = Str::trim(string_value($variant->image));
 
         if (filled($variant_image)) {
             return $variant_image;
         }
 
-        $image_from_images = Str::trim((string)optional($variant->images->first())->image);
+        $image_from_images = Str::trim(string_value(data_get($variant->images->first(), 'image')));
 
         if (filled($image_from_images)) {
             return $image_from_images;
         }
 
-        $product_image = Str::trim((string)optional($variant->product)->image);
+        $product_image = Str::trim(string_value(data_get($variant->product, 'image')));
 
         return filled($product_image) ? $product_image : null;
     }
 
     /**
+     * @param Collection<int, array<string, mixed>> $resolved_items
      * @return array<int, callable(array<string, mixed>): array<string, mixed>>
      */
     private function resolveTotalsCallbacks(Collection $resolved_items, string $locale): array
     {
-        $checkout_state = (array) session()->get('checkout.selection_state', []);
-        $app_settings = get_app_settings();
+        try {
+            $checkout_state = (array)session()->get('checkout.selection_state', []);
+            $app_settings = get_app_settings();
 
-        return [
-            app(UkrPoshtaDeliveryModule::class)->resolveCallback(),
-            app(NovaPoshtaDeliveryModule::class)->resolveCallback(),
-            app(PromoCodeModule::class)->resolveCallback([
-                'cart_items' => $resolved_items->all(),
-                'code' => $checkout_state['promo_code'] ?? null,
-                'locale' => $locale,
-                'user_id' => auth()->id(),
-                'user_group_id' => $app_settings?->user_group_id,
-            ]),
-            app(GiftCertificateModule::class)->resolveCallback(),
-        ];
+            return [
+                app(UkrPoshtaDeliveryModule::class)->resolveCallback(),
+                app(NovaPoshtaDeliveryModule::class)->resolveCallback(),
+                app(PromoCodeModule::class)->resolveCallback([
+                    'cart_items' => $resolved_items->all(),
+                    'code' => $checkout_state['promo_code'] ?? null,
+                    'locale' => $locale,
+                    'user_id' => Auth::id(),
+                    'user_group_id' => $app_settings?->user_group_id,
+                ]),
+                app(GiftCertificateModule::class)->resolveCallback(),
+            ];
+        } catch (Throwable $e) {
+            Log::channel('stack')->error($e->getMessage(), $e->getTrace());
+
+            return [];
+        }
     }
 
     /**
@@ -368,10 +402,11 @@ readonly class CartViewDataBuilderService
     }
 
     /**
-     * @param Collection $resolved_items
-     * @param string     $mode
+     * @param Collection<int, array<string, mixed>> $resolved_items
+     * @param string                                $mode
+     * @param string                                $locale
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function collectCartData(Collection $resolved_items, string $mode, string $locale): array
     {
@@ -380,7 +415,7 @@ readonly class CartViewDataBuilderService
             callbacks : $this->resolveTotalsCallbacks($resolved_items, $locale),
         );
 
-        $total_quantity = (int)$resolved_items->sum(fn (array $item_data): int => (int)$item_data['quantity']);
+        $total_quantity = integer_value($resolved_items->sum(fn (array $item_data): int => integer_value($item_data['quantity'])));
 
         return [
             'mode' => $mode,

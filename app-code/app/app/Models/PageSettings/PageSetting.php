@@ -9,6 +9,10 @@ use App\Models\Trait\SlugTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
+/**
+ * @property array<string, mixed>|null $settings
+ * @property int $id
+ */
 class PageSetting extends Model
 {
     use HasSlugsTrait;
@@ -34,6 +38,7 @@ class PageSetting extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -53,11 +58,14 @@ class PageSetting extends Model
             return [];
         }
 
-        return collect($settings_items)
+        /** @var array<int, array<string, mixed>> $items */
+        $items = collect($settings_items)
             ->filter(fn (mixed $item): bool => is_array($item))
             ->map(fn (array $item): array => $item)
             ->values()
             ->all();
+
+        return $items;
     }
 
     /**
@@ -72,10 +80,13 @@ class PageSetting extends Model
             return [];
         }
 
-        return collect($settings_items)
+        /** @var array<int, array<string, mixed>> $items */
+        $items = collect($settings_items)
             ->filter(fn (mixed $item): bool => is_array($item))
             ->map(fn (array $item): array => $item)
             ->values()
             ->all();
+
+        return $items;
     }
 }

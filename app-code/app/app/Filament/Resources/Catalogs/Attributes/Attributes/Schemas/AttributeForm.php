@@ -51,7 +51,7 @@ class AttributeForm
     /**
      * Create language tabs for specific section
      *
-     * @param  Collection<Language>  $active_languages
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Language>  $active_languages
      * @return array<Tabs\Tab>
      */
     protected static function createLanguageTabs(Collection $active_languages): array

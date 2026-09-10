@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Trait;
 
+use Illuminate\Database\Eloquent\Model;
+
 trait TotalModelItemsResourceTrait
 {
     /**
@@ -11,7 +13,13 @@ trait TotalModelItemsResourceTrait
      */
     public static function getNavigationBadge(): ?string
     {
-        $total_items_in_model = self::$model::count();
+        $model = static::$model ?? null;
+
+        if (! is_string($model) || ! is_a($model, Model::class, true)) {
+            return '0';
+        }
+
+        $total_items_in_model = $model::query()->count();
 
         return $total_items_in_model > 0 ? (string) $total_items_in_model : '0';
     }

@@ -9,6 +9,13 @@ use App\Models\Catalogs\Attributes\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string|null $value_string
+ * @property int $id
+ * @property int $attribute_id
+ * @property int $language_id
+ * @property-read Attribute|null $attribute
+ */
 class ProductVariantAttributeValue extends Model
 {
     protected $fillable = [
@@ -19,8 +26,9 @@ class ProductVariantAttributeValue extends Model
     ];
 
     /**
-     * @return string[]
+     * @return array<string, \Stringable|string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -31,7 +39,8 @@ class ProductVariantAttributeValue extends Model
     }
 
     /**
-     * @return BelongsTo<ProductVariant, $this>
+     * @phpstan-return BelongsTo<ProductVariant, $this>
+     * @psalm-return BelongsTo<ProductVariant, self>
      */
     public function variant(): BelongsTo
     {
@@ -39,7 +48,8 @@ class ProductVariantAttributeValue extends Model
     }
 
     /**
-     * @return BelongsTo<Attribute, $this>
+     * @phpstan-return BelongsTo<Attribute, $this>
+     * @psalm-return BelongsTo<Attribute, self>
      */
     public function attribute(): BelongsTo
     {
@@ -47,7 +57,8 @@ class ProductVariantAttributeValue extends Model
     }
 
     /**
-     * @return BelongsTo<Language, $this>
+     * @phpstan-return BelongsTo<Language, $this>
+     * @psalm-return BelongsTo<Language, self>
      */
     public function language(): BelongsTo
     {

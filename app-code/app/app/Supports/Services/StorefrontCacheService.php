@@ -12,12 +12,13 @@ final class StorefrontCacheService
 {
     private const string PREFIX = 'storefront:';
 
+    /** @param Closure(): mixed $callback */
     public function remember(string $key, Closure $callback, int $ttl_seconds = 300): mixed
     {
         return Cache::remember(
             self::PREFIX . Str::trim($key),
             now()->addSeconds($ttl_seconds),
-            $callback,
+            static fn (): mixed => $callback(),
         );
     }
 }

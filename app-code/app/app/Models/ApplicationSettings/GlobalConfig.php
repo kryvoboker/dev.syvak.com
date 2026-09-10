@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $key
+ * @property string|null $value
+ * @property bool $is_active
+ */
 class GlobalConfig extends Model
 {
     protected $fillable = [
@@ -19,6 +25,7 @@ class GlobalConfig extends Model
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -26,13 +33,21 @@ class GlobalConfig extends Model
         ];
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function key(): Attribute
     {
         return Attribute::make(
-            set: fn (mixed $value): ?string => filled($value) ? trim((string) $value) : null,
+            set: fn (mixed $value): ?string => filled($value) && is_scalar($value) ? trim((string) $value) : null,
         );
     }
 
+    /**
+     * @phpstan-return Attribute<mixed, mixed>
+     * @psalm-return Attribute
+     */
     public function value(): Attribute
     {
         return Attribute::make(
@@ -49,7 +64,7 @@ class GlobalConfig extends Model
                     return json_encode($value, JSON_UNESCAPED_UNICODE) ?: null;
                 }
 
-                $string_value = (string) $value;
+                $string_value = is_scalar($value) ? (string) $value : '';
 
                 return $string_value === '' ? null : $string_value;
             },
