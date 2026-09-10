@@ -1,17 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
-use App\Providers\AppServiceProvider;
-use App\Providers\Filament\AlyoAdminPanelProvider;
-use App\Providers\ModuleProvidersServiceProvider;
-use App\Providers\OpenAiServiceProvider;
-use Fruitcake\LaravelDebugbar\ServiceProvider as DebugbarServiceProvider;
-
 return [
-    AppServiceProvider::class,
-    AlyoAdminPanelProvider::class,
-    ModuleProvidersServiceProvider::class,
-    OpenAiServiceProvider::class,
-    DebugbarServiceProvider::class,
+    App\Providers\AppServiceProvider::class,
+    App\Providers\Filament\AlyoAdminPanelProvider::class,
+    App\Providers\HorizonServiceProvider::class,
+    App\Providers\ModuleProvidersServiceProvider::class,
+    App\Providers\OpenAiServiceProvider::class,
+    Fruitcake\LaravelDebugbar\ServiceProvider::class,
 ];

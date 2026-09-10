@@ -7,6 +7,7 @@ namespace App\Services\Order;
 use App\Enums\Cart\CartModeEnum;
 use App\Enums\Cart\CartRequestKeyEnum;
 use App\Enums\Order\OrderDataKeyEnum;
+use App\Enums\Order\OrderNotificationOutcomeEnum;
 use App\Enums\Order\PaymentMethodEnum;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
@@ -39,9 +40,10 @@ readonly class OrderCreationService
         private OrderAggregatePersistenceService $order_aggregate_persistence_service,
         private OrderLifecycleService $order_lifecycle_service,
         private PickupCheckoutDataService $pickup_checkout_data_service,
-        private CheckoutStateResetService $checkout_state_reset_service,
+        private ?CheckoutStateResetService $checkout_state_reset_service = null,
         private ?PromoCodeService $promo_code_service = null,
         private ?FailureOrderRecoveryService $failure_order_recovery_service = null,
+        private ?OrderNotificationOutboxService $notification_outbox_service = null,
     ) {
     }
 
@@ -139,7 +141,8 @@ readonly class OrderCreationService
         if ($is_success === true) {
             $this->cart_service->clearCart(string_value(Arr::get($validated_data, CartRequestKeyEnum::CartMode->value, CartModeEnum::FastOrder->value)));
             $this->consumePromoCode(string_keyed_array(Arr::get($validation_result, 'cart', [])), $order);
-            $this->checkout_state_reset_service->resetAfterOrder();
+            $this->checkout_state_reset_service?->resetAfterOrder();
+            $this->notification_outbox_service?->record($order, OrderNotificationOutcomeEnum::Success);
 
             return [
                 'success' => true,
@@ -155,6 +158,7 @@ readonly class OrderCreationService
 
         $this->markPaymentFailed($payment, string_keyed_array(Arr::get($payment_result, 'errors', [])));
         $this->failure_order_recovery_service?->remember($order);
+        $this->notification_outbox_service?->record($order, OrderNotificationOutcomeEnum::Failure);
 
         // Keep cart untouched for failed payment flow.
         return [
@@ -289,6 +293,7 @@ readonly class OrderCreationService
             if ($payment_result['success'] !== true) {
                 $this->markPaymentFailed($payment, string_keyed_array(Arr::get($payment_result, 'errors', [])));
                 $this->failure_order_recovery_service?->remember($order);
+                $this->notification_outbox_service?->record($order, OrderNotificationOutcomeEnum::Failure);
 
                 return [
                     'success' => false,
@@ -299,7 +304,8 @@ readonly class OrderCreationService
                 ];
             }
 
-            $this->checkout_state_reset_service->resetAfterOrder();
+            $this->checkout_state_reset_service?->resetAfterOrder();
+            $this->notification_outbox_service?->record($order, OrderNotificationOutcomeEnum::Success);
 
             return [
                 'success' => true,
@@ -320,7 +326,7 @@ readonly class OrderCreationService
         if ((bool) Arr::get($payment_result, 'is_success', false) === true) {
             $this->cart_service->clearCart(CartModeEnum::Regular->value);
             $this->consumePromoCode(string_keyed_array(Arr::get($validation_result, 'cart', [])), $order);
-            $this->checkout_state_reset_service->resetAfterOrder();
+            $this->checkout_state_reset_service?->resetAfterOrder();
 
             return [
                 'success' => true,
@@ -337,6 +343,7 @@ readonly class OrderCreationService
 
         $this->markPaymentFailed($payment, string_keyed_array(Arr::get($payment_result, 'errors', [])));
         $this->failure_order_recovery_service?->remember($order);
+        $this->notification_outbox_service?->record($order, OrderNotificationOutcomeEnum::Failure);
 
         return [
             'success' => false,

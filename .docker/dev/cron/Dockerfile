@@ -32,6 +32,8 @@ RUN install-php-extensions  \
     sockets \
     intl \
     bcmath \
+    pcntl \
+    redis \
   && rm -f /usr/local/bin/install-php-extensions
 
 FROM php-cli AS supercronic

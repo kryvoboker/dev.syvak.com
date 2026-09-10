@@ -19,6 +19,13 @@ services:
     env_file:
       - ../../.docker/dev/env/.env
       - ../../.docker/dev/env/.env.mariadb
+    environment:
+      QUEUE_CONNECTION: redis
+      REDIS_HOST: dev-syvak-redis
+      REDIS_QUEUE_CONNECTION: default
+      REDIS_QUEUE: default
+      ORDER_NOTIFICATIONS_KAFKA_TOPIC: order-notifications
+      ORDER_NOTIFICATIONS_KAFKA_CONSUMER_GROUP: order-notifications
     volumes:
       - ../../app-code/app:/var/webroot/sites/ttter.syvak.com/app
       - ../../app-code/httpdocs:/var/webroot/sites/ttter.syvak.com/httpdocs
@@ -32,6 +39,10 @@ services:
       - ALL # Removes Linux capabilities
     depends_on:
       dev-syvak-mariadb:
+        condition: service_healthy
+      dev-syvak-redis:
+        condition: service_healthy
+      dev-syvak-kafka:
         condition: service_healthy
     networks:
       - dev-syvak-net
@@ -135,6 +146,69 @@ services:
       - apparmor=docker-default      # Limits syscalls and file system
     cap_drop:
       - ALL # Removes Linux capabilities
+    networks:
+      - dev-syvak-net
+
+  dev-syvak-redis:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/redis/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+        USERNAME: redis
+    image: dev-syvak-redis:1.0-alpine
+    container_name: dev-syvak-redis
+    restart: unless-stopped
+    ports:
+      - "42608:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ../../.db/redis:/data
+    init: true # Ensures proper signal handling and zombie reaping
+    security_opt:
+      - no-new-privileges:true
+      - apparmor=docker-default
+    cap_drop:
+      - ALL # Removes Linux capabilities
+    networks:
+      - dev-syvak-net
+
+  dev-syvak-kafka:
+    image: apache/kafka:4.0.0
+    container_name: dev-syvak-kafka
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://dev-syvak-kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@dev-syvak-kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 1
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    volumes:
+      - ../../.db/kafka:/var/lib/kafka/data
+    security_opt:
+      - no-new-privileges:true
+      - apparmor=docker-default
+    cap_drop:
+      - ALL
     networks:
       - dev-syvak-net
 
