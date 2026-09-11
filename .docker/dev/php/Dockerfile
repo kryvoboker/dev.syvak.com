@@ -117,6 +117,7 @@ COPY --chown=${UID}:${GID} .docker/dev/php/entrypoint.sh /usr/local/bin/entrypoi
 COPY .docker/dev/php/supervisord.conf /etc/supervisord.conf
 COPY .docker/dev/php/horizon.conf /etc/supervisor/conf.d/horizon.conf
 COPY .docker/dev/php/kafka-order-notifications.conf /etc/supervisor/conf.d/kafka-order-notifications.conf
+COPY .docker/dev/php/rabbitmq-order-notifications.conf /etc/supervisor/conf.d/rabbitmq-order-notifications.conf
 
 RUN mkdir -p /var/log/php-fpm /var/log/supervisor /var/run \
   && chown -R ${UID}:${GID} /var/log/php-fpm /var/log/supervisor /var/run
