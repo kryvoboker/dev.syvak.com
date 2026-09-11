@@ -10,11 +10,4 @@ slim.report.json
 !**/.env.*.example
 
 figma-info.txt
-ai-chat.txt
-
-/login-credentials.md
-/.ai-factory
-/.ai-factory.json
-/.codex
-AGENTS.md
 .mcp.json
