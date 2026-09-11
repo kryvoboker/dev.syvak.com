@@ -19,6 +19,8 @@ use App\Services\Modules\ModuleProviderRegistrarService;
 use App\Services\Modules\ModuleProviderResolverService;
 use App\Services\Modules\ModuleRuntimeResolverService;
 use App\Services\Order\OrderAdminOptionsService;
+use App\Services\Order\OrderNotificationPublisher;
+use App\Services\Order\RabbitMqOrderNotificationPublisher;
 use App\Services\PageSettings\PageSettingsBootstrapService;
 use App\Supports\Services\AppSettingsService;
 use App\Supports\Services\CacheInvalidationService;
@@ -78,6 +80,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ConvertPrice::class);
         $this->app->singleton(ModuleCacheService::class);
         $this->app->scoped(OrderAdminOptionsService::class);
+        $this->app->bind(OrderNotificationPublisher::class, RabbitMqOrderNotificationPublisher::class);
         $this->app->singleton(ModuleDiscoveryService::class);
         $this->app->singleton(ModuleDefinitionSyncService::class);
         $this->app->singleton(ModuleInstanceService::class);

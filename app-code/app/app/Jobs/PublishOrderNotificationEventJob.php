@@ -30,8 +30,8 @@ final class PublishOrderNotificationEventJob implements ShouldQueue
     }
 
     /**
-     * @return void
      * @throws Throwable
+     * @return void
      */
     public function handle(): void
     {
