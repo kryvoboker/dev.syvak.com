@@ -13,15 +13,22 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('lastname')->nullable()->after('name');
+            $table->string('lastname')
+                ->nullable()
+                ->after('name');
 
             $table->string('telephone', 20)
                 ->unique()
                 ->nullable()
                 ->after('email');
 
-            $table->string('avatar', 600)->nullable()->after('telephone');
-            $table->string('avatar_file_name')->nullable()->after('avatar');
+            $table->string('avatar', 600)
+                ->nullable()
+                ->after('telephone');
+
+            $table->string('avatar_file_name')
+                ->nullable()
+                ->after('avatar');
 
             $table->boolean('is_active')
                 ->nullable(false)

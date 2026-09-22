@@ -35,7 +35,6 @@ The project follows a **Modular Monolith** architecture.
 - `README.md` — project landing page
 - `routes/web.php` — storefront + AJAX routes
 - `bootstrap/app.php` — app bootstrap, middleware, exception flow
-- `/ARCHITECTURE.md` — AI workflow architecture rules
 
 ## See Also
 

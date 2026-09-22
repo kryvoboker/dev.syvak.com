@@ -8,6 +8,7 @@ use App\Jobs\SendTelegramLogJob;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
+use Override;
 
 final class AsyncTelegramBotHandler extends AbstractProcessingHandler
 {
@@ -37,7 +38,7 @@ final class AsyncTelegramBotHandler extends AbstractProcessingHandler
      *
      * @return void
      */
-    #[\Override]
+    #[Override]
     protected function write(LogRecord $record): void
     {
         $formatted_message = $record->formatted;

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Override;
 
 /**
  * @property int $id
@@ -35,6 +36,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read OrderShippings|null $shipping
  * @property-read \Illuminate\Database\Eloquent\Collection<int, PromoCodeUsage> $promoCodeUsages
  * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderPromoCodeProducts> $promoCodeProducts
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, OrderNotificationEvent> $notificationEvents
  */
 class Orders extends Model
 {
@@ -62,7 +64,7 @@ class Orders extends Model
     /**
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -172,5 +174,11 @@ class Orders extends Model
     public function promoCodeProducts(): HasMany
     {
         return $this->hasMany(OrderPromoCodeProducts::class, 'order_id');
+    }
+
+    /** @return HasMany<OrderNotificationEvent, $this> */
+    public function notificationEvents(): HasMany
+    {
+        return $this->hasMany(OrderNotificationEvent::class, 'order_id');
     }
 }

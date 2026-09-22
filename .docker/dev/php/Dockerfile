@@ -15,6 +15,8 @@ RUN apt update \
       graphviz \
       fontconfig \
       fonts-dejavu-core \
+      librdkafka-dev \
+      supervisor \
   && rm -rf /var/lib/apt/lists/*
 
 RUN ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
@@ -33,6 +35,9 @@ RUN install-php-extensions \
     sockets \
     intl \
     bcmath \
+    rdkafka \
+    pcntl \
+    redis \
   && rm -f /usr/local/bin/install-php-extensions
 
 RUN docker-php-ext-enable xdebug xhprof
@@ -96,19 +101,27 @@ RUN mkdir -p \
     ${NPM_CONFIG_CACHE}/ \
     ${COMPOSER_CACHE_DIR}/ \
   && chown -R ${UID}:${GID} \
-    ${COMPOSER_HOME}/ \
     ${NPM_CONFIG_PREFIX}/ \
     ${NPM_CONFIG_CACHE}/ \
-  && chmod -R 755 \
     ${COMPOSER_HOME}/ \
+  && chmod -R 755 \
     ${NPM_CONFIG_CACHE}/ \
-    ${NPM_CONFIG_PREFIX}/
+    ${NPM_CONFIG_PREFIX}/ \
+    ${COMPOSER_HOME}/
 
 # Rebuild the font cache after installing fonts
 RUN fc-cache -f -v
 
 # Copy and set permissions for entrypoint script
 COPY --chown=${UID}:${GID} .docker/dev/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+COPY .docker/dev/php/supervisord.conf /etc/supervisord.conf
+COPY .docker/dev/php/horizon.conf /etc/supervisor/conf.d/horizon.conf
+COPY .docker/dev/php/kafka-order-notifications.conf /etc/supervisor/conf.d/kafka-order-notifications.conf
+COPY .docker/dev/php/rabbitmq-order-notifications.conf /etc/supervisor/conf.d/rabbitmq-order-notifications.conf
+
+RUN mkdir -p /var/log/php-fpm /var/log/supervisor /var/run \
+  && chown -R ${UID}:${GID} /var/log/php-fpm /var/log/supervisor /var/run
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 

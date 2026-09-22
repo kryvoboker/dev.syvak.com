@@ -8,3 +8,5 @@ slim.report.json
 **/.env.*
 !**/.env.example
 !**/.env.*.example
+
+figma-info.txt

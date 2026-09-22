@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Order;
 
+use App\Enums\Order\OrderNotificationOutcomeEnum;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
 use App\Models\Orders\OrderStatuses;
@@ -19,6 +20,7 @@ final class OrderLifecycleService
 {
     public function __construct(
         private readonly CacheInvalidationService $cache_invalidation_service,
+        private readonly OrderNotificationOutboxService $notification_outbox_service,
     ) {
     }
 
@@ -127,10 +129,21 @@ final class OrderLifecycleService
                 continue;
             }
 
-            return $this->transitionOrder($order, $status, 'payment_status_changed', [
+            $transitioned = $this->transitionOrder($order, $status, 'payment_status_changed', [
                 ...$context,
                 'payment_status' => $payment_status,
             ]);
+
+            if ($transitioned) {
+                $this->notification_outbox_service->record(
+                    $order,
+                    $payment_status === self::PAYMENT_STATUS_PAID
+                        ? OrderNotificationOutcomeEnum::Success
+                        : OrderNotificationOutcomeEnum::Failure,
+                );
+            }
+
+            return $transitioned;
         }
 
         return false;

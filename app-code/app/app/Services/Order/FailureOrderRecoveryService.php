@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Order;
 
 use App\Enums\Cart\CartModeEnum;
+use App\Enums\Order\OrderNotificationOutcomeEnum;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\Orders;
 use App\Services\Cart\CartService;
@@ -37,6 +38,7 @@ final readonly class FailureOrderRecoveryService
         private WayForPayPaymentModule $wayforpay_payment_module,
         private WayForPayModuleDataService $wayforpay_data_service,
         private WayForPayConfig $wayforpay_config,
+        private OrderNotificationOutboxService $notification_outbox_service,
     ) {
     }
 
@@ -120,6 +122,7 @@ final readonly class FailureOrderRecoveryService
 
                 if ($payment_result['success'] !== true) {
                     $this->markFailed($payment, $this->errorData(Arr::get($payment_result, 'errors', [])));
+                    $this->notification_outbox_service->record($order, OrderNotificationOutcomeEnum::Failure);
                     $this->incrementRetryCount();
 
                     return ['success' => false, 'errors' => (array) Arr::get($payment_result, 'errors', [])];
@@ -148,6 +151,7 @@ final readonly class FailureOrderRecoveryService
 
             if (! (bool) Arr::get($payment_result, 'is_success', false)) {
                 $this->markFailed($payment, $this->errorData(Arr::get($payment_result, 'errors', [])));
+                $this->notification_outbox_service->record($order, OrderNotificationOutcomeEnum::Failure);
                 $this->incrementRetryCount();
 
                 return ['success' => false, 'errors' => (array) Arr::get($payment_result, 'errors', [])];

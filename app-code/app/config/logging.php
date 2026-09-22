@@ -3,10 +3,8 @@
 declare(strict_types=1);
 
 use App\Logging\AsyncTelegramBotHandler;
-use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\NullHandler;
-use Monolog\Handler\SocketHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Handler\TelegramBotHandler;
@@ -152,25 +150,6 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
-        ],
-
-        'buggregator_monolog' => [
-            'driver' => 'monolog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'handler' => SocketHandler::class,
-            'formatter' => JsonFormatter::class,
-            'formatter_with' => [
-                'dateFormat' => 'Y-m-d H:i:s',
-            ],
-            'processors' => [
-                UidProcessor::class,
-                WebProcessor::class,
-                MemoryPeakUsageProcessor::class,
-                MemoryUsageProcessor::class,
-            ],
-            'handler_with' => [
-                'connectionString' => env('LOG_SOCKET_URL', '127.0.0.1:9913'),
-            ],
         ],
 
         'monolog_telegram_bot' => [
