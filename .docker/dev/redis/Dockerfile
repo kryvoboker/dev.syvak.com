@@ -20,8 +20,8 @@ RUN deluser ${USERNAME} 2>/dev/null || true \
   && adduser -D -u ${UID} -G ${USERNAME} -s /bin/bash ${USERNAME}
 
 RUN mkdir -p /data/ /var/log/redis/ \
-  && chown -R ${UID}:${GID} /data/ /var/log/redis/ \
-  && chmod -R 755 /data/ /var/log/redis/
+  && chown -R ${UID}:${GID} /data/ /var/log/ \
+  && chmod -R 755 /data/ /var/redis/
 
 COPY .docker/dev/redis/redis.conf /usr/local/etc/redis/redis.conf
 

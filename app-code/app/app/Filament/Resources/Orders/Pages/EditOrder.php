@@ -309,8 +309,6 @@ class EditOrder extends EditRecord
                 ->send();
 
             $this->halt();
-
-            return $record;
         }
     }
 

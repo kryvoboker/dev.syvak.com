@@ -101,13 +101,13 @@ RUN mkdir -p \
     ${NPM_CONFIG_CACHE}/ \
     ${COMPOSER_CACHE_DIR}/ \
   && chown -R ${UID}:${GID} \
-    ${COMPOSER_HOME}/ \
     ${NPM_CONFIG_PREFIX}/ \
     ${NPM_CONFIG_CACHE}/ \
-  && chmod -R 755 \
     ${COMPOSER_HOME}/ \
+  && chmod -R 755 \
     ${NPM_CONFIG_CACHE}/ \
-    ${NPM_CONFIG_PREFIX}/
+    ${NPM_CONFIG_PREFIX}/ \
+    ${COMPOSER_HOME}/
 
 # Rebuild the font cache after installing fonts
 RUN fc-cache -f -v

@@ -90,18 +90,20 @@
             "@php artisan filament:upgrade"
         ],
         "post-install-cmd": [
-            "if [ -f config/filament.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament configuration...'; @php artisan vendor:publish --tag=filament-config --no-interaction; fi",
-            "if [ -f config/filament-shield.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament Shield configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament Shield configuration...'; @php artisan vendor:publish --tag=filament-shield-config --no-interaction; fi",
-            "if [ -f config/livewire.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Livewire configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Livewire configuration...'; @php artisan vendor:publish --tag=livewire:config --no-interaction; fi",
-            "@php artisan livewire:publish --assets"
+            "if [ -f config/filament.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament configuration...'; php artisan vendor:publish --tag=filament-config --no-interaction; fi",
+            "if [ -f config/filament-shield.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament Shield configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament Shield configuration...'; php artisan vendor:publish --tag=filament-shield-config --no-interaction; fi",
+            "if [ -f config/livewire.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Livewire configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Livewire configuration...'; php artisan vendor:publish --tag=livewire:config --no-interaction; fi",
+            "@php artisan livewire:publish --assets",
+            "@php artisan filament:assets"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan lang:update",
-            "if [ -f config/filament.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament configuration...'; @php artisan vendor:publish --tag=filament-config --no-interaction; fi",
-            "if [ -f config/filament-shield.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament Shield configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament Shield configuration...'; @php artisan vendor:publish --tag=filament-shield-config --no-interaction; fi",
-            "if [ -f config/livewire.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Livewire configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Livewire configuration...'; @php artisan vendor:publish --tag=livewire:config --no-interaction; fi",
-            "@php artisan livewire:publish --assets"
+            "if [ -f config/filament.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament configuration...'; php artisan vendor:publish --tag=filament-config --no-interaction; fi",
+            "if [ -f config/filament-shield.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament Shield configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament Shield configuration...'; php artisan vendor:publish --tag=filament-shield-config --no-interaction; fi",
+            "if [ -f config/livewire.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Livewire configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Livewire configuration...'; php artisan vendor:publish --tag=livewire:config --no-interaction; fi",
+            "@php artisan livewire:publish --assets",
+            "@php artisan filament:assets"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
