@@ -226,7 +226,7 @@ services:
       retries: 12
       start_period: 30s
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - ../../rabbitmq-data:/var/lib/rabbitmq
     security_opt:
       - no-new-privileges:true
       - apparmor=docker-default
