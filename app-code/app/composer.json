@@ -27,12 +27,10 @@
         "laravel/horizon": "^5.49",
         "laravel/tinker": "^v3.0",
         "livewire/livewire": "^v4.4",
-        "mateusjunges/laravel-kafka": "^2.11",
         "mobiledetect/mobiledetectlib": "^4.11",
         "nwidart/laravel-modules": "^v13.0",
         "nyholm/psr7": "1.8",
         "openai-php/client": "^v0.20",
-        "php-amqplib/php-amqplib": "^3.7",
         "spatie/laravel-data": "^4.23",
         "spatie/laravel-permission": "^8.3",
         "wayforpay/php-sdk": "^1.0"

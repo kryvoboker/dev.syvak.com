@@ -61,8 +61,8 @@ final readonly class OrderNotificationDeliveryService
      * @param OrderNotificationChannelEnum $channel
      * @param array<string, mixed>         $payload
      *
-     * @return void
      * @throws Throwable
+     * @return void
      */
     private function deliver(OrderNotificationEvent $event, OrderNotificationChannelEnum $channel, array $payload): void
     {
@@ -103,9 +103,9 @@ final readonly class OrderNotificationDeliveryService
     /**
      * @param array<string, mixed> $payload
      *
-     * @return string
      * @throws ConnectionException
      * @throws RequestException
+     * @return string
      */
     private function sendTelegram(array $payload): string
     {
@@ -127,9 +127,9 @@ final readonly class OrderNotificationDeliveryService
     /**
      * @param array<string, mixed> $payload
      *
-     * @return string
      * @throws ConnectionException
      * @throws RequestException
+     * @return string
      */
     private function sendSalesDrive(array $payload): string
     {

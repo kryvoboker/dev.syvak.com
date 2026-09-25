@@ -6,7 +6,7 @@ namespace App\Services\Order;
 
 use App\Enums\Order\OrderNotificationEventStatusEnum;
 use App\Enums\Order\OrderNotificationOutcomeEnum;
-use App\Jobs\PublishOrderNotificationEventJob;
+use App\Jobs\ProcessOrderNotificationEventJob;
 use App\Models\Orders\OrderNotificationEvent;
 use App\Models\Orders\Orders;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +38,7 @@ final readonly class OrderNotificationOutboxService
                 ],
             );
 
-            PublishOrderNotificationEventJob::dispatch(integer_value($event->getKey()));
+            ProcessOrderNotificationEventJob::dispatch(integer_value($event->getKey()));
 
             return $event;
         } catch (Throwable $throwable) {
