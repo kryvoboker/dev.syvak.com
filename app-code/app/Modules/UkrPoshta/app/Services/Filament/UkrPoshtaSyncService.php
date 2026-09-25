@@ -183,7 +183,7 @@ readonly class UkrPoshtaSyncService
                 default => $this->markQueuedSyncFailed($state, sprintf('Unknown Ukr Poshta sync stage [%s].', Arr::get($state, 'stage', ''))),
             };
         } catch (Throwable $throwable) {
-            Log::channel('stack')->error('[FIX] Ukr Poshta queued sync step failed.', [
+            Log::channel('stack')->error('Ukr Poshta queued sync step failed.', [
                 'stage' => (string)Arr::get($state, 'stage', ''),
                 'phase' => (string)Arr::get($state, 'phase', ''),
                 'error' => $throwable->getMessage(),

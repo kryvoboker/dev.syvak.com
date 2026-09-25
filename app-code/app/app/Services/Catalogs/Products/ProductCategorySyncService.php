@@ -29,7 +29,7 @@ class ProductCategorySyncService
             try {
                 $product->categories()->sync($normalized_category_ids);
 
-                Log::channel('daily')->info('[FIX:product-categories-lock] Product categories synced.', [
+                Log::channel('daily')->info('Product categories synced.', [
                     'product_id' => $product_id,
                     'categories_count' => count($normalized_category_ids),
                     'attempt' => $attempt,
@@ -38,7 +38,7 @@ class ProductCategorySyncService
                 return;
             } catch (Throwable $throwable) {
                 if (! $this->isLockWaitTimeoutException($throwable) || $attempt === $max_attempts) {
-                    Log::channel('stack')->error('[FIX:product-categories-lock] Product category sync failed.', [
+                    Log::channel('stack')->error('Product category sync failed.', [
                         'product_id' => $product_id,
                         'attempt' => $attempt,
                         'exception' => $throwable,
@@ -47,7 +47,7 @@ class ProductCategorySyncService
                     throw $throwable;
                 }
 
-                Log::channel('stack')->warning('[FIX:product-categories-lock] Retrying product category sync after lock timeout.', [
+                Log::channel('stack')->warning('Retrying product category sync after lock timeout.', [
                     'product_id' => $product_id,
                     'attempt' => $attempt,
                 ]);

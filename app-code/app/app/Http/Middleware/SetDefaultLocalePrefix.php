@@ -104,7 +104,7 @@ class SetDefaultLocalePrefix
         $language = resolve_language_by_locale($resolved_locale);
 
         if ($language === null) {
-            Log::channel('stack')->warning('[FIX:locale-switch] Unable to resolve route locale language.', [
+            Log::channel('stack')->warning('Unable to resolve route locale language.', [
                 'locale' => $resolved_locale,
                 'path' => $request->path(),
             ]);

@@ -937,11 +937,11 @@ if (!function_exists('resolve_product_variant_slug_variants')) {
                 continue;
             }
 
-            Log::channel('daily')->warning('[FIX:localized-product-slug] Falling back to static product variant URL.', [
+            Log::channel('daily')->warning('Falling back to static product variant URL.', [
                 'language_code' => $language_code,
                 'product_id' => $product_id,
                 'variant_id' => $variant_id,
-                'is_default' => (bool)$variant->is_default,
+                'is_default' => $variant->is_default,
             ]);
 
             $result[$language_code] = [

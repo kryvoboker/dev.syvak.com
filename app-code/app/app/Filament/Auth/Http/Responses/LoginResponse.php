@@ -54,7 +54,7 @@ class LoginResponse implements LoginResponseContract
 
         $fallback_locale = Arr::first($allowed_locales, default: 'en');
 
-        Log::channel('stack')->warning('[FIX:admin-locale] Could not resolve the selected admin locale.', [
+        Log::channel('stack')->warning('Could not resolve the selected admin locale.', [
             'session_locale' => $session_locale,
             'application_locale' => $application_locale,
             'fallback_locale' => $fallback_locale,

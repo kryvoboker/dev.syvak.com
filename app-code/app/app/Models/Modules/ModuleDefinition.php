@@ -130,7 +130,7 @@ class ModuleDefinition extends Model
         try {
             return $page_class::getUrl();
         } catch (Throwable $throwable) {
-            Log::channel('stack')->warning('[FIX] Failed to resolve module admin page URL.', [
+            Log::channel('stack')->warning('Failed to resolve module admin page URL.', [
                 'module_definition_id' => $this->id,
                 'module_name' => $this->nwidart_name,
                 'page_class' => $page_class,
