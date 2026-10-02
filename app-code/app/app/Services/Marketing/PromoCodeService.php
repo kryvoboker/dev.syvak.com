@@ -81,6 +81,8 @@ final class PromoCodeService
         $totals_data['promo_code'] = [
             'code' => $promo_code->code,
             'promo_code_id' => integer_value($promo_code->getKey()),
+            'discount_type' => string_value($result['discount_type'] ?? PromoCodeDiscountTypeEnum::Fixed->value),
+            'discount_value' => float_value($result['discount_value'] ?? 0),
             'discount_amount' => $discount_amount,
             'discount_amount_formatted' => $this->formatMoney(
                 $discount_amount,
@@ -157,6 +159,22 @@ final class PromoCodeService
 
         $currency_code = string_value(Arr::get($totals_data, 'currency_code', config('app.currency.current_currency_code')));
         $item_totals = $this->resolveEligibleItemTotals($promo_code, $cart_items, $forced_product_ids);
+
+        if (
+            $promo_code->promo_type !== PromoCodeTypeEnum::Super
+            && $item_totals['eligible_subtotal'] <= 0
+            && $item_totals['has_skipped_discounted_products']
+        ) {
+            Log::channel('daily')->info('[FIX:promo-code-discounted-products] regular promo code rejected', [
+                'promo_code_id' => $promo_code->getKey(),
+            ]);
+
+            return $this->invalidResult(
+                'discounted_products',
+                __('storefront/default.cart.errors.promo_discounted_products'),
+            );
+        }
+
         $non_product_total = max(0, $current_total - float_value(Arr::get($totals_data, 'items_subtotal', 0)));
         $base_amount = (float) $item_totals['eligible_subtotal'] + (float) $non_product_total;
 
@@ -167,15 +185,26 @@ final class PromoCodeService
         }
 
         $base_amount = min(max(0, $base_amount), max(0, $current_total));
+        $discount_type = $this->resolveDiscountType($promo_code);
         $discount_value = $this->resolveDiscountValue($promo_code, $currency_code);
-        $discount_amount = $promo_code->discount_type === PromoCodeDiscountTypeEnum::Percentage
+        $discount_amount = $discount_type === PromoCodeDiscountTypeEnum::Percentage
             ? (float) $base_amount * ($discount_value / (float) 100)
             : min((float) $base_amount, $discount_value);
+
+        Log::channel('daily')->info('[FIX:promo-percentage-discount] promo discount calculated', [
+            'promo_code_id' => $promo_code->getKey(),
+            'discount_type' => $discount_type->value,
+            'discount_value' => $discount_value,
+            'base_amount' => $base_amount,
+            'discount_amount' => $discount_amount,
+        ]);
 
         return [
             'is_valid' => true,
             'promo_code' => $promo_code,
             'discount_amount' => round(max(0, $discount_amount), 4),
+            'discount_type' => $discount_type->value,
+            'discount_value' => round($discount_value, 4),
             'base_amount' => round($base_amount, 4),
             'eligible_items_subtotal' => round($item_totals['eligible_subtotal'], 4),
             'non_discounted_subtotal' => round($item_totals['non_discounted_subtotal'], 4),
@@ -254,7 +283,7 @@ final class PromoCodeService
     /**
      * @param array<int, array<string, mixed>> $cart_items
      * @param array<int, int> $forced_product_ids
-     * @return array{eligible_subtotal:float, non_discounted_subtotal:float, rrc_subtotal:float, has_discounted_products:bool}
+     * @return array{eligible_subtotal:float, non_discounted_subtotal:float, rrc_subtotal:float, has_discounted_products:bool, has_skipped_discounted_products:bool}
      */
     private function resolveEligibleItemTotals(PromoCode $promo_code, array $cart_items, array $forced_product_ids = []): array
     {
@@ -265,6 +294,7 @@ final class PromoCodeService
         $non_discounted_subtotal = 0.0;
         $rrc_subtotal = 0.0;
         $has_discounted_products = false;
+        $has_skipped_discounted_products = false;
 
         $product_categories = $this->resolveProductCategories($cart_items, $category_ids);
 
@@ -281,7 +311,12 @@ final class PromoCodeService
 
             $is_discounted = (bool) Arr::get($item, 'is_discounted', false);
 
+            if ($is_discounted) {
+                $has_discounted_products = true;
+            }
+
             if ($promo_code->promo_type !== PromoCodeTypeEnum::Super && $is_discounted && ! in_array($product_id, $forced_product_ids, true)) {
+                $has_skipped_discounted_products = true;
                 Log::channel('daily')->info('[PromoCodeService] regular promo code skipped discounted product', [
                     'promo_code_id' => $promo_code->getKey(),
                     'product_id' => $product_id,
@@ -294,14 +329,18 @@ final class PromoCodeService
             $eligible_subtotal += $current_line_total;
             $rrc_subtotal += $rrc_line_total;
 
-            if ($is_discounted) {
-                $has_discounted_products = true;
-            } else {
+            if (! $is_discounted) {
                 $non_discounted_subtotal += $current_line_total;
             }
         }
 
-        return compact('eligible_subtotal', 'non_discounted_subtotal', 'rrc_subtotal', 'has_discounted_products');
+        return compact(
+            'eligible_subtotal',
+            'non_discounted_subtotal',
+            'rrc_subtotal',
+            'has_discounted_products',
+            'has_skipped_discounted_products',
+        );
     }
 
     /**
@@ -438,7 +477,7 @@ final class PromoCodeService
             return 0.0;
         }
 
-        if ($promo_code->discount_type === PromoCodeDiscountTypeEnum::Percentage || $target_currency === null || $default_currency === null) {
+        if ($this->resolveDiscountType($promo_code) === PromoCodeDiscountTypeEnum::Percentage || $target_currency === null || $default_currency === null) {
             return float_value($discount->value);
         }
 
@@ -447,6 +486,23 @@ final class PromoCodeService
         }
 
         return convert_price(float_value($discount->value), string_value($default_currency->code), string_value($target_currency->code));
+    }
+
+    private function resolveDiscountType(PromoCode $promo_code): PromoCodeDiscountTypeEnum
+    {
+        $raw_discount_type = $promo_code->getRawOriginal('discount_type');
+        $resolved_discount_type = PromoCodeDiscountTypeEnum::tryFrom(string_value($raw_discount_type));
+
+        if ($resolved_discount_type instanceof PromoCodeDiscountTypeEnum) {
+            return $resolved_discount_type;
+        }
+
+        Log::channel('stack')->warning('[FIX:promo-percentage-discount] unknown promo discount type', [
+            'promo_code_id' => $promo_code->getKey(),
+            'discount_type' => $raw_discount_type,
+        ]);
+
+        return PromoCodeDiscountTypeEnum::Fixed;
     }
 
     private function resolveErrorMessage(PromoCode $promo_code, string $error_type, ?string $locale): string

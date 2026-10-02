@@ -1,0 +1,14 @@
+<?php
+
+namespace Filament\Pages;
+
+abstract class BasePage
+{
+    /**
+     * @param bool $shouldRollbackDatabaseTransaction
+     * @return never
+     */
+    protected function halt(bool $shouldRollbackDatabaseTransaction = false): void
+    {
+    }
+}

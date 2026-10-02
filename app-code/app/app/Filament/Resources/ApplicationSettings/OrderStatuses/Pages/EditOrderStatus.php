@@ -57,7 +57,6 @@ class EditOrderStatus extends EditRecord
         } catch (OrderStatusInvariantException $exception) {
             $this->sendInvariantNotification($exception->reason);
             $this->halt();
-            throw $exception;
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -68,7 +67,6 @@ class EditOrderStatus extends EditRecord
                 ->send();
 
             $this->halt();
-            throw $throwable;
         }
     }
 

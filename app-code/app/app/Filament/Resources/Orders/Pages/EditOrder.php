@@ -25,8 +25,10 @@ use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use LogicException;
 use Throwable;
 
@@ -298,9 +300,32 @@ class EditOrder extends EditRecord
         }
 
         try {
-            return app(OrderAdminPersistenceService::class)->update($record, $data);
+            $updated_record = app(OrderAdminPersistenceService::class)->update($record, $data);
+            $this->record = $updated_record;
+
+            return $updated_record;
         } catch (Throwable $throwable) {
+            if ($throwable instanceof ValidationException) {
+                $message = string_value(collect($throwable->errors())->flatten()->first());
+
+                Notification::make()
+                    ->title(__('admin/default.errors.title'))
+                    ->body($message)
+                    ->danger()
+                    ->persistent()
+                    ->send();
+
+                $this->halt();
+            }
+
             report($throwable);
+
+            Log::channel('daily')->error('Order update failed', [
+                'order_id' => $record->getKey(),
+                'promo_code_id' => Arr::get($data, 'promo_code.id'),
+                'exception' => $throwable::class,
+                'message' => $throwable->getMessage(),
+            ]);
 
             Notification::make()
                 ->title(__('admin/default.errors.title'))
@@ -310,6 +335,32 @@ class EditOrder extends EditRecord
 
             $this->halt();
         }
+    }
+
+    protected function afterSave(): void
+    {
+        $record = $this->getRecord();
+
+        if (! $record instanceof Orders) {
+            return;
+        }
+
+        $record->load([
+            'customer',
+            'shipping',
+            'payments.paymentStatus',
+            'products',
+            'totals',
+            'histories' => function ($query): void {
+                $query
+                    ->orderByDesc('created_at')
+                    ->orderByDesc('id');
+            },
+            'promoCodeUsages.promoCode',
+            'promoCodeUsages.products.orderProduct',
+        ]);
+
+        $this->form->fill($this->mutateFormDataBeforeFill($record->attributesToArray()));
     }
 
     protected function getHeaderActions(): array
@@ -339,7 +390,7 @@ class EditOrder extends EditRecord
 
     private static function logMutation(string $action, Orders $record): void
     {
-        Log::channel('daily')->info('[EditOrder] order mutation completed', [
+        Log::channel('daily')->info('Order mutation completed', [
             'action' => $action,
             'admin_user_id' => auth()->id(),
             'order_id' => $record->getKey(),

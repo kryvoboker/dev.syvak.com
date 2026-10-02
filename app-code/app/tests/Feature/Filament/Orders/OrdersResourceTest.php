@@ -23,10 +23,12 @@ use App\Models\Payment\PaymentStatuses;
 use App\Models\Users\User;
 use App\Services\Marketing\PromoCodePersistenceService;
 use App\Services\Marketing\PromoCodeService;
+use App\Services\Order\OrderAdminPersistenceService;
 use Filament\Facades\Filament;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Hashing\HashManager;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -157,6 +159,90 @@ class OrdersResourceTest extends TestCase
                 'promo_code.discount_type' => 'fixed',
                 'promo_code.discount_value' => '25.0000',
             ]);
+    }
+
+    public function test_admin_can_apply_a_promo_code_to_an_order_without_one(): void
+    {
+        $admin = $this->createAdmin(['View:Orders', 'Update:Orders']);
+        $order = $this->createOrder();
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Spring sale',
+            'code' => 'SPRING10',
+            'normalized_code' => 'spring10',
+            'promo_type' => 'super',
+            'discount_type' => 'fixed',
+            'is_active' => true,
+        ]);
+        PromoCodeDiscount::query()->create([
+            'promo_code_id' => $promo_code->getKey(),
+            'currency_id' => $order->currency_id,
+            'value' => 10,
+        ]);
+
+        $this->actingAs($admin);
+
+        $component = Livewire::test(EditOrder::class, ['record' => $order->getKey()])
+            ->fillForm([
+                'promo_code.id' => (string) $promo_code->getKey(),
+                'customer.no_call' => false,
+            ])
+            ->assertFormSet(['promo_code.id' => $promo_code->getKey()])
+            ->callAction('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('promo_code_usages', [
+            'order_id' => $order->getKey(),
+            'promo_code_id' => $promo_code->getKey(),
+        ]);
+
+        $component
+            ->assertFormSet([
+                'promo_code.id' => $promo_code->getKey(),
+            ])
+            ->assertFormSet([
+                'promo_code.id' => $promo_code->getKey(),
+                'promo_code.code' => 'SPRING10',
+                'promo_code.promo_type' => 'super',
+                'promo_code.discount_type' => 'fixed',
+                'promo_code.discount_amount' => 10,
+                'promo_code.discount_value' => 10,
+            ]);
+
+        $this->assertDatabaseHas('promo_code_usages', [
+            'order_id' => $order->getKey(),
+            'promo_code_id' => $promo_code->getKey(),
+        ]);
+        $this->assertDatabaseHas('order_totals', [
+            'order_id' => $order->getKey(),
+            'total_type' => 'promo_code',
+            'value' => -10,
+        ]);
+    }
+
+    public function test_admin_sees_an_error_when_applying_an_invalid_promo_code(): void
+    {
+        $order = $this->createOrder();
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Expired sale',
+            'code' => 'EXPIRED10',
+            'normalized_code' => 'expired10',
+            'promo_type' => 'regular',
+            'discount_type' => 'fixed',
+            'ends_at' => now()->subDay(),
+            'is_active' => true,
+        ]);
+        PromoCodeDiscount::query()->create([
+            'promo_code_id' => $promo_code->getKey(),
+            'currency_id' => $order->currency_id,
+            'value' => 10,
+        ]);
+
+        $this->expectException(ValidationException::class);
+
+        app(OrderAdminPersistenceService::class)->update($order, [
+            'promo_code' => ['id' => (string) $promo_code->getKey()],
+            'products' => $order->products->toArray(),
+        ]);
     }
 
     public function test_promo_code_consumption_persists_discount_and_promo_types(): void
@@ -534,6 +620,8 @@ class OrdersResourceTest extends TestCase
             $table->string('normalized_code');
             $table->string('promo_type')->default('regular');
             $table->string('discount_type')->default('percentage');
+            $table->dateTime('starts_at')->nullable();
+            $table->dateTime('ends_at')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -579,6 +667,7 @@ class OrdersResourceTest extends TestCase
             $table->foreignId('promo_code_usage_id');
             $table->foreignId('order_product_id');
             $table->foreignId('product_id')->nullable();
+            $table->foreignId('product_variant_id')->nullable();
             $table->boolean('is_eligible')->default(false);
             $table->string('override', 20)->nullable();
             $table->decimal('discount_amount', 15, 4)->default(0);

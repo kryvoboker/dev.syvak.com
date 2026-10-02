@@ -166,6 +166,52 @@ class PromoCodeServiceTest extends TestCase
         $this->assertSame(10.0, $totals['promo_code']['discount_amount']);
     }
 
+    public function testPercentageDiscountUsesTheConfiguredPercentageInsteadOfAFixedAmount(): void
+    {
+        config()->set('app.currency.current_currency_code', 'USD');
+        config()->set('app.currency.current_exchange_rate', 1);
+
+        $currency = Currency::query()->create([
+            'code' => 'USD',
+            'name' => 'US Dollar',
+            'format_locale' => 'en_US',
+            'is_active' => true,
+            'is_default' => true,
+            'exchange_rate' => 1,
+            'decimal_places' => 2,
+        ]);
+        $promo_code = PromoCode::query()->create([
+            'name' => 'Percentage discount',
+            'code' => 'PERCENTAGE-40',
+            'normalized_code' => 'percentage-40',
+            'discount_type' => PromoCodeDiscountTypeEnum::Percentage,
+            'is_active' => true,
+        ]);
+        $promo_code->discounts()->create(['currency_id' => $currency->getKey(), 'value' => 40]);
+
+        $totals = app(PromoCodeService::class)->applyToTotals(
+            totals_data: [
+                'lines' => [],
+                'items_subtotal' => 200,
+                'grand_total' => 200,
+                'currency_code' => 'USD',
+                'exchange_rate' => 1,
+            ],
+            cart_items: [[
+                'product_id' => 1,
+                'line_total' => 200,
+                'rrc_line_total' => 200,
+                'is_discounted' => false,
+            ]],
+            code: 'percentage-40',
+        );
+
+        $this->assertSame(80.0, $totals['promo_code']['discount_amount']);
+        $this->assertSame('percentage', $totals['promo_code']['discount_type']);
+        $this->assertSame(40.0, $totals['promo_code']['discount_value']);
+        $this->assertSame(-80.0, $totals['lines'][0]['amount']);
+    }
+
     public function testExpiredPromoCodeUsesTheCurrentLanguageCustomError(): void
     {
         $language = \App\Models\ApplicationSettings\Language::query()->create([
@@ -239,7 +285,12 @@ class PromoCodeServiceTest extends TestCase
             code: 'test',
         );
 
-        $this->assertArrayNotHasKey('promo_code', $totals);
+        $this->assertArrayHasKey('promo_code', $totals);
+        $this->assertFalse($totals['promo_code']['is_valid']);
+        $this->assertSame(
+            'This promo code can only be applied to products without an active discount.',
+            $totals['promo_code']['message'],
+        );
         $this->assertSame([], $totals['lines']);
     }
 

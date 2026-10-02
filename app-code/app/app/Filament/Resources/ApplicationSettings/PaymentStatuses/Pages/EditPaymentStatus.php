@@ -67,7 +67,6 @@ class EditPaymentStatus extends EditRecord
         } catch (PaymentStatusInvariantException $exception) {
             $this->sendInvariantNotification($exception->reason);
             $this->halt();
-            throw $exception;
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -78,7 +77,6 @@ class EditPaymentStatus extends EditRecord
                 ->send();
 
             $this->halt();
-            throw $throwable;
         }
     }
 

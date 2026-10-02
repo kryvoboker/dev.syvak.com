@@ -124,6 +124,7 @@ return [
             'promo_expired' => 'This promo code has expired or is not active yet.',
             'promo_minimum_order' => 'The order total is too low for this promo code.',
             'promo_usage_limit' => 'This promo code has reached its usage limit.',
+            'promo_discounted_products' => 'This promo code can only be applied to products without an active discount.',
         ],
         'validation' => [
             'first_name_required' => 'First name is required.',

@@ -34,6 +34,18 @@
         $checkout_email = (string) ($checkout_selection_state['email'] ?? '');
         $checkout_comment = (string) ($checkout_selection_state['comment'] ?? '');
         $checkout_promo_code = (string) ($checkout_selection_state['promo_code'] ?? '');
+        $checkout_promo_data = is_array(data_get($cart_data, 'totals.promo_code'))
+            ? data_get($cart_data, 'totals.promo_code')
+            : [];
+        $checkout_promo_discount_type = (string) ($checkout_promo_data['discount_type'] ?? '');
+        $checkout_promo_discount_value = $checkout_promo_data['discount_value'] ?? null;
+        $checkout_promo_label = $checkout_promo_code;
+        $checkout_promo_discount_amount = (string) ($checkout_promo_data['discount_amount_formatted'] ?? '');
+        $checkout_promo_error = (string) ($checkout_promo_data['message'] ?? '');
+
+        if ($checkout_promo_discount_type === 'percentage' && is_numeric($checkout_promo_discount_value)) {
+            $checkout_promo_label .= ' (' . (string) $checkout_promo_discount_value . '%)';
+        }
         $checkout_no_call = ($checkout_selection_state['no_call'] ?? false) === true;
         $selected_delivery_point_description = (string) ($selected_delivery_point['description'] ?? '');
         $selected_delivery_point_value = (string) (
@@ -585,12 +597,15 @@
                                     <span data-checkout-total="delivery">{{ $checkout_data['delivery_formatted'] ?? '—' }}</span>
                                 </div>
 
-                                <div class="hidden items-center justify-between gap-4 text-sm text-light-green md:text-base" data-checkout-promo-total>
-                                    <span>{{ __('storefront/pages/checkout.texts.promo_code', ['promo_code' => $checkout_promo_code]) }}</span>
-                                    <span data-checkout-total="promo_code"></span>
+                                <div class="{{ $checkout_promo_discount_amount !== '' ? 'flex' : 'hidden' }} items-center justify-between gap-4 text-sm text-light-green md:text-base" data-checkout-promo-total>
+                                    <span data-checkout-promo-label
+                                          data-checkout-promo-label-template="{{ __('storefront/pages/checkout.texts.promo_code', ['promo_code' => ':promo_code']) }}">
+                                        {{ __('storefront/pages/checkout.texts.promo_code', ['promo_code' => $checkout_promo_label]) }}
+                                    </span>
+                                    <span data-checkout-total="promo_code">{{ $checkout_promo_discount_amount }}</span>
                                 </div>
 
-                                <p class="hidden text-sm text-light-red md:text-base" data-checkout-promo-error role="alert"></p>
+                                <p class="{{ $checkout_promo_error !== '' ? '' : 'hidden' }} text-sm text-light-red md:text-base" data-checkout-promo-error role="alert">{{ $checkout_promo_error }}</p>
 
                                 <div class="flex items-center justify-between gap-4 text-base font-bold uppercase md:text-lg">
                                     <span>{{ __('storefront/pages/checkout.texts.total') }}</span>

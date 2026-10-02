@@ -77,10 +77,23 @@ export const initializeCheckoutDeliveryLogic = (): void => {
 
         const promoTotalElement = <HTMLElement>findElem('[data-checkout-total="promo_code"]');
         const promoWrapperElement = <HTMLElement>findElem('[data-checkout-promo-total]');
+        const promoLabelElement = <HTMLElement>findElem('[data-checkout-promo-label]');
         const promoErrorElement = <HTMLElement>findElem('[data-checkout-promo-error]');
         const promoData = (totals.promo_code ?? {}) as Record<string, unknown>;
+        const promoCode = String(promoData.code ?? '');
+        const promoType = String(promoData.discount_type ?? '');
+        const promoValue = String(promoData.discount_value ?? '');
         const promoAmount = String(promoData.discount_amount_formatted ?? '');
         const promoError = String(promoData.message ?? '');
+
+        if (promoLabelElement && promoCode !== '') {
+            const promoLabel = promoType === 'percentage' && promoValue !== ''
+                ? `${promoCode} (${promoValue}%)`
+                : promoCode;
+            const promoLabelTemplate = promoLabelElement.dataset.checkoutPromoLabelTemplate ?? ':promo_code';
+
+            setTextContent(promoLabelElement, promoLabelTemplate.replace(':promo_code', promoLabel));
+        }
 
         if (promoTotalElement && promoWrapperElement) {
             setTextContent(promoTotalElement, promoAmount);

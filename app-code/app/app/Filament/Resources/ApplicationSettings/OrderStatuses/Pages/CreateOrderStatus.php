@@ -33,7 +33,6 @@ class CreateOrderStatus extends CreateRecord
         } catch (OrderStatusInvariantException $exception) {
             $this->sendInvariantNotification($exception->reason);
             $this->halt();
-            throw $exception;
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -44,7 +43,6 @@ class CreateOrderStatus extends CreateRecord
                 ->send();
 
             $this->halt();
-            throw $throwable;
         }
     }
 

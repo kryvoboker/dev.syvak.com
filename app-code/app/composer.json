@@ -24,7 +24,6 @@
         "intervention/image-laravel": "^4.1",
         "laravel-lang/lang": "^15.34",
         "laravel/framework": "^v13.25",
-        "laravel/horizon": "^5.49",
         "laravel/tinker": "^v3.0",
         "livewire/livewire": "^v4.4",
         "mobiledetect/mobiledetectlib": "^4.11",

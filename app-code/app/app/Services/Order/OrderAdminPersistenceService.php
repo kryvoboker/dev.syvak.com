@@ -10,6 +10,7 @@ use App\Models\ApplicationSettings\Language;
 use App\Models\Catalogs\Products\Product;
 use App\Models\Catalogs\Products\ProductVariant;
 use App\Models\Marketing\PromoCode;
+use App\Models\Marketing\PromoCodeUsage;
 use App\Models\Orders\OrderPayments;
 use App\Models\Orders\OrderPromoCodeProducts;
 use App\Models\Orders\Orders;
@@ -20,11 +21,14 @@ use App\Services\Marketing\PromoCodeService;
 use App\Supports\Services\CacheInvalidationService;
 use App\Supports\Services\Currency\ConvertPrice;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use LogicException;
 use Throwable;
 
 final readonly class OrderAdminPersistenceService
@@ -111,7 +115,7 @@ final readonly class OrderAdminPersistenceService
             ]);
 
             if (! $fresh_order instanceof Orders) {
-                throw new \LogicException('Updated order could not be reloaded.');
+                throw new LogicException('Updated order could not be reloaded.');
             }
 
             return $fresh_order;
@@ -319,12 +323,18 @@ final readonly class OrderAdminPersistenceService
         );
 
         if (($calculation['is_valid'] ?? false) !== true) {
-            $usage?->delete();
-            $promo_total?->delete();
-            $changed_sections[] = 'promo_code';
-            $changed_sections[] = 'totals';
+            $message = string_value($calculation['message'] ?? __('storefront/default.cart.errors.promo_invalid'));
 
-            return;
+            Log::channel('stack')->warning('Promo code was not applied', [
+                'order_id' => $order->getKey(),
+                'promo_code_id' => $promo_code->getKey(),
+                'error_type' => $calculation['error_type'] ?? 'invalid',
+                'message' => $message,
+            ]);
+
+            throw ValidationException::withMessages([
+                'promo_code.id' => $message,
+            ]);
         }
 
         if ($usage === null || integer_value($usage->promo_code_id) !== $promo_code_id) {
@@ -365,6 +375,12 @@ final readonly class OrderAdminPersistenceService
             $promo_total->save();
             $changed_sections[] = 'totals';
         }
+
+        Log::channel('daily')->info('Promo code applied to order', [
+            'order_id' => $order->getKey(),
+            'promo_code_id' => $promo_code->getKey(),
+            'discount_amount' => abs($discount_value),
+        ]);
     }
 
     /**
@@ -409,7 +425,7 @@ final readonly class OrderAdminPersistenceService
      */
     private function syncPromoCodeProducts(
         Orders $order,
-        \App\Models\Marketing\PromoCodeUsage $usage,
+        PromoCodeUsage $usage,
         PromoCode $promo_code,
         array $promo_products,
         array &$changed_sections,
@@ -494,7 +510,7 @@ final readonly class OrderAdminPersistenceService
             'method' => $method_options[$method_code ?? ''] ?? $shipping->method,
             'code' => $method_code,
             'is_cost_enabled' => $method_code !== 'pickup_store'
-                && (bool) Arr::get($data, 'is_cost_enabled', $shipping->is_cost_enabled),
+                && Arr::get($data, 'is_cost_enabled', $shipping->is_cost_enabled),
             'city' => $city['name'] ?? null,
             'city_id' => $city !== null ? $city_id : null,
             'address' => $capabilities['courier_address']
@@ -531,7 +547,7 @@ final readonly class OrderAdminPersistenceService
             $this->order_admin_delivery_service->getDefaultDeliveryCost($shipping_code),
         ));
         $is_cost_enabled = $shipping_code !== 'pickup_store'
-            && (bool) Arr::get($data, 'shipping_cost_enabled', $shipping->is_cost_enabled);
+            && Arr::get($data, 'shipping_cost_enabled', $shipping->is_cost_enabled);
 
         if ($shipping_cost === null) {
             return;
@@ -697,7 +713,7 @@ final readonly class OrderAdminPersistenceService
 
             $payment_status_id = Arr::get($payment_data, 'payment_status_id');
 
-            if (is_numeric($payment_status_id) && (int) $payment_status_id !== (int) $payment->payment_status_id) {
+            if (is_numeric($payment_status_id) && (int) $payment_status_id !== $payment->payment_status_id) {
                 $status = PaymentStatuses::query()->findOrFail((int) $payment_status_id);
                 $this->order_lifecycle_service->transitionPayment(
                     $payment,
@@ -763,7 +779,7 @@ final readonly class OrderAdminPersistenceService
         $product = Product::query()
             ->with([
                 'defaultVariant',
-                'productDescription' => function (\Illuminate\Database\Eloquent\Relations\Relation $query) use ($language_id): void {
+                'productDescription' => function (Relation $query) use ($language_id): void {
                     $query->where('language_id', $language_id);
                 },
             ])
@@ -782,7 +798,7 @@ final readonly class OrderAdminPersistenceService
         if ($variant instanceof ProductVariant) {
             $variant_id = $variant->getKey();
             $is_default_variant = $variant->is_default;
-            $unit_price = (float) $variant->price;
+            $unit_price = $variant->price;
         }
 
         return [
@@ -1123,8 +1139,8 @@ final readonly class OrderAdminPersistenceService
         $entries[] = [
             'event' => $event,
             'json' => $this->historyData([
-                "old_{$field}" => $old_value,
-                "new_{$field}" => $new_value,
+                "old_$field" => $old_value,
+                "new_$field" => $new_value,
             ]),
         ];
     }
@@ -1148,8 +1164,8 @@ final readonly class OrderAdminPersistenceService
 
         foreach ($fields as $field => $label_key) {
             if (($old_values[$field] ?? null) !== ($new_values[$field] ?? null)) {
-                $changes["old_{$label_key}"] = $old_values[$field] ?? null;
-                $changes["new_{$label_key}"] = $new_values[$field] ?? null;
+                $changes["old_$label_key"] = $old_values[$field] ?? null;
+                $changes["new_$label_key"] = $new_values[$field] ?? null;
             }
         }
 
@@ -1170,11 +1186,11 @@ final readonly class OrderAdminPersistenceService
         $result = [];
 
         foreach ($data as $key => $value) {
-            $translation_key = 'admin/orders/orders.history_data.' . Str::snake((string) $key);
+            $translation_key = 'admin/orders/orders.history_data.' . Str::snake($key);
             $translated_label = (string) __($translation_key);
             $label = $translated_label !== $translation_key
                 ? $translated_label
-                : Str::headline((string) $key);
+                : Str::headline($key);
             $result[$label] = $this->formatHistoryValue($value);
         }
 

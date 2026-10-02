@@ -33,7 +33,6 @@ class CreatePaymentStatus extends CreateRecord
         } catch (PaymentStatusInvariantException $exception) {
             $this->sendInvariantNotification($exception->reason);
             $this->halt();
-            throw $exception;
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -44,7 +43,6 @@ class CreatePaymentStatus extends CreateRecord
                 ->send();
 
             $this->halt();
-            throw $throwable;
         }
     }
 
