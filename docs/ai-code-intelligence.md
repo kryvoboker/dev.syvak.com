@@ -1,4 +1,4 @@
-[← Agent Collaboration](ai-agent-collaboration.md) · [Back to README](../README.md)
+[Back to README](../README.md) · [Framework-Aware Code Intelligence →](framework-aware-code-intelligence.md)
 
 # AI Code Intelligence
 

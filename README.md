@@ -44,22 +44,26 @@ GET /uk/category/{slug}/load-more
 
 ## Documentation
 
-| Guide                                                          | Description |
-|----------------------------------------------------------------|-------------|
-| [Getting Started](docs/getting-started.md)                     | Installation, setup, and first run |
-| [Architecture](docs/architecture.md)                            | Modular monolith rules and boundaries |
-| [Configuration](docs/configuration.md)                          | Environment variables and config strategy |
-| [Catalog Storefront](docs/catalog-storefront.md)               | Storefront routes and product pages |
-| [Catalog Filtering](docs/catalog-filtering.md)                 | Category filter configuration and request flow |
-| [Filter Administration](docs/catalog-filter-admin.md)           | Creating, updating, synchronizing, and indexing filters |
-| [Category Sorting](docs/category-sorting.md)                    | Category sorting settings and query contract |
-| [Admin Panel](docs/admin-panel.md)                              | Filament resources and admin workflows |
-| [Modules Guide](app-code/app/Modules/README.md)                | Module registration, loading, and singleton module rules |
-| [OpenAPI Entry](app-code/app/openapi/openapi.yaml)               | Root Swagger/OpenAPI entrypoint for module API docs |
-| [Helpers Reference](docs/helpers-reference.md)                   | Global helper functions and URL contracts |
-| [Services Reference](docs/services-reference.md)                 | Application and support service methods |
-| [Testing](docs/testing.md)                                      | PHPUnit, Larastan, Pint, Biome, and TypeScript workflows |
-| [Deployment](docs/deployment.md)                                | Docker-based deployment and production checklist |
+| Guide                                                                           | Description                                              |
+|---------------------------------------------------------------------------------|----------------------------------------------------------|
+| [Getting Started](docs/getting-started.md)                                      | Installation, setup, and first run                       |
+| [Architecture](docs/architecture.md)                                            | Modular monolith rules and boundaries                    |
+| [Configuration](docs/configuration.md)                                          | Environment variables and config strategy                |
+| [Catalog Storefront](docs/catalog-storefront.md)                                | Storefront routes and product pages                      |
+| [Catalog Filtering](docs/catalog-filtering.md)                                  | Category filter configuration and request flow           |
+| [Filter Administration](docs/catalog-filter-admin.md)                           | Creating, updating, synchronizing, and indexing filters  |
+| [Category Sorting](docs/category-sorting.md)                                    | Category sorting settings and query contract             |
+| [Admin Panel](docs/admin-panel.md)                                              | Filament resources and admin workflows                   |
+| [AI Code Intelligence](docs/ai-code-intelligence.md)                            | Project index and retrieval tools                        |
+| [Framework-Aware Code Intelligence](docs/framework-aware-code-intelligence.md)  | Universal framework-aware indexing workflow              |
+| [Application Framework Adapter](docs/ai-code-intelligence-framework-adapter.md) | Docker/Laravel discovery guide for this app              |
+| [AI Agent Collaboration](docs/ai-agent-collaboration.md)                        | Delegation and shared-workspace rules                    |
+| [Modules Guide](app-code/app/Modules/README.md)                                 | Module registration, loading, and singleton module rules |
+| [OpenAPI Entry](app-code/app/openapi/openapi.yaml)                              | Root Swagger/OpenAPI entrypoint for module API docs      |
+| [Helpers Reference](docs/helpers-reference.md)                                  | Global helper functions and URL contracts                |
+| [Services Reference](docs/services-reference.md)                                | Application and support service methods                  |
+| [Testing](docs/testing.md)                                                      | PHPUnit, Larastan, Pint, Biome, and TypeScript workflows |
+| [Deployment](docs/deployment.md)                                                | Docker-based deployment and production checklist         |
 
 ## License
 
