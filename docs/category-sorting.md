@@ -6,16 +6,16 @@ This document describes how category sorting options are configured in the admin
 
 ## Source of truth
 
-| Responsibility | Location |
-|---|---|
-| Category page and sort links | `app/Http/Controllers/Pages/CategoryController.php` |
-| Sorting query application | `app/Actions/FilterProductsAction.php` |
-| Admin settings form | `app/Filament/Resources/PageSettings/Category/Schemas/CategoryPageSettingsForm.php` |
-| Settings persistence and normalization | `app/Filament/Resources/PageSettings/Category/Pages/EditCategoryPageSettings.php` |
-| Runtime settings bootstrap | `app/Services/PageSettings/PageSettingsBootstrapService.php` |
-| Shared sorting helpers | `app/Supports/helpers.php` |
-| Sort configuration values | `config/page-settings.php` |
-| Storefront sort menu | `resources/views/storefront/pages/partials/category/sort.blade.php` |
+| Responsibility                         | Location                                                                            |
+|----------------------------------------|-------------------------------------------------------------------------------------|
+| Category page and sort links           | `app/Http/Controllers/Pages/CategoryController.php`                                 |
+| Sorting query application              | `app/Actions/FilterProductsAction.php`                                              |
+| Admin settings form                    | `app/Filament/Resources/PageSettings/Category/Schemas/CategoryPageSettingsForm.php` |
+| Settings persistence and normalization | `app/Filament/Resources/PageSettings/Category/Pages/EditCategoryPageSettings.php`   |
+| Runtime settings bootstrap             | `app/Services/PageSettings/PageSettingsBootstrapService.php`                        |
+| Shared sorting helpers                 | `app/Supports/helpers.php`                                                          |
+| Sort configuration values              | `config/page-settings.php`                                                          |
+| Storefront sort menu                   | `resources/views/storefront/pages/partials/category/sort.blade.php`                 |
 
 ## Admin settings
 
@@ -38,13 +38,13 @@ The `is_sorting_enabled` value is persisted in the category settings contract an
 
 The current query implementation recognizes these codes:
 
-| Code | Behavior |
-|---|---|
-| `default` | Newest products: `date_added DESC`, then `id DESC` |
-| `newest` | Explicit alias for the same newest-first behavior |
-| `bestsellers` | `products.viewed DESC`, then `id DESC` |
-| `price-asc` | Effective price ascending, then `id DESC` |
-| `price-desc` | Effective price descending, then `id DESC` |
+| Code          | Behavior                                           |
+|---------------|----------------------------------------------------|
+| `default`     | Newest products: `date_added DESC`, then `id DESC` |
+| `newest`      | Explicit alias for the same newest-first behavior  |
+| `bestsellers` | `products.viewed DESC`, then `id DESC`             |
+| `price-asc`   | Effective price ascending, then `id DESC`          |
+| `price-desc`  | Effective price descending, then `id DESC`         |
 
 The configured GET value is mapped to the internal code. Unknown or empty values resolve to `default`.
 

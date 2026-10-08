@@ -6,16 +6,16 @@ This document describes how category product filters are configured in Filament,
 
 ## Source of truth
 
-| Responsibility | Location |
-|---|---|
-| Filter orchestration and product query | `app/Actions/FilterProductsAction.php` |
-| AJAX result count endpoint | `app/Http/Controllers/Ajax/CatalogFilterAjaxController.php` |
-| Category page endpoint | `app/Http/Controllers/Pages/CategoryController.php` |
-| Request normalization and validation | `app/Http/Requests/Ajax/CatalogFilterAjaxIndexRequest.php` |
-| Admin filter-set form | `app/Filament/Resources/Catalogs/CatalogFilter/Schemas/CatalogFilterSetForm.php` |
-| Storefront filter UI | `resources/views/storefront/pages/partials/category/filter-content.blade.php` |
-| Storefront filter behavior | `resources/assets/catalog/ts/features/products/productsFilter.ts` |
-| Filter configuration defaults | `config/catalog-filter.php` |
+| Responsibility                         | Location                                                                         |
+|----------------------------------------|----------------------------------------------------------------------------------|
+| Filter orchestration and product query | `app/Actions/FilterProductsAction.php`                                           |
+| AJAX result count endpoint             | `app/Http/Controllers/Ajax/CatalogFilterAjaxController.php`                      |
+| Category page endpoint                 | `app/Http/Controllers/Pages/CategoryController.php`                              |
+| Request normalization and validation   | `app/Http/Requests/Ajax/CatalogFilterAjaxIndexRequest.php`                       |
+| Admin filter-set form                  | `app/Filament/Resources/Catalogs/CatalogFilter/Schemas/CatalogFilterSetForm.php` |
+| Storefront filter UI                   | `resources/views/storefront/pages/partials/category/filter-content.blade.php`    |
+| Storefront filter behavior             | `resources/assets/catalog/ts/features/products/productsFilter.ts`                |
+| Filter configuration defaults          | `config/catalog-filter.php`                                                      |
 
 `FilterProductsAction` is the shared application entry point. The category page and the AJAX controller must use the same action so that the displayed product list and the previewed result count follow the same rules.
 

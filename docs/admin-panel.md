@@ -52,10 +52,10 @@ Promo codes are managed in
 `Filament/Resources/Marketing/PromoCodes/`. The `General` tab contains the
 promo-code type:
 
-| Type | Meaning |
-|------|---------|
+| Type      | Meaning                                                                                                                           |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `regular` | Applies to eligible products at their regular price in the storefront. Products with an active product discount are not included. |
-| `super` | May apply to eligible products at both regular and active discount prices. |
+| `super`   | May apply to eligible products at both regular and active discount prices.                                                        |
 
 When an order contains a promo code, its `Promo Code` tab shows the product
 snapshot used for the order. The `Apply promo code forcibly` switch is the

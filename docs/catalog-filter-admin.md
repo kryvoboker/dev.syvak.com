@@ -20,29 +20,29 @@ CatalogFilterProductIndex rows
 
 The admin page is a settings page for the `default_category` set. It is not a CRUD interface for creating multiple independent filter sets.
 
-| Layer | Model/table | Purpose |
-|---|---|---|
-| Filter set | `CatalogFilterSet` / `catalog_filter_sets` | Global behavior and context configuration |
-| Filter group | `CatalogFilterGroup` / `catalog_filter_groups` | Price or product-attribute filter definition |
-| Filter value | `CatalogFilterValue` / `catalog_filter_values` | Selectable value belonging to an attribute group |
-| Product index | `CatalogFilterProductIndex` / `catalog_filter_product_index` | Precomputed product-to-filter lookup rows |
-| Index metadata | `CatalogFilterIndexMeta` / `catalog_filter_index_meta` | Version, status, lock, and rebuild statistics |
+| Layer          | Model/table                                                  | Purpose                                          |
+|----------------|--------------------------------------------------------------|--------------------------------------------------|
+| Filter set     | `CatalogFilterSet` / `catalog_filter_sets`                   | Global behavior and context configuration        |
+| Filter group   | `CatalogFilterGroup` / `catalog_filter_groups`               | Price or product-attribute filter definition     |
+| Filter value   | `CatalogFilterValue` / `catalog_filter_values`               | Selectable value belonging to an attribute group |
+| Product index  | `CatalogFilterProductIndex` / `catalog_filter_product_index` | Precomputed product-to-filter lookup rows        |
+| Index metadata | `CatalogFilterIndexMeta` / `catalog_filter_index_meta`       | Version, status, lock, and rebuild statistics    |
 
 ## Source of truth
 
-| Responsibility | Location |
-|---|---|
-| Filament resource | `app/Filament/Resources/Catalogs/CatalogFilter/CatalogFilterSetResource.php` |
-| Admin edit page | `app/Filament/Resources/Catalogs/CatalogFilter/Pages/EditCatalogFilterSet.php` |
-| Admin form schema | `app/Filament/Resources/Catalogs/CatalogFilter/Schemas/CatalogFilterSetForm.php` |
-| Canonical set bootstrap | `app/Services/Catalogs/CatalogFilter/CatalogFilterBootstrapService.php` |
-| Configuration persistence | `app/Services/Catalogs/CatalogFilter/CatalogFilterSetConfigurationService.php` |
-| Group synchronization | `app/Services/Catalogs/CatalogFilter/FilterGroupGeneratorService.php` |
-| Value synchronization | `app/Services/Catalogs/CatalogFilter/FilterValueGeneratorService.php` |
-| Index freshness state | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexFreshnessService.php` |
-| Product index rebuild | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexRebuildService.php` |
-| Rebuild dispatch | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexRebuildDispatcherService.php` |
-| Configuration defaults | `config/catalog-filter.php` |
+| Responsibility            | Location                                                                             |
+|---------------------------|--------------------------------------------------------------------------------------|
+| Filament resource         | `app/Filament/Resources/Catalogs/CatalogFilter/CatalogFilterSetResource.php`         |
+| Admin edit page           | `app/Filament/Resources/Catalogs/CatalogFilter/Pages/EditCatalogFilterSet.php`       |
+| Admin form schema         | `app/Filament/Resources/Catalogs/CatalogFilter/Schemas/CatalogFilterSetForm.php`     |
+| Canonical set bootstrap   | `app/Services/Catalogs/CatalogFilter/CatalogFilterBootstrapService.php`              |
+| Configuration persistence | `app/Services/Catalogs/CatalogFilter/CatalogFilterSetConfigurationService.php`       |
+| Group synchronization     | `app/Services/Catalogs/CatalogFilter/FilterGroupGeneratorService.php`                |
+| Value synchronization     | `app/Services/Catalogs/CatalogFilter/FilterValueGeneratorService.php`                |
+| Index freshness state     | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexFreshnessService.php`         |
+| Product index rebuild     | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexRebuildService.php`           |
+| Rebuild dispatch          | `app/Services/Catalogs/CatalogFilter/CatalogFilterIndexRebuildDispatcherService.php` |
+| Configuration defaults    | `config/catalog-filter.php`                                                          |
 
 ## Canonical filter set creation
 
@@ -157,14 +157,14 @@ sync groups → sync values → rebuild product index
 
 `CatalogFilterIndexMeta.last_status` uses the following lifecycle:
 
-| Status | Meaning |
-|---|---|
-| `ok` | The active index matches the current configuration. |
-| `stale` | Configuration, groups, or values changed and a rebuild is required. |
-| `queued` | A rebuild job was dispatched and is waiting for a worker. |
-| `running` | A rebuild is currently building a new index version. |
-| `failed` | The last rebuild failed; inspect the stored error and logs. |
-| `locked` | A rebuild could not acquire the configured rebuild lock. |
+| Status    | Meaning                                                             |
+|-----------|---------------------------------------------------------------------|
+| `ok`      | The active index matches the current configuration.                 |
+| `stale`   | Configuration, groups, or values changed and a rebuild is required. |
+| `queued`  | A rebuild job was dispatched and is waiting for a worker.           |
+| `running` | A rebuild is currently building a new index version.                |
+| `failed`  | The last rebuild failed; inspect the stored error and logs.         |
+| `locked`  | A rebuild could not acquire the configured rebuild lock.            |
 
 The storefront continues using the last active index version while a new version is stale, queued, or running. For a facet value with no rows in the active index, the storefront also has a live fallback count over active variants, which prevents a temporarily missing index row from being shown as zero.
 
@@ -193,12 +193,12 @@ When product attributes or filter settings change:
 
 The index has product-level and variant-level parts:
 
-| Part | Source | Effect |
-|---|---|---|
-| Product eligibility | Active product + active default variant | Determines whether the product can enter the category result set. |
-| Stock threshold | Default variant quantity | Applies `min_stock_quantity` to the product result. |
-| Effective price | Default variant price and its active discount | Supplies price filtering and price sorting for the product. |
-| Attribute facets | All active variants' attribute values | Allows a product to match a color, size, or other attribute on any active variant. |
+| Part                | Source                                        | Effect                                                                             |
+|---------------------|-----------------------------------------------|------------------------------------------------------------------------------------|
+| Product eligibility | Active product + active default variant       | Determines whether the product can enter the category result set.                  |
+| Stock threshold     | Default variant quantity                      | Applies `min_stock_quantity` to the product result.                                |
+| Effective price     | Default variant price and its active discount | Supplies price filtering and price sorting for the product.                        |
+| Attribute facets    | All active variants' attribute values         | Allows a product to match a color, size, or other attribute on any active variant. |
 
 Changing an attribute on a non-default active variant requires `Sync values` and `Rebuild Index` (or `Sync all`) to make the precomputed facet rows current. The storefront live-count fallback helps with missing rows, but it is not a substitute for synchronizing the admin configuration.
 
